@@ -20,17 +20,23 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net"
 	"net/url"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/siyuan-note/httpclient"
 )
 
 const (
-	maxWebFetchBytes = 5 * 1024 * 1024 // 5MB
-	maxWebFetchChars = 50000
+	maxWebFetchBytes     = 5 * 1024 * 1024  // text/html, text/plain
+	maxWebFetchFileBytes = 10 * 1024 * 1024 // file/image download
+	maxWebFetchChars     = 50000
 )
 
 func WebFetch(rawURL, format string) (string, error) {
@@ -63,16 +69,33 @@ func WebFetch(rawURL, format string) (string, error) {
 		return "", fmt.Errorf("HTTP %d", resp.StatusCode)
 	}
 
-	if resp.ContentLength > maxWebFetchBytes {
-		return "", errors.New("response too large (exceeds 5MB limit)")
+	contentType := resp.Header.Get("Content-Type")
+	maxReadBytes := int64(maxWebFetchBytes)
+	if !strings.HasPrefix(contentType, "text/html") && !strings.HasPrefix(contentType, "text/plain") {
+		maxReadBytes = maxWebFetchFileBytes
+	}
+	if resp.ContentLength > maxReadBytes {
+		return "", errors.New("response too large")
 	}
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, maxWebFetchBytes))
+	body, err := io.ReadAll(io.LimitReader(resp.Body, maxReadBytes))
 	if err != nil {
 		return "", errors.New("read body failed: " + err.Error())
 	}
 
-	contentType := resp.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "text/html") && !strings.HasPrefix(contentType, "text/plain") {
+		importDir := filepath.Join(TempDir, "import")
+		if merr := os.MkdirAll(importDir, 0755); merr != nil {
+			return "", errors.New("create import dir failed: " + merr.Error())
+		}
+		filename := extractFilename(rawURL, contentType)
+		filePath := filepath.Join(importDir, filename)
+		if werr := os.WriteFile(filePath, body, 0644); werr != nil {
+			return "", errors.New("write file failed: " + werr.Error())
+		}
+		return fmt.Sprintf("Saved to: %s (%d bytes)", filePath, len(body)), nil
+	}
+
 	htmlStr := string(body)
 
 	isHTML := strings.HasPrefix(contentType, "text/html")
@@ -130,4 +153,27 @@ func truncateRunes(s string, maxChars int) string {
 		return s
 	}
 	return string(runes[:maxChars]) + "\n\n...content truncated, total length " + fmt.Sprintf("%d", len(runes)) + " characters..."
+}
+
+func extractFilename(rawURL, contentType string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return gulu.Rand.String(7) + extByContentType(contentType)
+	}
+	name := path.Base(u.Path)
+	if name == "" || name == "." || name == "/" {
+		name = gulu.Rand.String(7) + extByContentType(contentType)
+	}
+	if filepath.Ext(name) == "" {
+		name += extByContentType(contentType)
+	}
+	return name
+}
+
+func extByContentType(contentType string) string {
+	ct := strings.SplitN(contentType, ";", 2)[0]
+	if exts, _ := mime.ExtensionsByType(ct); len(exts) > 0 {
+		return exts[0]
+	}
+	return ".bin"
 }

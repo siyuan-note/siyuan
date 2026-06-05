@@ -43,6 +43,7 @@ export class AgentChat extends Model {
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
     private currentToolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}> = [];
+    private abortController: AbortController | null = null;
 
     constructor(app: App, tab: Tab) {
         super({app: app, id: tab.id});
@@ -123,7 +124,7 @@ export class AgentChat extends Model {
                         self.messages.push({role: "user", content: text});
                         self.appendUserMessage(text);
                         self.setStreaming(true);
-                        const apiMessages = self.messages.map(function (m) { return {role: m.role, content: m.content}; });
+                        const apiMessages = self.messages.map(function (m) { return {role: m.role as "user" | "assistant", content: m.content}; });
                         self.abortController = new AbortController();
                         fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
                             function (event: ISSEResult) { self.handleSSEEvent(event); },
@@ -169,7 +170,7 @@ export class AgentChat extends Model {
             if (session) {
                 this.sessionId = session.id;
                 this.sessionTitle = session.title;
-                this.messages = session.messages;
+                this.messages = session.messages as IAgentMessage[];
                 this.hasTitled = true;
                 this.sessionPromptTokens = session.promptTokens || 0;
                 this.sessionCompletionTokens = session.completionTokens || 0;
@@ -335,7 +336,7 @@ export class AgentChat extends Model {
         if (!session) { return; }
         this.sessionId = session.id;
         this.sessionTitle = session.title;
-        this.messages = session.messages;
+        this.messages = session.messages as IAgentMessage[];
         this.hasTitled = true;
         this.currentAIElement = null;
         this.currentContent = "";
@@ -474,7 +475,7 @@ export class AgentChat extends Model {
 
         this.requestStartTime = Date.now();
 
-        const apiMessages = this.messages.map(function (m) { return {role: m.role, content: m.content}; });
+        const apiMessages = this.messages.map(function (m) { return {role: m.role as "user" | "assistant", content: m.content}; });
         const self = this;
 
         this.abortController = new AbortController();
@@ -754,7 +755,9 @@ export class AgentChat extends Model {
                 this.sessionTotalDuration += Date.now() - this.requestStartTime;
                 this.requestStartTime = 0;
             }
+            this.updateTokenDisplay();
             this.setStreaming(false);
+            // line 754 area
             if (!this.hasTitled && this.messages.length >= 2) {
                 this.hasTitled = true;
                 this.generateTitle();
@@ -773,9 +776,10 @@ export class AgentChat extends Model {
         this.currentToolCalls = [];
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
-            this.requestStartTime = 0;
-        }
-        this.setStreaming(false);
+                this.requestStartTime = 0;
+            }
+            this.updateTokenDisplay();
+            this.setStreaming(false);
 
         if (!this.hasTitled && this.messages.length >= 2) {
             this.hasTitled = true;
@@ -851,9 +855,10 @@ export class AgentChat extends Model {
         }
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
-            this.requestStartTime = 0;
-        }
-        this.setStreaming(false);
+                this.requestStartTime = 0;
+            }
+            this.updateTokenDisplay();
+            this.setStreaming(false);
     }
 
     private insertBeforeAI(el: HTMLElement) {
@@ -878,7 +883,7 @@ export class AgentChat extends Model {
     '<div class="agent-chat__confirm-actions">' +
         '<button class="b3-button b3-button--cancel agent-chat__confirm-reject">' + (L.agentConfirmReject || "Reject") + "</button>" +
         '<button class="b3-button b3-button--text agent-chat__confirm-approve">' + (L.agentConfirmApprove || "Approve") + "</button>" +
-        '<button class="b3-button b3-button--text agent-chat__confirm-always">' + (L.agentConfirmAlways || "Session Allow") + "</button>" +
+        '<button class="b3-button b3-button--text agent-chat__confirm-always ariaLabel" data-position="n" aria-label="' + (L.agentConfirmAlwaysDesc || "Session Allow") + '">' + (L.agentConfirmAlways || "Session Allow") + "</button>" +
     "</div>" +
 "</div>";
         const approveBtn = el.querySelector(".agent-chat__confirm-approve");

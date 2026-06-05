@@ -42,6 +42,9 @@ var sqlCmd = &cobra.Command{
 		if err := sql.CheckSingleStatement(stmt); err != nil {
 			return err
 		}
+		if err := sql.CheckReadonlyStatement(stmt); err != nil {
+			return err
+		}
 		rows, err := sql.Query(stmt, limit)
 		if err != nil {
 			return err

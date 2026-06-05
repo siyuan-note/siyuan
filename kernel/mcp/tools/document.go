@@ -170,7 +170,7 @@ func documentList(args map[string]interface{}) (CallToolResult, error) {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Documents in %s (hPath: %s):\n\n", notebook, hPath))
 	for _, f := range files {
-		sb.WriteString(fmt.Sprintf("- %s (id: %s, hPath: %s)\n", f.Name, f.ID, hPath+"/"+f.Name))
+		sb.WriteString(fmt.Sprintf("- %s (id: %s, hPath: %s)\n", f.Name, f.ID, strings.TrimRight(hPath, "/")+"/"+f.Name))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

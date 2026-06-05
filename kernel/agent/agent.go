@@ -29,6 +29,8 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/filelock"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
+	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -73,6 +75,12 @@ const maxToolCallRounds = 64
 type confirmResult struct {
 	approved bool
 	always   bool
+}
+
+type doomLoopTracker struct {
+	prevSig  string
+	prevName string
+	count    int
 }
 
 var confirmChannelsMu sync.Mutex
@@ -146,11 +154,18 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			}
 		}()
 
+		var mcpConns []mcpclient.Connection
+		if kernelModel.Conf.AI.MCP != nil {
+			mcpConns = mcpclient.ConnectServers(kernelModel.Conf.AI.MCP.Servers)
+		}
+		defer mcpclient.CloseConnections(mcpConns)
+
 		tools := convertMCPToolsToOpenAI()
 		messages := buildMessages(history, language, references)
 		var totalPrompt, totalCompletion int
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
+		var doomLoop doomLoopTracker
 
 		checkpointMsgs := make([]AgentMessage, 0, len(history))
 		for _, h := range history {
@@ -321,21 +336,39 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 
 					setCurrentTodoSession(sessionID)
-				result := executeTool(tc)
+					result := executeTool(tc)
 
 					ch <- AgentEvent{
-					Type:   "tool_result",
-					Name:   tc.Function.Name,
-					Result: result,
-				}
+						Type:   "tool_result",
+						Name:   tc.Function.Name,
+						Result: result,
+					}
 
-				messages = append(messages, openai.ChatCompletionMessage{
+					messages = append(messages, openai.ChatCompletionMessage{
 						Role:       openai.ChatMessageRoleTool,
 						Content:    result,
 						ToolCallID: tc.ID,
 					})
 					checkpointMsgs[assistantIdx].ToolCalls[i].Result = result
+
+					sig := tc.Function.Name + "::" + tc.Function.Arguments
+					if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
+						doomLoop.count++
+					} else {
+						doomLoop.prevSig = sig
+						doomLoop.prevName = tc.Function.Name
+						doomLoop.count = 1
+					}
 				}
+
+				if doomLoop.count >= 3 {
+					messages = append(messages, openai.ChatCompletionMessage{
+						Role:    openai.ChatMessageRoleSystem,
+						Content: "You have called '" + doomLoop.prevName + "' " + fmt.Sprintf("%d", doomLoop.count) + " times with the same arguments. Please try a different approach.",
+					})
+					doomLoop = doomLoopTracker{}
+				}
+
 				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 				continue
 			}

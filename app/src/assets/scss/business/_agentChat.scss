@@ -121,10 +121,15 @@
     align-items: flex-start;
 }
 
-.agent-chat__copy-btn {
+.agent-chat__msg-actions {
     align-self: flex-end;
+    display: flex;
+    gap: 4px;
     opacity: 0;
     transition: opacity 0.2s;
+}
+
+.agent-chat__copy-btn {
     padding: 2px 4px;
     font-size: 12px;
     gap: 4px;
@@ -136,7 +141,7 @@
     font-size: 14px;
 }
 
-.agent-chat__msg--ai:hover .agent-chat__copy-btn {
+.agent-chat__msg--ai:hover .agent-chat__msg-actions {
     opacity: 1;
 }
 

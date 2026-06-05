@@ -369,7 +369,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--ai";
         el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
-        this.addCopyButton(el);
+        this.addCopyButton(el, content);
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}>) {
@@ -749,19 +749,74 @@ export class AgentChat extends Model {
         this.currentContent = "";
     }
 
-    private addCopyButton(el: HTMLElement) {
-        const content = this.fullContent || el.querySelector(".agent-chat__bubble")?.textContent || "";
-        const btn = document.createElement("button");
-        btn.className = "agent-chat__copy-btn b3-button b3-button--text";
+    private addCopyButton(el: HTMLElement, contentOverride?: string) {
+        const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__bubble")?.textContent || "";
         const L = window.siyuan.languages;
-        btn.setAttribute("aria-label", L.copy || "Copy");
-        btn.title = L.copy || "Copy";
-        btn.innerHTML = '<span class="agent-chat__copy-icon">' + String.fromCodePoint(0x1F4CB) + "</span><span>" + (L.copy || "Copy") + "</span>";
-        btn.addEventListener("click", function (e: Event) {
+        const self = this;
+
+        const actions = document.createElement("div");
+        actions.className = "agent-chat__msg-actions";
+
+        const copyBtn = document.createElement("button");
+        copyBtn.className = "agent-chat__copy-btn b3-button b3-button--text";
+        copyBtn.setAttribute("aria-label", L.copy || "Copy");
+        copyBtn.title = L.copy || "Copy";
+        copyBtn.innerHTML = '<span class="agent-chat__copy-icon">' + String.fromCodePoint(0x1F4CB) + "</span><span>" + (L.copy || "Copy") + "</span>";
+        copyBtn.addEventListener("click", function (e: Event) {
             e.stopPropagation();
             navigator.clipboard.writeText(content).catch(function () {});
         });
-        el.appendChild(btn);
+        actions.appendChild(copyBtn);
+
+        const regenBtn = document.createElement("button");
+        regenBtn.className = "agent-chat__copy-btn b3-button b3-button--text";
+        regenBtn.setAttribute("aria-label", L.agentRegenerate || "Regenerate");
+        regenBtn.title = L.agentRegenerate || "Regenerate";
+        regenBtn.innerHTML = '<span class="agent-chat__copy-icon">' + String.fromCodePoint(0x1F504) + "</span><span>" + (L.agentRegenerate || "Regenerate") + "</span>";
+        regenBtn.addEventListener("click", function (e: Event) {
+            e.stopPropagation();
+            self.regenerateResponse();
+        });
+        actions.appendChild(regenBtn);
+
+        el.appendChild(actions);
+    }
+
+    private regenerateResponse() {
+        if (this.isStreaming) {
+            return;
+        }
+        // Remove last assistant message and its DOM
+        for (let i = this.messages.length - 1; i >= 0; i--) {
+            if (this.messages[i].role === "assistant") {
+                this.messages.splice(i, 1);
+                break;
+            }
+        }
+        // Remove all AI/tool/thinking/error DOM after last user message
+        const msgs = this.messagesContainer.querySelectorAll(".agent-chat__msg--ai, .agent-chat__msg--tool, .agent-chat__msg--thinking, .agent-chat__msg--error, .agent-chat__msg--confirm, .agent-chat__msg--question");
+        for (let i = msgs.length - 1; i >= 0; i--) {
+            msgs[i].remove();
+        }
+        this.currentAIElement = null;
+        this.currentContent = "";
+        this.fullContent = "";
+        this.currentToolCalls = [];
+
+        // Re-submit
+        this.setStreaming(true);
+        const apiMessages = this.messages.map(function (m) { return {role: m.role, content: m.content}; });
+        const self = this;
+        this.abortController = new AbortController();
+        fetchAgentSSE(
+            apiMessages,
+            window.siyuan.config.appearance.lang,
+            [],
+            function (event: ISSEResult) { self.handleSSEEvent(event); },
+            function (err: Error) { self.handleError(err); },
+            this.abortController.signal,
+            this.sessionId,
+        );
     }
 
     private finishResponse() {

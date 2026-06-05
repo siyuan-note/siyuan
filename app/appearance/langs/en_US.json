@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Processing results...",
   "agentChat": "Agent",  "agentQuestionSubmit": "Submit",
   "agentQuestionCustom": "Type your own answer...",
+  "agentRegenerate": "Regenerate",
   "agentQuestionSubmitted": "Submitted",
   "agentNewSession": "New Session",
   "agentInputPlaceholder": "Type a message, @ to reference, Enter to send...",

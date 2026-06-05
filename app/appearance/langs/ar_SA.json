@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "جاري معالجة النتائج...",
   "agentChat": "وكيل",  "agentQuestionSubmit": "إرسال",
   "agentQuestionCustom": "اكتب إجابتك...",
+  "agentRegenerate": "إعادة إنشاء",
   "agentQuestionSubmitted": "تم الإرسال",
   "agentNewSession": "جلسة جديدة",
   "agentInputPlaceholder": "اكتب رسالة، @ للإشارة، Enter للإرسال...",

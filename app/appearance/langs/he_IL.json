@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "מעבד תוצאות...",
   "agentChat": "סוכן",  "agentQuestionSubmit": "שלח",
   "agentQuestionCustom": "הקלד תשובה...",
+  "agentRegenerate": "צור מחדש",
   "agentQuestionSubmitted": "נשלח",
   "agentNewSession": "הפעלה חדשה",
   "agentInputPlaceholder": "הקלד הודעה, @ להפניה, Enter לשליחה...",

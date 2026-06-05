@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Обработка результатов...",
   "agentChat": "Агент",  "agentQuestionSubmit": "Отправить",
   "agentQuestionCustom": "Введите свой ответ...",
+  "agentRegenerate": "Пересоздать",
   "agentQuestionSubmitted": "Отправлено",
   "agentNewSession": "Новая сессия",
   "agentInputPlaceholder": "Введите сообщение, @ для ссылки, Enter для отправки...",

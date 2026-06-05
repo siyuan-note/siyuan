@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Spracovanie výsledkov...",
   "agentChat": "Agent",  "agentQuestionSubmit": "Odoslať",
   "agentQuestionCustom": "Napíšte odpoveď...",
+  "agentRegenerate": "Znova",
   "agentQuestionSubmitted": "Odoslané",
   "agentNewSession": "Nová relácia",
   "agentInputPlaceholder": "Napíšte správu, @ na odkaz, Enter na odoslanie...",

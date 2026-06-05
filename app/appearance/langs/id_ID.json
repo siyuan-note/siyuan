@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Memproses hasil...",
   "agentChat": "Agen",  "agentQuestionSubmit": "Kirim",
   "agentQuestionCustom": "Ketik jawaban Anda...",
+  "agentRegenerate": "Jawab ulang",
   "agentQuestionSubmitted": "Terkirim",
   "agentNewSession": "Sesi baru",
   "agentInputPlaceholder": "Ketik pesan, @ untuk referensi, Enter untuk mengirim...",

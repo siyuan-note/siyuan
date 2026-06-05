@@ -533,7 +533,22 @@ func handleQuestion(argsJSON string, ch chan<- AgentEvent, timeout time.Duration
 }
 
 func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
-	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>\n\nReply in " + langName(language) + "."
+	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>"
+
+	skills := kernelModel.DiscoverAgentSkills()
+	if len(skills) > 0 {
+		prompt += "\n\n<available_skills>\n"
+		for _, s := range skills {
+			prompt += "  <skill>\n"
+			prompt += "    <name>" + s.Name + "</name>\n"
+			prompt += "    <description>" + s.Description + "</description>\n"
+			prompt += "  </skill>\n"
+		}
+		prompt += "</available_skills>\n\n"
+		prompt += "Use the skill tool to load a skill when a task matches its description."
+	}
+
+	prompt += "\n\nReply in " + langName(language) + "."
 	if len(references) > 0 {
 		prompt += "\n\nThe user has referenced the following content blocks:\n"
 		for _, ref := range references {

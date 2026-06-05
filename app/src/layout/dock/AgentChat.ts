@@ -743,7 +743,6 @@ export class AgentChat extends Model {
         const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
         if (bubble) {
             bubble.classList.remove("agent-chat__bubble--streaming");
-            this.addCopyButton(this.currentAIElement);
         }
         this.currentAIElement = null;
         this.currentContent = "";
@@ -849,6 +848,7 @@ export class AgentChat extends Model {
         if (bubble) {
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
+        this.addCopyButton(this.currentAIElement);
         this.messages.push({role: "assistant", content: this.fullContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
         this.currentAIElement = null;
         this.currentContent = "";

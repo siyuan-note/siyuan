@@ -26,7 +26,23 @@ import (
 )
 
 type AI struct {
-	OpenAI *OpenAI `json:"openAI"`
+	OpenAI *OpenAI    `json:"openAI"`
+	MCP    *MCPConfig `json:"mcp"`
+}
+
+type MCPConfig struct {
+	Servers []MCPServer `json:"servers"`
+}
+
+type MCPServer struct {
+	Name    string            `json:"name"`
+	Enabled bool              `json:"enabled"`
+	Type    string            `json:"type"` // "stdio" | "http"
+	Command string            `json:"command"`
+	Args    []string          `json:"args"`
+	URL     string            `json:"url"`
+	Headers map[string]string `json:"headers"`
+	Timeout int               `json:"timeout"`
 }
 
 type OpenAI struct {

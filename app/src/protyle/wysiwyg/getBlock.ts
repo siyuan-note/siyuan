@@ -253,7 +253,7 @@ export const isEndOfBlock = (range: Range) => {
         if (hasNextSibling(nextSibling)) {
             return false;
         } else {
-            if (nextSibling.nodeType === 1 && (nextSibling as Element).classList.contains("emoji") && range.endOffset === 0) {
+            if (nextSibling.nodeType === 1 && (nextSibling as Element).classList.contains("emoji")) {
                 return false;
             }
             if (nextSibling.parentElement.getAttribute("spellcheck")) {

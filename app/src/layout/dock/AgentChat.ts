@@ -39,6 +39,7 @@ export class AgentChat extends Model {
     private sessionPromptTokens = 0;
     private sessionCompletionTokens = 0;
     private sessionTotalDuration = 0;
+    private sessionCreatedAt = 0;
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
@@ -168,6 +169,7 @@ export class AgentChat extends Model {
             const session = await SessionStore.load(last.id);
             if (session) {
                 this.sessionId = session.id;
+                this.sessionCreatedAt = session.createdAt || Date.now();
                 this.sessionTitle = session.title;
                 this.messages = session.messages as IAgentMessage[];
                 this.hasTitled = true;
@@ -193,6 +195,7 @@ export class AgentChat extends Model {
             }
         }
         this.sessionId = SessionStore.newSessionId();
+        this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;
         this.messages = [];
         this.showWelcome();
@@ -323,7 +326,7 @@ export class AgentChat extends Model {
             promptTokens: this.sessionPromptTokens,
             completionTokens: this.sessionCompletionTokens,
             totalDuration: this.sessionTotalDuration,
-            createdAt: Date.now(),
+            createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
         };
         await SessionStore.save(session);
@@ -334,6 +337,7 @@ export class AgentChat extends Model {
         const session = await SessionStore.load(id);
         if (!session) { return; }
         this.sessionId = session.id;
+        this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
         this.messages = session.messages as IAgentMessage[];
         this.hasTitled = true;
@@ -427,6 +431,7 @@ export class AgentChat extends Model {
         this.setStreaming(false);
         await this.saveSession();
         this.sessionId = SessionStore.newSessionId();
+        this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;
         this.messages = [];
         this.hasTitled = false;

@@ -372,6 +372,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						resultStr = executeTool(tc)
 					}
 
+					resultStr = util.TruncateToolOutput(resultStr, sessionID)
+
 					ch <- AgentEvent{
 						Type:   "tool_result",
 						Name:   tc.Function.Name,

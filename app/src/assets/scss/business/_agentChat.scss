@@ -558,70 +558,26 @@
     right: 8px;
     width: 280px;
     max-height: 300px;
-    overflow-y: auto;
-    background: var(--b3-theme-background);
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius-b);
-    box-shadow: var(--b3-dialog-shadow);
-}
 
-.agent-session-popup__list {
-    padding: 4px 0;
-}
-
-.agent-session-popup__item {
-    display: flex;
-    align-items: center;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--b3-border-color);
-}
-
-.agent-session-popup__item:last-child {
-    border-bottom: none;
-}
-
-.agent-session-popup__item:hover {
-    background: var(--b3-theme-surface-light);
-}
-
-.agent-session-popup__item--active {
-    background: var(--b3-theme-primary-lightest);
-}
-
-.agent-session-popup__title {
-    flex: 1;
-    font-size: 13px;
-    color: var(--b3-theme-on-background);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    .b3-menu__label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 .agent-session-popup__actions {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     flex-shrink: 0;
-    margin-left: 8px;
 }
 
-.agent-session-popup__rename,
 .agent-session-popup__delete {
-    font-size: 13px;
-    cursor: pointer;
-    padding: 2px 4px;
-    border-radius: var(--b3-border-radius);
-    color: var(--b3-theme-on-surface-light);
-}
-
-.agent-session-popup__rename:hover,
-.agent-session-popup__delete:hover {
-    background: var(--b3-theme-surface-light);
-    color: var(--b3-theme-on-surface);
-}
-
-.agent-session-popup__delete:hover {
     color: var(--b3-theme-error);
+
+    &:hover {
+        opacity: 0.7;
+    }
 }
 
 .agent-session-popup__rename-input {
@@ -633,13 +589,6 @@
     outline: none;
     background: var(--b3-theme-background);
     color: var(--b3-theme-on-background);
-}
-
-.agent-session-popup__empty {
-    padding: 16px;
-    text-align: center;
-    font-size: 13px;
-    color: var(--b3-theme-on-surface-light);
 }
 
 // Todo list styles

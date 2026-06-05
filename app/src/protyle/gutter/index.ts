@@ -7,7 +7,8 @@ import {
     isInEmbedBlock
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
-import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
+import {enterBack, iframeMenu, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
+import {foldBlocksRecursively, setFold} from "../util/blockFold";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
@@ -16,7 +17,7 @@ import {
     isInHarmony,
     isMac,
     isOnlyMeta,
-    openByMobile,
+    saveExportFile,
     updateHotkeyAfterTip,
     updateHotkeyTip,
     writeText
@@ -174,9 +175,13 @@ export class Gutter {
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
             event.dataTransfer.setDragImage(ghostElement, 0, 0);
-            setTimeout(() => {
-                ghostElement.remove();
-            });
+            if (window.siyuan.touchDragActive) {
+                window.siyuan.touchDragGhost = ghostElement;
+            } else {
+                setTimeout(() => {
+                    ghostElement.remove();
+                });
+            }
             buttonElement.style.opacity = "0.38";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}${Constants.ZWSP}${window.siyuan.config.system.workspaceDir}`,
@@ -720,7 +725,7 @@ export class Gutter {
             }));
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnInto",
-                icon: "iconRefresh",
+                icon: "iconTurnInto",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
                 submenu: turnIntoSubmenu
@@ -1322,7 +1327,7 @@ export class Gutter {
         if (turnIntoSubmenu.length > 0 && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnInto",
-                icon: "iconRefresh",
+                icon: "iconTurnInto",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
                 submenu: turnIntoSubmenu
@@ -1577,7 +1582,7 @@ export class Gutter {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportCodeBlock", {id}, (response) => {
                             hideMessage(msgId);
-                            openByMobile(response.data.path);
+                            saveExportFile(response.data.path);
                         });
                     }
                 }]
@@ -1650,7 +1655,7 @@ export class Gutter {
                         id: nodeElement.getAttribute("data-av-id"),
                         blockID: id,
                     }, response => {
-                        openByMobile(response.data.zip);
+                        saveExportFile(response.data.zip);
                     });
                 }
             }).element);
@@ -1676,7 +1681,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "assetIFrame",
                 type: "submenu",
-                icon: "iconLanguage",
+                icon: "iconGlobe",
                 label: window.siyuan.languages.assets,
                 submenu: iframeMenu(protyle, nodeElement)
             }).element);
@@ -1928,6 +1933,7 @@ export class Gutter {
         if (!protyle.options.backlinkData) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enter",
+                icon: "iconEnter",
                 accelerator: `${window.siyuan.config.keymap.general.enter.custom ? updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom) + "/" : ""}${updateHotkeyAfterTip("⌘" + window.siyuan.languages.click)}`,
                 label: window.siyuan.languages.enter,
                 click: () => {
@@ -1936,6 +1942,7 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enterBack",
+                icon: "iconEnterBack",
                 accelerator: window.siyuan.config.keymap.general.enterBack.custom,
                 label: window.siyuan.languages.enterBack,
                 click: () => {
@@ -1946,6 +1953,7 @@ export class Gutter {
             /// #if !MOBILE
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enter",
+                icon: "iconEnter",
                 accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘" + window.siyuan.languages.click)}`,
                 label: window.siyuan.languages.openBy,
                 click: () => {
@@ -1991,6 +1999,7 @@ export class Gutter {
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "jumpTo",
+            icon: "iconJumpTo",
             type: "submenu",
             label: window.siyuan.languages.jumpTo,
             submenu: [{
@@ -2028,6 +2037,7 @@ export class Gutter {
         if (type !== "NodeThematicBreak") {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "fold",
+                icon: "iconFoldUnFold",
                 label: window.siyuan.languages.fold,
                 accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}/${updateHotkeyTip("⌥" + window.siyuan.languages.click)}`,
                 click() {
@@ -2035,6 +2045,18 @@ export class Gutter {
                     focusBlock(nodeElement);
                 }
             }).element);
+            if (["NodeHeading", "NodeListItem", "NodeBlockquote", "NodeCallout", "NodeSuperBlock"].includes(type)) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "foldRecursive",
+                    icon: "iconListTree",
+                    label: window.siyuan.languages.foldRecursive,
+                    accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
+                    click() {
+                        foldBlocksRecursively(protyle, [nodeElement]);
+                        focusBlock(nodeElement);
+                    }
+                }).element);
+            }
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "attr",
@@ -2179,6 +2201,7 @@ export class Gutter {
         const disabledRTL = nodeElements.some(e => ["NodeAttributeView", "NodeCodeBlock", "NodeMathBlock"].includes(e.getAttribute("data-type")));
         window.siyuan.menus.menu.append(new MenuItem({
             id: "layout",
+            icon: "iconAlignSettings",
             label: window.siyuan.languages.layout,
             type: "submenu",
             submenu: [{
@@ -2231,7 +2254,7 @@ export class Gutter {
                 }
             }, {
                 id: "justify",
-                icon: "iconMenu",
+                icon: "iconAlignJustify",
                 label: window.siyuan.languages.justify,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
@@ -2377,6 +2400,7 @@ export class Gutter {
         const width = firstElement.style.width.endsWith("%") ? parseInt(firstElement.style.width) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
             id: "width",
+            icon: "iconWidth",
             label: window.siyuan.languages.width,
             submenu: styles.concat([{
                 id: "widthDrag",
@@ -2579,6 +2603,11 @@ export class Gutter {
                     }
 
                     let topElement = getTopAloneElement(nodeElement);
+                    // https://github.com/siyuan-note/siyuan/issues/17751 第二点
+                    if (topElement === nodeElement.parentElement && nodeElement.childElementCount > 3 &&
+                        nodeElement.classList.contains("li")) {
+                        topElement = nodeElement;
+                    }
                     // 提示下方仅有单个列表
                     if (topElement.classList.contains("callout") && !nodeElement.classList.contains("callout") &&
                         getParentBlock(nodeElement) !== topElement) {

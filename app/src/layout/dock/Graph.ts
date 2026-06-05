@@ -13,6 +13,7 @@ import {openGlobalSearch} from "../../search/util";
 import {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {Editor} from "../../editor";
+import {getDocDisplayName} from "../../util/pathName";
 
 declare const vis: any;
 
@@ -63,7 +64,7 @@ export class Graph extends Model {
                             if (this.graphData && data.data.box === this.graphData.box && this.rootId === data.data.id) {
                                 this.searchGraph(false);
                                 if (this.type === "local") {
-                                    this.parent.updateTitle(data.data.title);
+                                    this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                 }
                             }
                             if (this.type === "global") {
@@ -266,9 +267,7 @@ export class Graph extends Model {
 <button class="b3-button b3-button--small fn__block">${window.siyuan.languages.reset}</button>`;
         }
         this.element.innerHTML = `<div class="block__icons"> 
-    <div class="block__logo fn__flex-1">
-        <svg class="block__logoicon"><use xlink:href="#icon${this.type === "global" ? "GlobalGraph" : "Graph"}"></use></svg>${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}
-    </div>
+    <div class="block__logo fn__flex-1">${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}</div>
     <input class="b3-text-field search__label fn__size200 fn__none" placeholder="${window.siyuan.languages.search}" />
     <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
@@ -602,6 +601,7 @@ export class Graph extends Model {
                 autoResize: true,
                 interaction: {
                     hover: true,
+                    zoomSpeed: 0.5, // 1 is default
                 },
                 nodes: {
                     borderWidth: 0,

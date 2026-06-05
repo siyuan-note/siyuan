@@ -11,14 +11,14 @@ env:
   package_json: "app/package.json"
 
 jobs:
-  create_release:
-    name: Create Release
+  prepare:
+    name: Prepare
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
       release_version: ${{ steps.release_info.outputs.release_version }}
       version: ${{ steps.version.outputs.value }}
       packageManager: ${{ steps.packageManager.outputs.value }}
+      release_body: ${{ steps.release_info.outputs.release_body }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -30,31 +30,26 @@ jobs:
       - run: pip install PyGithub
 
       - id: thisLatestRelease
-        uses: pozetroninc/github-action-get-latest-release@master
-        with:
-          # owner: siyuan-note
-          # repo: siyuan
-          repository: ${{ github.repository }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          excludes: prerelease, draft
+        run: |
+          LATEST=$(gh api "repos/${{ github.repository }}/releases/latest" --jq '.tag_name' 2>/dev/null || echo "")
+          echo "release=$LATEST" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract version from package.json
-        uses: sergeysova/jq-action@v2
         id: version
-        with:
-          cmd: "jq .version ${{ env.package_json }} -r"
+        run: |
+          echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
       - name: Extract electronVersion from package.json
-        uses: sergeysova/jq-action@v2
         id: electronVersion
-        with:
-          cmd: "jq .devDependencies.electron ${{ env.package_json }} -r"
+        run: |
+          echo "value=$(jq .devDependencies.electron ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
       - name: Extract packageManager from package.json
-        uses: sergeysova/jq-action@v2
         id: packageManager
-        with:
-          cmd: "jq .packageManager ${{ env.package_json }} -r"
+        run: |
+          echo "value=$(jq .packageManager ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
       - name: Gather Release Information
         id: release_info
@@ -64,49 +59,29 @@ jobs:
           changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ github.repository }})
           changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ github.repository }})
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "release_body<<$EOF" >> $GITHUB_ENV
-          echo "$changelog_header" >> $GITHUB_ENV
-          echo "$changelog" >> $GITHUB_ENV
-          echo "$EOF" >> $GITHUB_ENV
+          echo "release_body<<$EOF" >> $GITHUB_OUTPUT
+          echo "$changelog_header" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        id: create_release
-        uses: ncipollo/release-action@v1
-        with:
-          name: ${{ steps.release_info.outputs.release_version }}
-          tag: ${{ github.ref }}
-          body: ${{ env.release_body }}
-          draft: false
-          prerelease: true
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
-    needs: create_release
+    needs: prepare
     strategy:
       matrix:
         config:
           - os: ubuntu-24.04
-            name: ubuntu build linux.AppImage
+            name: ubuntu build linux
             kernel_path: "../app/kernel-linux/SiYuan-Kernel"
             build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist-linux"
             goos: "linux"
             goarch: "amd64"
-            suffix: "linux.AppImage"
-          - os: ubuntu-24.04
-            name: ubuntu build linux.tar.gz
-            kernel_path: "../app/kernel-linux/SiYuan-Kernel"
-            build_args_prefix: "-s -w -X"
-            build_args_suffix: "Mode=prod"
-            electron_args: "dist-linux"
-            goos: "linux"
-            goarch: "amd64"
-            suffix: "linux.tar.gz"
+            suffix: "linux"
           - os: macos-latest
             name: macos build mac.dmg
             kernel_path: "../app/kernel-darwin/SiYuan-Kernel"
@@ -128,7 +103,7 @@ jobs:
           - os: windows-latest
             name: windows build win.exe
             kernel_path: "../app/kernel/SiYuan-Kernel.exe"
-            build_args_prefix: "-s -w -H=windowsgui -X"
+            build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist"
             goos: "windows"
@@ -152,6 +127,8 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
+          cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
+          cache: false
       - run: go version
 
       - name: Set up goversioninfo
@@ -168,10 +145,10 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install Node pnpm
-        run: npm install -g ${{ needs.create_release.outputs.packageManager }}
+        run: npm install -g ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Install Node Dependencies
@@ -183,29 +160,24 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Remove Build Directory
-        uses: JesseTG/rm@v1.0.2
-        with:
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build
+        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
+        shell: bash
 
       - name: Remove Kernel Directory for Linux
-        uses: JesseTG/rm@v1.0.2
-        with:
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-linux
+        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-linux"
+        shell: bash
 
       - name: Remove Kernel Directory for Windows
-        uses: JesseTG/rm@v1.0.2
-        with:
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel
+        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel"
+        shell: bash
 
       - name: Remove Kernel Directory for macOS
-        uses: JesseTG/rm@v1.0.2
-        with:
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin
+        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin"
+        shell: bash
 
       - name: Remove Kernel Directory for macOS ARM64
-        uses: JesseTG/rm@v1.0.2
-        with:
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin-arm64
+        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin-arm64"
+        shell: bash
 
       - name: Generate Icon Resource and Properties/Version Info For Windows
         run: ${{ github.workspace }}\go\${{ matrix.config.gobin }}\goversioninfo -platform-specific=true -icon="resource\icon.ico" -manifest="resource\goversioninfo.exe.manifest"
@@ -213,7 +185,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
 
       - name: Building Kernel
-        run: go build -tags fts5 -o "${{ matrix.config.kernel_path }}" -v -ldflags "${{ matrix.config.build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ matrix.config.build_args_suffix }}"
+        run: go build -tags fts5 -o "${{ matrix.config.kernel_path }}" -ldflags "${{ matrix.config.build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ matrix.config.build_args_suffix }}"
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
         env:
           GO111MODULE: on
@@ -222,16 +194,62 @@ jobs:
           GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ matrix.config.goarch }}
 
+      - name: Install RPM build tools
+        if: matrix.config.goos == 'linux'
+        run: sudo apt-get install -y rpm
+
       - name: Building Electron App
         run: pnpm run ${{ matrix.config.electron_args }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
-      - name: Upload Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Build Artifacts (Non-Linux)
+        if: matrix.config.goos != 'linux'
+        uses: actions/upload-artifact@v7
         with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_name: siyuan-${{ needs.create_release.outputs.release_version }}-${{ matrix.config.suffix }}
-          asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-${{ needs.create_release.outputs.version }}-${{ matrix.config.suffix }}
-          asset_content_type: application/octet-stream
+          name: siyuan-${{ matrix.config.suffix }}
+          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-${{ matrix.config.suffix }}
+
+      - name: Upload Build Artifacts (Linux)
+        if: matrix.config.goos == 'linux'
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-linux
+          path: |
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.AppImage
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.tar.gz
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.deb
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm
+
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [prepare, build]
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: ${{ needs.prepare.outputs.release_version }}
+          tag: ${{ github.ref }}
+          body: ${{ needs.prepare.outputs.release_body }}
+          draft: false
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          VERSION=${{ needs.prepare.outputs.version }}
+          REL_VER=${{ needs.prepare.outputs.release_version }}
+          gh release upload ${{ github.ref_name }} \
+            "siyuan-linux/siyuan-${VERSION}-linux.AppImage#siyuan-${REL_VER}-linux.AppImage" \
+            "siyuan-linux/siyuan-${VERSION}-linux.tar.gz#siyuan-${REL_VER}-linux.tar.gz" \
+            "siyuan-linux/siyuan-${VERSION}-linux.deb#siyuan-${REL_VER}-linux.deb" \
+            "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${REL_VER}-linux.rpm" \
+            "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${REL_VER}-mac.dmg" \
+            "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${REL_VER}-mac-arm64.dmg" \
+            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${REL_VER}-win.exe"

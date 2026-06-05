@@ -44,6 +44,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
+	"github.com/siyuan-note/siyuan/kernel/mcp"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -157,6 +158,7 @@ func Serve(fastMode bool, cookieKey string) {
 	serveAssets(ginServer)
 	serveAppearance(ginServer)
 	serveWebSocket(ginServer)
+	serveMCP(ginServer)
 	serveWebDAV(ginServer)
 	serveCalDAV(ginServer)
 	serveCardDAV(ginServer)
@@ -304,10 +306,21 @@ func serveExport(ginServer *gin.Engine) {
 	exportGroup := ginServer.Group("/export/", model.CheckAuth)
 	exportBaseDir := filepath.Join(util.TempDir, "export")
 
-	// 应下载而不是查看导出的文件
 	exportGroup.GET("/*filepath", func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/export/temp/") {
-			c.File(filepath.Join(util.TempDir, c.Request.URL.Path))
+			tempBaseDir := filepath.Join(util.TempDir, "export", "temp")
+			relativePath := strings.TrimPrefix(c.Request.URL.Path, "/export/temp/")
+			relativePath = filepath.Clean(relativePath)
+			if strings.Contains(relativePath, "..") {
+				c.Status(http.StatusUnauthorized)
+				return
+			}
+			fullPath := filepath.Join(tempBaseDir, relativePath)
+			if !gulu.File.IsSubPath(tempBaseDir, fullPath) {
+				c.Status(http.StatusUnauthorized)
+				return
+			}
+			c.File(fullPath)
 			return
 		}
 
@@ -319,6 +332,11 @@ func serveExport(ginServer *gin.Engine) {
 		}
 
 		fullPath := filepath.Join(exportBaseDir, decodedPath)
+		if !gulu.File.IsSubPath(exportBaseDir, fullPath) {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+
 		if util.IsSensitivePath(fullPath) {
 			logging.LogErrorf("refuse to export sensitive file [%s]", c.Request.URL.Path)
 			c.Status(http.StatusForbidden)
@@ -340,9 +358,7 @@ func serveExport(ginServer *gin.Engine) {
 			return
 		}
 
-		fileName := filepath.Base(decodedPath)
-		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
-
+		c.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(decodedPath)))
 		c.File(fullPath)
 	})
 }
@@ -418,6 +434,23 @@ func serveAppearance(ginServer *gin.Engine) {
 		queryParams.Set("r", gulu.Rand.String(7))
 		location.RawQuery = queryParams.Encode()
 
+		siyuanDesktopMode, desktopCookieErr := c.Request.Cookie("siyuan-desktop-mode")
+		if nil == desktopCookieErr {
+			if "true" == siyuanDesktopMode.Value {
+				if strings.Contains(userAgentHeader, "Electron") {
+					location.Path = "/stage/build/app/"
+				} else {
+					location.Path = "/stage/build/desktop/"
+				}
+				c.Redirect(302, location.String())
+				return
+			} else if "false" == siyuanDesktopMode.Value {
+				location.Path = "/stage/build/mobile/"
+				c.Redirect(302, location.String())
+				return
+			}
+		}
+
 		if strings.Contains(userAgentHeader, "Electron") {
 			location.Path = "/stage/build/app/"
 		} else if strings.Contains(userAgentHeader, "Pad") ||
@@ -469,6 +502,7 @@ func serveAppearance(ginServer *gin.Engine) {
 					util.ReportFileSysFatalError(err)
 					return
 				}
+				enUSData = bytes.TrimPrefix(enUSData, []byte("\xef\xbb\xbf"))
 				enUSMap := map[string]any{}
 				if err = gulu.JSON.UnmarshalJSON(enUSData, &enUSMap); err != nil {
 					logging.LogErrorf("unmarshal en_US.json [%s] failed: %s", enUSFilePath, err)
@@ -482,6 +516,7 @@ func serveAppearance(ginServer *gin.Engine) {
 						c.JSON(200, enUSMap)
 						return
 					}
+					data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 
 					langMap := map[string]any{}
 					if err = gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {
@@ -576,6 +611,22 @@ func serveAuthPage(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", data)
 }
 
+// formatContentDispositionAttachment 使用 mime.FormatMediaType 编码文件名，避免异常字符破坏响应头
+func formatContentDispositionAttachment(filename string) string {
+	if cd := mime.FormatMediaType("attachment", map[string]string{"filename": filename}); cd != "" {
+		return cd
+	}
+	return "attachment"
+}
+
+// 资源 GET 带 download=true 时以附件返回，便于浏览器 window.open 触发下载而非内联预览
+func setAssetsAttachmentDisposition(c *gin.Context, pathForBaseName string) {
+	if !strings.EqualFold(c.Query("download"), "true") {
+		return
+	}
+	c.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(pathForBaseName)))
+}
+
 func serveAssets(ginServer *gin.Engine) {
 	ginServer.POST("/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
 
@@ -590,18 +641,8 @@ func serveAssets(ginServer *gin.Engine) {
 		relativePath := path.Join("assets", requestPath)
 		p, err := model.GetAssetAbsPath(relativePath)
 		if err != nil {
-			if strings.Contains(strings.TrimPrefix(requestPath, "/"), "/") {
-				// 再使用编码过的路径解析一次 https://github.com/siyuan-note/siyuan/issues/11823
-				dest := url.PathEscape(strings.TrimPrefix(requestPath, "/"))
-				dest = strings.ReplaceAll(dest, ":", "%3A")
-				relativePath = path.Join("assets", dest)
-				p, err = model.GetAssetAbsPath(relativePath)
-			}
-
-			if err != nil {
-				context.Status(http.StatusNotFound)
-				return
-			}
+			context.Status(http.StatusNotFound)
+			return
 		}
 
 		if !model.IsAdminRoleContext(context) {
@@ -612,11 +653,18 @@ func serveAssets(ginServer *gin.Engine) {
 			}
 		}
 
+		if util.IsSensitivePath(p) {
+			logging.LogErrorf("refuse to serve sensitive file [%s]", context.Request.URL.Path)
+			context.Status(http.StatusForbidden)
+			return
+		}
+
 		if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {
 			return
 		}
 
 		// 返回原始文件
+		setAssetsAttachmentDisposition(context, p)
 		http.ServeFile(context.Writer, context.Request, p)
 	})
 
@@ -638,6 +686,7 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 			data = []byte(util.SanitizeSVG(string(data)))
 		}
 
+		setAssetsAttachmentDisposition(context, assetAbsPath)
 		context.Data(200, "image/svg+xml", data)
 		return true
 	}
@@ -656,6 +705,7 @@ func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool
 			}
 		}
 
+		setAssetsAttachmentDisposition(context, assetAbsPath)
 		http.ServeFile(context.Writer, context.Request, thumbnailPath)
 		return true
 	}
@@ -663,9 +713,18 @@ func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool
 }
 
 func serveRepoDiff(ginServer *gin.Engine) {
+	repoDiffBaseDir := filepath.Join(util.TempDir, "repo", "diff")
 	ginServer.GET("/repo/diff/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
-		requestPath := context.Param("path")
-		p := filepath.Join(util.TempDir, "repo", "diff", requestPath)
+		requestPath := filepath.Clean(context.Param("path"))
+		if strings.Contains(requestPath, "..") {
+			context.Status(http.StatusUnauthorized)
+			return
+		}
+		p := filepath.Join(repoDiffBaseDir, requestPath)
+		if !gulu.File.IsSubPath(repoDiffBaseDir, p) {
+			context.Status(http.StatusUnauthorized)
+			return
+		}
 		http.ServeFile(context.Writer, context.Request, p)
 	})
 }
@@ -1024,6 +1083,10 @@ func jwtMiddleware(c *gin.Context) {
 	}
 	c.Set(model.RoleContextKey, model.RoleVisitor)
 	c.Next()
+}
+
+func serveMCP(ginServer *gin.Engine) {
+	mcp.Serve(ginServer)
 }
 
 func serveFixedStaticFiles(ginServer *gin.Engine) {

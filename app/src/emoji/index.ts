@@ -451,7 +451,7 @@ export const openEmojiPanel = (
                     icon: unicode
                 }, () => {
                     dialog.destroy();
-                    updateFileTreeEmoji(unicode, id, "iconFilesRoot");
+                    updateFileTreeEmoji(unicode, id, "iconNewNoteBook");
                 });
             } else if (type === "doc") {
                 fetchPost("/api/attr/setBlockAttrs", {
@@ -572,7 +572,7 @@ export const openEmojiPanel = (
                         notebook: id,
                         icon: ""
                     }, () => {
-                        updateFileTreeEmoji("", id, "iconFilesRoot");
+                        updateFileTreeEmoji("", id, "iconNewNoteBook");
                     });
                 } else if (type === "doc") {
                     fetchPost("/api/attr/setBlockAttrs", {
@@ -605,7 +605,7 @@ export const openEmojiPanel = (
                         notebook: id,
                         icon: unicode
                     }, () => {
-                        updateFileTreeEmoji(unicode, id, "iconFilesRoot");
+                        updateFileTreeEmoji(unicode, id, "iconNewNoteBook");
                     });
                 } else if (type === "doc") {
                     fetchPost("/api/attr/setBlockAttrs", {

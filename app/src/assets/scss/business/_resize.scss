@@ -9,6 +9,7 @@
   &__t,
   &__d {
     position: absolute;
+    touch-action: none;
   }
 
   &__rd {

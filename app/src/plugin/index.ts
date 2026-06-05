@@ -7,7 +7,7 @@ import {Custom} from "../layout/dock/Custom";
 import {getAllEditor, getAllModels} from "../layout/getAll";
 import {Tab} from "../layout/Tab";
 import {resizeTopBar, setPanelFocus} from "../layout/util";
-import {getDockByType} from "../layout/tabUtil";
+import {getDockByType, setTabPosition} from "../layout/tabUtil";
 ///#else
 import {MobileCustom} from "../mobile/dock/MobileCustom";
 /// #endif
@@ -17,13 +17,15 @@ import {Setting} from "./Setting";
 import {clearOBG} from "../layout/dock/util";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
-import {afterLoadPlugin, loadPlugins} from "./loader";
+import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
+import {Kernel} from "./kernel";
 
 export class Plugin {
     private app: App;
     public i18n: IObject;
     public eventBus: EventBus;
+    public kernel: Kernel;
     public data: any = {};
     public displayName: string;
     public readonly name: string;
@@ -73,6 +75,11 @@ export class Plugin {
         this.i18n = options.i18n;
         this.displayName = options.displayName;
         this.eventBus = new EventBus(options.name);
+        this.kernel = new Kernel({
+            appId: options.app.appId,
+            name: options.name,
+            eventBus: this.eventBus,
+        });
 
         // https://github.com/siyuan-note/siyuan/issues/9943
         Object.defineProperty(this, "name", {
@@ -126,9 +133,14 @@ export class Plugin {
         // 兼容 3.4.1 以前同步数据使用重载插件的问题
         uninstall(this.app, this.name, true);
         loadPlugins(this.app, [this.name], false).then(() => {
-            afterLoadPlugin(this);
-            getAllEditor().forEach(editor => {
-                editor.protyle.toolbar.update(editor.protyle);
+            this.app.plugins.find(item => {
+                if (this.name === item.name) {
+                    afterLoadPlugin(item);
+                    getAllEditor().forEach(editor => {
+                        editor.protyle.toolbar.update(editor.protyle);
+                    });
+                    return true;
+                }
             });
         });
     }
@@ -231,6 +243,11 @@ export class Plugin {
             document.querySelector("#" + (iconElement.getAttribute("data-location") === "right" ? "barPlugins" : "drag"))?.before(iconElement);
         }
         this.topBarIcons.push(iconElement);
+        /// #if !MOBILE
+        if (!isWindow()) {
+            setTabPosition(true);
+        }
+        /// #endif
         return iconElement;
     }
 
@@ -450,6 +467,7 @@ export class Plugin {
             }
             window.siyuan.config.keymap.plugin[this.name][type2]["default"] = hotkey;
         }
+        addPluginDock(this);
         return this.docks[type2];
     }
 

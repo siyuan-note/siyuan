@@ -35,7 +35,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SetBlockReminder(id string, timed string) (err error) {
+func SetCloudReminder(id, content, timed string) (err error) {
+	if !IsSubscriber() {
+		if "ios" == util.Container {
+			return errors.New(Conf.Language(122))
+		}
+		return errors.New(Conf.Language(29))
+	}
+
+	var timedMills int64
+	if "0" != timed {
+		t, e := dateparse.ParseIn(timed, time.Now().Location())
+		if nil != e {
+			return e
+		}
+		timedMills = t.UnixMilli()
+	}
+
+	content = strings.TrimSpace(content)
+	err = SetCloudBlockReminder(id, content, timedMills)
+	if err != nil {
+		return
+	}
+
+	if "0" == timed {
+		util.PushMsg(fmt.Sprintf(Conf.Language(109), content), 3000)
+	} else {
+		util.PushMsg(fmt.Sprintf(Conf.Language(101), time.UnixMilli(timedMills).Format("2006-01-02 15:04")), 5000)
+	}
+
+	IncSync()
+	return
+}
+
+func SetBlockReminder(id, timed string) (err error) {
 	if !IsSubscriber() {
 		if "ios" == util.Container {
 			return errors.New(Conf.Language(122))
@@ -68,6 +101,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
 	}
+
 	content := sql.NodeStaticContent(node, nil, false, false, false)
 	content = gulu.Str.SubStr(content, 128)
 	content = strings.ReplaceAll(content, editor.Zwsp, "")
@@ -182,6 +216,10 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 
 	pushBlockAttrs(oldAttrs, node)
 
+	if ("true" == oldAttrs[DocHiddenAttr]) != ("true" == nameValues[DocHiddenAttr]) {
+		ReloadFiletree()
+	}
+
 	go func() {
 		sql.FlushQueue()
 		refreshDynamicRefText(node, tree)
@@ -263,47 +301,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	if html.EscapeAttrVal(oldAttrs["tags"]) != newAttrsUnEsc["tags"] {
 		ReloadTag()
 	}
-	return
-}
-
-func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
-	if util.ReadOnly {
-		return
-	}
-
-	FlushTxQueue()
-
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		return err
-	}
-
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
-		return fmt.Errorf(Conf.Language(15), id)
-	}
-
-	oldAttrs := parse.IAL2Map(node.KramdownIAL)
-	node.ClearIALAttrs()
-
-	_, err = setNodeAttrs0(node, nameValues)
-	if err != nil {
-		return
-	}
-
-	if err = indexWriteTreeUpsertQueue(tree); err != nil {
-		return
-	}
-
-	IncSync()
-	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-
-	pushBlockAttrs(oldAttrs, node)
-
-	go func() {
-		sql.FlushQueue()
-		refreshDynamicRefText(node, tree)
-	}()
 	return
 }
 

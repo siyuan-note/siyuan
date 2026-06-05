@@ -216,17 +216,27 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
-func DocAssets(rootID string) (ret []string, err error) {
+func DocAssets(rootID string, retainQueryStr bool) (ret []string, err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
 		return
 	}
 
 	ret = getAssetsLinkDests(tree.Root, false)
+	if !retainQueryStr {
+		for i, asset := range ret {
+			if idx := strings.Index(asset, "?"); idx >= 0 {
+				ret[i] = asset[:idx]
+			}
+		}
+	}
 	return
 }
 
 func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err error) {
+	syncingFiles.Store(rootID, true)
+	defer syncingFiles.Delete(rootID)
+
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
 		return
@@ -241,6 +251,10 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 	}
 
 	err = netAssets2LocalAssets0(tree, onlyImg, originalURL, assetsDirPath, true)
+	go func() {
+		time.Sleep(128 * time.Microsecond)
+		util.PushReloadProtyle(rootID)
+	}()
 	return
 }
 
@@ -537,21 +551,8 @@ func GetAssetAbsPath(relativePath string) (string, error) {
 		return absPath, nil
 	}
 
-	// supports URL-encoded local file names
-	unescaped, secondErr := url.PathUnescape(relativePath)
-	if secondErr == nil && unescaped != relativePath {
-		absPathUnescaped, secondErr := getAssetAbsPath(unescaped)
-		if secondErr == nil && absPathUnescaped != "" {
-			return absPathUnescaped, nil
-		}
-	}
-
-	// 优先返回原始路径错误，其次返回反转义路径错误
 	if err != nil {
 		return "", err
-	}
-	if secondErr != nil {
-		return "", secondErr
 	}
 	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }
@@ -780,7 +781,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 	unusedAssets := UnusedAssets(false)
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -821,7 +822,7 @@ func RemoveUnusedAssets() (ret []string) {
 				}
 			}
 
-			if !isFileWatcherAvailable() {
+			if util.IsMobileContainer() {
 				HandleAssetsRemoveEvent(absPath)
 			}
 
@@ -850,7 +851,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		return absPath
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -868,7 +869,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		cache.RemoveAssetHash(hash)
 	}
 
-	if !isFileWatcherAvailable() {
+	if util.IsMobileContainer() {
 		HandleAssetsRemoveEvent(absPath)
 	}
 
@@ -891,6 +892,10 @@ func RemoveUnusedAsset(p string) (ret string) {
 func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
+
+	if idx := strings.Index(oldPath, "?"); idx >= 0 {
+		oldPath = oldPath[:idx]
+	}
 
 	newName = strings.TrimSpace(newName)
 	newName = util.FilterUploadFileName(newName)
@@ -915,23 +920,40 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 	newAbsPath := filepath.Join(filepath.Dir(oldAbsPath), newName)
-	if err = filelock.Copy(oldAbsPath, newAbsPath); err != nil {
-		logging.LogErrorf("copy asset [%s] failed: %s", oldAbsPath, err)
-		return
-	}
-
-	if filelock.IsExist(filepath.Join(util.DataDir, oldPath+".sya")) {
-		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
-		if err = filelock.Copy(filepath.Join(util.DataDir, oldPath+".sya"), filepath.Join(util.DataDir, newPath+".sya")); err != nil {
-			logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
+	filelock.Lock(oldAbsPath)
+	if err = os.Rename(oldAbsPath, newAbsPath); err != nil {
+		if err = gulu.File.Copy(oldAbsPath, newAbsPath); err != nil {
+			filelock.Unlock(oldAbsPath)
+			logging.LogErrorf("copy asset [%s] failed: %s", oldAbsPath, err)
 			return
 		}
 	}
+	filelock.Unlock(oldAbsPath)
+
+	oldSya := filepath.Join(util.DataDir, oldPath+".sya")
+	filelock.Lock(oldSya)
+	if gulu.File.IsExist(oldSya) {
+		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
+		newSya := filepath.Join(util.DataDir, newPath+".sya")
+		if err = os.Rename(oldSya, newSya); err != nil {
+			if err = gulu.File.Copy(oldSya, newSya); err != nil {
+				filelock.Unlock(oldSya)
+				logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
+				return
+			}
+		}
+	}
+	filelock.Unlock(oldSya)
 
 	oldName := path.Base(oldPath)
 
 	notebooks, err := ListNotebooks()
 	if err != nil {
+		return
+	}
+
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
 		return
 	}
 
@@ -967,6 +989,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					continue
 				}
 
+				generateTreeHistory(tree, historyDir)
 				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 
@@ -974,6 +997,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 			}
 		}
 	}
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
 	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
 	if gulu.File.IsDir(storageAvDir) {
@@ -1745,8 +1769,4 @@ func copyAssetsToDataAssets(rootPath string) {
 			logging.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
 		}
 	}
-}
-
-func isFileWatcherAvailable() bool {
-	return util.ContainerAndroid != util.Container && util.ContainerIOS != util.Container && util.ContainerHarmony != util.Container
 }

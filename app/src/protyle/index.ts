@@ -23,6 +23,7 @@ import {
     updateTransaction
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
+import {getDocDisplayName} from "../util/pathName";
 /// #if !MOBILE
 import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
@@ -48,6 +49,7 @@ import {getAllModels} from "../layout/getAll";
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
 import {setFoldById, zoomOut} from "../menus/protyle";
+import {setEditMode} from "./util/setEditMode";
 
 export class Protyle {
 
@@ -71,7 +73,7 @@ export class Protyle {
         this.protyle = {
             getInstance: () => this,
             app,
-            transactionTime: new Date().getTime(),
+            transactionTime: Date.now(),
             id: genUUID(),
             disabled: false,
             updated: false,
@@ -197,7 +199,7 @@ export class Protyle {
                         case "rename":
                             if (this.protyle.path === data.data.path) {
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.updateTitle(data.data.title);
+                                    this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                 }
                                 if (this.protyle.background) {
                                     this.protyle.background.ial.title = data.data.title;
@@ -533,5 +535,9 @@ export class Protyle {
 
     public renderAVAttribute(element: HTMLElement, id: string, cb?: (element: HTMLElement) => void) {
         renderAVAttribute(element, id, this.protyle, cb);
+    }
+
+    public switchMode(mode: TEditorMode) {
+        setEditMode(this.protyle, mode);
     }
 }

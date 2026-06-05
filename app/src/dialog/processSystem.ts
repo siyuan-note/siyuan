@@ -16,7 +16,7 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
-import {setNoteBook} from "../util/pathName";
+import {getDocDisplayName, setNoteBook} from "../util/pathName";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
@@ -30,9 +30,10 @@ const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     fetchPost("/api/block/getDocInfo", {
         id: rootID
     }, (response) => {
-        tab.updateTitle(response.data.name);
+        const titleEmpty = response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true";
+        tab.updateTitle(getDocDisplayName(response.data.name, titleEmpty));
         if (protyle && protyle.title) {
-            protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+            protyle.title.setTitle(response.data.name, titleEmpty);
         }
     });
 };
@@ -50,14 +51,15 @@ export const reloadSync = (
         hideMessage();
     }
     /// #if MOBILE
-    if (window.siyuan.mobile.popEditor) {
+    if (window.siyuan.mobile.popEditor && window.siyuan.mobile.popEditor.protyle) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);
         } else {
             reloadProtyle(window.siyuan.mobile.popEditor.protyle, false, updateReadonly);
         }
     }
-    if (window.siyuan.mobile.editor) {
+    if (document.getElementById("empty").classList.contains("fn__none") &&
+        window.siyuan.mobile.editor && window.siyuan.mobile.editor.protyle) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
             setEmpty(app);
         } else {
@@ -519,6 +521,9 @@ export const bootSync = () => {
 };
 
 export const setTitle = (title: string, showVersionTitle = false) => {
+    if (window.siyuan.config.appearance.hideToolbar) {
+        return;
+    }
     const dragElement = document.getElementById("drag");
     const workspaceName = getWorkspaceName();
     if (showVersionTitle) {

@@ -1,6 +1,6 @@
 import {Constants} from "../../constants";
 import {closeModel, closePanel} from "./closePanel";
-import {openMobileFileById} from "../editor";
+import {getCurrentEditor, openMobileFileById} from "../editor";
 import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
@@ -147,6 +147,9 @@ export const initFramework = (app: App, isStart: boolean) => {
     });
     window.siyuan.mobile.docks.file = new MobileFiles(app);
     document.getElementById("toolbarFile").addEventListener("click", () => {
+        if (getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {
+            return;
+        }
         activeBlur();
         sidebarElement.style.transform = "translateX(0px)";
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");

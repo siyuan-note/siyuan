@@ -374,7 +374,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 			n.RemoveIALAttr(av.NodeAttrNameAvs)
 
 			// Blocks created via template update time earlier than creation time https://github.com/siyuan-note/siyuan/issues/8607
-			refreshUpdated(n)
+			treenode.RefreshUpdated(n)
 		}
 
 		if (ast.NodeListItem == n.Type && (nil == n.FirstChild ||

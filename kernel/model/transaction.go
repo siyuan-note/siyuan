@@ -526,9 +526,9 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			srcEmptyList.Unlink()
 		}
 
-		refreshUpdated(srcNode)
+		treenode.RefreshUpdated(srcNode)
 		tx.nodes[srcNode.ID] = srcNode
-		refreshUpdated(srcTree.Root)
+		treenode.RefreshUpdated(srcTree.Root)
 		tx.writeTree(srcTree)
 		if !isSameTree {
 			tx.writeTree(targetTree)
@@ -607,9 +607,9 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 	}
 
-	refreshUpdated(srcNode)
+	treenode.RefreshUpdated(srcNode)
 	tx.nodes[srcNode.ID] = srcNode
-	refreshUpdated(srcTree.Root)
+	treenode.RefreshUpdated(srcTree.Root)
 	tx.writeTree(srcTree)
 	if !isSameTree {
 		tx.writeTree(targetTree)
@@ -715,11 +715,11 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 			node.InsertAfter(toInsert)
 		}
 
-		createdUpdated(toInsert)
+		treenode.CreatedUpdated(toInsert)
 		tx.nodes[toInsert.ID] = toInsert
 	}
 
-	createdUpdated(insertedNode)
+	treenode.CreatedUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
 	tx.writeTree(tree)
 
@@ -822,11 +822,11 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 			}
 		}
 
-		createdUpdated(toInsert)
+		treenode.CreatedUpdated(toInsert)
 		tx.nodes[toInsert.ID] = toInsert
 	}
 
-	createdUpdated(insertedNode)
+	treenode.CreatedUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
 	tx.writeTree(tree)
 
@@ -1313,7 +1313,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 		}
 	}
 
-	createdUpdated(insertedNode)
+	treenode.CreatedUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
 
 	// 收集引用的定义块 ID
@@ -1565,7 +1565,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		}()
 	}
 
-	createdUpdated(updatedNode)
+	treenode.CreatedUpdated(updatedNode)
 	tx.nodes[updatedNode.ID] = updatedNode
 	tx.writeTree(tree)
 
@@ -1735,7 +1735,7 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 	}
 
 	node.SetIALAttr("updated", operation.Data.(string))
-	createdUpdated(node)
+	treenode.CreatedUpdated(node)
 	tx.nodes[node.ID] = node
 	tx.writeTree(tree)
 	return
@@ -1775,46 +1775,6 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	tx.writeTree(tree)
 	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
 	return
-}
-
-func refreshUpdated(node *ast.Node) {
-	updated := util.CurrentTimeSecondsStr()
-	node.SetIALAttr("updated", updated)
-	parents := treenode.ParentNodesWithHeadings(node)
-	for _, parent := range parents { // 更新所有父节点的更新时间字段
-		parent.SetIALAttr("updated", updated)
-	}
-}
-
-func createdUpdated(node *ast.Node) {
-	// 补全子节点的更新时间 Improve block update time filling https://github.com/siyuan-note/siyuan/issues/12182
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() || ast.NodeKramdownBlockIAL == n.Type {
-			return ast.WalkContinue
-		}
-
-		updated := n.IALAttr("updated")
-		if "" == updated && ast.IsNodeIDPattern(n.ID) {
-			created := util.TimeFromID(n.ID)
-			n.SetIALAttr("updated", created)
-		}
-		return ast.WalkContinue
-	})
-
-	created := util.TimeFromID(node.ID)
-	updated := node.IALAttr("updated")
-	if !util.IsTimeStr(updated) {
-		updated = created
-		node.SetIALAttr("updated", updated)
-	}
-	if updated < created {
-		updated = created
-	}
-	parents := treenode.ParentNodesWithHeadings(node)
-	for _, parent := range parents { // 更新所有父节点的更新时间字段
-		parent.SetIALAttr("updated", updated)
-		cache.PutBlockIAL(parent.ID, parse.IAL2Map(parent.KramdownIAL))
-	}
 }
 
 type Operation struct {

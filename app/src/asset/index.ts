@@ -113,7 +113,7 @@ export class Asset extends Model {
                 <svg><use xlink:href="#iconImage"></use></svg>
               </button>
               <button id="viewOutline" class="toolbarButton b3-tooltips b3-tooltips__ne" aria-label="${window.siyuan.languages.outline}">
-                 <svg><use xlink:href="#iconAlignCenter"></use></svg>
+                 <svg><use xlink:href="#iconOutline"></use></svg>
               </button>
               <button id="viewAttachments" class="toolbarButton fn__none" data-l10n-id="attachments">
                  <span data-l10n-id="attachments_label">Attachments</span>
@@ -286,7 +286,7 @@ export class Asset extends Model {
           <div id="toolbarContainer">
             <div id="toolbarViewer">
                 <button id="sidebarToggleButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
-                    <svg><use xlink:href="#iconLayoutRight"></use></svg>
+                    <svg><use xlink:href="#iconLayoutLeft"></use></svg>
                 </button>
                 <button id="viewFindButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search} ${updateHotkeyTip("⌘F")}">
                   <svg><use xlink:href="#iconSearch"></use></svg>
@@ -443,7 +443,7 @@ export class Asset extends Model {
         </div>
         <div class="b3-menu__separator pdf__util__hide" style="margin-top: 8px"></div>
         <button class="b3-menu__item pdf__util__hide" data-type="toggle">
-            <svg class="b3-menu__icon"><use xlink:href="#iconFilesRoot"></use></svg>
+            <svg class="b3-menu__icon"><use xlink:href="#iconPaintBucket"></use></svg>
             <span class="b3-menu__label">${window.siyuan.languages.showHideBg}</span>
         </button>
         <button class="b3-menu__item pdf__util__hide" data-type="copy">

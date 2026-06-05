@@ -52,7 +52,7 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 }
 
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据
-func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType string, bazaarPackagesMap map[string]*Package) bool {
+func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType, frontend string, bazaarPackagesMap map[string]*Package) bool {
 	// 展示信息
 	pkg.IconURL = baseURLPath + "icon.png"
 	pkg.PreviewURL = baseURLPath + "preview.png"
@@ -65,13 +65,17 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType
 	pkg.Installed = true
 	pkg.DisallowInstall = isBelowRequiredAppVersion(pkg)
 	if bazaarPkg := bazaarPackagesMap[pkg.Name]; nil != bazaarPkg {
-		pkg.DisallowUpdate = isBelowRequiredAppVersion(bazaarPkg)
-		pkg.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
 		pkg.RepoURL = bazaarPkg.RepoURL // 更新链接使用在线数据，避免本地元数据的链接错误
+		pkg.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
 
 		if 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
 			pkg.RepoHash = bazaarPkg.RepoHash
 			pkg.Outdated = true
+			disallowUpdate := isBelowRequiredAppVersion(bazaarPkg)
+			if "plugins" == pkgType {
+				disallowUpdate = disallowUpdate || IsIncompatiblePlugin(bazaarPkg, frontend)
+			}
+			pkg.DisallowUpdate = disallowUpdate
 		}
 	} else {
 		pkg.RepoURL = pkg.URL

@@ -12,7 +12,7 @@ import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../u
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
-import {setFold} from "../../menus/protyle";
+import {setFold} from "../util/blockFold";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true, event?: InputEvent) => {
     if (!blockElement.parentElement) {
@@ -209,7 +209,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.classList.contains("table")) {
             scrollLeft = blockElement.firstElementChild.scrollLeft;
         }
-        if (/<span data-type="backslash">.+<\/span><wbr>/.test(html)) {
+        if (/<span data-type="backslash">.{1,8}<\/span><wbr>/.test(html)) {
             // 转义不需要添加 zwsp
             blockElement.outerHTML = html;
         } else {
@@ -241,6 +241,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 realElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${tempId}"]`);
             }
             const realType = realElement.getAttribute("data-type");
+            let itemHTML = "";
             if (realType === "NodeCodeBlock") {
                 const languageElement = realElement.querySelector(".protyle-action__language");
                 if (languageElement) {
@@ -283,6 +284,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                             currentWbrElement.insertAdjacentText("beforebegin", Constants.ZWSP);
                         }
                     }
+                    itemHTML = realElement.outerHTML;
                     focusByWbr(protyle.wysiwyg.element, range);
                     protyle.hint.render(protyle);
                     // 表格出现滚动条，输入数字会向前滚 https://github.com/siyuan-note/siyuan/issues/3650
@@ -292,7 +294,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 }
             }
             // https://github.com/siyuan-note/siyuan/issues/14766
-            html += realElement.outerHTML;
+            html += itemHTML || realElement.outerHTML;
         });
     } else if (blockElement.getAttribute("data-type") === "NodeCodeBlock") {
         editElement.parentElement.removeAttribute("data-render");

@@ -75,10 +75,19 @@ export const initFileTree = () => {
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="refCreateSavePath" value="${window.siyuan.config.fileTree.refCreateSavePath}">
     <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.fileTree26}
+    <span class="fn__hr"></span>
+    <select class="b3-select fn__block" id="shorthandSaveBox">${genNotebookOption(window.siyuan.config.fileTree.shorthandSaveBox, undefined, true)}</select>
+    <span class="fn__hr"></span>
+    <input class="b3-text-field fn__block" id="shorthandSavePath" value="${window.siyuan.config.fileTree.shorthandSavePath}">
+    <div class="b3-label__text">${window.siyuan.languages.fileTree27}</div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
             (modelMainElement.querySelector("#docCreateSavePath") as HTMLInputElement).value = window.siyuan.config.fileTree.docCreateSavePath;
             (modelMainElement.querySelector("#refCreateSavePath") as HTMLInputElement).value = window.siyuan.config.fileTree.refCreateSavePath;
+            (modelMainElement.querySelector("#shorthandSavePath") as HTMLInputElement).value = window.siyuan.config.fileTree.shorthandSavePath;
             modelMainElement.querySelectorAll("input, select").forEach((item) => {
                 item.addEventListener("change", () => {
                     fetchPost("/api/setting/setFiletree", {
@@ -86,6 +95,8 @@ export const initFileTree = () => {
                         alwaysSelectOpenedFile: window.siyuan.config.fileTree.alwaysSelectOpenedFile,
                         refCreateSavePath: (modelMainElement.querySelector("#refCreateSavePath") as HTMLInputElement).value,
                         refCreateSaveBox: (modelMainElement.querySelector("#refCreateSaveBox") as HTMLInputElement).value,
+                        shorthandSavePath: (modelMainElement.querySelector("#shorthandSavePath") as HTMLInputElement).value,
+                        shorthandSaveBox: (modelMainElement.querySelector("#shorthandSaveBox") as HTMLInputElement).value,
                         docCreateSavePath: (modelMainElement.querySelector("#docCreateSavePath") as HTMLInputElement).value,
                         docCreateSaveBox: (modelMainElement.querySelector("#docCreateSaveBox") as HTMLInputElement).value,
                         openFilesUseCurrentTab: window.siyuan.config.fileTree.openFilesUseCurrentTab,

@@ -37,7 +37,8 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     }
     if (protyle.toolbar && panels.includes("util")) {
         const pinElement = protyle.toolbar.subElement.querySelector('[data-type="pin"]');
-        if (focusHide || !pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin)) {
+        if (!protyle.toolbar.isMultiSelectMode() &&
+            (focusHide || !pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin))) {
             protyle.toolbar.subElement.classList.add("fn__none");
             if (protyle.toolbar.subElementCloseCB) {
                 protyle.toolbar.subElementCloseCB();
@@ -66,7 +67,8 @@ export const hideAllElements = (types: string[]) => {
         getAllEditor().forEach(item => {
             if (item.protyle.toolbar) {
                 const pinElement = item.protyle.toolbar.subElement.querySelector('[data-type="pin"]');
-                if (!pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin)) {
+                if (!item.protyle.toolbar.isMultiSelectMode() &&
+                    (!pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin))) {
                     item.protyle.toolbar.subElement.classList.add("fn__none");
                     if (item.protyle.toolbar.subElementCloseCB) {
                         item.protyle.toolbar.subElementCloseCB();

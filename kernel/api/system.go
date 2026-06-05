@@ -345,7 +345,6 @@ func exportConf(c *gin.Context) {
 	clonedConf.Repo = nil
 	clonedConf.Publish = nil
 	clonedConf.CloudRegion = 0
-	clonedConf.DataIndexState = 0
 
 	data, err = gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
 	if err != nil {
@@ -632,8 +631,16 @@ func setAccessAuthCode(c *gin.Context) {
 		aac = model.Conf.AccessAuthCode
 	}
 
+	originalLen := len(aac)
+
 	aac = util.RemoveInvalid(aac)
 	aac = strings.TrimSpace(aac)
+
+	if 0 < originalLen && 0 == len(aac) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(287)
+		return
+	}
 
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()
@@ -668,7 +675,9 @@ func setFollowSystemLockScreen(c *gin.Context) {
 func getSysFonts(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	ret.Data = util.LoadSysFonts()
+
+	fonts := util.LoadSysFonts()
+	ret.Data = fonts
 }
 
 func version(c *gin.Context) {

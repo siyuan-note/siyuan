@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20250115151428"
+		"updated": "20260426175834"
 	},
 	"Children": [
 		{
@@ -511,7 +511,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223639-8217o1r",
-				"updated": "20250115151428"
+				"updated": "20260426175834"
 			},
 			"Children": [
 				{
@@ -525,12 +525,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223639-otxjla4",
-				"updated": "20250115151428"
+				"updated": "20260426175834"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After selecting the document on the document tree, right-click and select "
+					"Data": "After selecting the document on the document panel, right-click and select "
 				},
 				{
 					"Type": "NodeTextMark",

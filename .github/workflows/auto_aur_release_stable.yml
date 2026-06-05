@@ -34,7 +34,7 @@ jobs:
       - name: Create PKGBUILD
         run: |
           cat << EOF >> PKGBUILD
-          # maintainer: zxkmm (IHp4a21tQGhvdG1haWwuY29t)
+          # maintainer: SiYuan community (https://github.com/siyuan-note/siyuan/issues/new/choose)
           # auto running on siyuan official repo
           # PKGBUILD is modified from https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=siyuan-appimage
           # which is made by vvxxp8 <concatenate[g] the characters[x] in square[b] brackets[1] in[5] order[3] at gmail dot com>
@@ -97,7 +97,7 @@ jobs:
           EOF
 
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.2
         with:
           pkgname: siyuan-bin
           pkgbuild: ./PKGBUILD

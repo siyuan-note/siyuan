@@ -3,11 +3,13 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import * as fs from "fs";
 /// #endif
 /// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
 /// #endif
-import {getDefaultType} from "../../search/getDefault";
+import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
+import {showMessage} from "../../dialog/message";
 
 export const isPhablet = () => {
     return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
@@ -98,19 +100,65 @@ export const openByMobile = (uri: string) => {
     }
 };
 
-export const exportByMobile = (uri: string) => {
+export const saveExportFile = async (uri: string) => {
     if (!uri) {
         return;
     }
-    if (isInIOS()) {
-        openByMobile(uri);
-    } else if (isInAndroid()) {
-        window.JSAndroid.exportByDefault(uri);
-    } else if (isInHarmony()) {
-        window.JSHarmony.exportByDefault(uri);
-    } else {
-        window.open(uri);
+    /// #if !BROWSER
+    try {
+        const resolved = new URL(uri, `${location.origin}/`);
+        const pathSeg = resolved.pathname.substring(resolved.pathname.lastIndexOf("/") + 1);
+        let fileName: string;
+        try {
+            fileName = decodeURIComponent(pathSeg);
+        } catch {
+            fileName = pathSeg;
+        }
+        if (!fileName) {
+            fileName = "download";
+        }
+        const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "showSaveDialog",
+            defaultPath: fileName,
+            properties: ["showOverwriteConfirmation"],
+        });
+        if (result.canceled || !result.filePath) {
+            return;
+        }
+        const response = await fetch(resolved.href);
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status} ${response.statusText}: ${response.url || resolved.href}`
+            );
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
+        showMessage(window.siyuan.languages.exported);
+        return;
+    } catch (e) {
+        showMessage("saveExportFile failed: " + e);
     }
+    /// #else
+    try {
+        if (isInAndroid()) {
+            window.JSAndroid.saveExportFile(uri);
+            return;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.saveExportFile.postMessage(uri);
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.saveExportFile(uri);
+            return;
+        }
+        const openUrl = new URL(uri, `${location.origin}/`);
+        openUrl.searchParams.set("download", "true");
+        window.open(openUrl.href);
+    } catch (e) {
+        showMessage("saveExportFile failed: " + e);
+    }
+    /// #endif
 };
 
 export const readText = () => {
@@ -526,6 +574,7 @@ export const getLocalStorage = (cb: () => void) => {
             k: "",
             r: "",
             types: getDefaultType(),
+            subTypes: getDefaultSubType(),
             replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
@@ -560,6 +609,11 @@ export const getLocalStorage = (cb: () => void) => {
         if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes ||
             Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes).length === 0) {
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES);
+        }
+        // Migrate stored search data to include subTypes when absent
+        if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes ||
+            Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes).length === 0) {
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes = getDefaultSubType();
         }
         cb();
     });

@@ -78,6 +78,7 @@
     &:after {
       content: '‎';
     }
+
     // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
     // https://ld246.com/article/1626937851892 <u>test $\mu_p$ test</u>
     // https://ld246.com/article/1636204769623  test $\rightarrow$ test
@@ -87,6 +88,7 @@
   span[data-type~="kbd"] {
     padding: 2px 4px;
     font: 75% var(--b3-font-family-kbd);
+    font-variant-emoji: text;
     line-height: 1;
     color: var(--b3-theme-on-surface);
     vertical-align: middle;
@@ -624,7 +626,7 @@
 
   ul,
   ol {
-    padding-left: 2em;
+    padding: revert-layer;
     margin: 4px 0;
   }
 
@@ -682,7 +684,7 @@
     font-size: 85%;
     line-height: 14px;
     cursor: pointer;
-    padding: 5px;
+    padding: 4px;
     transition: var(--b3-transition);
     background-color: var(--b3-theme-on-surface);
     height: 24px;
@@ -719,9 +721,9 @@
     }
 
     & > svg {
-      height: 14px;
+      height: 16px;
       float: left;
-      width: 14px;
+      width: 16px;
       fill: currentColor;
     }
   }

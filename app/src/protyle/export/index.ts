@@ -25,8 +25,8 @@ const getPluginStyle = async () => {
 };
 
 const getIconScript = (servePath: string) => {
-    const isBuiltInIcon = ["ant", "material"].includes(window.siyuan.config.appearance.icon);
-    const html = isBuiltInIcon ? "" : `<script src="${servePath}appearance/icons/material/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
+    const isBuiltInIcon = ["litheness"].includes(window.siyuan.config.appearance.icon);
+    const html = isBuiltInIcon ? "" : `<script src="${servePath}appearance/icons/litheness/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
     return html + `<script src="${servePath}appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
 };
 
@@ -169,11 +169,12 @@ const renderPDF = async (id: string) => {
         body {
           margin: 0;
           font-family: var(--b3-font-family);
+          background-color: var(--b3-body-background);
         }
         
         #action {
           width: 232px;
-          background: var(--b3-theme-surface);
+          background-color: var(--b3-theme-background);
           padding: 12px 0;
           position: fixed;
           right: 0;
@@ -184,27 +185,36 @@ const renderPDF = async (id: string) => {
           z-index: 1;
           display: flex;
           flex-direction: column;
-        }
-        
-        #preview {
-          max-width: 800px;
-          margin: 0 auto;
-          position: absolute;
-          right: 232px;
-          left: 0;
-          box-sizing: border-box;
-        }
-        
-        #preview.exporting {
-          position: inherit;
-          max-width: none;
+          border-left: 1px solid var(--b3-body-background);
         }
         
         .b3-switch {
             margin-left: 14px;
         }
         
-        .exporting::-webkit-scrollbar {
+        #preview {
+          max-width: 800px;
+          margin: 24px auto;
+          position: absolute;
+          right: 232px;
+          left: 0;
+          min-height: calc(100% - 48px);
+          box-sizing: border-box;
+          background-color: var(--b3-theme-background);
+          box-shadow: var(--b3-dialog-shadow);
+        }
+        
+        .exporting #preview {
+          position: inherit;
+          max-width: none;
+          box-shadow: none;
+        }
+        
+        .exporting {
+            background-color: var(--b3-theme-background);
+        }
+        
+        .exporting #preview::-webkit-scrollbar {
           width: 0;
           height: 0;
         }
@@ -662,10 +672,9 @@ ${getIconScript(servePath)}
             } else {
                 ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", buildExportConfig());
             }
-            previewElement.classList.add("exporting");
+            document.body.classList.add("exporting");
             previewElement.style.zoom = "";
-            previewElement.style.paddingTop = "6px";
-            previewElement.style.paddingBottom = "0";
+            previewElement.style.padding = "6px 0 0 0";
             fixBlockWidth();
             actionElement.remove();
         });

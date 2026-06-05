@@ -466,24 +466,10 @@ func isSkipFile(filename string) bool {
 
 func moveTree(tree *parse.Tree) {
 	treenode.SetBlockTreePath(tree)
-
-	if hidden := tree.Root.IALAttr("custom-hidden"); "true" == hidden {
-		tree.Root.RemoveIALAttr("custom-hidden")
-		filesys.WriteTree(tree)
-	}
-
-	sql.RemoveTreeQueue(tree.ID)
-	sql.IndexTreeQueue(tree)
+	sql.MoveTreeQueue(tree)
 
 	box := Conf.Box(tree.Box)
-	box.renameSubTrees(tree)
-
-	refreshDocInfo(tree)
-}
-
-func (box *Box) renameSubTrees(tree *parse.Tree) {
 	subFiles := box.ListFiles(tree.Path)
-
 	luteEngine := util.NewLute()
 	for _, subFile := range subFiles {
 		if !strings.HasSuffix(subFile.path, ".sy") {
@@ -496,10 +482,12 @@ func (box *Box) renameSubTrees(tree *parse.Tree) {
 		}
 
 		treenode.SetBlockTreePath(subTree)
-		sql.RenameSubTreeQueue(subTree)
+		sql.MoveTreeQueue(subTree)
 		msg := fmt.Sprintf(Conf.Language(107), html.EscapeString(subTree.HPath))
 		util.PushStatusBar(msg)
 	}
+
+	refreshDocInfo(tree)
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {
@@ -652,7 +640,9 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 			}
 
 			// Import the YAML at the beginning of the Markdown as a code block https://github.com/siyuan-note/siyuan/issues/16488
-			codeBlock := &ast.Node{Type: ast.NodeCodeBlock}
+			codeBlock := &ast.Node{Type: ast.NodeCodeBlock, ID: ast.NewNodeID()}
+			codeBlock.SetIALAttr("id", codeBlock.ID)
+			codeBlock.SetIALAttr("updated", codeBlock.ID[:14])
 			openMarker := &ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3}
 			codeBlock.AppendChild(openMarker)
 			info := &ast.Node{Type: ast.NodeCodeBlockFenceInfoMarker, CodeBlockInfo: []byte("yaml")}
@@ -815,6 +805,10 @@ func FullReindex(needResetScroll bool) {
 	} else {
 		task.AppendTask(task.ReloadUI, util.ReloadUI)
 	}
+}
+
+func FullReindexDirect() {
+	fullReindex()
 }
 
 func fullReindex() {

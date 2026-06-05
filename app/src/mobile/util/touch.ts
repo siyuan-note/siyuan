@@ -7,11 +7,10 @@ import {
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur} from "./keyboardToolbar";
-import {isIPhone} from "../../protyle/util/compatibility";
-import {App} from "../../index";
-import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
+import {isChromeBrowser, isIPhone} from "../../protyle/util/compatibility";
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
+import {Constants} from "../../constants";
 
 let clientX: number;
 let clientY: number;
@@ -33,14 +32,53 @@ const popSide = (render = true) => {
     }
 };
 
-export const handleTouchEnd = (event: TouchEvent, app: App) => {
+export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
-    if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
-        event.stopImmediatePropagation();
-        event.preventDefault();
-        return;
+    const currentTime = Date.now();
+    const editor = getCurrentEditor();
+    if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
+        if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
+            // 多选模式
+            const blockElement = hasClosestBlock(target);
+            if (blockElement) {
+                blockElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--select");
+                });
+                const blockParentElement = hasClosestByClassName(blockElement.parentElement, "protyle-wysiwyg--select");
+                if (blockParentElement) {
+                    blockParentElement.classList.remove("protyle-wysiwyg--select");
+                }
+                blockElement.classList.toggle("protyle-wysiwyg--select");
+                editor.protyle.toolbar.subElement.querySelector(".multiSelectCount").textContent =
+                    editor.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length.toString();
+                event.stopImmediatePropagation();
+                event.preventDefault();
+            }
+        } else if (currentTime - time > Constants.TIMEOUT_LONGPRESS) {
+            // 长按
+            if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
+                target.dispatchEvent(new MouseEvent("contextmenu", {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: event.changedTouches[0].clientX,
+                    clientY: event.changedTouches[0].clientY,
+                }));
+            }
+            // 超长按
+            if (currentTime - time > 2000) {
+                const blockElement = hasClosestBlock(target);
+                if (blockElement) {
+                    const protyle = editor.protyle;
+                    protyle.toolbar.showMultiSelectMode(protyle, blockElement);
+                }
+            }
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            return;
+        }
     }
-    if (typeof yDiff === "undefined" && window.siyuan.mobile.editor.protyle.options.render.gutter) {
+
+    if (typeof yDiff === "undefined" && window.siyuan.mobile.editor?.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {
             if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
@@ -80,7 +118,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     }
 
     let scrollEnable = false;
-    if (new Date().getTime() - time < 1000) {
+    if (Date.now() - time < 1000) {
         scrollEnable = true;
     } else if (Math.abs(xDiff) > window.innerWidth / 3) {
         scrollEnable = true;
@@ -157,22 +195,28 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
-    if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" || (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
+    time = Date.now();
+    const target = event.touches[0].target as HTMLElement;
+    if (0 < event.touches.length && (target.tagName === "VIDEO" || target.tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
         activeBlur();
         return;
     }
-
-    if (globalTouchStart(event)) {
+    // 存在其他拖拽元素时
+    const otherTouchElement = hasClosestByClassName(target, "b3-chip");
+    if ((otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) ||
+        target.closest(".protyle-gutters") ||
+        target.closest(".av__gallery") ||
+        (target.tagName === "IMG" && target.style.cursor === "move" && target.parentElement.classList.contains("protyle-background__img"))) {
+        clientX = null;
+        clientY = null;
         return;
     }
-
-    if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element)) {
-        const editor = getCurrentEditor();
-        if (editor && !editor.protyle.disabled && event.touches[0].clientY > window.innerHeight / 2 &&
-            document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
-            window.siyuan.mobile.touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);
-        }
+    const editor = getCurrentEditor();
+    if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element) &&
+        editor && !editor.protyle.disabled && event.touches[0].clientY > window.innerHeight / 2 &&
+        document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+        window.siyuan.mobile.touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);
     }
 
     firstDirection = null;
@@ -184,11 +228,9 @@ export const handleTouchStart = (event: TouchEvent) => {
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;
-        time = new Date().getTime();
     } else {
         clientX = null;
         clientY = null;
-        time = 0;
         event.stopImmediatePropagation();
     }
     isFirstMove = true;
@@ -201,6 +243,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     if (!clientX || !clientY ||
         target.tagName === "AUDIO" ||
+        document.getElementById("dragGhost") ||
         hasClosestByClassName(target, "b3-dialog", true) ||
         (window.siyuan.mobile.editor && !window.siyuan.mobile.editor.protyle.toolbar.subElement.classList.contains("fn__none")) ||
         hasClosestByClassName(target, "keyboard") ||

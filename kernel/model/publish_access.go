@@ -274,7 +274,7 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			for _, bt := range bts {
 				passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 				if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
-					assets, _ := DocAssets(bt.ID)
+					assets, _ := DocAssets(bt.ID, false)
 					for _, assetPath := range assets {
 						if assetPath == relPath {
 							return true
@@ -285,7 +285,7 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			return false
 		}
 	}
-	return true
+	return false
 }
 
 func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, viewable av.Viewable) (ret av.Viewable) {
@@ -836,7 +836,7 @@ func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAcce
 	for _, bt := range bts {
 		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
-			assets, err := DocAssets(bt.ID)
+			assets, err := DocAssets(bt.ID, false)
 			if err == nil {
 				validAssets = append(validAssets, assets...)
 			}

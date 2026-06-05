@@ -152,7 +152,7 @@ func removeWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
+	workspacePaths = util.RemoveWorkspacePath(workspacePaths, path)
 
 	if err = util.WriteWorkspacePaths(workspacePaths); err != nil {
 		ret.Code = -1
@@ -195,7 +195,7 @@ func getMobileWorkspaces(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	if util.ContainerIOS != util.Container && util.ContainerAndroid != util.Container && util.ContainerHarmony != util.Container {
+	if !util.IsMobileContainer() {
 		return
 	}
 
@@ -318,8 +318,8 @@ func setWorkspaceDir(c *gin.Context) {
 	}
 
 	workspacePaths = append(workspacePaths, path)
-	workspacePaths = gulu.Str.RemoveDuplicatedElem(workspacePaths)
-	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
+	workspacePaths = util.DeduplicateWorkspacePaths(workspacePaths)
+	workspacePaths = util.RemoveWorkspacePath(workspacePaths, path)
 	workspacePaths = append(workspacePaths, path) // 切换的工作空间固定放在最后一个
 
 	if err = util.WriteWorkspacePaths(workspacePaths); err != nil {
@@ -328,7 +328,7 @@ func setWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+	if util.IsMobileContainer() {
 		util.PushMsg(model.Conf.Language(42), 1000*15)
 		time.Sleep(2 * time.Second)
 	}

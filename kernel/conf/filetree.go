@@ -27,6 +27,8 @@ type FileTree struct {
 	RefCreateSavePath        string `json:"refCreateSavePath"`        // 块引时新建文档存储路径
 	DocCreateSaveBox         string `json:"docCreateSaveBox"`         // 新建文档存储笔记本
 	DocCreateSavePath        string `json:"docCreateSavePath"`        // 新建文档存储路径
+	ShorthandSaveBox         string `json:"shorthandSaveBox"`         // 闪念速记存储笔记本
+	ShorthandSavePath        string `json:"shorthandSavePath"`        // 闪念速记存储路径
 	MaxListCount             int    `json:"maxListCount"`             // 最大列出数量
 	MaxOpenTabCount          int    `json:"maxOpenTabCount"`          // 最大打开页签数量
 	AllowCreateDeeper        bool   `json:"allowCreateDeeper"`        // 允许创建超过 7 层深度的子文档

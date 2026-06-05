@@ -19,6 +19,7 @@ package mobile
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -228,6 +229,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		job.StartCron()
 		go model.AutoGenerateFileHistory()
 		go cache.LoadAssets()
+		go model.StartEmbeddingIndexer()
 	}()
 }
 
@@ -293,11 +295,56 @@ func AssetName(name string) string {
 	return util.AssetName(name, ast.NewNodeID())
 }
 
+func HTML2Markdown(html string) string {
+	return util.NewLute().HTML2Md(html)
+}
+
 func Unzip(zipFilePath, destination string) {
 	if err := gulu.Zip.Unzip(zipFilePath, destination); nil != err {
 		logging.LogErrorf("unzip [%s] failed: %s", zipFilePath, err)
 		panic(err)
 	}
+}
+
+// GetExportFilePath 解析导出文件绝对路径，绕过 HTTP 层以避免锁屏密码拦截。
+// exportPath 格式为 "/export/xxx.zip" 或 "assets/xxx"。
+// 返回文件在磁盘上的绝对路径，以便原生端分块拷贝，避免大文件内存溢出。
+// 解析失败返回空字符串。
+func GetExportFilePath(exportPath string) (ret string) {
+	var absPath string
+	if strings.HasPrefix(exportPath, "/export/") {
+		fileName := strings.TrimPrefix(exportPath, "/export/")
+		if decoded, err := url.PathUnescape(fileName); err == nil {
+			fileName = decoded
+		}
+		fileName = filepath.Clean(fileName)
+		if strings.HasPrefix(fileName, "..") {
+			logging.LogWarnf("get export file path [%s] blocked: path traversal attempt [%s]", exportPath, fileName)
+			return
+		}
+		absPath = filepath.Join(util.TempDir, "export", fileName)
+		exportBaseDir := filepath.Join(util.TempDir, "export")
+		if !gulu.File.IsSubPath(exportBaseDir, absPath) {
+			logging.LogWarnf("get export file path [%s] blocked: path [%s] is outside export base dir [%s]", exportPath, absPath, exportBaseDir)
+			return
+		}
+	} else if strings.HasPrefix(exportPath, "assets/") {
+		var err error
+		absPath, err = model.GetAssetAbsPath(exportPath)
+		if nil != err {
+			logging.LogErrorf("get asset abs path [%s] failed: %s", exportPath, err)
+			return
+		}
+	} else {
+		logging.LogWarnf("get export file path [%s] failed: unsupported path prefix", exportPath)
+		return
+	}
+
+	if "" == absPath {
+		logging.LogWarnf("get export file path [%s] failed: resolved to empty abs path", exportPath)
+		return
+	}
+	return absPath
 }
 
 func Exit() {

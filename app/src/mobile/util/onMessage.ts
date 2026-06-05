@@ -10,8 +10,6 @@ import {
 import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
-import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
-import {updateControlAlt} from "../../protyle/util/hotKey";
 import {renderSnippet} from "../../config/util/snippets";
 import {redirectToCheckAuth} from "../../util/pathName";
 
@@ -50,9 +48,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "reloadTag":
                 window.siyuan.mobile.docks.tag?.update();
                 break;
-            case "setLocalShorthandCount":
-                setLocalShorthandCount();
-                break;
             case "setRefDynamicText":
                 setRefDynamicText(data.data);
                 break;
@@ -67,7 +62,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setConf":
                 window.siyuan.config = data.data;
-                updateControlAlt();
                 break;
             case "setPublish":
                 window.siyuan.config.publish = data.data;
@@ -78,6 +72,22 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "readonly":
                 window.siyuan.config.editor.readOnly = data.data;
+                break;
+            case "setLocalStorageVal":
+                window.siyuan.storage[data.data.key] = data.data.val;
+                break;
+            case "setLocalStorageVals":
+                Object.keys(data.data.keyVals).forEach((k) => {
+                    window.siyuan.storage[k] = data.data.keyVals[k];
+                });
+                break;
+            case "removeLocalStorageVal":
+                delete window.siyuan.storage[data.data.key];
+                break;
+            case "removeLocalStorageVals":
+                data.data.keys.forEach((k: string) => {
+                    delete window.siyuan.storage[k];
+                });
                 break;
             case"progress":
                 progressLoading(data);

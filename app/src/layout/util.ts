@@ -28,8 +28,9 @@ import {newCardModel} from "../card/newCardTab";
 import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
 import {setTitle} from "../dialog/processSystem";
-import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
+import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {adjustDockPadding} from "./dock/util";
 
 export const setPanelFocus = (element: Element, isSaveLayout = true) => {
     if (element.getAttribute("data-type") === "wnd") {
@@ -79,7 +80,10 @@ const dockToJSON = (dock: Dock) => {
     const json = [];
     const subDockToJSON = (index: number) => {
         const data: Config.IUILayoutDockTab[] = [];
-        dock.element.querySelectorAll(`span[data-index="${index}"]`).forEach(item => {
+        dock.elements[index].querySelectorAll(".dock__item").forEach(item => {
+            if (!item.getAttribute("data-type")) {
+                return;
+            }
             data.push({
                 type: item.getAttribute("data-type"),
                 size: {
@@ -228,7 +232,8 @@ const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
         }
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
-            existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom;
+            const km = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId];
+            existSubItem.hotkey = km ? km.custom : "";
         }
     });
 };
@@ -247,6 +252,7 @@ const JSONToDock = (json: any, app: App) => {
     window.siyuan.layout.leftDock = new Dock({position: "Left", data: json.left, app});
     window.siyuan.layout.rightDock = new Dock({position: "Right", data: json.right, app});
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom, app});
+    adjustDockPadding();
 };
 
 const removedTabs: Tab[] = [];
@@ -468,7 +474,23 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         afterLoadPlugin(item);
     });
     saveLayout();
-    resizeTopBar();
+    // https://github.com/siyuan-note/siyuan/issues/17779
+    if (window.siyuan.layout.rightDock.layout.children[0].element.classList.contains("fn__none") &&
+        window.siyuan.layout.rightDock.layout.children[1].element.classList.contains("fn__none")) {
+        window.siyuan.layout.rightDock.layout.element.style.width = "0px";
+    }
+    if (window.siyuan.layout.leftDock.layout.children[0].element.classList.contains("fn__none") &&
+        window.siyuan.layout.leftDock.layout.children[1].element.classList.contains("fn__none")) {
+        window.siyuan.layout.rightDock.layout.element.style.width = "0px";
+    }
+    if (window.siyuan.layout.bottomDock.layout.children[0].element.classList.contains("fn__none") &&
+        window.siyuan.layout.bottomDock.layout.children[1].element.classList.contains("fn__none")) {
+        window.siyuan.layout.bottomDock.layout.element.style.height = "0px";
+    }
+    // 等待 dock 面板动画结束
+    setTimeout(() => {
+        setTabPosition();
+    }, Constants.TIMEOUT_TRANSITION);
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, breakObj?: IObject) => {
@@ -653,15 +675,18 @@ export const resizeTopBar = () => {
     }
     barMoreElement.setAttribute("data-hideids", hideIds.join(","));
 
-    const width = dragElement.clientWidth;
-    const dragRect = dragElement.getBoundingClientRect();
-    const left = dragRect.left;
-    const right = window.innerWidth - dragRect.right;
-    if (left > right && left - right < width / 3) {
-        dragElement.style.paddingRight = (left - right) + "px";
-    } else if (left < right && right - left < width / 3) {
-        dragElement.style.paddingLeft = (right - left) + "px";
+    if (!window.siyuan.config.appearance.hideToolbar) {
+        const width = dragElement.clientWidth;
+        const dragRect = dragElement.getBoundingClientRect();
+        const left = dragRect.left;
+        const right = window.innerWidth - dragRect.right;
+        if (left > right && left - right < width / 3) {
+            dragElement.style.paddingRight = (left - right) + "px";
+        } else if (left < right && right - left < width / 3) {
+            dragElement.style.paddingLeft = (right - left) + "px";
+        }
     }
+
     window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].forEach((id: string) => {
         toolbarElement.querySelector("#" + id)?.classList.add("fn__none");
     });
@@ -703,7 +728,8 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             blockId: json.blockId,
             mode: json.mode,
             scrollPosition: json.scrollPosition,
-            action: typeof json.action === "string" ? (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]) : json.action.concat(Constants.CB_GET_FOCUS),
+            action: Array.isArray(json.action) ? json.action.concat(Constants.CB_GET_FOCUS) :
+                (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]),
         });
     }
     return model;
@@ -769,6 +795,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
 
         let range: Range;
         resizeElement.addEventListener("mousedown", (event: MouseEvent) => {
+            event.preventDefault();
             getAllModels().editor.forEach((item) => {
                 if (item.editor && item.editor.protyle && item.element.parentElement) {
                     hideElements(["gutter"], item.editor.protyle);
@@ -826,6 +853,9 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                     nextNowSize < 64 && nextNowSize < nextSize) {
                     return;
                 }
+                if (nextElement.classList.contains("layout__center") && nextNowSize <= 148) {
+                    return;
+                }
                 if (!previousElement.classList.contains("fn__flex-1")) {
                     previousElement.style[direction === "lr" ? "width" : "height"] = previousNowSize + "px";
                 }
@@ -841,6 +871,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
                 adjustLayout(isWindow() ? window.siyuan.layout.centerLayout : undefined);
+                setTabPosition(true);
                 resizeTabs();
                 if (!isWindow()) {
                     window.siyuan.layout.leftDock.setSize();
@@ -864,7 +895,8 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
     }
     resizeElement.classList.add("layout__resize");
     if (after) {
-        obj.element.insertAdjacentElement("beforebegin", resizeElement);
+        obj.element.insertAdjacentElement((obj.element.previousElementSibling && !obj.element.previousElementSibling.classList.contains("layout__resize")) ?
+            "beforebegin" : "afterend", resizeElement);
     } else {
         obj.element.insertAdjacentElement("afterend", resizeElement);
     }
@@ -935,11 +967,18 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
         } else {
             item.element.style.minWidth = "";
         }
+
+        if (!item.element.style.height && !item.element.classList.contains("layout__center") &&
+            item.element.classList.contains("fn__flex-column")) {
+            item.element.style.minHeight = "8px";
+        } else {
+            item.element.style.minHeight = "";
+        }
     });
     if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2) {
         let index = Math.ceil(screen.width / 8);
         while (index > 0) {
-            let width = 0;
+            let width = layout.element.firstElementChild.classList.contains("layout__dockl") ? 8 : 0;
             layout.children.find((item: Layout | Wnd) => {
                 if (item.element.style.width && item.element.style.width !== "0px") {
                     item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";

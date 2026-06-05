@@ -4,16 +4,16 @@ import {Model} from "./Model";
 import {Editor} from "../editor";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
-import {escapeGreat, escapeHtml} from "../util/escape";
+import {escapeHtml, escapeLessThans} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
-import {isTouchDevice} from "../util/functions";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
 import {ipcRenderer} from "electron";
 /// #endif
 import {layoutToJSON, saveLayout} from "./util";
+import {setTitle} from "../dialog/processSystem";
 
 export class Tab {
     public parent: Wnd;
@@ -73,20 +73,15 @@ export class Tab {
                         id
                     }, (response) => {
                         if (!this.headElement.getAttribute("aria-label")) {
-                            showTooltip(escapeGreat(response.data), this.headElement);
+                            showTooltip(escapeLessThans(response.data), this.headElement);
                         }
-                        this.headElement.setAttribute("aria-label", escapeGreat(response.data));
+                        this.headElement.setAttribute("aria-label", escapeLessThans(response.data));
                     });
                 } else {
-                    this.headElement.setAttribute("aria-label", escapeGreat(this.title));
+                    this.headElement.setAttribute("aria-label", escapeLessThans(this.title));
                 }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
-                if (isTouchDevice()) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
                 window.getSelection().removeAllRanges();
                 hideTooltip();
                 const tabElement = hasClosestByTag(event.target, "LI");
@@ -139,7 +134,9 @@ export class Tab {
                         }
                     });
                 }
+                /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "addRegionStyle"});
+                /// #endif
             });
         }
 
@@ -152,6 +149,14 @@ export class Tab {
     public updateTitle(title: string) {
         this.title = title;
         this.headElement.querySelector(".item__text").innerHTML = escapeHtml(title);
+
+        if (document.querySelector(".layout__wnd--active .layout-tab-bar .item--focus")) {
+            if (this.headElement.closest(".layout__wnd--active")) {
+                setTitle(title);
+            }
+        } else if (this.headElement.classList.contains("item--focus")) {
+            setTitle(title);
+        }
     }
 
     public addModel(model: Model) {

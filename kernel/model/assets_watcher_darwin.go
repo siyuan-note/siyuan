@@ -33,7 +33,7 @@ import (
 var assetsWatcher *watcher.Watcher
 
 func WatchAssets() {
-	if !isFileWatcherAvailable() {
+	if util.IsMobileContainer() {
 		return
 	}
 

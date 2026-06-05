@@ -18,6 +18,7 @@ import * as dayjs from "dayjs";
 import {openFileById} from "../../editor/util";
 /// #endif
 import {setTitle} from "../../dialog/processSystem";
+import {getDocDisplayName} from "../../util/pathName";
 import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {nbsp2space} from "../util/normalizeText";
@@ -292,7 +293,7 @@ export class Title {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "selectAll",
                     label: window.siyuan.languages.selectAll,
-                    icon: "iconSelect",
+                    icon: "iconSelectAll",
                     accelerator: "⌘A",
                     click: () => {
                         range.selectNodeContents(this.editElement);
@@ -335,7 +336,6 @@ export class Title {
                 this.setTitle(fileName);
                 focusByOffset(this.editElement, offset.start, offset.end);
             }
-            setTitle(fileName);
         }, Constants.TIMEOUT_INPUT);
     }
 
@@ -377,6 +377,9 @@ export class Title {
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.element.setAttribute("data-render", "true");
         this.setTitle(response.data.ial.title, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+        if (protyle.model?.parent) {
+            protyle.model.parent.updateTitle(getDocDisplayName(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true"));
+        }
         let nodeAttrHTML = "";
         if (response.data.ial.bookmark) {
             nodeAttrHTML += `<div class="protyle-attr--bookmark">${Lute.EscapeHTMLStr(response.data.ial.bookmark)}</div>`;
@@ -393,7 +396,7 @@ export class Title {
         if (response.data.ial["custom-avs"]) {
             let avTitle = "";
             response.data.attrViews.forEach((item: { id: string, name: string }) => {
-                avTitle += `<span data-av-id="${item.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${item.name}</span>&nbsp;`;
+                avTitle += `<span data-av-id="${item.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${Lute.EscapeHTMLStr(item.name)}</span>&nbsp;`;
             });
             if (avTitle) {
                 avTitle = avTitle.substring(0, avTitle.length - 6);
@@ -405,7 +408,7 @@ export class Title {
             this.element.querySelector(".protyle-attr").insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${response.data.refCount}</div>`);
         }
         // 存在设置新建文档名模板，不能使用 Untitled 进行判断，https://ld246.com/article/1649301009888
-        if (this.editElement && new Date().getTime() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000) {
+        if (this.editElement && Date.now() - dayjs(response.data.id.split("-")[0]).toDate().getTime() < 2000) {
             const range = this.editElement.ownerDocument.createRange();
             range.selectNodeContents(this.editElement);
             focusByRange(range);

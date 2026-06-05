@@ -82,7 +82,7 @@
   button {
     border: 0;
     background-color: transparent;
-    padding: 4px;
+    padding: 4px 3px;
     cursor: pointer;
     position: relative;
 
@@ -101,13 +101,14 @@
       left: 0;
       height: 100%;
       width: 100%;
+      touch-action: none;
     }
   }
 
   svg {
     color: var(--b3-theme-on-surface-light);
     height: calc(var(--b3-font-size-editor) * 1.625);
-    width: 14px;
+    width: 16px;
     float: left;
     transition: var(--b3-color-transition);
   }
@@ -125,7 +126,7 @@
   background-color: var(--b3-theme-background);
   flex-shrink: 0;
   box-sizing: border-box;
-  min-height: 30px;
+  min-height: 42px;
   z-index: 1;
   font-size: 14px;
 
@@ -189,10 +190,10 @@
   }
 
   &__arrow {
-    height: 10px;
-    width: 10px;
+    height: 14px;
+    width: 14px;
     color: var(--b3-theme-on-surface-light);
-    margin: 0 4px;
+    margin: 0 2px;
     flex-shrink: 0;
   }
 
@@ -229,8 +230,8 @@
     }
 
     svg {
-      height: 14px;
-      width: 14px;
+      height: 16px;
+      width: 16px;
       flex-shrink: 0;
       color: var(--b3-theme-on-surface);
 
@@ -377,11 +378,11 @@
 
   &__icon {
     position: absolute;
-    left: -24px;
+    left: -22px;
     top: 50%;
     opacity: 0;
-    margin: -15px 4px 0 0;
-    padding: 8px 4px 8px 4px;
+    margin: -17px 0 0 0;
+    padding: 9px 3px 9px 3px;
     transition: var(--b3-transition);
     color: var(--b3-theme-on-surface-light);
     cursor: pointer;
@@ -392,8 +393,8 @@
     }
 
     svg {
-      height: 14px;
-      width: 14px;
+      height: 16px;
+      width: 16px;
       float: left;
     }
   }
@@ -456,6 +457,7 @@ table + .protyle-action__table {
     width: 6px;
     cursor: col-resize;
     z-index: 2;
+    touch-action: none;
 
     &:hover::after {
       background-color: var(--b3-theme-primary-light);

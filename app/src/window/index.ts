@@ -6,7 +6,7 @@ import {initBlockPopover} from "../block/popover";
 import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {genUUID} from "../util/genID";
 import {fetchGet, fetchPost} from "../util/fetch";
-import {addBaseURL, redirectToCheckAuth, setNoteBook} from "../util/pathName";
+import {addBaseURL, getDocDisplayName, redirectToCheckAuth, setNoteBook} from "../util/pathName";
 import {openFileById} from "../editor/util";
 import {
     processSync,
@@ -26,9 +26,9 @@ import {init} from "./init";
 import {loadPlugins, reloadPlugin} from "../plugin/loader";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
-import {updateControlAlt} from "../protyle/util/hotKey";
 import {updateAppearance} from "../config/util/updateAppearance";
 import {renderSnippet} from "../config/util/snippets";
+import {setBodyHighlight} from "../util/assets";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -92,13 +92,27 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
-                                updateControlAlt();
                                 break;
                             case "progress":
                                 progressLoading(data);
                                 break;
                             case "setLocalStorageVal":
-                                window.siyuan.storage[data.data.key] = data.data.val;
+                                if (window.siyuan.storage) {
+                                    window.siyuan.storage[data.data.key] = data.data.val;
+                                }
+                                break;
+                            case "setLocalStorageVals":
+                                Object.keys(data.data.keyVals).forEach((k) => {
+                                    window.siyuan.storage[k] = data.data.keyVals[k];
+                                });
+                                break;
+                            case "removeLocalStorageVal":
+                                delete window.siyuan.storage[data.data.key];
+                                break;
+                            case "removeLocalStorageVals":
+                                data.data.keys.forEach((k: string) => {
+                                    delete window.siyuan.storage[k];
+                                });
                                 break;
                             case "rename":
                                 getAllTabs().forEach((tab) => {
@@ -107,7 +121,7 @@ class App {
                                         if (initTab) {
                                             const initTabData = JSON.parse(initTab);
                                             if (initTabData.instance === "Editor" && initTabData.rootId === data.data.id) {
-                                                tab.updateTitle(data.data.title);
+                                                tab.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                             }
                                         }
                                     }
@@ -171,7 +185,7 @@ class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
-            updateControlAlt();
+            setBodyHighlight();
             window.siyuan.isPublish = response.data.isPublish;
             await loadPlugins(this);
             getLocalStorage(() => {

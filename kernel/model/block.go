@@ -211,9 +211,17 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 			parent = parentBlock.ID
 			if nil != parentBlock.Previous {
 				previous = parentBlock.Previous.ID
+			} else {
+				if nil != current.Previous {
+					previous = current.Previous.ID
+				}
 			}
 			if nil != parentBlock.Next {
 				next = parentBlock.Next.ID
+			} else {
+				if nil != current.Next {
+					next = current.Next.ID
+				}
 			}
 		}
 		return
@@ -398,7 +406,7 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	ret = []*Block{}
 
 	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1"
-	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
+	if util.IsMobileContainer() {
 		sqlStmt = "SELECT * FROM blocks WHERE type = 'd'"
 	}
 
@@ -507,8 +515,8 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 		}
 	}
 
-	refreshUpdated(defNode)
-	refreshUpdated(refNode)
+	treenode.RefreshUpdated(defNode)
+	treenode.RefreshUpdated(refNode)
 
 	refPivot := treenode.NewParagraph("")
 	refNode.InsertBefore(refPivot)
@@ -1286,7 +1294,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	fillBlockRefCount(nodes)
 
 	luteEngine := NewLute()
-	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑
+	luteEngine.RenderOptions.ProtyleContenteditable = true
 	dom := renderBlockDOMByNodes(nodes, luteEngine)
 	content := renderBlockContentByNodes(nodes)
 	block = &Block{Box: def.Box, Path: def.Path, HPath: b.HPath, ID: def.ID, Type: def.Type.String(), Content: dom, Markdown: content /* 这里使用 Markdown 字段来临时存储 content */}

@@ -1,15 +1,15 @@
 :root {
     /* 主色 */
-    --b3-theme-primary: #3573f0;
-    --b3-theme-primary-light: rgba(53, 115, 240, .72);
-    --b3-theme-primary-lighter: rgba(53, 115, 240, .48);
-    --b3-theme-primary-lightest: rgba(53, 115, 240, .24);
+    --b3-theme-primary: #3575f0;
+    --b3-theme-primary-light: rgba(53, 117, 240, .72);
+    --b3-theme-primary-lighter: rgba(53, 117, 240, .48);
+    --b3-theme-primary-lightest: rgba(53, 117, 240, .24);
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #1e1e1e;
-    --b3-theme-background-light: rgba(255, 255, 255, .075);
-    --b3-theme-surface: #262626;
+    --b3-theme-background-light: rgba(255, 255, 255, .1);
+    --b3-theme-surface: #2c2c2c;
     --b3-theme-surface-light: rgba(41, 42, 45, .86);
-    --b3-theme-surface-lighter: rgba(230, 230, 230, .06);
+    --b3-theme-surface-lighter: rgba(230, 230, 230, .1);
     --b3-theme-error: #d23f31;
     --b3-theme-success: #65b84d;
 
@@ -28,18 +28,23 @@
     --b3-font-family-graph: arial;
     --b3-font-family-emoji: "Emojis Additional", emojis;
     --b3-font-family-math: KaTeX_Math;
-    --b3-font-family-kbd: SFMono-Regular, Consolas, "Liberation Mono";
+    --b3-font-family-kbd: var(--b3-font-family-protyle);
     --b3-font-size: 14px;
 
+    /* 背景 */
+    --b3-body-background: #2e3236;
+    --b3-body-background-hl-opacity: 0.24;
+    --b3-body-background-hl: 219, 86%, 57%;
+    --b3-layout-space: 4px;
+    --b3-layout-space-margin: -4px;
+
     /* 顶部工具栏 */
-    --b3-toolbar-background: var(--b3-theme-surface);
-    --b3-toolbar-blur-background: var(--b3-border-color);
     --b3-toolbar-color: var(--b3-theme-on-surface);
-    --b3-toolbar-hover: var(--b3-theme-background-light);
+    --b3-toolbar-hover: rgba(255, 255, 255, .08);
     --b3-toolbar-left-mac: 74px;
 
     /* 线条 */
-    --b3-border-color: #363636;
+    --b3-border-color: #484848;
     --b3-border-radius: 6px;
     --b3-border-radius-s: 3px;
     --b3-border-radius-b: 12px;
@@ -48,7 +53,7 @@
     --b3-scroll-color: rgba(230, 230, 230, .2);
 
     /* 列表 */
-    --b3-list-hover: rgba(255, 255, 255, .075);
+    --b3-list-hover: rgba(255, 255, 255, .10);
     --b3-list-icon-hover: rgba(201, 209, 217, .1);
 
     /* 菜单 */
@@ -58,7 +63,7 @@
     --b3-tooltips-background: #030303;
     --b3-tooltips-color: var(--b3-theme-on-surface-light);
     --b3-tooltips-second-color: #7d7c7a;
-    --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+    --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .5);
 
     /* 为空提示 */
     --b3-empty-color: var(--b3-theme-on-surface);
@@ -85,23 +90,23 @@
     --b3-font-color6: var(--b3-theme-primary);
     --b3-font-color7: var(--b3-theme-secondary);
     --b3-font-color8: var(--b3-theme-error);
-    --b3-font-color9: #f5539e;
-    --b3-font-color10: #00eeff;
-    --b3-font-color11: #74ff00;
-    --b3-font-color12: #fff200;
+    --b3-font-color9: #f47c9c;
+    --b3-font-color10: #4dd0e1;
+    --b3-font-color11: #10df54;
+    --b3-font-color12: #ecd424;
     --b3-font-color13: var(--b3-theme-background);
     --b3-font-background1: var(--b3-card-error-background);
     --b3-font-background2: var(--b3-card-warning-background);
     --b3-font-background3: var(--b3-card-info-background);
     --b3-font-background4: var(--b3-card-success-background);
-    --b3-font-background5: #4c5257;
-    --b3-font-background6: #08296c;
+    --b3-font-background5: #3a3f42;
+    --b3-font-background6: #031840;
     --b3-font-background7: #593905;
-    --b3-font-background8: #541812;
-    --b3-font-background9: #843473;
-    --b3-font-background10: #329096;
-    --b3-font-background11: #568b2a;
-    --b3-font-background12: #8d8829;
+    --b3-font-background8: #3a0c09;
+    --b3-font-background9: #4d1b40;
+    --b3-font-background10: #1a5459;
+    --b3-font-background11: #305415;
+    --b3-font-background12: #4a4712;
     --b3-font-background13: var(--b3-theme-on-background);
 
     /* 动画效果 */
@@ -128,7 +133,7 @@
     --b3-switch-checked-hover2: rgba(253, 252, 251, .10);
 
     /* 阴影 */
-    --b3-point-shadow: inset 0 .5px .5px .5px rgba(255, 255, 255, .09), 0 3px 6px rgba(0, 0, 0, .04), 0 0 0 0 transparent;
+    --b3-point-shadow: inset 0 .5px .5px .5px rgba(255, 255, 255, .12), 0 3px 8px rgba(0, 0, 0, .3), 0 0 0 0 transparent;
     --b3-dialog-shadow: 0 8px 24px #010409;
     --b3-button-shadow: 0 1px 2px 0 rgb(0 0 0 / .3), 0 1px 3px 1px rgb(255 255 255 /.15);
     --b3-button-active-shadow: 0 2px 3px 1px rgb(0 0 0 / .3), 0 2px 4px 2px rgb(255 255 255 /.15);
@@ -169,7 +174,7 @@
     --b3-protyle-inline-mark-background: #b29100;
     --b3-protyle-inline-mark-color: var(--b3-theme-on-background);
     --b3-protyle-inline-tag-color: #9aa0a6;
-    --b3-protyle-inline-blockref-color: #8957e5;
+    --b3-protyle-inline-blockref-color: #b388ff;
     --b3-protyle-inline-fileref-color: var(--b3-theme-secondary);
 
     /* PDF */
@@ -193,7 +198,7 @@
     --b3-callout-warning: var(--b3-highlight-current-background);
 
     /* 表格 */
-    --b3-table-even-background: rgba(255, 255, 255, .03);
+    --b3-table-even-background: rgba(255, 255, 255, .06);
 
     /* 数据库 */
     --b3-av-gallery-shadow: rgba(0, 0, 0, 0.04) 0px 2px 4px 0px, var(--b3-border-color) 0px 0px 0px 1px;
@@ -219,11 +224,6 @@
 
 :root:lang(ja_JP) {
     --b3-font-family: "Emojis Additional", "Emojis Reset", BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Yu Gothic UI", arial, sans-serif, emojis;
-}
-
-/* https://github.com/siyuan-note/siyuan/issues/6440 */
-.protyle-action--order::after {
-    mix-blend-mode: screen;
 }
 
 .b3-text-field::-webkit-calendar-picker-indicator {

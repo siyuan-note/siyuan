@@ -14,7 +14,7 @@ import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {getAssetName, pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
-import {escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
@@ -1003,9 +1003,9 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {
-                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAttr(item.content)}" src="${getCompressURL(encodeURI(item.content))}">`;
+                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${getCompressURL(encodeURI(item.content))}">`;
             } else {
-                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAttr(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
+                text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;
             }
         });
     } else if (cellValue.type === "checkbox") {

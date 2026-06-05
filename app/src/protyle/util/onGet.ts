@@ -251,7 +251,12 @@ const setHTML = (options: {
         if (protyle.breadcrumb) {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
-        protyle.element.removeAttribute("disabled-forever");
+        if (protyle.element.hasAttribute("disabled-forever")) {
+            if (protyle.wysiwyg.element.getAttribute("custom-sy-readonly") !== "true") {
+                protyle.disabled = false;
+            }
+            protyle.element.removeAttribute("disabled-forever");
+        }
         if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
             enableProtyle(protyle);
         } else {
@@ -309,6 +314,21 @@ const setHTML = (options: {
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
             onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
+        });
+    }
+    // 动态滚动条拖拽到最后几个块时需多加载一点块 https://github.com/siyuan-note/siyuan/issues/16906
+    if (options.action.includes(Constants.CB_GET_FOCUSFIRST) &&
+        protyle.wysiwyg.element.getBoundingClientRect().top > protyle.breadcrumb.element.getBoundingClientRect().bottom) {
+        fetchPost("/api/filetree/getDoc", {
+            id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+            mode: 1,
+            size: window.siyuan.config.editor.dynamicLoadBlocks,
+        }, getResponse => {
+            onGet({
+                data: getResponse,
+                protyle,
+                action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
+            });
         });
     }
     if (options.scrollAttr && !protyle.scroll.element.classList.contains("fn__none") && !protyle.element.classList.contains("fn__none")) {
@@ -422,9 +442,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         }
     });
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck]').forEach(item => {
-        if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
-            item.setAttribute("contenteditable", "true");
-        }
+        item.setAttribute("contenteditable", "true");
     });
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="false"]').forEach(item => {
         item.setAttribute("draggable", "true");

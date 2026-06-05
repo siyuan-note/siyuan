@@ -123,12 +123,12 @@ func insertBlocks0(tx *sql.Tx, bulk []*Block, context map[string]any) (err error
 	// 使用下面的 EvtSQLInsertBlocksFTS 就可以了
 	//eventbus.Publish(eventbus.EvtSQLInsertBlocks, context, current, total, len(bulk), evtHash)
 
-	stmt = fmt.Sprintf(BlocksFTSInsert, strings.Join(valueStrings, ","))
-	if err = prepareExecInsertTx(tx, stmt, valueArgs); err != nil {
-		return
-	}
-
-	if !caseSensitive {
+	if caseSensitive {
+		stmt = fmt.Sprintf(BlocksFTSInsert, strings.Join(valueStrings, ","))
+		if err = prepareExecInsertTx(tx, stmt, valueArgs); err != nil {
+			return
+		}
+	} else {
 		stmt = fmt.Sprintf(BlocksFTSCaseInsensitiveInsert, strings.Join(valueStrings, ","))
 		if err = prepareExecInsertTx(tx, stmt, valueArgs); err != nil {
 			return

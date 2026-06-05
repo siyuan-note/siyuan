@@ -74,6 +74,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     } catch (e) {
         console.error(`plugin ${item.name} onload error:`, e);
     }
+    await plugin.kernel.init();
     return plugin;
 };
 
@@ -111,8 +112,12 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
 
 const updateDock = (dockItem: Config.IUILayoutDockTab[], index: number, plugin: Plugin, type: string) => {
     const dockKeys = Object.keys(plugin.docks);
+    if (dockKeys.length === 0) {
+        return;
+    }
     dockItem.forEach((tabItem: Config.IUILayoutDockTab, tabIndex: number) => {
-        if (dockKeys.includes(tabItem.type)) {
+        if (dockKeys.includes(tabItem.type) &&
+            !document.querySelector(`.dock .dock__item[data-type="${tabItem.type}"]`)) {
             if (type === "Left") {
                 plugin.docks[tabItem.type].config.position = index === 0 ? "LeftTop" : "LeftBottom";
             } else if (type === "Right") {
@@ -157,7 +162,6 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         });
     }
     /// #if !MOBILE
-    resizeTopBar();
     plugin.statusBarIcons.forEach(element => {
         if (document.contains(element)) {
             return;
@@ -169,12 +173,16 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             statusElement.insertAdjacentElement("afterbegin", element);
         }
     });
+    resizeTopBar();
     /// #endif
-    if (isWindow()) {
+    addPluginDock(plugin);
+};
+
+export const addPluginDock = (plugin: Plugin) => {
+    /// #if !MOBILE
+    if (isWindow() || !window.siyuan.layout.leftDock) {
         return;
     }
-
-    /// #if !MOBILE
     window.siyuan.config.uiLayout.left.data.forEach((dockItem: Config.IUILayoutDockTab[], index: number) => {
         updateDock(dockItem, index, plugin, "Left");
     });
@@ -185,7 +193,14 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         updateDock(dockItem, index, plugin, "Bottom");
     });
     Object.keys(plugin.docks).forEach(key => {
-        if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] && window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
+        if (document.querySelector(`.dock .dock__item[data-type="${key}"]`)) {
+            return;
+        }
+        if (!window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name]) {
+            window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
+        }
+        if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] &&
+            window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
             plugin.docks[key].config = window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key];
         }
         const dock = plugin.docks[key];

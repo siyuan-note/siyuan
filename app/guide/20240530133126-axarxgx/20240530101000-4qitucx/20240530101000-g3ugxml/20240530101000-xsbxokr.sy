@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20251024173645"
+		"updated": "20260517165255"
 	},
 	"Children": [
 		{
@@ -19,7 +19,7 @@
 			"Properties": {
 				"ID": "20240530101000-0wo4ch4",
 				"id": "20240530101000-9imgmgf",
-				"updated": "20251024173645"
+				"updated": "20260504121953"
 			},
 			"Children": [
 				{
@@ -39,7 +39,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-5z0uafx",
-				"updated": "20251024173645"
+				"updated": "20260504121953"
 			},
 			"Children": [
 				{
@@ -1740,7 +1740,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ドキュメントツリーパネル"
+									"Data": "ドキュメントパネル"
 								}
 							]
 						},
@@ -2367,7 +2367,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デフォルトのズームレベルに戻す"
+									"Data": "インターフェースをリセット"
 								}
 							]
 						},
@@ -2424,7 +2424,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ページを拡大"
+									"Data": "インターフェースを拡大"
 								}
 							]
 						},
@@ -2481,7 +2481,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ページを縮小"
+									"Data": "インターフェースを縮小"
 								}
 							]
 						},
@@ -3693,7 +3693,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20250529111052"
+				"updated": "20260517165255"
 			},
 			"Children": [
 				{
@@ -3719,7 +3719,7 @@
 			"Properties": {
 				"ID": "20240530101000-tkbdrth",
 				"id": "20240530101000-9wkmh8w",
-				"updated": "20250529111052"
+				"updated": "20260517165255"
 			},
 			"Children": [
 				{
@@ -3739,7 +3739,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-1isfzez",
-				"updated": "20250529111052"
+				"updated": "20260517165255"
 			},
 			"Children": [
 				{
@@ -7276,6 +7276,72 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘↓"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "レベルごとに折りたたみ/展開"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "↑"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥⌘↑"
 								},
 								{
 									"Type": "NodeText",
@@ -15218,12 +15284,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240530101000-mifghto",
-				"updated": "20250929214234"
+				"updated": "20260427075616"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメントツリーパネル"
+					"Data": "ドキュメントパネル"
 				}
 			]
 		},

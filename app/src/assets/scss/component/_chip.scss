@@ -5,6 +5,7 @@
 
   .b3-chip {
     margin: 4px;
+    transition: transform 0.2s;
   }
 
   &__doctag {
@@ -27,7 +28,7 @@
   box-sizing: border-box;
   padding: 8px 12px;
   border-radius: var(--b3-border-radius);
-  transition: var(--b3-transition);
+  transition: var(--b3-color-transition), var(--b3-background-transition);
   text-decoration: none;
 
   &--hover {
@@ -96,6 +97,19 @@
     }
   }
 
+  &--dragging,
+  &--dragging:hover {
+    opacity: .38;
+  }
+
+  &--dragclone {
+    opacity: .38;
+  }
+
+  &--insert-after {
+    box-shadow: inset -2px 0 0 0 var(--b3-theme-primary-lighter);
+  }
+
   svg:not(.b3-chip__close) {
     margin-right: 6px;
     margin-left: -5px;
@@ -107,16 +121,18 @@
     margin-right: -5px;
     margin-left: 6px;
     border-radius: var(--b3-border-radius-b);
-    height: 16px;
-    width: 16px;
+    height: 12px;
+    width: 12px;
     transition: var(--b3-transition);
     cursor: pointer;
     opacity: .68;
     flex-shrink: 0;
+    padding: 2px;
 
     &:hover {
       // 不明原因 https://github.com/siyuan-note/siyuan/issues/7756#issuecomment-1484057954
       opacity: .99;
+      background-color: var(--b3-list-icon-hover);
     }
   }
 

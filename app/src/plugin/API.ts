@@ -80,6 +80,7 @@ openTab = (options: {
         id: string,     // 块 id
         action?: TProtyleAction [] // cb-get-all：获取所有内容；cb-get-focus：打开后光标定位在 id 所在的块；cb-get-hl: 打开后 id 块高亮
         zoomIn?: boolean // 是否缩放
+        mode?: TEditorMode  // 文档打开模式，默认 "wysiwyg"
     },
     pdf?: {
         path: string,
@@ -126,7 +127,8 @@ openTab = (options: {
             id: options.doc.id,
             action: options.doc.action,
             zoomIn: options.doc.zoomIn,
-            scrollPosition: "start"
+            scrollPosition: "start",
+            mode: options.doc.mode,
         });
     }
     if (options.asset) {
@@ -297,7 +299,7 @@ export const expandDocTree = async (options: {
     if (isNotebook) {
         liElement = file.element.querySelector(`.b3-list[data-url="${options.id}"]`)?.firstElementChild as HTMLElement;
     } else {
-        const response = await fetchSyncPost("api/block/getBlockInfo", {id: options.id});
+        const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
         if (response.code === -1) {
             return;
         }

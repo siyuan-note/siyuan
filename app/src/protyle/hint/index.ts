@@ -1,5 +1,11 @@
 import {Constants} from "../../constants";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByTag,
+    isInEmbedBlock
+} from "../util/hasClosest";
 import {
     focusBlock,
     focusByRange,
@@ -16,7 +22,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
-import {assetMenu, imgMenu, setFold} from "../../menus/protyle";
+import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
@@ -42,6 +48,7 @@ import {isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
+import {setFold} from "../util/blockFold";
 
 export class Hint {
     public timeId: number;
@@ -189,7 +196,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         // https://github.com/siyuan-note/siyuan/issues/5083
         if (this.splitChar === "/" || this.splitChar === "、") {
             clearTimeout(this.timeId);
-            if (this.enableSlash && !isMobile()) {
+            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+            if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
                 this.genHTML(hintSlash(key, protyle), protyle, false, "hint");
             }
             return;
@@ -526,7 +534,7 @@ ${genHintItemHTML(item)}
             }
             return;
         }
-        this.enableExtend = false;
+        this.enableExtend = value === "emoji";
         let id = "";
         if (nodeElement) {
             id = nodeElement.getAttribute("data-node-id");
@@ -1057,7 +1065,8 @@ ${genHintItemHTML(item)}
             return undefined;
         }
         // 上一次提示没有结束时不能被其余提示干扰 https://github.com/siyuan-note/siyuan/issues/14324
-        if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar) {
+        if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar &&
+            !(["/", "、"].includes(prevSplit) && this.splitChar === ":")) {
             this.splitChar = prevSplit;
             this.lastIndex = prevLastIndex;
         }

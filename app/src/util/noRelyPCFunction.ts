@@ -5,13 +5,35 @@ import {Constants} from "../constants";
 import {pathPosix} from "./pathName";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
-import {Files} from "../layout/dock/Files";
 import {Tag} from "../layout/dock/Tag";
 /// #endif
 import {upDownHint} from "./upDownHint";
 import {escapeHtml} from "./escape";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isNotCtrl} from "../protyle/util/compatibility";
+import {electronUndo} from "../protyle/undo";
+
+export const genTagList = (listElement: Element, k: string) => {
+    listElement.classList.remove("fn__none");
+    fetchPost("/api/search/searchTag", {
+        k,
+    }, (response) => {
+        let searchHTML = "";
+        let hasKey = false;
+        response.data.tags.forEach((item: string, index: number) => {
+            searchHTML += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+    <div class="fn__flex-1">${item}</div>
+</div>`;
+            if (item === `<mark>${response.data.k}</mark>`) {
+                hasKey = true;
+            }
+        });
+        if (!hasKey && response.data.k) {
+            searchHTML = `<div data-type="new" class="b3-list-item${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
+        }
+        listElement.innerHTML = searchHTML;
+    });
+};
 
 // 需独立出来，否则移动端引用的时候会引入 pc 端大量无用代码
 export const renameTag = (labelName: string) => {
@@ -72,29 +94,18 @@ export const renameTag = (labelName: string) => {
                 listElement.classList.add("fn__none");
             }
             event.preventDefault();
+        } else {
+            electronUndo(event);
         }
     });
-    inputElement.addEventListener("input", (event) => {
+    inputElement.addEventListener("input", (event: KeyboardEvent) => {
         event.stopPropagation();
-        listElement.classList.remove("fn__none");
-        fetchPost("/api/search/searchTag", {
-            k: inputElement.value.trim(),
-        }, (response) => {
-            let searchHTML = "";
-            let hasKey = false;
-            response.data.tags.forEach((item: string, index: number) => {
-                searchHTML += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
-    <div class="fn__flex-1">${item}</div>
-</div>`;
-                if (item === `<mark>${response.data.k}</mark>`) {
-                    hasKey = true;
-                }
-            });
-            if (!hasKey && response.data.k) {
-                searchHTML = `<div data-type="new" class="b3-list-item${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
-            }
-            listElement.innerHTML = searchHTML;
-        });
+        if (!event.isComposing) {
+            genTagList(listElement, inputElement.value.trim());
+        }
+    });
+    inputElement.addEventListener("compositionend", () => {
+        genTagList(listElement, inputElement.value.trim());
     });
     listElement.addEventListener("click", (event) => {
         const target = event.target as HTMLElement;
@@ -119,30 +130,5 @@ export const checkFold = (id: string, cb: (zoomIn: boolean, action: TProtyleActi
         cb(foldResponse.data.isFolded,
             foldResponse.data.isFolded ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
             foldResponse.data.isRoot);
-    });
-};
-
-export const setLocalShorthandCount = () => {
-    let fileElement;
-    /// #if MOBILE
-    fileElement = window.siyuan.mobile.docks.file.element;
-    /// #else
-    const dockFile = getDockByType("file");
-    if (!dockFile) {
-        return false;
-    }
-    fileElement = (dockFile.data.file as Files).element;
-    /// #endif
-    const helpIDs: string[] = [];
-    Object.keys(Constants.HELP_PATH).forEach((key) => {
-        helpIDs.push(Constants.HELP_PATH[key]);
-    });
-    fileElement.childNodes.forEach((item: Element) => {
-        if (item.querySelector('[data-type="addLocal"]') || helpIDs.includes(item.getAttribute("data-url"))) {
-            return;
-        }
-        item.querySelector('[data-type="more-root"]').insertAdjacentHTML("beforebegin", `<span data-type="addLocal" class="b3-list-item__action">
-    <svg><use xlink:href="#iconRiffCard"></use></svg>
-</span>`);
     });
 };

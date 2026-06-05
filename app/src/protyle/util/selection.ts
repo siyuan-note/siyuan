@@ -115,7 +115,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
         return true;
     }
     hideElements(["select"], protyle);
-    const ids: string [] = [];
+    const ids: string[] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         const nodeId = item.getAttribute("data-node-id");
         if (nodeId) {
@@ -298,7 +298,9 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
         if (range.toString()) {
             if (useDirect) {
-                const selection = window.getSelection();
+                const selection = window.getSelection() as Selection & {
+                    direction: "forward" | "backward" | "none"
+                };
                 // 判断选择方向
                 const isBackward = (selection && "direction" in selection && selection.direction !== "none") ?
                     selection.direction === "backward"
@@ -541,13 +543,30 @@ export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle
     if (!editElement) {
         return;
     }
-    const offset = getSelectionOffset(editElement, nodeElement, range);
-    const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
-    const cloneRange = focusByOffset(cloneNode, offset.end, offset.end, false);
-    if (cloneRange) {
-        cloneRange.insertNode(document.createElement("wbr"));
+    if (nodeElement.classList.contains("table")) {
+        const cellElement = hasClosestByTag(range.startContainer, "TH") || hasClosestByTag(range.startContainer, "TD");
+        if (cellElement) {
+            const offset = getSelectionOffset(cellElement, nodeElement, range);
+            cellElement.classList.add("range");
+            const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
+            cellElement.removeAttribute("class");
+            const cloneCellElement = cloneNode.querySelector(".range");
+            const cloneRange = focusByOffset(cloneCellElement, offset.end, offset.end, false);
+            if (cloneRange) {
+                cloneRange.insertNode(document.createElement("wbr"));
+            }
+            cloneCellElement.removeAttribute("class");
+            protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
+        }
+    } else {
+        const offset = getSelectionOffset(editElement, nodeElement, range);
+        const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
+        const cloneRange = focusByOffset(cloneNode, offset.end, offset.end, false);
+        if (cloneRange) {
+            cloneRange.insertNode(document.createElement("wbr"));
+        }
+        protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
     }
-    protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
 };
 
 export const focusByWbr = (element: Element, range: Range) => {

@@ -170,7 +170,7 @@ func indexBox(boxID string) {
 			return
 		}
 
-		docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
+		docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 		if "" == docIAL["updated"] { // 早期的数据可能没有 updated 属性，这里进行订正
 			updated := util.TimeFromID(tree.Root.ID)
 			tree.Root.SetIALAttr("updated", updated)
@@ -377,6 +377,10 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertBlocksFTS handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
@@ -388,6 +392,10 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLDeleteBlocks handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
@@ -395,10 +403,14 @@ func subscribeSQLEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtSQLUpdateBlocksHPaths, func(context map[string]any, blockCount int, hash string) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLUpdateBlocksHPaths handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(234), current, total, blockCount, hash)
@@ -407,10 +419,14 @@ func subscribeSQLEvents() {
 	})
 
 	eventbus.Subscribe(eventbus.EvtSQLInsertHistory, func(context map[string]any) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertHistory handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(191), current, total)
@@ -419,10 +435,14 @@ func subscribeSQLEvents() {
 	})
 
 	eventbus.Subscribe(eventbus.EvtSQLInsertAssetContent, func(context map[string]any) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertAssetContent handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(217), current, total)

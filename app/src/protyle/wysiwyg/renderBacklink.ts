@@ -83,11 +83,6 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
             disabledForeverProtyle(protyle);
         } else if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
             disabledProtyle(protyle);
-        } else if (element.parentElement.parentElement.classList.contains("protyle-wysiwyg__embed")) {
-            // 嵌入块
-            element.parentElement.parentElement.querySelectorAll('[contenteditable="true"][spellcheck]').forEach(item => {
-                item.setAttribute("contenteditable", "false");
-            });
         }
     });
 };

@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -56,7 +57,7 @@ func RemoveUnusedAttributeView(id string) {
 		return
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -94,7 +95,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 
 	unusedAttributeViews := UnusedAttributeViews(false)
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -1626,26 +1627,6 @@ func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter,
 	}
 	if 1 > len(sorts) {
 		sorts = []*av.ViewSort{}
-	}
-	return
-}
-
-func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
-	waitForSyncingStorages()
-
-	ret = []*av.Key{}
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	for _, keyValues := range attrView.KeyValues {
-		if av.KeyTypeRelation != keyValues.Key.Type && av.KeyTypeRollup != keyValues.Key.Type && av.KeyTypeLineNumber != keyValues.Key.Type {
-			if strings.Contains(strings.ToLower(keyValues.Key.Name), strings.ToLower(keyword)) {
-				ret = append(ret, keyValues.Key)
-			}
-		}
 	}
 	return
 }
@@ -3281,7 +3262,7 @@ func getAvNames(avIDs string) (ret string) {
 		}
 
 		tpl := strings.ReplaceAll(attrAvNameTpl, "${avID}", nodeAvID)
-		tpl = strings.ReplaceAll(tpl, "${avName}", nodeAvName)
+		tpl = strings.ReplaceAll(tpl, "${avName}", util.EscapeHTML(nodeAvName))
 		avNames.WriteString(tpl)
 		avNames.WriteString("&nbsp;")
 	}
@@ -3294,27 +3275,36 @@ func getAvNames(avIDs string) (ret string) {
 
 func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees map[string]*parse.Tree, nodes []*ast.Node) {
 	blockKeyValues := attrView.GetBlockKeyValues()
+	if nil == blockKeyValues || nil == blockKeyValues.Values {
+		return
+	}
+
 	trees = map[string]*parse.Tree{}
 	for _, blockKeyValue := range blockKeyValues.Values {
-		if blockKeyValue.IsDetached {
+		if blockKeyValue.IsDetached || nil == blockKeyValue.Block {
+			continue
+		}
+
+		blockID := blockKeyValue.Block.ID
+		if "" == blockID {
 			continue
 		}
 
 		var tree *parse.Tree
-		tree = trees[blockKeyValue.Block.ID]
+		tree = trees[blockID]
 		if nil == tree {
 			if nil == tx {
-				tree, _ = LoadTreeByBlockID(blockKeyValue.Block.ID)
+				tree, _ = LoadTreeByBlockID(blockID)
 			} else {
-				tree, _ = tx.loadTree(blockKeyValue.Block.ID)
+				tree, _ = tx.loadTree(blockID)
 			}
 		}
 		if nil == tree {
 			continue
 		}
-		trees[blockKeyValue.Block.ID] = tree
+		trees[blockID] = tree
 
-		node := treenode.GetNodeInTree(tree, blockKeyValue.Block.ID)
+		node := treenode.GetNodeInTree(tree, blockID)
 		if nil == node {
 			continue
 		}
@@ -3551,7 +3541,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 				err = av.SaveAttributeView(attrView)
 			}
 
-			msg := fmt.Sprintf(Conf.language(269), getAttrViewName(attrView))
+			msg := fmt.Sprintf(Conf.language(269), util.EscapeHTML(getAttrViewName(attrView)))
 			util.PushMsg(msg, 5000)
 			return
 		}
@@ -3808,7 +3798,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	refreshRelatedSrcAvs(avID, tx)
 
-	historyDir, err := GetHistoryDir(HistoryOpUpdate)
+	historyDir, err := getHistoryDir(HistoryOpUpdate)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -3844,8 +3834,8 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tree) (err error) {
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	if ast.NodeDocument == node.Type {
-		delete(attrs, "custom-hidden")
-		node.RemoveIALAttr("custom-hidden")
+		delete(attrs, DocHiddenAttr)
+		node.RemoveIALAttr(DocHiddenAttr)
 	}
 
 	if avs := attrs[av.NodeAttrNameAvs]; "" != avs {
@@ -4667,6 +4657,16 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
+				isPrimaryKey := av.KeyTypeBlock == keyValues.Key.Type
+				if isPrimaryKey != (av.KeyTypeBlock == colType) {
+					if isPrimaryKey {
+						err = errors.New("cannot change type of primary key field")
+					} else {
+						err = errors.New("cannot change field type to primary key")
+					}
+					return
+				}
+
 				keyValues.Key.Name = strings.TrimSpace(operation.Name)
 
 				changeType = keyValues.Key.Type != colType
@@ -4732,6 +4732,16 @@ func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr)
 func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
+		return
+	}
+
+	key, keyErr := attrView.GetKey(keyID)
+	if nil != keyErr {
+		err = keyErr
+		return
+	}
+	if av.KeyTypeBlock == key.Type {
+		err = errors.New("cannot remove primary key field")
 		return
 	}
 
@@ -5005,10 +5015,13 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (
 		if _, ok := v["itemID"]; ok {
 			itemID = v["itemID"].(string)
 		} else if _, ok := v["rowID"]; ok {
-			// TODO 计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
+			// TODO 该参数将于 2026 年 12 月 1 日后删除
 			itemID = v["rowID"].(string)
-			logging.LogWarnf("[%s] parameter [%s] is deprecated, it will be removed at [%s], visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
-				"/api/av/batchSetAttributeViewBlockAttrs", "rowID", "2026-06-30")
+			msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
+				"/api/av/batchSetAttributeViewBlockAttrs", "rowID")
+			logging.LogWarnf(msg)
+			err = fmt.Errorf(msg)
+			return
 		}
 		valueData := v["value"]
 		_, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData)
@@ -5791,11 +5804,21 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 		}
 
 		blockKeyValues := attrView.GetBlockKeyValues()
+		if nil == blockKeyValues || nil == blockKeyValues.Values {
+			continue
+		}
+
 		for _, blockValue := range blockKeyValues.Values {
-			if blockValue.IsDetached {
+			if blockValue.IsDetached || nil == blockValue.Block {
 				continue
 			}
-			bt := treenode.GetBlockTree(blockValue.BlockID)
+
+			boundBlockID := blockValue.Block.ID
+			if "" == boundBlockID {
+				continue
+			}
+
+			bt := treenode.GetBlockTree(boundBlockID)
 			if nil == bt {
 				continue
 			}
@@ -5809,7 +5832,7 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 				cachedTrees[bt.RootID] = tree
 			}
 
-			node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+			node := treenode.GetNodeInTree(tree, boundBlockID)
 			if nil == node {
 				continue
 			}

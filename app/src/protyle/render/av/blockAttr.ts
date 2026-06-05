@@ -24,13 +24,13 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     switch (value.type) {
         case "block":
             if (value?.isDetached) {
-                html = `<span>${value.block?.content || window.siyuan.languages.untitled}</span>`;
+                html = `<span>${escapeHtml(value.block?.content || window.siyuan.languages.untitled)}</span>`;
             } else {
-                html = `<span data-type="block-ref" data-id="${value.block.id}" data-subtype="s" class="av__celltext--ref">${value.block?.content || window.siyuan.languages.untitled}</span>`;
+                html = `<span data-type="block-ref" data-id="${value.block.id}" data-subtype="s" class="av__celltext--ref">${escapeHtml(value.block?.content || window.siyuan.languages.untitled)}</span>`;
             }
             break;
         case "text":
-            html = value.text.content;
+            html = escapeHtml(value.text.content);
             break;
         case "number":
             html = value.number.formattedContent || value.number.content.toString();
@@ -53,13 +53,13 @@ const genAVRollupHTML = (value: IAVCellValue) => {
             }
             break;
         case "url":
-            html = value.url.content ? `<a class="fn__a" href="${value.url.content}" target="_blank">${value.url.content}</a>` : "";
+            html = value.url.content ? `<a class="fn__a" href="${escapeAttr(value.url.content)}" target="_blank">${escapeHtml(value.url.content)}</a>` : "";
             break;
         case "phone":
-            html = value.phone.content ? `<a class="fn__a" href="tel:${value.phone.content}" target="_blank">${value.phone.content}</a>` : "";
+            html = value.phone.content ? `<a class="fn__a" href="tel:${escapeAttr(value.phone.content)}" target="_blank">${escapeHtml(value.phone.content)}</a>` : "";
             break;
         case "email":
-            html = value.email.content ? `<a class="fn__a" href="mailto:${value.email.content}" target="_blank">${value.email.content}</a>` : "";
+            html = value.email.content ? `<a class="fn__a" href="mailto:${escapeAttr(value.email.content)}" target="_blank">${escapeHtml(value.email.content)}</a>` : "";
             break;
     }
     return html;
@@ -72,7 +72,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<input data-id="${value.block.id}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">`;
             break;
         case "text":
-            html = `<textarea style="resize: vertical" rows="${(value.text?.content || "").split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.text?.content || ""}</textarea>`;
+            html = `<textarea style="resize: vertical" rows="${(value.text?.content || "").split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">${escapeHtml(value.text?.content || "")}</textarea>`;
             break;
         case "number":
             html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
@@ -90,9 +90,9 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "mAsset":
             value.mAsset?.forEach(item => {
                 if (item.type === "image") {
-                    html += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${getCompressURL(item.content)}">`;
+                    html += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${getCompressURL(item.content)}">`;
                 } else {
-                    html += `<span class="b3-chip b3-chip--middle av__celltext--url ariaLabel" aria-label="${escapeAttr(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
+                    html += `<span class="b3-chip b3-chip--middle av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;
                 }
             });
             break;
@@ -113,14 +113,14 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             }
             break;
         case "url":
-            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
+            html = `<input value="${escapeAttr(value.url.content)}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
-<a ${value.url.content ? `href="${value.url.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconLink"></use></svg></a>`;
+<a ${value.url.content ? `href="${escapeAttr(value.url.content)}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconLink"></use></svg></a>`;
             break;
         case "phone":
-            html = `<input value="${value.phone.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
+            html = `<input value="${escapeAttr(value.phone.content)}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
-<a ${value.phone.content ? `href="tel:${value.phone.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
+<a ${value.phone.content ? `href="tel:${escapeAttr(value.phone.content)}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
         case "checkbox":
             html = `<svg class="av__checkbox"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
@@ -129,9 +129,9 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.template.content}</div>`;
             break;
         case "email":
-            html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
+            html = `<input value="${escapeAttr(value.email.content)}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
-<a ${value.email.content ? `href="mailto:${value.email.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
+<a ${value.email.content ? `href="mailto:${escapeAttr(value.email.content)}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
         case "relation":
             value?.relation?.contents?.forEach((item, index) => {
@@ -192,7 +192,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             avName: string
         }) => {
             let innerHTML = `<div class="custom-attr__avheader">
-    <div class="block__logo popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
+    <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg>
         <span class="fn__ellipsis">${table.avName || window.siyuan.languages.database}</span>
     </div>
@@ -202,7 +202,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             table.keyValues?.forEach(item => {
                 innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
-    <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(item.key.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.key.desc)}</div>">
+    <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(item.key.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.key.desc)}</div>">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
         <span>${escapeHtml(item.key.name)}</span>
     </div>

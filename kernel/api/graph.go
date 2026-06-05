@@ -84,8 +84,10 @@ func getGraph(c *gin.Context) {
 		return
 	}
 
-	model.Conf.Graph.Global = global
-	model.Conf.Save()
+	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
+		model.Conf.Graph.Global = global
+		model.Conf.Save()
+	}
 
 	boxID, nodes, links := model.BuildGraph(query)
 	if model.IsReadOnlyRoleContext(c) {
@@ -142,8 +144,10 @@ func getLocalGraph(c *gin.Context) {
 		return
 	}
 
-	model.Conf.Graph.Local = local
-	model.Conf.Save()
+	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
+		model.Conf.Graph.Local = local
+		model.Conf.Save()
+	}
 
 	boxID, nodes, links := model.BuildTreeGraph(id, keyword)
 	if model.IsReadOnlyRoleContext(c) {

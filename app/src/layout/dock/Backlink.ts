@@ -11,6 +11,7 @@ import {Protyle} from "../../protyle";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
 import {isSupportCSSHL, searchMarkRender} from "../../protyle/render/searchMarkRender";
+import {getDocDisplayName} from "../../util/pathName";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -59,7 +60,7 @@ export class Backlink extends Model {
                     switch (data.cmd) {
                         case "rename":
                             if (this.rootId === data.data.id) {
-                                this.parent.updateTitle(data.data.title);
+                                this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                             }
                             break;
                         case "closeBox":
@@ -85,9 +86,7 @@ export class Backlink extends Model {
         const backlinkSort = window.siyuan.config.editor.backlinkSort;
         const backmentionSort = window.siyuan.config.editor.backmentionSort;
         this.element.innerHTML = `<div class="block__icons">
-    <div class="block__logo fn__flex-1">
-        <svg class="block__logoicon"><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.backlinks}
-    </div>
+    <div class="block__logo fn__flex-1">${window.siyuan.languages.backlinks}</div>
     <span class="counter listCount" style="margin-left: 0"></span>
     <span class="fn__space"></span>
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
@@ -109,9 +108,7 @@ export class Backlink extends Model {
 </div>
 <div class="backlinkList fn__flex-1"></div>
 <div class="block__icons">
-    <div class="block__logo fn__flex-1 fn__pointer" data-type="mention">
-        <svg class="block__logoicon"><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.mentions}
-    </div>
+    <div class="block__logo fn__flex-1 fn__pointer" data-type="mention">${window.siyuan.languages.mentions}</div>
     <span class="counter listMCount" style="margin-left: 0;"></span>
     <span class="fn__space"></span>
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />

@@ -486,3 +486,43 @@ func IsChartCodeBlockCode(code *ast.Node) bool {
 	language = strings.ReplaceAll(language, editor.Caret, "")
 	return render.NoHighlight(language)
 }
+
+func RefreshUpdated(node *ast.Node) {
+	updated := util.CurrentTimeSecondsStr()
+	node.SetIALAttr("updated", updated)
+	parents := ParentNodesWithHeadings(node)
+	for _, parent := range parents { // 更新所有父节点的更新时间字段
+		parent.SetIALAttr("updated", updated)
+	}
+}
+
+func CreatedUpdated(node *ast.Node) {
+	// 补全子节点的更新时间 Improve block update time filling https://github.com/siyuan-note/siyuan/issues/12182
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() || ast.NodeKramdownBlockIAL == n.Type {
+			return ast.WalkContinue
+		}
+
+		updated := n.IALAttr("updated")
+		if "" == updated && ast.IsNodeIDPattern(n.ID) {
+			created := util.TimeFromID(n.ID)
+			n.SetIALAttr("updated", created)
+		}
+		return ast.WalkContinue
+	})
+
+	created := util.TimeFromID(node.ID)
+	updated := node.IALAttr("updated")
+	if !util.IsTimeStr(updated) {
+		updated = created
+		node.SetIALAttr("updated", updated)
+	}
+	if updated < created {
+		updated = created
+	}
+	parents := ParentNodesWithHeadings(node)
+	for _, parent := range parents { // 更新所有父节点的更新时间字段
+		parent.SetIALAttr("updated", updated)
+		cache.PutBlockIAL(parent.ID, parse.IAL2Map(parent.KramdownIAL))
+	}
+}

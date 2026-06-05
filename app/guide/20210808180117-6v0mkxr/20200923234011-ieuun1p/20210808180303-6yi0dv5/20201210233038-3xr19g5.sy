@@ -6,7 +6,7 @@
 		"id": "20201210233038-3xr19g5",
 		"title": "Conversion of Document and Heading",
 		"type": "doc",
-		"updated": "20241214173509"
+		"updated": "20260426180032"
 	},
 	"Children": [
 		{
@@ -136,7 +136,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091550-5sh49go",
-				"updated": "20241214173509"
+				"updated": "20260426175843"
 			},
 			"Children": [
 				{
@@ -154,12 +154,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091550-rbetlgr",
-				"updated": "20241214173509"
+				"updated": "20260426175843"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the document tree, select the document you want to convert to a heading block, then hold down the Alt key and drag it to the position in the editor tab where you want to insert it. There are two situations here:"
+					"Data": "In the document panel, select the document you want to convert to a heading block, then hold down the Alt key and drag it to the position in the editor tab where you want to insert it. There are two situations here:"
 				}
 			]
 		},
@@ -447,7 +447,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091550-fualfrs",
-				"updated": "20241018105626"
+				"updated": "20260426180032"
 			},
 			"Children": [
 				{
@@ -461,12 +461,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240415092450-yckmprz",
-				"updated": "20240415092509"
+				"updated": "20260426180032"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select the heading block that needs to be converted in the editor tab, press and hold the heading block icon, and then drag it to the document tree for conversion. After the heading block is converted to a document block:"
+					"Data": "Select the heading block that needs to be converted in the editor tab, press and hold the heading block icon, and then drag it to the document panel for conversion. After the heading block is converted to a document block:"
 				}
 			]
 		},
@@ -543,7 +543,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20241018105907-fja873w",
-				"updated": "20241018105907"
+				"updated": "20260426180027"
 			},
 			"Children": [
 				{
@@ -557,12 +557,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20241018105907-kbn7z2a",
-				"updated": "20241018105907"
+				"updated": "20260426180027"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In addition to converting heading blocks to document blocks, you can also convert list item blocks (not list blocks) to document blocks. Press and hold the block icon of the list item block, and then drag it to the document tree for conversion. After the list item block is converted to a document block:"
+					"Data": "In addition to converting heading blocks to document blocks, you can also convert list item blocks (not list blocks) to document blocks. Press and hold the block icon of the list item block, and then drag it to the document panel for conversion. After the list item block is converted to a document block:"
 				}
 			]
 		},

@@ -5,9 +5,8 @@ import {getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../l
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, useShell, pathPosix} from "../util/pathName";
+import {getDisplayName, getDocDisplayName, pathPosix, useShell} from "../util/pathName";
 import {Constants} from "../constants";
-import {setEditMode} from "../protyle/util/setEditMode";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {focusBlock, focusByOffset, focusByRange} from "../protyle/util/selection";
@@ -62,6 +61,7 @@ export const openFileById = async (options: {
     return openFile({
         app: options.app,
         fileName: response.data.rootTitle,
+        rootTitleEmpty: response.data.rootTitleEmpty,
         rootIcon: response.data.rootIcon,
         rootID: response.data.rootID,
         id: options.id,
@@ -361,7 +361,6 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     editor.parent.parent.switchTab(editor.parent.headElement);
     editor.parent.parent.showHeading();
     if (options.mode !== "preview" && !editor.editor.protyle.preview.element.classList.contains("fn__none")) {
-        // TODO https://github.com/siyuan-note/siyuan/issues/3059
         return true;
     }
     if (options.zoomIn) {
@@ -442,9 +441,6 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     if (options.action?.includes(Constants.CB_GET_OUTLINE)) {
         hideElements(["select"], editor.editor.protyle);
     }
-    if (options.mode) {
-        setEditMode(editor.editor.protyle, options.mode);
-    }
 };
 
 const newTab = (options: IOpenFileOptions) => {
@@ -523,7 +519,7 @@ const newTab = (options: IOpenFileOptions) => {
         });
     } else {
         tab = new Tab({
-            title: getDisplayName(options.fileName, true, true),
+            title: getDocDisplayName(options.fileName, options.rootTitleEmpty),
             docIcon: options.rootIcon,
             callback(tab) {
                 let editor;
@@ -633,6 +629,9 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
             let blockId = "";
             if (protyle && protyle.block) {
                 blockId = protyle.block.rootID;
+                if (!blockId && reload && item.type === "local") {
+                    blockId = item.blockId;
+                }
             }
             if (blockId === item.blockId && !reload && item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
                 return;

@@ -182,6 +182,7 @@
         word-break: keep-all;
         height: calc(1.625em + 8px);
         line-height: calc(1.625em + 8px);
+        touch-action: none;
 
         & ~ [data-type="NodeHeading"] {
           &.h1 {
@@ -392,7 +393,6 @@
         //.protyle-attr--refcount {right: 0;}
 
         & > .protyle-wysiwyg__embed {
-          -webkit-user-modify: read-only;
           border-top: 1px dashed var(--b3-theme-on-surface-light);
           position: relative;
 
@@ -469,6 +469,7 @@
         border-radius: var(--b3-border-radius);
         cursor: col-resize;
         transition: var(--b3-transition);
+        touch-action: none;
         position: absolute;
         top: 35%;
         margin-left: -8px;
@@ -642,10 +643,10 @@
     content: "";
     height: 16px;
     width: 16px;
-    background: var(--b3-theme-surface-lighter);
+    background-color: var(--b3-theme-surface-lighter);
     display: block;
     position: absolute;
-    left: -18px;
+    left: -16px;
     top: 50%;
     border-radius: var(--b3-border-radius-b);
     margin-top: -8px;
@@ -732,7 +733,7 @@
 
     &:hover {
       &::after {
-        background-color: var(--b3-theme-background-light);
+        background-color: var(--b3-list-icon-hover);
       }
 
       color: var(--b3-theme-on-background);
@@ -754,7 +755,7 @@
 .protyle-wysiwyg[data-readonly="false"] {
   span[data-type~="inline-math"],
   .protyle-action__language,
-  .render-node {
+  .render-node:not([data-type="NodeBlockQueryEmbed"]) {
     cursor: pointer;
   }
 
@@ -787,14 +788,6 @@
     opacity: .86;
   }
 
-  .render-node .img:hover .protyle-icons,
-  .render-node .render-node:hover > .protyle-icons,
-    // https://github.com/siyuan-note/siyuan/issues/11879
-  .protyle-wysiwyg__embed .img:hover .protyle-action__drag,
-  .protyle-wysiwyg__embed .iframe:hover .protyle-action__drag {
-    display: none;
-  }
-
   .callout-icon {
     cursor: pointer;
     transition: var(--b3-background-transition);
@@ -814,8 +807,7 @@
 }
 
 .protyle-wysiwyg:not([contenteditable]),
-.protyle-wysiwyg[data-readonly="true"],
-.protyle-wysiwyg__embed {
+.protyle-wysiwyg[data-readonly="true"] {
   .img:hover .protyle-icons {
     display: none;
   }

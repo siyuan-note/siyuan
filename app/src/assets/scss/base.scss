@@ -33,6 +33,8 @@
 @use "business/resize" as *;
 @use "business/av" as *;
 @use "business/emojis" as *;
+@use "business/agentChat" as *;
+@use "business/agentComposer" as *;
 @use "component/svg" as *;
 @use "main/main" as *;
 @use "util/responsive" as *; // 需放置最后，否则 https://github.com/siyuan-note/siyuan/issues/7056

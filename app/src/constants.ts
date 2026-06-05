@@ -6,8 +6,6 @@ declare const NODE_ENV: string;
 const _SIYUAN_VERSION = SIYUAN_VERSION;
 const _NODE_ENV = NODE_ENV;
 
-const altNumber = navigator.platform.toUpperCase().indexOf("MAC") > -1 ? "⌃" : "⌥";
-
 const getFunctionKey = () => {
     const fData: { [key: number]: string } = {};
     for (let i = 1; i <= 32; i++) {
@@ -192,7 +190,7 @@ export abstract class Constants {
     public static readonly DIALOG_GLOBALSEARCH = "dialog-globalsearch";
     public static readonly DIALOG_HISTORYCOMPARE = "dialog-historycompare";
 
-    public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 访问鉴权码
+    public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 锁屏密码
     public static readonly DIALOG_AICUSTOMACTION = "dialog-aicustomaction"; // AI 自定义操作
     public static readonly DIALOG_AIUPDATECUSTOMACTION = "dialog-aiupdatecustomaction"; // 更新 AI 自定义操作
     public static readonly DIALOG_BACKGROUNDLINK = "dialog-backgroundlink"; // 题头图-随机
@@ -308,6 +306,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_RESIZE = 200;
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_LOAD = 300;
+    public static readonly TIMEOUT_LONGPRESS = 400;
     public static readonly TIMEOUT_TRANSITION = 300;
     public static readonly TIMEOUT_COUNT = 1000;
 
@@ -319,14 +318,19 @@ export abstract class Constants {
         es_ES: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
         he_IL: "20210808180117-6v0mkxr",
+        hi_IN: "20210808180117-6v0mkxr",
+        id_ID: "20210808180117-6v0mkxr",
         it_IT: "20210808180117-6v0mkxr",
         ja_JP: "20240530133126-axarxgx",
         ko_KR: "20210808180117-6v0mkxr",
         pl_PL: "20210808180117-6v0mkxr",
         pt_BR: "20210808180117-6v0mkxr",
         ru_RU: "20210808180117-6v0mkxr",
+        th_TH: "20210808180117-6v0mkxr",
+        nl_NL: "20210808180117-6v0mkxr",
         sk_SK: "20210808180117-6v0mkxr",
         tr_TR: "20210808180117-6v0mkxr",
+        uk_UA: "20210808180117-6v0mkxr",
         zh_CHT: "20211226090932-5lcq56f",
         zh_CN: "20210808180117-czj9bvb",
     };
@@ -445,16 +449,16 @@ export abstract class Constants {
             stickSearch: {default: "⇧⌘F", custom: "⇧⌘F"},
             replace: {default: "⌘R", custom: "⌘R"},
             closeTab: {default: "⌘W", custom: "⌘W"},
-            fileTree: {default: altNumber + "1", custom: altNumber + "1"},
-            outline: {default: altNumber + "2", custom: altNumber + "2"},
-            bookmark: {default: altNumber + "3", custom: altNumber + "3"},
-            tag: {default: altNumber + "4", custom: altNumber + "4"},
-            dailyNote: {default: altNumber + "5", custom: altNumber + "5"},
-            inbox: {default: altNumber + "6", custom: altNumber + "6"},
-            backlinks: {default: altNumber + "7", custom: altNumber + "7"},
-            graphView: {default: altNumber + "8", custom: altNumber + "8"},
-            globalGraph: {default: altNumber + "9", custom: altNumber + "9"},
-            riffCard: {default: altNumber + "0", custom: altNumber + "0"},
+            fileTree: {default: "⌃1", custom: "⌃1"},
+            outline: {default: "⌃2", custom: "⌃2"},
+            bookmark: {default: "⌃3", custom: "⌃3"},
+            tag: {default: "⌃4", custom: "⌃4"},
+            dailyNote: {default: "⌃5", custom: "⌃5"},
+            inbox: {default: "⌃6", custom: "⌃6"},
+            backlinks: {default: "⌃7", custom: "⌃7"},
+            graphView: {default: "⌃8", custom: "⌃8"},
+            globalGraph: {default: "⌃9", custom: "⌃9"},
+            riffCard: {default: "⌃0", custom: "⌃0"},
             config: {default: "⌥P", custom: "⌥P"},
             dataHistory: {default: "⌥H", custom: "⌥H"},
             toggleWin: {default: "⌥M", custom: "⌥M"},
@@ -498,6 +502,7 @@ export abstract class Constants {
                 expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
+                foldRecursive: {default: "⌥⌘↑", custom: "⌥⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},
                 refTab: {default: "⇧⌘.", custom: "⇧⌘."},
                 openBy: {default: "⌥,", custom: "⌥,"},
@@ -510,7 +515,7 @@ export abstract class Constants {
                 copyBlockEmbed: {default: "⇧⌘E", custom: "⇧⌘E"},
                 copyHPath: {default: "⇧⌘P", custom: "⇧⌘P"},
                 undo: {default: "⌘Z", custom: "⌘Z"},
-                redo: {default: "⌘Y", custom: "⌘Y"},
+                redo: {default: "⇧⌘Z", custom: "⇧⌘Z"},
                 rename: {default: "F2", custom: "F2"},
                 newNameFile: {default: "F3", custom: "F3"},
                 newContentFile: {default: "F4", custom: "F4"},
@@ -694,7 +699,7 @@ export abstract class Constants {
                     type: "outline",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconAlignCenter",
+                    icon: "iconOutline",
                     hotkeyLangId: "outline",
                 }, {
                     type: "inbox",
@@ -712,7 +717,7 @@ export abstract class Constants {
                     type: "tag",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconTags",
+                    icon: "iconTag",
                     hotkeyLangId: "tag",
                 }]
             ]
@@ -721,6 +726,12 @@ export abstract class Constants {
             pin: true,
             data: [
                 [{
+                    type: "agentChat",
+                    size: {width: 320, height: 0},
+                    show: false,
+                    icon: "iconSparkles",
+                    hotkeyLangId: "agentChat",
+                }, {
                     type: "graph",
                     size: {width: 320, height: 0},
                     show: false,

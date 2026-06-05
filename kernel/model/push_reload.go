@@ -135,14 +135,19 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	}
 
 	subFileCount := 0
-	subFiles, err := os.ReadDir(filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy")))
-	if err == nil {
-		for _, subFile := range subFiles {
-			if "true" == tree.Root.IALAttr("custom-hidden") {
-				continue
-			}
+	if "true" != tree.Root.IALAttr(DocHiddenAttr) {
+		subDir := filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
+		subFiles, err := os.ReadDir(subDir)
+		if err == nil {
+			for _, subFile := range subFiles {
+				if !strings.HasSuffix(subFile.Name(), ".sy") {
+					continue
+				}
 
-			if strings.HasSuffix(subFile.Name(), ".sy") {
+				subDocIAL := filesys.DocIAL(filepath.Join(subDir, subFile.Name()))
+				if "true" == subDocIAL[DocHiddenAttr] {
+					continue
+				}
 				subFileCount++
 			}
 		}
@@ -413,4 +418,26 @@ func ReloadAttrView(avID string) {
 
 func pushReloadAttrView(avID string) {
 	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]any{"id": avID})
+}
+
+func PushCreate(box *Box, p string, arg map[string]any) {
+	evt := util.NewCmdResult("create", 0, util.PushModeBroadcast)
+	listDocTree := false
+	if nil == arg {
+		arg = map[string]any{
+			"listDocTree": true,
+		}
+	}
+
+	listDocTreeArg := arg["listDocTree"]
+	if nil != listDocTreeArg {
+		listDocTree = listDocTreeArg.(bool)
+	}
+
+	evt.Data = map[string]any{
+		"box":         box,
+		"path":        p,
+		"listDocTree": listDocTree,
+	}
+	util.PushEvent(evt)
 }

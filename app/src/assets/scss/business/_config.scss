@@ -16,15 +16,8 @@
     height: 100%;
 
     .b3-label:not(.b3-label--inner) {
-      padding: 0;
-      margin: 16px 24px 32px;
-      box-shadow: 0 15px 0 0 var(--b3-theme-background), 0 16px 0 0 var(--b3-border-color);
-      border-bottom: 0;
-
-      &:last-child {
-        margin-bottom: 16px;
-        box-shadow: none;
-      }
+      margin: 0 16px;
+      padding: 16px 0;
     }
 
     label.b3-label:not(.b3-label--inner) {
@@ -45,20 +38,33 @@
     textarea.b3-text-field {
       resize: vertical;
     }
+
+    .config-group {
+      background-color: var(--b3-theme-surface);
+      margin: 16px 24px;
+      border-radius: var(--b3-border-radius-b);
+
+      &__title {
+        display: block;
+        padding: 24px 40px 0 40px;
+      }
+    }
+
   }
 
-  &__panel > .b3-tab-bar {
+  &__panel {
+    background-color: var(--b3-theme-background);
+    border-radius: var(--b3-border-radius-b);
+  }
+
+  &__side {
     user-select: none;
     width: 240px;
-    overflow: auto;
     padding: 8px 0;
     box-sizing: border-box;
-
-    .config__tab-hr {
-      margin: 16px 0;
-      background: var(--b3-border-color);
-      height: 1px;
-    }
+    border-right: 1px solid var(--b3-border-color);
+    display: flex;
+    flex-direction: column;
 
     .config__tab-title {
       display: flex;
@@ -66,6 +72,11 @@
       height: 32px;
       padding: 0 12px;
       margin-bottom: 8px;
+    }
+
+    & > .b3-list {
+      flex: 1;
+      overflow: auto;
     }
 
     .b3-form__icon {
@@ -77,21 +88,21 @@
 
       &__graphic {
         margin-right: 0;
-        padding: 0 10px 0 5px;
-        height: 14px;
-        width: 14px;
+        padding: 0 8px 0 4px;
+        height: 16px;
+        width: 16px;
       }
     }
   }
 
   &-query {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 8px 16px;
+    margin-top: 8px;
 
     label,
     .label {
-      width: 16%;
-      margin: 8px 17% 0 0;
       color: var(--b3-theme-on-surface);
       align-items: center;
     }
@@ -222,6 +233,7 @@
     &__key {
       padding: 2px 4px;
       font-family: var(--b3-font-family-kbd);
+      font-variant-emoji: text;
       line-height: 1;
       color: var(--b3-theme-on-surface);
       vertical-align: middle;

@@ -628,24 +628,6 @@ func getAttributeViewFilterSort(c *gin.Context) {
 	}
 }
 
-func searchAttributeViewNonRelationKey(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, _ := util.JsonArg(c, ret)
-	if nil == arg {
-		return
-	}
-
-	avID := arg["avID"].(string)
-	keyword := arg["keyword"].(string)
-
-	nonRelationKeys := model.SearchAttributeViewNonRelationKey(avID, keyword)
-	ret.Data = map[string]any{
-		"keys": nonRelationKeys,
-	}
-}
-
 func searchAttributeViewRollupDestKeys(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -994,10 +976,13 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	if _, ok := arg["itemID"]; ok {
 		itemID = arg["itemID"].(string)
 	} else if _, ok := arg["rowID"]; ok {
-		// TODO 计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
-		itemID = arg["rowID"].(string)
-		logging.LogWarnf("[%s] parameter [%s] is deprecated, it will be removed at [%s], visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
-			c.Request.RequestURI, "rowID", "2026-06-30")
+		// TODO 该参数将于 2026 年 12 月 1 日后删除
+		msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
+			c.Request.RequestURI, "rowID")
+		logging.LogWarnf(msg)
+		ret.Code = -1
+		ret.Msg = msg
+		return
 	}
 	value := arg["value"].(any)
 	updatedVal, err := model.UpdateAttributeViewCell(nil, avID, keyID, itemID, value)

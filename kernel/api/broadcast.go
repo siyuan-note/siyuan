@@ -524,10 +524,10 @@ func PruneBroadcastChannels() []string {
 //	"http://localhost:6806/es/broadcast/subscribe?retry=1000&channel=test1&channel=test2"
 func broadcastSubscribe(c *gin.Context) {
 	// REF: https://github.com/gin-gonic/examples/blob/master/server-sent-event/main.go
-	c.Writer.Header().Set("Content-Type", "text/event-stream")
-	c.Writer.Header().Set("Cache-Control", "no-cache")
-	c.Writer.Header().Set("Connection", "keep-alive")
-	c.Writer.Header().Set("Transfer-Encoding", "chunked")
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("Transfer-Encoding", "chunked")
 
 	defer UnifiedSSE.WaitGroup.Done()
 	UnifiedSSE.WaitGroup.Add(1)
@@ -582,7 +582,7 @@ func broadcastPublish(c *gin.Context) {
 	// Multipart form
 	form, err := c.MultipartForm()
 	if err != nil {
-		ret.Code = -2
+		ret.Code = 1
 		ret.Msg = err.Error()
 		return
 	}
@@ -620,7 +620,7 @@ func broadcastPublish(c *gin.Context) {
 				_, err := broadcastChannel.BroadcastString(value)
 				if err != nil {
 					logging.LogErrorf("broadcast message failed: %s", err)
-					result.Code = -2
+					result.Code = 2
 					result.Msg = err.Error()
 					continue
 				}
@@ -661,7 +661,7 @@ func broadcastPublish(c *gin.Context) {
 				value, err := file.Open()
 				if err != nil {
 					logging.LogErrorf("open multipart form file [%s] failed: %s", file.Filename, err)
-					result.Code = -4
+					result.Code = 3
 					result.Msg = err.Error()
 					continue
 				}
@@ -669,14 +669,14 @@ func broadcastPublish(c *gin.Context) {
 				content := make([]byte, file.Size)
 				if _, err := value.Read(content); err != nil {
 					logging.LogErrorf("read multipart form file [%s] failed: %s", file.Filename, err)
-					result.Code = -3
+					result.Code = 4
 					result.Msg = err.Error()
 					continue
 				}
 
 				if _, err := broadcastChannel.BroadcastBinary(content); err != nil {
 					logging.LogErrorf("broadcast binary message failed: %s", err)
-					result.Code = -2
+					result.Code = 5
 					result.Msg = err.Error()
 					continue
 				}
@@ -740,7 +740,7 @@ func postMessage(c *gin.Context) {
 		if _, err := broadcastChannel.BroadcastString(message); err != nil {
 			logging.LogErrorf("broadcast message failed: %s", err)
 
-			ret.Code = -2
+			ret.Code = 1
 			ret.Msg = err.Error()
 			return
 		}

@@ -7,7 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {isInMobileApp, isIPad, isMac, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInMobileApp, isIPad, isMac, saveExportFile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -57,7 +57,7 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="downloadInstallPkg" type="checkbox"${window.siyuan.config.system.downloadInstallPkg ? " checked" : ""}>
 </label>
-<div class="b3-label${isBrowser() ? " fn__none" : ""}">
+<div class="b3-label${(isBrowser() && !isInMobileApp() && !isIPad()) ? " fn__none" : ""}">
     <label class="fn__flex config__item">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about11}
@@ -325,7 +325,7 @@ ${checkUpdateHTML}
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {
-                openByMobile(response.data.zip);
+                saveExportFile(response.data.zip);
             });
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");
@@ -469,12 +469,12 @@ ${checkUpdateHTML}
         });
         about.element.querySelector("#exportCACert")?.addEventListener("click", () => {
             fetchPost("/api/system/exportTLSCACert", {}, (response) => {
-                openByMobile(response.data.path);
+                saveExportFile(response.data.path);
             });
         });
         about.element.querySelector("#exportCABundle")?.addEventListener("click", () => {
             fetchPost("/api/system/exportTLSCABundle", {}, (response) => {
-                openByMobile(response.data.path);
+                saveExportFile(response.data.path);
             });
         });
         about.element.querySelector("#importCABundle")?.addEventListener("click", () => {

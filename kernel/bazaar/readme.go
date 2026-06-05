@@ -117,6 +117,7 @@ func renderPackageREADME(linkBase string, mdData []byte) (ret string) {
 	tree := parse.Parse("", mdData, luteEngine.ParseOptions)
 	normalizeNodesIAL(tree)
 	ret = luteEngine.Tree2HTML(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	ret = util.ConvertIframeToLink(ret)
 	ret = util.LinkTarget(ret, linkBase)
 	return
 }

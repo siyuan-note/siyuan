@@ -130,10 +130,6 @@
     align-content: center;
     z-index: 3; // 需大于 database table view
     align-items: center;
-
-    &--top {
-      top: 48px;
-    }
   }
 
   &__code {
@@ -151,6 +147,7 @@
   &__kbd {
     padding: 2px 4px;
     font: 75% var(--b3-font-family-kbd);
+    font-variant-emoji: text;
     line-height: 1;
     color: var(--b3-theme-on-surface);
     vertical-align: middle;

@@ -217,7 +217,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226122545-lsv6dhu",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "鑒權密碼"
+					"TextMarkTextContent": "鎖屏密碼"
 				},
 				{
 					"Type": "NodeText",
@@ -463,6 +463,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "tr_TR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "uk_UA"
 				},
 				{
 					"Type": "NodeText",

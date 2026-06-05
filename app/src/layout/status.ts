@@ -133,28 +133,52 @@ export const initStatus = (isWindow = false) => {
     /// #endif
 };
 
-let countRootId: string;
 let countTimeout: number;
+let countAbortController: AbortController | null = null;
+let lastRootId: string;
+
+const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) => {
+    clearTimeout(countTimeout);
+    countTimeout = window.setTimeout(() => {
+        if (countAbortController) {
+            countAbortController.abort();
+            countAbortController = null;
+        }
+        countAbortController = new AbortController();
+        const signal = countAbortController.signal;
+        const capturedController = countAbortController;
+
+        const onFetched = (response: IWebSocketData) => {
+            if (signal.aborted) {
+                return;
+            }
+            renderStatusbarCounter(response.data.stat);
+            if (countAbortController === capturedController) {
+                countAbortController = null;
+            }
+        };
+
+        if (content) {
+            fetchPost("/api/block/getContentWordCount", {content}, onFetched, undefined, undefined, signal);
+            lastRootId = null;
+        } else if (ids && ids.length > 0) {
+            fetchPost("/api/block/getBlocksWordCount", {ids}, onFetched, undefined, undefined, signal);
+            lastRootId = null;
+        } else if (rootID && lastRootId !== rootID) {
+            lastRootId = rootID;
+            fetchPost("/api/block/getTreeStat", {id: rootID}, onFetched, undefined, undefined, signal);
+        } else {
+            lastRootId = null;
+        }
+    }, Constants.TIMEOUT_COUNT);
+};
+
 export const countSelectWord = (range: Range, rootID?: string) => {
     /// #if !MOBILE
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
-    clearTimeout(countTimeout);
-    countTimeout = window.setTimeout(() => {
-        const selectText = range.toString();
-        if (selectText) {
-            fetchPost("/api/block/getContentWordCount", {"content": range.toString()}, (response) => {
-                renderStatusbarCounter(response.data.stat);
-            });
-            countRootId = "";
-        } else if (rootID && rootID !== countRootId) {
-            countRootId = rootID;
-            fetchPost("/api/block/getTreeStat", {id: rootID}, (response) => {
-                renderStatusbarCounter(response.data.stat);
-            });
-        }
-    }, Constants.TIMEOUT_COUNT);
+    scheduleStatusStat(rootID, range.toString());
     /// #endif
 };
 
@@ -163,34 +187,30 @@ export const countBlockWord = (ids: string[], rootID?: string, clearCache = fals
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
-    if (getSelection().rangeCount > 0 && getSelection().getRangeAt(0).toString() && ids.length === 0) {
-        countSelectWord(getSelection().getRangeAt(0));
+    if (clearCache) {
+        lastRootId = null;
+    }
+    if (ids.length > 0) {
+        scheduleStatusStat(rootID, undefined, ids);
         return;
     }
-    clearTimeout(countTimeout);
-    countTimeout = window.setTimeout(() => {
-        if (clearCache) {
-            countRootId = "";
-        }
-        if (ids.length > 0) {
-            fetchPost("/api/block/getBlocksWordCount", {ids}, (response) => {
-                renderStatusbarCounter(response.data.stat);
-            });
-            countRootId = "";
-        } else if (rootID && rootID !== countRootId) {
-            countRootId = rootID;
-            fetchPost("/api/block/getTreeStat", {id: rootID}, (response) => {
-                renderStatusbarCounter(response.data.stat);
-            });
-        }
-    }, Constants.TIMEOUT_COUNT);
+    const selectText = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0).toString() : "";
+    if (selectText) {
+        scheduleStatusStat(rootID, selectText);
+        return;
+    }
+    scheduleStatusStat(rootID);
     /// #endif
 };
 
 export const clearCounter = () => {
-    countRootId = "";
-    document.querySelector("#status .status__counter").innerHTML = "";
+    lastRootId = null;
     clearTimeout(countTimeout);
+    if (countAbortController) {
+        countAbortController.abort();
+        countAbortController = null;
+    }
+    document.querySelector("#status .status__counter").innerHTML = "";
 };
 
 export const renderStatusbarCounter = (stat: {

@@ -8,6 +8,7 @@ import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
+import {getDefaultSubType} from "./getDefault";
 
 export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
     const filterDialog = new Dialog({
@@ -40,7 +41,10 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="paragraph" type="checkbox"${config.types.paragraph ? " checked" : ""}>
     </label>
-    <label class="fn__flex b3-label">
+    <div class="fn__flex b3-label">
+        <span style="margin:0 4px 0 -20px" class="b3-list-item__toggle b3-list-item__toggle--hl fn__pointer">
+            <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+        </span>
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconHeadings"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
@@ -48,7 +52,17 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="heading" type="checkbox"${config.types.heading ? " checked" : ""}>
-    </label>
+    </div>
+    <div class="fn__none" style="padding-left: 20px">
+        ${(["h1", "h2", "h3", "h4", "h5", "h6"] as const).map((h) => `
+        <label class="fn__flex b3-label">
+            <div class="fn__flex-1 fn__flex-center">
+                ${window.siyuan.languages["heading" + h.charAt(1)]}
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch fn__flex-center" data-subtype="${h}" type="checkbox"${config.subTypes?.[h] ? " checked" : ""}>
+        </label>`).join("")}<div></div>
+    </div>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconCode"></use></svg>
         <span class="fn__space"></span>
@@ -104,7 +118,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <input class="b3-switch fn__flex-center" data-type="audioBlock" type="checkbox"${config.types.audioBlock ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
-        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconLanguage"></use></svg>
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconGlobe"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
             IFrame
@@ -148,15 +162,36 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="superBlock" type="checkbox"${config.types.superBlock ? " checked" : ""}>
     </label>
-    <label class="fn__flex b3-label">
+    <div class="fn__flex b3-label">
+        <span style="margin:0 4px 0 -20px" class="b3-list-item__toggle b3-list-item__toggle--hl fn__pointer" data-toggle-subtype="list">
+            <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+        </span>
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconList"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.list1} <sup>[1]</sup>
+            ${window.siyuan.languages.list1} <sup>[1] [2]</sup>
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="list" type="checkbox"${config.types.list ? " checked" : ""}>
-    </label>
+    </div>
+    <div class="fn__none" style="padding-left: 20px;">
+        <label class="fn__flex b3-label">
+            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages["ordered-list"]}</div>
+            <span class="fn__space"></span>
+            <input class="b3-switch fn__flex-center" data-subtype="o" type="checkbox"${config.subTypes?.o ? " checked" : ""}>
+        </label>
+        <label class="fn__flex b3-label">
+            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages.unorderedList}</div>
+            <span class="fn__space"></span>
+            <input class="b3-switch fn__flex-center" data-subtype="u" type="checkbox"${config.subTypes?.u ? " checked" : ""}>
+        </label>
+        <label class="fn__flex b3-label">
+            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages.check}</div>
+            <span class="fn__space"></span>
+            <input class="b3-switch fn__flex-center" data-subtype="t" type="checkbox"${config.subTypes?.t ? " checked" : ""}>
+        </label>
+        <div></div>
+    </div>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconListItem"></use></svg>
         <span class="fn__space"></span>
@@ -178,23 +213,79 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     <span class="fn__space"></span>
     <div class="fn__flex-1">
         <div class="b3-label__text">[1] ${window.siyuan.languages.containerBlockTip1}</div>
-    </div>    
+        <div class="b3-label__text">[2] ${window.siyuan.languages.searchSubTypeListTip}</div>
+    </div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "92vw" : "520px",
+        width: isMobile() ? "92vw" : "600px",
         height: "70vh",
     });
     filterDialog.element.setAttribute("data-key", Constants.DIALOG_SEARCHTYPE);
+    filterDialog.element.querySelectorAll(".b3-list-item__toggle--hl").forEach((item: HTMLElement) => {
+        item.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            item.parentElement.nextElementSibling.classList.toggle("fn__none");
+            item.firstElementChild.classList.toggle("b3-list-item__arrow--open");
+        });
+    });
+    // Keep parent and subtype toggles in sync.
+    filterDialog.element.querySelectorAll("input[data-subtype]").forEach((item: HTMLInputElement) => {
+        item.addEventListener("change", () => {
+            if (!item.checked) {
+                return;
+            }
+            ({
+                h1: ["heading"], h2: ["heading"], h3: ["heading"],
+                h4: ["heading"], h5: ["heading"], h6: ["heading"],
+                o: ["list", "listItem"],
+                u: ["list", "listItem"],
+                t: ["list", "listItem"],
+            })[item.getAttribute("data-subtype")].forEach((parentType) => {
+                const parentElement = filterDialog.element.querySelector(`input[data-type="${parentType}"]`) as HTMLInputElement;
+                if (parentElement && !parentElement.checked) {
+                    parentElement.checked = true;
+                }
+            });
+        });
+    });
+    const parentSubtypes: Record<string, string[]> = {
+        heading: ["h1", "h2", "h3", "h4", "h5", "h6"],
+        list: ["o", "u", "t"],
+        listItem: ["o", "u", "t"],
+    };
+    Object.keys(parentSubtypes).forEach((key) => {
+        const parentElement = filterDialog.element.querySelector(`input[data-type="${key}"]`) as HTMLInputElement;
+        parentElement.addEventListener("change", () => {
+            if (parentElement.checked) {
+                return;
+            }
+            parentSubtypes[key].forEach((subtype) => {
+                const subtypeBox = filterDialog.element.querySelector(`input[data-subtype="${subtype}"]`) as HTMLInputElement;
+                if (subtypeBox && subtypeBox.checked) {
+                    subtypeBox.checked = false;
+                }
+            });
+        });
+    });
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         filterDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
+        if (!config.subTypes) {
+            config.subTypes = getDefaultSubType();
+        }
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
-            config.types[item.getAttribute("data-type") as keyof (typeof config.types)] = item.checked;
+            const subtype = item.getAttribute("data-subtype");
+            if (subtype) {
+                config.subTypes[subtype as keyof Config.IUILayoutTabSearchConfigSubTypes] = item.checked;
+            } else {
+                config.types[item.getAttribute("data-type") as keyof (typeof config.types)] = item.checked;
+            }
         });
         cb();
         window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
@@ -284,6 +375,17 @@ export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => voi
             cb();
         }
     }).element);
+    if (window.siyuan.config.ai.openAI.embeddingAPIKey) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconSparkles",
+            label: window.siyuan.languages.semanticSearch,
+            current: config.method === 4,
+            click() {
+                config.method = 4;
+                cb();
+            }
+        }).element);
+    }
 };
 
 const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
@@ -302,7 +404,7 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
         const criteriaElement = element.querySelector("#criteria").firstElementChild;
         criteriaElement.classList.remove("fn__none");
         criteriaElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
-        criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
+        criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconClose"></use></svg></div>`);
     });
 };
 
@@ -643,10 +745,10 @@ export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTab
             if (configIsSame(item, config)) {
                 isSame = true;
             }
-            html += `<div data-type="set-criteria" class="${isSame ? "b3-chip--current " : ""}b3-chip b3-chip--middle b3-chip--pointer">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+            html += `<div data-type="set-criteria" class="${isSame ? "b3-chip--current " : ""}b3-chip b3-chip--middle b3-chip--pointer">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconClose"></use></svg></div>`;
         });
         /// #if MOBILE
-        element.innerHTML = `<div class="b3-chips${html?"":" fn__none"}">
+        element.innerHTML = `<div class="b3-chips${html ? "" : " fn__none"}">
     ${html}
 </div>`;
         /// #else

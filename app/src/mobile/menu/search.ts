@@ -8,7 +8,7 @@ import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
-import {escapeGreat, escapeHtml} from "../../util/escape";
+import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {newFileByName} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
@@ -25,7 +25,7 @@ import {
 } from "../../search/assets";
 import {addClearButton} from "../../util/addClearButton";
 import {checkFold} from "../../util/noRelyPCFunction";
-import {getDefaultType} from "../../search/getDefault";
+import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
 import {
     saveAssetKeyList,
     saveKeyList,
@@ -59,6 +59,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
         r: replaceInputElement.value,
         ids: isAll ? [] : [currentId],
         types: config.types,
+        subTypes: config.subTypes,
         method: config.method,
         replaceTypes: config.replaceTypes,
         paths: config.idPath || [],
@@ -98,7 +99,8 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     });
 };
 
-const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig) => {
+const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig,
+                      clear = false) => {
     if (config.hasReplace !== newConfig.hasReplace) {
         if (newConfig.hasReplace) {
             element.querySelector('[data-type="toggle-replace"]').classList.add("toolbar__icon--active");
@@ -111,7 +113,7 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     const searchPathElement = element.querySelector("#searchPath");
     if (newConfig.hPath) {
         searchPathElement.classList.remove("fn__none");
-        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(newConfig.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(newConfig.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
     } else {
         searchPathElement.classList.add("fn__none");
     }
@@ -145,7 +147,9 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     } else {
         searchIncludeElement.setAttribute("disabled", "disabled");
     }
-    (document.querySelector("#toolbarSearch") as HTMLInputElement).value = newConfig.k;
+    if (newConfig.k || clear) {
+        (document.querySelector("#toolbarSearch") as HTMLInputElement).value = newConfig.k;
+    }
     (element.querySelector("#toolbarReplace") as HTMLInputElement).value = newConfig.r;
     config = JSON.parse(JSON.stringify(newConfig));
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
@@ -172,7 +176,7 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeGreat(title)}</span>
+<span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeHtml(title)}</span>
 </div><div>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
@@ -208,7 +212,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
     </div>
     <div class="fn__flex">
         ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span><span class="fn__space"></span>` : ""}
-        <span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
+        <span class="b3-list-item__text b3-list-item__meta">${escapeHtml(title)}</span>
     </div>
 </div>`;
         }
@@ -262,8 +266,9 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
         if (rmCurrentCriteria) {
             element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         }
-        const loadingElement = element.querySelector(".fn__loading--top");
+        const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
         loadingElement.classList.remove("fn__none");
+        loadingElement.style.top = element.querySelector(".b3-list--background").getBoundingClientRect().top + "px";
         const previousElement = element.querySelector('[data-type="previous"]');
         const nextElement = element.querySelector('[data-type="next"]');
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
@@ -288,6 +293,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 query: config.query,
                 method: config.method,
                 types: config.types,
+                subTypes: config.subTypes,
                 paths: config.idPath || [],
                 groupBy: config.group,
                 orderBy: config.sort,
@@ -416,8 +422,9 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config);
+                    }, config, true);
                 }
                 if (target.parentElement.parentElement.childElementCount === 1) {
                     target.parentElement.parentElement.classList.add("fn__none");
@@ -465,7 +472,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                     config.hPath = response.data[0];
                     const searchPathElement = element.querySelector("#searchPath");
                     searchPathElement.classList.remove("fn__none");
-                    searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                    searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
 
                     const includeElement = element.querySelector('[data-type="include"]');
                     includeElement.classList.remove("toolbar__icon--active");
@@ -499,7 +506,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 
                             const searchPathElement = element.querySelector("#searchPath");
                             searchPathElement.classList.remove("fn__none");
-                            searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                            searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
 
                             const includeElement = element.querySelector('[data-type="include"]');
                             includeElement.classList.add("toolbar__icon--active");
@@ -562,8 +569,9 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config);
+                    }, config, true);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 });
                 window.siyuan.menus.menu.fullscreen();
@@ -695,6 +703,9 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 
 export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
+    if (config.method === 4 && !window.siyuan.config.ai.openAI.embeddingAPIKey) {
+        config.method = 0;
+    }
     const rangeText = (getCurrentEditor()?.protyle.toolbar.range || (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange())).toString();
     if (rangeText) {
         config.k = rangeText;
@@ -756,7 +767,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     <div id="searchPath" class="b3-chips${config.hPath ? "" : " fn__none"}" style="background-color: var(--b3-theme-background);">
         <div class="b3-chip b3-chip--middle">
             ${escapeHtml(config.hPath)}
-            <svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg>
+            <svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg>
         </div>
     </div>
     <div class="toolbar">
@@ -813,7 +824,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             <span class="fn__flex-1"></span>
          </div>
     </div>
-     <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
+     <div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         bindEvent(element) {
             document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
@@ -885,7 +896,7 @@ const getUnRefListMobile = (element: Element, page = 1) => {
     fetchPost("/api/search/listInvalidBlockRefs", {
         page,
     }, (response) => {
-        element.parentElement.querySelector(".fn__loading--top").classList.add("fn__none");
+        element.parentElement.querySelector(".fn__loading").classList.add("fn__none");
         const nextElement = element.querySelector('[data-type="unRefNext"]');
         if (page < response.data.pageCount) {
             nextElement.removeAttribute("disabled");
@@ -894,14 +905,14 @@ const getUnRefListMobile = (element: Element, page = 1) => {
         }
         let resultHTML = "";
         response.data.blocks.forEach((item: IBlock, index: number) => {
-            const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+            const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
             resultHTML += `<div class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-type="search-item" data-node-id="${item.id}">
 <div class="b3-list-item__first">
     <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
     ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
+<span class="b3-list-item__text b3-list-item__meta">${title}</span>
 </div>`;
         });
         element.querySelector("#searchUnRefResult").innerHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>

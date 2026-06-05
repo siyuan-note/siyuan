@@ -50,41 +50,14 @@ func moveLocalShorthands(c *gin.Context) {
 		return
 	}
 
-	var parentID string
-	parentIDArg := arg["parentID"]
-	if nil != parentIDArg {
-		parentID = parentIDArg.(string)
-	}
-
-	var hPath string
-	hPathArg := arg["path"]
-	if nil != hPathArg {
-		hPath = arg["path"].(string)
-		baseName := path.Base(hPath)
-		dir := path.Dir(hPath)
-		r, _ := regexp.Compile("\r\n|\r|\n|\u2028|\u2029|\t|/")
-		baseName = r.ReplaceAllString(baseName, "")
-		if 512 < utf8.RuneCountInString(baseName) {
-			baseName = gulu.Str.SubStr(baseName, 512)
-		}
-		hPath = path.Join(dir, baseName)
-	}
-
-	// TODO: 改造旧方案，去掉 hPath, parentID，改为使用文档树配置项 闪念速记存放位置，参考创建日记实现
-	// https://github.com/siyuan-note/siyuan/issues/14414
-	ids, err := model.MoveLocalShorthands(notebook, hPath, parentID)
+	ids, err := model.MoveLocalShorthands(notebook)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	model.FlushTxQueue()
-	box := model.Conf.Box(notebook)
-	for _, id := range ids {
-		b, _ := model.GetBlock(id, nil)
-		pushCreate(box, b.Path, arg)
-	}
+	ret.Data = ids
 }
 
 func listDocTree(c *gin.Context) {
@@ -716,10 +689,7 @@ func duplicateDoc(c *gin.Context) {
 	}
 
 	notebook := tree.Box
-	box := model.Conf.Box(notebook)
 	model.DuplicateDoc(tree)
-	arg["listDocTree"] = true
-	pushCreate(box, tree.Path, arg)
 
 	ret.Data = map[string]any{
 		"id":       tree.Root.ID,
@@ -750,17 +720,13 @@ func createDoc(c *gin.Context) {
 		}
 	}
 
-	tree, err := model.CreateDocByMd(notebook, p, title, md, sorts)
+	tree, err := model.CreateDocByMd(notebook, p, title, md, sorts, arg)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
-
-	model.FlushTxQueue()
-	box := model.Conf.Box(notebook)
-	pushCreate(box, p, arg)
 
 	ret.Data = map[string]any{
 		"id": tree.Root.ID,
@@ -878,18 +844,13 @@ func createDocWithMd(c *gin.Context) {
 		clippingHref = clippingHrefArg.(string)
 	}
 
-	id, err := model.CreateWithMarkdown(tags, notebook, hPath, markdown, parentID, id, withMath, clippingHref)
+	id, err := model.CreateWithMarkdown(tags, notebook, hPath, markdown, parentID, id, withMath, clippingHref, arg)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = id
-
-	model.FlushTxQueue()
-	box := model.Conf.Box(notebook)
-	b, _ := model.GetBlock(id, nil)
-	pushCreate(box, b.Path, arg)
 }
 
 func getDocCreateSavePath(c *gin.Context) {
@@ -997,6 +958,42 @@ func getRefCreateSavePath(c *gin.Context) {
 	ret.Data = map[string]any{
 		"box":  refCreateSaveBox,
 		"path": refCreateSavePath,
+	}
+}
+
+func getShorthandSavePath(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	notebook := arg["notebook"].(string)
+
+	shorthandSaveBox := model.Conf.FileTree.ShorthandSaveBox
+	shorthandSavePathTpl := model.Conf.FileTree.ShorthandSavePath
+
+	if "" == shorthandSaveBox {
+		shorthandSaveBox = notebook
+	}
+
+	if shorthandSaveBox != notebook {
+		if "" != shorthandSavePathTpl && !strings.HasPrefix(shorthandSavePathTpl, "/") {
+			shorthandSavePathTpl = "/" + shorthandSavePathTpl
+		}
+	}
+
+	shorthandSavePath, err := model.RenderGoTemplate(shorthandSavePathTpl)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{
+		"box":  shorthandSaveBox,
+		"path": shorthandSavePath,
 	}
 }
 
@@ -1146,6 +1143,14 @@ func getDoc(c *gin.Context) {
 			queryTypes[t] = b.(bool)
 		}
 	}
+	var querySubTypes map[string]bool
+	if querySubTypesArg := arg["querySubTypes"]; nil != querySubTypesArg {
+		typesArg := querySubTypesArg.(map[string]any)
+		querySubTypes = map[string]bool{}
+		for t, b := range typesArg {
+			querySubTypes[t] = b.(bool)
+		}
+	}
 
 	m := arg["mode"] // 0: 仅当前 ID，1：向上 2：向下，3：上下都加载，4：加载末尾
 	mode := 0
@@ -1186,7 +1191,7 @@ func getDoc(c *gin.Context) {
 	}
 
 	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err :=
-		model.GetDoc(startID, endID, id, index, query, queryTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
+		model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
 	if errors.Is(err, model.ErrBlockNotFound) {
 		ret.Code = 3
 		return
@@ -1228,22 +1233,6 @@ func getDoc(c *gin.Context) {
 		"keywords":         keywords,
 		"reqId":            arg["reqId"],
 	}
-}
-
-func pushCreate(box *model.Box, p string, arg map[string]any) {
-	evt := util.NewCmdResult("create", 0, util.PushModeBroadcast)
-	listDocTree := false
-	listDocTreeArg := arg["listDocTree"]
-	if nil != listDocTreeArg {
-		listDocTree = listDocTreeArg.(bool)
-	}
-
-	evt.Data = map[string]any{
-		"box":         box,
-		"path":        p,
-		"listDocTree": listDocTree,
-	}
-	util.PushEvent(evt)
 }
 
 func setPublishAccess(c *gin.Context) {

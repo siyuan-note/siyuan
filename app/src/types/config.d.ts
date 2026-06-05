@@ -159,6 +159,18 @@ declare namespace Config {
          */
         apiTimeout: number;
         /**
+         * Agent total session timeout (unit: seconds, 0 = no limit)
+         */
+        agentTimeout?: number;
+        /**
+         * Agent confirmation timeout (unit: seconds), auto-rejects on timeout
+         */
+        agentConfirmTimeout?: number;
+        /**
+         * Agent API maximum retry attempts on failure
+         */
+        agentMaxRetries?: number;
+        /**
          * API request additional user agent field
          */
         apiUserAgent: string;
@@ -166,6 +178,18 @@ declare namespace Config {
          * API version number
          */
         apiVersion: string;
+        /**
+         * Embedding API key (empty if not configured)
+         */
+        embeddingAPIKey: string;
+        /**
+         * Embedding API base URL
+         */
+        embeddingBaseURL: string;
+        /**
+         * Embedding model name
+         */
+        embeddingModel: string;
     }
 
     /**
@@ -211,6 +235,10 @@ declare namespace Config {
          */
         darkThemes: string[];
         /**
+         * Whether to hide toolbar
+         */
+        hideToolbar: boolean;
+        /**
          * Whether to hide status bar
          */
         hideStatusBar: boolean;
@@ -221,7 +249,7 @@ declare namespace Config {
         /**
          * List of installed icon names
          */
-        icons: string[];
+        icons: { label: string; name: string }[];
         /**
          * The version number of the icon currently in use
          */
@@ -283,6 +311,8 @@ declare namespace Config {
         | "es_ES"
         | "fr_FR"
         | "he_IL"
+        | "hi_IN"
+        | "id_ID"
         | "it_IT"
         | "ja_JP"
         | "ko_KR"
@@ -291,6 +321,9 @@ declare namespace Config {
         | "ru_RU"
         | "sk_SK"
         | "tr_TR"
+        | "uk_UA"
+        | "th_TH"
+        | "nl_NL"
         | "zh_CN"
         | "zh_CHT";
 
@@ -450,6 +483,10 @@ declare namespace Config {
          * The font used in the editor
          */
         fontFamily: string;
+        /**
+         * The font weight used in the editor, 0 means not set
+         */
+        fontWeight: number;
         /**
          * The font size used in the editor
          */
@@ -672,6 +709,14 @@ declare namespace Config {
          */
         refCreateSavePath: string;
         refCreateSaveBox: string;
+        /**
+         * Shorthand save notebook
+         */
+        shorthandSaveBox: string;
+        /**
+         * Shorthand save path
+         */
+        shorthandSavePath: string;
         docCreateSaveBox: string;
         /**
          * Close the secondary confirmation when deleting a document
@@ -929,6 +974,7 @@ declare namespace Config {
         attr: IKey;
         backlinks: IKey;
         collapse: IKey;
+        foldRecursive: IKey;
         copyBlockEmbed: IKey;
         copyBlockRef: IKey;
         copyHPath: IKey;
@@ -2174,6 +2220,7 @@ declare namespace Config {
          * - `1`: Query syntax
          * - `2`: SQL
          * - `3`: Regular expression
+         * - `4`: Fuzzy search
          * @default 0
          */
         method?: number;
@@ -2209,6 +2256,26 @@ declare namespace Config {
          */
         sort?: number;
         types?: IUILayoutTabSearchConfigTypes;
+        subTypes?: IUILayoutTabSearchConfigSubTypes;
+    }
+
+    /**
+     * Search subtype filtering. When all flags within a category (heading or
+     * list) are false, that category is not subtype-filtered (parent type
+     * filter applies as before). When at least one flag is true, only blocks
+     * matching the selected subtypes are returned for that category.
+     */
+    export interface IUILayoutTabSearchConfigSubTypes {
+        h1: boolean;
+        h2: boolean;
+        h3: boolean;
+        h4: boolean;
+        h5: boolean;
+        h6: boolean;
+        // List subtypes — apply to both list and listItem
+        o: boolean;
+        u: boolean;
+        t: boolean;
     }
 
     /**

@@ -46,6 +46,32 @@ export const ai = {
     <div class="b3-label__text">${window.siyuan.languages.apiMaxContextsTip}</div>
 </div>
 <div class="b3-label">
+    ${window.siyuan.languages.agentTimeout || "Agent Timeout"}
+    <div class="fn__hr"></div>
+    <div class="fn__flex">
+        <input class="b3-text-field fn__flex-1" type="number" step="1" min="0" id="agentTimeout" value="${window.siyuan.config.ai.openAI.agentTimeout || 600}"/>
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">s</span>
+    </div>
+    <div class="b3-label__text">${window.siyuan.languages.agentTimeoutTip || "0 = no limit"}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.agentConfirmTimeout || "Confirm Timeout"}
+    <div class="fn__hr"></div>
+    <div class="fn__flex">
+        <input class="b3-text-field fn__flex-1" type="number" step="1" min="10" max="600" id="agentConfirmTimeout" value="${window.siyuan.config.ai.openAI.agentConfirmTimeout || 120}"/>
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">s</span>
+    </div>
+    <div class="b3-label__text">${window.siyuan.languages.agentConfirmTimeoutTip || "Auto reject after timeout"}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.agentMaxRetries || "Max Retries"}
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="0" max="10" id="agentMaxRetries" value="${window.siyuan.config.ai.openAI.agentMaxRetries || 3}"/>
+    <div class="b3-label__text">${window.siyuan.languages.agentMaxRetriesTip || "Max API retry attempts on failure"}</div>
+</div>
+<div class="b3-label">
     ${window.siyuan.languages.apiModel}
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" id="apiModel" value="${window.siyuan.config.ai.openAI.apiModel}"/>
@@ -133,6 +159,38 @@ export const ai = {
     <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="1" max="64" id="apiMaxContexts" value="${window.siyuan.config.ai.openAI.apiMaxContexts}"/>
 </div>
 <div class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.agentTimeout || "Agent Timeout"}
+        <div class="b3-label__text">${window.siyuan.languages.agentTimeoutTip || "0 = no limit"}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="fn__size200 fn__flex-center fn__flex">
+        <input class="b3-text-field fn__flex-1" type="number" step="1" min="0" id="agentTimeout" value="${window.siyuan.config.ai.openAI.agentTimeout || 600}"/>
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">s</span>
+    </div>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.agentConfirmTimeout || "Confirm Timeout"}
+        <div class="b3-label__text">${window.siyuan.languages.agentConfirmTimeoutTip || "Auto reject after timeout"}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="fn__size200 fn__flex-center fn__flex">
+        <input class="b3-text-field fn__flex-1" type="number" step="1" min="10" max="600" id="agentConfirmTimeout" value="${window.siyuan.config.ai.openAI.agentConfirmTimeout || 120}"/>
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">s</span>
+    </div>
+</div>
+<div class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.agentMaxRetries || "Max Retries"}
+        <div class="b3-label__text">${window.siyuan.languages.agentMaxRetriesTip || "Max API retry attempts on failure"}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="0" max="10" id="agentMaxRetries" value="${window.siyuan.config.ai.openAI.agentMaxRetries || 3}"/>
+</div>
+<div class="fn__flex b3-label">
     <div class="fn__block">
         ${window.siyuan.languages.apiModel}
         <div class="b3-label__text">${window.siyuan.languages.apiModelTip}</div>
@@ -184,16 +242,7 @@ export const ai = {
     </div>
 </div>`;
         /// #endif
-        return `<div class="fn__flex-column" style="height: 100%">
-<div class="layout-tab-bar fn__flex">
-    <div data-type="openai" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">OpenAI</span><span class="fn__flex-1"></span></div>
-</div>
-<div class="fn__flex-1">
-    <div data-type="openai">
-        ${responsiveHTML}
-    </div>
-</div>
-</div>`;
+        return responsiveHTML;
     },
     bindEvent: () => {
         const togglePassword = ai.element.querySelector('.b3-form__icona-icon[data-action="togglePassword"]');
@@ -217,6 +266,9 @@ export const ai = {
                         apiProxy: (ai.element.querySelector("#apiProxy") as HTMLInputElement).value,
                         apiTimeout: parseInt((ai.element.querySelector("#apiTimeout") as HTMLInputElement).value),
                         apiProvider: (ai.element.querySelector("#apiProvider") as HTMLSelectElement).value,
+                        agentTimeout: parseInt((ai.element.querySelector("#agentTimeout") as HTMLInputElement).value),
+                        agentConfirmTimeout: parseInt((ai.element.querySelector("#agentConfirmTimeout") as HTMLInputElement).value),
+                        agentMaxRetries: parseInt((ai.element.querySelector("#agentMaxRetries") as HTMLInputElement).value),
                     }
                 }, response => {
                     window.siyuan.config.ai = response.data;

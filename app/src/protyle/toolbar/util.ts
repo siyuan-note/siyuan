@@ -156,7 +156,7 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         name: "tag",
         lang: "tag",
         hotkey: window.siyuan.config.keymap.editor.insert.tag.custom,
-        icon: "iconTags",
+        icon: "iconTag",
         tipPosition: "n",
     }, {
         name: "code",
@@ -259,7 +259,7 @@ export const copyTextByType = async (ids: string[],
             text += `siyuan://blocks/${id}`;
         } else if (type === "protocolMd") {
             const response = await fetchSyncPost("/api/block/getRefText", {id});
-            text += `[${response.data}](siyuan://blocks/${id})`;
+            text += `[${response.data.replace("[", "\\[").replace("]", "\\]")}](siyuan://blocks/${id})`;
         } else if (type === "hPath") {
             const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
             text += response.data;

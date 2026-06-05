@@ -309,6 +309,27 @@ func setBlockReminder(c *gin.Context) {
 	}
 }
 
+func setCloudReminder(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	timed := arg["timed"].(string) // yyyyMMddHHmmss
+	content := arg["content"].(string)
+	err := model.SetCloudReminder(id, content, timed)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 7000}
+		return
+	}
+}
+
 func getUnfoldedParentID(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -371,10 +392,14 @@ func getDocInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	info := model.GetDocInfo(id)
+	info, err := model.GetDocInfo(id)
 	if nil == info {
 		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+		if err != nil && !errors.Is(err, model.ErrTreeNotFound) {
+			ret.Msg = err.Error()
+		} else {
+			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+		}
 		return
 	}
 	if model.IsReadOnlyRoleContext(c) {
@@ -676,17 +701,29 @@ func getBlockInfo(c *gin.Context) {
 
 	// 仅在此处使用带重建索引的加载函数，其他地方不要使用
 	tree, err := model.LoadTreeByBlockIDWithReindex(id)
-	if errors.Is(err, model.ErrIndexing) {
-		ret.Code = 3
-		ret.Msg = model.Conf.Language(56)
-		return
-	} else if errors.Is(err, treenode.ErrSpecTooNew) {
+	if err != nil {
+		if errors.Is(err, model.ErrIndexing) {
+			ret.Code = 3
+			ret.Msg = model.Conf.Language(56)
+			return
+		}
+		if errors.Is(err, treenode.ErrSpecTooNew) {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(275)
+			return
+		}
+		if errors.Is(err, model.ErrBoxUnindexed) {
+			ret.Code = -1
+			ret.Msg = "" // 加载的时候已经推送过提示了，这里不需要再提示
+			return
+		}
+		if errors.Is(err, model.ErrTreeNotFound) {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+			return
+		}
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(275)
-		return
-	} else if errors.Is(err, model.ErrBoxUnindexed) {
-		ret.Code = -1
-		ret.Msg = "" // 加载的时候已经推送过提示了，这里不需要再提示
+		ret.Msg = err.Error()
 		return
 	}
 
@@ -720,13 +757,14 @@ func getBlockInfo(c *gin.Context) {
 	rootTitle := root.IAL["title"]
 	rootTitle = html.UnescapeString(rootTitle)
 	icon := root.IAL["icon"]
-	ret.Data = map[string]string{
-		"box":         block.Box,
-		"path":        block.Path,
-		"rootID":      block.RootID,
-		"rootTitle":   rootTitle,
-		"rootChildID": rootChildID,
-		"rootIcon":    icon,
+	ret.Data = map[string]any{
+		"box":            block.Box,
+		"path":           block.Path,
+		"rootID":         block.RootID,
+		"rootTitle":      rootTitle,
+		"rootTitleEmpty": root.IAL[model.NodeAttrTitleEmpty] == "true",
+		"rootChildID":    rootChildID,
+		"rootIcon":       icon,
 	}
 }
 

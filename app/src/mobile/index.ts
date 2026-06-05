@@ -16,7 +16,7 @@ import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets, loadAssets} from "../util/assets";
-import {bootSync} from "../dialog/processSystem";
+import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
@@ -35,10 +35,10 @@ import {updateCardHV} from "../card/util";
 import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
-import {updateControlAlt} from "../protyle/util/hotKey";
 import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
+import {initTouchDragBridge} from "../util/touchDragBridge";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -107,7 +107,7 @@ class App {
                     callMobileAppShowKeyboard();
                 }
             }
-            if (!hasClosestByClassName(event.target as Element, "protyle-util")) {
+            if (document.contains(event.target) && !hasClosestByClassName(event.target as Element, "protyle-util")) {
                 hideAllElements(["util"]);
             }
         });
@@ -141,7 +141,6 @@ class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = confResponse.data.conf;
-            updateControlAlt();
             window.siyuan.isPublish = confResponse.data.isPublish;
             correctHotkey(siyuanApp);
             await loadPlugins(this);
@@ -176,9 +175,7 @@ class App {
             });
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
-            document.addEventListener("touchend", (event) => {
-                handleTouchEnd(event, siyuanApp);
-            }, false);
+            document.addEventListener("touchend", handleTouchEnd, false);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;
@@ -207,6 +204,7 @@ class App {
                     }
                 }
             });
+            initTouchDragBridge();
         });
     }
 }
@@ -215,10 +213,27 @@ const siyuanApp = new App();
 
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {
-    window.siyuan.ws.send("ping", {});
-    window.siyuan.mobile.docks.file.send("ping", {});
-    window.siyuan.mobile.editor.protyle.ws.send("ping", {});
-    window.siyuan.mobile.popEditor?.protyle.ws.send("ping", {});
+    // 后台唤醒时任一 socket 可能仍在 CONNECTING，调用 send 会抛 InvalidStateError，
+    // 单独 try/catch 防止首个错误中断整个 ping 序列；下次 reconnectWebSocket 会再次尝试
+    const tryPing = (m?: { send: (cmd: string, p: Record<string, unknown>) => void }) => {
+        if (!m) {
+            return;
+        }
+        try {
+            m.send("ping", {});
+        } catch (e) {
+            console.warn("reconnectWebSocket: ping skipped", e);
+        }
+    };
+    tryPing(window.siyuan.ws);
+    tryPing(window.siyuan.mobile.docks?.file);
+    tryPing(window.siyuan.mobile.editor?.protyle.ws);
+    tryPing(window.siyuan.mobile.popEditor?.protyle.ws);
+};
+window.lockscreenByMode = () => {
+    if (window.siyuan.config.system.lockScreenMode === 1) {
+        lockScreen(siyuanApp);
+    }
 };
 window.goBack = goBack;
 window.showMessage = showMessage;

@@ -153,10 +153,10 @@ func GetBlockTreesByType(typ string) (ret []*BlockTree) {
 	return
 }
 
-func GetBlockTreeByPath(path string) (ret *BlockTree) {
+func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
-	sqlStmt := "SELECT * FROM blocktrees WHERE path = ?"
-	err := queryRow(sqlStmt, path).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"
+	err := queryRow(sqlStmt, boxID, path).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
 		if errors.Is(err, sql.ErrNoRows) {
@@ -623,6 +623,8 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
 
 		if strings.Contains(err.Error(), "database disk image is malformed") {
+			closeDatabase()
+			util.RemoveDatabaseFile(util.BlockTreeDBPath)
 			initDatabase(true)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 		}
@@ -640,6 +642,8 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
 
 			if strings.Contains(err.Error(), "database disk image is malformed") {
+				closeDatabase()
+				util.RemoveDatabaseFile(util.BlockTreeDBPath)
 				initDatabase(true)
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 			}

@@ -596,6 +596,7 @@ interface ISiyuan {
     ctrlIsPressed?: boolean,
     altIsPressed?: boolean,
     shiftIsPressed?: boolean,
+    metaIsPressed?: boolean,
     coordinates?: {
         pageX: number,
         pageY: number,

@@ -1257,6 +1257,7 @@ data-type="navigation-root" data-path="/">
         box: string,
         path: string
     }, setStorage = true, isSetCurrent = true) {
+        filePath = filePath.replace(/\/\/+/g, "/");
         const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
         if (!treeElement) {
             // 有文件树和编辑器的布局初始化时，文件树还未挂载

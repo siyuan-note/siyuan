@@ -126,7 +126,7 @@ func documentCreate(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	id := ast.NewNodeID()
-	docPath := parentPath + "/" + id + ".sy"
+	docPath := strings.TrimRight(parentPath, "/") + "/" + id + ".sy"
 	tree, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("create doc failed: %s", err)}}, IsError: true}, nil

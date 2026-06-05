@@ -1210,7 +1210,7 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.DataDir, "%"))                 // v3.0.6 生成的错误历史文件夹
 	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
-	// v3.7.0-dev 开发版数据索引队列，后面改成 index.queue 了
+	// v3.7.0-dev 开发版遗留文件清理
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal"))
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal.lock"))
 	os.RemoveAll(filepath.Join(util.DataDir, "storage", "ai", "agent", "todos"))

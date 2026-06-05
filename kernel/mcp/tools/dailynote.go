@@ -71,6 +71,7 @@ func dailynoteCreate(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	model.FlushTxQueue()
+	model.AppendPushReloadFiletreeEntry()
 	id := util.GetTreeID(p)
 
 	status := "created"
@@ -115,6 +116,7 @@ func dailynoteAppend(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(parentID)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("block appended to daily note: %s", parentID)}}}, nil
 }
 
@@ -152,5 +154,6 @@ func dailynotePrepend(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(parentID)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("block prepended to daily note: %s", parentID)}}}, nil
 }

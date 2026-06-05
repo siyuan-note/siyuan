@@ -43,6 +43,7 @@ export class AgentChat extends Model {
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
     private currentToolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}> = [];
+    private abortController: AbortController | null = null;
 
     constructor(app: App, tab: Tab) {
         super({app: app, id: tab.id});
@@ -123,7 +124,7 @@ export class AgentChat extends Model {
                         self.messages.push({role: "user", content: text});
                         self.appendUserMessage(text);
                         self.setStreaming(true);
-                        const apiMessages = self.messages.map(function (m) { return {role: m.role, content: m.content}; });
+                        const apiMessages = self.messages.map(function (m) { return {role: m.role as "user" | "assistant", content: m.content}; });
                         self.abortController = new AbortController();
                         fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
                             function (event: ISSEResult) { self.handleSSEEvent(event); },
@@ -169,7 +170,7 @@ export class AgentChat extends Model {
             if (session) {
                 this.sessionId = session.id;
                 this.sessionTitle = session.title;
-                this.messages = session.messages;
+                this.messages = session.messages as IAgentMessage[];
                 this.hasTitled = true;
                 this.sessionPromptTokens = session.promptTokens || 0;
                 this.sessionCompletionTokens = session.completionTokens || 0;
@@ -335,7 +336,7 @@ export class AgentChat extends Model {
         if (!session) { return; }
         this.sessionId = session.id;
         this.sessionTitle = session.title;
-        this.messages = session.messages;
+        this.messages = session.messages as IAgentMessage[];
         this.hasTitled = true;
         this.currentAIElement = null;
         this.currentContent = "";
@@ -474,7 +475,7 @@ export class AgentChat extends Model {
 
         this.requestStartTime = Date.now();
 
-        const apiMessages = this.messages.map(function (m) { return {role: m.role, content: m.content}; });
+        const apiMessages = this.messages.map(function (m) { return {role: m.role as "user" | "assistant", content: m.content}; });
         const self = this;
 
         this.abortController = new AbortController();

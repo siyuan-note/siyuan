@@ -30,7 +30,7 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
             ${window.siyuan.languages.type}
         </div>
         <span class="fn__space"></span>
-        <div class="b3-form__icona fn__flex-1">
+        <div class="b3-form__icona fn__flex-1" style="overflow: visible">
             <input value="${blockElements[0].getAttribute("data-subtype")}" type="text" class="b3-text-field fn__block b3-form__icona-input">
             <svg class="b3-form__icona-icon"><use xlink:href="#iconDown"></use></svg>
         </div>

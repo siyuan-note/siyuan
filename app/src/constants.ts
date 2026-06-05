@@ -67,6 +67,9 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
     public static readonly CUSTOM_SY_TITLE_EMPTY: string = "custom-sy-title-empty";
 
+    // 临时标记 DOM 属性以辅助完成其功能
+    public static readonly ATTRIBUTE_EDITING = "data-editing";
+
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
     public static readonly SIZE_UPLOAD_TIP_SIZE: number = 268435456; // 256 M

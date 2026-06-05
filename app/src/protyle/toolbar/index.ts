@@ -862,6 +862,8 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
+        // https://github.com/siyuan-note/siyuan/issues/17814
+        nodeElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         hideElements(["hint", "select"], protyle);
         window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");

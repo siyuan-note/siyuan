@@ -110,6 +110,10 @@ const promiseTransaction = () => {
                 let updatedEmbed = false;
 
                 const updateHTML = (item: Element, html: string) => {
+                    if (item.getAttribute(Constants.ATTRIBUTE_EDITING) === "true") {
+                        item.removeAttribute(Constants.ATTRIBUTE_EDITING);
+                        return;
+                    }
                     const tempElement = document.createElement("template");
                     tempElement.innerHTML = protyle.lute.SpinBlockDOM(html);
                     tempElement.content.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {

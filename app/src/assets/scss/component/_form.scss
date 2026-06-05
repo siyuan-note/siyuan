@@ -74,6 +74,7 @@
       width: 16px;
       cursor: pointer;
       padding: 5px;
+      border-radius: 0 calc(var(--b3-border-radius) - 1px) calc(var(--b3-border-radius) - 1px) 0;
 
       &:hover {
         color: var(--b3-theme-on-background);

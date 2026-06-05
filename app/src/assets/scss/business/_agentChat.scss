@@ -670,3 +670,84 @@
     flex-shrink: 0;
     font-size: 14px;
 }
+
+// Question card styles
+.agent-chat__question-card {
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+    font-size: 13px;
+    background: var(--b3-theme-background);
+}
+
+.agent-chat__question-item {
+    padding: 12px;
+    + .agent-chat__question-item {
+        border-top: 1px solid var(--b3-border-color);
+    }
+}
+
+.agent-chat__question-header {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--b3-theme-on-background);
+}
+
+.agent-chat__question-text {
+    margin-bottom: 10px;
+    color: var(--b3-theme-on-surface);
+    line-height: 1.5;
+}
+
+.agent-chat__question-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.agent-chat__question-option {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: var(--b3-border-radius);
+    cursor: pointer;
+    transition: var(--b3-transition);
+    &:hover { background: var(--b3-theme-surface-light); }
+    input { flex-shrink: 0; margin-top: 2px; }
+}
+
+.agent-chat__question-option-label {
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--b3-theme-on-surface);
+}
+
+.agent-chat__question-option-desc {
+    font-size: 12px;
+    color: var(--b3-theme-on-surface-light);
+    line-height: 1.4;
+}
+
+.agent-chat__question-custom {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px 8px;
+    margin-top: 8px;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    font-size: 13px;
+    outline: none;
+    background: var(--b3-theme-background);
+    color: var(--b3-theme-on-background);
+    &::placeholder { color: var(--b3-theme-on-surface-light); }
+    &:focus { border-color: var(--b3-theme-primary); }
+}
+
+.agent-chat__question-submit {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 12px;
+    border-top: 1px solid var(--b3-border-color);
+}

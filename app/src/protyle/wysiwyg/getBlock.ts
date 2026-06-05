@@ -2,7 +2,8 @@ import {hasClosestBlock, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 
 export const getParentBlock = (element: Element) => {
-    if (element.parentElement.classList.contains("callout-content")) {
+    if (element.parentElement.classList.contains("callout-content") ||
+        element.parentElement.classList.contains("protyle-wysiwyg__embed")) {
         return element.parentElement.parentElement;
     }
     return element.parentElement;

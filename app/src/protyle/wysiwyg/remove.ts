@@ -34,9 +34,6 @@ import {onGet} from "../util/onGet";
 import {setFold} from "../util/blockFold";
 
 export const removeBlock = async (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
-    if (isInEmbedBlock(blockElement)) {
-        return;
-    }
     protyle.observerLoad?.disconnect();
     // 删除后，防止滚动条滚动后调用 get 请求，因为返回的请求已查找不到内容块了
     preventScroll(protyle);
@@ -73,6 +70,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             const item = selectElements[i];
             const topElement = getTopAloneElement(item);
             topParentElement = topElement.parentElement;
+            if (isInEmbedBlock(item)) {
+                continue;
+            }
             const id = topElement.getAttribute("data-node-id");
             deletes.push({
                 action: "delete",
@@ -276,6 +276,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 });
             }
         }, Constants.TIMEOUT_COUNT);// 需等待滚动阻塞、后台处理完成。否则会加载已删除的内容
+        return;
+    }
+    if (isInEmbedBlock(blockElement)) {
         return;
     }
     const blockType = blockElement.getAttribute("data-type");

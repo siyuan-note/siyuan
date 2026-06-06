@@ -9,7 +9,7 @@ import {bgFade, scrollCenter} from "../../util/highlightById";
 import {pushBack} from "../../util/backForward";
 /// #endif
 import {focusBlock, focusByOffset} from "./selection";
-import {hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
+import {hasClosestByAttribute} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
 import {removeLoading} from "../ui/initUI";
 import {isMobile} from "../../util/functions";

@@ -1265,7 +1265,7 @@ export class AgentChat extends Model {
         }
         if (step.reasoningContent) {
             detail += '<div class="agent-chat__thinking-round">Reasoning:</div>';
-            detail += '<div>' + this.escapeHtml(step.reasoningContent) + "</div>";
+            detail += "<div>" + this.escapeHtml(step.reasoningContent) + "</div>";
         }
 
         const el = document.createElement("div");

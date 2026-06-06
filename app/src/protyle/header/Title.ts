@@ -17,7 +17,6 @@ import * as dayjs from "dayjs";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif
-import {setTitle} from "../../dialog/processSystem";
 import {getDocDisplayName} from "../../util/pathName";
 import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";

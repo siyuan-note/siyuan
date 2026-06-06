@@ -8,7 +8,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling, isNotEdit
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
-import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
@@ -214,7 +214,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             // 使用 md 闭合后继续输入应为普通文本, 转义不需要添加 zwsp
             html = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
         }
-        blockElement.insertAdjacentHTML('afterend', html);
+        blockElement.insertAdjacentHTML("afterend", html);
         blockElement = blockElement.nextElementSibling as HTMLElement;
         blockElement.previousElementSibling.remove();
         // https://github.com/siyuan-note/siyuan/issues/8972

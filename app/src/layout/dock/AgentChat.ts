@@ -51,6 +51,7 @@ export class AgentChat extends Model {
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
     private currentThinkingReasoningContent = "";
+    private modelSelect: HTMLSelectElement;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -87,7 +88,9 @@ export class AgentChat extends Model {
     '<div class="agent-chat__input-area">' +
         '<div class="agent-chat__composer-host"></div>' +
         '<div class="agent-chat__buttons">' +
+            '<select class="agent-chat__model b3-select"></select>' +
             '<span class="agent-chat__tokens fn__none"></span>' +
+            '<span class="fn__flex-1"></span>' +
             '<button class="agent-chat__send b3-button b3-button--text">' + (L.agentSend || "Send") + "</button>" +
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none">' + (L.agentStop || "Stop") + "</button>" +
         "</div>" +
@@ -102,10 +105,29 @@ export class AgentChat extends Model {
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
+        this.modelSelect = panel.querySelector(".agent-chat__model") as HTMLSelectElement;
+
+        this.initModelSelect();
 
         const self = this;
         this.composer = mountComposer(this.composerHost, function () { self.sendMessage(); });
         this.initSessions();
+    }
+
+    private initModelSelect() {
+        const aiConfig = window.siyuan.config.ai;
+        const mainModel = aiConfig.openAI.apiModel;
+        const providers = aiConfig.providers || [];
+        let html = '<option value="">' + this.escapeHtml(mainModel) + "</option>";
+        for (const p of providers) {
+            if (p.enabled === false) { continue; }
+            html += '<option value="' + this.escapeHtml(p.apiModel) + '">' + this.escapeHtml(p.apiModel) + "</option>";
+        }
+        this.modelSelect.innerHTML = html;
+    }
+
+    private getSelectedModel(): string {
+        return this.modelSelect.value;
     }
 
     private showWelcome() {
@@ -147,7 +169,8 @@ export class AgentChat extends Model {
                                 self.handleError(err);
                             },
                             self.abortController.signal,
-                            self.sessionId);
+                            self.sessionId,
+                            self.getSelectedModel());
                     }
                 };
             }(examples[i] as HTMLElement));
@@ -174,6 +197,7 @@ export class AgentChat extends Model {
                 getDockByType("agentChat").toggleModel("agentChat", false, true);
                 return;
             }
+            if (t.closest(".agent-chat__model")) { return; }
             if (self.composer) { self.composer.focus(); }
         });
     }
@@ -354,6 +378,7 @@ export class AgentChat extends Model {
 
     private async switchSession(id: string) {
         this.setStreaming(false);
+        this.flushThinkingStep();
         await this.saveSession();
         const session = await SessionStore.load(id);
         if (!session) { return; }
@@ -462,6 +487,7 @@ export class AgentChat extends Model {
             this.abortController = null;
         }
         this.setStreaming(false);
+        this.flushThinkingStep();
         await this.saveSession();
         this.sessionId = SessionStore.newSessionId();
         this.sessionCreatedAt = Date.now();
@@ -572,6 +598,7 @@ export class AgentChat extends Model {
             },
             this.abortController.signal,
             this.sessionId,
+            this.getSelectedModel(),
         );
     }
 
@@ -731,6 +758,7 @@ export class AgentChat extends Model {
                 toolCalls: tc,
                 reasoningContent: this.currentThinkingReasoningContent,
             });
+            this.saveSession();
         }
         this.finishActiveThinking();
         this.currentThinkingText = "";
@@ -802,6 +830,7 @@ export class AgentChat extends Model {
     }
 
     private appendReasoning(token: string) {
+        this.currentThinkingReasoningContent += token;
         const thinking = this.messagesContainer.querySelector(".agent-chat__msg--thinking:last-child .agent-chat__thinking-body");
         if (!thinking) { return; }
         thinking.innerHTML += token;
@@ -869,6 +898,13 @@ export class AgentChat extends Model {
             if (all[i].classList.contains("agent-chat__msg--user")) { break; }
             all[i].remove();
         }
+        // Remove last group of thinking steps
+        for (let i = this.thinkingSteps.length - 1; i >= 0; i--) {
+            if (this.thinkingSteps[i].reasoning === "analyzing") {
+                this.thinkingSteps.splice(i);
+                break;
+            }
+        }
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
@@ -894,6 +930,7 @@ export class AgentChat extends Model {
             },
             this.abortController.signal,
             this.sessionId,
+            this.getSelectedModel(),
         );
     }
 
@@ -968,6 +1005,7 @@ export class AgentChat extends Model {
             reasoningContent: this.currentThinkingReasoningContent,
         });
         this.currentThinkingText = "";
+        this.saveSession();
     }
 
     private generateTitle() {
@@ -997,6 +1035,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--error">' + this.escapeHtml(message) + "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
+        this.flushThinkingStep();
         this.saveSession();
     }
 
@@ -1041,6 +1080,8 @@ export class AgentChat extends Model {
             }
             this.updateTokenDisplay();
             this.setStreaming(false);
+        this.flushThinkingStep();
+        this.saveSession();
     }
 
     private insertBeforeAI(el: HTMLElement) {

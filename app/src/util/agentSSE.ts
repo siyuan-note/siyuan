@@ -47,10 +47,12 @@ export async function fetchAgentSSE(
     onError: (err: Error) => void,
     signal?: AbortSignal,
     sessionID?: string,
+    model?: string,
 ): Promise<void> {
     try {
         const body: Record<string, unknown> = {messages: messages, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
+        if (model) { body.model = model; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",

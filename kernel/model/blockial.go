@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -277,6 +278,10 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 			}
 		}
 
+		if lowerName == "icon" && "" != value {
+			value = normalizeIconValue(value)
+		}
+
 		if "" == value {
 			// 删除属性
 			if name != lowerName {
@@ -347,6 +352,29 @@ func validateChars(name string, startIdx, n int) bool {
 		}
 	}
 	return true
+}
+
+func normalizeIconValue(value string) string {
+	if strings.ContainsAny(value, "./") {
+		return value
+	}
+
+	allASCII := true
+	for _, r := range value {
+		if r > 127 {
+			allASCII = false
+			break
+		}
+	}
+	if allASCII {
+		return value
+	}
+
+	var parts []string
+	for _, r := range value {
+		parts = append(parts, strconv.FormatInt(int64(r), 16))
+	}
+	return strings.Join(parts, "-")
 }
 
 func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {

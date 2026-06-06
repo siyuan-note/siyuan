@@ -26,8 +26,9 @@ import (
 )
 
 type AI struct {
-	OpenAI *OpenAI    `json:"openAI"`
-	MCP    *MCPConfig `json:"mcp"`
+	OpenAI    *OpenAI    `json:"openAI"`
+	MCP       *MCPConfig `json:"mcp"`
+	Providers []*OpenAI  `json:"providers,omitempty"`
 }
 
 type MCPConfig struct {
@@ -63,6 +64,7 @@ type OpenAI struct {
 	AgentTimeout        int     `json:"agentTimeout"`        // total session timeout, seconds, 0 = no limit
 	AgentConfirmTimeout int     `json:"agentConfirmTimeout"` // confirmation timeout, seconds
 	AgentMaxRetries     int     `json:"agentMaxRetries"`     // max API retry attempts on failure
+	Enabled             *bool   `json:"enabled,omitempty"`
 }
 
 func NewAI() *AI {
@@ -145,4 +147,40 @@ func NewAI() *AI {
 		}
 	}
 	return &AI{OpenAI: openAI}
+}
+
+func (p *OpenAI) IsEnabled() bool {
+	return p.Enabled == nil || *p.Enabled
+}
+
+func (ai *AI) HasAnyProvider() bool {
+	if ai.OpenAI != nil && ai.OpenAI.APIKey != "" && ai.OpenAI.IsEnabled() {
+		return true
+	}
+	for _, p := range ai.Providers {
+		if p != nil && p.APIKey != "" && p.IsEnabled() {
+			return true
+		}
+	}
+	return false
+}
+
+func (ai *AI) GetProvider(model string) *OpenAI {
+	if model == "" {
+		if ai.OpenAI != nil && ai.OpenAI.IsEnabled() && ai.OpenAI.APIKey != "" {
+			return ai.OpenAI
+		}
+		for _, p := range ai.Providers {
+			if p != nil && p.IsEnabled() && p.APIKey != "" {
+				return p
+			}
+		}
+		return ai.OpenAI
+	}
+	for _, p := range ai.Providers {
+		if p != nil && p.APIModel == model && p.IsEnabled() && p.APIKey != "" {
+			return p
+		}
+	}
+	return ai.OpenAI
 }

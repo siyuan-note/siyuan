@@ -135,7 +135,6 @@ var (
 func Serve(fastMode bool, cookieKey string) {
 	gin.SetMode(gin.ReleaseMode)
 	ginServer := gin.New()
-	ginServer.UseH2C = true
 	ginServer.MaxMultipartMemory = 1024 * 1024 * 32 // 插入较大的资源文件时内存占用较大 https://github.com/siyuan-note/siyuan/issues/5023
 	ginServer.Use(
 		model.ControlConcurrency, // 请求串行化 Concurrency control when requesting the kernel API https://github.com/siyuan-note/siyuan/issues/9939
@@ -205,7 +204,18 @@ func Serve(fastMode bool, cookieKey string) {
 	model.Conf.ServerAddrs = util.GetServerAddrs()
 	model.Conf.Save()
 
-	util.ServerURL, err = url.Parse("http://127.0.0.1:" + port)
+	// Generate TLS certificates for local HTTPS + HTTP/2 support
+	certPath, keyPath, certErr := util.GetOrCreateTLSCert()
+	if certErr != nil {
+		logging.LogWarnf("failed to get TLS certificates, local HTTPS/HTTP2 unavailable: %s", certErr)
+		certPath = ""
+	}
+
+	if "" != certPath {
+		util.ServerURL, err = url.Parse("https://127.0.0.1:" + port)
+	} else {
+		util.ServerURL, err = url.Parse("http://127.0.0.1:" + port)
+	}
 	if err != nil {
 		logging.LogErrorf("parse server url failed: %s", err)
 	}
@@ -215,21 +225,11 @@ func Serve(fastMode bool, cookieKey string) {
 		rewritePortJSON(pid, port)
 	}
 
-	// Prepare TLS if enabled
-	var certPath, keyPath string
 	useTLS := model.Conf.System.NetworkServeTLS && model.Conf.System.NetworkServe
 	if useTLS {
-		// Ensure TLS certificates exist (proxy will use them directly)
-		var tlsErr error
-		certPath, keyPath, tlsErr = util.GetOrCreateTLSCert()
-		if tlsErr != nil {
-			logging.LogErrorf("failed to get TLS certificates: %s", tlsErr)
-			if !fastMode {
-				os.Exit(logging.ExitCodeUnavailablePort)
-			}
-			return
-		}
 		logging.LogInfof("kernel [pid=%s] http server [%s] is booting (TLS will be enabled on fixed port proxy)", pid, host+":"+port)
+	} else if "" != certPath {
+		logging.LogInfof("kernel [pid=%s] http server [%s] is booting (local HTTPS + HTTP/2 enabled)", pid, host+":"+port)
 	} else {
 		logging.LogInfof("kernel [pid=%s] http server [%s] is booting", pid, host+":"+port)
 	}
@@ -239,21 +239,17 @@ func Serve(fastMode bool, cookieKey string) {
 
 	go func() {
 		time.Sleep(1 * time.Second)
-		go proxy.InitFixedPortService(host, useTLS, certPath, keyPath)
+		go proxy.InitFixedPortService(host, certPath, keyPath)
 		go proxy.InitPublishService()
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
 	httpHandler := ginServer.Handler()
-	p := &http.Protocols{}
-	p.SetHTTP1(true)
-	p.SetUnencryptedHTTP2(true)
 	util.HttpServer = &http.Server{
-		Handler:   httpHandler,
-		Protocols: p,
+		Handler: httpHandler,
 	}
 
-	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {
+	if "" != certPath {
 		if err = util.ServeMultiplexed(ln, httpHandler, certPath, keyPath, util.HttpServer); err != nil {
 			if errors.Is(err, http.ErrServerClosed) || errors.Is(err, cmux.ErrListenerClosed) {
 				return

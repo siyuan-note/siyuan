@@ -20,6 +20,7 @@ const {
     BrowserWindow,
     Notification,
     shell,
+    session,
     Menu,
     MenuItem,
     screen,
@@ -76,7 +77,6 @@ app.commandLine.appendSwitch("auto-detect", "false");
 app.commandLine.appendSwitch("no-proxy-server");
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
 app.commandLine.appendSwitch("xdg-portal-required-version", "4");
-app.commandLine.appendSwitch("max-connections-per-host", "32");
 
 // Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
@@ -286,7 +286,7 @@ const exitApp = (port, errorWindowId) => {
     }
 };
 
-const localServer = "http://127.0.0.1";
+const localServer = "https://127.0.0.1";
 
 const getServer = (port = kernelPort) => {
     return localServer + ":" + port;
@@ -735,6 +735,15 @@ const initKernel = (workspace, port, lang) => {
 };
 
 app.whenReady().then(() => {
+    // Trust self-signed TLS certificates for local HTTPS server
+    session.defaultSession.setCertificateVerifyProc((request, callback) => {
+        if (request.hostname === "127.0.0.1" || request.hostname === "localhost") {
+            callback(0); // VERIFY_OK
+        } else {
+            callback(-3); // default Chromium handling
+        }
+    });
+
     const resetTrayMenu = (tray, lang, mainWindow) => {
         if (!mainWindow || mainWindow.isDestroyed()) {
             return;

@@ -28,7 +28,7 @@ import (
 	"github.com/soheilhy/cmux"
 )
 
-func InitFixedPortService(host string, useTLS bool, certPath, keyPath string) {
+func InitFixedPortService(host string, certPath, keyPath string) {
 	if util.FixedPort != util.ServerPort {
 		if util.IsPortOpen(util.FixedPort) {
 			return
@@ -38,17 +38,16 @@ func InitFixedPortService(host string, useTLS bool, certPath, keyPath string) {
 
 		// 启动一个固定 6806 端口的反向代理服务器，这样浏览器扩展才能直接使用 127.0.0.1:6806，不用配置端口
 		proxy := httputil.NewSingleHostReverseProxy(util.ServerURL)
+		proxy.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
 
-		if useTLS {
-			proxy.Transport = &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-			}
-
+		if "" != certPath {
 			logging.LogInfof("fixed port service [%s] is running (HTTP/HTTPS dual mode)", addr)
 
-			ln, err := net.Listen("tcp", addr)
-			if err != nil {
-				logging.LogWarnf("boot fixed port service [%s] failed: %s", addr, err)
+			ln, listenErr := net.Listen("tcp", addr)
+			if listenErr != nil {
+				logging.LogWarnf("boot fixed port service [%s] failed: %s", addr, listenErr)
 				return
 			}
 

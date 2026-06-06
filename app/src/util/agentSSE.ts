@@ -34,6 +34,9 @@ export type ISSEResult = {
     type: "question";
     questionID: string;
     arguments: Record<string, unknown>;
+} | {
+    type: "reasoning";
+    token: string;
 };
 
 export async function fetchAgentSSE(
@@ -44,10 +47,12 @@ export async function fetchAgentSSE(
     onError: (err: Error) => void,
     signal?: AbortSignal,
     sessionID?: string,
+    model?: string,
 ): Promise<void> {
     try {
         const body: Record<string, unknown> = {messages: messages, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
+        if (model) { body.model = model; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",
@@ -177,6 +182,8 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 questionID: data.questionID as string,
                 arguments: (data.arguments || {}) as Record<string, unknown>,
             };
+        case "reasoning":
+            return {type: "reasoning", token: data.token as string};
         default:
             return null;
     }

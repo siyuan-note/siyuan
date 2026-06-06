@@ -3091,6 +3091,7 @@ export class WYSIWYG {
                                     actionElement.parentElement.setAttribute("data-task", "X");
                                 }
                                 actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                                actionElement.parentElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                                 updateTransaction(protyle, actionId, actionElement.parentElement.outerHTML, html);
                             }
                         } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {

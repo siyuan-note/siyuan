@@ -78,10 +78,8 @@ export class Undo {
                     break;
                 }
             }
-            state.undoOperations.forEach((item) => {
-                onTransaction(protyle, item, true);
-            });
-            transaction(protyle, state.undoOperations);
+            onTransaction(protyle, state.undoOperations, true);
+            transaction(protyle, state.undoOperations, undefined, {skipSync: true});
         } else {
             for (let i = state.doOperations.length - 1; i >= 0; i--) {
                 if (state.doOperations[i].action === "insert") {
@@ -93,10 +91,8 @@ export class Undo {
                     break;
                 }
             }
-            state.doOperations.forEach(item => {
-                onTransaction(protyle, item, true);
-            });
-            transaction(protyle, state.doOperations);
+            onTransaction(protyle, state.doOperations, true);
+            transaction(protyle, state.doOperations, undefined, {skipSync: true});
         }
         document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);

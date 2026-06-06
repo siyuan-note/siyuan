@@ -326,7 +326,7 @@ export class Protyle {
                 /// #endif
                 return true;
             } else {
-                onTransaction(this.protyle, item, false);
+                onTransaction(this.protyle, [item], false);
                 // 反链面板移除元素后，文档为空
                 if (!(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
                     needCreateAction = item.action;

@@ -527,7 +527,8 @@ interface ISiyuan {
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],
-        undoOperations: IOperation[]
+        undoOperations: IOperation[],
+        skipSync?: boolean
     }[]
     reqIds: {
         [key: string]: number

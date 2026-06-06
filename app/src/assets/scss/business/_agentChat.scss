@@ -311,6 +311,26 @@
     align-items: stretch;
 }
 
+.agent-chat__tool-line {
+    font-size: 12px;
+    color: var(--b3-theme-on-surface-light);
+    padding: 2px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &:hover {
+        color: var(--b3-theme-on-surface);
+    }
+}
+
+.agent-chat__tool-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .agent-chat__tool-card {
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius);

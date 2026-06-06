@@ -47,7 +47,6 @@ export class AgentChat extends Model {
     private currentToolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}> = [];
     private abortController: AbortController | null = null;
     private isRenderingSessionList = false;
-    private messageHistory: Record<string, string[]> = {};
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -187,6 +186,9 @@ export class AgentChat extends Model {
                 this.sessionPromptTokens = session.promptTokens || 0;
                 this.sessionCompletionTokens = session.completionTokens || 0;
                 this.sessionTotalDuration = session.totalDuration || 0;
+                if (this.composer) {
+                    this.composer.restoreHistory(session.messageHistory || []);
+                }
                 this.titleElement.textContent = session.title;
                 this.updateTokenDisplay();
                 for (let i = 0; i < session.messages.length; i++) {
@@ -346,22 +348,20 @@ export class AgentChat extends Model {
             totalDuration: this.sessionTotalDuration,
             createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
+            messageHistory: this.composer?.getHistory() || [],
         };
         await SessionStore.save(session);
     }
 
     private async switchSession(id: string) {
         this.setStreaming(false);
-        if (this.composer) {
-            this.messageHistory[this.sessionId] = this.composer.getHistory();
-        }
         await this.saveSession();
         const session = await SessionStore.load(id);
         if (!session) { return; }
         this.sessionId = session.id;
         if (this.composer) {
             this.composer.clearHistory();
-            this.composer.restoreHistory(this.messageHistory[id] || []);
+            this.composer.restoreHistory(session.messageHistory || []);
         }
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
@@ -402,45 +402,13 @@ export class AgentChat extends Model {
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}>) {
-        const L = window.siyuan.languages;
+        // Only render todo_write cards, skip other tool calls
         for (let i = 0; i < toolCalls.length; i++) {
             const tc = toolCalls[i];
-            const argsStr = JSON.stringify(tc.arguments, null, 2);
-            const el = document.createElement("div");
-            el.className = "agent-chat__msg agent-chat__msg--tool";
-            el.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--call" data-tool="' + tc.name + '">' +
-    '<div class="agent-chat__tool-header">' +
-        '<span class="agent-chat__tool-icon">&#128736;</span>' +
-        '<span class="agent-chat__tool-title">' + (L.agentToolCall || "Calling tool") + ": " + tc.name + "</span>" +
-    "</div>" +
-    '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(argsStr) + "</pre>" +
-"</div>";
-            const header = el.querySelector(".agent-chat__tool-header") as HTMLElement;
-            const body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
-            header.addEventListener("click", function () {
-                body.classList.toggle("fn__none");
-            });
-            this.messagesContainer.appendChild(el);
-
-            if (tc.result) {
+            if (tc.result && tc.name === "todo_write") {
                 const rel = document.createElement("div");
                 rel.className = "agent-chat__msg agent-chat__msg--tool";
-                if (tc.name === "todo_write") {
-                    rel.innerHTML = this.renderTodoList(tc.result);
-                } else {
-                    rel.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--result" data-tool="' + tc.name + '">' +
-    '<div class="agent-chat__tool-header">' +
-        '<span class="agent-chat__tool-icon">&#128196;</span>' +
-        '<span class="agent-chat__tool-title">' + (L.agentToolResult || "Tool result") + ": " + tc.name + "</span>" +
-    "</div>" +
-    '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(tc.result) + "</pre>" +
-"</div>";
-                    const rheader = rel.querySelector(".agent-chat__tool-header") as HTMLElement;
-                    const rbody = rel.querySelector(".agent-chat__tool-body") as HTMLElement;
-                    rheader.addEventListener("click", function () {
-                        rbody.classList.toggle("fn__none");
-                    });
-                }
+                rel.innerHTML = this.renderTodoList(tc.result);
                 this.messagesContainer.appendChild(rel);
             }
         }
@@ -458,6 +426,7 @@ export class AgentChat extends Model {
         await this.saveSession();
         this.sessionId = SessionStore.newSessionId();
         this.sessionCreatedAt = Date.now();
+        if (this.composer) { this.composer.clearHistory(); }
         this.sessionTitle = this.defaultTitle;
         this.messages = [];
         this.hasTitled = false;
@@ -668,47 +637,15 @@ export class AgentChat extends Model {
     }
 
     private appendToolCall(name: string, args: Record<string, unknown>) {
-        const el = document.createElement("div");
-        el.className = "agent-chat__msg agent-chat__msg--tool";
-        const argsStr = JSON.stringify(args, null, 2);
-        const L = window.siyuan.languages;
-        el.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--call" data-tool="' + name + '">' +
-    '<div class="agent-chat__tool-header">' +
-        '<span class="agent-chat__tool-icon">&#128736;</span>' +
-        '<span class="agent-chat__tool-title">' + (L.agentToolCall || "Calling tool") + ": " + name + "</span>" +
-    "</div>" +
-    '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(argsStr) + "</pre>" +
-"</div>";
-        const header = el.querySelector(".agent-chat__tool-header") as HTMLElement;
-        const body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
-        header.addEventListener("click", function () {
-            body.classList.toggle("fn__none");
-        });
-        this.insertBeforeAI(el);
-        this.scrollToBottom();
+        // Tool calls are tracked in currentToolCalls, no DOM needed
     }
 
     private appendToolResult(name: string, result: string) {
+        if (name !== "todo_write") { return; }
+
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--tool";
-        const L = window.siyuan.languages;
-
-        if (name === "todo_write") {
-            el.innerHTML = this.renderTodoList(result);
-        } else {
-            el.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--result" data-tool="' + name + '">' +
-    '<div class="agent-chat__tool-header">' +
-        '<span class="agent-chat__tool-icon">&#128196;</span>' +
-        '<span class="agent-chat__tool-title">' + (L.agentToolResult || "Tool result") + ": " + name + "</span>" +
-    "</div>" +
-    '<pre class="agent-chat__tool-body">' + this.escapeHtml(result) + "</pre>" +
-"</div>";
-            const header = el.querySelector(".agent-chat__tool-header") as HTMLElement;
-            const body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
-            header.addEventListener("click", function () {
-                body.classList.toggle("fn__none");
-            });
-        }
+        el.innerHTML = this.renderTodoList(result);
         this.insertBeforeAI(el);
         this.scrollToBottom();
     }
@@ -738,6 +675,7 @@ export class AgentChat extends Model {
     }
 
     private appendThinking(reasoning: string) {
+        this.clearThinking();
         const L = window.siyuan.languages;
         let text = reasoning;
         let roundLabel = "";
@@ -750,16 +688,12 @@ export class AgentChat extends Model {
         }
 
         let detailLines = "";
-        if (reasoning === "processing") {
-            const toolCards = this.messagesContainer.querySelectorAll(".agent-chat__tool-card--call");
-            if (toolCards.length > 0) {
-                detailLines += '<div class="agent-chat__thinking-summary">' + (L.agentToolCall || "Tool call") + "s:</div>";
-                for (let i = 0; i < toolCards.length; i++) {
-                    const name = toolCards[i].getAttribute("data-tool") || "";
-                    if (name) {
-                        detailLines += '<div class="agent-chat__thinking-item">' + this.escapeHtml(name) + "</div>";
-                    }
-                }
+        if (reasoning === "processing" && this.currentToolCalls.length > 0) {
+            detailLines += '<div class="agent-chat__thinking-summary">' + (L.agentToolCall || "Tool call") + "s:</div>";
+            for (let i = 0; i < this.currentToolCalls.length; i++) {
+                const tc = this.currentToolCalls[i];
+                const name = tc.name + (tc.result ? " \u2713" : " \u25CC");
+                detailLines += '<div class="agent-chat__thinking-item">' + this.escapeHtml(name) + "</div>";
             }
         }
 

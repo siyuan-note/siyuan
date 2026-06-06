@@ -25,6 +25,7 @@ export interface AgentSession {
     promptTokens?: number;
     completionTokens?: number;
     totalDuration?: number;
+    messageHistory?: string[];
     createdAt: number;
     updatedAt: number;
 }

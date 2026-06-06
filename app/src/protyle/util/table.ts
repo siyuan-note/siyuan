@@ -385,7 +385,11 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     if (!cellElement || !nodeElement) {
         return false;
     }
-
+    // 光标在表格中，选中其他块标后按删除按钮无效
+    const selectedElement = protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select");
+    if (selectedElement && !selectedElement.contains(cellElement)) {
+        return false;
+    }
     if (event.key === "Backspace" && range.toString() === "") {
         const previousElement = hasPreviousSibling(range.startContainer) as Element;
         if (range.startOffset === 1 && previousElement.nodeType === 1 && previousElement.tagName === "BR" &&

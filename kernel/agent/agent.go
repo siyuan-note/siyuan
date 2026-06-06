@@ -175,6 +175,7 @@ type agentCheckpoint struct {
 	ID               string                    `json:"id"`
 	Title            string                    `json:"title"`
 	Messages         []AgentMessage            `json:"messages"`
+	Entries          []json.RawMessage         `json:"entries,omitempty"`
 	PromptTokens     int                       `json:"promptTokens"`
 	CompletionTokens int                       `json:"completionTokens"`
 	TotalDuration    int64                     `json:"totalDuration"`
@@ -677,6 +678,9 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		}
 		if len(old.ThinkingSteps) > 0 {
 			cp.ThinkingSteps = old.ThinkingSteps
+		}
+		if len(old.Entries) > 0 {
+			cp.Entries = old.Entries
 		}
 	}
 

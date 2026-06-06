@@ -15,25 +15,18 @@ export interface AgentSession {
     id: string;
     title: string;
     model?: string;
-    messages: Array<{
-        role: string;
-        content: string;
-        toolCalls?: Array<{
-            name: string;
-            arguments: Record<string, unknown>;
-            result?: string;
-        }>;
+    entries?: Array<{
+        type: "user" | "thinking" | "assistant";
+        content?: string;
+        reasoning?: string;
+        text?: string;
+        reasoningContent?: string;
+        toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>;
     }>;
     promptTokens?: number;
     completionTokens?: number;
     totalDuration?: number;
     messageHistory?: string[];
-    thinkingSteps?: Array<{
-        reasoning: string;
-        text: string;
-        toolCalls: Array<{name: string; result?: string}>;
-        reasoningContent: string;
-    }>;
     createdAt: number;
     updatedAt: number;
 }
@@ -95,7 +88,7 @@ async function rebuildIndex(): Promise<void> {
             if (name === "index.json" || !name.endsWith(".json")) { continue; }
             const id = name.replace(".json", "");
             const session = await readJsonFile(SESSIONS_DIR + name);
-            if (session && session.id && session.messages) {
+            if (session && session.id && (session.entries || session.messages)) {
                 list.push({
                     id: id,
                     title: session.title || "AI Agent",

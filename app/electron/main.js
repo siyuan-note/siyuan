@@ -20,6 +20,7 @@ const {
     BrowserWindow,
     Notification,
     shell,
+    session,
     Menu,
     MenuItem,
     screen,
@@ -285,7 +286,7 @@ const exitApp = (port, errorWindowId) => {
     }
 };
 
-const localServer = "http://127.0.0.1";
+const localServer = "https://127.0.0.1";
 
 const getServer = (port = kernelPort) => {
     return localServer + ":" + port;
@@ -734,6 +735,15 @@ const initKernel = (workspace, port, lang) => {
 };
 
 app.whenReady().then(() => {
+    // Trust self-signed TLS certificates for local HTTPS server
+    session.defaultSession.setCertificateVerifyProc((request, callback) => {
+        if (request.hostname === "127.0.0.1" || request.hostname === "localhost") {
+            callback(0); // VERIFY_OK
+        } else {
+            callback(-3); // default Chromium handling
+        }
+    });
+
     const resetTrayMenu = (tray, lang, mainWindow) => {
         if (!mainWindow || mainWindow.isDestroyed()) {
             return;

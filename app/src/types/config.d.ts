@@ -115,6 +115,7 @@ declare namespace Config {
      */
     export interface IAI {
         openAI: IOpenAI;
+        providers?: IOpenAI[];
     }
 
     /**
@@ -190,6 +191,10 @@ declare namespace Config {
          * Embedding model name
          */
         embeddingModel: string;
+        /**
+         * Whether this provider is enabled
+         */
+        enabled?: boolean;
     }
 
     /**

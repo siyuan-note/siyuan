@@ -133,8 +133,8 @@ func handleToolsCall(req *JsonRpcRequest) any {
 		}
 	}
 
-	t, exists := tools.Registry[toolName]
-	if !exists {
+	t := tools.LookupTool(toolName)
+	if t == nil {
 		return &JsonRpcResponse{
 			JsonRpc: "2.0",
 			Result: tools.CallToolResult{

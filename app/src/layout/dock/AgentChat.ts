@@ -522,7 +522,6 @@ export class AgentChat extends Model {
         this.messages.push({role: "user", content: text});
         this.appendUserMessage(text);
         if (this.composer) { this.composer.pushHistory(text); }
-        this.saveSession().catch(function (e) { console.error(e); });
 
         this.requestStartTime = Date.now();
 
@@ -697,6 +696,15 @@ export class AgentChat extends Model {
     }
 
     private appendThinking(reasoning: string) {
+        if (this.currentThinkingText) {
+            const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
+            this.thinkingSteps.push({
+                reasoning: this.currentThinkingReasoning,
+                text: this.currentThinkingText,
+                toolCalls: tc,
+                reasoningContent: this.currentThinkingReasoningContent,
+            });
+        }
         this.finishActiveThinking();
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
@@ -872,15 +880,6 @@ export class AgentChat extends Model {
             this.currentAIElement = null;
             this.currentContent = "";
             this.fullContent = "";
-            if (this.currentThinkingText) {
-                const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
-                this.thinkingSteps.push({
-                    reasoning: this.currentThinkingReasoning,
-                    text: this.currentThinkingText,
-                    toolCalls: tc,
-                    reasoningContent: this.currentThinkingReasoningContent,
-                });
-            }
             this.currentToolCalls = [];
             if (this.requestStartTime) {
                 this.sessionTotalDuration += Date.now() - this.requestStartTime;

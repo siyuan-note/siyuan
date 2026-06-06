@@ -49,8 +49,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/soheilhy/cmux"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+
 	"golang.org/x/net/webdav"
 )
 
@@ -245,9 +244,10 @@ func Serve(fastMode bool, cookieKey string) {
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
-	httpHandler := h2c.NewHandler(ginServer.Handler(), &http2.Server{})
+	httpHandler := ginServer.Handler()
 	util.HttpServer = &http.Server{
-		Handler: httpHandler,
+		Handler:   httpHandler,
+		Protocols: &http.Protocols{UnencryptedHTTP2: true},
 	}
 
 	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {

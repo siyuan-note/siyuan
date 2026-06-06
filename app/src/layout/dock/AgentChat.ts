@@ -188,6 +188,7 @@ export class AgentChat extends Model {
                 this.sessionTotalDuration = session.totalDuration || 0;
                 if (this.composer) {
                     this.composer.restoreHistory(session.messageHistory || []);
+                    console.log("[AgentChat] loaded history:", (session.messageHistory || []).length, "items, composer has:", this.composer.getHistory().length);
                 }
                 this.titleElement.textContent = session.title;
                 this.updateTokenDisplay();
@@ -504,6 +505,7 @@ export class AgentChat extends Model {
         this.messages.push({role: "user", content: text});
         this.appendUserMessage(text);
         if (this.composer) { this.composer.pushHistory(text); }
+        this.saveSession().catch(function (e) { console.error(e); });
 
         this.requestStartTime = Date.now();
 

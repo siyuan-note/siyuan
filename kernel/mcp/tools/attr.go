@@ -33,7 +33,7 @@ var AttrTool = &Tool{
 			"action": {Type: "string", Description: "Operation", Enum: []string{"get", "set", "batch-get"}},
 			"id":     {Type: "string", Description: "Block ID"},
 			"ids":    {Type: "string", Description: "Comma-separated block IDs (for batch-get)"},
-			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set).\nCommon attributes:\n- icon: emoji hex codepoint like \"1f4ca\" (NOT the emoji char \"📊\"), custom image path like \"1/b3log.png\", or dynamic icon URL\n- title-img: CSS format like 'background-image:url(\"assets/example.jpg\")', NOT a bare asset path\n- tags: comma-separated tag names"},
+			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set).\nCommon attributes:\n- icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"\n- title-img: CSS format like 'background-image:url(\"assets/example.jpg\")', NOT a bare asset path\n- tags: comma-separated tag names"},
 		},
 		Required: []string{"action"},
 	},

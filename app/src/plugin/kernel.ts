@@ -79,41 +79,39 @@ export class Kernel implements IKernelPlugin {
     }
 
     #createRpc(): IKernelPluginRpc {
-        const self = this;
-
         const call = new Proxy({} as Record<TJsonRpcMethod, (...args: TJsonRpcMethodParams) => Promise<any>>, {
-            get(_target, method: string) {
-                return (...args: TJsonRpcMethodParams) => self.#rpcCall(method, ...args);
+            get: (_target, method: string) => {
+                return (...args: TJsonRpcMethodParams) => this.#rpcCall(method, ...args);
             }
         });
 
         const notify = new Proxy({} as Record<TJsonRpcMethod, (...args: TJsonRpcMethodParams) => void>, {
-            get(_target, method: string) {
-                return (...args: TJsonRpcMethodParams) => self.#rpcNotify(method, ...args);
+            get: (_target, method: string) => {
+                return (...args: TJsonRpcMethodParams) => this.#rpcNotify(method, ...args);
             }
         });
 
         return {
             call,
             notify,
-            batch: self.#rpcBatchCall.bind(self),
+            batch: this.#rpcBatchCall.bind(this),
             bind: (method: TJsonRpcMethod, handler: TJsonRpcHandler<void>) => {
                 const handlers = (() => {
-                    let handlers = self.#handlers.get(method);
+                    let handlers = this.#handlers.get(method);
                     if (!handlers) {
                         handlers = new Set();
-                        self.#handlers.set(method, handlers);
+                        this.#handlers.set(method, handlers);
                     }
                     return handlers;
                 })();
                 handlers.add(handler);
             },
             unbind: (method: TJsonRpcMethod, handler: TJsonRpcHandler<void>) => {
-                const handlers = self.#handlers.get(method);
+                const handlers = this.#handlers.get(method);
                 if (handlers) {
                     handlers.delete(handler);
                     if (handlers.size === 0) {
-                        self.#handlers.delete(method);
+                        this.#handlers.delete(method);
                     }
                 }
             },

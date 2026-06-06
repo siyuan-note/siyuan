@@ -205,6 +205,8 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 		return writeSSEEvent(c, "content", map[string]string{"token": event.Token})
 	case "thinking":
 		return writeSSEEvent(c, "thinking", map[string]string{"reasoning": event.Reasoning})
+	case "reasoning":
+		return writeSSEEvent(c, "reasoning", map[string]string{"token": event.Token})
 	case "confirm":
 		return writeSSEEvent(c, "confirm", map[string]interface{}{
 			"name":      event.Name,

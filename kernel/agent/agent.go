@@ -263,6 +263,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						sendEvent(ch, AgentEvent{Type: "content", Token: choice.Delta.Content})
 					}
 
+					if choice.Delta.ReasoningContent != "" {
+						sendEvent(ch, AgentEvent{Type: "reasoning", Token: choice.Delta.ReasoningContent})
+					}
+
 					for _, tcd := range choice.Delta.ToolCalls {
 						idx := 0
 						if tcd.Index != nil {

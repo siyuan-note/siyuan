@@ -569,6 +569,9 @@ export class AgentChat extends Model {
                 case "question":
                     this.appendQuestion(event.questionID, event.arguments);
                     break;
+                case "reasoning":
+                    this.appendReasoning(event.token);
+                    break;
             }
         } catch (e) {
             console.error("agent SSE event handler error:", e, event);
@@ -732,6 +735,12 @@ export class AgentChat extends Model {
         });
         this.insertBeforeAI(el);
         this.scrollToBottom();
+    }
+
+    private appendReasoning(token: string) {
+        const thinking = this.messagesContainer.querySelector(".agent-chat__msg--thinking:last-child .agent-chat__thinking-body");
+        if (!thinking) { return; }
+        thinking.innerHTML += token;
     }
 
     private finalizeCurrentRound() {

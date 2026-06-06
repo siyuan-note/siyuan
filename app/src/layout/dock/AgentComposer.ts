@@ -167,7 +167,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                                 if (!suggestionMenu) { return false; }
                                 if (props.event.key === "ArrowDown") {
                                     props.event.preventDefault();
-                                    var items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                                    const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
                                     if (items.length > 0) {
                                         selectedIndex = (selectedIndex + 1) % items.length;
                                         updateHighlight();
@@ -176,7 +176,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                                 }
                                 if (props.event.key === "ArrowUp") {
                                     props.event.preventDefault();
-                                    var items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                                    const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
                                     if (items.length > 0) {
                                         selectedIndex = (selectedIndex - 1 + items.length) % items.length;
                                         updateHighlight();

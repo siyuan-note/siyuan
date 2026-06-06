@@ -88,15 +88,15 @@ export async function fetchAgentSSE(
             buffer = lines.pop() || "";
 
             for (let i = 0; i < lines.length; i++) {
-                var line = lines[i];
+                const line = lines[i];
                 if (line.indexOf("event:") === 0) {
                     currentEvent = line.slice(6).trim();
                 } else if (line.indexOf("data:") === 0) {
-                    var dataStr = line.slice(5).trim();
+                    const dataStr = line.slice(5).trim();
                     if (currentEvent && dataStr) {
                         try {
-                            var data = JSON.parse(dataStr);
-                            var result = buildSSEResult(currentEvent, data);
+                            const data = JSON.parse(dataStr);
+                            const result = buildSSEResult(currentEvent, data);
                             if (result) {
                                 onEvent(result);
                             }
@@ -111,13 +111,13 @@ export async function fetchAgentSSE(
 
         buffer += decoder.decode();
         if (buffer) {
-            var line = buffer.trim();
+            const line = buffer.trim();
             if (line.indexOf("data:") === 0 && currentEvent) {
-                var dataStr = line.slice(5).trim();
+                const dataStr = line.slice(5).trim();
                 if (dataStr) {
                     try {
-                        var data = JSON.parse(dataStr);
-                        var result = buildSSEResult(currentEvent, data);
+                        const data = JSON.parse(dataStr);
+                        const result = buildSSEResult(currentEvent, data);
                         if (result) {
                             onEvent(result);
                         }

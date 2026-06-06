@@ -129,6 +129,10 @@ export class AgentChat extends Model {
                         // 不支持 setSendText，直接用 sendMessage 发送
                         self.messages.push({role: "user", content: text});
                         self.appendUserMessage(text);
+                        if (!self.hasTitled) {
+                            self.hasTitled = true;
+                            self.generateTitle();
+                        }
                         self.setStreaming(true);
                         const apiMessages = self.messages.map(function (m) { return {role: m.role as "user" | "assistant", content: m.content}; });
                         self.abortController = new AbortController();
@@ -178,7 +182,7 @@ export class AgentChat extends Model {
         await SessionStore.init();
         const list = await SessionStore.list();
         if (list.length > 0) {
-            list.sort(function (a, b) { return b.updatedAt - a.updatedAt; });
+            list.sort(function (a, b) { return b.createdAt - a.createdAt; });
             const last = list[0];
             const session = await SessionStore.load(last.id);
             if (session) {
@@ -379,6 +383,7 @@ export class AgentChat extends Model {
     }
 
     private appendPersistedAssistant(content: string) {
+        if (!content || !content.trim()) { return; }
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
         el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
@@ -387,7 +392,7 @@ export class AgentChat extends Model {
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}>) {
-        // Only render todo_write cards, skip other tool calls
+        let hasRendered = false;
         for (let i = 0; i < toolCalls.length; i++) {
             const tc = toolCalls[i];
             if (tc.result && tc.name === "todo_write") {
@@ -395,10 +400,16 @@ export class AgentChat extends Model {
                 rel.className = "agent-chat__msg agent-chat__msg--tool";
                 rel.innerHTML = this.renderTodoList(tc.result);
                 this.messagesContainer.appendChild(rel);
+                hasRendered = true;
             }
         }
-        if (content) {
+        if (content && content.trim()) {
             this.appendPersistedAssistant(content);
+            hasRendered = true;
+        }
+        if (!hasRendered) {
+            // 无可见内容，不创建 air 空 DOM
+            return;
         }
     }
 

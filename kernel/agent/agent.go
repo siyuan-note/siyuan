@@ -437,7 +437,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			}
 
 			content := contentBuilder.String()
-			checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+			if content != "" {
+				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+			}
 			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 			if content == "" {
 				content = " "

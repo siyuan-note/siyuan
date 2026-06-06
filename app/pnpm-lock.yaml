@@ -11,6 +11,13 @@ importers:
       '@electron/remote':
         specifier: ^2.1.3
         version: 2.1.3(electron@41.7.1)
+    devDependencies:
+      '@eslint/eslintrc':
+        specifier: ^3.3.1
+        version: 3.3.5
+      '@eslint/js':
+        specifier: ^9.24.0
+        version: 9.39.4
       '@tiptap/core':
         specifier: ^3.24.0
         version: 3.24.0(@tiptap/pm@3.24.0)
@@ -41,13 +48,6 @@ importers:
       '@tiptap/suggestion':
         specifier: ^3.24.0
         version: 3.24.0(@tiptap/core@3.24.0(@tiptap/pm@3.24.0))(@tiptap/pm@3.24.0)
-    devDependencies:
-      '@eslint/eslintrc':
-        specifier: ^3.3.1
-        version: 3.3.5
-      '@eslint/js':
-        specifier: ^9.24.0
-        version: 9.39.4
       '@types/node':
         specifier: ^18.13.0
         version: 18.13.0

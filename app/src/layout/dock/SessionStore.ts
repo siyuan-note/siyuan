@@ -26,6 +26,12 @@ export interface AgentSession {
     completionTokens?: number;
     totalDuration?: number;
     messageHistory?: string[];
+    thinkingSteps?: Array<{
+        reasoning: string;
+        text: string;
+        toolCalls: Array<{name: string; result?: string}>;
+        reasoningContent: string;
+    }>;
     createdAt: number;
     updatedAt: number;
 }

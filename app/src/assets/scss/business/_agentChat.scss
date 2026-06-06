@@ -353,6 +353,14 @@
     background: var(--b3-theme-background);
 }
 
+.agent-chat__msg--thinking-done {
+    opacity: 0.6;
+
+    .agent-chat__thinking-text {
+        font-style: italic;
+    }
+}
+
 .agent-chat__thinking-header {
     display: flex;
     align-items: center;
@@ -383,9 +391,13 @@
 }
 
 .agent-chat__thinking-arrow {
-    font-size: 10px;
-    color: var(--b3-theme-on-surface-light);
     flex-shrink: 0;
+    color: var(--b3-theme-primary);
+
+    svg {
+        width: 14px;
+        height: 14px;
+    }
 }
 
 .agent-chat__thinking-body {

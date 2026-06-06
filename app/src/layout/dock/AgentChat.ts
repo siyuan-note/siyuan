@@ -47,6 +47,10 @@ export class AgentChat extends Model {
     private currentToolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}> = [];
     private abortController: AbortController | null = null;
     private isRenderingSessionList = false;
+    private thinkingSteps: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}> = [];
+    private currentThinkingText = "";
+    private currentThinkingReasoning = "";
+    private currentThinkingReasoningContent = "";
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -188,12 +192,17 @@ export class AgentChat extends Model {
                 this.sessionTotalDuration = session.totalDuration || 0;
                 if (this.composer) {
                     this.composer.restoreHistory(session.messageHistory || []);
-                    console.log("[AgentChat] loaded history:", (session.messageHistory || []).length, "items, composer has:", this.composer.getHistory().length);
                 }
                 this.titleElement.textContent = session.title;
                 this.updateTokenDisplay();
+                let thinkingIdx = 0;
+                const steps = session.thinkingSteps || [];
                 for (let i = 0; i < session.messages.length; i++) {
                     const msg = session.messages[i];
+                    if (msg.role === "assistant" && msg.toolCalls && msg.toolCalls.length > 0 && thinkingIdx < steps.length) {
+                        this.renderSingleThinkingCard(steps[thinkingIdx]);
+                        thinkingIdx++;
+                    }
                     if (msg.role === "user") {
                         this.appendUserMessage(msg.content);
                     } else if (msg.role === "assistant") {
@@ -350,6 +359,7 @@ export class AgentChat extends Model {
             createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
             messageHistory: this.composer?.getHistory() || [],
+            thinkingSteps: this.thinkingSteps,
         };
         await SessionStore.save(session);
     }
@@ -379,8 +389,14 @@ export class AgentChat extends Model {
         }
         this.messagesContainer.innerHTML = "";
         this.titleElement.textContent = session.title;
+        let thinkingIdx = 0;
+        const steps = session.thinkingSteps || [];
         for (let i = 0; i < session.messages.length; i++) {
             const msg = session.messages[i];
+            if (msg.role === "assistant" && msg.toolCalls && msg.toolCalls.length > 0 && thinkingIdx < steps.length) {
+                this.renderSingleThinkingCard(steps[thinkingIdx]);
+                thinkingIdx++;
+            }
             if (msg.role === "user") {
                 this.appendUserMessage(msg.content);
             } else if (msg.role === "assistant") {
@@ -434,6 +450,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
+        this.thinkingSteps = [];
         this.sessionPromptTokens = 0;
         this.sessionCompletionTokens = 0;
         this.sessionTotalDuration = 0;
@@ -610,7 +627,7 @@ export class AgentChat extends Model {
 
     private appendToken(token: string) {
         if (!this.currentAIElement) {
-            this.clearThinking();
+            this.finishActiveThinking();
             this.currentAIElement = this.createAIMessagePlaceholder();
         }
         this.currentContent += token;
@@ -680,7 +697,10 @@ export class AgentChat extends Model {
     }
 
     private appendThinking(reasoning: string) {
-        this.clearThinking();
+        this.finishActiveThinking();
+        this.currentThinkingText = "";
+        this.currentThinkingReasoning = reasoning;
+        this.currentThinkingReasoningContent = "";
         const L = window.siyuan.languages;
         let text = reasoning;
         let roundLabel = "";
@@ -691,6 +711,8 @@ export class AgentChat extends Model {
             text = L.agentThinkingProcessing || "Processing results...";
             roundLabel = "Continuing...";
         }
+
+        this.currentThinkingText = text;
 
         let detailLines = "";
         if (reasoning === "processing" && this.currentToolCalls.length > 0) {
@@ -713,7 +735,10 @@ export class AgentChat extends Model {
     '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-dot"></span>' +
         '<span class="agent-chat__thinking-text">' + this.escapeHtml(text) + "</span>" +
-        '<span class="agent-chat__thinking-arrow">&#9662;</span>' +
+        '<span class="agent-chat__thinking-arrow">' +
+            '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
+            '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
+        "</span>" +
     "</div>" +
     bodyHTML +
 "</div>";
@@ -729,11 +754,13 @@ export class AgentChat extends Model {
 
         const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
         const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
-        const arrow = el.querySelector(".agent-chat__thinking-arrow") as HTMLElement;
+        const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
+        const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
         header.addEventListener("click", function () {
             body.classList.toggle("fn__none");
             const isHidden = body.classList.contains("fn__none");
-            arrow.innerHTML = isHidden ? "&#9662;" : "&#9652;";
+            expandIcon.classList.toggle("fn__none", !isHidden);
+            contractIcon.classList.toggle("fn__none", isHidden);
         });
         this.insertBeforeAI(el);
         this.scrollToBottom();
@@ -840,12 +867,20 @@ export class AgentChat extends Model {
             return;
         }
         this.flushTokenUpdate();
-        this.clearThinking();
         if (!this.currentContent) {
             this.currentAIElement.remove();
             this.currentAIElement = null;
             this.currentContent = "";
             this.fullContent = "";
+            if (this.currentThinkingText) {
+                const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
+                this.thinkingSteps.push({
+                    reasoning: this.currentThinkingReasoning,
+                    text: this.currentThinkingText,
+                    toolCalls: tc,
+                    reasoningContent: this.currentThinkingReasoningContent,
+                });
+            }
             this.currentToolCalls = [];
             if (this.requestStartTime) {
                 this.sessionTotalDuration += Date.now() - this.requestStartTime;
@@ -853,7 +888,6 @@ export class AgentChat extends Model {
             }
             this.updateTokenDisplay();
             this.setStreaming(false);
-            // line 754 area
             if (!this.hasTitled && this.messages.length >= 2) {
                 this.hasTitled = true;
                 this.generateTitle();
@@ -870,6 +904,15 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
+        if (this.currentThinkingText) {
+            const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
+            this.thinkingSteps.push({
+                reasoning: this.currentThinkingReasoning,
+                text: this.currentThinkingText,
+                toolCalls: tc,
+                reasoningContent: this.currentThinkingReasoningContent,
+            });
+        }
         this.currentToolCalls = [];
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
@@ -1128,6 +1171,49 @@ export class AgentChat extends Model {
         }
     }
 
+    private renderSingleThinkingCard(step: {reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}) {
+        let detail = "";
+        if (step.toolCalls.length > 0) {
+            detail += '<div class="agent-chat__thinking-summary">Tool calls:</div>';
+            for (let j = 0; j < step.toolCalls.length; j++) {
+                const tc = step.toolCalls[j];
+                detail += '<div class="agent-chat__thinking-item">' + this.escapeHtml(tc.name + (tc.result ? " \u2713" : " \u25CC")) + "</div>";
+            }
+        }
+        if (step.reasoningContent) {
+            detail += '<div class="agent-chat__thinking-round">Reasoning:</div>';
+            detail += '<div>' + this.escapeHtml(step.reasoningContent) + "</div>";
+        }
+
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--thinking agent-chat__msg--thinking-done";
+        el.innerHTML = '<div class="agent-chat__thinking-card">' +
+    '<div class="agent-chat__thinking-header">' +
+        '<span class="agent-chat__thinking-dot fn__none"></span>' +
+        '<span class="agent-chat__thinking-text">' + this.escapeHtml(step.text) + "</span>" +
+        '<span class="agent-chat__thinking-arrow">' +
+            '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
+            '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
+        "</span>" +
+    "</div>" +
+    '<div class="agent-chat__thinking-body fn__none">' +
+        detail +
+    "</div>" +
+"</div>";
+
+        const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
+        const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
+        const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
+        const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
+        header.addEventListener("click", function () {
+            body.classList.toggle("fn__none");
+            const isHidden = body.classList.contains("fn__none");
+            expandIcon.classList.toggle("fn__none", !isHidden);
+            contractIcon.classList.toggle("fn__none", isHidden);
+        });
+        this.messagesContainer.appendChild(el);
+    }
+
     private updateTokenDisplay() {
         if (!this.tokenDisplayEl) {
             return;
@@ -1157,6 +1243,22 @@ export class AgentChat extends Model {
         const items = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking");
         for (let i = 0; i < items.length; i++) {
             items[i].remove();
+        }
+    }
+
+    private finishActiveThinking() {
+        const items = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking");
+        for (let i = 0; i < items.length; i++) {
+            const el = items[i] as HTMLElement;
+            el.classList.add("agent-chat__msg--thinking-done");
+            const dot = el.querySelector(".agent-chat__thinking-dot");
+            if (dot) { dot.classList.add("fn__none"); }
+            const textEl = el.querySelector(".agent-chat__thinking-text");
+            if (textEl) {
+                const raw = textEl.textContent || "";
+                if (raw.indexOf("分析") >= 0) { textEl.textContent = raw.replace("正在分析", "已分析"); }
+                else if (raw.indexOf("处理") >= 0) { textEl.textContent = raw.replace("正在处理", "已处理"); }
+            }
         }
     }
 

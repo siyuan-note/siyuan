@@ -58,9 +58,7 @@ type OpenAI struct {
 	APIUserAgent        string  `json:"apiUserAgent"`
 	APIProvider         string  `json:"apiProvider"` // OpenAI, Azure
 	APIVersion          string  `json:"apiVersion"`  // Azure API version
-	EmbeddingModel      string  `json:"embeddingModel"`
-	EmbeddingBaseURL    string  `json:"embeddingBaseURL"`
-	EmbeddingAPIKey     string  `json:"embeddingAPIKey"`
+	Type                string  `json:"type,omitempty"`      // empty or "chat" = chat model, "embedding" = embedding model
 	AgentTimeout        int     `json:"agentTimeout"`        // total session timeout, seconds, 0 = no limit
 	AgentConfirmTimeout int     `json:"agentConfirmTimeout"` // confirmation timeout, seconds
 	AgentMaxRetries     int     `json:"agentMaxRetries"`     // max API retry attempts on failure
@@ -122,14 +120,19 @@ func NewAI() *AI {
 	if userAgent := os.Getenv("SIYUAN_OPENAI_API_USER_AGENT"); "" != userAgent {
 		openAI.APIUserAgent = userAgent
 	}
-	if embeddingBaseURL := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != embeddingBaseURL {
-		openAI.EmbeddingBaseURL = embeddingBaseURL
-	}
-	if embeddingAPIKey := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != embeddingAPIKey {
-		openAI.EmbeddingAPIKey = embeddingAPIKey
-	}
-	if embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != embeddingModel {
-		openAI.EmbeddingModel = embeddingModel
+	embeddingAPIKey := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY")
+	embeddingBaseURL := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL")
+	embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL")
+	var providers []*OpenAI
+	if "" != embeddingAPIKey && "" != embeddingBaseURL && "" != embeddingModel {
+		providers = append(providers, &OpenAI{
+			APIKey:     embeddingAPIKey,
+			APITimeout: 30,
+			APIBaseURL: embeddingBaseURL,
+			APIModel:   embeddingModel,
+			Type:       "embedding",
+			Enabled:    &[]bool{true}[0],
+		})
 	}
 	if agentTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_TIMEOUT"); "" != agentTimeout {
 		if v, err := strconv.Atoi(agentTimeout); err == nil {
@@ -146,7 +149,7 @@ func NewAI() *AI {
 			openAI.AgentMaxRetries = v
 		}
 	}
-	return &AI{OpenAI: openAI}
+	return &AI{OpenAI: openAI, Providers: providers}
 }
 
 func (p *OpenAI) IsEnabled() bool {
@@ -183,4 +186,16 @@ func (ai *AI) GetProvider(model string) *OpenAI {
 		}
 	}
 	return ai.OpenAI
+}
+
+func (ai *AI) GetEmbeddingProvider() *OpenAI {
+	for _, p := range ai.Providers {
+		if p != nil && p.Type == "embedding" {
+			return p
+		}
+	}
+	if ai.OpenAI != nil && ai.OpenAI.Type == "embedding" {
+		return ai.OpenAI
+	}
+	return nil
 }

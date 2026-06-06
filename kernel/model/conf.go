@@ -595,12 +595,12 @@ func InitConf() {
 			Conf.AI.OpenAI.APIMaxContexts)
 	}
 
-	if "" != Conf.AI.OpenAI.EmbeddingAPIKey {
+	if embeddingProvider := Conf.AI.GetEmbeddingProvider(); embeddingProvider != nil {
 		logging.LogInfof("embedding API enabled\n"+
 			"    baseURL=%s\n"+
 			"    model=%s",
-			Conf.AI.OpenAI.EmbeddingBaseURL,
-			Conf.AI.OpenAI.EmbeddingModel)
+			embeddingProvider.APIBaseURL,
+			embeddingProvider.APIModel)
 	}
 
 	Conf.ReadOnly = util.ReadOnly

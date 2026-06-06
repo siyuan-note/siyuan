@@ -212,7 +212,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                     return true;
                 }
                 if (event.key === "ArrowUp" && !suggestionMenu) {
-                    const isEmpty = _view.state.doc.textContent.trim() === "";
+                    const isEmpty = _view.state.doc.childCount === 1 &&
+                        _view.state.doc.firstChild?.childCount === 0;
                     if (isEmpty && history.length > 0) {
                         event.preventDefault();
                         if (historyIdx === -1) { historyIdx = history.length - 1; }

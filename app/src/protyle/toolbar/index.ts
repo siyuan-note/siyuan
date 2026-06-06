@@ -1899,6 +1899,7 @@ export class Toolbar {
                     highlightRender(nodeElement);
                 }
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                nodeElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 doOperations.push({
                     id,
                     data: nodeElement.outerHTML,

@@ -1178,6 +1178,7 @@ export const turnsIntoTransaction = (options: {
                 if (foldData && foldData.doOperations?.length > 0) {
                     doOperations.push(...foldData.doOperations);
                 }
+                item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 undoOperations.push({
                     action: "update",
                     id,
@@ -1545,6 +1546,7 @@ export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyl
             data: element.outerHTML
         });
         cb(element as HTMLElement);
+        element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         operations.push({
             action: "update",
             id,

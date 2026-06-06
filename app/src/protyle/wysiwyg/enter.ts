@@ -284,6 +284,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         if (item.dataset.nodeId === id) {
             blockElement.before(item);
             blockElement.remove();
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             doOperation.push({
                 action: "update",
                 data: item.outerHTML,
@@ -485,6 +486,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                 updateListOrder(listItemElement.parentElement);
             }
             if (listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                listItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 transaction(protyle, [{
                     action: "update",
                     data: listItemElement.outerHTML,
@@ -573,6 +575,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         updateListOrder(listItemElement.parentElement);
     }
     if (listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        listItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         transaction(protyle, [{
             action: "update",
             id: listItemElement.getAttribute("data-node-id"),

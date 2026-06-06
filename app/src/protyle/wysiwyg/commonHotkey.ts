@@ -388,6 +388,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                 });
                 nextElement.setAttribute("data-marker", starIndex + ".");
                 nextElement.querySelector(".protyle-action--order").textContent = starIndex + ".";
+                nextElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 doOperations.push({
                     action: "update",
                     data: nextElement.outerHTML,

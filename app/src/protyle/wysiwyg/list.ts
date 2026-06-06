@@ -288,6 +288,7 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
                     const count = index + 1 + ".";
                     item.setAttribute("data-marker", count);
                     item.querySelector(".protyle-action--order").textContent = count;
+                    item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                     doOperations.push({
                         action: "update",
                         id: itemId,
@@ -682,6 +683,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             item.setAttribute("data-marker", "*");
             item.removeAttribute("data-task");
             item.classList.remove("protyle-task--done");
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             doOperations.push({
                 action: "update",
                 id: itemId,
@@ -698,6 +700,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             item.setAttribute("data-subtype", "o");
             item.setAttribute("data-marker", "1.");
             item.removeAttribute("data-task");
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             doOperations.push({
                 action: "update",
                 id: itemId,
@@ -714,6 +717,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             item.setAttribute("data-subtype", "t");
             item.setAttribute("data-marker", "*");
             item.setAttribute("data-task", " ");
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             doOperations.push({
                 action: "update",
                 id: itemId,

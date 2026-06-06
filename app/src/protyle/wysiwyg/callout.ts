@@ -75,6 +75,7 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
             item.querySelector(".callout-title").innerHTML = title ||
                 (textElements[0].value.trim().substring(0, 1).toUpperCase() + textElements[0].value.trim().substring(1).toLowerCase());
             item.querySelector(".callout-icon").innerHTML = dialogCalloutIconElement.innerHTML;
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             doOperations.push({
                 id,
                 data: item.outerHTML,

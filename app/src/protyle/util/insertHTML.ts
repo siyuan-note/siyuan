@@ -362,6 +362,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             range.deleteContents();
         }
         range.insertNode(document.createElement("wbr"));
+        blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         undoOperation.push({
             action: "update",
             id,
@@ -463,6 +464,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         let addId = item.getAttribute("data-node-id");
         const hasParentHeading = item.getAttribute("parent-heading");
         if (addId === id) {
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             doOperation.push({
                 action: "update",
                 data: item.outerHTML,

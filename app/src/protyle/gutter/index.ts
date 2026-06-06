@@ -2326,6 +2326,7 @@ export class Gutter {
         const undoOperations: IOperation[] = [];
         const operations: IOperation[] = [];
         nodeElements.forEach((e) => {
+            e.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             undoOperations.push({
                 action: "update",
                 id: e.getAttribute("data-node-id"),
@@ -2334,6 +2335,7 @@ export class Gutter {
         });
         inputElement.addEventListener(inputElement.type === "number" ? "blur" : "change", () => {
             nodeElements.forEach((e: HTMLElement) => {
+                e.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 operations.push({
                     action: "update",
                     id: e.getAttribute("data-node-id"),

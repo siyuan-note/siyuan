@@ -837,6 +837,7 @@ ${genHintItemHTML(item)}
                     }
                     nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);
+                    nodeElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                     nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${newId}"]`);
                     // https://github.com/siyuan-note/siyuan/issues/6864
                     if (nodeElement.getAttribute("data-type") === "NodeTable") {

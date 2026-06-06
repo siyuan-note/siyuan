@@ -578,6 +578,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         // extractContents 内容过多时需要进行滚动条重置，否则位置会错位
         protyle.contentElement.scrollTop = scroll;
         protyle.scroll.lastScrollTop = scroll - 1;
+        previousLastElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         doOperations.push({
             action: "update",
             data: previousLastElement.outerHTML,
@@ -650,6 +651,8 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
         if (listElement.getAttribute("data-subtype") === "o") {
             updateListOrder(listElement);
         }
+        listElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        previousLastElement.parentElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         transaction(protyle, [{
             action: "update",
             id: listElement.getAttribute("data-node-id"),

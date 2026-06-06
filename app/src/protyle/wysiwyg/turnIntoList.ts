@@ -2,6 +2,7 @@ import {transaction, updateTransaction} from "./transaction";
 import {focusByWbr} from "../util/selection";
 import * as dayjs from "dayjs";
 import {decodeHTML, escapeAttr} from "../../util/escape";
+import {Constants} from "../../constants";
 
 export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
     const html = decodeHTML(editElement.innerHTML);
@@ -52,6 +53,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
             const liItemId = Lute.NewNodeID();
             const oldHTML = blockElement.outerHTML;
             editElement.innerHTML = html.substring(contextStartIndex);
+            blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             transaction(protyle, [{
                 action: "update",
                 id,
@@ -98,6 +100,7 @@ export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElemen
         const oldHTML = blockElement.outerHTML;
         const marker = editElement.innerHTML.substring(0, 1);
         editElement.innerHTML = editElement.innerHTML.substring(2);
+        blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         transaction(protyle, [{
             action: "update",
             id,

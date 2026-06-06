@@ -6,6 +6,7 @@ const SESSIONS_INDEX = SESSIONS_DIR + "index.json";
 interface SessionIndexItem {
     id: string;
     title: string;
+    model?: string;
     createdAt: number;
     updatedAt: number;
 }
@@ -13,6 +14,7 @@ interface SessionIndexItem {
 export interface AgentSession {
     id: string;
     title: string;
+    model?: string;
     messages: Array<{
         role: string;
         content: string;
@@ -97,6 +99,7 @@ async function rebuildIndex(): Promise<void> {
                 list.push({
                     id: id,
                     title: session.title || "AI Agent",
+                    model: session.model || "",
                     createdAt: session.createdAt || entries[i].updated || Date.now(),
                     updatedAt: session.updatedAt || entries[i].updated || Date.now(),
                 });
@@ -136,17 +139,18 @@ export const SessionStore = {
         await writeJsonFile(SESSIONS_DIR + session.id + ".json", session);
 
         const list = await this.list();
-        let found = false;
+        let foundIdx = -1;
         for (let i = 0; i < list.length; i++) {
             if (list[i].id === session.id) {
                 list[i].title = session.title;
                 list[i].updatedAt = session.updatedAt;
-                found = true;
+                list[i].model = session.model;
+                foundIdx = i;
                 break;
             }
         }
-        if (!found) {
-            list.unshift({id: session.id, title: session.title, createdAt: session.createdAt, updatedAt: session.updatedAt});
+        if (foundIdx < 0) {
+            list.unshift({id: session.id, title: session.title, model: session.model, createdAt: session.createdAt, updatedAt: session.updatedAt});
         }
         await writeIndex(list);
     },

@@ -219,6 +219,7 @@ export class AgentChat extends Model {
                 this.sessionPromptTokens = session.promptTokens || 0;
                 this.sessionCompletionTokens = session.completionTokens || 0;
                 this.sessionTotalDuration = session.totalDuration || 0;
+                if (session.model) { this.modelSelect.value = session.model; }
                 if (this.composer) {
                     this.composer.restoreHistory(session.messageHistory || []);
                 }
@@ -372,6 +373,7 @@ export class AgentChat extends Model {
             updatedAt: Date.now(),
             messageHistory: this.composer?.getHistory() || [],
             thinkingSteps: this.thinkingSteps,
+            model: this.getSelectedModel(),
         };
         await SessionStore.save(session);
     }
@@ -398,6 +400,7 @@ export class AgentChat extends Model {
         this.sessionPromptTokens = session.promptTokens || 0;
         this.sessionCompletionTokens = session.completionTokens || 0;
         this.sessionTotalDuration = session.totalDuration || 0;
+        if (session.model) { this.modelSelect.value = session.model; }
         if (this.tokenDisplayEl) {
             this.updateTokenDisplay();
         }

@@ -245,9 +245,12 @@ func Serve(fastMode bool, cookieKey string) {
 	}()
 
 	httpHandler := ginServer.Handler()
+	p := &http.Protocols{}
+	p.SetHTTP1(true)
+	p.SetUnencryptedHTTP2(true)
 	util.HttpServer = &http.Server{
 		Handler:   httpHandler,
-		Protocols: &http.Protocols{UnencryptedHTTP2: true},
+		Protocols: p,
 	}
 
 	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {

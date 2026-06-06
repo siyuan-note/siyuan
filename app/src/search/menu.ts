@@ -375,7 +375,7 @@ export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => voi
             cb();
         }
     }).element);
-    if (window.siyuan.config.ai.openAI.embeddingAPIKey) {
+    if (window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconSparkles",
             label: window.siyuan.languages.semanticSearch,

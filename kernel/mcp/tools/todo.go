@@ -104,17 +104,17 @@ func formatTodoResult(todos []model.AgentTodoItem) string {
 	}
 
 	var sb strings.Builder
-	sb.WriteString("📋 Todo List\n\n")
+	sb.WriteString("Todo List\n\n")
 	for _, t := range todos {
 		switch t.Status {
 		case "completed":
-			sb.WriteString(fmt.Sprintf("✅ %s\n", t.Content))
+			sb.WriteString(fmt.Sprintf("- [x] %s\n", t.Content))
 		case "in_progress":
-			sb.WriteString(fmt.Sprintf("🔄 %s\n", t.Content))
+			sb.WriteString(fmt.Sprintf("- [/] %s\n", t.Content))
 		case "cancelled":
-			sb.WriteString(fmt.Sprintf("❌ %s\n", t.Content))
+			sb.WriteString(fmt.Sprintf("- [-] %s\n", t.Content))
 		default:
-			sb.WriteString(fmt.Sprintf("○ %s\n", t.Content))
+			sb.WriteString(fmt.Sprintf("- [ ] %s\n", t.Content))
 		}
 	}
 	return sb.String()

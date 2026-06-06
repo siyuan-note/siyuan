@@ -426,34 +426,31 @@ func isEmbeddingEnabled() bool {
 }
 
 func embeddingKey() string {
-	if "" != Conf.AI.OpenAI.EmbeddingAPIKey {
-		return Conf.AI.OpenAI.EmbeddingAPIKey
+	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIKey {
+		return p.APIKey
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != v {
-		Conf.AI.OpenAI.EmbeddingAPIKey = v
 		return v
 	}
 	return ""
 }
 
 func embeddingBaseURL() string {
-	if "" != Conf.AI.OpenAI.EmbeddingBaseURL {
-		return Conf.AI.OpenAI.EmbeddingBaseURL
+	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIBaseURL {
+		return p.APIBaseURL
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != v {
-		Conf.AI.OpenAI.EmbeddingBaseURL = v
 		return v
 	}
-	return Conf.AI.OpenAI.EmbeddingBaseURL
+	return ""
 }
 
 func embeddingModel() string {
-	if "" != Conf.AI.OpenAI.EmbeddingModel {
-		return Conf.AI.OpenAI.EmbeddingModel
+	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIModel {
+		return p.APIModel
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != v {
-		Conf.AI.OpenAI.EmbeddingModel = v
 		return v
 	}
-	return Conf.AI.OpenAI.EmbeddingModel
+	return ""
 }

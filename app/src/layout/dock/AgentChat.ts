@@ -6,6 +6,7 @@ import {mountComposer} from "./AgentComposer";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
+import {setPosition} from "../../util/setPosition";
 
 interface IAgentMessage {
     role: "user" | "assistant";
@@ -286,6 +287,9 @@ export class AgentChat extends Model {
         });
 
         this.parent.panelElement.appendChild(this.sessionPopup);
+
+        const btnRect = this.sessionMenuBtn.getBoundingClientRect();
+        setPosition(this.sessionPopup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
 
         const self2 = this;
         this.sessionPopup.addEventListener("click", function (e: MouseEvent) {
@@ -853,9 +857,10 @@ export class AgentChat extends Model {
             }
         }
         // Remove all AI/tool/thinking/error DOM after last user message
-        const msgs = this.messagesContainer.querySelectorAll(".agent-chat__msg--ai, .agent-chat__msg--tool, .agent-chat__msg--thinking, .agent-chat__msg--error, .agent-chat__msg--confirm, .agent-chat__msg--question");
-        for (let i = msgs.length - 1; i >= 0; i--) {
-            msgs[i].remove();
+        const all = this.messagesContainer.querySelectorAll(".agent-chat__msg");
+        for (let i = all.length - 1; i >= 0; i--) {
+            if (all[i].classList.contains("agent-chat__msg--user")) { break; }
+            all[i].remove();
         }
         this.currentAIElement = null;
         this.currentContent = "";

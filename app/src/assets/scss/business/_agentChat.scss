@@ -554,16 +554,8 @@
 
 .agent-session-popup {
     position: fixed;
-    top: 40px;
-    right: 8px;
     width: 280px;
     max-height: 300px;
-
-    .b3-menu__label {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
 }
 
 .agent-session-popup__actions {

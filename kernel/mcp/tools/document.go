@@ -27,7 +27,7 @@ import (
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations for SiYuan notebooks.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (hPath, e.g. /folder/doc), title. Optional: markdown.\n- list: List documents at an hPath. Requires: notebook. Optional: path (hPath, default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/hPath. Requires: id, notebook, path (target hPath, e.g. /folder or / for root).\n- duplicate: Duplicate a document by ID. Requires: id.\n- search_docs: Search documents by keyword. Requires: keyword.",
+	Description: "Document operations for SiYuan.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (hPath, e.g. /folder/doc), title. Optional: markdown.\n- list: List documents at an hPath. Requires: notebook. Optional: path (hPath, default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/hPath. Requires: id, notebook, path (target hPath, e.g. /folder or / for root).\n- duplicate: Duplicate a document by ID. Requires: id.\n- search_docs: Search documents by keyword. Requires: keyword.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

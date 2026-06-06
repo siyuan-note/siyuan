@@ -159,15 +159,29 @@ type Reference struct {
 	Title string `json:"title"`
 }
 
+type checkpointThinkingStep struct {
+	Reasoning        string               `json:"reasoning"`
+	Text             string               `json:"text"`
+	ToolCalls        []checkpointBriefTC  `json:"toolCalls"`
+	ReasoningContent string               `json:"reasoningContent"`
+}
+
+type checkpointBriefTC struct {
+	Name   string  `json:"name"`
+	Result string  `json:"result,omitempty"`
+}
+
 type agentCheckpoint struct {
-	ID               string         `json:"id"`
-	Title            string         `json:"title"`
-	Messages         []AgentMessage `json:"messages"`
-	PromptTokens     int            `json:"promptTokens"`
-	CompletionTokens int            `json:"completionTokens"`
-	TotalDuration    int64          `json:"totalDuration"`
-	CreatedAt        int64          `json:"createdAt"`
-	UpdatedAt        int64          `json:"updatedAt"`
+	ID               string                    `json:"id"`
+	Title            string                    `json:"title"`
+	Messages         []AgentMessage            `json:"messages"`
+	PromptTokens     int                       `json:"promptTokens"`
+	CompletionTokens int                       `json:"completionTokens"`
+	TotalDuration    int64                     `json:"totalDuration"`
+	CreatedAt        int64                     `json:"createdAt"`
+	UpdatedAt        int64                     `json:"updatedAt"`
+	MessageHistory   []string                  `json:"messageHistory,omitempty"`
+	ThinkingSteps    []checkpointThinkingStep  `json:"thinkingSteps,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, history []UserMessage, language string, references []Reference, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
@@ -655,6 +669,12 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		}
 		if old.CreatedAt > 0 {
 			cp.CreatedAt = old.CreatedAt
+		}
+		if len(old.MessageHistory) > 0 {
+			cp.MessageHistory = old.MessageHistory
+		}
+		if len(old.ThinkingSteps) > 0 {
+			cp.ThinkingSteps = old.ThinkingSteps
 		}
 	}
 

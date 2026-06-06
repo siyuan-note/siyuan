@@ -186,6 +186,7 @@ export class AgentChat extends Model {
                 this.sessionCreatedAt = session.createdAt || Date.now();
                 this.sessionTitle = session.title;
                 this.messages = session.messages as IAgentMessage[];
+                this.thinkingSteps = session.thinkingSteps || [];
                 this.hasTitled = true;
                 this.sessionPromptTokens = session.promptTokens || 0;
                 this.sessionCompletionTokens = session.completionTokens || 0;
@@ -195,24 +196,7 @@ export class AgentChat extends Model {
                 }
                 this.titleElement.textContent = session.title;
                 this.updateTokenDisplay();
-                let thinkingIdx = 0;
-                const steps = session.thinkingSteps || [];
-                for (let i = 0; i < session.messages.length; i++) {
-                    const msg = session.messages[i];
-                    if (msg.role === "assistant" && msg.toolCalls && msg.toolCalls.length > 0 && thinkingIdx < steps.length) {
-                        this.renderSingleThinkingCard(steps[thinkingIdx]);
-                        thinkingIdx++;
-                    }
-                    if (msg.role === "user") {
-                        this.appendUserMessage(msg.content);
-                    } else if (msg.role === "assistant") {
-                        if (msg.toolCalls && msg.toolCalls.length > 0) {
-                            this.appendPersistedToolCalls(msg.content, msg.toolCalls);
-                        } else {
-                            this.appendPersistedAssistant(msg.content);
-                        }
-                    }
-                }
+                this.renderLoadedSession(session);
                 this.scrollToBottom();
                 return;
             }
@@ -377,6 +361,7 @@ export class AgentChat extends Model {
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
         this.messages = session.messages as IAgentMessage[];
+        this.thinkingSteps = session.thinkingSteps || [];
         this.hasTitled = true;
         this.currentAIElement = null;
         this.currentContent = "";
@@ -389,24 +374,7 @@ export class AgentChat extends Model {
         }
         this.messagesContainer.innerHTML = "";
         this.titleElement.textContent = session.title;
-        let thinkingIdx = 0;
-        const steps = session.thinkingSteps || [];
-        for (let i = 0; i < session.messages.length; i++) {
-            const msg = session.messages[i];
-            if (msg.role === "assistant" && msg.toolCalls && msg.toolCalls.length > 0 && thinkingIdx < steps.length) {
-                this.renderSingleThinkingCard(steps[thinkingIdx]);
-                thinkingIdx++;
-            }
-            if (msg.role === "user") {
-                this.appendUserMessage(msg.content);
-            } else if (msg.role === "assistant") {
-                if (msg.toolCalls && msg.toolCalls.length > 0) {
-                    this.appendPersistedToolCalls(msg.content, msg.toolCalls);
-                } else {
-                    this.appendPersistedAssistant(msg.content);
-                }
-            }
-        }
+        this.renderLoadedSession(session);
         this.scrollToBottom();
     }
 
@@ -431,6 +399,49 @@ export class AgentChat extends Model {
         }
         if (content) {
             this.appendPersistedAssistant(content);
+        }
+    }
+
+    private renderLoadedSession(session: AgentSession) {
+        const messages = session.messages as IAgentMessage[];
+        const steps = session.thinkingSteps || [];
+        const groups: Array<Array<typeof steps[0]>> = [];
+        let cur: Array<typeof steps[0]> = [];
+        for (let s = 0; s < steps.length; s++) {
+            const step = steps[s];
+            if (step.reasoning === "analyzing" && cur.length > 0) {
+                groups.push(cur);
+                cur = [];
+            }
+            cur.push(step);
+        }
+        if (cur.length > 0) {
+            groups.push(cur);
+        }
+        let groupIdx = 0;
+        for (let i = 0; i < messages.length; i++) {
+            const msg = messages[i];
+            if (msg.role === "user") {
+                this.appendUserMessage(msg.content);
+            } else if (msg.role === "assistant") {
+                if (groupIdx < groups.length) {
+                    for (let s = 0; s < groups[groupIdx].length; s++) {
+                        this.renderSingleThinkingCard(groups[groupIdx][s]);
+                    }
+                    groupIdx++;
+                }
+                if (msg.toolCalls && msg.toolCalls.length > 0) {
+                    this.appendPersistedToolCalls(msg.content, msg.toolCalls);
+                } else {
+                    this.appendPersistedAssistant(msg.content);
+                }
+            }
+        }
+        while (groupIdx < groups.length) {
+            for (let s = 0; s < groups[groupIdx].length; s++) {
+                this.renderSingleThinkingCard(groups[groupIdx][s]);
+            }
+            groupIdx++;
         }
     }
 
@@ -522,6 +533,11 @@ export class AgentChat extends Model {
         this.messages.push({role: "user", content: text});
         this.appendUserMessage(text);
         if (this.composer) { this.composer.pushHistory(text); }
+
+        if (!this.hasTitled && this.messages.length === 1) {
+            this.hasTitled = true;
+            this.generateTitle();
+        }
 
         this.requestStartTime = Date.now();
 
@@ -872,6 +888,20 @@ export class AgentChat extends Model {
 
     private finishResponse() {
         if (!this.currentAIElement) {
+            if (this.currentToolCalls.length === 0) {
+                this.setStreaming(false);
+                return;
+            }
+            this.flushThinkingStep();
+            this.messages.push({role: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
+            this.currentToolCalls = [];
+            if (this.requestStartTime) {
+                this.sessionTotalDuration += Date.now() - this.requestStartTime;
+                this.requestStartTime = 0;
+            }
+            this.updateTokenDisplay();
+            this.setStreaming(false);
+            this.saveSession();
             return;
         }
         this.flushTokenUpdate();
@@ -880,6 +910,10 @@ export class AgentChat extends Model {
             this.currentAIElement = null;
             this.currentContent = "";
             this.fullContent = "";
+            if (this.currentToolCalls.length > 0) {
+                this.flushThinkingStep();
+                this.messages.push({role: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
+            }
             this.currentToolCalls = [];
             if (this.requestStartTime) {
                 this.sessionTotalDuration += Date.now() - this.requestStartTime;
@@ -887,10 +921,6 @@ export class AgentChat extends Model {
             }
             this.updateTokenDisplay();
             this.setStreaming(false);
-            if (!this.hasTitled && this.messages.length >= 2) {
-                this.hasTitled = true;
-                this.generateTitle();
-            }
             this.saveSession();
             return;
         }
@@ -903,15 +933,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
-        if (this.currentThinkingText) {
-            const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
-            this.thinkingSteps.push({
-                reasoning: this.currentThinkingReasoning,
-                text: this.currentThinkingText,
-                toolCalls: tc,
-                reasoningContent: this.currentThinkingReasoningContent,
-            });
-        }
+        this.flushThinkingStep();
         this.currentToolCalls = [];
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
@@ -920,11 +942,21 @@ export class AgentChat extends Model {
             this.updateTokenDisplay();
             this.setStreaming(false);
 
-        if (!this.hasTitled && this.messages.length >= 2) {
-            this.hasTitled = true;
-            this.generateTitle();
-        }
         this.saveSession();
+    }
+
+    private flushThinkingStep() {
+        if (!this.currentThinkingText) {
+            return;
+        }
+        const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
+        this.thinkingSteps.push({
+            reasoning: this.currentThinkingReasoning,
+            text: this.currentThinkingText,
+            toolCalls: tc,
+            reasoningContent: this.currentThinkingReasoningContent,
+        });
+        this.currentThinkingText = "";
     }
 
     private generateTitle() {

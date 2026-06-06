@@ -49,6 +49,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/soheilhy/cmux"
+
 	"golang.org/x/net/webdav"
 )
 
@@ -244,8 +245,12 @@ func Serve(fastMode bool, cookieKey string) {
 	}()
 
 	httpHandler := ginServer.Handler()
+	p := &http.Protocols{}
+	p.SetHTTP1(true)
+	p.SetUnencryptedHTTP2(true)
 	util.HttpServer = &http.Server{
-		Handler: httpHandler,
+		Handler:   httpHandler,
+		Protocols: p,
 	}
 
 	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {

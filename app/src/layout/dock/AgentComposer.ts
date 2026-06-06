@@ -21,6 +21,9 @@ interface ComposerHandle {
     getSendData: () => {text: string; references: {id: string; title: string}[]};
     clear: () => void;
     pushHistory: (text: string) => void;
+    getHistory: () => string[];
+    clearHistory: () => void;
+    restoreHistory: (h: string[]) => void;
 }
 
 export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHandle {
@@ -259,5 +262,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
             if (history.length > 50) { history.shift(); }
             historyIdx = -1;
         },
+        getHistory: function () { return history.slice(); },
+        clearHistory: function () { history.length = 0; historyIdx = -1; },
+        restoreHistory: function (h: string[]) { history.length = 0; history.push(...h); historyIdx = -1; },
     };
 }

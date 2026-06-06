@@ -22,6 +22,7 @@ import (
 	"io"
 	"os/exec"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -37,10 +38,27 @@ const (
 type Connection struct {
 	ServerName string
 	Session    *mcp.ClientSession
-	Cmd        *exec.Cmd // non-nil for stdio servers
+	Cmd        *exec.Cmd
 }
 
-func ConnectServers(servers []conf.MCPServer) []Connection {
+var (
+	mcpOnce  sync.Once
+	mcpConns []Connection
+)
+
+func EnsureMCPConnected(servers []conf.MCPServer) {
+	mcpOnce.Do(func() {
+		mcpConns = connectServers(servers)
+	})
+}
+
+func DisconnectMCP() {
+	closeConnections(mcpConns)
+	mcpOnce = sync.Once{}
+	mcpConns = nil
+}
+
+func connectServers(servers []conf.MCPServer) []Connection {
 	var connections []Connection
 
 	for _, server := range servers {
@@ -76,12 +94,12 @@ func ConnectServers(servers []conf.MCPServer) []Connection {
 				desc = "[MCP:" + server.Name + "] " + desc
 			}
 
-			tools.Registry[name] = &tools.Tool{
+			tools.SetTool(name, &tools.Tool{
 				Name:        name,
 				Description: desc,
 				InputSchema: convertMCPSchema(tool.InputSchema),
 				Handler:     mcpToolHandler(session, tool.Name),
-			}
+			})
 			registered++
 		}
 
@@ -96,7 +114,7 @@ func ConnectServers(servers []conf.MCPServer) []Connection {
 	return connections
 }
 
-func CloseConnections(connections []Connection) {
+func closeConnections(connections []Connection) {
 	for _, conn := range connections {
 		if conn.Session != nil {
 			conn.Session.Close()

@@ -114,6 +114,13 @@ func AnswerQuestion(id string, answers []string) {
 	}
 }
 
+func sendEvent(ch chan<- AgentEvent, ev AgentEvent) {
+	select {
+	case ch <- ev:
+	default:
+	}
+}
+
 type AgentEvent struct {
 	Type             string
 	Token            string
@@ -170,15 +177,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		defer close(ch)
 		defer func() {
 			if r := recover(); r != nil {
-				ch <- AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)}
+				sendEvent(ch, AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)})
 			}
 		}()
 
-		var mcpConns []mcpclient.Connection
 		if kernelModel.Conf.AI.MCP != nil {
-			mcpConns = mcpclient.ConnectServers(kernelModel.Conf.AI.MCP.Servers)
+			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.MCP.Servers)
 		}
-		defer mcpclient.CloseConnections(mcpConns)
 
 		tools := convertMCPToolsToOpenAI()
 		messages := buildMessages(history, language, references)
@@ -201,9 +206,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			}
 
 			if round == 0 {
-				ch <- AgentEvent{Type: "thinking", Reasoning: "analyzing"}
+				sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "analyzing"})
 			} else {
-				ch <- AgentEvent{Type: "thinking", Reasoning: "processing"}
+				sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "processing"})
 			}
 
 			req := openai.ChatCompletionRequest{
@@ -225,10 +230,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 					messages = compactMessages(messages, keepTurns)
 					compactCount++
-					ch <- AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)}
+					sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)})
 					continue
 				}
-				ch <- AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()}
+				sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
 				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 				return
 			}
@@ -242,7 +247,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					if recvErr == io.EOF {
 						break
 					}
-					ch <- AgentEvent{Type: "error", Error: "Stream error: " + recvErr.Error()}
+					sendEvent(ch, AgentEvent{Type: "error", Error: "Stream error: " + recvErr.Error()})
 					return
 				}
 
@@ -255,7 +260,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				for _, choice := range resp.Choices {
 					if choice.Delta.Content != "" {
 						contentBuilder.WriteString(choice.Delta.Content)
-						ch <- AgentEvent{Type: "content", Token: choice.Delta.Content}
+						sendEvent(ch, AgentEvent{Type: "content", Token: choice.Delta.Content})
 					}
 
 					for _, tcd := range choice.Delta.ToolCalls {
@@ -310,15 +315,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						action, _ = a.(string)
 					}
 
-					ch <- AgentEvent{
+					sendEvent(ch, AgentEvent{
 						Type:      "tool_call",
 						Name:      tc.Function.Name,
 						Arguments: args,
-					}
+					})
 
 					if needsConfirm(tc.Function.Name, action, alwaysAllow) {
 						confirmID := tc.ID
-						ch <- AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID}
+						sendEvent(ch, AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID})
 						ch2 := make(chan confirmResult, 1)
 						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = ch2
@@ -343,13 +348,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							confirmChannelsMu.Unlock()
 							timedOut = true
 							rejectionMsg = "Confirmation timed out, operation skipped automatically"
-							ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg}
+							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg})
 						}
 
 						if timedOut || !result.approved {
 							if rejectionMsg == "" {
 								rejectionMsg = "User rejected this operation"
-								ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg}
+								sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg})
 							}
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:       openai.ChatMessageRoleTool,
@@ -366,22 +371,21 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						}
 					}
 
-					setCurrentTodoSession(sessionID)
 					var resultStr string
 					if tc.Function.Name == "question" {
 						resultStr = handleQuestion(tc.Function.Arguments, ch, 5*time.Minute)
 						doomLoop = doomLoopTracker{}
 					} else {
-						resultStr = executeTool(tc)
+						resultStr = executeTool(tc, sessionID)
 					}
 
 					resultStr = util.TruncateToolOutput(resultStr, sessionID)
 
-					ch <- AgentEvent{
+					sendEvent(ch, AgentEvent{
 						Type:   "tool_result",
 						Name:   tc.Function.Name,
 						Result: resultStr,
-					}
+					})
 
 					messages = append(messages, openai.ChatCompletionMessage{
 						Role:       openai.ChatMessageRoleTool,
@@ -425,14 +429,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				Content: content,
 			})
 
-			ch <- AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion}
-			ch <- AgentEvent{Type: "done"}
+			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion})
+			sendEvent(ch, AgentEvent{Type: "done"})
 			return
 		}
 
-		ch <- AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion}
+		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
-		ch <- AgentEvent{Type: "done"}
+		sendEvent(ch, AgentEvent{Type: "done"})
 	}()
 
 	return ch
@@ -500,11 +504,11 @@ func handleQuestion(argsJSON string, ch chan<- AgentEvent, timeout time.Duration
 		questionID = questionID[:10]
 	}
 
-	ch <- AgentEvent{
+	sendEvent(ch, AgentEvent{
 		Type:       "question",
 		QuestionID: questionID,
 		Arguments:  args,
-	}
+	})
 
 	ch2 := make(chan QuestionAnswer, 1)
 	questionChannelsMu.Lock()
@@ -672,7 +676,7 @@ func createStreamWithRetry(ctx context.Context, client *openai.Client, req opena
 				return nil, ctx.Err()
 			case <-time.After(delay):
 			}
-			ch <- AgentEvent{Type: "retry", RetryAttempt: attempt + 1, RetryMax: maxRetries}
+			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt + 1, RetryMax: maxRetries})
 		}
 
 		stream, err := client.CreateChatCompletionStream(ctx, req)

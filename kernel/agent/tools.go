@@ -25,8 +25,9 @@ import (
 )
 
 func convertMCPToolsToOpenAI() []openai.Tool {
-	result := make([]openai.Tool, 0, len(tools.Registry))
-	for _, t := range tools.Registry {
+	allTools := tools.GetAllTools()
+	result := make([]openai.Tool, 0, len(allTools))
+	for _, t := range allTools {
 		result = append(result, openai.Tool{
 			Type: openai.ToolTypeFunction,
 			Function: &openai.FunctionDefinition{
@@ -39,8 +40,20 @@ func convertMCPToolsToOpenAI() []openai.Tool {
 	return result
 }
 
-func setCurrentTodoSession(sessionID string) {
-	tools.SetCurrentTodoSessionID(sessionID)
+func executeTool(tc openai.ToolCall, sessionID string) string {
+	t := tools.GetTool(tc.Function.Name)
+	if t == nil {
+		return "unknown tool: " + tc.Function.Name
+	}
+
+	args := parseToolArgs(tc.Function.Arguments)
+	args["_sessionID"] = sessionID
+	result, err := t.Handler(args)
+	if err != nil {
+		return "tool execution error: " + err.Error()
+	}
+
+	return resultToString(result)
 }
 
 func convertSchema(schema tools.ToolSchema) any {
@@ -95,21 +108,6 @@ func convertProperty(prop tools.Property) map[string]any {
 		p["required"] = reqVals
 	}
 	return p
-}
-
-func executeTool(toolCall openai.ToolCall) string {
-	t, ok := tools.Registry[toolCall.Function.Name]
-	if !ok {
-		return "unknown tool: " + toolCall.Function.Name
-	}
-
-	args := parseToolArgs(toolCall.Function.Arguments)
-	result, err := t.Handler(args)
-	if err != nil {
-		return "tool execution error: " + err.Error()
-	}
-
-	return resultToString(result)
 }
 
 func resultToString(result tools.CallToolResult) string {

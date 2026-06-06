@@ -1409,7 +1409,7 @@
   "importCABundleTip": "Importeer de CA-bundel van een ander SiYuan-apparaat. Na import gebruikt dit apparaat dezelfde CA, waardoor clients certificaten van al zulke apparaten vertrouwen",
   "importCABundleSuccess": "CA-bundel geimporteerd; herstarten",
   "about13": "API-token",
-  "about14": "Deze token is nodig voor authenticatie bij API-aanroepen<br>HTTP-header: <code class=\"fn__code\">Authorization: token ${token}</code>",
+  "about14": "Deze token is nodig voor authenticatie bij API-aanroepen<div class=\"fn__hr--small\"></div>HTTP-header: <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "Geen proxy bij Directe verbinding",
   "about18": "Schermvergrendelingswachtwoord instellen bij niet-loopback",
   "desktopMode": "Bureaubladmodus",

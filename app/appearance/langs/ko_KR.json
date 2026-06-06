@@ -1409,7 +1409,7 @@
   "importCABundleTip": "다른 SiYuan 장치에서 CA 번들을 가져옵니다. 가져온 후 이 장치는 동일한 CA를 사용하게 되어 클라이언트가 모든 장치의 인증서를 신뢰할 수 있게 됩니다",
   "importCABundleSuccess": "CA 번들 가져오기에 성공했습니다. 변경 사항을 적용하려면 애플리케이션을 재시작하세요",
   "about13": "API 토큰",
-  "about14": "API를 호출할 때 토큰을 인증해야 합니다<br>HTTP 요청 헤더 <code class=\"fn__code\">Authorization: token ${token}</code>",
+  "about14": "API를 호출할 때 토큰을 인증해야 합니다<div class=\"fn__hr--small\"></div>HTTP 요청 헤더 <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "<code class='fn__code'>직접 연결</code>로 설정하면 프록시를 활성화하지 않습니다",
   "about18": "비 루프백 주소(<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code>)를 사용할 때는 먼저 화면 잠금 비밀번호를 설정하세요",
   "desktopMode": "데스크톱 모드",

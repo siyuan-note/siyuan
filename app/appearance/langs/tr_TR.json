@@ -1409,7 +1409,7 @@
   "importCABundleTip": "CA sertifika paketini başka bir SiYuan cihazından içe aktarın. İçe aktarıldıktan sonra bu cihaz aynı CA'yı kullanacak ve istemcilerin tüm cihazların sertifikalarına güvenmesine izin verecektir",
   "importCABundleSuccess": "CA sertifika paketi başarıyla içe aktarıldı, değişiklikleri uygulamak için lütfen uygulamayı yeniden başlatın",
   "about13": "API anahtarı",
-  "about14": "API çağrılarında kimlik doğrulaması gerekir<br>HTTP başlığı: <code class=\"fn__code\">Authorization: token ${token}</code>",
+  "about14": "API çağrılarında kimlik doğrulaması gerekir<div class=\"fn__hr--small\"></div>HTTP başlığı: <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "<code class='fn__code'>Doğrudan bağlantı</code> seçiliyse proxy etkinleştirme",
   "about18": "Loopback dışı adres (<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code>) kullanıyorsan önce erişim yetkilendirme kodunu ayarla",
   "desktopMode": "Masaüstü Modu",

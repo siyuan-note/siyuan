@@ -1409,7 +1409,7 @@
   "importCABundleTip": "นำเข้าแพ็คเกจ CA จากอุปกรณ์ SiYuan อื่น หลังจากนำเข้าอุปกรณ์นี้จะใช้ CA เดียวกัน ทำให้ไคลเอนต์เชื่อถือใบรับรองจากอุปกรณ์ดังกล่าวทั้งหมด",
   "importCABundleSuccess": "นำเข้าแพ็คเกจ CA สำเร็จ โปรดเริ่มต้นแอปใหม่เพื่อใช้การเปลี่ยนแปลง",
   "about13": "โทเค็น API",
-  "about14": "ต้องใช้โทเค็นนี้ในการรับรองความถูกต้องเมื่อเรียก API<br>ส่วนหัว HTTP: <code class=\"fn__code\">Authorization: token ${token}</code>",
+  "about14": "ต้องใช้โทเค็นนี้ในการรับรองความถูกต้องเมื่อเรียก API<div class=\"fn__hr--small\"></div>ส่วนหัว HTTP: <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "ไม่เปิดใช้งานพร็อกซีเมื่อตั้งค่าเป็น <code class='fn__code'>เชื่อมต่อโดยตรง</code>",
   "about18": "เมื่อใช้ที่อยู่ที่ไม่ใช่ loopback (<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code>) โปรดตั้งรหัสผ่านล็อกหน้าจอก่อน",
   "desktopMode": "เดสก์ท็อป",

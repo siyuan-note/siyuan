@@ -1409,7 +1409,7 @@
   "importCABundleTip": "استيراد حزمة CA من جهاز SiYuan آخر. بعد الاستيراد سيستخدم هذا الجهاز نفس CA، مما يسمح للعملاء بالثقة في شهادات جميع الأجهزة",
   "importCABundleSuccess": "تم استيراد حزمة CA بنجاح، يرجى إعادة تشغيل التطبيق لتطبيق التغييرات",
   "about13": "‫رمز API‬",
-  "about14": "‫ مصادفة الرمز المميز عند استدعاء واجهة برمجة التطبيقات (API)‬<br>‫رأس طلب HTTP هو ‪<code class='fn__code'>Authorization: token ${token}</code>‬‬",
+  "about14": "‫ مصادفة الرمز المميز عند استدعاء واجهة برمجة التطبيقات (API)‬<div class=\"fn__hr--small\"></div>‫رأس طلب HTTP هو ‪<code class='fn__code'>Authorization: token ${token}</code>‬‬",
   "about17": "‫عند الضبط على ‪<code class='fn__code'>اتصال مباشر</code>‬ لن يتم تفعيل الوكيل‬",
   "about18": "‫عند استخدام عنوان غير محلي (‪<code class='fn__code'>127.0.0.1</code>‬/‪<code class='fn__code'>[::1]</code>‬)، يرجى تعيين رمز الإذن بالوصول أولاً‬",
   "desktopMode": "وضع سطح المكتب",

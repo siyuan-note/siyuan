@@ -10,6 +10,7 @@ import {ipcRenderer} from "electron";
 import {sendUnregisterGlobalShortcut} from "../boot/globalEvent/keydown";
 /// #endif
 import {sendGlobalShortcut} from "../boot/globalEvent/keydown";
+import {syncAppMenuShortcuts} from "../boot/globalEvent/commonHotkey";
 
 export const keymap = {
     element: undefined as Element,
@@ -255,6 +256,7 @@ export const keymap = {
                 });
             }
             sendGlobalShortcut(app);
+            syncAppMenuShortcuts();
             /// #endif
         });
     },

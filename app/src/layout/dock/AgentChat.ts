@@ -576,7 +576,6 @@ export class AgentChat extends Model {
                     break;
                 case "tool_call":
                     this.currentToolCalls.push({name: event.name, arguments: event.arguments});
-                    this.appendToolCall(event.name, event.arguments);
                     break;
                 case "confirm":
                     this.appendConfirm(event.name, event.arguments, event.confirmID);
@@ -671,10 +670,6 @@ export class AgentChat extends Model {
                 bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
             }
         }
-    }
-
-    private appendToolCall(_name: string, _args: Record<string, unknown>) {
-        // Tool calls are tracked in currentToolCalls, no DOM needed
     }
 
     private appendToolResult(name: string, result: string) {

@@ -696,6 +696,7 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		return
 	}
 	_ = filelock.WriteFile(path, data)
+	UpdateSessionIndex(sessionID, cp.Title, cp.CreatedAt, cp.UpdatedAt)
 }
 
 func createStreamWithRetry(ctx context.Context, client *openai.Client, req openai.ChatCompletionRequest, maxRetries int, ch chan<- AgentEvent) (*openai.ChatCompletionStream, error) {

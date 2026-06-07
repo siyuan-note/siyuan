@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"sync"
 	"time"
@@ -199,6 +200,90 @@ func agentChatTitle(c *gin.Context) {
 	title := agent.GenerateTitle(client, selectedProvider.APIModel, req.Message)
 	ret := gulu.Ret.NewResult()
 	ret.Data = title
+	c.JSON(http.StatusOK, ret)
+}
+
+type agentSessionsReq struct {
+	Page     int    `json:"page"`
+	PageSize int    `json:"pageSize"`
+	Keyword  string `json:"keyword"`
+}
+
+func lsSessions(c *gin.Context) {
+	req := &agentSessionsReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	result := agent.ListSessions(req.Page, req.PageSize, req.Keyword)
+	ret := gulu.Ret.NewResult()
+	ret.Data = result
+	c.JSON(http.StatusOK, ret)
+}
+
+type agentSessionGetReq struct {
+	ID string `json:"id"`
+}
+
+func getSession(c *gin.Context) {
+	req := &agentSessionGetReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	session, err := agent.GetSession(req.ID)
+	if err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	ret := gulu.Ret.NewResult()
+	ret.Data = session
+	c.JSON(http.StatusOK, ret)
+}
+
+type agentSessionDeleteReq struct {
+	ID string `json:"id"`
+}
+
+func removeSession(c *gin.Context) {
+	req := &agentSessionDeleteReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	_ = agent.DeleteSession(req.ID)
+	ret := gulu.Ret.NewResult()
+	c.JSON(http.StatusOK, ret)
+}
+
+func saveSession(c *gin.Context) {
+	body, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "failed to read body: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	_ = agent.SaveSession(body)
+	ret := gulu.Ret.NewResult()
 	c.JSON(http.StatusOK, ret)
 }
 

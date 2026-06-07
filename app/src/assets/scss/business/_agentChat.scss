@@ -594,13 +594,22 @@
     position: fixed;
     z-index: 9999;
     width: 280px;
-    max-height: 300px;
+    max-height: 360px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .b3-menu__items {
+        flex: 1;
+        min-height: 0;
+    }
 }
 
 .agent-session-popup__search {
     width: calc(100% - 16px);
     margin: 0 8px 4px;
     box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .agent-session-popup__actions {

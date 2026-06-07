@@ -359,6 +359,10 @@ export class AgentChat extends Model {
                 return;
             }
 
+            if (target.closest(".agent-session-popup__rename-input")) {
+                return;
+            }
+
             const item = target.closest(".b3-menu__item");
             if (item) {
                 const id = (item as HTMLElement).getAttribute("data-id") || "";

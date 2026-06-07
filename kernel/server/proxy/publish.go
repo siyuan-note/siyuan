@@ -18,6 +18,7 @@ package proxy
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -27,6 +28,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/soheilhy/cmux"
 )
 
 type PublishServiceTransport struct{}
@@ -35,9 +37,12 @@ var (
 	Host = "0.0.0.0"
 	Port = "0"
 
-	listener  net.Listener
-	server    *http.Server
-	transport = PublishServiceTransport{}
+	listener             net.Listener
+	server               *http.Server
+	transport            = PublishServiceTransport{}
+	publishRoundTripper  = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 )
 
 func InitPublishService() (uint16, error) {
@@ -88,19 +93,24 @@ func initPublishListener() (err error) {
 }
 
 func closePublishListener() {
-	if server == nil {
+	if listener == nil {
 		return
 	}
 
-	// 关闭所有发布服务的 WebSocket 连接
 	util.ClosePublishServiceSessions()
 
-	if err := server.Shutdown(context.Background()); err != nil {
-		logging.LogErrorf("shutdown server failed: %s", err)
+	if err := listener.Close(); err != nil {
+		logging.LogErrorf("close publish listener failed: %s", err)
 	}
 
-	if err := server.Close(); err != nil {
-		logging.LogErrorf("close server failed: %s", err)
+	if server != nil {
+		if err := server.Shutdown(context.Background()); err != nil {
+			logging.LogErrorf("shutdown publish server failed: %s", err)
+		}
+
+		if err := server.Close(); err != nil {
+			logging.LogErrorf("close publish server failed: %s", err)
+		}
 	}
 	server, listener = nil, nil
 }
@@ -108,15 +118,24 @@ func closePublishListener() {
 func startPublishReverseProxyService() {
 	logging.LogInfof("publish service [%s:%s] is running", Host, Port)
 
-	server = &http.Server{
-		Handler: &httputil.ReverseProxy{
-			Rewrite:   rewrite,
-			Transport: transport,
-		},
+	handler := &httputil.ReverseProxy{
+		Rewrite:   rewrite,
+		Transport: transport,
 	}
 
-	if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		logging.LogErrorf("boot publish service failed: %s", err)
+	certPath, keyPath, certErr := util.GetOrCreateTLSCert()
+	if certErr == nil && "" != certPath {
+		server = &http.Server{Handler: handler}
+		if serveErr := util.ServeMultiplexed(listener, handler, certPath, keyPath, nil); serveErr != nil {
+			if !errors.Is(serveErr, cmux.ErrListenerClosed) && !errors.Is(serveErr, http.ErrServerClosed) {
+				logging.LogErrorf("publish service failed: %s", serveErr)
+			}
+		}
+	} else {
+		server = &http.Server{Handler: handler}
+		if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logging.LogErrorf("boot publish service failed: %s", err)
+		}
 	}
 
 	logging.LogInfof("publish service [%s:%s] is stopped", Host, Port)
@@ -140,7 +159,7 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 				if account := model.GetBasicAuthAccount(username); account != nil {
 					// Valid account
 					request.Header.Set(model.XAuthTokenKey, account.Token)
-					response, err = http.DefaultTransport.RoundTrip(request)
+					response, err = publishRoundTripper.RoundTrip(request)
 					return
 				}
 
@@ -185,12 +204,12 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 
 		// set JWT
 		request.Header.Set(model.XAuthTokenKey, account.Token)
-		response, err = http.DefaultTransport.RoundTrip(request)
+		response, err = publishRoundTripper.RoundTrip(request)
 		response.Header.Add("Set-Cookie", cookie.String())
 		return
 	}
 
 	request.Header.Set(model.XAuthTokenKey, model.GetBasicAuthAccount("").Token)
-	response, err = http.DefaultTransport.RoundTrip(request)
+	response, err = publishRoundTripper.RoundTrip(request)
 	return
 }

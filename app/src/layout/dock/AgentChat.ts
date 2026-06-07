@@ -203,7 +203,7 @@ export class AgentChat extends Model {
                 this.sessionCreatedAt = session.createdAt || Date.now();
                 this.sessionTitle = session.title;
                 this.entries = (session.entries && session.entries.length > 0) ? session.entries as any as SessionEntry[] : [];
-                this.hasTitled = true;
+                this.hasTitled = session.titled !== false;
                 this.sessionPromptTokens = session.promptTokens || 0;
                 this.sessionCompletionTokens = session.completionTokens || 0;
                 this.sessionTotalDuration = session.totalDuration || 0;
@@ -350,6 +350,7 @@ export class AgentChat extends Model {
         const session: AgentSession = {
             id: this.sessionId,
             title: this.sessionTitle,
+            titled: this.hasTitled,
             entries: this.entries.slice(),
             promptTokens: this.sessionPromptTokens,
             completionTokens: this.sessionCompletionTokens,
@@ -376,7 +377,7 @@ export class AgentChat extends Model {
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
         this.entries = (session.entries && session.entries.length > 0) ? session.entries as any as SessionEntry[] : [];
-        this.hasTitled = true;
+        this.hasTitled = session.titled !== false;
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";

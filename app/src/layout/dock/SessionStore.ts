@@ -1,7 +1,6 @@
 import {fetchSyncPost} from "../../util/fetch";
 
 const SESSIONS_DIR = "data/storage/ai/agent/sessions/";
-const SESSIONS_INDEX = SESSIONS_DIR + "index.json";
 
 interface SessionIndexItem {
     id: string;
@@ -14,6 +13,7 @@ interface SessionIndexItem {
 export interface AgentSession {
     id: string;
     title: string;
+    titled?: boolean;
     model?: string;
     entries?: Array<{
         type: "user" | "thinking" | "assistant";
@@ -38,7 +38,6 @@ function newSessionId(): string {
 async function readJsonFile(path: string): Promise<any | null> {
     try {
         const r = await fetchSyncPost("/api/file/getFile", {path: path}) as any;
-        // getFile 返回的是文件内容本身，不是 {code, data} 包装
         if (!r) { return null; }
         return r;
     } catch (e) {
@@ -47,7 +46,7 @@ async function readJsonFile(path: string): Promise<any | null> {
 }
 
 async function writeJsonFile(path: string, data: any): Promise<void> {
-    const content = JSON.stringify(data, null, 2);
+    const content = JSON.stringify(data, null, "\t");
     const fileName = path.split("/").pop() || "file.json";
     const file = new File([new Blob([content], {type: "application/json"})], fileName);
     const formData = new FormData();
@@ -57,100 +56,57 @@ async function writeJsonFile(path: string, data: any): Promise<void> {
     await fetchSyncPost("/api/file/putFile", formData);
 }
 
-async function ensureDir(): Promise<SessionIndexItem[]> {
-    const idx = await readJsonFile(SESSIONS_INDEX);
-    if (idx && Array.isArray(idx)) { return idx; }
-
+async function readDir(path: string): Promise<Array<{name: string; isDir: boolean; updated: number}> | null> {
     try {
-        const r = await fetchSyncPost("/api/file/readDir", {path: SESSIONS_DIR}) as any;
-        if (r && r.code === 0) {
-            await rebuildIndex();
-            const newIdx = await readJsonFile(SESSIONS_INDEX);
-            return Array.isArray(newIdx) ? newIdx : [];
-        }
-    } catch (e) {
-        // readDir 失败，继续尝试创建
-    }
-
-    await writeJsonFile(SESSIONS_INDEX, []);
-    return [];
+        const r = await fetchSyncPost("/api/file/readDir", {path}) as any;
+        if (r && r.code === 0 && r.data) { return r.data; }
+    } catch (e) { /* readDir failed, directory may not exist */ }
+    return null;
 }
 
-async function rebuildIndex(): Promise<void> {
-    try {
-        const r = await fetchSyncPost("/api/file/readDir", {path: SESSIONS_DIR}) as any;
-        if (!r || r.code !== 0 || !r.data) {
-            await writeJsonFile(SESSIONS_INDEX, []);
-            return;
-        }
-        const entries = r.data as Array<{name: string; updated: number}>;
-        const list: SessionIndexItem[] = [];
-        for (let i = 0; i < entries.length; i++) {
-            const name = entries[i].name;
-            if (name === "index.json" || !name.endsWith(".json")) { continue; }
-            const id = name.replace(".json", "");
-            const session = await readJsonFile(SESSIONS_DIR + name);
-            if (session && session.id && (session.entries || session.messages)) {
-                list.push({
-                    id: id,
-                    title: session.title || "AI Agent",
-                    model: session.model || "",
-                    createdAt: session.createdAt || entries[i].updated || Date.now(),
-                    updatedAt: session.updatedAt || entries[i].updated || Date.now(),
-                });
-            }
-        }
-        await writeJsonFile(SESSIONS_INDEX, list);
-    } catch (e) {
-        console.warn("[SessionStore] rebuildIndex failed:", e);
-        await writeJsonFile(SESSIONS_INDEX, []);
-    }
-}
-
-async function writeIndex(list: SessionIndexItem[]): Promise<void> {
-    await writeJsonFile(SESSIONS_INDEX, list);
+function getSessionFilePath(id: string): string {
+    return SESSIONS_DIR + id + "/session.json";
 }
 
 export const SessionStore = {
     async init(): Promise<SessionIndexItem[]> {
-        return await ensureDir();
+        return await this.list();
     },
 
     async list(): Promise<SessionIndexItem[]> {
-        const idx = await readJsonFile(SESSIONS_INDEX);
-        return Array.isArray(idx) ? idx : [];
+        const entries = await readDir(SESSIONS_DIR);
+        if (!entries) { return []; }
+
+        const list: SessionIndexItem[] = [];
+        for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+            if (!entry.isDir) { continue; }
+            const session = await readJsonFile(getSessionFilePath(entry.name));
+            if (session && session.id) {
+                list.push({
+                    id: session.id,
+                    title: session.title || "AI Agent",
+                    model: session.model || "",
+                    createdAt: session.createdAt || entry.updated || Date.now(),
+                    updatedAt: session.updatedAt || entry.updated || Date.now(),
+                });
+            }
+        }
+        list.sort((a, b) => b.updatedAt - a.updatedAt);
+        return list;
     },
 
     async load(id: string): Promise<AgentSession | null> {
-        return await readJsonFile(SESSIONS_DIR + id + ".json");
+        return await readJsonFile(getSessionFilePath(id));
     },
 
     async save(session: AgentSession): Promise<void> {
         session.updatedAt = Date.now();
-        await writeJsonFile(SESSIONS_DIR + session.id + ".json", session);
-
-        const list = await this.list();
-        let foundIdx = -1;
-        for (let i = 0; i < list.length; i++) {
-            if (list[i].id === session.id) {
-                list[i].title = session.title;
-                list[i].updatedAt = session.updatedAt;
-                list[i].model = session.model;
-                foundIdx = i;
-                break;
-            }
-        }
-        if (foundIdx < 0) {
-            list.unshift({id: session.id, title: session.title, model: session.model, createdAt: session.createdAt, updatedAt: session.updatedAt});
-        }
-        await writeIndex(list);
+        await writeJsonFile(getSessionFilePath(session.id), session);
     },
 
     async remove(id: string): Promise<void> {
-        await fetchSyncPost("/api/file/removeFile", {path: SESSIONS_DIR + id + ".json"});
-        let list = await this.list();
-        list = list.filter(function (item: any) { return item.id !== id; });
-        await writeIndex(list);
+        await fetchSyncPost("/api/file/removeFile", {path: SESSIONS_DIR + id + "/"});
     },
 
     async rename(id: string, newTitle: string): Promise<void> {
@@ -160,5 +116,5 @@ export const SessionStore = {
         await this.save(session);
     },
 
-    newSessionId: newSessionId,
+    newSessionId,
 };

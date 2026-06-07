@@ -132,7 +132,7 @@ export const saveExportFile = async (uri: string) => {
             );
         }
         const arrayBuffer = await response.arrayBuffer();
-        fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
+        await fs.promises.writeFile(result.filePath, new Uint8Array(arrayBuffer));
         showMessage(window.siyuan.languages.exported);
         return;
     } catch (e) {

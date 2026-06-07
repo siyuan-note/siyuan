@@ -123,6 +123,14 @@ declare namespace Config {
      */
     export interface IOpenAI {
         /**
+         * Immutable unique identifier
+         */
+        id?: string;
+        /**
+         * Display name, defaults to apiModel
+         */
+        name?: string;
+        /**
          * API base URL
          */
         apiBaseURL: string;

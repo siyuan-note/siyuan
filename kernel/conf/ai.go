@@ -22,6 +22,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 
+	"github.com/88250/lute/ast"
 	"github.com/sashabaranov/go-openai"
 )
 
@@ -47,6 +48,8 @@ type MCPServer struct {
 }
 
 type OpenAI struct {
+	ID                  string  `json:"id,omitempty"`   // immutable unique identifier
+	Name                string  `json:"name,omitempty"` // display name, defaults to apiModel
 	APIKey              string  `json:"apiKey"`
 	APITimeout          int     `json:"apiTimeout"`
 	APIProxy            string  `json:"apiProxy"`
@@ -56,8 +59,8 @@ type OpenAI struct {
 	APIMaxContexts      int     `json:"apiMaxContexts"`
 	APIBaseURL          string  `json:"apiBaseURL"`
 	APIUserAgent        string  `json:"apiUserAgent"`
-	APIProvider         string  `json:"apiProvider"` // OpenAI, Azure
-	APIVersion          string  `json:"apiVersion"`  // Azure API version
+	APIProvider         string  `json:"apiProvider"`         // OpenAI, Azure
+	APIVersion          string  `json:"apiVersion"`          // Azure API version
 	Type                string  `json:"type,omitempty"`      // empty or "chat" = chat model, "embedding" = embedding model
 	AgentTimeout        int     `json:"agentTimeout"`        // total session timeout, seconds, 0 = no limit
 	AgentConfirmTimeout int     `json:"agentConfirmTimeout"` // confirmation timeout, seconds
@@ -152,6 +155,13 @@ func NewAI() *AI {
 	return &AI{OpenAI: openAI, Providers: providers}
 }
 
+func (p *OpenAI) DisplayName() string {
+	if p.Name != "" {
+		return p.Name
+	}
+	return p.APIModel
+}
+
 func (p *OpenAI) IsEnabled() bool {
 	return p.Enabled == nil || *p.Enabled
 }
@@ -168,8 +178,8 @@ func (ai *AI) HasAnyProvider() bool {
 	return false
 }
 
-func (ai *AI) GetProvider(model string) *OpenAI {
-	if model == "" {
+func (ai *AI) GetProvider(id string) *OpenAI {
+	if id == "" {
 		if ai.OpenAI != nil && ai.OpenAI.IsEnabled() && ai.OpenAI.APIKey != "" {
 			return ai.OpenAI
 		}
@@ -180,12 +190,54 @@ func (ai *AI) GetProvider(model string) *OpenAI {
 		}
 		return ai.OpenAI
 	}
+
 	for _, p := range ai.Providers {
-		if p != nil && p.APIModel == model && p.IsEnabled() && p.APIKey != "" {
+		if p != nil && p.ID == id && p.IsEnabled() && p.APIKey != "" {
+			return p
+		}
+	}
+	if ai.OpenAI != nil && ai.OpenAI.ID == id && ai.OpenAI.IsEnabled() && ai.OpenAI.APIKey != "" {
+		return ai.OpenAI
+	}
+
+	for _, p := range ai.Providers {
+		if p != nil && p.Name == id && p.IsEnabled() && p.APIKey != "" {
+			return p
+		}
+	}
+	if ai.OpenAI != nil && ai.OpenAI.Name == id && ai.OpenAI.IsEnabled() && ai.OpenAI.APIKey != "" {
+		return ai.OpenAI
+	}
+
+	for _, p := range ai.Providers {
+		if p != nil && p.APIModel == id && p.IsEnabled() && p.APIKey != "" {
 			return p
 		}
 	}
 	return ai.OpenAI
+}
+
+func (ai *AI) Normalize() {
+	if nil == ai.OpenAI {
+		ai.OpenAI = &OpenAI{}
+	}
+	if "" == ai.OpenAI.ID {
+		ai.OpenAI.ID = ast.NewNodeID()
+	}
+	if "" == ai.OpenAI.Name {
+		ai.OpenAI.Name = ai.OpenAI.APIModel
+	}
+	for _, p := range ai.Providers {
+		if nil == p {
+			continue
+		}
+		if "" == p.ID {
+			p.ID = ast.NewNodeID()
+		}
+		if "" == p.Name {
+			p.Name = p.APIModel
+		}
+	}
 }
 
 func (ai *AI) GetEmbeddingProvider() *OpenAI {

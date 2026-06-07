@@ -111,12 +111,12 @@ export class AgentChat extends Model {
 
     private initModelSelect() {
         const aiConfig = window.siyuan.config.ai;
-        const mainModel = aiConfig.openAI.apiModel;
+        const mainName = aiConfig.openAI.name || aiConfig.openAI.apiModel;
         const providers = aiConfig.providers || [];
-        let html = '<option value="">' + this.escapeHtml(mainModel) + "</option>";
+        let html = '<option value="' + aiConfig.openAI.id + '">' + this.escapeHtml(mainName) + "</option>";
         for (const p of providers) {
             if (p.enabled === false) { continue; }
-            html += '<option value="' + this.escapeHtml(p.apiModel) + '">' + this.escapeHtml(p.apiModel) + "</option>";
+            html += '<option value="' + p.id + '">' + this.escapeHtml(p.name || p.apiModel) + "</option>";
         }
         this.modelSelect.innerHTML = html;
     }

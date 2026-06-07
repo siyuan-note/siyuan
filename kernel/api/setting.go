@@ -216,7 +216,20 @@ func setAI(c *gin.Context) {
 		ai.OpenAI.APIMaxContexts = 7
 	}
 
+	if len(ai.Providers) == 0 {
+		ai.Providers = model.Conf.AI.Providers
+	}
+	if nil == ai.MCP {
+		ai.MCP = model.Conf.AI.MCP
+	}
+	if "" == ai.OpenAI.ID {
+		ai.OpenAI.ID = model.Conf.AI.OpenAI.ID
+	}
+	if "" == ai.OpenAI.Name {
+		ai.OpenAI.Name = model.Conf.AI.OpenAI.Name
+	}
 	model.Conf.AI = ai
+	model.Conf.AI.Normalize()
 	model.Conf.Save()
 
 	ret.Data = ai

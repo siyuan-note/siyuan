@@ -24,10 +24,13 @@ import (
 	"io"
 	"math/rand/v2"
 	"os"
+
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/88250/gulu"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/filelock"
@@ -160,29 +163,30 @@ type Reference struct {
 }
 
 type checkpointThinkingStep struct {
-	Reasoning        string               `json:"reasoning"`
-	Text             string               `json:"text"`
-	ToolCalls        []checkpointBriefTC  `json:"toolCalls"`
-	ReasoningContent string               `json:"reasoningContent"`
+	Reasoning        string              `json:"reasoning"`
+	Text             string              `json:"text"`
+	ToolCalls        []checkpointBriefTC `json:"toolCalls"`
+	ReasoningContent string              `json:"reasoningContent"`
 }
 
 type checkpointBriefTC struct {
-	Name   string  `json:"name"`
-	Result string  `json:"result,omitempty"`
+	Name   string `json:"name"`
+	Result string `json:"result,omitempty"`
 }
 
 type agentCheckpoint struct {
-	ID               string                    `json:"id"`
-	Title            string                    `json:"title"`
-	Messages         []AgentMessage            `json:"messages"`
-	Entries          []json.RawMessage         `json:"entries,omitempty"`
-	PromptTokens     int                       `json:"promptTokens"`
-	CompletionTokens int                       `json:"completionTokens"`
-	TotalDuration    int64                     `json:"totalDuration"`
-	CreatedAt        int64                     `json:"createdAt"`
-	UpdatedAt        int64                     `json:"updatedAt"`
-	MessageHistory   []string                  `json:"messageHistory,omitempty"`
-	ThinkingSteps    []checkpointThinkingStep  `json:"thinkingSteps,omitempty"`
+	ID               string                   `json:"id"`
+	Title            string                   `json:"title"`
+	Titled           bool                     `json:"titled"`
+	Messages         []AgentMessage           `json:"messages"`
+	Entries          []json.RawMessage        `json:"entries,omitempty"`
+	PromptTokens     int                      `json:"promptTokens"`
+	CompletionTokens int                      `json:"completionTokens"`
+	TotalDuration    int64                    `json:"totalDuration"`
+	CreatedAt        int64                    `json:"createdAt"`
+	UpdatedAt        int64                    `json:"updatedAt"`
+	MessageHistory   []string                 `json:"messageHistory,omitempty"`
+	ThinkingSteps    []checkpointThinkingStep `json:"thinkingSteps,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, history []UserMessage, language string, references []Reference, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
@@ -660,15 +664,18 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		UpdatedAt:        time.Now().UnixMilli(),
 	}
 
-	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions")
+	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID)
 	_ = os.MkdirAll(dir, 0755)
 
-	path := filepath.Join(dir, sessionID+".json")
+	path := filepath.Join(dir, "session.json")
 	existing, err := os.ReadFile(path)
 	if err == nil {
 		var old agentCheckpoint
-		if json.Unmarshal(existing, &old) == nil && old.Title != "" && old.Title != "AI Agent" {
-			cp.Title = old.Title
+		if gulu.JSON.UnmarshalJSON(existing, &old) == nil {
+			if old.Titled {
+				cp.Title = old.Title
+				cp.Titled = true
+			}
 		}
 		if old.CreatedAt > 0 {
 			cp.CreatedAt = old.CreatedAt
@@ -684,7 +691,7 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		}
 	}
 
-	data, err := json.MarshalIndent(cp, "", "  ")
+	data, err := gulu.JSON.MarshalIndentJSON(cp, "", "\t")
 	if err != nil {
 		return
 	}
@@ -779,6 +786,6 @@ func backoffDuration(attempt int) time.Duration {
 	if base <= 1*time.Second {
 		return base
 	}
-	jitter := time.Duration(rand.Int64N(int64(base) * 40 / 100)) - time.Duration(base*20/100)
+	jitter := time.Duration(rand.Int64N(int64(base)*40/100)) - time.Duration(base*20/100)
 	return base + jitter
 }

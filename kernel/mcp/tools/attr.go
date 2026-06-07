@@ -99,6 +99,7 @@ func attrSet(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "set attrs failed: " + err.Error()}}, IsError: true}, nil
 	}
 
+	model.AppendPushReloadFiletreeEntry()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attributes set for: " + id}}}, nil
 }
 

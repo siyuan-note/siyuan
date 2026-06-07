@@ -3,7 +3,7 @@ import {Model} from "../Model";
 import {App} from "../../index";
 import {fetchAgentSSE, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
-import {AgentSession, SessionStore} from "./SessionStore";
+import {AgentSession, SessionIndexItem, SessionStore} from "./SessionStore";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {setPosition} from "../../util/setPosition";
@@ -42,6 +42,8 @@ export class AgentChat extends Model {
     private currentToolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}> = [];
     private abortController: AbortController | null = null;
     private isRenderingSessionList = false;
+    private sessionListItems: SessionIndexItem[] = [];
+    private currentSearchKeyword = "";
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
     private currentThinkingReasoningContent = "";
@@ -109,12 +111,12 @@ export class AgentChat extends Model {
 
     private initModelSelect() {
         const aiConfig = window.siyuan.config.ai;
-        const mainModel = aiConfig.openAI.apiModel;
+        const mainName = aiConfig.openAI.name || aiConfig.openAI.apiModel;
         const providers = aiConfig.providers || [];
-        let html = '<option value="">' + this.escapeHtml(mainModel) + "</option>";
+        let html = '<option value="' + aiConfig.openAI.id + '">' + this.escapeHtml(mainName) + "</option>";
         for (const p of providers) {
             if (p.enabled === false) { continue; }
-            html += '<option value="' + this.escapeHtml(p.apiModel) + '">' + this.escapeHtml(p.apiModel) + "</option>";
+            html += '<option value="' + p.id + '">' + this.escapeHtml(p.name || p.apiModel) + "</option>";
         }
         this.modelSelect.innerHTML = html;
     }
@@ -193,8 +195,7 @@ export class AgentChat extends Model {
     }
 
     private async initSessions() {
-        await SessionStore.init();
-        const list = await SessionStore.list();
+        const list = await SessionStore.init();
         if (list.length > 0) {
             list.sort((a, b) => b.createdAt - a.createdAt);
             const last = list[0];
@@ -204,7 +205,7 @@ export class AgentChat extends Model {
                 this.sessionCreatedAt = session.createdAt || Date.now();
                 this.sessionTitle = session.title;
                 this.entries = (session.entries && session.entries.length > 0) ? session.entries as any as SessionEntry[] : [];
-                this.hasTitled = true;
+                this.hasTitled = session.titled !== false;
                 this.sessionPromptTokens = session.promptTokens || 0;
                 this.sessionCompletionTokens = session.completionTokens || 0;
                 this.sessionTotalDuration = session.totalDuration || 0;
@@ -238,39 +239,82 @@ export class AgentChat extends Model {
     private closeSessionMenu() {
         document.querySelectorAll(".agent-session-popup").forEach(function (el) { el.remove(); });
         this.sessionPopup = null;
+        this.currentSearchKeyword = "";
+        this.sessionListItems = [];
     }
 
     private async renderSessionList() {
         this.isRenderingSessionList = true;
         this.closeSessionMenu();
         try {
-            const list = await SessionStore.list();
-        list.sort((a, b) => b.createdAt - a.createdAt);
+            this.sessionListItems = await SessionStore.list();
+            this.sessionListItems.sort((a, b) => b.createdAt - a.createdAt);
 
-        this.sessionPopup = document.createElement("div");
-        this.sessionPopup.className = "agent-session-popup b3-menu";
+            this.sessionPopup = document.createElement("div");
+            this.sessionPopup.className = "agent-session-popup b3-menu";
 
-        let html = '<div class="b3-menu__items">';
+            const L = window.siyuan.languages;
+
+            let html = '<input class="b3-text-field agent-session-popup__search" placeholder="' + L.agentSessionSearch + '">';
+            html += '<div class="b3-menu__items"></div>';
+
+            this.sessionPopup.innerHTML = html;
+
+            const itemsContainer = this.sessionPopup.querySelector(".b3-menu__items") as HTMLElement;
+            this.rebuildSessionItems(itemsContainer);
+
+            const searchInput = this.sessionPopup.querySelector(".agent-session-popup__search") as HTMLInputElement;
+            searchInput.addEventListener("input", () => {
+                this.filterSessionList(searchInput.value, itemsContainer);
+            });
+            searchInput.addEventListener("click", (e: MouseEvent) => {
+                e.stopPropagation();
+            });
+
+            this.parent.panelElement.appendChild(this.sessionPopup);
+
+            const btnRect = this.sessionMenuBtn.getBoundingClientRect();
+            setPosition(this.sessionPopup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
+
+            this.sessionPopup.addEventListener("click", (e: MouseEvent) => {
+                e.stopPropagation();
+            });
+            const closeOut = () => {
+                this.closeSessionMenu();
+                document.removeEventListener("click", closeOut);
+            };
+            setTimeout(() => {
+                document.addEventListener("click", closeOut);
+            }, 10);
+        } finally {
+            this.isRenderingSessionList = false;
+        }
+    }
+
+    private rebuildSessionItems(container: HTMLElement) {
+        const list = this.sessionListItems;
+        let html = "";
         if (list.length === 0) {
             html += '<div class="b3-menu__item"><span class="b3-menu__label" style="text-align:center;color:var(--b3-theme-on-surface-light)">' + (window.siyuan.languages.emptyContent || "No sessions") + "</span></div>";
         } else {
             for (let i = 0; i < list.length; i++) {
                 const s = list[i];
-            const isActive = s.id === this.sessionId;
-            html += '<div class="b3-menu__item' + (isActive ? " b3-menu__item--current" : "") + '" data-id="' + s.id + '">' +
-                '<span class="b3-menu__label ariaLabel" data-position="east" aria-label="' + this.escapeHtml(s.title || this.defaultTitle) + '">' + this.escapeHtml(s.title || this.defaultTitle) + "</span>" +
-                '<span class="agent-session-popup__actions">' +
-                    '<svg class="agent-session-popup__rename ariaLabel" data-position="north" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><use xlink:href="#iconEdit"></use></svg>' +
-                    '<svg class="agent-session-popup__delete ariaLabel" data-position="north" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.delete + '"><use xlink:href="#iconTrashcan"></use></svg>' +
-                    "</span>" +
-                "</div>";
+                const isActive = s.id === this.sessionId;
+                html += '<div class="b3-menu__item' + (isActive ? " b3-menu__item--current" : "") + '" data-id="' + s.id + '">' +
+                    '<span class="b3-menu__label ariaLabel" data-position="east" aria-label="' + this.escapeHtml(s.title || this.defaultTitle) + '">' + this.escapeHtml(s.title || this.defaultTitle) + "</span>" +
+                    '<span class="agent-session-popup__actions">' +
+                        '<svg class="agent-session-popup__rename ariaLabel" data-position="north" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><use xlink:href="#iconEdit"></use></svg>' +
+                        '<svg class="agent-session-popup__delete ariaLabel" data-position="north" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.delete + '"><use xlink:href="#iconTrashcan"></use></svg>' +
+                        "</span>" +
+                    "</div>";
             }
         }
-        html += "</div>";
+        container.innerHTML = html;
+        this.bindSessionItemEvents(container);
+    }
 
-        this.sessionPopup.innerHTML = html;
-
-        this.sessionPopup.querySelectorAll(".b3-menu__item").forEach((item) => {
+    private bindSessionItemEvents(container: HTMLElement) {
+        container.querySelectorAll(".b3-menu__item").forEach((item) => {
             item.addEventListener("click", () => {
                 const id = item.getAttribute("data-id") || "";
                 if (id && id !== this.sessionId) {
@@ -279,14 +323,14 @@ export class AgentChat extends Model {
                 }
             });
         });
-        this.sessionPopup.querySelectorAll(".agent-session-popup__delete").forEach((btn) => {
+        container.querySelectorAll(".agent-session-popup__delete").forEach((btn) => {
             btn.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
                 const id = btn.getAttribute("data-id") || "";
                 if (id) { this.deleteSession(id); }
             });
         });
-        this.sessionPopup.querySelectorAll(".agent-session-popup__rename").forEach((btn) => {
+        container.querySelectorAll(".agent-session-popup__rename").forEach((btn) => {
             btn.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
                 const id = btn.getAttribute("data-id") || "";
@@ -297,25 +341,33 @@ export class AgentChat extends Model {
                 }
             });
         });
+    }
 
-        this.parent.panelElement.appendChild(this.sessionPopup);
-
-        const btnRect = this.sessionMenuBtn.getBoundingClientRect();
-        setPosition(this.sessionPopup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);
-
-        this.sessionPopup.addEventListener("click", (e: MouseEvent) => {
-            e.stopPropagation();
-        });
-        const closeOut = () => {
-            this.closeSessionMenu();
-            document.removeEventListener("click", closeOut);
-        };
-        setTimeout(() => {
-            document.addEventListener("click", closeOut);
-        }, 10);
-        } finally {
-            this.isRenderingSessionList = false;
+    private filterSessionList(keyword: string, container: HTMLElement) {
+        this.currentSearchKeyword = keyword.trim();
+        if (!this.currentSearchKeyword) {
+            this.rebuildSessionItems(container);
+            return;
         }
+        const kw = this.currentSearchKeyword.toLowerCase();
+        let hasVisible = false;
+        const items = container.querySelectorAll(".b3-menu__item[data-id]");
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i] as HTMLElement;
+            const id = item.getAttribute("data-id") || "";
+            const session = this.sessionListItems.find((s) => s.id === id);
+            const title = (session ? session.title : "") || this.defaultTitle;
+            if (title.toLowerCase().indexOf(kw) >= 0) {
+                item.style.display = "";
+                hasVisible = true;
+            } else {
+                item.style.display = "none";
+            }
+        }
+        if (!hasVisible) {
+            container.innerHTML = '<div class="b3-menu__item"><span class="b3-menu__label" style="text-align:center;color:var(--b3-theme-on-surface-light)">' + (window.siyuan.languages.emptyContent || "No sessions") + "</span></div>";
+        }
+        this.highlightCurrentSession();
     }
 
     private startRename(id: string, rowEl: HTMLElement) {
@@ -340,6 +392,8 @@ export class AgentChat extends Model {
         input.replaceWith(titleEl);
         titleEl.textContent = title;
         await SessionStore.rename(id, title);
+        const listItem = this.sessionListItems.find((s) => s.id === id);
+        if (listItem) { listItem.title = title; }
         if (id === this.sessionId) {
             this.sessionTitle = title;
             this.titleElement.textContent = title;
@@ -351,6 +405,7 @@ export class AgentChat extends Model {
         const session: AgentSession = {
             id: this.sessionId,
             title: this.sessionTitle,
+            titled: this.hasTitled,
             entries: this.entries.slice(),
             promptTokens: this.sessionPromptTokens,
             completionTokens: this.sessionCompletionTokens,
@@ -377,7 +432,7 @@ export class AgentChat extends Model {
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
         this.entries = (session.entries && session.entries.length > 0) ? session.entries as any as SessionEntry[] : [];
-        this.hasTitled = true;
+        this.hasTitled = session.titled !== false;
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
@@ -479,9 +534,11 @@ export class AgentChat extends Model {
 
     private async deleteSession(id: string) {
         await SessionStore.remove(id);
+        this.sessionListItems = this.sessionListItems.filter((item) => item.id !== id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
             const list = await SessionStore.list();
+            this.sessionListItems = list;
             this.entries = [];
             if (list.length > 0) {
                 this.sessionId = list[0].id;
@@ -492,20 +549,13 @@ export class AgentChat extends Model {
             }
         }
 
-        // Remove the deleted row from popup DOM directly (no re-render flash)
-        const row = this.sessionPopup?.querySelector('.b3-menu__item[data-id="' + id + '"]');
-        if (row) {
-            row.remove();
-        }
-        const items = this.sessionPopup?.querySelectorAll(".b3-menu__item");
-        if (items && items.length === 0) {
-            const listEl = this.sessionPopup?.querySelector(".b3-menu__items");
-            if (listEl) {
-                listEl.innerHTML = '<div class="b3-menu__item"><span class="b3-menu__label" style="text-align:center;color:var(--b3-theme-on-surface-light)">' + (window.siyuan.languages.emptyContent || "No sessions") + "</span></div>";
+        const itemsContainer = this.sessionPopup?.querySelector(".b3-menu__items") as HTMLElement;
+        if (itemsContainer) {
+            if (this.currentSearchKeyword) {
+                this.filterSessionList(this.currentSearchKeyword, itemsContainer);
+            } else {
+                this.rebuildSessionItems(itemsContainer);
             }
-        }
-        if (wasCurrent && this.sessionPopup) {
-            this.highlightCurrentSession();
         }
     }
 
@@ -927,11 +977,11 @@ export class AgentChat extends Model {
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
         this.addCopyButton(this.currentAIElement);
+        this.flushThinkingStep();
         this.entries.push({type: "assistant", content: this.currentContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
-        this.flushThinkingStep();
         this.currentToolCalls = [];
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
@@ -1016,6 +1066,7 @@ export class AgentChat extends Model {
             if (bubble) {
                 bubble.classList.remove("agent-chat__bubble--streaming");
             }
+            this.flushThinkingStep();
             if (this.currentContent) {
                 this.entries.push({type: "assistant", content: this.currentContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
             }
@@ -1030,7 +1081,6 @@ export class AgentChat extends Model {
             }
             this.updateTokenDisplay();
             this.setStreaming(false);
-        this.flushThinkingStep();
         this.saveSession();
     }
 

@@ -183,6 +183,7 @@ func PollPushQueue() {
 				util.PushReloadProtyle(bt.RootID)
 			}
 		case "reloadAttrView":
+			cache.RemoveAVData(e.ID)
 			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]any{"id": e.ID})
 		case "reloadUI":
 			util.ReloadUI()

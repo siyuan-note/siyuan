@@ -31,6 +31,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -510,10 +511,18 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 
 	avID := filepath.Base(avJSONPath)
 	avID = strings.TrimSuffix(avID, filepath.Ext(avID))
-	data, readErr := filelock.ReadFile(avJSONPath)
-	if nil != readErr {
-		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-		return
+
+	var data []byte
+	if cached, ok := cache.GetAVData(avID); ok {
+		data = cached
+	} else {
+		var readErr error
+		data, readErr = filelock.ReadFile(avJSONPath)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+		cache.SetAVData(avID, data)
 	}
 
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
@@ -643,6 +652,8 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 		return
 	}
+
+	cache.SetAVData(av.ID, data)
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
 		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)

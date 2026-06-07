@@ -792,6 +792,7 @@ func FullReindex(needResetScroll bool) {
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
+	cache.ClearAVCache()
 
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)

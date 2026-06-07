@@ -55,6 +55,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -1892,6 +1893,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if file.Path == "/snippets/conf.json" {
 			needReloadSnippet = true
 		}
+
+		if strings.HasPrefix(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
+			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
+		}
 	}
 
 	removeWidgetDirSet, unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New(), hashset.New()
@@ -1941,6 +1946,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if file.Path == "/snippets/conf.json" {
 			needReloadSnippet = true
+		}
+
+		if strings.HasPrefix(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
+			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
 		}
 	}
 

@@ -280,6 +280,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 				if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
 					logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
 				}
+				cache.RemoveAVData(avNode.AttributeViewID)
 			}
 
 			avIDs = append(avIDs, avNode.AttributeViewID)
@@ -467,6 +468,7 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
+	cache.RemoveAVData(strings.TrimSuffix(filepath.Base(historyPath), ".json"))
 	IncSync()
 	util.PushMsg(Conf.Language(102), 3000)
 	return nil

@@ -193,8 +193,7 @@ export class AgentChat extends Model {
     }
 
     private async initSessions() {
-        await SessionStore.init();
-        const list = await SessionStore.list();
+        const list = await SessionStore.init();
         if (list.length > 0) {
             list.sort((a, b) => b.createdAt - a.createdAt);
             const last = list[0];

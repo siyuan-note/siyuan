@@ -57,21 +57,23 @@ async function writeJsonFile(path: string, data: any): Promise<void> {
     await fetchSyncPost("/api/file/putFile", formData);
 }
 
-async function ensureDir(): Promise<void> {
+async function ensureDir(): Promise<SessionIndexItem[]> {
     const idx = await readJsonFile(SESSIONS_INDEX);
-    if (idx && Array.isArray(idx)) { return; }
+    if (idx && Array.isArray(idx)) { return idx; }
 
     try {
         const r = await fetchSyncPost("/api/file/readDir", {path: SESSIONS_DIR}) as any;
         if (r && r.code === 0) {
             await rebuildIndex();
-            return;
+            const newIdx = await readJsonFile(SESSIONS_INDEX);
+            return Array.isArray(newIdx) ? newIdx : [];
         }
     } catch (e) {
         // readDir 失败，继续尝试创建
     }
 
     await writeJsonFile(SESSIONS_INDEX, []);
+    return [];
 }
 
 async function rebuildIndex(): Promise<void> {
@@ -110,12 +112,8 @@ async function writeIndex(list: SessionIndexItem[]): Promise<void> {
 }
 
 export const SessionStore = {
-    async init(): Promise<void> {
-        await ensureDir();
-        const idx = await readJsonFile(SESSIONS_INDEX);
-        if (!idx || !Array.isArray(idx)) {
-            await rebuildIndex();
-        }
+    async init(): Promise<SessionIndexItem[]> {
+        return await ensureDir();
     },
 
     async list(): Promise<SessionIndexItem[]> {

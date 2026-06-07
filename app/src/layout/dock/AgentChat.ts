@@ -245,7 +245,7 @@ export class AgentChat extends Model {
         this.closeSessionMenu();
         try {
             const list = await SessionStore.list();
-        list.sort((a, b) => b.updatedAt - a.updatedAt);
+        list.sort((a, b) => b.createdAt - a.createdAt);
 
         this.sessionPopup = document.createElement("div");
         this.sessionPopup.className = "agent-session-popup b3-menu";

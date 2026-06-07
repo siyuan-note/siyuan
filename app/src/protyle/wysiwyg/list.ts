@@ -322,7 +322,7 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
         }
     }
     if (!previousElement.parentElement.classList.contains("protyle-wysiwyg")) {
-        updateTransaction(protyle, previousElement.parentElement.getAttribute("data-node-id"), previousElement.parentElement.outerHTML, html);
+        updateTransaction(protyle, previousElement.parentElement, html);
     }
     focusByWbr(previousElement, range);
 };
@@ -639,7 +639,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
         liItemElements[0].firstElementChild.remove();
         liItemElements[0].lastElementChild.remove();
         liElement.outerHTML = liItemElements[0].innerHTML;
-        updateTransaction(protyle, parentLiItemElement.getAttribute("data-node-id"), parentLiItemElement.outerHTML, html);
+        updateTransaction(protyle, parentLiItemElement, html);
         focusByWbr(parentLiItemElement, range);
         return;
     }
@@ -883,7 +883,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
         if (parentLiItemElement && parentLiItemElement.getAttribute("data-subtype") === "o") {
             updateListOrder(parentParentElement);
         }
-        updateTransaction(protyle, parentParentElement.getAttribute("data-node-id"), parentParentElement.outerHTML, html);
+        updateTransaction(protyle, parentParentElement, html);
     }
     focusByWbr(parentParentElement, range);
 };

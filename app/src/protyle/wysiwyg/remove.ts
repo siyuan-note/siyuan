@@ -623,7 +623,7 @@ export const removeImage = (imgSelectElement: Element, nodeElement: HTMLElement,
     }
     imgSelectElement.insertAdjacentHTML("afterend", "<wbr>");
     imgSelectElement.remove();
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+    updateTransaction(protyle, nodeElement, oldHTML);
     focusByWbr(nodeElement, range);
     // 不太清楚为什么删除图片后无法上下键定位，但重绘后就好了 https://ld246.com/article/1714314625702
     const editElement = getContenteditableElement(nodeElement);
@@ -846,7 +846,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
         if (listElement.getAttribute("data-subtype") === "o") {
             updateListOrder(listElement);
         }
-        updateTransaction(protyle, listElement.getAttribute("data-node-id"), listElement.outerHTML, html);
+        updateTransaction(protyle, listElement, html);
     }
     focusByWbr(previousLastElement.parentElement, range);
 };

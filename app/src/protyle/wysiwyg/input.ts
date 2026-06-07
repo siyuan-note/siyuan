@@ -92,7 +92,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     if ((type !== "NodeCodeBlock" && type !== "NodeHeading") && // https://github.com/siyuan-note/siyuan/issues/11851
         (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
         // 软换行
-        updateTransaction(protyle, id, blockElement.outerHTML, protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
+        updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
         wbrElement.remove();
         return;
     }
@@ -126,7 +126,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     } else if ((trimStartHTML.startsWith("```") || trimStartHTML.startsWith("···") || trimStartHTML.startsWith("~~~")) &&
         trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") === -1) {
         // ```test` 后续处理，```test 不处理
-        updateTransaction(protyle, id, blockElement.outerHTML, protyle.wysiwyg.lastHTMLs[id]);
+        updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id]);
         wbrElement.remove();
         return;
     }

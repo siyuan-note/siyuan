@@ -98,7 +98,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 protyle.toolbar.showRender(protyle, blockElement);
                 processRender(blockElement);
             }
-            updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
+            updateTransaction(protyle, blockElement, oldHTML);
             return true;
         }
     }
@@ -117,7 +117,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         range.insertNode(wbrElement);
         editableElement.parentElement.removeAttribute("data-render");
         highlightRender(blockElement);
-        updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
+        updateTransaction(protyle, blockElement, oldHTML);
         scrollCenter(protyle);
         return true;
     }
@@ -340,15 +340,17 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         currentElement = item;
         selectsElement.push(item);
     });
-    if (currentElement.parentElement.classList.contains("bq") && currentElement.parentElement.childElementCount > 2 &&
+    let parentElement = currentElement.parentElement;
+    if (parentElement.classList.contains("bq") && parentElement.childElementCount > 2 &&
         currentElement.previousElementSibling.classList.contains("p") && currentElement.classList.contains("p") &&
         currentElement.previousElementSibling.textContent.startsWith("[!") && parentHTML) {
-        const parentId = currentElement.parentElement.getAttribute("data-node-id");
-        const calloutHTML = protyle.lute.SpinBlockDOM(currentElement.parentElement.outerHTML);
+        const calloutHTML = protyle.lute.SpinBlockDOM(parentElement.outerHTML);
         if (calloutHTML.indexOf('data-type="NodeCallout"') > -1) {
-            currentElement.parentElement.outerHTML = calloutHTML;
+            parentElement.insertAdjacentHTML("afterend", calloutHTML);
+            parentElement = parentElement.nextElementSibling as HTMLElement;
+            parentElement.previousElementSibling.remove();
             mathRender(protyle.wysiwyg.element);
-            updateTransaction(protyle, parentId, calloutHTML, parentHTML);
+            updateTransaction(protyle, parentElement, parentHTML);
             focusByWbr(protyle.wysiwyg.element, range);
             scrollCenter(protyle);
             return true;
@@ -362,8 +364,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         }
     });
     transaction(protyle, doOperation, undoOperation);
-    if (currentElement.parentElement.classList.contains("sb") &&
-        currentElement.parentElement.getAttribute("data-sb-layout") === "col") {
+    if (parentElement.classList.contains("sb") &&
+        parentElement.getAttribute("data-sb-layout") === "col") {
         turnsIntoOneTransaction({
             protyle,
             selectsElement,
@@ -425,7 +427,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         if (listItemElement.getAttribute("data-subtype") === "o") {
             updateListOrder(listItemElement.parentElement);
         }
-        updateTransaction(protyle, listItemElement.parentElement.getAttribute("data-node-id"), listItemElement.parentElement.outerHTML, html);
+        updateTransaction(protyle, listItemElement.parentElement, html);
         focusByWbr(newElement, range);
         scrollCenter(protyle);
         removeEmptyNode(newElement);
@@ -450,7 +452,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             if (subListElement.getAttribute("data-subtype") === "o") {
                 updateListOrder(subListElement);
             }
-            updateTransaction(protyle, listItemElement.getAttribute("data-node-id"), listItemElement.outerHTML, html);
+            updateTransaction(protyle, listItemElement, html);
             focusByWbr(listItemElement, range);
             scrollCenter(protyle);
         } else {
@@ -505,7 +507,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                     id: listItemElement.getAttribute("data-node-id")
                 }]);
             } else {
-                updateTransaction(protyle, listItemElement.parentElement.getAttribute("data-node-id"), listItemElement.parentElement.outerHTML, html);
+                updateTransaction(protyle, listItemElement.parentElement, html);
             }
             focusByWbr(newElement, range);
             scrollCenter(protyle);
@@ -594,7 +596,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             data: listItemHTML
         }]);
     } else {
-        updateTransaction(protyle, listItemElement.parentElement.getAttribute("data-node-id"), listItemElement.parentElement.outerHTML, oldHTML);
+        updateTransaction(protyle, listItemElement.parentElement, oldHTML);
     }
     focusByWbr(newElement, range);
     scrollCenter(protyle);
@@ -631,7 +633,7 @@ export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProt
                 startElement.after(newlineNode);
                 range.selectNode(newlineNode);
                 range.collapse(false);
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 return true;
             }
         }
@@ -682,5 +684,5 @@ const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProty
     }
     range.collapse(true);
     focusByRange(range);
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+    updateTransaction(protyle, nodeElement, oldHTML);
 };

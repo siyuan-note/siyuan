@@ -41,7 +41,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 }
                 blockElement.previousElementSibling.outerHTML = `<div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>`;
                 editElement.innerHTML = html.substring(contextStartIndex);
-                updateTransaction(protyle, liElement.getAttribute("data-node-id"), liElement.outerHTML, oldHTML);
+                updateTransaction(protyle, liElement, oldHTML);
                 focusByWbr(protyle.wysiwyg.element, range);
                 return true;
             }

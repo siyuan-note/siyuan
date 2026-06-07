@@ -88,7 +88,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
             tableElement.rows[k].cells[item].setAttribute("align", type);
         });
     }
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     focusByWbr(tableElement, range);
 };
 
@@ -119,7 +119,7 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
     range.selectNodeContents(newRowElement.cells[getColIndex(cellElement)]);
     range.collapse(true);
     focusByRange(range);
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     scrollToView(nodeElement, newRowElement, protyle);
 };
 
@@ -174,7 +174,7 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
     range.selectNodeContents(newRowElement.cells[getColIndex(cellElement)]);
     range.collapse(true);
     focusByRange(range);
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     scrollToView(nodeElement, newRowElement, protyle);
 };
 
@@ -205,7 +205,7 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
     }
     tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col style='min-width: 60px;'>".repeat(count));
     focusByWbr(nodeElement, range);
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
 };
 
 export const deleteRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
@@ -230,7 +230,7 @@ export const deleteRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
         range.collapse(true);
         focusByRange(range);
         scrollToView(nodeElement, previousTrElement, protyle);
-        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+        updateTransaction(protyle, nodeElement, html);
     }
 };
 
@@ -263,7 +263,7 @@ export const deleteColumn = (protyle: IProtyle, range: Range, nodeElement: Eleme
         cells[index].remove();
     }
     nodeElement.querySelectorAll("col")[index]?.remove();
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     focusByRange(range);
 };
 
@@ -291,7 +291,7 @@ export const moveRowToUp = (protyle: IProtyle, range: Range, cellElement: HTMLEl
         rowElement.after(headElement);
         rowElement.parentElement.previousElementSibling.append(rowElement);
     }
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     focusByWbr(nodeElement, range);
     scrollCenter(protyle, rowElement);
 };
@@ -321,7 +321,7 @@ export const moveRowToDown = (protyle: IProtyle, range: Range, cellElement: HTML
         rowElement.after(firstRowElement);
         rowElement.parentElement.nextElementSibling.insertAdjacentElement("afterbegin", rowElement);
     }
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     focusByWbr(nodeElement, range);
     scrollCenter(protyle, rowElement);
 };
@@ -349,7 +349,7 @@ export const moveColumnToLeft = (protyle: IProtyle, range: Range, cellElement: H
     }
     const colElements = nodeElement.querySelectorAll("col");
     colElements[cellIndex].after(colElements[cellIndex - 1]);
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     focusByWbr(nodeElement, range);
 };
 
@@ -375,7 +375,7 @@ export const moveColumnToRight = (protyle: IProtyle, range: Range, cellElement: 
     }
     const colElements = nodeElement.querySelectorAll("col");
     colElements[cellIndex].before(colElements[cellIndex + 1]);
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    updateTransaction(protyle, nodeElement, html);
     focusByWbr(nodeElement, range);
 };
 
@@ -420,7 +420,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         }
         range.collapse(false);
         scrollCenter(protyle);
-        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+        updateTransaction(protyle, nodeElement, oldHTML);
         event.preventDefault();
         return true;
     }
@@ -799,7 +799,7 @@ export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement
     selectCellElements.forEach(item => {
         item.innerHTML = "";
     });
-    updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
+    updateTransaction(protyle, tableBlockElement, oldHTML);
 };
 
 export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
@@ -856,7 +856,7 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
             }
             nodeElement.removeAttribute("caption");
         }
-        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+        updateTransaction(protyle, nodeElement, html);
         dialog.destroy();
     });
     inputElement.value = captionElement?.textContent || "";

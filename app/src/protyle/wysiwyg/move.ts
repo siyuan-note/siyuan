@@ -77,7 +77,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         if (previousElement.getAttribute("data-subtype") === "o") {
             updateListOrder(previousElement.parentElement);
         }
-        updateTransaction(protyle, previousElement.parentElement.parentElement.parentElement.getAttribute("data-node-id"), previousElement.parentElement.parentElement.parentElement.outerHTML, oldListHTML);
+        updateTransaction(protyle, previousElement.parentElement.parentElement.parentElement, oldListHTML);
         preventScroll(protyle);
         focusByWbr(previousElement.parentElement, range);
         scrollCenter(protyle);
@@ -92,7 +92,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         const orderIndex = parseInt(sourceElements[0].parentElement.firstElementChild.getAttribute("data-marker"));
         sourceElements[sourceElements.length - 1].after(previousElement);
         updateListOrder(sourceElements[0].parentElement, orderIndex);
-        updateTransaction(protyle, sourceElements[0].parentElement.getAttribute("data-node-id"), sourceElements[0].parentElement.outerHTML, html);
+        updateTransaction(protyle, sourceElements[0].parentElement, html);
     } else {
         const id = previousElement.getAttribute("data-node-id");
         transaction(protyle, [{
@@ -175,7 +175,7 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         if (nextElement.getAttribute("data-subtype") === "o") {
             updateListOrder(nextElement.parentElement, orderIndex);
         }
-        updateTransaction(protyle, nextElement.parentElement.parentElement.parentElement.getAttribute("data-node-id"), nextElement.parentElement.parentElement.parentElement.outerHTML, oldListHTML);
+        updateTransaction(protyle, nextElement.parentElement.parentElement.parentElement, oldListHTML);
         preventScroll(protyle);
         focusByWbr(nextElement.parentElement, range);
         scrollCenter(protyle);
@@ -190,7 +190,7 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         const orderIndex = parseInt(sourceElements[0].parentElement.firstElementChild.getAttribute("data-marker"));
         sourceElements[0].before(nextElement);
         updateListOrder(nextElement.parentElement, orderIndex);
-        updateTransaction(protyle, nextElement.parentElement.getAttribute("data-node-id"), nextElement.parentElement.outerHTML, html);
+        updateTransaction(protyle, nextElement.parentElement, html);
     } else {
         const id = nextElement.getAttribute("data-node-id");
         transaction(protyle, [{

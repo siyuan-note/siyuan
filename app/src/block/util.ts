@@ -162,7 +162,7 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
     if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o" &&
         !newElement.parentElement.classList.contains("protyle-wysiwyg")) {
         updateListOrder(newElement.parentElement, orderIndex);
-        updateTransaction(protyle, newElement.parentElement.getAttribute("data-node-id"), newElement.parentElement.outerHTML, parentOldHTML);
+        updateTransaction(protyle, newElement.parentElement, parentOldHTML);
     } else {
         let doOperations: IOperation[];
         if (position === "beforebegin") {

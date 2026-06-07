@@ -1492,7 +1492,7 @@ export class Gutter {
                         nodeElement.setAttribute("data-sb-layout", "col");
                     }
                     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                    updateTransaction(protyle, nodeElement, oldHTML);
                     focusByRange(protyle.toolbar.range);
                     hideElements(["gutter"], protyle);
                 }
@@ -1604,7 +1604,7 @@ export class Gutter {
                         element.querySelector("input").addEventListener("change", (event) => {
                             const newHeight = ((event.target as HTMLInputElement).value || "420") + "px";
                             (nodeElement as HTMLElement).style.height = newHeight;
-                            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                            updateTransaction(protyle, nodeElement, html);
                             html = nodeElement.outerHTML;
                             event.stopPropagation();
                             const renderElement = nodeElement.querySelector('[contenteditable="false"]') as HTMLElement;

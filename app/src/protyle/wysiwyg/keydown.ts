@@ -822,7 +822,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const oldHTML = nodeElement.outerHTML;
                     range.startContainer.textContent = "";
                     previousSibling.remove();
-                    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                    updateTransaction(protyle, nodeElement, oldHTML);
                     focusByWbr(nodeElement, range);
                     event.stopPropagation();
                     event.preventDefault();
@@ -865,7 +865,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             range.insertNode(wbrElement);
                             const oldHTML = nodeElement.outerHTML;
                             wbrElement.nextSibling.textContent = Constants.ZWSP;
-                            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                            updateTransaction(protyle, nodeElement, oldHTML);
                             focusByWbr(nodeElement, range);
                             event.preventDefault();
                             return;
@@ -879,7 +879,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             range.insertNode(wbrElement);
                             const oldHTML = nodeElement.outerHTML;
                             wbrElement.nextSibling.textContent = Constants.ZWSP;
-                            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                            updateTransaction(protyle, nodeElement, oldHTML);
                             focusByWbr(nodeElement, range);
                             event.preventDefault();
                             return;
@@ -995,7 +995,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             range.insertNode(wbrElement);
                             const oldHTML = nodeElement.outerHTML;
                             wbrElement.previousSibling.textContent = Constants.ZWSP;
-                            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                            updateTransaction(protyle, nodeElement, oldHTML);
                             focusByWbr(nodeElement, range);
                             event.preventDefault();
                             return;
@@ -1009,7 +1009,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             range.insertNode(wbrElement);
                             const oldHTML = nodeElement.outerHTML;
                             wbrElement.previousSibling.textContent = Constants.ZWSP;
-                            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                            updateTransaction(protyle, nodeElement, oldHTML);
                             focusByWbr(nodeElement, range);
                             event.preventDefault();
                             return;
@@ -1070,7 +1070,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         range.deleteContents();
                         range.insertNode(document.createTextNode(Constants.ZWSP));
                         range.insertNode(document.createElement("wbr"));
-                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                        updateTransaction(protyle, nodeElement, oldHTML);
                         focusByWbr(nodeElement, range);
                         event.preventDefault();
                         return;
@@ -1197,7 +1197,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         topElement.lastElementChild.insertAdjacentHTML("afterbegin", `<div class="protyle-attr--name"><svg><use xlink:href="#iconN"></use></svg>${content.trim()}</div>`);
                     }
                     topElement.setAttribute("name", content.trim());
-                    updateTransaction(protyle, topElement.getAttribute("data-node-id"), topElement.outerHTML, oldHTML);
+                    updateTransaction(protyle, topElement, oldHTML);
                 });
             }
             event.preventDefault();
@@ -1502,10 +1502,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const html = nodeElement.outerHTML;
                 // 需要 EscapeHTMLStr https://github.com/siyuan-note/siyuan/issues/11451
                 editElement.innerHTML = "```" + window.siyuan.storage[Constants.LOCAL_CODELANG] + "\n" + Lute.EscapeHTMLStr(editElement.textContent) + "<wbr>\n```";
-                const newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
-                nodeElement.outerHTML = newHTML;
-                const newNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-                updateTransaction(protyle, id, newHTML, html);
+                nodeElement.insertAdjacentHTML("afterend", protyle.lute.SpinBlockDOM(nodeElement.outerHTML));
+                const newNodeElement = nodeElement.nextElementSibling;
+                nodeElement.remove();
+                updateTransaction(protyle, newNodeElement, html);
                 highlightRender(newNodeElement);
                 event.preventDefault();
                 event.stopPropagation();
@@ -1721,7 +1721,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 taskItemElement.classList.add("protyle-task--done");
             }
             taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, taskItemElement.getAttribute("data-node-id"), taskItemElement.outerHTML, html);
+            updateTransaction(protyle, taskItemElement, html);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -1784,7 +1784,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const oldHTML = selectsElement[0].outerHTML;
                     selectsElement[0].setAttribute("data-sb-layout", "row");
                     selectsElement[0].setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, selectsElement[0].getAttribute("data-node-id"), selectsElement[0].outerHTML, oldHTML);
+                    updateTransaction(protyle, selectsElement[0], oldHTML);
                 } else {
                     range.insertNode(document.createElement("wbr"));
                     const sbData = await cancelSB(protyle, selectsElement[0]);
@@ -1813,7 +1813,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const oldHTML = selectsElement[0].outerHTML;
                     selectsElement[0].setAttribute("data-sb-layout", "col");
                     selectsElement[0].setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, selectsElement[0].getAttribute("data-node-id"), selectsElement[0].outerHTML, oldHTML);
+                    updateTransaction(protyle, selectsElement[0], oldHTML);
                 } else {
                     range.insertNode(document.createElement("wbr"));
                     const sbData = await cancelSB(protyle, selectsElement[0]);

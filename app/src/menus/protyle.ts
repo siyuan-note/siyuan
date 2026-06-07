@@ -270,7 +270,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
             click() {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 removeInlineType(refElement, "file-annotation-ref", protyle.toolbar.range);
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 oldHTML = nodeElement.outerHTML;
             }
         }, {
@@ -281,7 +281,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
                 refElement.insertAdjacentHTML("beforebegin", refElement.innerHTML + " ");
                 refElement.textContent = "*";
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 oldHTML = nodeElement.outerHTML;
             }
         }]
@@ -294,7 +294,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
             refElement.insertAdjacentHTML("afterend", "<wbr>");
             refElement.remove();
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            updateTransaction(protyle, nodeElement, oldHTML);
             focusByWbr(nodeElement, protyle.toolbar.range);
             oldHTML = nodeElement.outerHTML;
         }
@@ -327,7 +327,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
     window.siyuan.menus.menu.removeCB = () => {
         if (nodeElement.outerHTML !== oldHTML) {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            updateTransaction(protyle, nodeElement, oldHTML);
         }
 
         const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
@@ -340,7 +340,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
 };
 
 export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
-    const nodeElement = hasClosestBlock(element);
+    let nodeElement = hasClosestBlock(element) as HTMLElement;
     if (!nodeElement) {
         return;
     }
@@ -513,7 +513,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
                         element.innerHTML = response.data;
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                        updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                        updateTransaction(protyle, nodeElement, oldHTML);
                         oldHTML = nodeElement.outerHTML;
                     });
                     focusByRange(protyle.toolbar.range);
@@ -527,7 +527,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 click() {
                     element.setAttribute("data-subtype", "s");
                     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                    updateTransaction(protyle, nodeElement, oldHTML);
                     focusByRange(protyle.toolbar.range);
                     oldHTML = nodeElement.outerHTML;
                 }
@@ -540,7 +540,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             click() {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 removeInlineType(element, "block-ref", protyle.toolbar.range);
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 oldHTML = nodeElement.outerHTML;
             }
         }, {
@@ -551,7 +551,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 element.setAttribute("data-subtype", "s");
                 element.textContent = "*";
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 focusByRange(protyle.toolbar.range);
                 oldHTML = nodeElement.outerHTML;
             }
@@ -564,7 +564,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 element.setAttribute("data-subtype", "s");
                 element.textContent = "*";
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 focusByRange(protyle.toolbar.range);
                 oldHTML = nodeElement.outerHTML;
             }
@@ -575,7 +575,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             click() {
                 element.outerHTML = `<span data-type="a" data-href="siyuan://blocks/${element.getAttribute("data-id")}">${element.innerHTML}</span><wbr>`;
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 focusByWbr(nodeElement, protyle.toolbar.range);
                 oldHTML = nodeElement.outerHTML;
             }
@@ -586,9 +586,10 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 iconHTML: "",
                 label: window.siyuan.languages.blockEmbed,
                 click() {
-                    const html = `<div data-content="select * from blocks where id='${refBlockId}'" data-node-id="${id}" data-type="NodeBlockQueryEmbed" class="render-node" updated="${dayjs().format("YYYYMMDDHHmmss")}">${nodeElement.querySelector(".protyle-attr").outerHTML}</div>`;
-                    nodeElement.outerHTML = html;
-                    updateTransaction(protyle, id, html, oldHTML);
+                    nodeElement.insertAdjacentHTML("afterend", `<div data-content="select * from blocks where id='${refBlockId}'" data-node-id="${id}" data-type="NodeBlockQueryEmbed" class="render-node" updated="${dayjs().format("YYYYMMDDHHmmss")}">${nodeElement.querySelector(".protyle-attr").outerHTML}</div>`);
+                    nodeElement = nodeElement.nextElementSibling as HTMLElement;
+                    nodeElement.previousElementSibling.remove();
+                    updateTransaction(protyle, nodeElement, oldHTML);
                     blockRender(protyle, protyle.wysiwyg.element);
                     oldHTML = nodeElement.outerHTML;
                 }
@@ -644,7 +645,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 element.insertAdjacentHTML("afterend", "<wbr>");
                 element.remove();
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 focusByWbr(nodeElement, protyle.toolbar.range);
                 oldHTML = nodeElement.outerHTML;
             }
@@ -657,7 +658,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 element.insertAdjacentHTML("afterend", "<wbr>");
                 element.remove();
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
                 focusByWbr(nodeElement, protyle.toolbar.range);
                 oldHTML = nodeElement.outerHTML;
             }
@@ -693,7 +694,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         window.siyuan.menus.menu.removeCB = () => {
             if (nodeElement.outerHTML !== oldHTML) {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
             }
             const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
             if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
@@ -760,7 +761,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                 currentRange.extractContents();
                 focusByWbr(nodeElement, currentRange);
                 focusByRange(currentRange);
-                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
             }
         }).element);
     } else {
@@ -796,7 +797,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                             inlineElement.insertAdjacentHTML("afterend", "<wbr>");
                             inlineElement.remove();
                             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                            updateTransaction(protyle, nodeElement, oldHTML);
                             focusByWbr(nodeElement, protyle.toolbar.range);
                         }
                     }).element);
@@ -808,7 +809,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                             inlineElement.insertAdjacentHTML("afterend", "<wbr>");
                             inlineElement.remove();
                             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                            updateTransaction(protyle, nodeElement, oldHTML);
                             focusByWbr(nodeElement, protyle.toolbar.range);
                         }
                     }).element);
@@ -1194,7 +1195,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 writeText(content);
                 (assetElement as HTMLElement).outerHTML = "<wbr>";
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
                 focusByWbr(protyle.wysiwyg.element, range);
             }
         }).element);
@@ -1206,7 +1207,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             click: function () {
                 (assetElement as HTMLElement).outerHTML = "<wbr>";
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
                 focusByWbr(protyle.wysiwyg.element, range);
             }
         }).element);
@@ -1296,7 +1297,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                             return;
                         }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                        updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                        updateTransaction(protyle, nodeElement, html);
                         window.siyuan.menus.menu.remove();
                         focusBlock(nodeElement);
                     });
@@ -1325,7 +1326,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         });
                         rangeElement.addEventListener("change", () => {
                             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                            updateTransaction(protyle, nodeElement, html);
                             window.siyuan.menus.menu.remove();
                             focusBlock(nodeElement);
                         });
@@ -1361,7 +1362,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                             return;
                         }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                        updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                        updateTransaction(protyle, nodeElement, html);
                         window.siyuan.menus.menu.remove();
                         focusBlock(nodeElement);
                     });
@@ -1390,7 +1391,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         });
                         rangeHeightElement.addEventListener("change", () => {
                             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                            updateTransaction(protyle, nodeElement, html);
                             window.siyuan.menus.menu.remove();
                             focusBlock(nodeElement);
                         });
@@ -1465,7 +1466,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             }
             imgElement.setAttribute("alt", textElements[2].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, ""));
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            updateTransaction(protyle, nodeElement, html);
         };
     }
 };
@@ -1634,7 +1635,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 linkElement.insertAdjacentHTML("afterend", "<wbr>");
                 linkElement.remove();
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
                 focusByWbr(nodeElement, protyle.toolbar.range);
                 html = nodeElement.outerHTML;
             }
@@ -1666,7 +1667,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                     linkElement.removeAttribute("data-href");
                     linkElement.removeAttribute("data-title");
                     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                    updateTransaction(protyle, nodeElement, html);
                     protyle.toolbar.range.selectNode(linkElement);
                     protyle.toolbar.range.collapse(false);
                     focusByRange(protyle.toolbar.range);
@@ -1683,7 +1684,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 inputElements[2].value = "";
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 removeInlineType(linkElement, "a", protyle.toolbar.range);
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
                 html = nodeElement.outerHTML;
             }
         }).element);
@@ -1755,7 +1756,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         }
         if (html !== nodeElement.outerHTML) {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            updateTransaction(protyle, nodeElement, html);
         }
     };
 };
@@ -1783,7 +1784,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         }
         if (nodeElement.outerHTML !== oldHTML) {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            updateTransaction(protyle, nodeElement, oldHTML);
         }
     };
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_INLINE_TAG);
@@ -1915,7 +1916,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+            updateTransaction(protyle, nodeElement, oldHTML);
             focusByWbr(nodeElement, protyle.toolbar.range);
         }
     }).element);
@@ -1988,7 +1989,7 @@ export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
                 element.insertAdjacentHTML("afterend", "<wbr>");
                 element.remove();
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
                 focusByWbr(nodeElement, protyle.toolbar.range);
             }
         }).element);
@@ -2011,7 +2012,7 @@ const genImageWidthMenu = (label: string, imgElement: HTMLElement, protyle: IPro
             img3115(imgElement.parentElement.parentElement);
             imgElement.parentElement.style.width = label === window.siyuan.languages.default ? "" : `calc(${label} - 8px)`;
             imgElement.style.height = "";
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            updateTransaction(protyle, nodeElement, html);
             focusBlock(nodeElement);
         }
     };
@@ -2027,7 +2028,7 @@ const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IPr
             imgElement.style.height = label === window.siyuan.languages.default ? "" : parseInt(label) + "vh";
             img3115(imgElement.parentElement.parentElement);
             imgElement.parentElement.style.width = "";
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            updateTransaction(protyle, nodeElement, html);
             focusBlock(nodeElement);
         }
     };
@@ -2088,7 +2089,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
                     iframeElement.setAttribute("src", value);
                 }
 
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
                 html = nodeElement.outerHTML;
                 event.stopPropagation();
             });
@@ -2117,7 +2118,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             element.style.maxWidth = "none";
             element.querySelector("textarea").addEventListener("change", (event) => {
                 videoElement.setAttribute("src", (event.target as HTMLTextAreaElement).value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim());
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
                 html = nodeElement.outerHTML;
                 event.stopPropagation();
             });
@@ -2201,7 +2202,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                     }
                 }
                 focusByRange(range);
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML);
             }
         });
     }
@@ -2214,7 +2215,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                 const html = nodeElement.outerHTML;
                 thMatchElement.style.width = "";
                 thMatchElement.style.minWidth = "60px";
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+                updateTransaction(protyle, nodeElement, html);
             }
         });
     }
@@ -2230,7 +2231,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             } else {
                 nodeElement.setAttribute("custom-pinthead", "true");
             }
-            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+            updateTransaction(protyle, nodeElement, html);
         }
     });
     otherMenus.push({

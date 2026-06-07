@@ -51,6 +51,6 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
     const brElement = wbrElement.parentElement.querySelector("br");
     setLastNodeRange(brElement.previousSibling as Element, range, false);
     brElement.remove();
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+    updateTransaction(protyle, nodeElement, oldHTML);
     wbrElement.remove();
 };

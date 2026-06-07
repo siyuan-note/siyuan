@@ -257,7 +257,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
         }
     });
     range.collapse(false);
-    updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
+    updateTransaction(protyle, blockElement, oldHTML);
     return true;
 };
 
@@ -335,7 +335,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             focusByWbr(blockElement, range);
         }
         blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
+        updateTransaction(protyle, blockElement, oldHTML);
         setTimeout(() => {
             scrollCenter(protyle, undefined, "nearest", "smooth");
         }, Constants.TIMEOUT_LOAD);

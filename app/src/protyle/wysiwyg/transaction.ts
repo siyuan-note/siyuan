@@ -1290,7 +1290,9 @@ export const turnsOneInto = async (options: {
     const parentId = options.nodeElement.parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;
     // @ts-ignore
     const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
-    options.nodeElement.outerHTML = newHTML;
+    options.nodeElement.insertAdjacentHTML("afterend", newHTML);
+    options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;
+    options.nodeElement.previousElementSibling.remove();
     if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
         const tempElement = document.createElement("template");
         tempElement.innerHTML = newHTML;
@@ -1324,7 +1326,7 @@ export const turnsOneInto = async (options: {
         });
         transaction(options.protyle, doOperations, undoOperations);
     } else {
-        updateTransaction(options.protyle, options.id, newHTML, oldHTML);
+        updateTransaction(options.protyle, options.nodeElement, oldHTML);
     }
     focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
     options.protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
@@ -1517,17 +1519,20 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
     }
 };
 
-export const updateTransaction = (protyle: IProtyle, id: string, newHTML: string, html: string) => {
-    if (newHTML === html) {
+export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: string) => {
+    const id = element.getAttribute("data-node-id");
+    const newHTML = element.outerHTML;
+    if (newHTML === oldHTML) {
         return;
     }
+    element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
     transaction(protyle, [{
         id,
         data: newHTML,
         action: "update"
     }], [{
         id,
-        data: html,
+        data: oldHTML,
         action: "update"
     }]);
 };

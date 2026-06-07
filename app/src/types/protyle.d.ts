@@ -519,7 +519,6 @@ interface IProtyle {
     observerLoad?: ResizeObserver,
     observer?: ResizeObserver,
     app: import("../index").App,
-    transactionTime: number,
     id: string,
     query?: {
         key: string,

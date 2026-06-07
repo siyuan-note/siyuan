@@ -524,12 +524,6 @@ interface ISiyuan {
         [key: string]: any
     },
     closedTabs?: ILayoutJSON[]
-    transactions?: {
-        protyle: IProtyle,
-        doOperations: IOperation[],
-        undoOperations: IOperation[],
-        skipSync?: boolean
-    }[]
     reqIds: {
         [key: string]: number
     },
@@ -1222,7 +1216,7 @@ interface IKernelPluginRpcCall {
 
     /**
      * JSON-RPC 2.0 中 id 可以是 string、number 或 null，但为了兼容性和实用性，插件系统中不允许使用 null 作为 id
-     * 
+     *
      * 不设置时且 notification 不为 true 时会自动生成一个唯一的 id，设置时必须保证 id 的唯一性，否则可能会导致响应错误或混乱
      */
     id?: TJsonRpcId;

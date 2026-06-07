@@ -1590,10 +1590,11 @@ func closeDatabase() {
 
 func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 	(*templateFuncMap)["queryBlocks"] = func(stmt string, args ...string) (retBlocks []*Block) {
-		for _, arg := range args {
-			stmt = strings.Replace(stmt, "?", strings.ReplaceAll(arg, "'", "''"), 1)
+		queryArgs := make([]any, len(args))
+		for i, arg := range args {
+			queryArgs[i] = arg
 		}
-		retBlocks = SelectBlocksRawStmt(stmt, 1, 512)
+		retBlocks = SelectBlocksRawStmt(stmt, 1, 512, queryArgs...)
 		return
 	}
 	(*templateFuncMap)["getBlock"] = func(arg any) (retBlock *Block) {
@@ -1608,10 +1609,11 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		return
 	}
 	(*templateFuncMap)["querySpans"] = func(stmt string, args ...string) (retSpans []*Span) {
-		for _, arg := range args {
-			stmt = strings.Replace(stmt, "?", strings.ReplaceAll(arg, "'", "''"), 1)
+		queryArgs := make([]any, len(args))
+		for i, arg := range args {
+			queryArgs[i] = arg
 		}
-		retSpans = SelectSpansRawStmt(stmt, 512)
+		retSpans = SelectSpansRawStmt(stmt, 512, queryArgs...)
 		return
 	}
 	(*templateFuncMap)["querySQL"] = func(stmt string) (ret []map[string]any) {

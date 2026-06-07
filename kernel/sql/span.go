@@ -49,7 +49,7 @@ type Span struct {
 	IAL      string
 }
 
-func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
+func SelectSpansRawStmt(stmt string, limit int, args ...any) (ret []*Span) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
 		//logging.LogErrorf("select [%s] failed: %s", stmt, err)
@@ -76,7 +76,7 @@ func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
 	stmt = strings.ReplaceAll(stmt, "\\\"", "\"")
 	stmt = strings.ReplaceAll(stmt, "\\\\*", "\\*")
 	stmt = strings.ReplaceAll(stmt, "from dual", "")
-	rows, err := query(stmt)
+	rows, err := query(stmt, args...)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return

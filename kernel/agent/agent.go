@@ -46,11 +46,13 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Notebook: a top-level container holding documents. Use notebook.list to see all notebooks. Specify notebook ID when creating documents.
 - hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document tools (document.create, document.move, document.list) refers to hPath, not the internal ID-based filesystem path. When a document is renamed, its hPath changes but its ID stays the same.
 - Document vs block move: document.move performs full document relocation — it moves a document (and its children) to a new parent hPath in a notebook. Requires: id, notebook, path. The notebook ID can be found via document.get (field: Box). block.move repositions a single block under a new parent block — use this for moving content blocks, not entire documents.
+- Dailynote (daily note/diary/journal): a special document created by the dailynote tool that follows the notebook's daily note save path. When the user asks to write or create a diary, daily note, or journal entry, always use dailynote.create (not document.create). dailynote.create creates or retrieves today's daily note for the given notebook; use dailynote.append/prepend to add content to it.
 
 ## Tool Usage Patterns
 - Finding information: search.fulltext (keyword) → block.get (by ID) to read full content. For semantic search use search.semantic.
 - Exploring structure: document.list (see child documents under an hPath) → document.get (read document metadata and content) → block.get_children (list blocks inside a document) → block.get (read a specific block). Use breadcrumb to trace a block's location path.
 - Creating content: document.create specifies the target notebook and hPath to create a document → block.append/prepend/insert to add blocks into the document. Use dataType "markdown" for text content.
+- Creating diary/dailynote: dailynote.create with notebook ID to create or open today's daily note → dailynote.append/prepend to add content. Do not use document.create for diary/dailynote requests.
 - Modifying content: block.update with a block's ID and new markdown content.
 - Organizing: document.move (full document relocation to a new hPath, needs notebook ID from document.get). document.rename changes a document's title (hPath follows). block.move repositions a single block under a new parent — for content blocks, not entire documents. document.delete removes a document by ID.
 - Attributes/properties: use attr.get/set to read/write custom attributes on any block. Use database tools for spreadsheets/attribute views.
@@ -578,6 +580,7 @@ func buildMessages(history []UserMessage, language string, references []Referenc
 	}
 
 	prompt += "\n\nReply in " + langName(language) + "."
+	prompt += "\n\nIn the user's language, a daily note is called: " + util.I18nTerm(language, "dailyNote") + ". When the user asks to write or create this, use dailynote.create, not document.create."
 	if len(references) > 0 {
 		prompt += "\n\nThe user has referenced the following content blocks:\n"
 		for _, ref := range references {

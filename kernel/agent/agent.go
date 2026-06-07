@@ -579,7 +579,7 @@ func buildMessages(history []UserMessage, language string, references []Referenc
 		prompt += "Use the skill tool to load a skill when a task matches its description."
 	}
 
-	prompt += "\n\nReply in " + langName(language) + "."
+	prompt += "\n\nReply in " + util.I18nTerm(language, "_label") + "."
 	prompt += "\n\nIn the user's language, a daily note is called: " + util.I18nTerm(language, "dailyNote") + ". When the user asks to write or create this, use dailynote.create, not document.create."
 	if len(references) > 0 {
 		prompt += "\n\nThe user has referenced the following content blocks:\n"
@@ -602,53 +602,6 @@ func buildMessages(history []UserMessage, language string, references []Referenc
 		})
 	}
 	return messages
-}
-
-func langName(lang string) string {
-	switch lang {
-	case "zh_CN":
-		return "Chinese (简体中文)"
-	case "zh_CHT":
-		return "Traditional Chinese (繁體中文)"
-	case "ja_JP":
-		return "Japanese"
-	case "ko_KR":
-		return "Korean"
-	case "fr_FR":
-		return "French"
-	case "de_DE":
-		return "German"
-	case "es_ES":
-		return "Spanish"
-	case "it_IT":
-		return "Italian"
-	case "pt_BR":
-		return "Portuguese"
-	case "ru_RU":
-		return "Russian"
-	case "ar_SA":
-		return "Arabic"
-	case "he_IL":
-		return "Hebrew"
-	case "hi_IN":
-		return "Hindi"
-	case "id_ID":
-		return "Indonesian"
-	case "nl_NL":
-		return "Dutch"
-	case "pl_PL":
-		return "Polish"
-	case "th_TH":
-		return "Thai"
-	case "tr_TR":
-		return "Turkish"
-	case "uk_UA":
-		return "Ukrainian"
-	case "sk_SK":
-		return "Slovak"
-	default:
-		return "English"
-	}
 }
 
 func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64) {

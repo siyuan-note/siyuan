@@ -977,11 +977,11 @@ export class AgentChat extends Model {
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
         this.addCopyButton(this.currentAIElement);
+        this.flushThinkingStep();
         this.entries.push({type: "assistant", content: this.currentContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
-        this.flushThinkingStep();
         this.currentToolCalls = [];
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
@@ -1066,6 +1066,7 @@ export class AgentChat extends Model {
             if (bubble) {
                 bubble.classList.remove("agent-chat__bubble--streaming");
             }
+            this.flushThinkingStep();
             if (this.currentContent) {
                 this.entries.push({type: "assistant", content: this.currentContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
             }
@@ -1080,7 +1081,6 @@ export class AgentChat extends Model {
             }
             this.updateTokenDisplay();
             this.setStreaming(false);
-        this.flushThinkingStep();
         this.saveSession();
     }
 

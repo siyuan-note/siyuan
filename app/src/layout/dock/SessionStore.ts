@@ -2,7 +2,7 @@ import {fetchSyncPost} from "../../util/fetch";
 
 const SESSIONS_DIR = "data/storage/ai/agent/sessions/";
 
-interface SessionIndexItem {
+export interface SessionIndexItem {
     id: string;
     title: string;
     model?: string;

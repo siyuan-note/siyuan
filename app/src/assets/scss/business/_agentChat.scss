@@ -597,6 +597,12 @@
     max-height: 300px;
 }
 
+.agent-session-popup__search {
+    width: calc(100% - 16px);
+    margin: 0 8px 4px;
+    box-sizing: border-box;
+}
+
 .agent-session-popup__actions {
     display: flex;
     align-items: center;

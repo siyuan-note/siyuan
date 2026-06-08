@@ -10,7 +10,7 @@ import {setPosition} from "../../util/setPosition";
 
 type SessionEntry =
     | {type: "user"; content: string}
-    | {type: "thinking"; reasoning: string; text: string; reasoningContent: string; toolCalls: Array<{name: string; result?: string}>}
+    | {type: "thinking"; steps: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>}
     | {type: "assistant"; content: string; toolCalls?: Array<{name: string; arguments: Record<string, unknown>; result?: string}>};
 
 export class AgentChat extends Model {
@@ -51,6 +51,7 @@ export class AgentChat extends Model {
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
     private currentThinkingReasoningContent = "";
+    private currentThinkingSteps: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}> = [];
     private modelSelect: HTMLSelectElement;
 
     constructor(app: App, tab: Tab) {
@@ -454,6 +455,7 @@ export class AgentChat extends Model {
 
     private async switchSession(id: string) {
         this.setStreaming(false);
+        this.finishActiveThinking();
         this.flushThinkingStep();
         await this.saveSession();
         const session = await SessionStore.load(id);
@@ -522,7 +524,7 @@ export class AgentChat extends Model {
                     this.appendUserMessage((entry as {content: string}).content);
                     break;
                 case "thinking":
-                    this.renderSingleThinkingCard(entry as {reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string});
+                    this.renderMergedThinkingCard((entry as {steps: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>}).steps);
                     break;
                 case "assistant":
                     if (entry.toolCalls && entry.toolCalls.length > 0) {
@@ -541,6 +543,7 @@ export class AgentChat extends Model {
             this.abortController = null;
         }
         this.setStreaming(false);
+        this.finishActiveThinking();
         this.flushThinkingStep();
         await this.saveSession();
         this.sessionId = SessionStore.newSessionId();
@@ -560,6 +563,7 @@ export class AgentChat extends Model {
             this.tokenDisplayEl.classList.add("fn__none");
         }
         this.messagesContainer.innerHTML = "";
+        this.currentThinkingSteps = [];
         this.titleElement.textContent = this.defaultTitle;
         if (this.composer) { this.composer.clear(); }
         if (this.composer) { this.composer.focus(); }
@@ -726,7 +730,6 @@ export class AgentChat extends Model {
 
     private appendToken(token: string) {
         if (!this.currentAIElement) {
-            this.finishActiveThinking();
             this.currentAIElement = this.createAIMessagePlaceholder();
         }
         this.currentContent += token;
@@ -791,11 +794,17 @@ export class AgentChat extends Model {
     }
 
     private appendThinking(reasoning: string) {
+        const L = window.siyuan.languages;
         if (this.currentThinkingText) {
-            this.finishActiveThinking();
+            let doneText = this.currentThinkingText;
+            if (this.currentThinkingReasoning === "analyzing") {
+                doneText = L.agentThinkingAnalyzed || "Analyzed your request...";
+            } else if (this.currentThinkingReasoning === "processing") {
+                doneText = L.agentThinkingProcessed || "Processed results...";
+            }
+            this.currentThinkingText = doneText;
             const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
-            this.entries.push({
-                type: "thinking",
+            this.currentThinkingSteps.push({
                 reasoning: this.currentThinkingReasoning,
                 text: this.currentThinkingText,
                 toolCalls: tc,
@@ -805,7 +814,6 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
-        const L = window.siyuan.languages;
         let text = reasoning;
         let roundLabel = "";
         if (reasoning === "analyzing") {
@@ -830,6 +838,32 @@ export class AgentChat extends Model {
             }
         }
 
+        if (reasoning === "processing" && this.currentAIElement) {
+            if (this.currentContent) {
+                const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
+                if (bubble) { bubble.classList.remove("agent-chat__bubble--streaming"); }
+            } else {
+                this.currentAIElement.remove();
+            }
+            this.currentAIElement = null;
+            this.currentContent = "";
+        }
+
+        const existingCard = this.messagesContainer.querySelector(".agent-chat__msg--thinking") as HTMLElement;
+        const existingBody = existingCard?.querySelector(".agent-chat__thinking-body");
+        if (existingBody) {
+            const textEl = existingCard.querySelector(".agent-chat__thinking-text");
+            if (textEl) { textEl.textContent = text; }
+            if (detailLines) {
+                existingBody.innerHTML += '<div class="agent-chat__thinking-round">' + this.escapeHtml(roundLabel) + "</div>" + detailLines;
+            }
+            this.scrollToBottom();
+            return;
+        }
+        if (existingCard) {
+            existingCard.remove();
+        }
+
         const bodyHTML = '<div class="agent-chat__thinking-body fn__none">' +
             '<div class="agent-chat__thinking-round">' + this.escapeHtml(roundLabel) + "</div>" +
             detailLines +
@@ -848,15 +882,6 @@ export class AgentChat extends Model {
     "</div>" +
     bodyHTML +
 "</div>";
-
-        if (reasoning === "processing" && this.currentAIElement) {
-            if (this.currentContent) {
-                this.finalizeCurrentRound();
-            } else {
-                this.currentAIElement.remove();
-                this.currentAIElement = null;
-            }
-        }
 
         const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
         const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
@@ -877,21 +902,6 @@ export class AgentChat extends Model {
         const thinking = this.messagesContainer.querySelector(".agent-chat__msg--thinking:last-child .agent-chat__thinking-body");
         if (!thinking) { return; }
         thinking.innerHTML += token;
-    }
-
-    private finalizeCurrentRound() {
-        if (!this.currentAIElement) {
-            return;
-        }
-        if (this.currentContent) {
-            this.entries.push({type: "assistant", content: this.currentContent});
-        }
-        const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
-        if (bubble) {
-            bubble.classList.remove("agent-chat__bubble--streaming");
-        }
-        this.currentAIElement = null;
-        this.currentContent = "";
     }
 
     private addCopyButton(el: HTMLElement, contentOverride?: string) {
@@ -944,6 +954,10 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.currentThinkingSteps = [];
+        this.currentThinkingText = "";
+        this.currentThinkingReasoning = "";
+        this.currentThinkingReasoningContent = "";
 
         // Re-submit
         this.setStreaming(true);
@@ -969,6 +983,7 @@ export class AgentChat extends Model {
     }
 
     private finishResponse() {
+        this.finishActiveThinking();
         if (!this.currentAIElement) {
             if (this.currentToolCalls.length === 0) {
                 this.setStreaming(false);
@@ -1028,18 +1043,23 @@ export class AgentChat extends Model {
     }
 
     private flushThinkingStep() {
-        if (!this.currentThinkingText) {
-            return;
+        if (this.currentThinkingText) {
+            const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
+            this.currentThinkingSteps.push({
+                reasoning: this.currentThinkingReasoning,
+                text: this.currentThinkingText,
+                toolCalls: tc,
+                reasoningContent: this.currentThinkingReasoningContent,
+            });
+            this.currentThinkingText = "";
         }
-        const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
-        this.entries.push({
-            type: "thinking",
-            reasoning: this.currentThinkingReasoning,
-            text: this.currentThinkingText,
-            toolCalls: tc,
-            reasoningContent: this.currentThinkingReasoningContent,
-        });
-        this.currentThinkingText = "";
+        if (this.currentThinkingSteps.length > 0) {
+            this.entries.push({
+                type: "thinking",
+                steps: this.currentThinkingSteps.slice(),
+            });
+            this.currentThinkingSteps = [];
+        }
     }
 
     private generateTitle() {
@@ -1061,6 +1081,7 @@ export class AgentChat extends Model {
     }
 
     private appendError(message: string) {
+        this.finishActiveThinking();
         this.clearThinking();
         if (this.currentAIElement && !this.currentContent) {
             this.currentAIElement.remove();
@@ -1076,6 +1097,8 @@ export class AgentChat extends Model {
     }
 
     private appendRetry(attempt: number, maxRetries: number) {
+        this.finishActiveThinking();
+        this.currentThinkingSteps = [];
         this.clearThinking();
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--thinking";
@@ -1100,6 +1123,7 @@ export class AgentChat extends Model {
             if (bubble) {
                 bubble.classList.remove("agent-chat__bubble--streaming");
             }
+            this.finishActiveThinking();
             this.flushThinkingStep();
             if (this.currentContent) {
                 this.entries.push({type: "assistant", content: this.currentContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
@@ -1309,6 +1333,57 @@ export class AgentChat extends Model {
     '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-dot fn__none"></span>' +
         '<span class="agent-chat__thinking-text">' + this.escapeHtml(step.text) + "</span>" +
+        '<span class="agent-chat__thinking-arrow">' +
+            '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
+            '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
+        "</span>" +
+    "</div>" +
+    '<div class="agent-chat__thinking-body fn__none">' +
+        detail +
+    "</div>" +
+"</div>";
+
+        const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
+        const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
+        const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
+        const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
+        header.addEventListener("click", function () {
+            body.classList.toggle("fn__none");
+            const isHidden = body.classList.contains("fn__none");
+            expandIcon.classList.toggle("fn__none", !isHidden);
+            contractIcon.classList.toggle("fn__none", isHidden);
+        });
+        this.messagesContainer.appendChild(el);
+    }
+
+    private renderMergedThinkingCard(steps: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>) {
+        let detail = "";
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            if (step.toolCalls.length > 0) {
+                detail += '<div class="agent-chat__thinking-summary">Tool calls:</div>';
+                for (let j = 0; j < step.toolCalls.length; j++) {
+                    const tc = step.toolCalls[j];
+                    const statusSvg = tc.result
+                        ? ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconCheck"></use></svg>'
+                        : ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconUncheck"></use></svg>';
+                    detail += '<div class="agent-chat__thinking-item">' + this.escapeHtml(tc.name) + statusSvg + "</div>";
+                }
+            }
+            if (step.reasoningContent) {
+                detail += '<div class="agent-chat__thinking-round">Reasoning:</div>';
+                detail += "<div>" + this.escapeHtml(step.reasoningContent) + "</div>";
+            }
+        }
+
+        const headerText = steps[steps.length - 1].text;
+
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--thinking agent-chat__msg--thinking-done";
+        el.innerHTML = '<div class="agent-chat__thinking-card">' +
+    '<div class="agent-chat__thinking-header">' +
+        '<span class="agent-chat__thinking-dot fn__none"></span>' +
+        '<span class="agent-chat__thinking-text">' + this.escapeHtml(headerText) + "</span>" +
         '<span class="agent-chat__thinking-arrow">' +
             '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +

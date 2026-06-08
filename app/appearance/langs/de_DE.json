@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Diese Funktion ist in der frühen Vorschau, noch instabil. Bitte sichern Sie Ihre Daten vor der Verwendung",
   "agentSessionSearch": "Sitzungen suchen...",
   "agentWelcomeGreeting": "Hey, was hast du vor? Ich kümmere mich drum",
   "agentExample1": "Durchsuche meine letzten Besprechungsnotizen",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Maximale API-Wiederholungsversuche bei Fehler",
   "agentThinkingAnalyzing": "Anfrage wird analysiert...",
   "agentThinkingProcessing": "Ergebnisse werden verarbeitet...",
+  "agentThinkingAnalyzed": "Anfrage analysiert...",
+  "agentThinkingProcessed": "Ergebnisse verarbeitet...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Senden",
   "agentQuestionCustom": "Eigene Antwort eingeben...",

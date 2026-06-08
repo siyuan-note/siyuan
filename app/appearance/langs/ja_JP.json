@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 この機能は早期プレビュー段階で、まだ不安定です。使用前にデータをバックアップしてください",
   "agentSessionSearch": "セッションを検索...",
   "agentWelcomeGreeting": "ねえ、何か考えてる？任せて",
   "agentExample1": "最近の会議メモを検索",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "API リクエスト失敗時の最大リトライ回数",
   "agentThinkingAnalyzing": "リクエストを分析中...",
   "agentThinkingProcessing": "結果を処理中...",
+  "agentThinkingAnalyzed": "リクエストを分析済み...",
+  "agentThinkingProcessed": "結果を処理済み...",
   "agentChat": "エージェント",
   "agentQuestionSubmit": "送信",
   "agentQuestionCustom": "自由回答を入力...",

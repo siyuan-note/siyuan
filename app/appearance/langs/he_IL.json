@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 תכונה זו בתצוגה מקדימה מוקדמת, עדיין לא יציבה. אנא גבה את הנתונים שלך לפני השימוש",
   "agentSessionSearch": "חיפוש הפעלות...",
   "agentWelcomeGreeting": "היי, מה בראש? אני אטפל בזה",
   "agentExample1": "חפש את הערות הפגישות האחרונות שלי",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "מקסימום ניסיונות חוזרים של API בכשלון",
   "agentThinkingAnalyzing": "מנתח את הבקשה שלך...",
   "agentThinkingProcessing": "מעבד תוצאות...",
+  "agentThinkingAnalyzed": "הבקשה נותחה...",
+  "agentThinkingProcessed": "תוצאות עובדו...",
   "agentChat": "סוכן",
   "agentQuestionSubmit": "שלח",
   "agentQuestionCustom": "הקלד תשובה...",

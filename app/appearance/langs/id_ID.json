@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Fitur ini dalam pratinjau awal, masih tidak stabil. Harap cadangkan data Anda sebelum digunakan",
   "agentSessionSearch": "Cari sesi...",
   "agentWelcomeGreeting": "Hei, ada rencana apa? Serahkan padaku",
   "agentExample1": "Cari catatan rapat terbaru saya",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Percobaan ulang API maksimum saat gagal",
   "agentThinkingAnalyzing": "Menganalisis permintaan Anda...",
   "agentThinkingProcessing": "Memproses hasil...",
+  "agentThinkingAnalyzed": "Permintaan Anda dianalisis...",
+  "agentThinkingProcessed": "Hasil diproses...",
   "agentChat": "Agen",
   "agentQuestionSubmit": "Kirim",
   "agentQuestionCustom": "Ketik jawaban Anda...",

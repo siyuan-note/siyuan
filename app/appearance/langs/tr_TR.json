@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Bu özellik erken önizleme aşamasında, henüz kararsız. Lütfen kullanmadan önce verilerinizi yedekleyin",
   "agentSessionSearch": "Oturum ara...",
   "agentWelcomeGreeting": "Selam, aklında ne var? Hallederim",
   "agentExample1": "Son toplantı notlarımı ara",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Hata durumunda maks. API yeniden deneme sayısı",
   "agentThinkingAnalyzing": "İsteğiniz analiz ediliyor...",
   "agentThinkingProcessing": "Sonuçlar işleniyor...",
+  "agentThinkingAnalyzed": "İsteğiniz analiz edildi...",
+  "agentThinkingProcessed": "Sonuçlar işlendi...",
   "agentChat": "Ajan",
   "agentQuestionSubmit": "Gönder",
   "agentQuestionCustom": "Cevabınızı yazın...",

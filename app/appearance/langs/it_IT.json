@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Questa funzione è in anteprima anticipata, ancora instabile. Eseguire il backup dei dati prima dell'uso",
   "agentSessionSearch": "Cerca sessioni...",
   "agentWelcomeGreeting": "Ehi, cosa hai in mente? Ci penso io",
   "agentExample1": "Cerca i miei appunti delle riunioni recenti",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Tentativi massimi API in caso di errore",
   "agentThinkingAnalyzing": "Analisi della richiesta...",
   "agentThinkingProcessing": "Elaborazione risultati...",
+  "agentThinkingAnalyzed": "Richiesta analizzata...",
+  "agentThinkingProcessed": "Risultati elaborati...",
   "agentChat": "Agente",
   "agentQuestionSubmit": "Invia",
   "agentQuestionCustom": "Scrivi la tua risposta...",

@@ -24,8 +24,7 @@ export interface AgentSession {
     entries?: Array<{
         type: "user" | "thinking" | "assistant";
         content?: string;
-        reasoning?: string;
-        text?: string;
+        steps?: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>;
         reasoningContent?: string;
         toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>;
     }>;

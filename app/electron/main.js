@@ -328,6 +328,11 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
 };
 
 const initMainWindow = () => {
+    if (!app.isReady()) {
+        writeLog("initMainWindow: app not ready, skipping");
+        return;
+    }
+
     // 恢复主窗体状态
     let oldWindowState = {};
     try {

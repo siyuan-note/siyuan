@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 هذه الميزة في مرحلة المعاينة المبكرة، لا تزال غير مستقرة. يرجى عمل نسخة احتياطية لبياناتك قبل الاستخدام",
   "agentSessionSearch": "البحث عن جلسات...",
   "agentWelcomeGreeting": "مرحبًا، ما الذي يدور في ذهنك؟ سأتولى الأمر",
   "agentExample1": "البحث عن ملاحظات الاجتماعات الأخيرة",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "الحد الأقصى لمحاولات إعادة طلب API عند الفشل",
   "agentThinkingAnalyzing": "جاري تحليل طلبك...",
   "agentThinkingProcessing": "جاري معالجة النتائج...",
+  "agentThinkingAnalyzed": "تم تحليل طلبك...",
+  "agentThinkingProcessed": "تم معالجة النتائج...",
   "agentChat": "وكيل",
   "agentQuestionSubmit": "إرسال",
   "agentQuestionCustom": "اكتب إجابتك...",

@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Táto funkcia je v ranom náhľade, zatiaľ nestabilná. Pred použitím si zálohujte údaje",
   "agentSessionSearch": "Vyhľadať relácie...",
   "agentWelcomeGreeting": "Hej, čo máš na mysli? Postarám sa o to",
   "agentExample1": "Vyhľadať moje nedávne poznámky zo stretnutí",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Max. počet opakovaných pokusov API pri chybe",
   "agentThinkingAnalyzing": "Analyzovanie požiadavky...",
   "agentThinkingProcessing": "Spracovanie výsledkov...",
+  "agentThinkingAnalyzed": "Požiadavka analyzovaná...",
+  "agentThinkingProcessed": "Výsledky spracované...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Odoslať",
   "agentQuestionCustom": "Napíšte odpoveď...",

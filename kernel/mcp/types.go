@@ -17,9 +17,14 @@
 package mcp
 
 const (
-	ProtocolVersion = "2025-06-18"
-	ServerName      = "SiYuan"
+	ProtocolVersion   = "2025-06-18"
+	ProtocolV20260728 = "2026-07-28"
+	ServerName        = "SiYuan"
 )
+
+type Meta struct {
+	ClientInfo *ServerInfo `json:"io.modelcontextprotocol/clientInfo,omitempty"`
+}
 
 type JsonRpcRequest struct {
 	JsonRpc string `json:"jsonrpc"`

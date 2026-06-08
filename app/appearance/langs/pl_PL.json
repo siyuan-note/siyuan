@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Ta funkcja jest we wczesnej fazie podglądu, wciąż niestabilna. Przed użyciem wykonaj kopię zapasową danych",
   "agentSessionSearch": "Szukaj sesji...",
   "agentWelcomeGreeting": "Hej, co masz na myśli? Zajmę się tym",
   "agentExample1": "Wyszukaj moje ostatnie notatki ze spotkań",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Maks. liczba ponownych prób API przy błędzie",
   "agentThinkingAnalyzing": "Analizowanie żądania...",
   "agentThinkingProcessing": "Przetwarzanie wyników...",
+  "agentThinkingAnalyzed": "Żądanie przeanalizowane...",
+  "agentThinkingProcessed": "Wyniki przetworzone...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Wyślij",
   "agentQuestionCustom": "Wpisz odpowiedź...",

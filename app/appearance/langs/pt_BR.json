@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Este recurso está em pré-visualização inicial, ainda instável. Faça backup dos seus dados antes de usar",
   "agentSessionSearch": "Pesquisar sessões...",
   "agentWelcomeGreeting": "Ei, o que tem em mente? Deixa comigo",
   "agentExample1": "Pesquisar minhas anotações de reuniões recentes",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Tentativas máximas da API em caso de falha",
   "agentThinkingAnalyzing": "Analisando sua solicitação...",
   "agentThinkingProcessing": "Processando resultados...",
+  "agentThinkingAnalyzed": "Solicitação analisada...",
+  "agentThinkingProcessed": "Resultados processados...",
   "agentChat": "Agente",
   "agentQuestionSubmit": "Enviar",
   "agentQuestionCustom": "Digite sua resposta...",

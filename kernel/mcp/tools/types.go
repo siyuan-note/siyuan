@@ -20,22 +20,32 @@ type Tool struct {
 	Name        string            `json:"name"`
 	Description string            `json:"description"`
 	InputSchema ToolSchema        `json:"inputSchema"`
+	OutputSchema *ToolSchema      `json:"outputSchema,omitempty"`
 	Handler     func(args map[string]interface{}) (CallToolResult, error) `json:"-"`
 }
 
 type ToolSchema struct {
-	Type       string              `json:"type"`
-	Properties map[string]Property `json:"properties"`
-	Required   []string            `json:"required,omitempty"`
+	Type       string                 `json:"type,omitempty"`
+	Properties map[string]Property    `json:"properties,omitempty"`
+	Required   []string               `json:"required,omitempty"`
+	OneOf      []ToolSchema           `json:"oneOf,omitempty"`
+	AnyOf      []ToolSchema           `json:"anyOf,omitempty"`
+	AllOf      []ToolSchema           `json:"allOf,omitempty"`
+	Ref        string                 `json:"$ref,omitempty"`
+	Defs       map[string]ToolSchema  `json:"$defs,omitempty"`
 }
 
 type Property struct {
-	Type        string              `json:"type"`
+	Type        string              `json:"type,omitempty"`
 	Description string              `json:"description,omitempty"`
 	Enum        []string            `json:"enum,omitempty"`
 	Items       *Property           `json:"items,omitempty"`
 	Properties  map[string]Property `json:"properties,omitempty"`
 	Required    []string            `json:"required,omitempty"`
+	OneOf       []Property          `json:"oneOf,omitempty"`
+	AnyOf       []Property          `json:"anyOf,omitempty"`
+	AllOf       []Property          `json:"allOf,omitempty"`
+	Ref         string              `json:"$ref,omitempty"`
 }
 
 type CallToolResult struct {

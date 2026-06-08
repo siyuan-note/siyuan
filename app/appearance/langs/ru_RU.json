@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 Эта функция на стадии раннего предпросмотра, пока нестабильна. Сделайте резервную копию данных перед использованием",
   "agentSessionSearch": "Поиск сессий...",
   "agentWelcomeGreeting": "Привет, что задумал? Я всё устрою",
   "agentExample1": "Найти мои недавние заметки о встречах",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "Макс. повторных попыток API при сбое",
   "agentThinkingAnalyzing": "Анализ запроса...",
   "agentThinkingProcessing": "Обработка результатов...",
+  "agentThinkingAnalyzed": "Запрос проанализирован...",
+  "agentThinkingProcessed": "Результаты обработаны...",
   "agentChat": "Агент",
   "agentQuestionSubmit": "Отправить",
   "agentQuestionCustom": "Введите свой ответ...",

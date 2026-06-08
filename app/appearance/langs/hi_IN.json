@@ -1,4 +1,5 @@
 {
+  "featurePreview": "💡 यह सुविधा प्रारंभिक पूर्वावलोकन में है, अभी अस्थिर है। कृपया उपयोग से पहले डेटा का बैकअप लें",
   "agentSessionSearch": "सत्र खोजें...",
   "agentWelcomeGreeting": "अरे, क्या सोच रहे हो? मैं संभाल लूंगा",
   "agentExample1": "मेरी हाल की बैठक के नोट्स खोजें",
@@ -17,6 +18,8 @@
   "agentMaxRetriesTip": "विफलता पर API के अधिकतम पुनः प्रयास",
   "agentThinkingAnalyzing": "आपके अनुरोध का विश्लेषण...",
   "agentThinkingProcessing": "परिणाम संसाधित कर रहा है...",
+  "agentThinkingAnalyzed": "आपके अनुरोध का विश्लेषण पूर्ण...",
+  "agentThinkingProcessed": "परिणाम संसाधित...",
   "agentChat": "एजेंट",
   "agentQuestionSubmit": "जमा करें",
   "agentQuestionCustom": "अपना उत्तर लिखें...",

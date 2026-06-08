@@ -55,6 +55,7 @@ export class AgentChat extends Model {
     private currentThinkingSteps: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string; content?: string}> = [];
     private currentThinkingStepContent = "";
     private pendingConfirms: SessionEntry[] = [];
+    private renderedToolNames: Record<string, boolean> = {};
     private modelSelect: HTMLSelectElement;
 
     constructor(app: App, tab: Tab) {
@@ -610,6 +611,7 @@ export class AgentChat extends Model {
         this.sessionCompletionTokens = 0;
         this.sessionTotalDuration = 0;
         this.currentToolCalls = [];
+        this.renderedToolNames = {};
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.classList.add("fn__none");
         }
@@ -896,13 +898,22 @@ export class AgentChat extends Model {
 
         let detailLines = "";
         if (reasoning === "processing" && this.currentToolCalls.length > 0) {
-            const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
-            detailLines += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
+            const newTools: Array<{name: string; result?: string}> = [];
             for (let i = 0; i < this.currentToolCalls.length; i++) {
                 const tc = this.currentToolCalls[i];
-                detailLines += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
+                if (!this.renderedToolNames[tc.name]) {
+                    this.renderedToolNames[tc.name] = true;
+                    newTools.push(tc);
+                }
             }
-            detailLines += '</div>';
+            if (newTools.length > 0) {
+                const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
+                detailLines += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
+                for (let i = 0; i < newTools.length; i++) {
+                    detailLines += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(newTools[i].name) + "</span>";
+                }
+                detailLines += '</div>';
+            }
         }
 
         if (reasoning === "processing" && this.currentAIElement) {
@@ -1045,6 +1056,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.renderedToolNames = {};
         this.currentThinkingSteps = [];
         this.currentThinkingStepContent = "";
         this.currentThinkingText = "";
@@ -1109,6 +1121,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.renderedToolNames = {};
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
@@ -1222,6 +1235,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.renderedToolNames = {};
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;

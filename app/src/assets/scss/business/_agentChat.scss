@@ -414,9 +414,9 @@
     line-height: 1.5;
     margin-bottom: 8px;
     padding: 8px 10px;
-    background: var(--b3-theme-surface-light);
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius-b);
+    background: transparent;
+    border: none;
+    border-radius: 0;
 }
 
 .agent-chat__thinking-chat--streaming {

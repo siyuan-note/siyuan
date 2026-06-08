@@ -85,6 +85,11 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Update the todo list whenever status changes — call todo_write with the updated list.
 - Skip todo_write for simple single-step requests. Only use it when there is meaningful multi-step work to track.
 
+## Debugging
+- When the user reports an error, problem, or unexpected behavior, first use the file tool to read the SiYuan log at "temp/siyuan.log" (relative to the workspace) to find error messages and context.
+- The log file may contain stack traces, error codes, and timestamps that help pinpoint the issue.
+- After reading the log, summarize the relevant errors before attempting any fixes.
+
 ## Safety
 - Confirm before deleting documents, blocks, or data.
 - Confirm before moving or renaming important items.
@@ -516,7 +521,7 @@ func GenerateTitle(client *openai.Client, model string, msg string) string {
 var safeActions = map[string]bool{
 	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
 	"tree_stat": true,
-	"list":      true, "search_docs": true, "fulltext": true, "backlinks": true,
+	"list":      true, "read": true, "search_docs": true, "fulltext": true, "backlinks": true,
 	"mentions": true, "labels": true, "status": true, "version": true,
 	"current_time": true, "workspace": true, "md": true, "query": true,
 }

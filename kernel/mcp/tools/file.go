@@ -36,6 +36,8 @@ var FileTool = &Tool{
 			"action": {Type: "string", Description: "Operation", Enum: []string{"list", "read", "write", "delete", "rename", "copy"}},
 			"path":   {Type: "string", Description: "Relative path within workspace (for list, read, write, delete)"},
 			"data":   {Type: "string", Description: "File content (for write)"},
+			"offset": {Type: "number", Description: "Line number to start reading from (for read, 1-based). Negative means N lines from the end. Default: 0 (read from beginning)."},
+			"limit":  {Type: "number", Description: "Maximum lines to read (for read). Default: all lines."},
 			"old":    {Type: "string", Description: "Source path (for rename)"},
 			"new":    {Type: "string", Description: "Destination path (for rename)"},
 			"src":    {Type: "string", Description: "Source path (for copy)"},
@@ -107,6 +109,15 @@ func fileList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
+func getFloat64Arg(args map[string]interface{}, key string) float64 {
+	if v, ok := args[key]; ok {
+		if f, ok := v.(float64); ok {
+			return f
+		}
+	}
+	return 0
+}
+
 func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
@@ -120,7 +131,43 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "read file failed: " + err.Error()}}, IsError: true}, nil
 	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(data)}}}, nil
+
+	offset := int(getFloat64Arg(args, "offset"))
+	limit := int(getFloat64Arg(args, "limit"))
+
+	if offset == 0 && limit == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(data)}}}, nil
+	}
+
+	lines := strings.Split(string(data), "\n")
+	total := len(lines)
+
+	if offset < 0 {
+		offset = total + offset
+		if offset < 0 {
+			offset = 0
+		}
+	} else {
+		offset--
+		if offset < 0 {
+			offset = 0
+		}
+	}
+
+	end := total
+	if limit > 0 {
+		end = offset + limit
+		if end > total {
+			end = total
+		}
+	}
+
+	if offset >= total {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("(file has %d lines, offset out of range)", total)}}, IsError: true}, nil
+	}
+
+	result := strings.Join(lines[offset:end], "\n")
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: result}}}, nil
 }
 
 func fileWrite(args map[string]interface{}) (CallToolResult, error) {

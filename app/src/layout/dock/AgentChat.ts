@@ -1451,19 +1451,24 @@ export class AgentChat extends Model {
     private renderMergedThinkingCard(steps: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string; content?: string}>) {
         const L = window.siyuan.languages;
         let detail = "";
+        const seenTools: Record<string, boolean> = {};
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             if (step.content) {
                 detail += '<div class="agent-chat__thinking-chat">' + (this.lute.MarkdownStr("", step.content) || this.escapeHtml(step.content)) + "</div>";
             }
             if (step.toolCalls.length > 0) {
-                const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
-                detail += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
-                for (let j = 0; j < step.toolCalls.length; j++) {
-                    const tc = step.toolCalls[j];
-                    detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
+                const newTools = step.toolCalls.filter(tc => !seenTools[tc.name]);
+                if (newTools.length > 0) {
+                    const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
+                    detail += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
+                    for (let j = 0; j < newTools.length; j++) {
+                        const tc = newTools[j];
+                        seenTools[tc.name] = true;
+                        detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
+                    }
+                    detail += '</div>';
                 }
-                detail += '</div>';
             }
             if (step.reasoningContent) {
                 detail += '<div class="agent-chat__thinking-reasoning-text">' + this.escapeHtml(step.reasoningContent) + "</div>";

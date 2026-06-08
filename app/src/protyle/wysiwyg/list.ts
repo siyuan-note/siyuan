@@ -7,6 +7,7 @@ import {moveToPrevious, removeBlock} from "./remove";
 import {hasClosestByClassName, isBlockElement} from "../util/hasClosest";
 import {getParentBlock} from "./getBlock";
 import {setFold} from "../util/blockFold";
+import {scrollCenter} from "../../util/highlightById";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -98,6 +99,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
             id,
         }]);
         focusByWbr(lastElement.nextElementSibling, range);
+        scrollCenter(protyle, lastElement.nextElementSibling);
         return true;
     }
 
@@ -120,6 +122,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
         id,
     }]);
     focusByWbr(newListElement, range);
+    scrollCenter(protyle, newListElement);
     return true;
 };
 

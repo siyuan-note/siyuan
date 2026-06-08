@@ -399,12 +399,6 @@
     border-top: 1px solid var(--b3-border-color);
 }
 
-.agent-chat__thinking-round {
-    font-weight: 500;
-    margin-bottom: 4px;
-    color: var(--b3-theme-on-surface);
-}
-
 .agent-chat__thinking-reasoning-text {
     font-size: 13px;
     color: var(--b3-theme-on-surface);
@@ -432,27 +426,20 @@
 .agent-chat__thinking-summary {
     font-size: 12px;
     color: var(--b3-theme-on-surface-light);
-    margin-top: 4px;
-    margin-bottom: 2px;
 }
 
-.agent-chat__thinking-item {
+.agent-chat__thinking-tools-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    margin-bottom: 4px;
+}
+
+.agent-chat__thinking-tool {
     font-size: 12px;
     color: var(--b3-theme-primary);
-    padding: 1px 0 1px 12px;
-    position: relative;
-}
-
-.agent-chat__thinking-item::before {
-    content: "•";
-    position: absolute;
-    left: 2px;
-}
-
-.agent-chat__thinking-icon {
-    width: 10px;
-    height: 10px;
-    vertical-align: -1px;
+    white-space: nowrap;
 }
 
 @keyframes agentThinkingPulse {

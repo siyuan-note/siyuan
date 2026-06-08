@@ -857,27 +857,23 @@ export class AgentChat extends Model {
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
         let text = reasoning;
-        let roundLabel = "";
         if (reasoning === "analyzing") {
             text = L.agentThinkingAnalyzing || "Analyzing your request...";
-            roundLabel = "Step 1";
         } else if (reasoning === "processing") {
             text = L.agentThinkingProcessing || "Processing results...";
-            roundLabel = "Continuing...";
         }
 
         this.currentThinkingText = text;
 
         let detailLines = "";
         if (reasoning === "processing" && this.currentToolCalls.length > 0) {
-            detailLines += '<div class="agent-chat__thinking-summary">' + (L.agentToolCall || "Tool call") + "s:</div>";
+            const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
+            detailLines += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
             for (let i = 0; i < this.currentToolCalls.length; i++) {
                 const tc = this.currentToolCalls[i];
-                const statusSvg = tc.result
-                    ? ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconCheck"></use></svg>'
-                    : ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconUncheck"></use></svg>';
-                detailLines += '<div class="agent-chat__thinking-item">' + this.escapeHtml(tc.name) + statusSvg + "</div>";
+                detailLines += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
             }
+            detailLines += '</div>';
         }
 
         if (reasoning === "processing" && this.currentAIElement) {
@@ -906,7 +902,7 @@ export class AgentChat extends Model {
             const textEl = existingCard.querySelector(".agent-chat__thinking-text");
             if (textEl) { textEl.textContent = text; }
             if (detailLines) {
-                existingBody.innerHTML += '<div class="agent-chat__thinking-round">' + this.escapeHtml(roundLabel) + "</div>" + detailLines;
+                existingBody.innerHTML += detailLines;
             }
             this.scrollToBottom();
             return;
@@ -916,7 +912,6 @@ export class AgentChat extends Model {
         }
 
         let bodyHTML = '<div class="agent-chat__thinking-body fn__none">' +
-            '<div class="agent-chat__thinking-round">' + this.escapeHtml(roundLabel) + "</div>" +
             detailLines +
         "</div>";
 
@@ -956,10 +951,6 @@ export class AgentChat extends Model {
         const thinking = thinkingElems[thinkingElems.length - 1];
         let reasoningEl: HTMLElement;
         if (isNewRound) {
-            const roundDiv = document.createElement("div");
-            roundDiv.className = "agent-chat__thinking-round";
-            roundDiv.textContent = "Reasoning:";
-            thinking.appendChild(roundDiv);
             reasoningEl = document.createElement("div");
             reasoningEl.className = "agent-chat__thinking-reasoning-text";
             thinking.appendChild(reasoningEl);
@@ -967,10 +958,6 @@ export class AgentChat extends Model {
             const allReasoning = thinking.querySelectorAll(".agent-chat__thinking-reasoning-text");
             reasoningEl = allReasoning[allReasoning.length - 1] as HTMLElement;
             if (!reasoningEl) {
-                const roundDiv = document.createElement("div");
-                roundDiv.className = "agent-chat__thinking-round";
-                roundDiv.textContent = "Reasoning:";
-                thinking.appendChild(roundDiv);
                 reasoningEl = document.createElement("div");
                 reasoningEl.className = "agent-chat__thinking-reasoning-text";
                 thinking.appendChild(reasoningEl);
@@ -1380,17 +1367,14 @@ export class AgentChat extends Model {
     private renderSingleThinkingCard(step: {reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}) {
         let detail = "";
         if (step.toolCalls.length > 0) {
-            detail += '<div class="agent-chat__thinking-summary">Tool calls:</div>';
+            detail += '<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>';
             for (let j = 0; j < step.toolCalls.length; j++) {
                 const tc = step.toolCalls[j];
-                const statusSvg = tc.result
-                    ? ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconCheck"></use></svg>'
-                    : ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconUncheck"></use></svg>';
-                detail += '<div class="agent-chat__thinking-item">' + this.escapeHtml(tc.name) + statusSvg + "</div>";
+                detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
             }
+            detail += '</div>';
         }
         if (step.reasoningContent) {
-            detail += '<div class="agent-chat__thinking-round">Reasoning:</div>';
             detail += "<div>" + this.escapeHtml(step.reasoningContent) + "</div>";
         }
 
@@ -1428,32 +1412,19 @@ export class AgentChat extends Model {
         let detail = "";
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
-            let roundLabel = "";
-            if (step.reasoning === "analyzing") {
-                roundLabel = "Step 1";
-            } else if (step.reasoning === "processing") {
-                roundLabel = "Continuing...";
-            }
-            if (roundLabel) {
-                detail += '<div class="agent-chat__thinking-round">' + this.escapeHtml(roundLabel) + "</div>";
-            }
             if (step.content) {
                 detail += '<div class="agent-chat__thinking-chat">' + (this.lute.MarkdownStr("", step.content) || this.escapeHtml(step.content)) + "</div>";
             }
             if (step.toolCalls.length > 0) {
-                detail += '<div class="agent-chat__thinking-summary">' + (L.agentToolCall || "Tool call") + "s:</div>";
-                detail += '<div class="agent-chat__thinking-tools">';
+                const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
+                detail += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
                 for (let j = 0; j < step.toolCalls.length; j++) {
                     const tc = step.toolCalls[j];
-                    const statusSvg = tc.result
-                        ? ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconCheck"></use></svg>'
-                        : ' <svg class="agent-chat__thinking-icon"><use xlink:href="#iconUncheck"></use></svg>';
-                    detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + statusSvg + "</span>";
+                    detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
                 }
                 detail += '</div>';
             }
             if (step.reasoningContent) {
-                detail += '<div class="agent-chat__thinking-round">Reasoning:</div>';
                 detail += '<div class="agent-chat__thinking-reasoning-text">' + this.escapeHtml(step.reasoningContent) + "</div>";
             }
         }

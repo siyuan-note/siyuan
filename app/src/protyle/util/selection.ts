@@ -357,17 +357,17 @@ export const getSelectionOffset = (selectElement: Node, editorElement?: Element,
     }
     preSelectionRange.setEnd(range.startContainer, range.startOffset);
     // 需加上表格内软换行 br 的长度
-    position.start = preSelectionRange.toString().length + preSelectionRange.cloneContents().querySelectorAll("br").length;
-    position.end = position.start + range.toString().length + range.cloneContents().querySelectorAll("br").length;
+    position.start = preSelectionRange.toString().length + preSelectionRange.cloneContents().querySelectorAll("br, .emoji").length;
+    position.end = position.start + range.toString().length + range.cloneContents().querySelectorAll("br, .emoji").length;
     return position;
 };
 
-function searchNode(
+const searchNode = (
     container: Node,
     startNode: Node,
     predicate: (node: Node) => boolean,
     excludeSibling?: boolean,
-): boolean {
+) => {
     if (!startNode) {
         return false;
     }
@@ -397,7 +397,7 @@ function searchNode(
     }
 
     return false;
-}
+};
 
 export const setLastNodeRange = (editElement: Element, range: Range, setStart = true) => {
     if (!editElement) {
@@ -467,6 +467,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     } else if (isFocus && (isNotEditBlock(container) || container.classList.contains("av"))) {
         return focusBlock(container);
     }
+    const isSame = start === end;
     let startNode: Node;
     searchNode(container, container.firstChild, node => {
         if (node.nodeType === Node.TEXT_NODE) {
@@ -478,7 +479,8 @@ export const focusByOffset = (container: Element, start: number, end: number, is
             start -= dataLength;
             end -= dataLength;
             return false;
-        } else if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === "BR") {
+        } else if (node.nodeType === Node.ELEMENT_NODE &&
+            ((node as Element).tagName === "BR" || (node as Element).classList.contains("emoji"))) {
             if (start <= 1) {
                 startNode = node;
                 return true;
@@ -491,17 +493,21 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 
     let endNode;
     if (startNode) {
-        searchNode(container, startNode, node => {
-            if (node.nodeType === Node.TEXT_NODE) {
-                const dataLength = (node as Text).data.length;
-                if (end <= dataLength) {
-                    endNode = node;
-                    return true;
+        if (isSame) {
+            endNode = startNode;
+        } else {
+            searchNode(container, startNode, node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const dataLength = (node as Text).data.length;
+                    if (end <= dataLength) {
+                        endNode = node;
+                        return true;
+                    }
+                    end -= dataLength;
+                    return false;
                 }
-                end -= dataLength;
-                return false;
-            }
-        });
+            });
+        }
     }
 
     const range = document.createRange();
@@ -518,18 +524,21 @@ export const focusByOffset = (container: Element, start: number, end: number, is
             setLastNodeRange(getContenteditableElement(container as Element), range);
         }
     }
-
-    if (endNode) {
-        if (end <= (endNode as Text).data.length) {
-            range.setEnd(endNode, end);
-        } else {
-            range.setEndAfter(endNode);
-        }
+    if (isSame) {
+        range.collapse(true);
     } else {
-        if (end === 0) {
-            range.setEnd(container, 0);
+        if (endNode) {
+            if (startNode.nodeType === Node.TEXT_NODE && end <= (endNode as Text).data.length) {
+                range.setEnd(endNode, end);
+            } else {
+                range.setEndAfter(endNode);
+            }
         } else {
-            setLastNodeRange(getContenteditableElement(container as Element), range, false);
+            if (end === 0) {
+                range.setEnd(container, 0);
+            } else {
+                setLastNodeRange(getContenteditableElement(container as Element), range, false);
+            }
         }
     }
     if (isFocus) {

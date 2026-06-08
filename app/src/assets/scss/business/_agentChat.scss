@@ -140,10 +140,10 @@
 
 .agent-chat__msg--ai .agent-chat__bubble {
     @extend .agent-chat__bubble-content;
-    background: var(--b3-theme-surface-light);
-    border: 1px solid var(--b3-border-color);
+    background: transparent;
+    border: none;
     color: var(--b3-theme-on-surface);
-    border-radius: var(--b3-border-radius-b);
+    border-radius: 0;
     padding: 8px 12px;
     max-width: 85%;
     word-break: break-word;

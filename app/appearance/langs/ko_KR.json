@@ -26,7 +26,7 @@
   "agentRegenerate": "재생성",
   "agentQuestionSubmitted": "제출됨",
   "agentNewSession": "새 세션",
-  "agentInputPlaceholder": "메시지를 입력하고 @로 참조, Enter로 전송...",
+  "agentInputPlaceholder": "메시지를 입력하고 @로 참조, /스킬, Enter로 전송...",
   "agentSend": "보내기",
   "agentStop": "중지",
   "agentToolCall": "도구 호출",

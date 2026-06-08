@@ -203,6 +203,88 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                     },
                 },
             }),
+            Mention.configure({
+                HTMLAttributes: {class: "agent-mention-chip"},
+                suggestion: {
+                    char: "/",
+                    items: async function ({query}): Promise<BlockHit[]> {
+                        try {
+                            const resp = await fetch("/api/ai/agent/lsSkills", {
+                                method: "POST",
+                                headers: {"Content-Type": "application/json"},
+                            });
+                            const data = await resp.json();
+                            const skills = (data && data.data) ? data.data : [];
+                            const q = query.toLowerCase();
+                            return skills.filter(function (s: Record<string, string>) {
+                                return !q || s.name.toLowerCase().includes(q) || s.description.toLowerCase().includes(q);
+                            }).map(function (s: Record<string, string>) {
+                                return {
+                                    id: s.name,
+                                    label: s.name,
+                                    icon: "",
+                                    hPath: s.description || "",
+                                };
+                            });
+                        } catch (e) {
+                            return [];
+                        }
+                    },
+                    command: function ({editor: ed, range, props}) {
+                        const item = props as BlockHit;
+                        ed.chain().focus().deleteRange(range).insertContent(item.label + " ").run();
+                    },
+                    render: function () {
+                        return {
+                            onStart: function (props) {
+                                suggestionCommand = function (item) { props.command(item); };
+                                openMenu(props.items as BlockHit[], suggestionCommand!, props.clientRect?.bind(props));
+                            },
+                            onUpdate: function (props) {
+                                suggestionCommand = function (item) { props.command(item); };
+                                openMenu(props.items as BlockHit[], suggestionCommand!, props.clientRect?.bind(props));
+                            },
+                            onExit: function () { closeMenu(); },
+                            onKeyDown: function (props) {
+                                if (!suggestionMenu) { return false; }
+                                if (props.event.key === "ArrowDown") {
+                                    props.event.preventDefault();
+                                    const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                                    if (items.length > 0) {
+                                        selectedIndex = (selectedIndex + 1) % items.length;
+                                        updateHighlight();
+                                    }
+                                    return true;
+                                }
+                                if (props.event.key === "ArrowUp") {
+                                    props.event.preventDefault();
+                                    const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                                    if (items.length > 0) {
+                                        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                                        updateHighlight();
+                                    }
+                                    return true;
+                                }
+                                if (props.event.key === "Enter") {
+                                    props.event.preventDefault();
+                                    if (suggestionItems.length > 0 && suggestionCommand) {
+                                        const idx = selectedIndex;
+                                        if (idx >= 0 && idx < suggestionItems.length) {
+                                            suggestionCommand(suggestionItems[idx]);
+                                        }
+                                    }
+                                    return true;
+                                }
+                                if (props.event.key === "Escape") {
+                                    closeMenu();
+                                    return true;
+                                }
+                                return false;
+                            },
+                        };
+                    },
+                },
+            }),
         ],
         editorProps: {
             attributes: {class: "agent-composer__pm"},

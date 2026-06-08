@@ -26,7 +26,7 @@
   "agentRegenerate": "Regenerar",
   "agentQuestionSubmitted": "Enviado",
   "agentNewSession": "Nova sessão",
-  "agentInputPlaceholder": "Digite uma mensagem, @ para referenciar, Enter para enviar...",
+  "agentInputPlaceholder": "Digite uma mensagem, @referência, /habilidade, Enter para enviar...",
   "agentSend": "Enviar",
   "agentStop": "Parar",
   "agentToolCall": "Chamada de ferramenta",

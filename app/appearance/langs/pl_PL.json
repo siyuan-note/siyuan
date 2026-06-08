@@ -26,7 +26,7 @@
   "agentRegenerate": "Wygeneruj ponownie",
   "agentQuestionSubmitted": "Wysłano",
   "agentNewSession": "Nowa sesja",
-  "agentInputPlaceholder": "Wpisz wiadomość, @ aby odwołać, Enter aby wysłać...",
+  "agentInputPlaceholder": "Wpisz wiadomość, @odniesienie, /umiejętność, Enter aby wysłać...",
   "agentSend": "Wyślij",
   "agentStop": "Zatrzymaj",
   "agentToolCall": "Wywołanie narzędzia",

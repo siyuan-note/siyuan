@@ -26,7 +26,7 @@
   "agentRegenerate": "Rigenera",
   "agentQuestionSubmitted": "Inviato",
   "agentNewSession": "Nuova sessione",
-  "agentInputPlaceholder": "Digita un messaggio, @ per riferimento, Invio per inviare...",
+  "agentInputPlaceholder": "Digita un messaggio, @riferimento, /abilità, Invio per inviare...",
   "agentSend": "Invia",
   "agentStop": "Ferma",
   "agentToolCall": "Chiamata strumento",

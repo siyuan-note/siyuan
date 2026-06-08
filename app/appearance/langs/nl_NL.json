@@ -26,7 +26,7 @@
   "agentRegenerate": "Opnieuw",
   "agentQuestionSubmitted": "Verzonden",
   "agentNewSession": "Nieuwe sessie",
-  "agentInputPlaceholder": "Typ een bericht, @ om te verwijzen, Enter om te verzenden...",
+  "agentInputPlaceholder": "Typ een bericht, @referentie, /vaardigheid, Enter om te verzenden...",
   "agentSend": "Verzenden",
   "agentStop": "Stoppen",
   "agentToolCall": "Tool aanroep",

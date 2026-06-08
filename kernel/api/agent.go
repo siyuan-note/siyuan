@@ -346,3 +346,10 @@ func writeSSEEvent(c *gin.Context, eventType string, data interface{}) error {
 func writeSSEError(c *gin.Context, message string) error {
 	return writeSSEEvent(c, "error", map[string]string{"message": message})
 }
+
+func lsSkills(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	skills := util.DiscoverSkills()
+	ret.Data = skills
+}

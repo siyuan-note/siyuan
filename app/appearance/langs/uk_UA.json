@@ -26,7 +26,7 @@
   "agentRegenerate": "Перегенерувати",
   "agentQuestionSubmitted": "Надіслано",
   "agentNewSession": "Нова сесія",
-  "agentInputPlaceholder": "Введіть повідомлення, @ для посилання, Enter для надсилання...",
+  "agentInputPlaceholder": "Введіть повідомлення, @посилання, /навичка, Enter для надсилання...",
   "agentSend": "Надіслати",
   "agentStop": "Зупинити",
   "agentToolCall": "Виклик інструменту",

@@ -26,7 +26,7 @@
   "agentRegenerate": "重新回答",
   "agentQuestionSubmitted": "已提交",
   "agentNewSession": "新会话",
-  "agentInputPlaceholder": "输入消息，@ 引用，回车发送...",
+  "agentInputPlaceholder": "输入消息，@引用，/技能，回车发送...",
   "agentSend": "发送",
   "agentStop": "停止",
   "agentToolCall": "调用工具",

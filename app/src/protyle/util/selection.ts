@@ -505,6 +505,14 @@ export const focusByOffset = (container: Element, start: number, end: number, is
                     }
                     end -= dataLength;
                     return false;
+                } else if (node.nodeType === Node.ELEMENT_NODE &&
+                    ((node as Element).tagName === "BR" || (node as Element).classList.contains("emoji"))) {
+                    if (end <= 1) {
+                        endNode = node;
+                        return true;
+                    }
+                    end -= 1;
+                    return false;
                 }
             });
         }
@@ -528,7 +536,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
         range.collapse(true);
     } else {
         if (endNode) {
-            if (startNode.nodeType === Node.TEXT_NODE && end <= (endNode as Text).data.length) {
+            if (endNode.nodeType === Node.TEXT_NODE && end <= (endNode as Text).data.length) {
                 range.setEnd(endNode, end);
             } else {
                 range.setEndAfter(endNode);

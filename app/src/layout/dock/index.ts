@@ -662,6 +662,7 @@ export class Dock {
             if (isSaveLayout) {
                 this.saveLocalPlugin(type, {show: true});
             }
+            this.showDock();
         }
 
         // dock 中两个面板的显示关系
@@ -718,7 +719,6 @@ export class Dock {
             anotherWnd.element.style.width = "";
         }
         resizeTabs(isSaveLayout);
-        this.showDock();
         if (target.classList.contains("dock__item--active") && !removeDock && (type === "graph" || type === "globalGraph")) {
             const graph = this.data[type] as Graph;
             graph.onGraph(false);

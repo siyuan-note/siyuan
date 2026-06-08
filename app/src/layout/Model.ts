@@ -81,6 +81,10 @@ export class Model {
                 kernelError();
             }
         };
+        if (this.ws) {
+            this.ws.onclose = null;
+            this.ws.close();
+        }
         this.ws = ws;
     }
 

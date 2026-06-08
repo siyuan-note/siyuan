@@ -21,7 +21,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
+    if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed") && !blockElement.classList.contains("code-block")) {
         return;
     }
     const disableElement = isNotEditBlock(blockElement);

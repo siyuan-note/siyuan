@@ -152,10 +152,12 @@ export class Title {
                         event.stopPropagation();
                     }
                 } else if (event.key === "Enter") {
-                    const editElement = getContenteditableElement(protyle.wysiwyg.element.firstElementChild);
-                    if (editElement && editElement.textContent === "" && editElement.getAttribute("placeholder")) {
+                    const firstElement = protyle.wysiwyg.element.firstElementChild;
+                    const editElement = getContenteditableElement(firstElement);
+                    if (editElement && editElement.textContent === "" && editElement.getAttribute("placeholder") ||
+                        firstElement.classList.contains("li")) {
                         // 配合提示文本使用，避免提示文本挤压到第二个块中
-                        focusBlock(protyle.wysiwyg.element.firstElementChild, protyle.wysiwyg.element);
+                        focusBlock(firstElement, protyle.wysiwyg.element);
                     } else {
                         const newId = Lute.NewNodeID();
                         const newElement = genEmptyElement(false, true, newId);

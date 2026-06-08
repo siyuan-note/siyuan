@@ -329,8 +329,7 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
 
 const initMainWindow = () => {
     if (!app.isReady()) {
-        writeLog("initMainWindow: app not ready, deferring");
-        app.whenReady().then(() => initMainWindow());
+        writeLog("initMainWindow: app not ready, skipping");
         return;
     }
 

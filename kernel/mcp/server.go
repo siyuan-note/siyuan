@@ -72,6 +72,12 @@ func handlePost(c *gin.Context) {
 		return
 	}
 
+	protoVersion := c.GetHeader("MCP-Protocol-Version")
+	if protoVersion == ProtocolV20260728 {
+		handlePost2026(c, &req)
+		return
+	}
+
 	var session *Session
 	if req.Method == "initialize" {
 		session = newSession()
@@ -88,12 +94,27 @@ func handlePost(c *gin.Context) {
 		}
 	}
 
-	response := processRequest(&req, session)
+	response := processRequest(&req, session, protoVersion)
 
 	if req.Method == "initialize" {
 		c.Header("Mcp-Session-Id", session.ID)
 	}
 
+	writeResponse(c, response)
+}
+
+func handlePost2026(c *gin.Context, req *JsonRpcRequest) {
+	mcpMethod := c.GetHeader("Mcp-Method")
+	if mcpMethod != "" && mcpMethod != req.Method {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Mcp-Method header does not match body method"})
+		return
+	}
+
+	response := processRequest2026(req)
+	writeResponse(c, response)
+}
+
+func writeResponse(c *gin.Context, response any) {
 	switch v := response.(type) {
 	case nil:
 		c.Status(http.StatusAccepted)

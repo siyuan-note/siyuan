@@ -24,9 +24,10 @@ import (
 var supportedProtocolVersions = map[string]bool{
 	"2025-06-18": true,
 	"2024-11-05": true,
+	"2026-07-28": true,
 }
 
-func processRequest(req *JsonRpcRequest, session *Session) any {
+func processRequest(req *JsonRpcRequest, session *Session, protocolVersion string) any {
 	isNotification := req.ID == nil
 
 	switch req.Method {
@@ -55,6 +56,50 @@ func processRequest(req *JsonRpcRequest, session *Session) any {
 			return nil
 		}
 		return handleToolsList(req.ID)
+
+	case "tools/call":
+		if isNotification {
+			return nil
+		}
+		return handleToolsCall(req)
+
+	default:
+		if isNotification {
+			return nil
+		}
+		return &JsonRpcErrorResponse{
+			JsonRpc: "2.0",
+			Error:   RpcError{Code: -32601, Message: "Method not found"},
+			ID:      req.ID,
+		}
+	}
+}
+
+func processRequest2026(req *JsonRpcRequest) any {
+	isNotification := req.ID == nil
+
+	switch req.Method {
+	case "server/discover":
+		if isNotification {
+			return nil
+		}
+		return handleDiscover(req)
+
+	case "ping":
+		if isNotification {
+			return nil
+		}
+		return &JsonRpcResponse{
+			JsonRpc: "2.0",
+			Result:  map[string]interface{}{},
+			ID:      req.ID,
+		}
+
+	case "tools/list":
+		if isNotification {
+			return nil
+		}
+		return handleToolsList2026(req.ID)
 
 	case "tools/call":
 		if isNotification {
@@ -166,5 +211,38 @@ func handleToolsCall(req *JsonRpcRequest) any {
 		JsonRpc: "2.0",
 		Result:  result,
 		ID:      req.ID,
+	}
+}
+
+func handleDiscover(req *JsonRpcRequest) *JsonRpcResponse {
+	return &JsonRpcResponse{
+		JsonRpc: "2.0",
+		Result: map[string]interface{}{
+			"protocolVersion": ProtocolV20260728,
+			"capabilities": ServerCapabilities{
+				Tools: &ToolsCapability{ListChanged: false},
+			},
+			"serverInfo": ServerInfo{
+				Name:    ServerName,
+				Version: util.Ver,
+			},
+		},
+		ID: req.ID,
+	}
+}
+
+func handleToolsList2026(id any) *JsonRpcResponse {
+	toolList := make([]*tools.Tool, 0, len(tools.Registry))
+	for _, t := range tools.Registry {
+		toolList = append(toolList, t)
+	}
+	return &JsonRpcResponse{
+		JsonRpc: "2.0",
+		Result: map[string]interface{}{
+			"tools":      toolList,
+			"ttlMs":      60000,
+			"cacheScope": "user",
+		},
+		ID: id,
 	}
 }

@@ -21,7 +21,7 @@ import (
 )
 
 func convertMCPSchema(inputSchema any) tools.ToolSchema {
-	schema := tools.ToolSchema{Type: "object"}
+	schema := tools.ToolSchema{}
 
 	if inputSchema == nil {
 		return schema
@@ -49,6 +49,29 @@ func convertMCPSchema(inputSchema any) tools.ToolSchema {
 			if s, ok := r.(string); ok {
 				schema.Required = append(schema.Required, s)
 			}
+		}
+	}
+
+	if oneOf, ok := m["oneOf"].([]any); ok {
+		schema.OneOf = convertSchemaArray(oneOf)
+	}
+
+	if anyOf, ok := m["anyOf"].([]any); ok {
+		schema.AnyOf = convertSchemaArray(anyOf)
+	}
+
+	if allOf, ok := m["allOf"].([]any); ok {
+		schema.AllOf = convertSchemaArray(allOf)
+	}
+
+	if ref, ok := m["$ref"].(string); ok {
+		schema.Ref = ref
+	}
+
+	if defs, ok := m["$defs"].(map[string]any); ok {
+		schema.Defs = make(map[string]tools.ToolSchema)
+		for name, def := range defs {
+			schema.Defs[name] = convertMCPSchema(def)
 		}
 	}
 
@@ -101,5 +124,37 @@ func convertMCPProperty(val any) tools.Property {
 		}
 	}
 
+	if oneOf, ok := m["oneOf"].([]any); ok {
+		prop.OneOf = convertPropArray(oneOf)
+	}
+
+	if anyOf, ok := m["anyOf"].([]any); ok {
+		prop.AnyOf = convertPropArray(anyOf)
+	}
+
+	if allOf, ok := m["allOf"].([]any); ok {
+		prop.AllOf = convertPropArray(allOf)
+	}
+
+	if ref, ok := m["$ref"].(string); ok {
+		prop.Ref = ref
+	}
+
 	return prop
+}
+
+func convertSchemaArray(arr []any) []tools.ToolSchema {
+	result := make([]tools.ToolSchema, 0, len(arr))
+	for _, item := range arr {
+		result = append(result, convertMCPSchema(item))
+	}
+	return result
+}
+
+func convertPropArray(arr []any) []tools.Property {
+	result := make([]tools.Property, 0, len(arr))
+	for _, item := range arr {
+		result = append(result, convertMCPProperty(item))
+	}
+	return result
 }

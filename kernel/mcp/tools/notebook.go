@@ -19,18 +19,20 @@ package tools
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 )
 
 var NotebookTool = &Tool{
 	Name:        "notebook",
-	Description: "Notebook management for SiYuan.\n- list: List all notebooks.\n- create: Create a notebook. Requires: name.\n- rename: Rename a notebook. Requires: id, name.\n- remove: Remove a notebook. Requires: id.",
+	Description: "Notebook management for SiYuan.\n- list: List all notebooks.\n- open: Open a notebook. Requires: id.\n- close: Close a notebook. Requires: id.\n- create: Create a notebook. Requires: name.\n- rename: Rename a notebook. Requires: id, name.\n- remove: Remove a notebook. Requires: id.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"list", "create", "rename", "remove"}},
-			"id":     {Type: "string", Description: "Notebook ID (for rename, remove)"},
+			"action": {Type: "string", Description: "Operation", Enum: []string{"list", "open", "close", "create", "rename", "remove"}},
+			"id":     {Type: "string", Description: "Notebook ID (for open, close, rename, remove)"},
 			"name":   {Type: "string", Description: "Notebook name (for create, rename)"},
 		},
 		Required: []string{"action"},
@@ -47,6 +49,10 @@ func notebookHandler(args map[string]interface{}) (CallToolResult, error) {
 	switch action {
 	case "list":
 		return notebookList(args)
+	case "open":
+		return notebookOpen(args)
+	case "close":
+		return notebookClose(args)
 	case "create":
 		return notebookCreate(args)
 	case "rename":
@@ -55,7 +61,7 @@ func notebookHandler(args map[string]interface{}) (CallToolResult, error) {
 		return notebookRemove(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, create, rename, remove]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, open, close, create, rename, remove]"}},
 		IsError: true,
 	}, nil
 }
@@ -113,4 +119,33 @@ func notebookRemove(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook removed: " + id}}}, nil
+}
+
+func notebookOpen(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+
+	_, err := model.Mount(id)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "open notebook failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	if model.IsUserGuide(id) {
+		time.Sleep(7 * time.Second)
+		sql.FlushQueue()
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook opened: " + id}}}, nil
+}
+
+func notebookClose(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+
+	model.Unmount(id)
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook closed: " + id}}}, nil
 }

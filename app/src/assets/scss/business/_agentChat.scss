@@ -340,8 +340,7 @@
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius);
     overflow: hidden;
-    font-size: 13px;
-    background: var(--b3-theme-background);
+    background: transparent;
 }
 
 .agent-chat__msg--thinking-done {
@@ -358,7 +357,7 @@
     gap: 8px;
     padding: 4px 8px;
     cursor: pointer;
-    background: var(--b3-theme-background);
+    background: transparent;
     color: var(--b3-theme-on-surface-light);
     user-select: none;
     font-style: italic;
@@ -393,12 +392,11 @@
 
 .agent-chat__thinking-body {
     padding: 8px 12px;
-    background: var(--b3-theme-surface);
+    background: transparent;
     border-top: 1px solid var(--b3-border-color);
 }
 
 .agent-chat__thinking-reasoning-text {
-    font-size: 13px;
     color: var(--b3-theme-on-surface);
     line-height: 1.5;
     margin-bottom: 8px;
@@ -407,7 +405,6 @@
 }
 
 .agent-chat__thinking-chat {
-    font-size: 13px;
     color: var(--b3-theme-on-surface);
     line-height: 1.5;
     margin-bottom: 8px;

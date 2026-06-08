@@ -23,6 +23,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var NotebookTool = &Tool{
@@ -127,7 +128,7 @@ func notebookOpen(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	_, err := model.Mount(id)
+	existed, err := model.Mount(id)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "open notebook failed: " + err.Error()}}, IsError: true}, nil
 	}
@@ -135,6 +136,15 @@ func notebookOpen(args map[string]interface{}) (CallToolResult, error) {
 	if model.IsUserGuide(id) {
 		time.Sleep(7 * time.Second)
 		sql.FlushQueue()
+	}
+
+	if box := model.Conf.Box(id); nil != box {
+		evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
+		evt.Data = map[string]any{
+			"box":     box,
+			"existed": existed,
+		}
+		util.PushEvent(evt)
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook opened: " + id}}}, nil

@@ -787,3 +787,13 @@
     padding: 8px 12px;
     border-top: 1px solid var(--b3-border-color);
 }
+
+.agent-chat__preview-notice {
+    font-size: 12px;
+    text-align: center;
+    padding: 4px 12px;
+    color: var(--b3-card-warning-color);
+    background: var(--b3-card-warning-background);
+    border-top: 1px solid var(--b3-card-warning-color);
+    flex-shrink: 0;
+}

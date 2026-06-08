@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/filelock"
@@ -217,6 +218,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		defer close(ch)
 		defer func() {
 			if r := recover(); r != nil {
+				logging.LogErrorf("agent chat panic: %v\n%s", r, logging.ShortStack())
 				sendEvent(ch, AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)})
 			}
 		}()

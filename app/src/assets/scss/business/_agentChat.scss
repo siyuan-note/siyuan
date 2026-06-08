@@ -608,6 +608,12 @@
         flex: 1;
         min-height: 0;
     }
+
+    .b3-menu__label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 .agent-session-popup__search {

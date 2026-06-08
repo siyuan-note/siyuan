@@ -21,6 +21,7 @@ export interface AgentSession {
     title: string;
     titled?: boolean;
     model?: string;
+    messages?: Array<{role: string; content: string}>;
     entries?: Array<{
         type: "user" | "thinking" | "assistant";
         content?: string;

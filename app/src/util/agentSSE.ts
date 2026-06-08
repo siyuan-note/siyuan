@@ -43,7 +43,7 @@ export async function fetchAgentSSE(
     messages: Array<{role: string; content: string}>,
     language: string,
     references: Array<{id: string; title: string}>,
-    onEvent: (event: ISSEResult) => void,
+    onEvent: (event: ISSEResult) => void | Promise<void>,
     onError: (err: Error) => void,
     signal?: AbortSignal,
     sessionID?: string,
@@ -98,7 +98,7 @@ export async function fetchAgentSSE(
                             const data = JSON.parse(dataStr);
                             const result = buildSSEResult(currentEvent, data);
                             if (result) {
-                                onEvent(result);
+                                await onEvent(result);
                             }
                         } catch (e) {
                             // skip malformed data
@@ -119,7 +119,7 @@ export async function fetchAgentSSE(
                         const data = JSON.parse(dataStr);
                         const result = buildSSEResult(currentEvent, data);
                         if (result) {
-                            onEvent(result);
+                            await onEvent(result);
                         }
                     } catch (e) {
                         // skip malformed data

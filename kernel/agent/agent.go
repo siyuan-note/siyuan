@@ -254,9 +254,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)})
 					continue
 				}
-				sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
-				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
-				return
+			sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
+			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
+			return
 			}
 
 			var contentBuilder strings.Builder

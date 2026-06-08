@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "จำนวนครั้งสูงสุดในการลอง API ใหม่เมื่อล้มเหลว",
   "agentThinkingAnalyzing": "กำลังวิเคราะห์คำขอ...",
   "agentThinkingProcessing": "กำลังประมวลผล...",
+  "agentThinkingAnalyzed": "วิเคราะห์คำขอแล้ว...",
+  "agentThinkingProcessed": "ประมวลผลแล้ว...",
   "agentChat": "เอเจนต์",
   "agentQuestionSubmit": "ส่ง",
   "agentQuestionCustom": "พิมพ์คำตอบของคุณ...",

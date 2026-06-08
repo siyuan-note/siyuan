@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "الحد الأقصى لمحاولات إعادة طلب API عند الفشل",
   "agentThinkingAnalyzing": "جاري تحليل طلبك...",
   "agentThinkingProcessing": "جاري معالجة النتائج...",
+  "agentThinkingAnalyzed": "تم تحليل طلبك...",
+  "agentThinkingProcessed": "تم معالجة النتائج...",
   "agentChat": "وكيل",
   "agentQuestionSubmit": "إرسال",
   "agentQuestionCustom": "اكتب إجابتك...",

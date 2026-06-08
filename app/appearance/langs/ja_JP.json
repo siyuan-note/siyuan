@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "API リクエスト失敗時の最大リトライ回数",
   "agentThinkingAnalyzing": "リクエストを分析中...",
   "agentThinkingProcessing": "結果を処理中...",
+  "agentThinkingAnalyzed": "リクエストを分析済み...",
+  "agentThinkingProcessed": "結果を処理済み...",
   "agentChat": "エージェント",
   "agentQuestionSubmit": "送信",
   "agentQuestionCustom": "自由回答を入力...",

@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "Макс. повторних спроб API при збої",
   "agentThinkingAnalyzing": "Аналіз запиту...",
   "agentThinkingProcessing": "Обробка результатів...",
+  "agentThinkingAnalyzed": "Запит проаналізовано...",
+  "agentThinkingProcessed": "Результати оброблено...",
   "agentChat": "Агент",
   "agentQuestionSubmit": "Надіслати",
   "agentQuestionCustom": "Введіть свою відповідь...",

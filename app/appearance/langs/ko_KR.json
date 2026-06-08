@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "API 요청 실패 시 최대 재시도 횟수",
   "agentThinkingAnalyzing": "요청 분석 중...",
   "agentThinkingProcessing": "결과 처리 중...",
+  "agentThinkingAnalyzed": "요청 분석 완료...",
+  "agentThinkingProcessed": "결과 처리 완료...",
   "agentChat": "에이전트",
   "agentQuestionSubmit": "제출",
   "agentQuestionCustom": "직접 입력...",

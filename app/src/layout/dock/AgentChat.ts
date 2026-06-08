@@ -792,6 +792,7 @@ export class AgentChat extends Model {
 
     private appendThinking(reasoning: string) {
         if (this.currentThinkingText) {
+            this.finishActiveThinking();
             const tc = this.currentToolCalls.map(function (t) { return {name: t.name, result: t.result}; });
             this.entries.push({
                 type: "thinking",
@@ -801,7 +802,6 @@ export class AgentChat extends Model {
                 reasoningContent: this.currentThinkingReasoningContent,
             });
         }
-        this.finishActiveThinking();
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
@@ -1365,17 +1365,28 @@ export class AgentChat extends Model {
     }
 
     private finishActiveThinking() {
-        const items = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking");
+        const L = window.siyuan.languages;
+        let doneText = "";
+        if (this.currentThinkingReasoning === "analyzing") {
+            doneText = L.agentThinkingAnalyzed || "Analyzed your request...";
+        } else if (this.currentThinkingReasoning === "processing") {
+            doneText = L.agentThinkingProcessed || "Processed results...";
+        }
+        this.currentThinkingText = doneText || this.currentThinkingText;
+
+        const items = this.messagesContainer.querySelectorAll(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+        );
         for (let i = 0; i < items.length; i++) {
             const el = items[i] as HTMLElement;
             el.classList.add("agent-chat__msg--thinking-done");
             const dot = el.querySelector(".agent-chat__thinking-dot");
             if (dot) { dot.classList.add("fn__none"); }
-            const textEl = el.querySelector(".agent-chat__thinking-text");
-            if (textEl) {
-                const raw = textEl.textContent || "";
-                if (raw.indexOf("分析") >= 0) { textEl.textContent = raw.replace("正在分析", "已分析"); }
-                else if (raw.indexOf("处理") >= 0) { textEl.textContent = raw.replace("正在处理", "已处理"); }
+            if (doneText) {
+                const textEl = el.querySelector(".agent-chat__thinking-text");
+                if (textEl) {
+                    textEl.textContent = doneText;
+                }
             }
         }
     }

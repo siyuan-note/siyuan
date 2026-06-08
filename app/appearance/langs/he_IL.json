@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "מקסימום ניסיונות חוזרים של API בכשלון",
   "agentThinkingAnalyzing": "מנתח את הבקשה שלך...",
   "agentThinkingProcessing": "מעבד תוצאות...",
+  "agentThinkingAnalyzed": "הבקשה נותחה...",
+  "agentThinkingProcessed": "תוצאות עובדו...",
   "agentChat": "סוכן",
   "agentQuestionSubmit": "שלח",
   "agentQuestionCustom": "הקלד תשובה...",

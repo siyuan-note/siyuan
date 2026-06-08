@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "Max. počet opakovaných pokusov API pri chybe",
   "agentThinkingAnalyzing": "Analyzovanie požiadavky...",
   "agentThinkingProcessing": "Spracovanie výsledkov...",
+  "agentThinkingAnalyzed": "Požiadavka analyzovaná...",
+  "agentThinkingProcessed": "Výsledky spracované...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Odoslať",
   "agentQuestionCustom": "Napíšte odpoveď...",

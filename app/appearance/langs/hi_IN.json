@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "विफलता पर API के अधिकतम पुनः प्रयास",
   "agentThinkingAnalyzing": "आपके अनुरोध का विश्लेषण...",
   "agentThinkingProcessing": "परिणाम संसाधित कर रहा है...",
+  "agentThinkingAnalyzed": "आपके अनुरोध का विश्लेषण पूर्ण...",
+  "agentThinkingProcessed": "परिणाम संसाधित...",
   "agentChat": "एजेंट",
   "agentQuestionSubmit": "जमा करें",
   "agentQuestionCustom": "अपना उत्तर लिखें...",

@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "Max API retry attempts on failure",
   "agentThinkingAnalyzing": "Analyzing your request...",
   "agentThinkingProcessing": "Processing results...",
+  "agentThinkingAnalyzed": "Analyzed your request...",
+  "agentThinkingProcessed": "Processed results...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Submit",
   "agentQuestionCustom": "Type your own answer...",

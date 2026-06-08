@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "Hata durumunda maks. API yeniden deneme sayısı",
   "agentThinkingAnalyzing": "İsteğiniz analiz ediliyor...",
   "agentThinkingProcessing": "Sonuçlar işleniyor...",
+  "agentThinkingAnalyzed": "İsteğiniz analiz edildi...",
+  "agentThinkingProcessed": "Sonuçlar işlendi...",
   "agentChat": "Ajan",
   "agentQuestionSubmit": "Gönder",
   "agentQuestionCustom": "Cevabınızı yazın...",

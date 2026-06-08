@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "API 请求失败时的最大重试次数",
   "agentThinkingAnalyzing": "正在分析你的请求...",
   "agentThinkingProcessing": "正在处理结果...",
+  "agentThinkingAnalyzed": "已分析你的请求...",
+  "agentThinkingProcessed": "已处理结果...",
   "agentChat": "智能体",
   "agentQuestionSubmit": "提交",
   "agentQuestionCustom": "输入自定义答案...",

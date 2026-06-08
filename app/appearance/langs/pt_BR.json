@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "Tentativas máximas da API em caso de falha",
   "agentThinkingAnalyzing": "Analisando sua solicitação...",
   "agentThinkingProcessing": "Processando resultados...",
+  "agentThinkingAnalyzed": "Solicitação analisada...",
+  "agentThinkingProcessed": "Resultados processados...",
   "agentChat": "Agente",
   "agentQuestionSubmit": "Enviar",
   "agentQuestionCustom": "Digite sua resposta...",

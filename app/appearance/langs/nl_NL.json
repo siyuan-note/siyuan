@@ -18,6 +18,8 @@
   "agentMaxRetriesTip": "Max. API-herhalingspogingen bij fout",
   "agentThinkingAnalyzing": "Verzoek analyseren...",
   "agentThinkingProcessing": "Resultaten verwerken...",
+  "agentThinkingAnalyzed": "Verzoek geanalyseerd...",
+  "agentThinkingProcessed": "Resultaten verwerkt...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Verzenden",
   "agentQuestionCustom": "Typ je antwoord...",

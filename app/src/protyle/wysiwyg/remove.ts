@@ -215,6 +215,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                         id: listElement.getAttribute("data-node-id"),
                         data: listElement.outerHTML
                     });
+                    listElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                     updateListOrder(listElement, 1);
                     deletes.push({
                         action: "update",
@@ -428,7 +429,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
 
     const parentElement = hasClosestBlock(getParentBlock(blockElement));
     const editableElement = getContenteditableElement(blockElement);
-    const previousLastElement = getLastBlock(previousElement) as HTMLElement;
+    let previousLastElement = getLastBlock(previousElement) as HTMLElement;
     if (range.toString() === "" && isMobile() && previousLastElement && previousLastElement.classList.contains("hr") && getSelectionOffset(editableElement).start === 0) {
         transaction(protyle, [{
             action: "delete",
@@ -564,7 +565,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             }
         }
         // 图片前删除到上一个文字块时，图片前有 zwsp
-        previousLastElement.outerHTML = protyle.lute.SpinBlockDOM(previousLastElement.outerHTML);
+        previousLastElement.insertAdjacentHTML("afterend",  protyle.lute.SpinBlockDOM(previousLastElement.outerHTML));
+        previousLastElement = previousLastElement.nextElementSibling as HTMLElement;
+        previousLastElement.previousElementSibling.remove();
         mathRender(getPreviousBlock(removeElement) as HTMLElement);
         const removeParentElement = removeElement.parentElement;
         // https://github.com/siyuan-note/siyuan/issues/12327
@@ -706,6 +709,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
         if (listElement.getAttribute("data-subtype") === "o") {
             updateListOrder(listElement, parseInt(listElement.firstElementChild.getAttribute("data-marker")) - 1);
         }
+        listElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         doOperations.splice(0, 0, {
             action: "update",
             id: listElement.getAttribute("data-node-id"),
@@ -836,6 +840,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
                     id: nextId,
                     data: nextElement.outerHTML
                 });
+                nextElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 nextElement = nextElement.nextElementSibling;
             }
         }

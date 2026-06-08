@@ -269,6 +269,22 @@ const promiseTransaction = (options: {
                 });
             }
         });
+        // 删除仅有的折叠标题后展开内容为空
+        if (protyle.wysiwyg.element.childElementCount === 0 &&
+            // 聚焦时不需要新增块，否则会导致 https://github.com/siyuan-note/siyuan/issues/12326 第一点
+            !protyle.block.showAll) {
+            const newID = Lute.NewNodeID();
+            const emptyElement = genEmptyElement(false, true, newID);
+            protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
+            transaction(protyle, [{
+                action: "insert",
+                data: emptyElement.outerHTML,
+                id: newID,
+                parentID: protyle.block.parentID
+            }]);
+            // 不能撤销，否则就无限循环了
+            focusByWbr(emptyElement, range);
+        }
     }
     fetchPost("/api/transactions", {
         session: protyle.id,
@@ -290,22 +306,6 @@ const promiseTransaction = (options: {
                     return;
                 }
             });
-        }
-        // 删除仅有的折叠标题后展开内容为空
-        if (protyle.wysiwyg.element.childElementCount === 0 &&
-            // 聚焦时不需要新增块，否则会导致 https://github.com/siyuan-note/siyuan/issues/12326 第一点
-            !protyle.block.showAll) {
-            const newID = Lute.NewNodeID();
-            const emptyElement = genEmptyElement(false, true, newID);
-            protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-            transaction(protyle, [{
-                action: "insert",
-                data: emptyElement.outerHTML,
-                id: newID,
-                parentID: protyle.block.parentID
-            }]);
-            // 不能撤销，否则就无限循环了
-            focusByWbr(emptyElement, range);
         }
     });
 };

@@ -43,6 +43,10 @@ export class AgentChat extends Model {
     private abortController: AbortController | null = null;
     private isRenderingSessionList = false;
     private sessionListItems: SessionIndexItem[] = [];
+    private sessionListTotal = 0;
+    private sessionListPage = 0;
+    private isLoadingMore = false;
+    private searchTimer: number | null = null;
     private currentSearchKeyword = "";
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
@@ -241,14 +245,19 @@ export class AgentChat extends Model {
         this.sessionPopup = null;
         this.currentSearchKeyword = "";
         this.sessionListItems = [];
+        this.sessionListTotal = 0;
+        this.sessionListPage = 0;
+        if (this.searchTimer !== null) { clearTimeout(this.searchTimer); this.searchTimer = null; }
     }
 
     private async renderSessionList() {
         this.isRenderingSessionList = true;
         this.closeSessionMenu();
         try {
-            this.sessionListItems = await SessionStore.list();
-            this.sessionListItems.sort((a, b) => b.createdAt - a.createdAt);
+            const result = await SessionStore.list({page: 1, pageSize: 30});
+            this.sessionListItems = result.sessions;
+            this.sessionListTotal = result.total;
+            this.sessionListPage = 1;
 
             this.sessionPopup = document.createElement("div");
             this.sessionPopup.className = "agent-session-popup b3-menu";
@@ -261,14 +270,21 @@ export class AgentChat extends Model {
             this.sessionPopup.innerHTML = html;
 
             const itemsContainer = this.sessionPopup.querySelector(".b3-menu__items") as HTMLElement;
-            this.rebuildSessionItems(itemsContainer);
-
+            this.renderSessionItems(itemsContainer, result.sessions, false);
             const searchInput = this.sessionPopup.querySelector(".agent-session-popup__search") as HTMLInputElement;
             searchInput.addEventListener("input", () => {
                 this.filterSessionList(searchInput.value, itemsContainer);
             });
             searchInput.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
+            });
+
+            itemsContainer.addEventListener("scroll", () => {
+                if (this.isLoadingMore) { return; }
+                if (this.sessionListItems.length >= this.sessionListTotal) { return; }
+                if (itemsContainer.scrollHeight - itemsContainer.scrollTop - itemsContainer.clientHeight <= 30) {
+                    this.loadMoreSessions(itemsContainer);
+                }
             });
 
             this.parent.panelElement.appendChild(this.sessionPopup);
@@ -291,14 +307,13 @@ export class AgentChat extends Model {
         }
     }
 
-    private rebuildSessionItems(container: HTMLElement) {
-        const list = this.sessionListItems;
+    private renderSessionItems(container: HTMLElement, items: SessionIndexItem[], append: boolean) {
         let html = "";
-        if (list.length === 0) {
+        if (items.length === 0 && !append) {
             html += '<div class="b3-menu__item"><span class="b3-menu__label" style="text-align:center;color:var(--b3-theme-on-surface-light)">' + (window.siyuan.languages.emptyContent || "No sessions") + "</span></div>";
         } else {
-            for (let i = 0; i < list.length; i++) {
-                const s = list[i];
+            for (let i = 0; i < items.length; i++) {
+                const s = items[i];
                 const isActive = s.id === this.sessionId;
                 html += '<div class="b3-menu__item' + (isActive ? " b3-menu__item--current" : "") + '" data-id="' + s.id + '">' +
                     '<span class="b3-menu__label ariaLabel" data-position="east" aria-label="' + this.escapeHtml(s.title || this.defaultTitle) + '">' + this.escapeHtml(s.title || this.defaultTitle) + "</span>" +
@@ -309,65 +324,83 @@ export class AgentChat extends Model {
                     "</div>";
             }
         }
-        container.innerHTML = html;
+        if (append) {
+            container.insertAdjacentHTML("beforeend", html);
+        } else {
+            container.innerHTML = html;
+        }
         this.bindSessionItemEvents(container);
     }
 
     private bindSessionItemEvents(container: HTMLElement) {
-        container.querySelectorAll(".b3-menu__item").forEach((item) => {
-            item.addEventListener("click", () => {
-                const id = item.getAttribute("data-id") || "";
+        if (container.dataset.eventsBound) { return; }
+        container.dataset.eventsBound = "1";
+
+        container.addEventListener("click", (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+
+            const deleteBtn = target.closest(".agent-session-popup__delete");
+            if (deleteBtn) {
+                e.stopPropagation();
+                const id = deleteBtn.getAttribute("data-id") || "";
+                if (id) { this.deleteSession(id); }
+                return;
+            }
+
+            const renameBtn = target.closest(".agent-session-popup__rename");
+            if (renameBtn) {
+                e.stopPropagation();
+                const id = renameBtn.getAttribute("data-id") || "";
+                if (id) {
+                    const parent = renameBtn.parentElement;
+                    const row = parent ? parent.parentElement as HTMLElement : null;
+                    if (row) { this.startRename(id, row); }
+                }
+                return;
+            }
+
+            if (target.closest(".agent-session-popup__rename-input")) {
+                return;
+            }
+
+            const item = target.closest(".b3-menu__item");
+            if (item) {
+                const id = (item as HTMLElement).getAttribute("data-id") || "";
                 if (id && id !== this.sessionId) {
                     this.closeSessionMenu();
                     this.switchSession(id);
                 }
-            });
+            }
         });
-        container.querySelectorAll(".agent-session-popup__delete").forEach((btn) => {
-            btn.addEventListener("click", (e: MouseEvent) => {
-                e.stopPropagation();
-                const id = btn.getAttribute("data-id") || "";
-                if (id) { this.deleteSession(id); }
-            });
-        });
-        container.querySelectorAll(".agent-session-popup__rename").forEach((btn) => {
-            btn.addEventListener("click", (e: MouseEvent) => {
-                e.stopPropagation();
-                const id = btn.getAttribute("data-id") || "";
-                if (id) {
-                    const parent = btn.parentElement;
-                    const row = parent ? parent.parentElement as HTMLElement : null;
-                    if (row) { this.startRename(id, row); }
-                }
-            });
-        });
+    }
+
+    private async loadMoreSessions(container: HTMLElement) {
+        if (this.isLoadingMore) { return; }
+        this.isLoadingMore = true;
+        try {
+            const result = await SessionStore.list({page: this.sessionListPage + 1, pageSize: 30, keyword: this.currentSearchKeyword});
+            this.sessionListPage = result.page;
+            this.sessionListItems = this.sessionListItems.concat(result.sessions);
+            this.sessionListTotal = result.total;
+            this.renderSessionItems(container, result.sessions, true);
+        } finally {
+            this.isLoadingMore = false;
+        }
     }
 
     private filterSessionList(keyword: string, container: HTMLElement) {
         this.currentSearchKeyword = keyword.trim();
-        if (!this.currentSearchKeyword) {
-            this.rebuildSessionItems(container);
-            return;
-        }
-        const kw = this.currentSearchKeyword.toLowerCase();
-        let hasVisible = false;
-        const items = container.querySelectorAll(".b3-menu__item[data-id]");
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i] as HTMLElement;
-            const id = item.getAttribute("data-id") || "";
-            const session = this.sessionListItems.find((s) => s.id === id);
-            const title = (session ? session.title : "") || this.defaultTitle;
-            if (title.toLowerCase().indexOf(kw) >= 0) {
-                item.style.display = "";
-                hasVisible = true;
-            } else {
-                item.style.display = "none";
-            }
-        }
-        if (!hasVisible) {
-            container.innerHTML = '<div class="b3-menu__item"><span class="b3-menu__label" style="text-align:center;color:var(--b3-theme-on-surface-light)">' + (window.siyuan.languages.emptyContent || "No sessions") + "</span></div>";
-        }
-        this.highlightCurrentSession();
+        if (this.searchTimer !== null) { clearTimeout(this.searchTimer); }
+        this.searchTimer = window.setTimeout(async () => {
+            const result = await SessionStore.list({page: 1, pageSize: 30, keyword: this.currentSearchKeyword});
+            this.sessionListItems = result.sessions;
+            this.sessionListTotal = result.total;
+            this.sessionListPage = 1;
+            this.searchTimer = null;
+            this.renderSessionItems(container, result.sessions, false);
+            container.scrollTop = 0;
+            this.highlightCurrentSession();
+        }, 300);
     }
 
     private startRename(id: string, rowEl: HTMLElement) {
@@ -537,7 +570,8 @@ export class AgentChat extends Model {
         this.sessionListItems = this.sessionListItems.filter((item) => item.id !== id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
-            const list = await SessionStore.list();
+            const result = await SessionStore.list({page: 1, pageSize: 1});
+            const list = result.sessions;
             this.sessionListItems = list;
             this.entries = [];
             if (list.length > 0) {
@@ -551,12 +585,11 @@ export class AgentChat extends Model {
 
         const itemsContainer = this.sessionPopup?.querySelector(".b3-menu__items") as HTMLElement;
         if (itemsContainer) {
-            if (this.currentSearchKeyword) {
-                this.filterSessionList(this.currentSearchKeyword, itemsContainer);
-            } else {
-                this.rebuildSessionItems(itemsContainer);
-            }
-        }
+            const result = await SessionStore.list({page: 1, pageSize: 30, keyword: this.currentSearchKeyword});
+            this.sessionListItems = result.sessions;
+            this.sessionListTotal = result.total;
+            this.sessionListPage = 1;
+            this.renderSessionItems(itemsContainer, result.sessions, false);        }
     }
 
     private highlightCurrentSession() {

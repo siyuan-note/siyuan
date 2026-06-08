@@ -252,6 +252,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		cache.ClearTreeCache()
 		cache.ClearDocsIAL()
 		cache.ClearBlocksIAL()
+		cache.ClearAVCache()
 
 		avDirPath := filepath.Join(util.WorkingDir, "guide", boxID, "storage", "av")
 		if filelock.IsExist(avDirPath) {

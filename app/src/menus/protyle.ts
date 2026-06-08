@@ -989,21 +989,22 @@ export const zoomOut = (options: {
         id: options.id,
         size: options.id === options.protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
     }, async (getResponse) => {
-        if (options.isPushBack) {
-            onGet({
-                data: getResponse,
-                protyle: options.protyle,
-                action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_HTML],
-                afterCB: options.callback,
-            });
-        } else {
-            onGet({
-                data: getResponse,
-                protyle: options.protyle,
-                action: options.id === options.protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML],
-                afterCB: options.callback,
-            });
+        const action: TProtyleAction[] = [Constants.CB_GET_HTML];
+        if (!options.isPushBack) {
+            action.push(Constants.CB_GET_UNUNDO);
         }
+        if (options.id !== options.protyle.block.rootID) {
+            action.push(Constants.CB_GET_ALL);
+        }
+        if (options.focusId) {
+            action.push(Constants.CB_GET_FOCUS);
+        }
+        onGet({
+            data: getResponse,
+            protyle: options.protyle,
+            action,
+            afterCB: options.callback,
+        });
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
             let focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);

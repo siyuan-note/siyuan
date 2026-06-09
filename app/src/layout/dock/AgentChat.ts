@@ -56,6 +56,7 @@ export class AgentChat extends Model {
     private currentThinkingStepContent = "";
     private pendingConfirms: SessionEntry[] = [];
     private renderedToolNames: Record<string, boolean> = {};
+    private hasInterveningCard = false;
     private modelSelect: HTMLSelectElement;
 
     constructor(app: App, tab: Tab) {
@@ -561,7 +562,7 @@ export class AgentChat extends Model {
                     }
                     break;
                 case "confirm":
-                    this.appendPersistedConfirm(entry as {name: string; args: Record<string, unknown>; confirmID: string; status?: string});
+                    this.appendPersistedConfirm(entry as unknown as {name: string; args: Record<string, unknown>; confirmID: string; status?: string});
                     break;
             }
         }
@@ -612,6 +613,7 @@ export class AgentChat extends Model {
         this.sessionTotalDuration = 0;
         this.currentToolCalls = [];
         this.renderedToolNames = {};
+        this.hasInterveningCard = false;
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.classList.add("fn__none");
         }
@@ -673,6 +675,7 @@ export class AgentChat extends Model {
 
         this.setStreaming(true);
         this.clearThinking();
+        this.hasInterveningCard = false;
         this.composer.clear();
 
         this.entries.push({type: "user", content: text});
@@ -840,6 +843,7 @@ export class AgentChat extends Model {
         el.innerHTML = this.renderTodoList(result);
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
     }
 
     private renderTodoList(result: string): string {
@@ -934,6 +938,42 @@ export class AgentChat extends Model {
             if (streamingEl) {
                 streamingEl.classList.remove("agent-chat__thinking-chat--streaming");
             }
+        }
+
+        if (reasoning === "processing" && this.hasInterveningCard) {
+            const L = window.siyuan.languages;
+            const oldCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)");
+            for (let i = 0; i < oldCards.length; i++) {
+                const card = oldCards[i] as HTMLElement;
+                card.classList.add("agent-chat__msg--thinking-done");
+                const dot = card.querySelector(".agent-chat__thinking-dot");
+                if (dot) { dot.classList.add("fn__none"); }
+                const txtEl = card.querySelector(".agent-chat__thinking-text");
+                if (txtEl) {
+                    txtEl.textContent = L.agentThinkingAnalyzed || "Analyzed your request...";
+                }
+            }
+            if (this.currentThinkingStepContent && this.currentThinkingSteps.length > 0) {
+                this.currentThinkingSteps[this.currentThinkingSteps.length - 1].content = this.currentThinkingStepContent;
+            }
+            if (this.currentThinkingSteps.length > 0) {
+                this.entries.push({type: "thinking", steps: this.currentThinkingSteps.slice()});
+                this.currentThinkingSteps = [];
+            }
+            this.currentThinkingStepContent = "";
+            // Flush tool calls as assistant entry
+            if (this.currentToolCalls.length > 0) {
+                this.entries.push({type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
+                this.currentToolCalls = [];
+            }
+            // Flush pending confirms
+            if (this.pendingConfirms.length > 0) {
+                for (const c of this.pendingConfirms) {
+                    this.entries.push(c);
+                }
+                this.pendingConfirms = [];
+            }
+            this.hasInterveningCard = false;
         }
 
         const existingCard = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)") as HTMLElement;
@@ -1057,6 +1097,7 @@ export class AgentChat extends Model {
         this.fullContent = "";
         this.currentToolCalls = [];
         this.renderedToolNames = {};
+        this.hasInterveningCard = false;
         this.currentThinkingSteps = [];
         this.currentThinkingStepContent = "";
         this.currentThinkingText = "";
@@ -1202,6 +1243,7 @@ export class AgentChat extends Model {
 "</div>";
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
     }
 
     private async stopGeneration() {
@@ -1295,6 +1337,7 @@ export class AgentChat extends Model {
         }); }
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
         this.pendingConfirms.push({type: "confirm", name, args, confirmID, status: "pending"});
     }
 
@@ -1315,7 +1358,7 @@ export class AgentChat extends Model {
         } catch (e) {
             console.error("agent confirm request error:", e);
         }
-        const entry = this.entries.find(e => e.type === "confirm" && e.confirmID === confirmID);
+        const entry = this.entries.find(e => e.type === "confirm" && e.confirmID === confirmID) as {status?: string} | undefined;
         if (entry) {
             entry.status = always ? "always" : (approved ? "approved" : "rejected");
         }
@@ -1402,6 +1445,7 @@ export class AgentChat extends Model {
 
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
     }
 
     private async postQuestionAnswer(questionID: string, answers: string[]) {

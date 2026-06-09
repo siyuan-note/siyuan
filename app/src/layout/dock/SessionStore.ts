@@ -21,12 +21,17 @@ export interface AgentSession {
     title: string;
     titled?: boolean;
     model?: string;
+    messages?: Array<{role: string; content: string}>;
     entries?: Array<{
-        type: "user" | "thinking" | "assistant";
+        type: "user" | "thinking" | "assistant" | "confirm";
         content?: string;
         steps?: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>;
         reasoningContent?: string;
         toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>;
+        confirmName?: string;
+        confirmArgs?: Record<string, unknown>;
+        confirmID?: string;
+        confirmStatus?: string;
     }>;
     promptTokens?: number;
     completionTokens?: number;

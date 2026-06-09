@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/filelock"
@@ -53,7 +54,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Exploring structure: document.list (see child documents under an hPath) → document.get (read document metadata and content) → block.get_children (list blocks inside a document) → block.get (read a specific block). Use breadcrumb to trace a block's location path.
 - Creating content: document.create specifies the target notebook and hPath to create a document → block.append/prepend/insert to add blocks into the document. Use dataType "markdown" for text content.
 - Creating diary/dailynote: dailynote.create with notebook ID to create or open today's daily note → dailynote.append/prepend to add content. Do not use document.create for diary/dailynote requests.
-- Modifying content: block.update with a block's ID and new markdown content.
+- Modifying content: block.update replaces a single block's content with new markdown. To insert multiple new blocks into a document, use block.append/block.prepend (add to parent) or block.insert (add between siblings). Do NOT use block.update to add new blocks.
 - Organizing: document.move (full document relocation to a new hPath, needs notebook ID from document.get). document.rename changes a document's title (hPath follows). block.move repositions a single block under a new parent — for content blocks, not entire documents. document.delete removes a document by ID.
 - Attributes/properties: use attr.get/set to read/write custom attributes on any block. Use database tools for spreadsheets/attribute views.
 
@@ -64,6 +65,20 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Use markdown formatting for readability: bullet points, headings, code blocks for technical content.
 - Do not fabricate information. If you don't know something or can't find it in the user's notes, say so honestly instead of making up an answer. Search and verify before claiming facts.
 
+## SiYuan User Guide
+- SiYuan has a built-in user guide notebook that documents all supported features.
+  Notebook IDs by language:
+  - 简体中文: "20210808180117-czj9bvb"
+  - 繁體中文: "20211226090932-5lcq56f"
+  - 日本語: "20240530133126-axarxgx"
+  - English and other languages: "20210808180117-6v0mkxr"
+- When a user asks whether SiYuan supports a feature or how to use a feature:
+  1. Use notebook.list to check if the appropriate user guide notebook is already open (listed). If it is, skip step 2 and go directly to step 3.
+  2. If not already open, use notebook.open to open the appropriate user guide notebook for the user's language.
+  3. Use search.fulltext to search the user guide for relevant documentation.
+  4. If found, cite the content. If not found, honestly tell the user the feature may not be supported.
+- Do NOT invent features or UI workflows. The user guide is the authoritative source for SiYuan capabilities.
+
 ## Todo Tracking
 - For multi-step tasks (3+ distinct steps), use the todo_write tool to create a structured task list before starting work. This helps the user see your progress.
 - Each call replaces the entire list. Include all tasks, marking each with the correct status.
@@ -71,6 +86,12 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Mark a task as in_progress before starting work on it, and completed immediately after finishing.
 - Update the todo list whenever status changes — call todo_write with the updated list.
 - Skip todo_write for simple single-step requests. Only use it when there is meaningful multi-step work to track.
+
+## Debugging
+- When the user reports an error, problem, or unexpected behavior, first use the file tool to read the SiYuan log at "temp/siyuan.log" (relative to the workspace) to find error messages and context.
+- Use offset=-200 and limit=200 to read the last 200 lines of the log first. If more context is needed, adjust the offset to read earlier lines.
+- The log file may contain stack traces, error codes, and timestamps that help pinpoint the issue.
+- After reading the log, summarize the relevant errors before attempting any fixes.
 
 ## Safety
 - Confirm before deleting documents, blocks, or data.
@@ -198,6 +219,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		defer close(ch)
 		defer func() {
 			if r := recover(); r != nil {
+				logging.LogErrorf("agent chat panic: %v\n%s", r, logging.ShortStack())
 				sendEvent(ch, AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)})
 			}
 		}()
@@ -254,9 +276,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)})
 					continue
 				}
-				sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
-				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
-				return
+			sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
+			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
+			return
 			}
 
 			var contentBuilder strings.Builder
@@ -503,7 +525,7 @@ func GenerateTitle(client *openai.Client, model string, msg string) string {
 var safeActions = map[string]bool{
 	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
 	"tree_stat": true,
-	"list":      true, "search_docs": true, "fulltext": true, "backlinks": true,
+	"list":      true, "read": true, "search_docs": true, "fulltext": true, "backlinks": true,
 	"mentions": true, "labels": true, "status": true, "version": true,
 	"current_time": true, "workspace": true, "md": true, "query": true,
 }

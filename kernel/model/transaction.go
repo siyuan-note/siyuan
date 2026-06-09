@@ -178,9 +178,12 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	}()
 
 	isLargeInsert := tx.processLargeInsert()
-	tx.processLargeDelete()
+	isLargeDelete := tx.processLargeDelete()
 	if !isLargeInsert {
 		for _, op := range tx.DoOperations {
+			if isLargeDelete && "delete" == op.Action {
+				continue
+			}
 			switch op.Action {
 			case "create":
 				ret = tx.doCreate(op)
@@ -355,14 +358,12 @@ func (tx *Transaction) processLargeDelete() bool {
 	}
 
 	var deleteOps []*Operation
-	var lastOp *Operation
 	for i, op := range tx.DoOperations {
 		if "delete" != op.Action {
 			if i != opSize-1 {
 				return false
 			}
 
-			lastOp = op
 			continue
 		}
 
@@ -374,9 +375,6 @@ func (tx *Transaction) processLargeDelete() bool {
 	}
 
 	tx.doLargeDelete(deleteOps)
-	if nil != lastOp {
-		tx.DoOperations = []*Operation{lastOp}
-	}
 	return true
 }
 

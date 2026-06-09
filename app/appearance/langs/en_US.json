@@ -26,7 +26,7 @@
   "agentRegenerate": "Regenerate",
   "agentQuestionSubmitted": "Submitted",
   "agentNewSession": "New Session",
-  "agentInputPlaceholder": "Type a message, @ to reference, Enter to send...",
+  "agentInputPlaceholder": "Type a message, @reference, /skill, Enter to send...",
   "agentSend": "Send",
   "agentStop": "Stop",
   "agentToolCall": "Tool call",

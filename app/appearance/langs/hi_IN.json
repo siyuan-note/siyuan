@@ -26,7 +26,7 @@
   "agentRegenerate": "पुन: उत्पन्न करें",
   "agentQuestionSubmitted": "जमा हुआ",
   "agentNewSession": "नया सत्र",
-  "agentInputPlaceholder": "संदेश लिखें, @ संदर्भ के लिए, Enter भेजने के लिए...",
+  "agentInputPlaceholder": "संदेश लिखें, @संदर्भ, /कौशल, Enter भेजने के लिए...",
   "agentSend": "भेजें",
   "agentStop": "रोकें",
   "agentToolCall": "टूल कॉल",

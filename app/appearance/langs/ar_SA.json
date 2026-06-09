@@ -26,7 +26,7 @@
   "agentRegenerate": "إعادة إنشاء",
   "agentQuestionSubmitted": "تم الإرسال",
   "agentNewSession": "جلسة جديدة",
-  "agentInputPlaceholder": "اكتب رسالة، @ للإشارة، Enter للإرسال...",
+  "agentInputPlaceholder": "اكتب رسالة، @للإشارة، /مهارة، Enter للإرسال...",
   "agentSend": "إرسال",
   "agentStop": "إيقاف",
   "agentToolCall": "استدعاء الأداة",

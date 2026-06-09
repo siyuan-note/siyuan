@@ -26,7 +26,7 @@
   "agentRegenerate": "Yenile",
   "agentQuestionSubmitted": "Gönderildi",
   "agentNewSession": "Yeni oturum",
-  "agentInputPlaceholder": "Mesaj yazın, @ ile referans, Enter ile gönderin...",
+  "agentInputPlaceholder": "Mesaj yazın, @referans, /beceri, Enter ile gönderin...",
   "agentSend": "Gönder",
   "agentStop": "Durdur",
   "agentToolCall": "Araç çağrısı",

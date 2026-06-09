@@ -26,7 +26,7 @@
   "agentRegenerate": "Znova",
   "agentQuestionSubmitted": "Odoslané",
   "agentNewSession": "Nová relácia",
-  "agentInputPlaceholder": "Napíšte správu, @ na odkaz, Enter na odoslanie...",
+  "agentInputPlaceholder": "Napíšte správu, @odkaz, /zručnosť, Enter na odoslanie...",
   "agentSend": "Odoslať",
   "agentStop": "Zastaviť",
   "agentToolCall": "Volanie nástroja",

@@ -54,6 +54,10 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
     let historyIdx = -1;
     let savedDraft = "";
 
+    let slashActive = false;
+    let slashRange: {from: number; to: number} | null = null;
+    let cachedSkills: BlockHit[] | null = null;
+
     const updateHighlight = () => {
         if (!suggestionMenu) { return; }
         const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
@@ -207,6 +211,44 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
         editorProps: {
             attributes: {class: "agent-composer__pm"},
             handleKeyDown: function (_view, event) {
+                if (suggestionMenu && slashActive) {
+                    if (event.key === "ArrowDown") {
+                        event.preventDefault();
+                        const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                        if (items.length > 0) {
+                            selectedIndex = (selectedIndex + 1) % items.length;
+                            updateHighlight();
+                        }
+                        return true;
+                    }
+                    if (event.key === "ArrowUp") {
+                        event.preventDefault();
+                        const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                        if (items.length > 0) {
+                            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                            updateHighlight();
+                        }
+                        return true;
+                    }
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        if (suggestionItems.length > 0 && suggestionCommand) {
+                            const idx = selectedIndex;
+                            if (idx >= 0 && idx < suggestionItems.length) {
+                                suggestionCommand(suggestionItems[idx]);
+                            }
+                        }
+                        return true;
+                    }
+                    if (event.key === "Escape") {
+                        event.preventDefault();
+                        closeMenu();
+                        slashActive = false;
+                        slashRange = null;
+                        return true;
+                    }
+                    return false;
+                }
                 if (event.key === "Enter" && !event.shiftKey && !suggestionMenu) {
                     event.preventDefault();
                     onSend();
@@ -247,6 +289,62 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                 return false;
             },
         },
+    });
+
+    editor.on("update", function () {
+        if (suggestionMenu && !slashActive) { return; }
+        const {$from} = editor.state.selection;
+        const textBefore = $from.parent.textBetween(0, $from.parentOffset);
+        const match = textBefore.match(/(?:^|\s)\/(\S*)$/);
+        if (match) {
+            const query = match[1];
+            const slashPos = $from.pos - query.length - 1;
+            slashActive = true;
+            slashRange = {from: slashPos, to: $from.pos};
+
+            const filterAndOpen = function (skills: BlockHit[]) {
+                const q = query.toLowerCase();
+                const filtered = !q ? skills : skills.filter(function (s) {
+                    return s.label.toLowerCase().includes(q) || s.hPath.toLowerCase().includes(q);
+                });
+                suggestionCommand = function (item: BlockHit) {
+                    editor.chain().focus().deleteRange({from: slashRange!.from, to: slashRange!.to}).insertContent(item.label + " ").run();
+                    closeMenu();
+                    slashActive = false;
+                    slashRange = null;
+                };
+                openMenu(filtered, suggestionCommand!);
+                cachedSkills = skills;
+            };
+
+            if (cachedSkills) {
+                filterAndOpen(cachedSkills);
+            } else {
+                fetch("/api/ai/agent/lsSkills", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                }).then(function (r) { return r.json(); }).then(function (data) {
+                    const rawSkills = (data && data.data) ? data.data : [];
+                    const items: BlockHit[] = rawSkills.map(function (s: Record<string, string>) {
+                        return {
+                            id: s.name,
+                            label: s.name,
+                            icon: "",
+                            hPath: s.description || "",
+                        };
+                    });
+                    filterAndOpen(items);
+                }).catch(function () {
+                    closeMenu();
+                    slashActive = false;
+                    slashRange = null;
+                });
+            }
+        } else if (slashActive) {
+            closeMenu();
+            slashActive = false;
+            slashRange = null;
+        }
     });
 
     return {

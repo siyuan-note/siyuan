@@ -26,7 +26,7 @@
   "agentRegenerate": "צור מחדש",
   "agentQuestionSubmitted": "נשלח",
   "agentNewSession": "הפעלה חדשה",
-  "agentInputPlaceholder": "הקלד הודעה, @ להפניה, Enter לשליחה...",
+  "agentInputPlaceholder": "הקלד הודעה, @להפניה, /מיומנות, Enter לשליחה...",
   "agentSend": "שלח",
   "agentStop": "עצור",
   "agentToolCall": "קריאת כלי",

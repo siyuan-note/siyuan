@@ -26,7 +26,7 @@
   "agentRegenerate": "Jawab ulang",
   "agentQuestionSubmitted": "Terkirim",
   "agentNewSession": "Sesi baru",
-  "agentInputPlaceholder": "Ketik pesan, @ untuk referensi, Enter untuk mengirim...",
+  "agentInputPlaceholder": "Ketik pesan, @referensi, /keterampilan, Enter untuk mengirim...",
   "agentSend": "Kirim",
   "agentStop": "Berhenti",
   "agentToolCall": "Panggilan alat",

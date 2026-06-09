@@ -369,3 +369,10 @@ func extractSVG(fullHTML string) string {
 	}
 	return fullHTML[start : end+6]
 }
+
+var nonAlphanumericRegexp = regexp.MustCompile(`[^0-9a-zA-Z]`)
+
+// SanitizeName replaces all non-alphanumeric characters in the input string with underscores.
+func SanitizeName(name string) string {
+	return nonAlphanumericRegexp.ReplaceAllString(name, "_")
+}

@@ -56,6 +56,7 @@ export class AgentChat extends Model {
     private currentThinkingStepContent = "";
     private pendingConfirms: SessionEntry[] = [];
     private renderedToolNames: Record<string, boolean> = {};
+    private hasInterveningCard = false;
     private modelSelect: HTMLSelectElement;
 
     constructor(app: App, tab: Tab) {
@@ -493,7 +494,7 @@ export class AgentChat extends Model {
         if (!content || !content.trim()) { return; }
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
-        el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         this.addCopyButton(el, content);
     }
@@ -561,7 +562,7 @@ export class AgentChat extends Model {
                     }
                     break;
                 case "confirm":
-                    this.appendPersistedConfirm(entry as {name: string; args: Record<string, unknown>; confirmID: string; status?: string});
+                    this.appendPersistedConfirm(entry as unknown as {name: string; args: Record<string, unknown>; confirmID: string; status?: string});
                     break;
             }
         }
@@ -612,6 +613,7 @@ export class AgentChat extends Model {
         this.sessionTotalDuration = 0;
         this.currentToolCalls = [];
         this.renderedToolNames = {};
+        this.hasInterveningCard = false;
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.classList.add("fn__none");
         }
@@ -673,6 +675,7 @@ export class AgentChat extends Model {
 
         this.setStreaming(true);
         this.clearThinking();
+        this.hasInterveningCard = false;
         this.composer.clear();
 
         this.entries.push({type: "user", content: text});
@@ -769,7 +772,7 @@ export class AgentChat extends Model {
     private appendUserMessage(text: string) {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--user";
-        el.innerHTML = '<div class="agent-chat__bubble">' + this.escapeHtml(text) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body">' + this.escapeHtml(text) + "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
     }
@@ -778,7 +781,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
-        el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--streaming"></div>';
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--streaming"></div>';
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         return el;
@@ -813,9 +816,9 @@ export class AgentChat extends Model {
             this.pendingTokenUpdate = true;
             this.rafId = requestAnimationFrame(() => {
                 this.pendingTokenUpdate = false;
-                const bubble = this.currentAIElement?.querySelector(".agent-chat__bubble") as HTMLElement;
-                if (bubble) {
-                    bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+                const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
+                if (bodyEl) {
+                    bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
                 }
             });
         }
@@ -825,9 +828,9 @@ export class AgentChat extends Model {
         if (this.pendingTokenUpdate) {
             this.pendingTokenUpdate = false;
             cancelAnimationFrame(this.rafId);
-            const bubble = this.currentAIElement?.querySelector(".agent-chat__bubble") as HTMLElement;
-            if (bubble) {
-                bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+            const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
+            if (bodyEl) {
+                bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
             }
         }
     }
@@ -840,6 +843,7 @@ export class AgentChat extends Model {
         el.innerHTML = this.renderTodoList(result);
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
     }
 
     private renderTodoList(result: string): string {
@@ -918,8 +922,8 @@ export class AgentChat extends Model {
 
         if (reasoning === "processing" && this.currentAIElement) {
             if (this.currentContent) {
-                const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
-                if (bubble) { bubble.classList.remove("agent-chat__bubble--streaming"); }
+                const bodyEl = this.currentAIElement.querySelector(".agent-chat__body") as HTMLElement;
+                if (bodyEl) { bodyEl.classList.remove("agent-chat__body--streaming"); }
                 this.currentThinkingStepContent = this.currentContent;
                 this.currentAIElement.remove();
             } else {
@@ -934,6 +938,42 @@ export class AgentChat extends Model {
             if (streamingEl) {
                 streamingEl.classList.remove("agent-chat__thinking-chat--streaming");
             }
+        }
+
+        if (reasoning === "processing" && this.hasInterveningCard) {
+            const L = window.siyuan.languages;
+            const oldCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)");
+            for (let i = 0; i < oldCards.length; i++) {
+                const card = oldCards[i] as HTMLElement;
+                card.classList.add("agent-chat__msg--thinking-done");
+                const dot = card.querySelector(".agent-chat__thinking-dot");
+                if (dot) { dot.classList.add("fn__none"); }
+                const txtEl = card.querySelector(".agent-chat__thinking-text");
+                if (txtEl) {
+                    txtEl.textContent = L.agentThinkingAnalyzed || "Analyzed your request...";
+                }
+            }
+            if (this.currentThinkingStepContent && this.currentThinkingSteps.length > 0) {
+                this.currentThinkingSteps[this.currentThinkingSteps.length - 1].content = this.currentThinkingStepContent;
+            }
+            if (this.currentThinkingSteps.length > 0) {
+                this.entries.push({type: "thinking", steps: this.currentThinkingSteps.slice()});
+                this.currentThinkingSteps = [];
+            }
+            this.currentThinkingStepContent = "";
+            // Flush tool calls as assistant entry
+            if (this.currentToolCalls.length > 0) {
+                this.entries.push({type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
+                this.currentToolCalls = [];
+            }
+            // Flush pending confirms
+            if (this.pendingConfirms.length > 0) {
+                for (const c of this.pendingConfirms) {
+                    this.entries.push(c);
+                }
+                this.pendingConfirms = [];
+            }
+            this.hasInterveningCard = false;
         }
 
         const existingCard = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)") as HTMLElement;
@@ -1007,7 +1047,7 @@ export class AgentChat extends Model {
     }
 
     private addCopyButton(el: HTMLElement, contentOverride?: string) {
-        const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__bubble")?.textContent || "";
+        const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__body")?.textContent || "";
         const L = window.siyuan.languages;
 
         const actions = document.createElement("div");
@@ -1057,6 +1097,7 @@ export class AgentChat extends Model {
         this.fullContent = "";
         this.currentToolCalls = [];
         this.renderedToolNames = {};
+        this.hasInterveningCard = false;
         this.currentThinkingSteps = [];
         this.currentThinkingStepContent = "";
         this.currentThinkingText = "";
@@ -1098,7 +1139,7 @@ export class AgentChat extends Model {
             }
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
-            el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             this.currentAIElement = el;
             this.currentContent = savedContent;
@@ -1180,7 +1221,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
-        el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--error">' + this.escapeHtml(message) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + this.escapeHtml(message) + "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         this.flushThinkingStep();
@@ -1202,6 +1243,7 @@ export class AgentChat extends Model {
 "</div>";
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
     }
 
     private async stopGeneration() {
@@ -1221,7 +1263,7 @@ export class AgentChat extends Model {
             }
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
-            el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             this.currentAIElement = el;
             this.currentContent = savedContent;
@@ -1295,6 +1337,7 @@ export class AgentChat extends Model {
         }); }
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
         this.pendingConfirms.push({type: "confirm", name, args, confirmID, status: "pending"});
     }
 
@@ -1315,7 +1358,7 @@ export class AgentChat extends Model {
         } catch (e) {
             console.error("agent confirm request error:", e);
         }
-        const entry = this.entries.find(e => e.type === "confirm" && e.confirmID === confirmID);
+        const entry = this.entries.find(e => e.type === "confirm" && e.confirmID === confirmID) as {status?: string} | undefined;
         if (entry) {
             entry.status = always ? "always" : (approved ? "approved" : "rejected");
         }
@@ -1402,6 +1445,7 @@ export class AgentChat extends Model {
 
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.hasInterveningCard = true;
     }
 
     private async postQuestionAnswer(questionID: string, answers: string[]) {

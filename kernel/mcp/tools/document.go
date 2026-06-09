@@ -27,11 +27,11 @@ import (
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations for SiYuan.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (hPath, e.g. /folder/doc), title. Optional: markdown.\n- list: List documents at an hPath. Requires: notebook. Optional: path (hPath, default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/hPath. Requires: id, notebook, path (target hPath, e.g. /folder or / for root).\n- duplicate: Duplicate a document by ID. Requires: id.\n- search_docs: Search documents by keyword. Requires: keyword.",
+	Description: "Document operations for SiYuan.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (hPath, e.g. /folder/doc), title. Optional: markdown.\n- list: List documents at an hPath. Requires: notebook. Optional: path (hPath, default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/hPath. Requires: id, notebook, path (target hPath, e.g. /folder or / for root).\n- duplicate: Duplicate a document by ID. Requires: id.\n- search_docs: Search documents by keyword. Requires: keyword.\n- info: Get document metadata info by ID. Requires: id.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":   {Type: "string", Description: "Operation", Enum: []string{"get", "create", "list", "delete", "rename", "move", "duplicate", "search_docs"}},
+			"action":   {Type: "string", Description: "Operation", Enum: []string{"get", "create", "list", "delete", "rename", "move", "duplicate", "search_docs", "info"}},
 			"id":       {Type: "string", Description: "Document block ID"},
 			"title":    {Type: "string", Description: "Document title (for create, rename)"},
 			"path":     {Type: "string", Description: "Document hPath, the human-readable path shown in the document tree (e.g. /folder/doc). Used for create, list, move."},
@@ -67,9 +67,11 @@ func documentHandler(args map[string]interface{}) (CallToolResult, error) {
 		return documentDuplicate(args)
 	case "search_docs":
 		return documentSearchDocs(args)
+	case "info":
+		return documentInfo(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [get, create, list, delete, rename, move, duplicate, search_docs]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [get, create, list, delete, rename, move, duplicate, search_docs, info]"}},
 		IsError: true,
 	}, nil
 }
@@ -270,5 +272,43 @@ func documentSearchDocs(args map[string]interface{}) (CallToolResult, error) {
 	for _, d := range docs {
 		sb.WriteString(fmt.Sprintf("- %s (id: %s, hPath: %s)\n", d["name"], d["id"], d["hPath"]))
 	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func documentInfo(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+
+	info, err := model.GetDocInfo(id)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("get doc info failed: %s", err)}}, IsError: true}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf(
+		"ID: %s\nRootID: %s\nName: %s\nRefCount: %d\nSubFileCount: %d\nIcon: %s",
+		info.ID, info.RootID, info.Name, info.RefCount, info.SubFileCount, info.Icon,
+	))
+	if len(info.RefIDs) > 0 {
+		sb.WriteString(fmt.Sprintf("\nRefIDs: %s", strings.Join(info.RefIDs, ", ")))
+	}
+	if len(info.AttrViews) > 0 {
+		sb.WriteString("\nAttrViews:")
+		for _, av := range info.AttrViews {
+			sb.WriteString(fmt.Sprintf("\n  - %s: %s", av.ID, av.Name))
+		}
+	}
+	if len(info.IAL) > 0 {
+		sb.WriteString("\nIAL:")
+		for k, v := range info.IAL {
+			if len(v) > 100 {
+				v = v[:100] + "..."
+			}
+			sb.WriteString(fmt.Sprintf("\n  %s: %s", k, v))
+		}
+	}
+
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

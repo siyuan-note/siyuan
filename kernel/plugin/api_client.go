@@ -565,6 +565,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.client.socket worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.client.socket reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -718,6 +721,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.client.event worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.client.event reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)

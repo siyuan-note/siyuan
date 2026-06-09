@@ -25,13 +25,14 @@ import (
 
 var RefTool = &Tool{
 	Name:        "ref",
-	Description: "Reference and backlink operations for SiYuan.\n- backlinks: Get backlinks for a block/document. Requires: id. Optional: keyword.\n- mentions: Get mentions of a block/document. Requires: id. Optional: keyword.\n- refresh: Refresh backlink index for a block/document. Requires: id.",
+	Description: "Reference and backlink operations for SiYuan.\n- backlinks: Get backlinks for a block/document. Requires: id. Optional: keyword, sort.\n- mentions: Get mentions of a block/document. Requires: id. Optional: keyword, sort.\n- refresh: Refresh backlink index for a block/document. Requires: id.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
 			"action":  {Type: "string", Description: "Operation", Enum: []string{"backlinks", "mentions", "refresh"}},
 			"id":      {Type: "string", Description: "Block ID"},
 			"keyword": {Type: "string", Description: "Filter by keyword"},
+			"sort":    {Type: "number", Description: "Sort mode for backlinks and mentions: 0=updated-desc 1=updated-asc 2=created-desc 3=created-asc 4=name-desc 5=name-asc 6=alphanum-desc 7=alphanum-asc (default 0)"},
 		},
 		Required: []string{"action", "id"},
 	},
@@ -61,8 +62,12 @@ func refHandler(args map[string]interface{}) (CallToolResult, error) {
 func refBacklinks(args map[string]interface{}) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyword, _ := args["keyword"].(string)
+	sortMode := 0
+	if v, ok := args["sort"].(float64); ok {
+		sortMode = int(v)
+	}
 
-	_, backlinks, _, _, _ := model.GetBacklink2(id, keyword, "", 0, 0, model.Conf.Editor.BacklinkContainChildren)
+	_, backlinks, _, _, _ := model.GetBacklink2(id, keyword, "", sortMode, 0, model.Conf.Editor.BacklinkContainChildren)
 	if len(backlinks) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no backlinks found"}}}, nil
 	}
@@ -78,8 +83,12 @@ func refBacklinks(args map[string]interface{}) (CallToolResult, error) {
 func refMentions(args map[string]interface{}) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyword, _ := args["keyword"].(string)
+	sortMode := 0
+	if v, ok := args["sort"].(float64); ok {
+		sortMode = int(v)
+	}
 
-	_, _, mentions, _, _ := model.GetBacklink2(id, "", keyword, 0, 0, model.Conf.Editor.BacklinkContainChildren)
+	_, _, mentions, _, _ := model.GetBacklink2(id, "", keyword, 0, sortMode, model.Conf.Editor.BacklinkContainChildren)
 	if len(mentions) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no mentions found"}}}, nil
 	}

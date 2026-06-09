@@ -18,19 +18,21 @@ package tools
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var AssetTool = &Tool{
 	Name:        "asset",
-	Description: "Asset management for SiYuan.\n- upload: Upload local files as workspace assets. Requires: id, files (comma-separated absolute paths).\n- unused: List unused assets.\n- clean: Clean unused assets. Optional: path (single unused asset path to remove).",
+	Description: "Asset management for SiYuan.\n- upload: Upload local files as workspace assets. Requires: id, files (comma-separated absolute paths).\n- unused: List unused assets.\n- clean: Clean unused assets. Optional: path (single unused asset path to remove).\n- stat: Get asset file metadata (size, modTime). Requires: path.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"upload", "unused", "clean"}},
+			"action": {Type: "string", Description: "Operation", Enum: []string{"upload", "unused", "clean", "stat"}},
 			"id":     {Type: "string", Description: "Document block ID (for upload)"},
 			"files":  {Type: "string", Description: "Comma-separated absolute file paths (for upload)"},
 			"path":   {Type: "string", Description: "Single unused asset path to remove, relative to data directory (for clean, optional). Use as returned by the unused action, e.g. assets/image/xxx.png."},
@@ -53,9 +55,11 @@ func assetHandler(args map[string]interface{}) (CallToolResult, error) {
 		return assetUnused(args)
 	case "clean":
 		return assetClean(args)
+	case "stat":
+		return assetStat(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [upload, unused, clean]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [upload, unused, clean, stat]"}},
 		IsError: true,
 	}, nil
 }
@@ -120,4 +124,22 @@ func assetClean(args map[string]interface{}) (CallToolResult, error) {
 		sb.WriteString(fmt.Sprintf("- %s\n", p))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func assetStat(args map[string]interface{}) (CallToolResult, error) {
+	p, _ := args["path"].(string)
+	if p == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
+	}
+
+	abs := filepath.Join(util.DataDir, p)
+	info, err := os.Stat(abs)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "stat failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf(
+		"Path: %s\nSize: %d\nIsDir: %v\nModTime: %s",
+		p, info.Size(), info.IsDir(), info.ModTime().Format("2006-01-02 15:04:05"),
+	)}}}, nil
 }

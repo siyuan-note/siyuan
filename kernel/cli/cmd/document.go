@@ -228,6 +228,33 @@ var documentDuplicateCmd = &cobra.Command{
 	},
 }
 
+var documentInfoCmd = &cobra.Command{
+	Use:   "info --id <id>",
+	Short: "Get document info",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("id")
+		if id == "" {
+			return fmt.Errorf("--id is required")
+		}
+		info, err := model.GetDocInfo(id)
+		if err != nil {
+			return err
+		}
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(info, "", "  ")
+			fmt.Println(string(data))
+		default:
+			fmt.Printf("ID:           %s\n", info.ID)
+			fmt.Printf("RootID:       %s\n", info.RootID)
+			fmt.Printf("Name:         %s\n", info.Name)
+			fmt.Printf("RefCount:     %d\n", info.RefCount)
+			fmt.Printf("SubFileCount: %d\n", info.SubFileCount)
+		}
+		return nil
+	},
+}
+
 func resolvePath(boxID, userPath, hpath string) string {
 	if userPath != "" {
 		return userPath
@@ -270,6 +297,7 @@ func init() {
 	documentMoveCmd.Flags().String("hpath", "", "target human-readable path")
 
 	documentDuplicateCmd.Flags().String("id", "", "document block ID to duplicate")
+	documentInfoCmd.Flags().String("id", "", "document block ID")
 
 	rootCmd.AddCommand(documentCmd)
 	documentCmd.AddCommand(documentListCmd)
@@ -279,6 +307,7 @@ func init() {
 	documentCmd.AddCommand(documentRenameCmd)
 	documentCmd.AddCommand(documentMoveCmd)
 	documentCmd.AddCommand(documentDuplicateCmd)
+	documentCmd.AddCommand(documentInfoCmd)
 }
 
 

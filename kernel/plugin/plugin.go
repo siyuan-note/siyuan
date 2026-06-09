@@ -35,6 +35,7 @@ import (
 	"github.com/lxzan/gws"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/smallnest/chanx"
@@ -109,6 +110,7 @@ type KernelPlugin struct {
 	bus EventBus.Bus // Event bus for plugin events and RPC request/response dispatch
 
 	rpcMethods sync.Map // string -> *RpcMethod, registered JSON-RPC methods
+	mcpTools   sync.Map // string -> *tools.Tool, fully-qualified MCP tool names registered by this plugin
 
 	socketsMu sync.RWMutex       // mutex for gwsSockets map
 	sockets   map[*gws.Conn]bool // tracked gws WebSocket connections (true: RPC server, false: regular)
@@ -161,6 +163,20 @@ func createEventMessage(eventType string, detail any) R {
 // State returns the current plugin state (safe for concurrent reads).
 func (p *KernelPlugin) State() PluginState {
 	return PluginState(p.state.Load())
+}
+
+// Clear removes all registered MCP tools and RPC methods for this plugin.
+// Called on plugin stop to prevent residue in global registries.
+func (p *KernelPlugin) Clear() {
+	p.rpcMethods.Clear()
+
+	p.mcpTools.Range(func(_, value any) bool {
+		if tool, ok := value.(*tools.Tool); ok {
+			tools.RemoveTool(tool.Name)
+		}
+		return true
+	})
+	p.mcpTools.Clear()
 }
 
 // updateState updates the plugin state atomically and pushes the new state to the frontend via util.PushKernelPluginState.
@@ -225,6 +241,8 @@ func (p *KernelPlugin) close() (err error) {
 
 // error sets the plugin state to errored and frees the goja runtime.
 func (p *KernelPlugin) error() {
+	p.Clear()
+
 	if err := p.close(); err != nil {
 		logging.LogErrorf("[plugin:%s] failed to close runtime during error handling: %v", p.Name, err)
 	}
@@ -291,7 +309,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 
 	p.onUnload()
 
-	p.rpcMethods.Clear()
+	p.Clear()
 
 	p.cancel()
 
@@ -350,6 +368,83 @@ func (p *KernelPlugin) unbindRpcMethod(name string) error {
 		return nil
 	}
 	return nil
+}
+
+// registerMcpTool registers a tool to the global MCP registry with a plugin-specific prefix, and tracks it for cleanup on plugin stop.
+func (p *KernelPlugin) registerMcpTool(name string, tool *tools.Tool) error {
+	p.mcpTools.Store(name, tool)
+	tools.SetTool(tool.Name, tool)
+	return nil
+}
+
+// unregisterMcpTool removes a tool from the global MCP registry and the plugin's tracking map.
+func (p *KernelPlugin) unregisterMcpTool(name string) error {
+	if value, loaded := p.mcpTools.LoadAndDelete(name); loaded {
+		if tool, ok := value.(*tools.Tool); ok {
+			tools.RemoveTool(tool.Name)
+		}
+	}
+	return nil
+}
+
+// invokeMcpTool calls a JS handler registered via siyuan.mcp.registerTool and returns the CallToolResult.
+func (p *KernelPlugin) invokeMcpTool(handler goja.Callable, args map[string]interface{}) (tools.CallToolResult, error) {
+	if p.State() != PluginStateRunning {
+		return tools.CallToolResult{
+			IsError: true,
+			Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("plugin [%s] is not running (state: %s)", p.Name, p.State().String())}},
+		}, nil
+	}
+
+	done := make(chan *TaskResult, 1)
+
+	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+		jsArgs := rt.ToValue(args)
+		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
+			done <- result.TaskResult()
+		}, rt, true, handler, rt.GlobalObject(), jsArgs)
+		return
+	}, nil)
+	if runErr != nil {
+		return tools.CallToolResult{
+			IsError: true,
+			Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("error running plugin runtime worker: %v", runErr)}},
+		}, nil
+	}
+
+	select {
+	case taskResult := <-done:
+		if taskResult.err != nil {
+			return tools.CallToolResult{
+				IsError: true,
+				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("error invoking MCP tool handler: %v", taskResult.err)}},
+			}, nil
+		}
+
+		if taskResult.value == nil {
+			return tools.CallToolResult{
+				Content: []tools.ContentItem{{Type: "text", Text: "null"}},
+			}, nil
+		}
+
+		jsonBytes, marshalErr := json.Marshal(taskResult.value)
+		if marshalErr != nil {
+			return tools.CallToolResult{
+				IsError: true,
+				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("error marshaling MCP tool result: %v", marshalErr)}},
+			}, nil
+		}
+
+		return tools.CallToolResult{
+			Content: []tools.ContentItem{{Type: "text", Text: string(jsonBytes)}},
+		}, nil
+
+	case <-p.context.Done():
+		return tools.CallToolResult{
+			IsError: true,
+			Content: []tools.ContentItem{{Type: "text", Text: "plugin stopped while invoking MCP tool handler"}},
+		}, nil
+	}
 }
 
 // runtimeEventHandler dispatches an event to the plugin's goja runtime

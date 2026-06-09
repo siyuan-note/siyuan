@@ -29,19 +29,22 @@ import (
 
 var FileTool = &Tool{
 	Name:        "file",
-	Description: "Workspace file operations for SiYuan (paths are relative to workspace).\n- list: List directory contents. Requires: path.\n- read: Read file content. Requires: path.\n- write: Write file content. Requires: path, data.\n- delete: Delete file or directory. Requires: path.\n- rename: Rename or move file. Requires: old, new.\n- copy: Copy file or directory. Requires: src, dst.",
+	Description: "Workspace file operations for SiYuan (paths are relative to workspace).\n- list: List directory contents. Requires: path.\n- read: Read file content. Requires: path.\n- write: Write file content. Requires: path, data.\n- delete: Delete file or directory. Requires: path.\n- rename: Rename or move file. Requires: old, new.\n- copy: Copy file or directory. Requires: src, dst.\n- grep: Search file contents using regex pattern. Requires: pattern, path. Optional: include, context.\n- find: Find files by glob pattern recursively. Requires: path. Optional: include (e.g. \"*.go\").\n- stat: Get file metadata (size, isDir, modTime). Requires: path.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"list", "read", "write", "delete", "rename", "copy"}},
-			"path":   {Type: "string", Description: "Relative path within workspace (for list, read, write, delete)"},
-			"data":   {Type: "string", Description: "File content (for write)"},
-			"offset": {Type: "number", Description: "Line number to start reading from (for read, 1-based). Negative means N lines from the end. Default: 0 (read from beginning)."},
-			"limit":  {Type: "number", Description: "Maximum lines to read (for read). Default: all lines."},
-			"old":    {Type: "string", Description: "Source path (for rename)"},
-			"new":    {Type: "string", Description: "Destination path (for rename)"},
-			"src":    {Type: "string", Description: "Source path (for copy)"},
-			"dst":    {Type: "string", Description: "Destination path (for copy)"},
+			"action":  {Type: "string", Description: "Operation", Enum: []string{"list", "read", "write", "delete", "rename", "copy", "grep", "find", "stat"}},
+			"path":    {Type: "string", Description: "Relative path within workspace (for list, read, write, delete, grep, find, stat)"},
+			"data":    {Type: "string", Description: "File content (for write)"},
+			"offset":  {Type: "number", Description: "Line number to start reading from (for read, 1-based). Negative means N lines from the end. Default: 0 (read from beginning)."},
+			"limit":   {Type: "number", Description: "Maximum lines to read (for read). Default: all lines."},
+			"old":     {Type: "string", Description: "Source path (for rename)"},
+			"new":     {Type: "string", Description: "Destination path (for rename)"},
+			"src":     {Type: "string", Description: "Source path (for copy)"},
+			"dst":     {Type: "string", Description: "Destination path (for copy)"},
+			"pattern": {Type: "string", Description: "Regex pattern to search for (for grep)"},
+			"include": {Type: "string", Description: "File glob pattern to filter files (for grep, find; e.g. \"*.go\", \"*.{ts,tsx}\")"},
+			"context": {Type: "number", Description: "Number of context lines before and after each match (for grep, default 0)"},
 		},
 		Required: []string{"action"},
 	},
@@ -67,9 +70,15 @@ func fileHandler(args map[string]interface{}) (CallToolResult, error) {
 		return fileRename(args)
 	case "copy":
 		return fileCopy(args)
+	case "grep":
+		return fileGrep(args)
+	case "find":
+		return fileFind(args)
+	case "stat":
+		return fileStat(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, read, write, delete, rename, copy]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, read, write, delete, rename, copy, grep, find, stat]"}},
 		IsError: true,
 	}, nil
 }
@@ -306,4 +315,153 @@ func typeLabel(isDir bool) string {
 		return "DIR"
 	}
 	return "FILE"
+}
+
+func fileGrep(args map[string]interface{}) (CallToolResult, error) {
+	pattern, _ := args["pattern"].(string)
+	if pattern == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "pattern is required"}}, IsError: true}, nil
+	}
+
+	p, _ := args["path"].(string)
+	if p == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
+	}
+
+	abs, err := resolvePath(p)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
+
+	include, _ := args["include"].(string)
+	ctx := int(getFloat64Arg(args, "context"))
+
+	results, err := gulu.File.Grep(abs, include, pattern, ctx, 0)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "grep failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Found %d lines:\n\n", len(results)))
+	for _, r := range results {
+		rel, relErr := filepath.Rel(util.WorkspaceDir, r.File)
+		if relErr != nil {
+			rel = r.File
+		}
+		sep := ":"
+		if r.Context {
+			sep = "-:"
+		}
+		sb.WriteString(fmt.Sprintf("%s:%d%s %s\n", rel, r.Line, sep, r.Text))
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func fileFind(args map[string]interface{}) (CallToolResult, error) {
+	p, _ := args["path"].(string)
+	if p == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
+	}
+
+	abs, err := resolvePath(p)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
+
+	include, _ := args["include"].(string)
+
+	var results []string
+	err = filepath.WalkDir(abs, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return nil
+		}
+		if d.IsDir() {
+			name := d.Name()
+			if name == ".git" || name == ".svn" || name == ".hg" || strings.HasPrefix(name, ".") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !d.Type().IsRegular() {
+			return nil
+		}
+		if include != "" && !matchGlob(d.Name(), include) {
+			return nil
+		}
+
+		rel, relErr := filepath.Rel(util.WorkspaceDir, path)
+		if relErr != nil {
+			rel = path
+		}
+		results = append(results, rel)
+		return nil
+	})
+
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "find failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Found %d files:\n\n", len(results)))
+	for _, r := range results {
+		sb.WriteString(r + "\n")
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func matchGlob(filename, pattern string) bool {
+	patterns := expandGlobBrace(pattern)
+	for _, p := range patterns {
+		if matched, _ := filepath.Match(p, filename); matched {
+			return true
+		}
+	}
+	return false
+}
+
+func expandGlobBrace(pattern string) []string {
+	i := strings.Index(pattern, "{")
+	if i < 0 {
+		return []string{pattern}
+	}
+
+	j := strings.Index(pattern[i:], "}")
+	if j < 0 {
+		return []string{pattern}
+	}
+	j += i
+
+	prefix := pattern[:i]
+	body := pattern[i+1 : j]
+	suffix := pattern[j+1:]
+
+	var result []string
+	for _, opt := range strings.Split(body, ",") {
+		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
+	}
+	return result
+}
+
+func fileStat(args map[string]interface{}) (CallToolResult, error) {
+	p, _ := args["path"].(string)
+	if p == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
+	}
+
+	abs, err := resolvePath(p)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
+
+	info, err := os.Stat(abs)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "stat failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf(
+		"Path: %s\nSize: %d\nIsDir: %v\nModTime: %s",
+		p, info.Size(), info.IsDir(), info.ModTime().Format("2006-01-02 15:04:05"),
+	)}}}, nil
 }

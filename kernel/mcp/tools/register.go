@@ -73,6 +73,12 @@ func SetTool(name string, t *Tool) {
 	Registry[name] = t
 }
 
+func RemoveTool(name string) {
+	registryMu.Lock()
+	defer registryMu.Unlock()
+	delete(Registry, name)
+}
+
 func register(t *Tool) {
 	SetTool(t.Name, t)
 }

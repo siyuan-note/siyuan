@@ -131,8 +131,19 @@ export const saveExportFile = async (uri: string) => {
                 `HTTP ${response.status} ${response.statusText}: ${response.url || resolved.href}`
             );
         }
-        const arrayBuffer = await response.arrayBuffer();
-        await fs.promises.writeFile(result.filePath, new Uint8Array(arrayBuffer));
+        const reader = response.body.getReader();
+        const fd = await fs.promises.open(result.filePath, "w");
+        try {
+            while (true) {
+                const {done, value} = await reader.read();
+                if (done) {
+                    break;
+                }
+                await fd.write(value);
+            }
+        } finally {
+            await fd.close();
+        }
         showMessage(window.siyuan.languages.exported);
         return;
     } catch (e) {

@@ -7,6 +7,7 @@ import {AgentSession, SessionIndexItem, SessionStore} from "./SessionStore";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {setPosition} from "../../util/setPosition";
+import {escapeHtml} from "../../util/escape";
 
 type SessionEntry =
     | {type: "user"; content: string}
@@ -124,10 +125,10 @@ export class AgentChat extends Model {
         const aiConfig = window.siyuan.config.ai;
         const mainName = aiConfig.openAI.name || aiConfig.openAI.apiModel;
         const providers = aiConfig.providers || [];
-        let html = '<option value="' + aiConfig.openAI.id + '">' + this.escapeHtml(mainName) + "</option>";
+        let html = '<option value="' + aiConfig.openAI.id + '">' + escapeHtml(mainName) + "</option>";
         for (const p of providers) {
             if (p.enabled === false) { continue; }
-            html += '<option value="' + p.id + '">' + this.escapeHtml(p.name || p.apiModel) + "</option>";
+            html += '<option value="' + p.id + '">' + escapeHtml(p.name || p.apiModel) + "</option>";
         }
         this.modelSelect.innerHTML = html;
     }
@@ -141,9 +142,9 @@ export class AgentChat extends Model {
         const html = '<div class="agent-welcome">' +
             '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
             '<div class="agent-welcome__examples">' +
-                '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
-                '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
-                '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
+                '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
+                '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
+                '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
             "</div>" +
         "</div>";
         this.messagesContainer.innerHTML = html;
@@ -323,7 +324,7 @@ export class AgentChat extends Model {
                 const s = items[i];
                 const isActive = s.id === this.sessionId;
                 html += '<div class="b3-menu__item' + (isActive ? " b3-menu__item--current" : "") + '" data-id="' + s.id + '">' +
-                    '<span class="b3-menu__label ariaLabel" data-position="east" aria-label="' + this.escapeHtml(s.title || this.defaultTitle) + '">' + this.escapeHtml(s.title || this.defaultTitle) + "</span>" +
+                    '<span class="b3-menu__label ariaLabel" data-position="east" aria-label="' + escapeHtml(s.title || this.defaultTitle) + '">' + escapeHtml(s.title || this.defaultTitle) + "</span>" +
                     '<span class="agent-session-popup__actions">' +
                         '<svg class="agent-session-popup__rename ariaLabel" data-position="north" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><use xlink:href="#iconEdit"></use></svg>' +
                         '<svg class="agent-session-popup__delete ariaLabel" data-position="north" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.delete + '"><use xlink:href="#iconTrashcan"></use></svg>' +
@@ -494,7 +495,7 @@ export class AgentChat extends Model {
         if (!content || !content.trim()) { return; }
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
-        el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         this.addCopyButton(el, content);
     }
@@ -527,7 +528,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--confirm agent-chat__msg--confirmed";
         const argsStr = JSON.stringify(entry.args, null, 2);
         const action = (entry.args.action as string) || entry.name;
-        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", this.escapeHtml(action)).replace("{name}", this.escapeHtml(entry.name));
+        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(entry.name));
         let statusLabel = "";
         if (entry.status === "approved") {
             statusLabel = L.agentConfirmApprove || "Approved";
@@ -538,7 +539,7 @@ export class AgentChat extends Model {
         }
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
     '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
-    '<pre class="agent-chat__confirm-args">' + this.escapeHtml(argsStr) + "</pre>" +
+    '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
     (statusLabel ? '<div class="agent-chat__confirm-actions"><span class="agent-chat__confirm-done">' + statusLabel + "</span></div>" : "") +
 "</div>";
         this.messagesContainer.appendChild(el);
@@ -772,7 +773,7 @@ export class AgentChat extends Model {
     private appendUserMessage(text: string) {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--user";
-        el.innerHTML = '<div class="agent-chat__body">' + this.escapeHtml(text) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
     }
@@ -802,7 +803,7 @@ export class AgentChat extends Model {
                 chatEl.className = "agent-chat__thinking-chat agent-chat__thinking-chat--streaming";
                 thinkBody.appendChild(chatEl);
             }
-            chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+            chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
             this.scrollToBottom();
             return;
         }
@@ -818,7 +819,7 @@ export class AgentChat extends Model {
                 this.pendingTokenUpdate = false;
                 const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
                 if (bodyEl) {
-                    bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+                    bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
                 }
             });
         }
@@ -830,7 +831,7 @@ export class AgentChat extends Model {
             cancelAnimationFrame(this.rafId);
             const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
             if (bodyEl) {
-                bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+                bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
             }
         }
     }
@@ -857,13 +858,13 @@ export class AgentChat extends Model {
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             if (line.startsWith("- [x]")) {
-                html += '<div class="agent-chat__todo-item agent-chat__todo-item--completed"><svg class="agent-chat__todo-status"><use xlink:href="#iconCheck"></use></svg>' + this.escapeHtml(line.substring(5).trim()) + "</div>";
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--completed"><svg class="agent-chat__todo-status"><use xlink:href="#iconCheck"></use></svg>' + escapeHtml(line.substring(5).trim()) + "</div>";
             } else if (line.startsWith("- [/]")) {
-                html += '<div class="agent-chat__todo-item agent-chat__todo-item--in-progress"><svg class="agent-chat__todo-status"><use xlink:href="#iconRefresh"></use></svg>' + this.escapeHtml(line.substring(5).trim()) + "</div>";
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--in-progress"><svg class="agent-chat__todo-status"><use xlink:href="#iconRefresh"></use></svg>' + escapeHtml(line.substring(5).trim()) + "</div>";
             } else if (line.startsWith("- [-]")) {
-                html += '<div class="agent-chat__todo-item agent-chat__todo-item--cancelled"><svg class="agent-chat__todo-status"><use xlink:href="#iconCloseRound"></use></svg>' + this.escapeHtml(line.substring(5).trim()) + "</div>";
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--cancelled"><svg class="agent-chat__todo-status"><use xlink:href="#iconCloseRound"></use></svg>' + escapeHtml(line.substring(5).trim()) + "</div>";
             } else if (line.startsWith("- [ ]")) {
-                html += '<div class="agent-chat__todo-item agent-chat__todo-item--pending"><svg class="agent-chat__todo-status"><use xlink:href="#iconUncheck"></use></svg>' + this.escapeHtml(line.substring(5).trim()) + "</div>";
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--pending"><svg class="agent-chat__todo-status"><use xlink:href="#iconUncheck"></use></svg>' + escapeHtml(line.substring(5).trim()) + "</div>";
             }
         }
         html += "</div></div>";
@@ -914,7 +915,7 @@ export class AgentChat extends Model {
                 const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
                 detailLines += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
                 for (let i = 0; i < newTools.length; i++) {
-                    detailLines += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(newTools[i].name) + "</span>";
+                    detailLines += '<span class="agent-chat__thinking-tool">' + escapeHtml(newTools[i].name) + "</span>";
                 }
                 detailLines += "</div>";
             }
@@ -1000,7 +1001,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__thinking-card">' +
     '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-dot"></span>' +
-        '<span class="agent-chat__thinking-text">' + this.escapeHtml(text) + "</span>" +
+        '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
         '<span class="agent-chat__thinking-arrow">' +
             '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
@@ -1009,15 +1010,7 @@ export class AgentChat extends Model {
     bodyHTML +
 "</div>";
 
-        const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
-        const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
-        const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
-        const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
-        header.addEventListener("click", function () {
-            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
-            expandIcon.classList.toggle("fn__none", isExpanded);
-            contractIcon.classList.toggle("fn__none", !isExpanded);
-        });
+        this.bindThinkingCardToggle(el);
         this.insertBeforeAI(el);
         this.scrollToBottom();
     }
@@ -1138,7 +1131,7 @@ export class AgentChat extends Model {
             }
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
-            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             this.currentAIElement = el;
             this.currentContent = savedContent;
@@ -1220,7 +1213,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
-        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + this.escapeHtml(message) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + escapeHtml(message) + "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         this.flushThinkingStep();
@@ -1237,7 +1230,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__thinking-card">' +
     '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-dot"></span>' +
-        '<span class="agent-chat__thinking-text">' + this.escapeHtml("Retrying (" + attempt + "/" + maxRetries + ")...") + "</span>" +
+        '<span class="agent-chat__thinking-text">' + escapeHtml("Retrying (" + attempt + "/" + maxRetries + ")...") + "</span>" +
     "</div>" +
 "</div>";
         this.insertBeforeAI(el);
@@ -1262,7 +1255,7 @@ export class AgentChat extends Model {
             }
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
-            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             this.currentAIElement = el;
             this.currentContent = savedContent;
@@ -1300,10 +1293,10 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--confirm";
         const argsStr = JSON.stringify(args, null, 2);
         const action = (args.action as string) || name;
-        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", this.escapeHtml(action)).replace("{name}", this.escapeHtml(name));
+        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(name));
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
     '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
-    '<pre class="agent-chat__confirm-args">' + this.escapeHtml(argsStr) + "</pre>" +
+    '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
     '<div class="agent-chat__confirm-actions">' +
         '<button class="b3-button b3-button--cancel agent-chat__confirm-reject">' + (L.agentConfirmReject || "Reject") + "</button>" +
         '<button class="b3-button b3-button--text agent-chat__confirm-approve">' + (L.agentConfirmApprove || "Approve") + "</button>" +
@@ -1384,10 +1377,10 @@ export class AgentChat extends Model {
 
             html += '<div class="agent-chat__question-item">';
             if (header) {
-                html += '<div class="agent-chat__question-header">' + this.escapeHtml(header) + "</div>";
+                html += '<div class="agent-chat__question-header">' + escapeHtml(header) + "</div>";
             }
             if (question) {
-                html += '<div class="agent-chat__question-text">' + this.escapeHtml(question) + "</div>";
+                html += '<div class="agent-chat__question-text">' + escapeHtml(question) + "</div>";
             }
             html += '<div class="agent-chat__question-options" data-qi="' + qi + '">';
             const inputType = multiple ? "checkbox" : "radio";
@@ -1397,10 +1390,10 @@ export class AgentChat extends Model {
                 const label = (opt.label as string) || "";
                 const desc = (opt.description as string) || "";
                 html += '<label class="agent-chat__question-option">' +
-                    '<input type="' + inputType + '" name="' + inputName + '" value="' + this.escapeHtml(label) + '">' +
-                    '<span class="agent-chat__question-option-label">' + this.escapeHtml(label) + "</span>";
+                    '<input type="' + inputType + '" name="' + inputName + '" value="' + escapeHtml(label) + '">' +
+                    '<span class="agent-chat__question-option-label">' + escapeHtml(label) + "</span>";
                 if (desc) {
-                    html += '<span class="agent-chat__question-option-desc">' + this.escapeHtml(desc) + "</span>";
+                    html += '<span class="agent-chat__question-option-desc">' + escapeHtml(desc) + "</span>";
                 }
                 html += "</label>";
             }
@@ -1468,12 +1461,12 @@ export class AgentChat extends Model {
             detail += '<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>';
             for (let j = 0; j < step.toolCalls.length; j++) {
                 const tc = step.toolCalls[j];
-                detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
+                detail += '<span class="agent-chat__thinking-tool">' + escapeHtml(tc.name) + "</span>";
             }
             detail += "</div>";
         }
         if (step.reasoningContent) {
-            detail += "<div>" + this.escapeHtml(step.reasoningContent) + "</div>";
+            detail += "<div>" + escapeHtml(step.reasoningContent) + "</div>";
         }
 
         const el = document.createElement("div");
@@ -1481,7 +1474,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__thinking-card">' +
     '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-dot fn__none"></span>' +
-        '<span class="agent-chat__thinking-text">' + this.escapeHtml(step.text) + "</span>" +
+        '<span class="agent-chat__thinking-text">' + escapeHtml(step.text) + "</span>" +
         '<span class="agent-chat__thinking-arrow">' +
             '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
@@ -1492,15 +1485,7 @@ export class AgentChat extends Model {
     "</div>" +
 "</div>";
 
-        const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
-        const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
-        const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
-        const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
-        header.addEventListener("click", function () {
-            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
-            expandIcon.classList.toggle("fn__none", isExpanded);
-            contractIcon.classList.toggle("fn__none", !isExpanded);
-        });
+        this.bindThinkingCardToggle(el);
         this.messagesContainer.appendChild(el);
     }
 
@@ -1511,7 +1496,7 @@ export class AgentChat extends Model {
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             if (step.content) {
-                detail += '<div class="agent-chat__thinking-chat">' + (this.lute.MarkdownStr("", step.content) || this.escapeHtml(step.content)) + "</div>";
+                detail += '<div class="agent-chat__thinking-chat">' + (this.lute.MarkdownStr("", step.content) || escapeHtml(step.content)) + "</div>";
             }
             if (step.toolCalls.length > 0) {
                 const newTools = step.toolCalls.filter(tc => !seenTools[tc.name]);
@@ -1521,13 +1506,13 @@ export class AgentChat extends Model {
                     for (let j = 0; j < newTools.length; j++) {
                         const tc = newTools[j];
                         seenTools[tc.name] = true;
-                        detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
+                        detail += '<span class="agent-chat__thinking-tool">' + escapeHtml(tc.name) + "</span>";
                     }
                     detail += "</div>";
                 }
             }
             if (step.reasoningContent) {
-                detail += '<div class="agent-chat__thinking-reasoning-text">' + this.escapeHtml(step.reasoningContent) + "</div>";
+                detail += '<div class="agent-chat__thinking-reasoning-text">' + escapeHtml(step.reasoningContent) + "</div>";
             }
         }
 
@@ -1538,7 +1523,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__thinking-card">' +
     '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-dot fn__none"></span>' +
-        '<span class="agent-chat__thinking-text">' + this.escapeHtml(headerText) + "</span>" +
+        '<span class="agent-chat__thinking-text">' + escapeHtml(headerText) + "</span>" +
         '<span class="agent-chat__thinking-arrow">' +
             '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
@@ -1549,15 +1534,7 @@ export class AgentChat extends Model {
     "</div>" +
 "</div>";
 
-        const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
-        const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
-        const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
-        const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
-        header.addEventListener("click", function () {
-            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
-            expandIcon.classList.toggle("fn__none", isExpanded);
-            contractIcon.classList.toggle("fn__none", !isExpanded);
-        });
+        this.bindThinkingCardToggle(el);
         this.messagesContainer.appendChild(el);
     }
 
@@ -1637,9 +1614,16 @@ export class AgentChat extends Model {
         });
     }
 
-    private escapeHtml(text: string): string {
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
+    private bindThinkingCardToggle(el: HTMLElement) {
+        const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
+        const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
+        const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
+        const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
+        if (!header || !body || !expandIcon || !contractIcon) { return; }
+        header.addEventListener("click", () => {
+            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
+            expandIcon.classList.toggle("fn__none", isExpanded);
+            contractIcon.classList.toggle("fn__none", !isExpanded);
+        });
     }
 }

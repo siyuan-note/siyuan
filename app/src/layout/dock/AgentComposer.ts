@@ -7,6 +7,7 @@ import Mention from "@tiptap/extension-mention";
 import {Placeholder} from "@tiptap/extension-placeholder";
 import {History} from "@tiptap/extension-history";
 import {getIconByType} from "../../editor/getIcon";
+import {escapeHtml} from "../../util/escape";
 
 interface BlockHit {
     id: string;
@@ -28,12 +29,6 @@ interface ComposerHandle {
 
 export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHandle {
     const L = window.siyuan.languages;
-
-    const escapeHtmlHelper = function (text: string): string {
-        const div = document.createElement("div");
-        div.textContent = text;
-        return div.innerHTML;
-    };
 
     let suggestionMenu: HTMLElement | null = null;
     let selectedIndex = 0;
@@ -78,8 +73,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
             row.className = "agent-mention-menu__item";
             row.setAttribute("data-index", i.toString());
             const iconSvg = item.icon ? '<svg class="agent-mention-menu__icon"><use xlink:href="#' + item.icon + '"></use></svg>' : "";
-            const hPathText = item.hPath ? '<div class="agent-mention-menu__hpath">' + escapeHtmlHelper(item.hPath) + "</div>" : "";
-            row.innerHTML = '<div class="agent-mention-menu__first">' + iconSvg + '<span class="agent-mention-menu__text">' + escapeHtmlHelper(item.label) + "</span></div>" + hPathText;
+            const hPathText = item.hPath ? '<div class="agent-mention-menu__hpath">' + escapeHtml(item.hPath) + "</div>" : "";
+            row.innerHTML = '<div class="agent-mention-menu__first">' + iconSvg + '<span class="agent-mention-menu__text">' + escapeHtml(item.label) + "</span></div>" + hPathText;
             row.addEventListener("mousedown", function (hit: BlockHit) {
                 return function (e: MouseEvent) { e.preventDefault(); command(hit); };
             }(item));

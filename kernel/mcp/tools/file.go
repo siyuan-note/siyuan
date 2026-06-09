@@ -44,6 +44,7 @@ var FileTool = &Tool{
 			"dst":     {Type: "string", Description: "Destination path (for copy)"},
 			"pattern": {Type: "string", Description: "Regex pattern to search for (for grep)"},
 			"include": {Type: "string", Description: "File glob pattern to filter files (for grep, e.g. \"*.go\", \"*.{ts,tsx}\")"},
+			"context": {Type: "number", Description: "Number of context lines before and after each match (for grep, default 0)"},
 		},
 		Required: []string{"action"},
 	},
@@ -329,20 +330,25 @@ func fileGrep(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	include, _ := args["include"].(string)
+	ctx := int(getFloat64Arg(args, "context"))
 
-	results, err := gulu.File.Grep(abs, include, pattern, 0)
+	results, err := gulu.File.Grep(abs, include, pattern, ctx, 0)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "grep failed: " + err.Error()}}, IsError: true}, nil
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Found %d matches:\n\n", len(results)))
+	sb.WriteString(fmt.Sprintf("Found %d lines:\n\n", len(results)))
 	for _, r := range results {
 		rel, relErr := filepath.Rel(util.WorkspaceDir, r.File)
 		if relErr != nil {
 			rel = r.File
 		}
-		sb.WriteString(fmt.Sprintf("%s:%d: %s\n", rel, r.Line, r.Text))
+		sep := ":"
+		if r.Context {
+			sep = "-:"
+		}
+		sb.WriteString(fmt.Sprintf("%s:%d%s %s\n", rel, r.Line, sep, r.Text))
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil

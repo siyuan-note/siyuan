@@ -494,7 +494,7 @@ export class AgentChat extends Model {
         if (!content || !content.trim()) { return; }
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
-        el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         this.addCopyButton(el, content);
     }
@@ -772,7 +772,7 @@ export class AgentChat extends Model {
     private appendUserMessage(text: string) {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--user";
-        el.innerHTML = '<div class="agent-chat__bubble">' + this.escapeHtml(text) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body">' + this.escapeHtml(text) + "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
     }
@@ -781,7 +781,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
-        el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--streaming"></div>';
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--streaming"></div>';
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         return el;
@@ -816,9 +816,9 @@ export class AgentChat extends Model {
             this.pendingTokenUpdate = true;
             this.rafId = requestAnimationFrame(() => {
                 this.pendingTokenUpdate = false;
-                const bubble = this.currentAIElement?.querySelector(".agent-chat__bubble") as HTMLElement;
-                if (bubble) {
-                    bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+                const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
+                if (bodyEl) {
+                    bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
                 }
             });
         }
@@ -828,9 +828,9 @@ export class AgentChat extends Model {
         if (this.pendingTokenUpdate) {
             this.pendingTokenUpdate = false;
             cancelAnimationFrame(this.rafId);
-            const bubble = this.currentAIElement?.querySelector(".agent-chat__bubble") as HTMLElement;
-            if (bubble) {
-                bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+            const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
+            if (bodyEl) {
+                bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
             }
         }
     }
@@ -922,8 +922,8 @@ export class AgentChat extends Model {
 
         if (reasoning === "processing" && this.currentAIElement) {
             if (this.currentContent) {
-                const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
-                if (bubble) { bubble.classList.remove("agent-chat__bubble--streaming"); }
+                const bodyEl = this.currentAIElement.querySelector(".agent-chat__body") as HTMLElement;
+                if (bodyEl) { bodyEl.classList.remove("agent-chat__body--streaming"); }
                 this.currentThinkingStepContent = this.currentContent;
                 this.currentAIElement.remove();
             } else {
@@ -1047,7 +1047,7 @@ export class AgentChat extends Model {
     }
 
     private addCopyButton(el: HTMLElement, contentOverride?: string) {
-        const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__bubble")?.textContent || "";
+        const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__body")?.textContent || "";
         const L = window.siyuan.languages;
 
         const actions = document.createElement("div");
@@ -1139,7 +1139,7 @@ export class AgentChat extends Model {
             }
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
-            el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             this.currentAIElement = el;
             this.currentContent = savedContent;
@@ -1221,7 +1221,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
-        el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--error">' + this.escapeHtml(message) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + this.escapeHtml(message) + "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         this.flushThinkingStep();
@@ -1263,7 +1263,7 @@ export class AgentChat extends Model {
             }
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
-            el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || this.escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             this.currentAIElement = el;
             this.currentContent = savedContent;

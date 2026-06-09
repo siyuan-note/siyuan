@@ -123,6 +123,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                 },
                 suggestion: {
                     char: "@",
+                    allowToIncludeChar: true,
+                    allowedPrefixes: null,
                     items: async function ({query}): Promise<BlockHit[]> {
                         try {
                             const resp = await fetch("/api/search/searchRefBlock", {

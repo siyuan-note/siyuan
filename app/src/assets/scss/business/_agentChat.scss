@@ -1,5 +1,4 @@
-.agent-chat {
-}
+
 
 .agent-chat__title {
     font-size: 14px;
@@ -110,14 +109,14 @@
     align-items: flex-end;
 }
 
-.agent-chat__msg--user .agent-chat__body {
+.agent-chat__msg--user .agent-chat__body,
+.agent-chat__msg--ai .agent-chat__body {
     @extend .agent-chat__body-content;
-    background: var(--b3-theme-surface);
-    border: 1px solid var(--b3-border-color);
+    min-width: 0;
+    background: transparent;
+    border: none;
     color: var(--b3-theme-on-surface);
-    border-radius: var(--b3-border-radius-b);
-    padding: 8px 12px;
-    max-width: 85%;
+    border-radius: 0;
     word-break: break-word;
     line-height: 1.5;
 }
@@ -136,17 +135,6 @@
 
 .agent-chat__msg--ai:hover .agent-chat__msg-actions {
     opacity: 1;
-}
-
-.agent-chat__msg--ai .agent-chat__body {
-    @extend .agent-chat__body-content;
-    min-width: 0;
-    background: transparent;
-    border: none;
-    color: var(--b3-theme-on-surface);
-    border-radius: 0;
-    word-break: break-word;
-    line-height: 1.5;
 }
 
 .agent-chat__body--streaming {
@@ -427,9 +415,18 @@
 }
 
 .agent-chat__thinking-body {
-    padding: 8px 12px;
+    max-height: 0;
+    overflow: hidden;
     background: transparent;
-    border-top: 1px solid var(--b3-border-color);
+    border-top: 1px solid transparent;
+    padding: 0 12px;
+    transition: max-height 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
+}
+
+.agent-chat__thinking-body--expanded {
+    max-height: 2000px;
+    padding: 8px 12px;
+    border-top-color: var(--b3-border-color);
 }
 
 .agent-chat__thinking-reasoning-text {
@@ -699,7 +696,7 @@
 
 // Todo list styles
 .agent-chat__tool-card--todo {
-    background: var(--b3-card-background);
+    background: transparent;
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius);
     overflow: hidden;
@@ -714,7 +711,7 @@
     font-weight: 500;
     color: var(--b3-theme-on-surface);
     border-bottom: 1px solid var(--b3-border-color);
-    background: var(--b3-list-background);
+    background: transparent;
 }
 
 .agent-chat__todo-items {

@@ -991,7 +991,7 @@ export class AgentChat extends Model {
             existingCard.remove();
         }
 
-        const bodyHTML = '<div class="agent-chat__thinking-body fn__none">' +
+        const bodyHTML = '<div class="agent-chat__thinking-body">' +
             detailLines +
         "</div>";
 
@@ -1014,10 +1014,9 @@ export class AgentChat extends Model {
         const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
         const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
         header.addEventListener("click", function () {
-            body.classList.toggle("fn__none");
-            const isHidden = body.classList.contains("fn__none");
-            expandIcon.classList.toggle("fn__none", !isHidden);
-            contractIcon.classList.toggle("fn__none", isHidden);
+            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
+            expandIcon.classList.toggle("fn__none", isExpanded);
+            contractIcon.classList.toggle("fn__none", !isExpanded);
         });
         this.insertBeforeAI(el);
         this.scrollToBottom();
@@ -1488,7 +1487,7 @@ export class AgentChat extends Model {
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
         "</span>" +
     "</div>" +
-    '<div class="agent-chat__thinking-body fn__none">' +
+    '<div class="agent-chat__thinking-body">' +
         detail +
     "</div>" +
 "</div>";
@@ -1498,10 +1497,9 @@ export class AgentChat extends Model {
         const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
         const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
         header.addEventListener("click", function () {
-            body.classList.toggle("fn__none");
-            const isHidden = body.classList.contains("fn__none");
-            expandIcon.classList.toggle("fn__none", !isHidden);
-            contractIcon.classList.toggle("fn__none", isHidden);
+            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
+            expandIcon.classList.toggle("fn__none", isExpanded);
+            contractIcon.classList.toggle("fn__none", !isExpanded);
         });
         this.messagesContainer.appendChild(el);
     }
@@ -1546,7 +1544,7 @@ export class AgentChat extends Model {
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
         "</span>" +
     "</div>" +
-    '<div class="agent-chat__thinking-body fn__none">' +
+    '<div class="agent-chat__thinking-body">' +
         detail +
     "</div>" +
 "</div>";
@@ -1556,10 +1554,9 @@ export class AgentChat extends Model {
         const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
         const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
         header.addEventListener("click", function () {
-            body.classList.toggle("fn__none");
-            const isHidden = body.classList.contains("fn__none");
-            expandIcon.classList.toggle("fn__none", !isHidden);
-            contractIcon.classList.toggle("fn__none", isHidden);
+            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
+            expandIcon.classList.toggle("fn__none", isExpanded);
+            contractIcon.classList.toggle("fn__none", !isExpanded);
         });
         this.messagesContainer.appendChild(el);
     }

@@ -198,19 +198,19 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         } else {
             newElement = genEmptyElement(false, true);
         }
+        blockElement.insertAdjacentElement("beforebegin", newElement);
         const newId = newElement.getAttribute("data-node-id");
         transaction(protyle, [{
             action: "insert",
             data: newElement.outerHTML,
             id: newId,
-            previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
+            previousID: blockElement.previousElementSibling?.previousElementSibling?.getAttribute("data-node-id"),
             parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID
         }], [{
             action: "delete",
             id: newId,
         }]);
         newElement.querySelector("wbr").remove();
-        blockElement.insertAdjacentElement("beforebegin", newElement);
         removeEmptyNode(newElement);
         return true;
     }

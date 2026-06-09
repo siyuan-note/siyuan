@@ -276,13 +276,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)})
 					continue
 				}
-			sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
-			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
+		logging.LogErrorf("agent API request failed: %s", streamErr.Error())
+		sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
+		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 			return
 			}
 
-			var contentBuilder strings.Builder
-			var aggregatedToolCalls []openai.ToolCall
+		var contentBuilder strings.Builder
+		var reasoningBuilder strings.Builder
+		var aggregatedToolCalls []openai.ToolCall
 
 			for {
 				resp, recvErr := stream.Recv()
@@ -290,8 +292,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					if recvErr == io.EOF {
 						break
 					}
-					sendEvent(ch, AgentEvent{Type: "error", Error: "Stream error: " + recvErr.Error()})
-					return
+			logging.LogErrorf("agent stream error: %s", recvErr.Error())
+			sendEvent(ch, AgentEvent{Type: "error", Error: "Stream error: " + recvErr.Error()})
+			return
 				}
 
 				select {
@@ -307,6 +310,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 
 					if choice.Delta.ReasoningContent != "" {
+						reasoningBuilder.WriteString(choice.Delta.ReasoningContent)
 						sendEvent(ch, AgentEvent{Type: "reasoning", Token: choice.Delta.ReasoningContent})
 					}
 
@@ -337,9 +341,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 			if len(aggregatedToolCalls) > 0 {
 				messages = append(messages, openai.ChatCompletionMessage{
-					Role:      openai.ChatMessageRoleAssistant,
-					Content:   contentBuilder.String(),
-					ToolCalls: aggregatedToolCalls,
+					Role:             openai.ChatMessageRoleAssistant,
+					Content:          contentBuilder.String(),
+					ReasoningContent: reasoningBuilder.String(),
+					ToolCalls:        aggregatedToolCalls,
 				})
 
 				checkpointMsg := AgentMessage{
@@ -474,8 +479,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				content = " "
 			}
 			messages = append(messages, openai.ChatCompletionMessage{
-				Role:    openai.ChatMessageRoleAssistant,
-				Content: content,
+				Role:             openai.ChatMessageRoleAssistant,
+				Content:          content,
+				ReasoningContent: reasoningBuilder.String(),
 			})
 
 			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion})

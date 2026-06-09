@@ -153,33 +153,6 @@ var blockKramdownCmd = &cobra.Command{
 	},
 }
 
-var blockInfoCmd = &cobra.Command{
-	Use:   "info --id <id>",
-	Short: "Get document info",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		id, _ := cmd.Flags().GetString("id")
-		if id == "" {
-			return fmt.Errorf("--id is required")
-		}
-		info, err := model.GetDocInfo(id)
-		if err != nil {
-			return err
-		}
-		switch outputFormat {
-		case "json":
-			data, _ := json.MarshalIndent(info, "", "  ")
-			fmt.Println(string(data))
-		default:
-			fmt.Printf("ID:           %s\n", info.ID)
-			fmt.Printf("RootID:       %s\n", info.RootID)
-			fmt.Printf("Name:         %s\n", info.Name)
-			fmt.Printf("RefCount:     %d\n", info.RefCount)
-			fmt.Printf("SubFileCount: %d\n", info.SubFileCount)
-		}
-		return nil
-	},
-}
-
 var blockStatCmd = &cobra.Command{
 	Use:   "stat --id <id>",
 	Short: "Get block content statistics",
@@ -428,7 +401,6 @@ func init() {
 	blockDomCmd.Flags().String("id", "", "block ID")
 	blockKramdownCmd.Flags().String("id", "", "block ID")
 	blockKramdownCmd.Flags().String("mode", "md", "export mode: md | textmark")
-	blockInfoCmd.Flags().String("id", "", "document block ID")
 	blockStatCmd.Flags().String("id", "", "block ID")
 
 	blockInsertCmd.Flags().String("parent", "", "parent block ID")
@@ -460,7 +432,6 @@ func init() {
 	blockCmd.AddCommand(blockBreadcrumbCmd)
 	blockCmd.AddCommand(blockDomCmd)
 	blockCmd.AddCommand(blockKramdownCmd)
-	blockCmd.AddCommand(blockInfoCmd)
 	blockCmd.AddCommand(blockStatCmd)
 	blockCmd.AddCommand(blockInsertCmd)
 	blockCmd.AddCommand(blockAppendCmd)

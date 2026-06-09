@@ -21,8 +21,11 @@ import (
 	"fmt"
 	"os"
 	"text/tabwriter"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
 )
@@ -107,6 +110,49 @@ var notebookRenameCmd = &cobra.Command{
 	},
 }
 
+var notebookOpenCmd = &cobra.Command{
+	Use:   "open --id <id>",
+	Short: "Open a notebook",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("id")
+		if id == "" {
+			return fmt.Errorf("--id is required")
+		}
+		existed, err := model.Mount(id)
+		if err != nil {
+			return err
+		}
+		if box := model.Conf.Box(id); nil != box {
+			evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
+			evt.Data = map[string]any{
+				"box":     box,
+				"existed": existed,
+			}
+			util.PushEvent(evt)
+		}
+		time.Sleep(1 * time.Second)
+		sql.FlushQueue()
+		fmt.Println(id)
+		return nil
+	},
+}
+
+var notebookCloseCmd = &cobra.Command{
+	Use:   "close --id <id>",
+	Short: "Close a notebook",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("id")
+		if id == "" {
+			return fmt.Errorf("--id is required")
+		}
+		model.Unmount(id)
+		time.Sleep(1 * time.Second)
+		sql.FlushQueue()
+		fmt.Println(id)
+		return nil
+	},
+}
+
 func printNotebookTable(boxes []*model.Box) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tCLOSED\tSORT")
@@ -121,10 +167,14 @@ func init() {
 	notebookRemoveCmd.Flags().String("id", "", "notebook ID")
 	notebookRenameCmd.Flags().String("id", "", "notebook ID")
 	notebookRenameCmd.Flags().String("name", "", "new notebook name")
+	notebookOpenCmd.Flags().String("id", "", "notebook ID")
+	notebookCloseCmd.Flags().String("id", "", "notebook ID")
 
 	rootCmd.AddCommand(notebookCmd)
 	notebookCmd.AddCommand(notebookListCmd)
 	notebookCmd.AddCommand(notebookCreateCmd)
 	notebookCmd.AddCommand(notebookRemoveCmd)
 	notebookCmd.AddCommand(notebookRenameCmd)
+	notebookCmd.AddCommand(notebookOpenCmd)
+	notebookCmd.AddCommand(notebookCloseCmd)
 }

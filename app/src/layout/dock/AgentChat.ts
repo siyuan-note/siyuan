@@ -912,7 +912,7 @@ export class AgentChat extends Model {
                 for (let i = 0; i < newTools.length; i++) {
                     detailLines += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(newTools[i].name) + "</span>";
                 }
-                detailLines += '</div>';
+                detailLines += "</div>";
             }
         }
 
@@ -951,7 +951,7 @@ export class AgentChat extends Model {
             existingCard.remove();
         }
 
-        let bodyHTML = '<div class="agent-chat__thinking-body fn__none">' +
+        const bodyHTML = '<div class="agent-chat__thinking-body fn__none">' +
             detailLines +
         "</div>";
 
@@ -1427,7 +1427,7 @@ export class AgentChat extends Model {
                 const tc = step.toolCalls[j];
                 detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
             }
-            detail += '</div>';
+            detail += "</div>";
         }
         if (step.reasoningContent) {
             detail += "<div>" + this.escapeHtml(step.reasoningContent) + "</div>";
@@ -1481,7 +1481,7 @@ export class AgentChat extends Model {
                         seenTools[tc.name] = true;
                         detail += '<span class="agent-chat__thinking-tool">' + this.escapeHtml(tc.name) + "</span>";
                     }
-                    detail += '</div>';
+                    detail += "</div>";
                 }
             }
             if (step.reasoningContent) {

@@ -25,8 +25,8 @@ import (
 )
 
 type SkillInfo struct {
-	Name        string
-	Description string
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 func SkillsDir() string {

@@ -301,6 +301,17 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
             const slashPos = $from.pos - query.length - 1;
             slashActive = true;
             slashRange = {from: slashPos, to: $from.pos};
+            const slashCoords = editor.view.coordsAtPos($from.pos);
+            const slashClientRect = function () {
+                return {
+                    left: slashCoords.left,
+                    top: slashCoords.top,
+                    right: slashCoords.right,
+                    bottom: slashCoords.bottom,
+                    width: slashCoords.right - slashCoords.left,
+                    height: slashCoords.bottom - slashCoords.top,
+                } as DOMRect;
+            };
 
             const filterAndOpen = function (skills: BlockHit[]) {
                 const q = query.toLowerCase();
@@ -313,7 +324,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                     slashActive = false;
                     slashRange = null;
                 };
-                openMenu(filtered, suggestionCommand!);
+                openMenu(filtered, suggestionCommand!, slashClientRect);
                 cachedSkills = skills;
             };
 

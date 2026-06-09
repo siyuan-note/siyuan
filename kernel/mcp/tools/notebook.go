@@ -133,11 +133,6 @@ func notebookOpen(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "open notebook failed: " + err.Error()}}, IsError: true}, nil
 	}
 
-	if model.IsUserGuide(id) {
-		time.Sleep(7 * time.Second)
-		sql.FlushQueue()
-	}
-
 	if box := model.Conf.Box(id); nil != box {
 		evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
 		evt.Data = map[string]any{
@@ -146,6 +141,9 @@ func notebookOpen(args map[string]interface{}) (CallToolResult, error) {
 		}
 		util.PushEvent(evt)
 	}
+
+	time.Sleep(1 * time.Second)
+	sql.FlushQueue()
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook opened: " + id}}}, nil
 }
@@ -157,5 +155,9 @@ func notebookClose(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	model.Unmount(id)
+
+	time.Sleep(1 * time.Second)
+	sql.FlushQueue()
+
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook closed: " + id}}}, nil
 }

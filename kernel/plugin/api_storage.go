@@ -86,6 +86,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.add worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.add reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -130,6 +133,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.remove worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.remove reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -211,6 +217,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.get worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.storage.get reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -286,6 +295,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.put worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.storage.put reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -360,6 +372,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.remove worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.storage.remove reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -441,6 +456,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.list worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.storage.list reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)

@@ -17,10 +17,12 @@
 package tools
 
 type Tool struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	InputSchema ToolSchema        `json:"inputSchema"`
-	Handler     func(args map[string]interface{}) (CallToolResult, error) `json:"-"`
+	Name        string     `json:"name"`
+	Title       string     `json:"title,omitempty"`
+	Description string     `json:"description"`
+	InputSchema ToolSchema `json:"inputSchema"`
+
+	Handler func(args map[string]interface{}) (CallToolResult, error) `json:"-"`
 }
 
 type ToolSchema struct {

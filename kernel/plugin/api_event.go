@@ -73,6 +73,9 @@ func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.event.emit worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.event.emit reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)

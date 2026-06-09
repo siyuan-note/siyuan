@@ -286,8 +286,29 @@ func documentInfo(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("get doc info failed: %s", err)}}, IsError: true}, nil
 	}
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf(
-		"ID: %s\nRootID: %s\nName: %s\nRefCount: %d\nSubFileCount: %d",
-		info.ID, info.RootID, info.Name, info.RefCount, info.SubFileCount,
-	)}}}, nil
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf(
+		"ID: %s\nRootID: %s\nName: %s\nRefCount: %d\nSubFileCount: %d\nIcon: %s",
+		info.ID, info.RootID, info.Name, info.RefCount, info.SubFileCount, info.Icon,
+	))
+	if len(info.RefIDs) > 0 {
+		sb.WriteString(fmt.Sprintf("\nRefIDs: %s", strings.Join(info.RefIDs, ", ")))
+	}
+	if len(info.AttrViews) > 0 {
+		sb.WriteString("\nAttrViews:")
+		for _, av := range info.AttrViews {
+			sb.WriteString(fmt.Sprintf("\n  - %s: %s", av.ID, av.Name))
+		}
+	}
+	if len(info.IAL) > 0 {
+		sb.WriteString("\nIAL:")
+		for k, v := range info.IAL {
+			if len(v) > 100 {
+				v = v[:100] + "..."
+			}
+			sb.WriteString(fmt.Sprintf("\n  %s: %s", k, v))
+		}
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

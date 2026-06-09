@@ -27,12 +27,13 @@ import (
 
 var BlockTool = &Tool{
 	Name:        "block",
-	Description: "Block operations for SiYuan.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- tree_stat: Get tree statistics (word count, character count, block count, etc.) by document ID. Requires: id.\n- dom: Get block DOM by ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a child block. Requires: data, dataType, parentID.\n- prepend: Prepend a child block. Requires: data, dataType, parentID.\n- update: Update a block. Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.\n- move: Move a block. Requires: id, parentID. Optional: previousID.\n- breadcrumb: Get block breadcrumb path. Requires: id.",
+	Description: "Block operations for SiYuan.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- tree_stat: Get tree statistics (word count, character count, block count, etc.) by document ID. Requires: id.\n- dom: Get block DOM by ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a child block. Requires: data, dataType, parentID.\n- prepend: Prepend a child block. Requires: data, dataType, parentID.\n- update: Update a block. Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.\n- move: Move a block. Requires: id, parentID. Optional: previousID.\n- breadcrumb: Get block breadcrumb path. Requires: id.\n- batch_get: Batch get block info by IDs. Requires: ids (comma-separated block IDs).\n- batch_kramdown: Batch get block kramdown by IDs. Requires: ids (comma-separated block IDs).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":     {Type: "string", Description: "Operation", Enum: []string{"get", "get_kramdown", "get_children", "tree_stat", "dom", "insert", "append", "prepend", "update", "delete", "move", "breadcrumb"}},
+			"action":     {Type: "string", Description: "Operation", Enum: []string{"get", "get_kramdown", "get_children", "tree_stat", "dom", "insert", "append", "prepend", "update", "delete", "move", "breadcrumb", "batch_get", "batch_kramdown"}},
 			"id":         {Type: "string", Description: "Block ID"},
+			"ids":        {Type: "string", Description: "Comma-separated block IDs (for batch_get, batch_kramdown)"},
 			"data":       {Type: "string", Description: "Content (markdown or dom)"},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
 			"parentID":   {Type: "string", Description: "Parent block ID"},
@@ -75,9 +76,13 @@ func blockHandler(args map[string]interface{}) (CallToolResult, error) {
 		return blockMove(args)
 	case "breadcrumb":
 		return blockBreadcrumb(args)
+	case "batch_get":
+		return blockBatchGet(args)
+	case "batch_kramdown":
+		return blockBatchKramdown(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [get, get_kramdown, get_children, tree_stat, dom, insert, append, prepend, update, delete, move, breadcrumb]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [get, get_kramdown, get_children, tree_stat, dom, insert, append, prepend, update, delete, move, breadcrumb, batch_get, batch_kramdown]"}},
 		IsError: true,
 	}, nil
 }
@@ -384,4 +389,72 @@ func blockDom(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block not found or empty: " + id}}, IsError: true}, nil
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: dom}}}, nil
+}
+
+func blockBatchGet(args map[string]interface{}) (CallToolResult, error) {
+	idsStr, _ := args["ids"].(string)
+	if idsStr == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids is required (comma-separated)"}}, IsError: true}, nil
+	}
+
+	ids := strings.Split(idsStr, ",")
+	for i := range ids {
+		ids[i] = strings.TrimSpace(ids[i])
+	}
+
+	if len(ids) == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no valid IDs provided"}}, IsError: true}, nil
+	}
+
+	infos := model.GetDocsInfo(ids, false, false)
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Batch get %d blocks (found %d):\n\n", len(ids), len(infos)))
+	for _, info := range infos {
+		sb.WriteString(fmt.Sprintf("- %s: %s (rootID: %s, refCount: %d)\n", info.ID, info.Name, info.RootID, info.RefCount))
+	}
+	for _, id := range ids {
+		found := false
+		for _, info := range infos {
+			if info.ID == id {
+				found = true
+				break
+			}
+		}
+		if !found {
+			sb.WriteString(fmt.Sprintf("- %s: not found\n", id))
+		}
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func blockBatchKramdown(args map[string]interface{}) (CallToolResult, error) {
+	idsStr, _ := args["ids"].(string)
+	if idsStr == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids is required (comma-separated)"}}, IsError: true}, nil
+	}
+
+	ids := strings.Split(idsStr, ",")
+	for i := range ids {
+		ids[i] = strings.TrimSpace(ids[i])
+	}
+
+	if len(ids) == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no valid IDs provided"}}, IsError: true}, nil
+	}
+
+	kramdowns := model.GetBlockKramdowns(ids, "md")
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Batch kramdown %d blocks (found %d):\n\n", len(ids), len(kramdowns)))
+	for _, id := range ids {
+		if kd, ok := kramdowns[id]; ok {
+			sb.WriteString(fmt.Sprintf("--- %s ---\n%s\n\n", id, kd))
+		} else {
+			sb.WriteString(fmt.Sprintf("--- %s ---\n(not found)\n\n", id))
+		}
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

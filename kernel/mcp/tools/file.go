@@ -29,12 +29,12 @@ import (
 
 var FileTool = &Tool{
 	Name:        "file",
-	Description: "Workspace file operations for SiYuan (paths are relative to workspace).\n- list: List directory contents. Requires: path.\n- read: Read file content. Requires: path.\n- write: Write file content. Requires: path, data.\n- delete: Delete file or directory. Requires: path.\n- rename: Rename or move file. Requires: old, new.\n- copy: Copy file or directory. Requires: src, dst.\n- grep: Search file contents using regex pattern. Requires: pattern, path. Optional: include, context.\n- find: Find files by glob pattern recursively. Requires: path. Optional: include (e.g. \"*.go\").",
+	Description: "Workspace file operations for SiYuan (paths are relative to workspace).\n- list: List directory contents. Requires: path.\n- read: Read file content. Requires: path.\n- write: Write file content. Requires: path, data.\n- delete: Delete file or directory. Requires: path.\n- rename: Rename or move file. Requires: old, new.\n- copy: Copy file or directory. Requires: src, dst.\n- grep: Search file contents using regex pattern. Requires: pattern, path. Optional: include, context.\n- find: Find files by glob pattern recursively. Requires: path. Optional: include (e.g. \"*.go\").\n- stat: Get file metadata (size, isDir, modTime). Requires: path.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":  {Type: "string", Description: "Operation", Enum: []string{"list", "read", "write", "delete", "rename", "copy", "grep", "find"}},
-			"path":    {Type: "string", Description: "Relative path within workspace (for list, read, write, delete, grep, find)"},
+			"action":  {Type: "string", Description: "Operation", Enum: []string{"list", "read", "write", "delete", "rename", "copy", "grep", "find", "stat"}},
+			"path":    {Type: "string", Description: "Relative path within workspace (for list, read, write, delete, grep, find, stat)"},
 			"data":    {Type: "string", Description: "File content (for write)"},
 			"offset":  {Type: "number", Description: "Line number to start reading from (for read, 1-based). Negative means N lines from the end. Default: 0 (read from beginning)."},
 			"limit":   {Type: "number", Description: "Maximum lines to read (for read). Default: all lines."},
@@ -74,9 +74,11 @@ func fileHandler(args map[string]interface{}) (CallToolResult, error) {
 		return fileGrep(args)
 	case "find":
 		return fileFind(args)
+	case "stat":
+		return fileStat(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, read, write, delete, rename, copy, grep, find]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, read, write, delete, rename, copy, grep, find, stat]"}},
 		IsError: true,
 	}, nil
 }
@@ -440,4 +442,26 @@ func expandGlobBrace(pattern string) []string {
 		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
 	}
 	return result
+}
+
+func fileStat(args map[string]interface{}) (CallToolResult, error) {
+	p, _ := args["path"].(string)
+	if p == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
+	}
+
+	abs, err := resolvePath(p)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
+
+	info, err := os.Stat(abs)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "stat failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf(
+		"Path: %s\nSize: %d\nIsDir: %v\nModTime: %s",
+		p, info.Size(), info.IsDir(), info.ModTime().Format("2006-01-02 15:04:05"),
+	)}}}, nil
 }

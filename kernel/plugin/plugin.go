@@ -389,6 +389,13 @@ func (p *KernelPlugin) unregisterMcpTool(name string) error {
 
 // invokeMcpTool calls a JS handler registered via siyuan.mcp.registerTool and returns the CallToolResult.
 func (p *KernelPlugin) invokeMcpTool(handler goja.Callable, args map[string]interface{}) (tools.CallToolResult, error) {
+	if p.State() != PluginStateRunning {
+		return tools.CallToolResult{
+			IsError: true,
+			Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("plugin [%s] is not running (state: %s)", p.Name, p.State().String())}},
+		}, nil
+	}
+
 	done := make(chan *TaskResult, 1)
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {

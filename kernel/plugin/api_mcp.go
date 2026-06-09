@@ -47,24 +47,25 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 	lo.Must0(mcp.Set("registerTool", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
-		var argErr error
-
 		var name string
 		var title string
 		var description string
+		var inputSchema *tools.ToolSchema
+		var outputSchema *tools.ToolSchema
 		var handler goja.Callable
-		var inputSchema tools.ToolSchema
 
-		if len(call.Arguments) < 3 {
-			argErr = fmt.Errorf("registerTool requires 3 arguments: name, config, handler")
-		} else {
-			if s := call.Argument(0); goja.IsString(s) {
-				name = s.String()
+		argErr := func() (err error) {
+			if len(call.Arguments) < 3 {
+				err = fmt.Errorf("registerTool requires 3 arguments: name, config, handler")
+				return
 			} else {
-				argErr = fmt.Errorf("first argument must be a tool name string")
-			}
+				if s := call.Argument(0); goja.IsString(s) {
+					name = s.String()
+				} else {
+					err = fmt.Errorf("first argument must be a tool name string")
+					return
+				}
 
-			if argErr == nil {
 				if c := call.Argument(1); isJsValueNotNull(c) {
 					configObj := c.ToObject(rt)
 					if configObj != nil {
@@ -75,31 +76,32 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 							description = descriptionValue.String()
 						}
 						if inputSchemaValue := configObj.Get("inputSchema"); isJsValueNotNull(inputSchemaValue) {
-							schemaJson, marshalErr := inputSchemaValue.ToObject(rt).MarshalJSON()
-							if marshalErr != nil {
-								argErr = fmt.Errorf("failed to serialize inputSchema: %v", marshalErr)
+							if inputSchema, err = jsSchemaToGoSchema(rt, inputSchemaValue); err != nil {
+								return
 							}
-							if argErr == nil {
-								unmarshalErr := json.Unmarshal(schemaJson, &inputSchema)
-								if unmarshalErr != nil {
-									argErr = fmt.Errorf("invalid inputSchema: %v", unmarshalErr)
-								}
+						} else {
+							err = fmt.Errorf("config.inputSchema is required")
+							return
+						}
+						if outputSchemaValue := configObj.Get("outputSchema"); isJsValueNotNull(outputSchemaValue) {
+							if outputSchema, err = jsSchemaToGoSchema(rt, outputSchemaValue); err != nil {
+								return
 							}
 						}
 					}
 				} else {
-					argErr = fmt.Errorf("second argument must be a config object")
+					err = fmt.Errorf("second argument must be a config object")
+					return
 				}
-			}
-
-			if argErr == nil {
 				if fn, ok := goja.AssertFunction(call.Argument(2)); ok {
 					handler = fn
 				} else {
-					argErr = fmt.Errorf("third argument must be a handler function")
+					err = fmt.Errorf("third argument must be a handler function")
+					return
 				}
+				return
 			}
-		}
+		}()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 			if argErr != nil {
@@ -110,10 +112,11 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 			fullToolName := pluginToolName(p.Name, name)
 
 			tool := &tools.Tool{
-				Name:        fullToolName,
-				Title:       title,
-				Description: description,
-				InputSchema: inputSchema,
+				Name:         fullToolName,
+				Title:        title,
+				Description:  description,
+				InputSchema:  *inputSchema,
+				OutputSchema: outputSchema,
 				Handler: func(args map[string]interface{}) (tools.CallToolResult, error) {
 					return p.invokeMcpTool(handler, args)
 				},
@@ -195,5 +198,24 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 
 	lo.Must0(ObjectFreeze(rt, mcp))
 	lo.Must0(siyuan.Set("mcp", mcp))
+	return
+}
+
+// jsSchemaToGoSchema converts a JavaScript value representing a tool schema into a Go ToolSchema struct.
+func jsSchemaToGoSchema(rt *goja.Runtime, value goja.Value) (toolSchema *tools.ToolSchema, err error) {
+	schemaJson, marshalErr := value.ToObject(rt).MarshalJSON()
+	if marshalErr != nil {
+		err = fmt.Errorf("failed to serialize inputSchema: %v", marshalErr)
+		return
+	}
+
+	schema := &tools.ToolSchema{}
+	unmarshalErr := json.Unmarshal(schemaJson, schema)
+	if unmarshalErr != nil {
+		err = fmt.Errorf("invalid inputSchema: %v", unmarshalErr)
+		return
+	}
+
+	toolSchema = schema
 	return
 }

@@ -35,10 +35,14 @@ const getKanbanTitleHTML = (group: IAVView, counter: number) => {
 </div>`;
 };
 
-const getKanbanHTML = (data: IAVKanban) => {
+const getKanbanHTML = (data: IAVKanban, e:HTMLElement) => {
     let galleryHTML = "";
     // body
     data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
+        if (data.pageSize > 100 && rowIndex > 99) {
+            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            return true;
+        }
         galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item">`;
         if (data.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + data.cardAspectRatio;
@@ -218,7 +222,7 @@ export const renderKanban = async (options: {
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body">${getKanbanHTML(group)}</div>
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body">${getKanbanHTML(group, options.blockElement)}</div>
 </div>`;
         }
     });

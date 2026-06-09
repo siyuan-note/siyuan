@@ -23,6 +23,7 @@ import {showMessage} from "../../../dialog/message";
 import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 /// #endif
 import {renderKanban} from "./kanban/render";
+import {bindAutoLoadScroll} from "./trim";
 
 interface IIds {
     groupId: string,
@@ -187,7 +188,11 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
 </div>
 </div>`;
     // body
-    data.rows.forEach((row: IAVRow, rowIndex: number) => {
+    data.rows.find((row: IAVRow, rowIndex: number) => {
+        if (data.pageSize > 100 && rowIndex > 99) {
+            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            return true;
+        }
         contentHTML += `<div class="av__row" data-id="${row.id}">`;
         if (pinIndex > -1) {
             contentHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -447,6 +452,7 @@ const afterRenderTable = (options: ITableOptions) => {
             /// #endif
         }
     });
+    bindAutoLoadScroll(options);
 };
 
 export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, avData?: IAV) => {

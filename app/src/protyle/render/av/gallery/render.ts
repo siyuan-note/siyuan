@@ -16,6 +16,7 @@ import {getPageSize} from "../groups";
 import {activeBlur} from "../../../../mobile/util/keyboardToolbar";
 /// #endif
 import {renderKanban} from "../kanban/render";
+import {bindAutoLoadScroll} from "../trim";
 
 interface IIds {
     groupId: string,
@@ -40,10 +41,14 @@ interface ITableOptions {
     }
 }
 
-const getGalleryHTML = (data: IAVGallery) => {
+const getGalleryHTML = (data: IAVGallery, e: HTMLElement) => {
     let galleryHTML = "";
     // body
     data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
+        if (data.pageSize > 100 && rowIndex > 99) {
+            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            return true;
+        }
         galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item">`;
         if (data.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + data.cardAspectRatio;
@@ -134,7 +139,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cardCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.blockElement)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -270,6 +275,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
             /// #endif
         }
     });
+    bindAutoLoadScroll(options);
 };
 
 export const renderGallery = async (options: {
@@ -363,7 +369,7 @@ export const renderGallery = async (options: {
         });
         return;
     }
-    const bodyHTML = getGalleryHTML(view);
+    const bodyHTML = getGalleryHTML(view, options.blockElement);
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}

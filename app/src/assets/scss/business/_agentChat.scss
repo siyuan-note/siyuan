@@ -21,6 +21,11 @@
     flex-direction: column;
     gap: 12px;
     user-select: text;
+    transition: opacity 0.2s ease;
+}
+
+.agent-chat__messages--switching {
+    opacity: 0;
 }
 
 .agent-welcome {

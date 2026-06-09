@@ -303,9 +303,12 @@ export class AgentChat extends Model {
             this.sessionPopup.addEventListener("click", (e: MouseEvent) => {
                 e.stopPropagation();
             });
+            const onResize = () => { this.closeSessionMenu(); };
+            window.addEventListener("resize", onResize);
             const closeOut = () => {
                 this.closeSessionMenu();
                 document.removeEventListener("click", closeOut);
+                window.removeEventListener("resize", onResize);
             };
             setTimeout(() => {
                 document.addEventListener("click", closeOut);
@@ -485,10 +488,14 @@ export class AgentChat extends Model {
         if (this.tokenDisplayEl) {
             this.updateTokenDisplay();
         }
-        this.messagesContainer.innerHTML = "";
-        this.titleElement.textContent = session.title;
-        this.renderLoadedSession(session);
-        this.scrollToBottom();
+        this.messagesContainer.classList.add("agent-chat__messages--switching");
+        this.messagesContainer.addEventListener("transitionend", () => {
+            this.messagesContainer.innerHTML = "";
+            this.titleElement.textContent = session.title;
+            this.renderLoadedSession(session);
+            this.scrollToBottom();
+            this.messagesContainer.classList.remove("agent-chat__messages--switching");
+        }, {once: true});
     }
 
     private appendPersistedAssistant(content: string) {

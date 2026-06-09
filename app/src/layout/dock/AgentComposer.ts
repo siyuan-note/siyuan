@@ -89,10 +89,14 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
         if (clientRect) {
             const rect = clientRect();
             let top = rect.top + rect.height + 4;
-            const left = rect.left;
+            let left = rect.left;
             const menuHeight = suggestionMenu.offsetHeight;
             if (top + menuHeight > window.innerHeight && rect.top > menuHeight + 4) {
                 top = rect.top - menuHeight - 4;
+            }
+            const menuWidth = suggestionMenu.offsetWidth;
+            if (left + menuWidth > window.innerWidth) {
+                left = window.innerWidth - menuWidth - 8;
             }
             suggestionMenu.style.top = top + "px";
             suggestionMenu.style.left = left + "px";

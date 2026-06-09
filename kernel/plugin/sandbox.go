@@ -104,6 +104,7 @@ func EnableSiyuanModule(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	lo.Must0(injectLogger(p, rt, siyuan))
 	lo.Must0(injectStorage(p, rt, siyuan))
 	lo.Must0(injectRpc(p, rt, siyuan))
+	lo.Must0(injectMcp(p, rt, siyuan))
 	lo.Must0(injectClient(p, rt, siyuan))
 	lo.Must0(injectServer(p, rt, siyuan))
 
@@ -173,6 +174,9 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] text worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.text() reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -202,6 +206,9 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] json worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.json() reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -225,6 +232,9 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] buffer worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.buffer() reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)
@@ -248,6 +258,9 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] arrayBuffer worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] data.arrayBuffer() reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)

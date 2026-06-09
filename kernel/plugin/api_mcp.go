@@ -74,6 +74,9 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 						}
 						if descriptionValue := configObj.Get("description"); goja.IsString(descriptionValue) {
 							description = descriptionValue.String()
+						} else {
+							err = fmt.Errorf("config.description is required and must be a string")
+							return
 						}
 						if inputSchemaValue := configObj.Get("inputSchema"); isJsValueNotNull(inputSchemaValue) {
 							if inputSchema, err = jsSchemaToGoSchema(rt, inputSchemaValue); err != nil {
@@ -125,10 +128,11 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 			p.registerMcpTool(name, tool)
 
 			result = map[string]any{
-				"name":        fullToolName,
-				"title":       title,
-				"description": description,
-				"inputSchema": inputSchema,
+				"name":         fullToolName,
+				"title":        title,
+				"description":  description,
+				"inputSchema":  inputSchema,
+				"outputSchema": outputSchema,
 			}
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
@@ -212,7 +216,7 @@ func jsSchemaToGoSchema(rt *goja.Runtime, value goja.Value) (toolSchema *tools.T
 	schema := &tools.ToolSchema{}
 	unmarshalErr := json.Unmarshal(schemaJson, schema)
 	if unmarshalErr != nil {
-		err = fmt.Errorf("invalid inputSchema: %v", unmarshalErr)
+		err = fmt.Errorf("invalid json schema: %v", unmarshalErr)
 		return
 	}
 

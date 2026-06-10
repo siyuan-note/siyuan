@@ -1493,6 +1493,10 @@ export class AgentChat extends Model {
         );
         for (let i = 0; i < items.length; i++) {
             const el = items[i] as HTMLElement;
+            if (i === items.length - 1) {
+                const streamingChat = el.querySelector(".agent-chat__thinking-chat--streaming");
+                if (streamingChat) { streamingChat.remove(); }
+            }
             el.classList.add("agent-chat__msg--thinking-done");
             const dot = el.querySelector(".agent-chat__thinking-dot");
             if (dot) {

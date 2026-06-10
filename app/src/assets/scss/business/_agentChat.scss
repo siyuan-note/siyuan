@@ -407,6 +407,10 @@
     background: transparent;
     border: none;
     border-radius: 0;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 
 .agent-chat__thinking-chat--streaming {

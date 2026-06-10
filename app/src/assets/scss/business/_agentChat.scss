@@ -21,10 +21,41 @@
     gap: 12px;
     user-select: text;
     transition: opacity 0.2s ease;
+    position: relative;
 }
 
 .agent-chat__messages--switching {
     opacity: 0;
+}
+
+.agent-chat__scroll-bottom {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--b3-theme-background);
+    border: 1px solid var(--b3-border-color);
+    box-shadow: var(--b3-dialog-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 5;
+
+    svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    &--visible {
+        opacity: 1;
+        visibility: visible;
+    }
 }
 
 .agent-welcome {

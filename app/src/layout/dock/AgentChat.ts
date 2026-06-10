@@ -86,6 +86,7 @@ export class AgentChat extends Model {
     private hasInterveningCard = false;
     private modelSelect: HTMLSelectElement;
     private userScrolledUp = false;
+    private scrollBottomBtn: HTMLElement;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -118,7 +119,7 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconMin"></use></svg>' +
             "</span>" +
             "</div>" +
-        '<div class="agent-chat__messages fn__flex-1"></div>' +
+        '<div class="agent-chat__messages fn__flex-1"><span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span></div>' +
         '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
         '<div class="agent-chat__input-area">' +
             '<div class="agent-chat__composer-host"></div>' +
@@ -141,6 +142,12 @@ export class AgentChat extends Model {
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
         this.modelSelect = panel.querySelector(".agent-chat__model") as HTMLSelectElement;
+        this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
+        this.messagesContainer.addEventListener("scroll", () => {
+            const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
+            this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 50;
+            this.scrollBottomBtn.classList.toggle("agent-chat__scroll-bottom--visible", this.userScrolledUp);
+        });
 
         this.initModelSelect();
 
@@ -269,10 +276,8 @@ export class AgentChat extends Model {
                 this.composer.focus();
             }
         });
-
-        this.messagesContainer.addEventListener("scroll", () => {
-            const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
-            this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 50;
+        this.scrollBottomBtn.addEventListener("click", () => {
+            this.scrollToBottom(true);
         });
     }
 
@@ -445,14 +450,16 @@ export class AgentChat extends Model {
                     this.appendUserMessage((entry as { content: string }).content);
                     break;
                 case "thinking":
-                    this.renderMergedThinkingCard((entry as {
-                        steps: Array<{
-                            reasoning: string;
-                            text: string;
-                            toolCalls: Array<{ name: string; result?: string }>;
-                            reasoningContent: string
-                        }>
-                    }).steps);
+                    if (entry.steps && entry.steps.length > 0) {
+                        this.renderMergedThinkingCard((entry as {
+                            steps: Array<{
+                                reasoning: string;
+                                text: string;
+                                toolCalls: Array<{ name: string; result?: string }>;
+                                reasoningContent: string
+                            }>
+                        }).steps);
+                    }
                     break;
                 case "assistant":
                     const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; promptTokens?: number; completionTokens?: number; duration?: number };
@@ -1395,6 +1402,7 @@ export class AgentChat extends Model {
         reasoningContent: string;
         content?: string
     }>) {
+        if (!steps || steps.length === 0) { return; }
         let detail = "";
         const seenTools: Record<string, boolean> = {};
         for (let i = 0; i < steps.length; i++) {

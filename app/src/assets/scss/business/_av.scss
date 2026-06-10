@@ -139,6 +139,10 @@
     overflow: auto hidden;
   }
 
+  &__spacer {
+    pointer-events: none;
+  }
+
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);

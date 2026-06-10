@@ -69,10 +69,19 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 firstVisibleIndex = Math.max(0, state.renderedStart - Math.ceil((rect.top - topLimit) / 36));
             }
         }
-
+        const headerElement = bodyEl.querySelector(".av__row--header");
         if (!isScrollingUp) {
             if (toRemoveAbove.length > 0) {
-                toRemoveAbove.forEach(row => row.remove());
+                let removeHeight = 0;
+                toRemoveAbove.forEach((row) => {
+                    removeHeight += row.getBoundingClientRect().height;
+                    row.remove();
+                });
+                if (headerElement.nextElementSibling.classList.contains("av__spacer")) {
+                    headerElement.nextElementSibling.setAttribute("style", `height: ${removeHeight + headerElement.nextElementSibling.getBoundingClientRect().height}px`);
+                } else {
+                    headerElement.insertAdjacentHTML("afterend", `<div class="av__spacer" style="${removeHeight}px"></div>`);
+                }
                 state.renderedStart = state.renderedStart + toRemoveAbove.length;
             }
             if (lastVisibleIndex > state.renderedEnd) {

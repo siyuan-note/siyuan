@@ -67,7 +67,6 @@ class App {
         window.siyuan = {
             zIndex: 10,
             notebooks: [],
-            transactions: [],
             reqIds: {},
             backStack: [],
             dialogs: [],

@@ -63,13 +63,13 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 }
             }
             if (i === currentRows.length - 1 && !isScrollingUp && rect.bottom < bottomLimit) {
-                lastVisibleIndex = Math.min(state.renderedEnd + Math.ceil((bottomLimit - rect.bottom) / 36), dataRows.length - 1); // 行高
+                lastVisibleIndex = Math.min(state.renderedEnd + Math.ceil((bottomLimit - rect.bottom) / 36), dataRows.length - 1);
             }
             if (i === 0 && isScrollingUp && rect.top > topLimit) {
                 firstVisibleIndex = Math.max(0, state.renderedStart - Math.ceil((rect.top - topLimit) / 36));
             }
         }
-        toRemoveBelow.forEach(row => row.remove());
+
         if (!isScrollingUp) {
             if (toRemoveAbove.length > 0) {
                 toRemoveAbove.forEach(row => row.remove());
@@ -84,9 +84,9 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 state.renderedEnd = lastVisibleIndex;
             }
         } else {
-            if (toRemoveAbove.length > 0) {
-                toRemoveAbove.forEach(row => row.remove());
-                state.renderedEnd = state.renderedEnd - toRemoveAbove.length;
+            if (toRemoveBelow.length > 0) {
+                toRemoveBelow.forEach(row => row.remove());
+                state.renderedEnd = state.renderedEnd - toRemoveBelow.length;
             }
             if (firstVisibleIndex < state.renderedStart) {
                 let rowsHTML = "";

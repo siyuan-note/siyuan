@@ -8,6 +8,7 @@ import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
+import * as dayjs from "dayjs";
 import {
     bindThinkingCardToggle,
     createThinkingCardElement,
@@ -20,7 +21,7 @@ import {
 } from "./AgentMessageRenderer";
 
 type SessionEntry =
-    | { type: "user"; content: string }
+    | { type: "user"; content: string; timestamp?: number }
     | {
     type: "thinking";
     steps: Array<{
@@ -36,7 +37,8 @@ type SessionEntry =
     toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>;
     promptTokens?: number;
     completionTokens?: number;
-    duration?: number
+    duration?: number;
+    timestamp?: number
 }
     | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string };
 
@@ -148,7 +150,7 @@ export class AgentChat extends Model {
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
-            this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 50;
+            this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 20;
             this.scrollBottomBtn.classList.toggle("agent-chat__scroll-bottom--visible", this.userScrolledUp);
         });
 
@@ -204,8 +206,8 @@ export class AgentChat extends Model {
                 const text = ex.getAttribute("data-text") || "";
                 if (text && this.composer) {
                     this.messagesContainer.innerHTML = "";
-                    this.entries.push({type: "user", content: text});
-                    this.appendUserMessage(text);
+                    this.entries.push({type: "user", content: text, timestamp: Date.now()});
+                    this.appendUserMessage(text, Date.now());
                     this.tryGenerateTitle();
                     this.setStreaming(true);
                     const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
@@ -379,7 +381,7 @@ export class AgentChat extends Model {
         }, {once: true});
     }
 
-    private appendPersistedAssistant(content: string, promptTokens?: number, completionTokens?: number, duration?: number) {
+    private appendPersistedAssistant(content: string, promptTokens?: number, completionTokens?: number, duration?: number, timestamp?: number) {
         if (!content || !content.trim()) {
             return;
         }
@@ -388,14 +390,14 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         postRender(el);
-        this.addCopyButton(el, content, promptTokens, completionTokens, duration);
+        this.addCopyButton(el, content, promptTokens, completionTokens, duration, timestamp);
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{
         name: string;
         arguments: Record<string, unknown>;
         result?: string
-    }>, promptTokens?: number, completionTokens?: number, duration?: number) {
+    }>, promptTokens?: number, completionTokens?: number, duration?: number, timestamp?: number) {
         let hasRendered = false;
         for (let i = 0; i < toolCalls.length; i++) {
             const tc = toolCalls[i];
@@ -408,7 +410,7 @@ export class AgentChat extends Model {
             }
         }
         if (content && content.trim()) {
-            this.appendPersistedAssistant(content, promptTokens, completionTokens, duration);
+            this.appendPersistedAssistant(content, promptTokens, completionTokens, duration, timestamp);
             hasRendered = true;
         }
         if (!hasRendered) {
@@ -450,7 +452,7 @@ export class AgentChat extends Model {
             const entry = session.entries[i];
             switch (entry.type) {
                 case "user":
-                    this.appendUserMessage((entry as { content: string }).content);
+                    this.appendUserMessage((entry as { content: string }).content, (entry as { timestamp?: number }).timestamp);
                     break;
                 case "thinking":
                     if (entry.steps && entry.steps.length > 0) {
@@ -465,11 +467,11 @@ export class AgentChat extends Model {
                     }
                     break;
                 case "assistant":
-                    const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; promptTokens?: number; completionTokens?: number; duration?: number };
+                    const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; promptTokens?: number; completionTokens?: number; duration?: number; timestamp?: number };
                     if (a.toolCalls && a.toolCalls.length > 0) {
-                        this.appendPersistedToolCalls(a.content, a.toolCalls, a.promptTokens, a.completionTokens, a.duration);
+                        this.appendPersistedToolCalls(a.content, a.toolCalls, a.promptTokens, a.completionTokens, a.duration, a.timestamp);
                     } else {
-                        this.appendPersistedAssistant(a.content, a.promptTokens, a.completionTokens, a.duration);
+                        this.appendPersistedAssistant(a.content, a.promptTokens, a.completionTokens, a.duration, a.timestamp);
                     }
                     break;
                 case "confirm":
@@ -584,11 +586,11 @@ export class AgentChat extends Model {
         this.hasInterveningCard = false;
         this.composer.clear();
 
-        this.entries.push({type: "user", content: text});
+        this.entries.push({type: "user", content: text, timestamp: Date.now()});
         if (this.entries.length === 1) {
             this.messagesContainer.innerHTML = "";
         }
-        this.appendUserMessage(text);
+        this.appendUserMessage(text, Date.now());
         this.tryGenerateTitle();
         if (this.composer) {
             this.composer.pushHistory(text);
@@ -683,10 +685,21 @@ export class AgentChat extends Model {
         await this.saveSession();
     }
 
-    private appendUserMessage(text: string) {
+    private appendUserMessage(text: string, timestamp?: number) {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--user";
-        el.innerHTML = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
+        let html = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
+        html += '<div class="agent-chat__msg-actions">';
+        if (timestamp) {
+            html += '<span class="agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
+        }
+        html += '<span class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
+        "</div>";
+        el.innerHTML = html;
+        el.querySelector(".block__icon")?.addEventListener("click", (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(text).catch(() => {});
+        });
         this.messagesContainer.appendChild(el);
         this.scrollToBottom(true);
     }
@@ -725,7 +738,6 @@ export class AgentChat extends Model {
         if (!this.currentAIElement) {
             this.currentAIElement = this.createAIMessagePlaceholder();
         }
-        this.scrollToBottom();
 
         if (!this.pendingTokenUpdate) {
             this.pendingTokenUpdate = true;
@@ -735,6 +747,7 @@ export class AgentChat extends Model {
                 if (bodyEl) {
                     bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
                     postRender(bodyEl);
+                    this.scrollToBottom();
                 }
             });
         }
@@ -937,12 +950,19 @@ export class AgentChat extends Model {
         reasoningEl.textContent += token;
     }
 
-    private addCopyButton(el: HTMLElement, contentOverride?: string, promptTokens?: number, completionTokens?: number, durationMs?: number) {
+    private addCopyButton(el: HTMLElement, contentOverride?: string, promptTokens?: number, completionTokens?: number, durationMs?: number, timestamp?: number) {
         const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__body")?.textContent || "";
         const L = window.siyuan.languages;
 
         const actions = document.createElement("div");
         actions.className = "agent-chat__msg-actions";
+
+        if (timestamp) {
+            const timeSpan = document.createElement("span");
+            timeSpan.className = "agent-chat__msg-time--ai";
+            timeSpan.textContent = this.formatMessageTime(timestamp);
+            actions.appendChild(timeSpan);
+        }
 
         if (promptTokens !== undefined && completionTokens !== undefined && (promptTokens + completionTokens > 0 || (durationMs && durationMs > 0))) {
             const total = promptTokens + completionTokens;
@@ -1051,6 +1071,7 @@ export class AgentChat extends Model {
         this.finishActiveThinking();
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
+        const ts = Date.now();
         const dur = this.requestStartTime ? Date.now() - this.requestStartTime : 0;
         const rPromptTokens = this.responsePromptTokens;
         const rCompletionTokens = this.responseCompletionTokens;
@@ -1070,7 +1091,7 @@ export class AgentChat extends Model {
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
-            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur);
+            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
         }
         this.flushThinkingStep();
         if (this.pendingConfirms.length > 0) {
@@ -1087,6 +1108,7 @@ export class AgentChat extends Model {
                 promptTokens: rPromptTokens || undefined,
                 completionTokens: rCompletionTokens || undefined,
                 duration: dur || undefined,
+                timestamp: ts,
             });
         } else if (this.currentToolCalls.length > 0) {
             this.entries.push({type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
@@ -1189,6 +1211,7 @@ export class AgentChat extends Model {
         this.finishActiveThinking();
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
+        const ts = Date.now();
         const dur = this.requestStartTime ? Date.now() - this.requestStartTime : 0;
         const rPromptTokens = this.responsePromptTokens;
         const rCompletionTokens = this.responseCompletionTokens;
@@ -1208,7 +1231,7 @@ export class AgentChat extends Model {
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
-            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur);
+            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
         }
         this.flushThinkingStep();
         if (this.currentContent) {
@@ -1219,6 +1242,7 @@ export class AgentChat extends Model {
                 promptTokens: rPromptTokens || undefined,
                 completionTokens: rCompletionTokens || undefined,
                 duration: dur || undefined,
+                timestamp: ts,
             });
         }
         this.currentAIElement = null;
@@ -1537,5 +1561,13 @@ export class AgentChat extends Model {
         requestAnimationFrame(() => {
             this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
         });
+    }
+
+    private formatMessageTime(ts: number): string {
+        const d = dayjs(ts);
+        if (d.format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")) {
+            return d.format("HH:mm");
+        }
+        return d.format("YYYY-MM-DD HH:mm");
     }
 }

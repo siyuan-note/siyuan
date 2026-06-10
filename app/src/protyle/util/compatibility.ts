@@ -153,20 +153,35 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
     try {
         if (isInAndroid()) {
             window.JSAndroid.saveExportFile(uri);
+            if (msgId) {
+                hideMessage(msgId);
+            }
             return;
         }
         if (isInIOS()) {
             window.webkit.messageHandlers.saveExportFile.postMessage(uri);
+            if (msgId) {
+                hideMessage(msgId);
+            }
             return;
         }
         if (isInHarmony()) {
             window.JSHarmony.saveExportFile(uri);
+            if (msgId) {
+                hideMessage(msgId);
+            }
             return;
         }
         const openUrl = new URL(uri, `${location.origin}/`);
         openUrl.searchParams.set("download", "true");
         window.open(openUrl.href);
+        if (msgId) {
+            hideMessage(msgId);
+        }
     } catch (e) {
+        if (msgId) {
+            hideMessage(msgId);
+        }
         showMessage("saveExportFile failed: " + e);
     }
     /// #endif

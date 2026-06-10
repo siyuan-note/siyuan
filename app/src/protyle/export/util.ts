@@ -102,7 +102,7 @@ export const exportImage = (id: string) => {
                 formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
                 formData.append("type", "image/png");
                 fetchPost("/api/export/exportAsFile", formData, (response) => {
-                    saveExportFile(response.data.file);
+                    saveExportFile(response.data.file, msgId);
                 });
                 hideMessage(msgId);
                 exportDialog.destroy();

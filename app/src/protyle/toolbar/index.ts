@@ -1021,7 +1021,7 @@ export class Toolbar {
                     formData.append("file", blob);
                     formData.append("type", "image/svg+xml");
                     fetchPost("/api/export/exportAsFile", formData, (response) => {
-                        saveExportFile(response.data.file);
+                        saveExportFile(response.data.file, msgId);
                         hideMessage(msgId);
                     });
                 });
@@ -1036,7 +1036,7 @@ export class Toolbar {
                         formData.append("file", blob);
                         formData.append("type", "image/png");
                         fetchPost("/api/export/exportAsFile", formData, (response) => {
-                            saveExportFile(response.data.file);
+                            saveExportFile(response.data.file, msgId);
                             hideMessage(msgId);
                         });
                     });

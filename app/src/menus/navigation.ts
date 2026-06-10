@@ -159,7 +159,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
                     ids: blockIDs,
                 }, response => {
                     hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }, {
@@ -172,7 +172,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
                     ids: blockIDs,
                 }, response => {
                     hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }]
@@ -393,7 +393,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     id: notebookId,
                 }, response => {
                     hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }, {
@@ -406,7 +406,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     notebook: notebookId
                 }, response => {
                     hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }]

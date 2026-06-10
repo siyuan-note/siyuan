@@ -1582,7 +1582,7 @@ export class Gutter {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportCodeBlock", {id}, (response) => {
                             hideMessage(msgId);
-                            saveExportFile(response.data.path);
+                            saveExportFile(response.data.path, msgId);
                         });
                     }
                 }]

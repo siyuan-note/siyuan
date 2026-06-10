@@ -876,11 +876,6 @@ export class AgentChat extends Model {
         const L = window.siyuan.languages;
         if (this.currentThinkingText) {
             let doneText = this.currentThinkingText;
-            if (this.currentThinkingReasoning === "analyzing") {
-                doneText = L.agentThinkingAnalyzed || "Analyzed your request...";
-            } else if (this.currentThinkingReasoning === "processing") {
-                doneText = L.agentThinkingProcessed || "Processed results...";
-            }
             this.currentThinkingText = doneText;
             const tc = this.currentToolCalls.map(function (t) {
                 return {name: t.name, result: t.result};
@@ -895,12 +890,7 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
-        let text = reasoning;
-        if (reasoning === "analyzing") {
-            text = L.agentThinkingAnalyzing || "Analyzing your request...";
-        } else if (reasoning === "processing") {
-            text = L.agentThinkingProcessing || "Processing results...";
-        }
+        let text = L.agentThinking || "Thinking...";
 
         this.currentThinkingText = text;
 
@@ -953,7 +943,7 @@ export class AgentChat extends Model {
                 }
                 const txtEl = card.querySelector(".agent-chat__thinking-text");
                 if (txtEl) {
-                    txtEl.textContent = L.agentThinkingAnalyzed || "Analyzed your request...";
+                    txtEl.textContent = L.agentThinking || "Thinking...";
                 }
             }
             if (this.currentThinkingStepContent && this.currentThinkingSteps.length > 0) {
@@ -1610,12 +1600,8 @@ export class AgentChat extends Model {
 
     private finishActiveThinking() {
         const L = window.siyuan.languages;
-        let doneText = "";
-        if (this.currentThinkingReasoning === "analyzing") {
-            doneText = L.agentThinkingAnalyzed || "Analyzed your request...";
-        } else if (this.currentThinkingReasoning === "processing") {
-            doneText = L.agentThinkingProcessed || "Processed results...";
-        }
+        const dur = this.requestStartTime ? ((Date.now() - this.requestStartTime) / 1000).toFixed(1) + "s" : "";
+        let doneText = L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", dur) : (L.agentThinking || "Thinking...");
         this.currentThinkingText = doneText || this.currentThinkingText;
 
         const items = this.messagesContainer.querySelectorAll(

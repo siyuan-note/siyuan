@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Snapshot otomatis dibuat",
+  "agentThinkingDoneTime": "Selesai berpikir: %s",
+  "agentThinking": "Berpikir...",
   "scrollToBottom": "Gulir ke bawah",
   "featurePreview": "💡 Fitur ini dalam pratinjau awal, masih tidak stabil. Harap cadangkan data Anda sebelum digunakan",
   "agentSessionSearch": "Cari sesi...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Tolak otomatis setelah waktu habis",
   "agentMaxRetries": "Percobaan maksimum",
   "agentMaxRetriesTip": "Percobaan ulang API maksimum saat gagal",
-  "agentThinkingAnalyzing": "Menganalisis permintaan Anda...",
-  "agentThinkingProcessing": "Memproses hasil...",
-  "agentThinkingAnalyzed": "Permintaan Anda dianalisis...",
-  "agentThinkingProcessed": "Hasil diproses...",
   "agentChat": "Agen",
   "agentQuestionSubmit": "Kirim",
   "agentQuestionCustom": "Ketik jawaban Anda...",

@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Otomatik anlık görüntü oluşturuldu",
+  "agentThinkingDoneTime": "Düşünüldü: %s",
+  "agentThinking": "Düşünüyor...",
   "scrollToBottom": "Aşağı kaydır",
   "featurePreview": "💡 Bu özellik erken önizleme aşamasında, henüz kararsız. Lütfen kullanmadan önce verilerinizi yedekleyin",
   "agentSessionSearch": "Oturum ara...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Zaman aşımından sonra otomatik reddet",
   "agentMaxRetries": "Maks. yeniden deneme",
   "agentMaxRetriesTip": "Hata durumunda maks. API yeniden deneme sayısı",
-  "agentThinkingAnalyzing": "İsteğiniz analiz ediliyor...",
-  "agentThinkingProcessing": "Sonuçlar işleniyor...",
-  "agentThinkingAnalyzed": "İsteğiniz analiz edildi...",
-  "agentThinkingProcessed": "Sonuçlar işlendi...",
   "agentChat": "Ajan",
   "agentQuestionSubmit": "Gönder",
   "agentQuestionCustom": "Cevabınızı yazın...",

@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Instantánea creada automáticamente",
+  "agentThinkingDoneTime": "Pensado: %s",
+  "agentThinking": "Pensando...",
   "scrollToBottom": "Desplazar al final",
   "featurePreview": "💡 Esta funcionalidad está en vista previa temprana, aún inestable. Haga una copia de seguridad de sus datos antes de usarla",
   "agentSessionSearch": "Buscar sesiones...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Rechazo automático tras agotar el tiempo",
   "agentMaxRetries": "Reintentos máximos",
   "agentMaxRetriesTip": "Reintentos máximos de la API en caso de error",
-  "agentThinkingAnalyzing": "Analizando tu solicitud...",
-  "agentThinkingProcessing": "Procesando resultados...",
-  "agentThinkingAnalyzed": "Solicitud analizada...",
-  "agentThinkingProcessed": "Resultados procesados...",
   "agentChat": "Agente",
   "agentQuestionSubmit": "Enviar",
   "agentQuestionCustom": "Escribir respuesta...",

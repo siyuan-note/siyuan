@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Автоматический снимок создан",
+  "agentThinkingDoneTime": "Обдумано: %s",
+  "agentThinking": "Думает...",
   "scrollToBottom": "Прокрутить вниз",
   "featurePreview": "💡 Эта функция на стадии раннего предпросмотра, пока нестабильна. Сделайте резервную копию данных перед использованием",
   "agentSessionSearch": "Поиск сессий...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Автоматический отказ при истечении времени",
   "agentMaxRetries": "Макс. повторов",
   "agentMaxRetriesTip": "Макс. повторных попыток API при сбое",
-  "agentThinkingAnalyzing": "Анализ запроса...",
-  "agentThinkingProcessing": "Обработка результатов...",
-  "agentThinkingAnalyzed": "Запрос проанализирован...",
-  "agentThinkingProcessed": "Результаты обработаны...",
   "agentChat": "Агент",
   "agentQuestionSubmit": "Отправить",
   "agentQuestionCustom": "Введите свой ответ...",

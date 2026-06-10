@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "自動スナップショットが作成されました",
+  "agentThinkingDoneTime": "考え済み：%s",
+  "agentThinking": "考え中...",
   "scrollToBottom": "最下部にスクロール",
   "featurePreview": "💡 この機能は早期プレビュー段階で、まだ不安定です。使用前にデータをバックアップしてください",
   "agentSessionSearch": "セッションを検索...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "タイムアウト後に自動的に拒否",
   "agentMaxRetries": "最大リトライ回数",
   "agentMaxRetriesTip": "API リクエスト失敗時の最大リトライ回数",
-  "agentThinkingAnalyzing": "リクエストを分析中...",
-  "agentThinkingProcessing": "結果を処理中...",
-  "agentThinkingAnalyzed": "リクエストを分析済み...",
-  "agentThinkingProcessed": "結果を処理済み...",
   "agentChat": "エージェント",
   "agentQuestionSubmit": "送信",
   "agentQuestionCustom": "自由回答を入力...",

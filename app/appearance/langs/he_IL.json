@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "נוצרה תמונת מצב אוטומטית",
+  "agentThinkingDoneTime": "חשב: %s",
+  "agentThinking": "חושב...",
   "scrollToBottom": "גלול לתחתית",
   "featurePreview": "💡 תכונה זו בתצוגה מקדימה מוקדמת, עדיין לא יציבה. אנא גבה את הנתונים שלך לפני השימוש",
   "agentSessionSearch": "חיפוש הפעלות...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "דחייה אוטומטית לאחר פקיעת זמן",
   "agentMaxRetries": "מקסימום ניסיונות חוזרים",
   "agentMaxRetriesTip": "מקסימום ניסיונות חוזרים של API בכשלון",
-  "agentThinkingAnalyzing": "מנתח את הבקשה שלך...",
-  "agentThinkingProcessing": "מעבד תוצאות...",
-  "agentThinkingAnalyzed": "הבקשה נותחה...",
-  "agentThinkingProcessed": "תוצאות עובדו...",
   "agentChat": "סוכן",
   "agentQuestionSubmit": "שלח",
   "agentQuestionCustom": "הקלד תשובה...",

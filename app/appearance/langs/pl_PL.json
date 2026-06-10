@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Automatyczna migawka utworzona",
+  "agentThinkingDoneTime": "Przemyślane: %s",
+  "agentThinking": "Myśli...",
   "scrollToBottom": "Przewiń na dół",
   "featurePreview": "💡 Ta funkcja jest we wczesnej fazie podglądu, wciąż niestabilna. Przed użyciem wykonaj kopię zapasową danych",
   "agentSessionSearch": "Szukaj sesji...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Automatyczne odrzucenie po przekroczeniu czasu",
   "agentMaxRetries": "Maks. liczba ponowień",
   "agentMaxRetriesTip": "Maks. liczba ponownych prób API przy błędzie",
-  "agentThinkingAnalyzing": "Analizowanie żądania...",
-  "agentThinkingProcessing": "Przetwarzanie wyników...",
-  "agentThinkingAnalyzed": "Żądanie przeanalizowane...",
-  "agentThinkingProcessed": "Wyniki przetworzone...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Wyślij",
   "agentQuestionCustom": "Wpisz odpowiedź...",

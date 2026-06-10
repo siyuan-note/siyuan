@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "已自动创建数据快照",
+  "agentThinkingDoneTime": "已思考：%s",
+  "agentThinking": "思考中...",
   "scrollToBottom": "滚动到底部",
   "featurePreview": "💡 该功能处于早期预览阶段，尚不稳定，建议备份数据后再使用",
   "agentSessionSearch": "搜索会话...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "操作确认超时后自动拒绝",
   "agentMaxRetries": "最大重试次数",
   "agentMaxRetriesTip": "API 请求失败时的最大重试次数",
-  "agentThinkingAnalyzing": "正在分析你的请求...",
-  "agentThinkingProcessing": "正在处理结果...",
-  "agentThinkingAnalyzed": "已分析你的请求...",
-  "agentThinkingProcessed": "已处理结果...",
   "agentChat": "智能体",
   "agentQuestionSubmit": "提交",
   "agentQuestionCustom": "输入自定义答案...",

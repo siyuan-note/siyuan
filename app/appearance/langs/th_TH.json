@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "สร้างสแนปช็อตอัตโนมัติ",
+  "agentThinkingDoneTime": "คิดแล้ว: %s",
+  "agentThinking": "กำลังคิด...",
   "scrollToBottom": "เลื่อนไปด้านล่าง",
   "featurePreview": "💡 ฟีเจอร์นี้อยู่ในช่วงตัวอย่างเบื้องต้น ยังไม่เสถียร โปรดสำรองข้อมูลก่อนใช้งาน",
   "agentSessionSearch": "ค้นหาเซสชัน...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "ปฏิเสธอัตโนมัติเมื่อหมดเวลา",
   "agentMaxRetries": "จำนวนครั้งสูงสุด",
   "agentMaxRetriesTip": "จำนวนครั้งสูงสุดในการลอง API ใหม่เมื่อล้มเหลว",
-  "agentThinkingAnalyzing": "กำลังวิเคราะห์คำขอ...",
-  "agentThinkingProcessing": "กำลังประมวลผล...",
-  "agentThinkingAnalyzed": "วิเคราะห์คำขอแล้ว...",
-  "agentThinkingProcessed": "ประมวลผลแล้ว...",
   "agentChat": "เอเจนต์",
   "agentQuestionSubmit": "ส่ง",
   "agentQuestionCustom": "พิมพ์คำตอบของคุณ...",

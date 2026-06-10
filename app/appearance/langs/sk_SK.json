@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Automatická snímka vytvorená",
+  "agentThinkingDoneTime": "Premyslené: %s",
+  "agentThinking": "Premýšľa...",
   "scrollToBottom": "Posunúť na koniec",
   "featurePreview": "💡 Táto funkcia je v ranom náhľade, zatiaľ nestabilná. Pred použitím si zálohujte údaje",
   "agentSessionSearch": "Vyhľadať relácie...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Automatické odmietnutie po uplynutí času",
   "agentMaxRetries": "Max. počet opakovaní",
   "agentMaxRetriesTip": "Max. počet opakovaných pokusov API pri chybe",
-  "agentThinkingAnalyzing": "Analyzovanie požiadavky...",
-  "agentThinkingProcessing": "Spracovanie výsledkov...",
-  "agentThinkingAnalyzed": "Požiadavka analyzovaná...",
-  "agentThinkingProcessed": "Výsledky spracované...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Odoslať",
   "agentQuestionCustom": "Napíšte odpoveď...",

@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "تم إنشاء لقطة تلقائيا",
+  "agentThinkingDoneTime": "تم التفكير: %s",
+  "agentThinking": "يفكر...",
   "scrollToBottom": "التمرير إلى الأسفل",
   "featurePreview": "💡 هذه الميزة في مرحلة المعاينة المبكرة، لا تزال غير مستقرة. يرجى عمل نسخة احتياطية لبياناتك قبل الاستخدام",
   "agentSessionSearch": "البحث عن جلسات...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "الرفض التلقائي بعد انتهاء المهلة",
   "agentMaxRetries": "الحد الأقصى للمحاولات",
   "agentMaxRetriesTip": "الحد الأقصى لمحاولات إعادة طلب API عند الفشل",
-  "agentThinkingAnalyzing": "جاري تحليل طلبك...",
-  "agentThinkingProcessing": "جاري معالجة النتائج...",
-  "agentThinkingAnalyzed": "تم تحليل طلبك...",
-  "agentThinkingProcessed": "تم معالجة النتائج...",
   "agentChat": "وكيل",
   "agentQuestionSubmit": "إرسال",
   "agentQuestionCustom": "اكتب إجابتك...",

@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Автоматичний знімок створено",
+  "agentThinkingDoneTime": "Обдумано: %s",
+  "agentThinking": "Думає...",
   "scrollToBottom": "Прокрутити вниз",
   "featurePreview": "💡 Ця функція на ранній стадії попереднього перегляду, ще нестабільна. Зробіть резервну копію даних перед використанням",
   "agentSessionSearch": "Пошук сесій...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Автоматична відмова після спливу часу",
   "agentMaxRetries": "Макс. повторів",
   "agentMaxRetriesTip": "Макс. повторних спроб API при збої",
-  "agentThinkingAnalyzing": "Аналіз запиту...",
-  "agentThinkingProcessing": "Обробка результатів...",
-  "agentThinkingAnalyzed": "Запит проаналізовано...",
-  "agentThinkingProcessed": "Результати оброблено...",
   "agentChat": "Агент",
   "agentQuestionSubmit": "Надіслати",
   "agentQuestionCustom": "Введіть свою відповідь...",

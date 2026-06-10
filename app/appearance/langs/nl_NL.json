@@ -1,5 +1,7 @@
 {
   "snapshotAutoCreated": "Automatische snapshot gemaakt",
+  "agentThinkingDoneTime": "Nagedacht: %s",
+  "agentThinking": "Denkt na...",
   "scrollToBottom": "Naar beneden scrollen",
   "featurePreview": "💡 Deze functie is in vroege preview, nog instabiel. Maak een back-up van uw gegevens voor gebruik",
   "agentSessionSearch": "Sessies zoeken...",
@@ -18,10 +20,6 @@
   "agentConfirmTimeoutTip": "Automatisch afwijzen na time-out",
   "agentMaxRetries": "Max. pogingen",
   "agentMaxRetriesTip": "Max. API-herhalingspogingen bij fout",
-  "agentThinkingAnalyzing": "Verzoek analyseren...",
-  "agentThinkingProcessing": "Resultaten verwerken...",
-  "agentThinkingAnalyzed": "Verzoek geanalyseerd...",
-  "agentThinkingProcessed": "Resultaten verwerkt...",
   "agentChat": "Agent",
   "agentQuestionSubmit": "Verzenden",
   "agentQuestionCustom": "Typ je antwoord...",

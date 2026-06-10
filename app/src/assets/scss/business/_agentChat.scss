@@ -593,9 +593,8 @@
 .agent-chat__input-area {
     background: var(--b3-theme-background);
     border: 1px solid var(--b3-border-color);
-    border-bottom: none;
-    border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
-    margin: 0 16px;
+    border-radius: var(--b3-border-radius-b);
+    margin: 0 16px 12px;
     padding: 8px;
     flex-shrink: 0;
 }
@@ -616,6 +615,12 @@
     display: flex;
     gap: 8px;
     margin-top: 8px;
+}
+
+.agent-chat__send svg,
+.agent-chat__stop svg {
+    width: 18px;
+    height: 18px;
 }
 
 .agent-chat__model-trigger {
@@ -872,9 +877,5 @@
     padding: 4px 12px;
     color: var(--b3-card-warning-color);
     background: var(--b3-card-warning-background);
-    border: 1px solid var(--b3-card-warning-color);
-    border-top: none;
-    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
-    margin: 0 16px 12px;
     flex-shrink: 0;
 }

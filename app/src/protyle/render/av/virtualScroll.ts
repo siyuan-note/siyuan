@@ -2,12 +2,14 @@ import {Constants} from "../../../constants";
 import {getRowHTML} from "./row";
 
 const BUFFER_RATIO = 3;
+const ESTIMATED_ROW_HEIGHT = 36;
 
 interface IBodyState {
     renderedStart: number;
     renderedEnd: number;
     view: IAVView;
     pinIndex: number;
+    topSpacerHeight: number;
 }
 
 const dataStore = new Map<string, {
@@ -37,6 +39,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     bodies.forEach((bodyEl: HTMLElement) => {
         const state = bodyStates.get(bodyEl);
         const dataRows = (state.view as IAVTable).rows;
+        const headerElement = bodyEl.querySelector(".av__row--header") as HTMLElement;
         const currentRows = bodyEl.querySelectorAll(".av__row:not(.av__row--header):not(.av__row--footer):not(.av__row--util)") as NodeListOf<HTMLElement>;
 
         let firstVisibleIndex: number;
@@ -63,27 +66,31 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 }
             }
             if (i === currentRows.length - 1 && !isScrollingUp && rect.bottom < bottomLimit) {
-                lastVisibleIndex = Math.min(state.renderedEnd + Math.ceil((bottomLimit - rect.bottom) / 36), dataRows.length - 1);
+                lastVisibleIndex = Math.min(state.renderedEnd + Math.ceil((bottomLimit - rect.bottom) / ESTIMATED_ROW_HEIGHT), dataRows.length - 1);
             }
             if (i === 0 && isScrollingUp && rect.top > topLimit) {
-                firstVisibleIndex = Math.max(0, state.renderedStart - Math.ceil((rect.top - topLimit) / 36));
+                firstVisibleIndex = Math.max(0, state.renderedStart - Math.ceil((rect.top - topLimit) / ESTIMATED_ROW_HEIGHT));
             }
         }
-        const headerElement = bodyEl.querySelector(".av__row--header");
+
+        const spacerElement = bodyEl.querySelector(".av__spacer") as HTMLElement;
         if (!isScrollingUp) {
             if (toRemoveAbove.length > 0) {
                 let removeHeight = 0;
                 toRemoveAbove.forEach((row) => {
-                    removeHeight += row.getBoundingClientRect().height;
+                    removeHeight += row.offsetHeight;
                     row.remove();
                 });
-                if (headerElement.nextElementSibling.classList.contains("av__spacer")) {
-                    headerElement.nextElementSibling.setAttribute("style", `height: ${removeHeight + headerElement.nextElementSibling.getBoundingClientRect().height}px`);
-                } else {
-                    headerElement.insertAdjacentHTML("afterend", `<div class="av__spacer" style="${removeHeight}px"></div>`);
-                }
+                state.topSpacerHeight += removeHeight;
                 state.renderedStart = state.renderedStart + toRemoveAbove.length;
+
+                if (spacerElement) {
+                    spacerElement.style.height = state.topSpacerHeight + "px";
+                } else if (state.topSpacerHeight > 0) {
+                    headerElement.insertAdjacentHTML("afterend", `<div class="av__spacer" style="height:${state.topSpacerHeight}px"></div>`);
+                }
             }
+
             if (lastVisibleIndex > state.renderedEnd) {
                 let rowsHTML = "";
                 for (let i = state.renderedEnd; i < lastVisibleIndex; i++) {
@@ -97,12 +104,30 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 toRemoveBelow.forEach(row => row.remove());
                 state.renderedEnd = state.renderedEnd - toRemoveBelow.length;
             }
+
             if (firstVisibleIndex < state.renderedStart) {
                 let rowsHTML = "";
                 for (let i = firstVisibleIndex; i < state.renderedStart; i++) {
                     rowsHTML += getRowHTML(state.view, dataRows[i], i, state.pinIndex);
                 }
-                bodyEl.querySelector(".av__row--header").insertAdjacentHTML("afterend", rowsHTML);
+                (spacerElement || headerElement).insertAdjacentHTML("afterend", rowsHTML);
+
+                let renderedHeight = 0;
+                let newRowElement = (spacerElement || headerElement).nextElementSibling as HTMLElement;
+                while (newRowElement) {
+                    if (parseInt(newRowElement.getAttribute("data-index"), 10) >= state.renderedStart) {
+                        break;
+                    }
+                    renderedHeight += newRowElement.offsetHeight;
+                    newRowElement = newRowElement.nextElementSibling as HTMLElement;
+                }
+
+                state.topSpacerHeight = Math.max(0, state.topSpacerHeight - renderedHeight);
+                if (state.topSpacerHeight === 0) {
+                    spacerElement?.remove();
+                } else if (spacerElement) {
+                    spacerElement.style.height = state.topSpacerHeight + "px";
+                }
                 state.renderedStart = firstVisibleIndex;
             }
         }
@@ -148,6 +173,7 @@ export const initVirtualScroll = (options: {
             pinIndex: parseInt(bodyEl.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex")),
             renderedEnd: bodyEl.querySelectorAll(".av__row:not(.av__row--header):not(.av__row--footer):not(.av__row--util)").length - 1,
             view: getBodyData(bodyEl),
+            topSpacerHeight: 0,
         };
         bodyStates.set(bodyEl, state);
     });

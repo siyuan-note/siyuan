@@ -113,6 +113,11 @@ var historyRollbackCmd = &cobra.Command{
 			return fmt.Errorf("--path is required")
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would rollback to history version: %s\n", historyPath)
+			return nil
+		}
+
 		if err := model.RollbackDocHistory(historyPath); err != nil {
 			return err
 		}
@@ -130,6 +135,11 @@ var historyClearCmd = &cobra.Command{
 	Use:   "clear",
 	Short: "Clear all history",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if dryRun {
+			fmt.Println("[dry-run] Would clear all history")
+			return nil
+		}
+
 		if err := model.ClearWorkspaceHistory(); err != nil {
 			return err
 		}

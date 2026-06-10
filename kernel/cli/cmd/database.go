@@ -157,6 +157,12 @@ var databaseKeyAddCmd = &cobra.Command{
 		if avID == "" || name == "" || keyType == "" {
 			return fmt.Errorf("--av, --name and --type are required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would add key \"%s\" (type=%s) to database %s\n", name, keyType, avID)
+			return nil
+		}
+
 		keyID := ast.NewNodeID()
 		if err := model.AddAttributeViewKey(avID, keyID, name, keyType, icon, prev); err != nil {
 			return err
@@ -177,6 +183,12 @@ var databaseKeyRemoveCmd = &cobra.Command{
 		if avID == "" || keyID == "" {
 			return fmt.Errorf("--av and --key are required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would remove key %s from database %s\n", keyID, avID)
+			return nil
+		}
+
 		if err := model.RemoveAttributeViewKey(avID, keyID, removeRelation); err != nil {
 			return err
 		}
@@ -208,10 +220,20 @@ var databaseCleanCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		avID, _ := cmd.Flags().GetString("av")
 		if avID != "" {
+			if dryRun {
+				fmt.Printf("[dry-run] Would clean unused database %s\n", avID)
+				return nil
+			}
 			model.RemoveUnusedAttributeView(avID)
 			fmt.Println(avID)
 			return nil
 		}
+
+		if dryRun {
+			fmt.Println("[dry-run] Would clean unused databases")
+			return nil
+		}
+
 		removed := model.RemoveUnusedAttributeViews()
 		fmt.Printf("%d database(s) cleaned\n", len(removed))
 		return nil
@@ -240,6 +262,11 @@ var databaseItemAddCmd = &cobra.Command{
 		}
 		if !isDetached && blockID == "" {
 			return fmt.Errorf("--block is required for non-detached rows")
+		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would add row to database %s\n", avID)
+			return nil
 		}
 
 		src := map[string]any{
@@ -275,6 +302,12 @@ var databaseItemRemoveCmd = &cobra.Command{
 		for i := range ids {
 			ids[i] = strings.TrimSpace(ids[i])
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would remove %d row(s) from database %s\n", len(ids), avID)
+			return nil
+		}
+
 		if err := model.RemoveAttributeViewBlock(ids, avID); err != nil {
 			return err
 		}
@@ -299,6 +332,12 @@ var databaseItemUpdateCmd = &cobra.Command{
 		if err := json.Unmarshal([]byte(valueStr), &valueData); err != nil {
 			return fmt.Errorf("invalid JSON: %s", err)
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would update cell in database %s: key=%s item=%s\n", avID, keyID, itemID)
+			return nil
+		}
+
 		if _, err := model.UpdateAttributeViewCell(nil, avID, keyID, itemID, valueData); err != nil {
 			return err
 		}

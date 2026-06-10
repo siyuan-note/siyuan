@@ -79,6 +79,11 @@ var documentCreateCmd = &cobra.Command{
 			dir = "/"
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would create document \"%s\" in notebook %s\n", title, notebook)
+			return nil
+		}
+
 		id := ast.NewNodeID()
 		docPath := path.Join(dir, id+".sy")
 		_, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
@@ -145,6 +150,12 @@ var documentRemoveCmd = &cobra.Command{
 		if id == "" {
 			return fmt.Errorf("--id is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would remove document %s\n", id)
+			return nil
+		}
+
 		tree, err := model.LoadTreeByBlockID(id)
 		if err != nil {
 			return err
@@ -172,6 +183,12 @@ var documentRenameCmd = &cobra.Command{
 		if title == "" {
 			return fmt.Errorf("--title is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would rename document %s to \"%s\"\n", id, title)
+			return nil
+		}
+
 		tree, err := model.LoadTreeByBlockID(id)
 		if err != nil {
 			return err
@@ -196,6 +213,12 @@ var documentMoveCmd = &cobra.Command{
 		if id == "" || toNotebook == "" {
 			return fmt.Errorf("--id and --notebook are required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would move document %s to notebook %s\n", id, toNotebook)
+			return nil
+		}
+
 		tree, err := model.LoadTreeByBlockID(id)
 		if err != nil {
 			return err
@@ -217,6 +240,12 @@ var documentDuplicateCmd = &cobra.Command{
 		if id == "" {
 			return fmt.Errorf("--id is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would duplicate document %s\n", id)
+			return nil
+		}
+
 		tree, err := model.LoadTreeByBlockID(id)
 		if err != nil {
 			return err

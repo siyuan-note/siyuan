@@ -102,6 +102,12 @@ var fileWriteCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would write file: %s\n", args[0])
+			return nil
+		}
+
 		src, _ := cmd.Flags().GetString("file")
 		var data []byte
 		if src != "" {
@@ -132,6 +138,12 @@ var fileDeleteCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would delete: %s\n", args[0])
+			return nil
+		}
+
 		info, err := os.Stat(p)
 		if err != nil {
 			return err
@@ -162,6 +174,12 @@ var fileRenameCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would rename/move: %s -> %s\n", args[0], args[1])
+			return nil
+		}
+
 		if err := os.MkdirAll(filepath.Dir(newP), 0755); err != nil {
 			return err
 		}
@@ -186,6 +204,12 @@ var fileCopyCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would copy: %s -> %s\n", args[0], args[1])
+			return nil
+		}
+
 		if err := copyPath(src, dst); err != nil {
 			return err
 		}

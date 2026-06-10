@@ -77,6 +77,12 @@ var bookmarkRemoveCmd = &cobra.Command{
 		if label == "" {
 			return fmt.Errorf("--label is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would remove bookmark \"%s\"\n", label)
+			return nil
+		}
+
 		if err := model.RemoveBookmark(label); err != nil {
 			return err
 		}
@@ -97,6 +103,12 @@ var bookmarkRenameCmd = &cobra.Command{
 		if newLabel == "" {
 			return fmt.Errorf("--new is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would rename bookmark \"%s\" to \"%s\"\n", oldLabel, newLabel)
+			return nil
+		}
+
 		if err := model.RenameBookmark(oldLabel, newLabel); err != nil {
 			return err
 		}

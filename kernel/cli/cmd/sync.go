@@ -34,6 +34,12 @@ var syncCmd = &cobra.Command{
 		if model.Conf.Sync.Mode == 3 {
 			return fmt.Errorf("full-manual mode requires 'push' or 'pull' subcommand")
 		}
+
+		if dryRun {
+			fmt.Println("[dry-run] Would sync data with cloud")
+			return nil
+		}
+
 		model.SyncData(true)
 		fmt.Println("ok")
 		return nil
@@ -44,6 +50,11 @@ var syncPushCmd = &cobra.Command{
 	Use:   "push",
 	Short: "Upload to cloud",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if dryRun {
+			fmt.Println("[dry-run] Would upload to cloud")
+			return nil
+		}
+
 		model.SyncDataUpload()
 		fmt.Println("ok")
 		return nil
@@ -54,6 +65,11 @@ var syncPullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Download from cloud",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if dryRun {
+			fmt.Println("[dry-run] Would download from cloud")
+			return nil
+		}
+
 		model.SyncDataDownload()
 		fmt.Println("ok")
 		return nil

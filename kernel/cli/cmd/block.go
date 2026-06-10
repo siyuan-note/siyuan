@@ -193,6 +193,14 @@ var blockInsertCmd = &cobra.Command{
 			return fmt.Errorf("--parent is required")
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would insert block under parent %s\n", parentID)
+			if previousID != "" {
+				fmt.Printf("         after previous sibling %s\n", previousID)
+			}
+			return nil
+		}
+
 		data, err := resolveData(cmd)
 		if err != nil {
 			return err
@@ -222,6 +230,11 @@ var blockAppendCmd = &cobra.Command{
 		parentID, _ := cmd.Flags().GetString("parent")
 		if parentID == "" {
 			return fmt.Errorf("--parent is required")
+		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would append block to parent %s\n", parentID)
+			return nil
 		}
 
 		data, err := resolveData(cmd)
@@ -254,6 +267,11 @@ var blockPrependCmd = &cobra.Command{
 			return fmt.Errorf("--parent is required")
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would prepend block to parent %s\n", parentID)
+			return nil
+		}
+
 		data, err := resolveData(cmd)
 		if err != nil {
 			return err
@@ -282,6 +300,11 @@ var blockUpdateCmd = &cobra.Command{
 		id, _ := cmd.Flags().GetString("id")
 		if id == "" {
 			return fmt.Errorf("--id is required")
+		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would update block %s\n", id)
+			return nil
 		}
 
 		data, err := resolveData(cmd)
@@ -314,6 +337,11 @@ var blockDeleteCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would delete block %s\n", id)
+			return nil
+		}
+
 		transactions := []*model.Transaction{{
 			DoOperations: []*model.Operation{{
 				Action: "delete",
@@ -337,6 +365,14 @@ var blockMoveCmd = &cobra.Command{
 		previousID, _ := cmd.Flags().GetString("previous")
 		if id == "" || parentID == "" {
 			return fmt.Errorf("--id and --parent are required")
+		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would move block %s to parent %s\n", id, parentID)
+			if previousID != "" {
+				fmt.Printf("         after previous sibling %s\n", previousID)
+			}
+			return nil
 		}
 
 		transactions := []*model.Transaction{{

@@ -64,15 +64,13 @@ export async function fetchAgentSSE(
         if (!response.ok) {
             const text = await response.text();
             onError(new Error(window.siyuan.languages._kernel[28]));
-            return;  // HTTP error
-        }
+            return;
         }
 
         const reader = response.body ? response.body.getReader() : null;
         if (!reader) {
             onError(new Error(window.siyuan.languages._kernel[28]));
-            return;  // body not readable
-        }
+            return;
         }
 
         const decoder = new TextDecoder();

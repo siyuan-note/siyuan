@@ -499,33 +499,30 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 	return ch
 }
 
-func GenerateTitle(client *openai.Client, model string, msg string) string {
-	runes := []rune(msg)
-	if len(runes) > 500 {
-		msg = string(runes[:500])
-	}
+func GenerateTitle(client *openai.Client, model string, userMsg string, aiReply string, language string) string {
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
 		Model: model,
 		Messages: []openai.ChatCompletionMessage{
-			{Role: openai.ChatMessageRoleSystem, Content: "Generate a short conversation title (max 10 words) based on the user's first message. Return ONLY the title, no quotes, no punctuation at the end."},
-			{Role: openai.ChatMessageRoleUser, Content: msg},
+			{Role: openai.ChatMessageRoleSystem, Content: "Generate a concise conversation title based on the conversation below. Reply in " + language + ". Return only the title, no quotes."},
+			{Role: openai.ChatMessageRoleUser, Content: userMsg},
+			{Role: openai.ChatMessageRoleAssistant, Content: aiReply},
 		},
 		MaxTokens: 30,
 	})
 	if err != nil || len(resp.Choices) == 0 {
-		runes = []rune(msg)
+		runes := []rune(userMsg)
 		if len(runes) > 30 {
 			return string(runes[:30]) + "..."
 		}
-		return msg
+		return userMsg
 	}
 	title := strings.TrimSpace(resp.Choices[0].Message.Content)
 	if title == "" {
-		runes = []rune(msg)
+		runes := []rune(userMsg)
 		if len(runes) > 30 {
 			return string(runes[:30]) + "..."
 		}
-		return msg
+		return userMsg
 	}
 	return title
 }

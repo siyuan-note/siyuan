@@ -85,6 +85,7 @@ export class AgentChat extends Model {
     private renderedToolNames: Record<string, boolean> = {};
     private hasInterveningCard = false;
     private modelSelect: HTMLSelectElement;
+    private userScrolledUp = false;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -192,13 +193,9 @@ export class AgentChat extends Model {
             ex.addEventListener("click", () => {
                 const text = ex.getAttribute("data-text") || "";
                 if (text && this.composer) {
-                    // 不支持 setSendText，直接用 sendMessage 发送
+                    this.messagesContainer.innerHTML = "";
                     this.entries.push({type: "user", content: text});
                     this.appendUserMessage(text);
-                    if (!this.hasTitled) {
-                        this.hasTitled = true;
-                        this.generateTitle();
-                    }
                     this.setStreaming(true);
                     const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
                         role: e.type === "user" ? "user" as const : "assistant" as const,
@@ -271,6 +268,11 @@ export class AgentChat extends Model {
                 this.composer.focus();
             }
         });
+
+        this.messagesContainer.addEventListener("scroll", () => {
+            const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
+            this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 50;
+        });
     }
 
     private async initSessions() {
@@ -297,7 +299,7 @@ export class AgentChat extends Model {
                 this.titleElement.textContent = session.title;
                 this.updateTokenDisplay();
                 this.renderLoadedSession(session);
-                this.scrollToBottom();
+                this.scrollToBottom(true);
                 return;
             }
         }
@@ -363,7 +365,7 @@ export class AgentChat extends Model {
             this.messagesContainer.innerHTML = "";
             this.titleElement.textContent = session.title;
             this.renderLoadedSession(session);
-            this.scrollToBottom();
+            this.scrollToBottom(true);
             this.messagesContainer.classList.remove("agent-chat__messages--switching");
         }, {once: true});
     }
@@ -572,16 +574,14 @@ export class AgentChat extends Model {
         this.composer.clear();
 
         this.entries.push({type: "user", content: text});
+        if (this.entries.length === 1) {
+            this.messagesContainer.innerHTML = "";
+        }
         this.appendUserMessage(text);
         if (this.composer) {
             this.composer.pushHistory(text);
         }
         await this.saveSession();
-
-        if (!this.hasTitled && this.entries.length === 1) {
-            this.hasTitled = true;
-            this.generateTitle();
-        }
 
         this.requestStartTime = Date.now();
 
@@ -676,7 +676,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--user";
         el.innerHTML = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
         this.messagesContainer.appendChild(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
     }
 
     private createAIMessagePlaceholder(): HTMLElement {
@@ -749,7 +749,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--tool";
         el.innerHTML = renderTodoList(result);
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }
 
@@ -1093,6 +1093,7 @@ export class AgentChat extends Model {
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
+        this.tryGenerateTitle();
     }
 
     private flushThinkingStep() {
@@ -1119,13 +1120,15 @@ export class AgentChat extends Model {
         }
     }
 
-    private generateTitle() {
-        const firstUser = this.entries.find((e) => e.type === "user");
-        const firstMsg = firstUser ? (firstUser as { content: string }).content.slice(0, 500) : "";
+    private tryGenerateTitle() {
+        if (this.hasTitled) { return; }
+        this.hasTitled = true;
+        const userMsg = this.entries.find((e) => e.type === "user")?.content?.slice(0, 500) || "";
+        const aiMsg = this.entries.find((e) => e.type === "assistant")?.content?.slice(0, 500) || "";
         fetch("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: firstMsg}),
+            body: JSON.stringify({message: userMsg, assistantReply: aiMsg}),
         }).then((resp) => resp.json()).then((data) => {
             if (data.code === 0 && data.data && data.data !== this.sessionTitle) {
                 this.sessionTitle = data.data;
@@ -1148,7 +1151,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--error";
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + escapeHtml(message) + "</div>";
         this.messagesContainer.appendChild(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.flushThinkingStep();
         await this.saveSession();
     }
@@ -1162,7 +1165,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--thinking";
         el.innerHTML = renderRetryCardHTML(attempt, maxRetries);
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }
 
@@ -1284,7 +1287,7 @@ export class AgentChat extends Model {
             });
         }
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
         this.pendingConfirms.push({type: "confirm", name, args, confirmID, status: "pending"});
     }
@@ -1355,7 +1358,7 @@ export class AgentChat extends Model {
         }
 
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }
 
@@ -1513,7 +1516,8 @@ export class AgentChat extends Model {
         }
     }
 
-    private scrollToBottom() {
+    private scrollToBottom(force = false) {
+        if (!force && this.userScrolledUp) { return; }
         requestAnimationFrame(() => {
             this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
         });

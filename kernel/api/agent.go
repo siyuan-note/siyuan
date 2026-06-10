@@ -174,8 +174,8 @@ func agentChatQuestion(c *gin.Context) {
 }
 
 type agentTitleReq struct {
-	Message        string `json:"message"`
-	AssistantReply string `json:"assistantReply"`
+	Message string `json:"message"`
+	Model   string `json:"model"`
 }
 
 func agentChatTitle(c *gin.Context) {
@@ -188,7 +188,7 @@ func agentChatTitle(c *gin.Context) {
 		return
 	}
 
-	selectedProvider := model.Conf.AI.GetProvider("")
+	selectedProvider := model.Conf.AI.GetProvider(req.Model)
 	client := util.NewOpenAIClient(
 		selectedProvider.APIKey,
 		selectedProvider.APIProxy,
@@ -198,7 +198,7 @@ func agentChatTitle(c *gin.Context) {
 		selectedProvider.APIProvider,
 	)
 
-	title := agent.GenerateTitle(client, selectedProvider.APIModel, req.Message, req.AssistantReply, model.Conf.Lang)
+	title := agent.GenerateTitle(client, selectedProvider.APIModel, req.Message, model.Conf.Lang)
 	ret := gulu.Ret.NewResult()
 	ret.Data = title
 	c.JSON(http.StatusOK, ret)

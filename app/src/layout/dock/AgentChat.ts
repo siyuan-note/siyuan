@@ -1124,11 +1124,10 @@ export class AgentChat extends Model {
         if (this.hasTitled) { return; }
         this.hasTitled = true;
         const userMsg = this.entries.find((e) => e.type === "user")?.content?.slice(0, 500) || "";
-        const aiMsg = this.entries.find((e) => e.type === "assistant")?.content?.slice(0, 500) || "";
         fetch("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: userMsg, assistantReply: aiMsg}),
+            body: JSON.stringify({message: userMsg, model: this.getSelectedModel()}),
         }).then((resp) => resp.json()).then((data) => {
             if (data.code === 0 && data.data && data.data !== this.sessionTitle) {
                 this.sessionTitle = data.data;

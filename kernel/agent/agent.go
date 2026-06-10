@@ -499,15 +499,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 	return ch
 }
 
-func GenerateTitle(client *openai.Client, model string, userMsg string, aiReply string, language string) string {
+func GenerateTitle(client *openai.Client, model string, userMsg string, language string) string {
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
 		Model: model,
 		Messages: []openai.ChatCompletionMessage{
-			{Role: openai.ChatMessageRoleSystem, Content: "Extract the core topic from the conversation below and generate a short title (under 12 words). Be specific, not generic. NEVER copy the user's message word-for-word. For example, 'Diary' is a good title for a conversation about writing a diary, while 'Help me write a diary' is bad. Reply in " + language + ". Return only the title, no quotes."},
+			{Role: openai.ChatMessageRoleSystem, Content: "Extract a short title (under 12 words) for the conversation provided by the user. Be specific, not generic. Reply in " + language + "."},
 			{Role: openai.ChatMessageRoleUser, Content: userMsg},
-			{Role: openai.ChatMessageRoleAssistant, Content: aiReply},
 		},
-		MaxTokens: 30,
+		MaxCompletionTokens: 50,
 	})
 	if err != nil || len(resp.Choices) == 0 {
 		runes := []rune(userMsg)

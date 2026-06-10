@@ -96,7 +96,7 @@ export const renderRetryCardHTML = (attempt: number, maxRetries: number): string
 };
 
 export const renderToolsLineHTML = (newTools: Array<{name: string; result?: string}>): string => {
-    let detailLines = `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>`;
+    let detailLines = "<div class=\"agent-chat__thinking-tools-line\"><span class=\"agent-chat__thinking-summary\">Tool calls:</span>";
     for (let i = 0; i < newTools.length; i++) {
         detailLines += '<span class="agent-chat__thinking-tool">' + escapeHtml(newTools[i].name) + "</span>";
     }

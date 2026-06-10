@@ -211,7 +211,6 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         return;
     }
     hideElements(["util", "toolbar", "hint"], protyle);
-    const id = nodeElement.getAttribute("data-node-id");
     let oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_INLINE_FILE_ANNOTATION_REF);
@@ -714,7 +713,6 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     protyle.toolbar.showContent(protyle, range, nodeElement);
     /// #else
     const oldHTML = nodeElement.outerHTML;
-    const id = nodeElement.getAttribute("data-node-id");
     const captionElement = hasClosestByTag(range.startContainer, "CAPTION");
     if (range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji")) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -786,7 +784,6 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                     }
                 }).element);
                 if (!protyle.disabled) {
-                    const id = nodeElement.getAttribute("data-node-id");
                     window.siyuan.menus.menu.append(new MenuItem({
                         id: "cut",
                         icon: "iconCut",
@@ -1481,7 +1478,6 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     }
     hideTooltip();
     hideElements(["util", "toolbar", "hint"], protyle);
-    const id = nodeElement.getAttribute("data-node-id");
     let html = nodeElement.outerHTML;
     const linkAddress = linkElement.getAttribute("data-href");
     let inputElements: NodeListOf<HTMLTextAreaElement>;
@@ -1769,7 +1765,6 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         return;
     }
     hideElements(["util", "toolbar", "hint"], protyle);
-    const id = nodeElement.getAttribute("data-node-id");
     let inputElement: HTMLInputElement;
     const oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.removeCB = () => {
@@ -1957,7 +1952,6 @@ export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
     if (!nodeElement) {
         return;
     }
-    const id = nodeElement.getAttribute("data-node-id");
     const html = nodeElement.outerHTML;
     window.siyuan.menus.menu.append(new MenuItem({
         id: "copy",
@@ -2036,7 +2030,6 @@ const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IPr
 };
 
 export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
-    const id = nodeElement.getAttribute("data-node-id");
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
@@ -2107,7 +2100,6 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
 };
 
 export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string) => {
-    const id = nodeElement.getAttribute("data-node-id");
     const videoElement = nodeElement.querySelector(type === "NodeVideo" ? "video" : "audio");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{

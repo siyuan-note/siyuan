@@ -1361,7 +1361,7 @@ export class AgentChat extends Model {
             if (step.toolCalls.length > 0) {
                 const newTools = step.toolCalls.filter(tc => !seenTools[tc.name]);
                 if (newTools.length > 0) {
-                    detail += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>`;
+                    detail += "<div class=\"agent-chat__thinking-tools-line\"><span class=\"agent-chat__thinking-summary\">Tool calls:</span>";
                     for (let j = 0; j < newTools.length; j++) {
                         const tc = newTools[j];
                         seenTools[tc.name] = true;

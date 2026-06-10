@@ -62,7 +62,6 @@ export async function fetchAgentSSE(
         });
 
         if (!response.ok) {
-            const text = await response.text();
             onError(new Error(window.siyuan.languages._kernel[28]));
             return;
         }

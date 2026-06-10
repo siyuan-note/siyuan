@@ -964,7 +964,6 @@ export class WYSIWYG {
                     target.parentElement.parentElement.classList.add("img--drag");
                 }
 
-                const id = nodeElement.getAttribute("data-node-id");
                 const html = nodeElement.outerHTML;
                 const x = event.clientX;
                 const dragElement = target.previousElementSibling as HTMLElement;
@@ -1054,7 +1053,6 @@ export class WYSIWYG {
                 nodeElement.firstElementChild.style.webkitUserModify = "read-only";
                 nodeElement.style.cursor = "col-resize";
                 target.removeAttribute("style");
-                const id = nodeElement.getAttribute("data-node-id");
                 const x = event.clientX;
                 const colIndex = parseInt(target.getAttribute("data-col-index"));
                 const colElement = nodeElement.querySelectorAll("table col")[colIndex] as HTMLElement;

@@ -129,10 +129,11 @@ func repoList(args map[string]interface{}) (CallToolResult, error) {
 
 func repoCreate(args map[string]interface{}) (CallToolResult, error) {
 	memo, _ := args["memo"].(string)
-	if err := model.IndexRepo(memo); err != nil {
+	id, err := model.IndexRepo(memo)
+	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "create snapshot failed: " + err.Error()}}, IsError: true}, nil
 	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "snapshot created"}}}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "snapshot created: " + id}}}, nil
 }
 
 func repoTag(args map[string]interface{}) (CallToolResult, error) {

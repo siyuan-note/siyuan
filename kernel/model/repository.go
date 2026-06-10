@@ -968,7 +968,7 @@ func initDataRepo() {
 	time.Sleep(1 * time.Second)
 	util.PushMsg(Conf.Language(138), 3000)
 	time.Sleep(1 * time.Second)
-	if initErr := IndexRepo("[Init] Init local data repo"); nil != initErr {
+	if _, initErr := IndexRepo("[Init] Init local data repo"); nil != initErr {
 		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), initErr), 0)
 	}
 }
@@ -1304,7 +1304,7 @@ func TagSnapshot(id, name string) (err error) {
 	return
 }
 
-func IndexRepo(memo string) (err error) {
+func IndexRepo(memo string) (id string, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -1334,6 +1334,7 @@ func IndexRepo(memo string) (err error) {
 		util.PushStatusBar("Index data repo failed: " + html.EscapeString(err.Error()))
 		return
 	}
+	id = index.ID
 	elapsed := time.Since(start)
 
 	if nil == latest || latest.ID != index.ID {

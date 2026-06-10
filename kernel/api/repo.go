@@ -485,7 +485,7 @@ func createSnapshot(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("memo", &memo, true, false)) {
 		return
 	}
-	if err := model.IndexRepo(memo); err != nil {
+	if _, err := model.IndexRepo(memo); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
 		ret.Data = map[string]any{"closeTimeout": 5000}

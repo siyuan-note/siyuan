@@ -90,10 +90,11 @@ var repoCreateCmd = &cobra.Command{
 			return nil
 		}
 
-		if err := model.IndexRepo(memo); err != nil {
+		id, err := model.IndexRepo(memo)
+		if err != nil {
 			return err
 		}
-		fmt.Println("ok")
+		fmt.Println("created snapshot", id)
 		return nil
 	},
 }

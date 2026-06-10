@@ -367,6 +367,8 @@
 
 .agent-chat__thinking-arrow {
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
     color: var(--b3-theme-primary);
 
     svg {
@@ -454,15 +456,17 @@
 }
 
 .agent-chat__confirm-header {
-    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px;
     color: var(--b3-theme-on-background);
     line-height: 1.5;
 
     .agent-chat__confirm-icon {
         width: 18px;
         height: 18px;
-        vertical-align: -4px;
-        margin-right: 4px;
+        flex-shrink: 0;
     }
 }
 

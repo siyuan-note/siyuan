@@ -166,7 +166,7 @@
 
     blockquote {
         position: relative;
-        margin: 0;
+        margin: 0.5em 0;
         padding-left: calc(0.25em + 6px);
         color: var(--b3-theme-on-surface);
         background-color: var(--b3-bq-background);
@@ -195,6 +195,7 @@
 
     pre {
         padding: 8px 12px;
+        margin: 0.5em 0;
         font-size: 85%;
         font-family: var(--b3-font-family-code);
         border-radius: var(--b3-border-radius);
@@ -216,7 +217,7 @@
     table {
         border-collapse: collapse;
         empty-cells: show;
-        margin: 0;
+        margin: 0.5em 0;
         border-spacing: 0;
 
         colgroup col {
@@ -271,7 +272,7 @@
     }
 
     > * + * {
-        margin-top: 0.5em;
+        margin-top: 0.6em;
     }
 
     & > *:last-child {
@@ -279,11 +280,11 @@
     }
 
     p {
-        margin: 0 0 0.4em;
+        margin: 0 0 0.5em;
     }
 
     li {
-        margin-bottom: 0.2em;
+        margin-bottom: 0.3em;
         word-break: break-word;
         overflow-wrap: break-word;
         line-height: 1.5;
@@ -420,7 +421,7 @@
 
 .agent-chat__thinking-tool {
     font-size: 12px;
-    color: var(--b3-theme-primary);
+    color: var(--b3-theme-on-surface-light);
     white-space: nowrap;
 }
 

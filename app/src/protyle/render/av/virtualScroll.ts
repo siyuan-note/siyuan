@@ -1,7 +1,7 @@
 import {Constants} from "../../../constants";
 import {getRowHTML} from "./row";
 
-const BUFFER_RATIO = 3;
+const BUFFER_RATIO = 1;
 const ESTIMATED_ROW_HEIGHT = 36;
 
 interface IBodyState {

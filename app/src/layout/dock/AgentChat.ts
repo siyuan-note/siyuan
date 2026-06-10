@@ -239,7 +239,7 @@ export class AgentChat extends Model {
             const isSelected = o.id === this.selectedModel;
             html += '<div class="agent-chat__model-item b3-menu__item' + (isSelected ? " b3-menu__item--current" : "") + '" data-i="' + i + '" data-id="' + o.id + '">' +
                 '<span class="b3-menu__label">' + escapeHtml(o.name) + "</span>" +
-                '<svg class="agent-chat__model-check"><use xlink:href="#iconCheck2"></use></svg>' +
+                '<svg class="agent-chat__model-check"><use xlink:href="#iconSelect"></use></svg>' +
             "</div>";
         }
         html += "</div>";

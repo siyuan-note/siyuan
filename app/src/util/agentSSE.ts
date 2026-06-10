@@ -130,7 +130,7 @@ export async function fetchAgentSSE(
     } catch (err) {
         const e = err as Error;
         if (e.name !== "AbortError") {
-            onError(e);
+            onError(new Error(window.siyuan.languages._kernel[28]));
         }
     }
 }

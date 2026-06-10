@@ -31,6 +31,12 @@ interface IIds {
     colId?: string
 }
 
+interface IVirtualData {
+    renderedStart: number;
+    renderedEnd: number;
+    topSpacerHeight: number;
+}
+
 interface ITableOptions {
     protyle: IProtyle,
     blockElement: HTMLElement,
@@ -49,6 +55,7 @@ interface ITableOptions {
         activeIds: IIds[],
         query: string,
         pageSizes: { [key: string]: string },
+        virtualData: { [key: string]: IVirtualData },
     }
 }
 
@@ -123,7 +130,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     </div>`;
 };
 
-const getTableHTMLs = (data: IAVTable, e: HTMLElement) => {
+const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IVirtualData) => {
     let calcHTML = "";
     let contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     let pinIndex = -1;
@@ -187,9 +194,17 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
     <div class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.newCol}" data-type="av-header-add" data-position="4south"><svg><use xlink:href="#iconAdd"></use></svg></div>
 </div>
 </div>`;
+    if (virtualData?.topSpacerHeight) {
+        contentHTML += `<div class="av__spacer" style="height: ${virtualData.topSpacerHeight}px;"></div>`;
+    }
     // body
     data.rows.find((row: IAVRow, rowIndex: number) => {
-        if (data.pageSize > 100 && rowIndex > 99) {
+        if (virtualData) {
+            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
+                return;
+            }
+        } else if (data.pageSize > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
@@ -244,7 +259,7 @@ const renderGroupTable = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement)}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
         }
     });
     if (options.renderAll) {
@@ -498,6 +513,14 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         });
         const headerTransformElement = e.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
         const footerTransformElement = e.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
+        const virtualData: { [key: string]: IVirtualData } = {};
+        e.querySelectorAll(".av__body").forEach(item => {
+            virtualData[item.getAttribute("data-group-id") || "all"] = ({
+                renderedStart: parseInt(item.querySelectorAll(".av__row")[1].getAttribute("data-index")),
+                renderedEnd: parseInt(item.querySelector(".av__row--util").previousElementSibling.getAttribute("data-index")),
+                topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
+            });
+        });
         const resetData = {
             selectCellId,
             alignSelf: e.style.alignSelf,
@@ -515,7 +538,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             dragFillId,
             activeIds,
             query: searchInputElement?.textContent || "",
-            pageSizes
+            pageSizes,
+            virtualData
         };
         if (e.firstElementChild.innerHTML === "") {
             e.style.alignSelf = "";
@@ -567,7 +591,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             continue;
         }
         const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}" style="float: left">
-    ${getTableHTMLs(view, e)}
+    ${getTableHTMLs(view, e, resetData.virtualData.all)}
 </div>`;
         if (renderAll) {
             e.firstElementChild.outerHTML = `<div class="av__container">

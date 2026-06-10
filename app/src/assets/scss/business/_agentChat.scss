@@ -104,6 +104,7 @@
 .agent-chat__msg--ai .agent-chat__body {
     @extend .agent-chat__body-content;
     min-width: 0;
+    width: 100%;
     background: transparent;
     border: none;
     color: var(--b3-theme-on-surface);

@@ -1,4 +1,8 @@
 import {escapeHtml} from "../../util/escape";
+import {setCodeTheme} from "../../protyle/render/util";
+import {addScript} from "../../protyle/util/addScript";
+import {Constants} from "../../constants";
+import {mathRender} from "../../protyle/render/mathRender";
 
 export const renderTodoList = (result: string): string => {
     const L = window.siyuan.languages;
@@ -145,4 +149,68 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
         expandIcon.classList.toggle("fn__none", isExpanded);
         contractIcon.classList.toggle("fn__none", !isExpanded);
     });
+};
+
+export const highlightCodeBlocks = (container: HTMLElement): void => {
+    const codeElements: Array<{el: HTMLElement; language: string}> = [];
+    container.querySelectorAll("pre code:not(.hljs)").forEach((codeEl) => {
+        const el = codeEl as HTMLElement;
+        let language = "";
+        for (const cls of el.className.split(" ")) {
+            if (cls.startsWith("language-")) {
+                language = cls.replace("language-", "");
+                break;
+            }
+        }
+        if (!language) {
+            language = el.parentElement?.getAttribute("data-language") || "";
+        }
+        if (language) {
+            codeElements.push({el, language});
+        }
+    });
+    if (codeElements.length === 0) { return; }
+
+    const process = () => {
+        codeElements.forEach(({el, language}) => {
+            if (!window.hljs.getLanguage(language)) {
+                language = "plaintext";
+            }
+            el.classList.add("hljs");
+            el.innerHTML = window.hljs.highlight(el.textContent || "", {language, ignoreIllegals: true}).value;
+        });
+    };
+
+    if (window.hljs) {
+        process();
+    } else {
+        setCodeTheme(Constants.PROTYLE_CDN);
+        addScript(`${Constants.PROTYLE_CDN}/js/highlight.js/highlight.min.js?v=11.11.1`, "protyleHljsScript")
+            .then(() => addScript(`${Constants.PROTYLE_CDN}/js/highlight.js/third-languages.js?v=2.0.1`, "protyleHljsThirdScript"))
+            .then(process);
+    }
+};
+
+export const postRender = (container: HTMLElement): void => {
+    container.querySelectorAll(".language-math").forEach((el) => {
+        if (el.hasAttribute("data-subtype")) { return; }
+        const content = el.textContent || "";
+        const preParent = el.closest("pre");
+        if (preParent) {
+            const div = document.createElement("div");
+            div.appendChild(document.createElement("span"));
+            div.setAttribute("data-subtype", "math");
+            div.setAttribute("data-content", content);
+            preParent.replaceWith(div);
+        } else {
+            el.setAttribute("data-subtype", "math");
+            el.setAttribute("data-content", content);
+            if (el.tagName === "DIV" && !el.firstElementChild) {
+                el.textContent = "";
+                el.appendChild(document.createElement("span"));
+            }
+        }
+    });
+    highlightCodeBlocks(container);
+    mathRender(container);
 };

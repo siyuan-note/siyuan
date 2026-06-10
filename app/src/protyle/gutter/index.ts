@@ -63,7 +63,7 @@ import {processClonePHElement} from "../render/util";
 import {openFileById} from "../../editor/util";
 import * as path from "path";
 /// #endif
-import {hideMessage, showMessage} from "../../dialog/message";
+import {showMessage} from "../../dialog/message";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
@@ -1581,7 +1581,6 @@ export class Gutter {
                     click() {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportCodeBlock", {id}, (response) => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.path, msgId);
                         });
                     }

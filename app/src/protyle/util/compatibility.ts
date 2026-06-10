@@ -8,7 +8,7 @@ import {ipcRenderer} from "electron";
 import {processSYLink} from "../../editor/openLink";
 /// #endif
 import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
 
 export const isPhablet = () => {
     return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
@@ -122,6 +122,9 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
             properties: ["showOverwriteConfirmation"],
         });
         if (result.canceled || !result.filePath) {
+            if (msgId) {
+                hideMessage(msgId);
+            }
             return;
         }
         const copyResponse = await (await fetch("/api/export/copyExportFile", {
@@ -135,10 +138,16 @@ export const saveExportFile = async (uri: string, msgId?: string) => {
         if (copyResponse.code !== 0) {
             throw new Error(copyResponse.msg);
         }
-        showMessage(window.siyuan.languages.exported, 6000, "info", msgId);
+        if (msgId) {
+            hideMessage(msgId);
+        }
+        showMessage(window.siyuan.languages.exported);
         return;
     } catch (e) {
-        showMessage("saveExportFile failed: " + e, 6000, "error", msgId);
+        if (msgId) {
+            hideMessage(msgId);
+        }
+        showMessage("saveExportFile failed: " + e);
     }
     /// #else
     try {

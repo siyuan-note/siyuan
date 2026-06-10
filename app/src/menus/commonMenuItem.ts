@@ -621,7 +621,6 @@ export const exportMd = (id: string) => {
                 fetchPost("/api/export/exportSY", {
                     id,
                 }, response => {
-                    hideMessage(msgId);
                     saveExportFile(response.data.zip, msgId);
                 });
             }
@@ -634,7 +633,6 @@ export const exportMd = (id: string) => {
                 fetchPost("/api/export/exportMd", {
                     id,
                 }, response => {
-                    hideMessage(msgId);
                     saveExportFile(response.data.zip, msgId);
                 });
             }
@@ -690,7 +688,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportReStructuredText", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -703,7 +700,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportAsciiDoc", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -716,7 +712,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportTextile", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -729,7 +724,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportOPML", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -742,7 +736,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportOrgMode", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -755,7 +748,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportMediaWiki", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -768,7 +760,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportODT", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -781,7 +772,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportRTF", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }
@@ -794,7 +784,6 @@ export const exportMd = (id: string) => {
                         fetchPost("/api/export/exportEPUB", {
                             id,
                         }, response => {
-                            hideMessage(msgId);
                             saveExportFile(response.data.zip, msgId);
                         });
                     }

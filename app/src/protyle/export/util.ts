@@ -104,7 +104,6 @@ export const exportImage = (id: string) => {
                 fetchPost("/api/export/exportAsFile", formData, (response) => {
                     saveExportFile(response.data.file, msgId);
                 });
-                hideMessage(msgId);
                 exportDialog.destroy();
             });
         }, Constants.TIMEOUT_LOAD);

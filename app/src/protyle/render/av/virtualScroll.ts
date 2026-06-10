@@ -168,13 +168,26 @@ export const initVirtualScroll = (options: {
     });
 
     options.blockElement.querySelectorAll(".av__body").forEach((bodyEl: HTMLElement) => {
-        const state: IBodyState = {
-            renderedStart: 0,
-            pinIndex: parseInt(bodyEl.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex")),
-            renderedEnd: bodyEl.querySelectorAll(".av__row:not(.av__row--header):not(.av__row--footer):not(.av__row--util)").length - 1,
-            view: getBodyData(bodyEl),
-            topSpacerHeight: 0,
-        };
-        bodyStates.set(bodyEl, state);
+        let state = bodyStates.get(bodyEl);
+        if (!state) {
+            state = {
+                renderedStart: 0,
+                pinIndex: parseInt(bodyEl.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex")),
+                renderedEnd: bodyEl.querySelectorAll(".av__row:not(.av__row--header):not(.av__row--footer):not(.av__row--util)").length - 1,
+                view: getBodyData(bodyEl),
+                topSpacerHeight: 0,
+            };
+            bodyStates.set(bodyEl, state);
+        } else {
+            const dataRows = (options.data.view as IAVTable).rows;
+            let rowsHTML = "";
+            for (let i = state.renderedStart; i < state.renderedEnd; i++) {
+                rowsHTML += getRowHTML(state.view, dataRows[i], i, state.pinIndex);
+            }
+            // TODO 替换原有代码
+            if (state.topSpacerHeight > 0) {
+                bodyEl.querySelector(".av__row--header").insertAdjacentHTML("afterend", `<div class="av__spacer" style="height:${state.topSpacerHeight}px"></div>`);
+            }
+        }
     });
 };

@@ -63,14 +63,16 @@ export async function fetchAgentSSE(
 
         if (!response.ok) {
             const text = await response.text();
-            onError(new Error("HTTP " + response.status + ": " + (text || response.statusText)));
-            return;
+            onError(new Error(window.siyuan.languages._kernel[28]));
+            return;  // HTTP error
+        }
         }
 
         const reader = response.body ? response.body.getReader() : null;
         if (!reader) {
-            onError(new Error("Response body is not readable"));
-            return;
+            onError(new Error(window.siyuan.languages._kernel[28]));
+            return;  // body not readable
+        }
         }
 
         const decoder = new TextDecoder();

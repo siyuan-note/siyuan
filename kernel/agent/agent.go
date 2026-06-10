@@ -222,7 +222,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		defer func() {
 			if r := recover(); r != nil {
 				logging.LogErrorf("agent chat panic: %v\n%s", r, logging.ShortStack())
-				sendEvent(ch, AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)})
+				sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			}
 		}()
 
@@ -279,7 +279,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					continue
 				}
 		logging.LogErrorf("agent API request failed: %s", streamErr.Error())
-		sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
+		sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 			return
 			}
@@ -295,7 +295,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						break
 					}
 			logging.LogErrorf("agent stream error: %s", recvErr.Error())
-			sendEvent(ch, AgentEvent{Type: "error", Error: "Stream error: " + recvErr.Error()})
+			sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			return
 				}
 

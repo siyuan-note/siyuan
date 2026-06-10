@@ -196,6 +196,7 @@ export class AgentChat extends Model {
                     this.messagesContainer.innerHTML = "";
                     this.entries.push({type: "user", content: text});
                     this.appendUserMessage(text);
+                    this.tryGenerateTitle();
                     this.setStreaming(true);
                     const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
                         role: e.type === "user" ? "user" as const : "assistant" as const,
@@ -578,6 +579,7 @@ export class AgentChat extends Model {
             this.messagesContainer.innerHTML = "";
         }
         this.appendUserMessage(text);
+        this.tryGenerateTitle();
         if (this.composer) {
             this.composer.pushHistory(text);
         }
@@ -1093,7 +1095,6 @@ export class AgentChat extends Model {
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
-        this.tryGenerateTitle();
     }
 
     private flushThinkingStep() {

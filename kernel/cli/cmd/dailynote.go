@@ -39,6 +39,11 @@ var dailynoteCreateCmd = &cobra.Command{
 			return fmt.Errorf("--notebook is required")
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would create daily note in notebook %s\n", notebook)
+			return nil
+		}
+
 		p, _, err := model.CreateDailyNote(notebook)
 		if err != nil {
 			return err
@@ -60,6 +65,11 @@ var dailynoteAppendCmd = &cobra.Command{
 		notebook, _ := cmd.Flags().GetString("notebook")
 		if notebook == "" {
 			return fmt.Errorf("--notebook is required")
+		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would ensure daily note in notebook %s and append block\n", notebook)
+			return nil
 		}
 
 		data, err := resolveData(cmd)
@@ -96,6 +106,11 @@ var dailynotePrependCmd = &cobra.Command{
 		notebook, _ := cmd.Flags().GetString("notebook")
 		if notebook == "" {
 			return fmt.Errorf("--notebook is required")
+		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would ensure daily note in notebook %s and prepend block\n", notebook)
+			return nil
 		}
 
 		data, err := resolveData(cmd)

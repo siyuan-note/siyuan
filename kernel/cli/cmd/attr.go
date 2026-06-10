@@ -91,6 +91,15 @@ Examples:
 			nameValues[strings.TrimSpace(parts[0])] = parts[1]
 		}
 
+		if dryRun {
+			var parts []string
+			for k, v := range nameValues {
+				parts = append(parts, fmt.Sprintf("%s=%s", k, v))
+			}
+			fmt.Printf("[dry-run] Would set attributes on block %s: %s\n", id, strings.Join(parts, ", "))
+			return nil
+		}
+
 		if err := model.SetBlockAttrs(id, nameValues); err != nil {
 			return err
 		}

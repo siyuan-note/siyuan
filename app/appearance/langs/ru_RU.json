@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Введите сообщение, @ссылка, /навык, Enter для отправки...",
   "agentSend": "Отправить",
   "agentStop": "Остановить",
-  "agentToolCall": "Вызов инструмента",
-  "agentToolResult": "Результат инструмента",
   "editorFontSize": "Размер шрифта редактора",
   "configGroupBehavior": "Поведение",
   "configGroupBlockFeatures": "Свойства блоков",

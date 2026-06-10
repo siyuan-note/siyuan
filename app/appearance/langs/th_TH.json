@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "พิมพ์ข้อความ, @อ้างอิง, /ทักษะ, Enter เพื่อส่ง...",
   "agentSend": "ส่ง",
   "agentStop": "หยุด",
-  "agentToolCall": "เรียกใช้เครื่องมือ",
-  "agentToolResult": "ผลลัพธ์เครื่องมือ",
   "editorFontSize": "ขนาดตัวอักษรตัวแก้ไข",
   "configGroupBehavior": "พฤติกรรม",
   "configGroupBlockFeatures": "คุณสมบัติบล็อก",

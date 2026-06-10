@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Wpisz wiadomość, @odniesienie, /umiejętność, Enter aby wysłać...",
   "agentSend": "Wyślij",
   "agentStop": "Zatrzymaj",
-  "agentToolCall": "Wywołanie narzędzia",
-  "agentToolResult": "Wynik narzędzia",
   "editorFontSize": "Rozmiar czcionki edytora",
   "configGroupBehavior": "Zachowanie",
   "configGroupBlockFeatures": "Funkcje bloków",

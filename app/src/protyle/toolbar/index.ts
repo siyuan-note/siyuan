@@ -36,7 +36,7 @@ import {matchHotKey} from "../util/hotKey";
 import {hideElements} from "../ui/hideElements";
 import {electronUndo} from "../undo";
 import {previewTemplate, toolbarKeyToMenu} from "./util";
-import {hideMessage, showMessage} from "../../dialog/message";
+import {showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
 import {mathRender} from "../render/mathRender";
@@ -1021,8 +1021,7 @@ export class Toolbar {
                     formData.append("file", blob);
                     formData.append("type", "image/svg+xml");
                     fetchPost("/api/export/exportAsFile", formData, (response) => {
-                        saveExportFile(response.data.file);
-                        hideMessage(msgId);
+                        saveExportFile(response.data.file, msgId);
                     });
                 });
                 return;
@@ -1036,8 +1035,7 @@ export class Toolbar {
                         formData.append("file", blob);
                         formData.append("type", "image/png");
                         fetchPost("/api/export/exportAsFile", formData, (response) => {
-                            saveExportFile(response.data.file);
-                            hideMessage(msgId);
+                            saveExportFile(response.data.file, msgId);
                         });
                     });
                 });

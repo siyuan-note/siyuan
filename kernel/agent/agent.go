@@ -63,6 +63,8 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Provide context: when mentioning documents or blocks, include their titles and IDs so the user can reference them.
 - Be concise: summarize key findings rather than repeating large amounts of content.
 - Use markdown formatting for readability: bullet points, headings, code blocks for technical content.
+- When writing code blocks, always specify the programming language after the opening fence (e.g. python, javascript, go) to enable syntax highlighting.
+- Use $...$ for inline formulas and $$...$$ for block formulas.
 - Do not fabricate information. If you don't know something or can't find it in the user's notes, say so honestly instead of making up an answer. Search and verify before claiming facts.
 
 ## SiYuan User Guide
@@ -220,7 +222,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		defer func() {
 			if r := recover(); r != nil {
 				logging.LogErrorf("agent chat panic: %v\n%s", r, logging.ShortStack())
-				sendEvent(ch, AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)})
+				sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			}
 		}()
 
@@ -277,7 +279,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					continue
 				}
 		logging.LogErrorf("agent API request failed: %s", streamErr.Error())
-		sendEvent(ch, AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()})
+		sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 			return
 			}
@@ -293,7 +295,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						break
 					}
 			logging.LogErrorf("agent stream error: %s", recvErr.Error())
-			sendEvent(ch, AgentEvent{Type: "error", Error: "Stream error: " + recvErr.Error()})
+			sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			return
 				}
 

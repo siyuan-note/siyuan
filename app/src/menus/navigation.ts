@@ -5,7 +5,7 @@ import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
 import {getDisplayName, getNotebookName, getTopPaths, pathPosix, useShell} from "../util/pathName";
-import {hideMessage, showMessage} from "../dialog/message";
+import {showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
 /// #if !MOBILE
@@ -158,8 +158,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
                 fetchPost("/api/export/exportSYs", {
                     ids: blockIDs,
                 }, response => {
-                    hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }, {
@@ -171,8 +170,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
                 fetchPost("/api/export/exportMds", {
                     ids: blockIDs,
                 }, response => {
-                    hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }]
@@ -392,8 +390,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 fetchPost("/api/export/exportNotebookSY", {
                     id: notebookId,
                 }, response => {
-                    hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }, {
@@ -405,8 +402,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 fetchPost("/api/export/exportNotebookMd", {
                     notebook: notebookId
                 }, response => {
-                    hideMessage(msgId);
-                    saveExportFile(response.data.zip);
+                    saveExportFile(response.data.zip, msgId);
                 });
             }
         }]

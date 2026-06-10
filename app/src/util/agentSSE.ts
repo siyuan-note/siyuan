@@ -63,13 +63,13 @@ export async function fetchAgentSSE(
 
         if (!response.ok) {
             const text = await response.text();
-            onError(new Error("HTTP " + response.status + ": " + (text || response.statusText)));
+            onError(new Error(window.siyuan.languages._kernel[28]));
             return;
         }
 
         const reader = response.body ? response.body.getReader() : null;
         if (!reader) {
-            onError(new Error("Response body is not readable"));
+            onError(new Error(window.siyuan.languages._kernel[28]));
             return;
         }
 
@@ -130,7 +130,7 @@ export async function fetchAgentSSE(
     } catch (err) {
         const e = err as Error;
         if (e.name !== "AbortError") {
-            onError(e);
+            onError(new Error(window.siyuan.languages._kernel[28]));
         }
     }
 }

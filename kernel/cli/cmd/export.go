@@ -39,8 +39,13 @@ var exportMdCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
-		_, content := model.ExportMarkdownContent(id, 4, 0, true, false, false, false, false)
 		output, _ := cmd.Flags().GetString("output")
+		if dryRun && output != "" {
+			fmt.Printf("[dry-run] Would export markdown for document %s to %s\n", id, output)
+			return nil
+		}
+
+		_, content := model.ExportMarkdownContent(id, 4, 0, true, false, false, false, false)
 		if output != "" {
 			return os.WriteFile(output, []byte(content), 0644)
 		}
@@ -58,8 +63,13 @@ var exportHTMLCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
-		_, dom, _ := model.ExportHTML(id, "", false, false, false)
 		output, _ := cmd.Flags().GetString("output")
+		if dryRun && output != "" {
+			fmt.Printf("[dry-run] Would export HTML for document %s to %s\n", id, output)
+			return nil
+		}
+
+		_, dom, _ := model.ExportHTML(id, "", false, false, false)
 		if output != "" {
 			return os.WriteFile(output, []byte(dom), 0644)
 		}
@@ -77,8 +87,13 @@ var exportPreviewCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
-		html := model.ExportPreview(id, false)
 		output, _ := cmd.Flags().GetString("output")
+		if dryRun && output != "" {
+			fmt.Printf("[dry-run] Would export preview HTML for document %s to %s\n", id, output)
+			return nil
+		}
+
+		html := model.ExportPreview(id, false)
 		if output != "" {
 			return os.WriteFile(output, []byte(html), 0644)
 		}
@@ -100,6 +115,11 @@ var exportDocxCmd = &cobra.Command{
 			return fmt.Errorf("--output is required for docx")
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would export docx for document %s to %s\n", id, output)
+			return nil
+		}
+
 		fullPath, err := model.ExportDocx(id, output, false, false)
 		if err != nil {
 			return err
@@ -118,8 +138,17 @@ var exportSYCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
-		_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".sy")
 		output, _ := cmd.Flags().GetString("output")
+		if dryRun {
+			if output != "" {
+				fmt.Printf("[dry-run] Would export .sy.zip for document %s to %s\n", id, output)
+			} else {
+				fmt.Printf("[dry-run] Would export .sy.zip for document %s to temp path\n", id)
+			}
+			return nil
+		}
+
+		_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".sy")
 		if output == "" {
 			fmt.Println(zipPath)
 			return nil
@@ -141,8 +170,17 @@ var exportMdZipCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
-		_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".md")
 		output, _ := cmd.Flags().GetString("output")
+		if dryRun {
+			if output != "" {
+				fmt.Printf("[dry-run] Would export markdown zip for document %s to %s\n", id, output)
+			} else {
+				fmt.Printf("[dry-run] Would export markdown zip for document %s to temp path\n", id)
+			}
+			return nil
+		}
+
+		_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".md")
 		if output == "" {
 			fmt.Println(zipPath)
 			return nil
@@ -159,11 +197,20 @@ var exportDataCmd = &cobra.Command{
 	Use:   "data [--output <file>]",
 	Short: "Export full workspace data backup",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		output, _ := cmd.Flags().GetString("output")
+		if dryRun {
+			if output != "" {
+				fmt.Printf("[dry-run] Would export full data backup to %s\n", output)
+			} else {
+				fmt.Println("[dry-run] Would export full data backup to temp path")
+			}
+			return nil
+		}
+
 		zipPath, err := model.ExportData()
 		if err != nil {
 			return err
 		}
-		output, _ := cmd.Flags().GetString("output")
 		if output == "" {
 			fmt.Println(zipPath)
 			return nil

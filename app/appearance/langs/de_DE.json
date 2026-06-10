@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Nachricht eingeben, @Referenz, /Skill, Enter zum Senden...",
   "agentSend": "Senden",
   "agentStop": "Stopp",
-  "agentToolCall": "Werkzeugaufruf",
-  "agentToolResult": "Werkzeugergebnis",
   "editorFontSize": "Editor-Schriftgröße",
   "configGroupBehavior": "Verhalten",
   "configGroupBlockFeatures": "Block-Eigenschaften",

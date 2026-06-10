@@ -34,6 +34,7 @@ import (
 var (
 	workspacePath string
 	outputFormat  string
+	dryRun        bool
 )
 
 var rootCmd = &cobra.Command{
@@ -130,6 +131,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&workspacePath, "workspace", "w", "", "workspace path")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "format", "f", "table", "output format: table | json")
+	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "dry run mode: validate and print what would happen without making changes")
 }
 
 func Execute() error {

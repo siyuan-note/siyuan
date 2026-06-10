@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "메시지를 입력하고 @로 참조, /스킬, Enter로 전송...",
   "agentSend": "보내기",
   "agentStop": "중지",
-  "agentToolCall": "도구 호출",
-  "agentToolResult": "도구 결과",
   "editorFontSize": "편집기 글꼴 크기",
   "configGroupBehavior": "동작",
   "configGroupBlockFeatures": "블록 기능",

@@ -928,3 +928,54 @@ func exportAsFile(c *gin.Context) {
 		"file": path.Join("/export/", name),
 	}
 }
+
+func copyExportFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var srcPath, dest string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("srcPath", &srcPath, true, true),
+		util.BindJsonArg("dest", &dest, true, true),
+	) {
+		return
+	}
+
+	if !filepath.IsAbs(dest) {
+		ret.Code = -1
+		ret.Msg = "dest must be an absolute path"
+		return
+	}
+
+	srcPath = filepath.Clean(srcPath)
+	if decoded, err := url.PathUnescape(srcPath); err == nil {
+		srcPath = decoded
+	}
+	srcFullPath := filepath.Join(util.TempDir, srcPath)
+	srcFullPath = filepath.Clean(srcFullPath)
+
+	exportBaseDir := filepath.Join(util.TempDir, "export")
+	if !gulu.File.IsSubPath(exportBaseDir, srcFullPath) && srcFullPath != exportBaseDir {
+		ret.Code = -1
+		ret.Msg = "invalid source path"
+		return
+	}
+
+	if util.IsSensitivePath(dest) {
+		ret.Code = -2
+		ret.Msg = "refuse to copy to sensitive path: " + dest
+		return
+	}
+
+	if err := filelock.Copy(srcFullPath, dest); err != nil {
+		logging.LogErrorf("copy export file [%s] to [%s] failed: %s", srcFullPath, dest, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

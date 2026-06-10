@@ -62,6 +62,12 @@ var notebookCreateCmd = &cobra.Command{
 		if name == "" {
 			return fmt.Errorf("--name is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would create notebook \"%s\"\n", name)
+			return nil
+		}
+
 		id, err := model.CreateBox(name)
 		if err != nil {
 			return err
@@ -80,6 +86,12 @@ var notebookRemoveCmd = &cobra.Command{
 		if id == "" {
 			return fmt.Errorf("--id is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would remove notebook %s\n", id)
+			return nil
+		}
+
 		if err := model.RemoveBox(id); err != nil {
 			return err
 		}
@@ -101,6 +113,12 @@ var notebookRenameCmd = &cobra.Command{
 		if name == "" {
 			return fmt.Errorf("--name is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would rename notebook %s to \"%s\"\n", id, name)
+			return nil
+		}
+
 		if err := model.RenameBox(id, name); err != nil {
 			return err
 		}
@@ -118,6 +136,12 @@ var notebookOpenCmd = &cobra.Command{
 		if id == "" {
 			return fmt.Errorf("--id is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would open notebook %s\n", id)
+			return nil
+		}
+
 		existed, err := model.Mount(id)
 		if err != nil {
 			return err
@@ -145,6 +169,12 @@ var notebookCloseCmd = &cobra.Command{
 		if id == "" {
 			return fmt.Errorf("--id is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would close notebook %s\n", id)
+			return nil
+		}
+
 		model.Unmount(id)
 		time.Sleep(1 * time.Second)
 		sql.FlushQueue()

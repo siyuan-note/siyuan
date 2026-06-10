@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "输入消息，@引用，/技能，回车发送...",
   "agentSend": "发送",
   "agentStop": "停止",
-  "agentToolCall": "调用工具",
-  "agentToolResult": "工具结果",
   "editorFontSize": "编辑器字号",
   "configGroupBehavior": "行为",
   "configGroupBlockFeatures": "块特性",

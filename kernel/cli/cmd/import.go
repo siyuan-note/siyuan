@@ -50,6 +50,11 @@ var importMdCmd = &cobra.Command{
 			return err
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would import Markdown from \"%s\" to notebook %s\n", filePath, notebook)
+			return nil
+		}
+
 		if err := model.ImportFromLocalPath(notebook, absPath, resolvePath(notebook, toPath, hpath)); err != nil {
 			return err
 		}
@@ -79,6 +84,11 @@ var importSYCmd = &cobra.Command{
 			return err
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would import .sy.zip from \"%s\" to notebook %s\n", filePath, notebook)
+			return nil
+		}
+
 		if err := model.ImportSY(absPath, notebook, resolvePath(notebook, toPath, hpath)); err != nil {
 			return err
 		}
@@ -100,6 +110,11 @@ var importDataCmd = &cobra.Command{
 		absPath, err := filepath.Abs(filePath)
 		if err != nil {
 			return err
+		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would import data backup from \"%s\"\n", filePath)
+			return nil
 		}
 
 		if err := model.ImportData(absPath); err != nil {

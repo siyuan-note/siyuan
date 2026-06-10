@@ -58,6 +58,12 @@ var tagRemoveCmd = &cobra.Command{
 		if label == "" {
 			return fmt.Errorf("--label is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would remove tag \"%s\"\n", label)
+			return nil
+		}
+
 		if err := model.RemoveTag(label); err != nil {
 			return err
 		}
@@ -78,6 +84,12 @@ var tagRenameCmd = &cobra.Command{
 		if newLabel == "" {
 			return fmt.Errorf("--new is required")
 		}
+
+		if dryRun {
+			fmt.Printf("[dry-run] Would rename tag \"%s\" to \"%s\"\n", oldLabel, newLabel)
+			return nil
+		}
+
 		if err := model.RenameTag(oldLabel, newLabel); err != nil {
 			return err
 		}

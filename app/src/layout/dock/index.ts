@@ -388,7 +388,9 @@ export class Dock {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/7504
-        if (document.activeElement && this.layout.element.contains(document.activeElement) && document.activeElement.classList.contains("b3-text-field")) {
+        if (document.activeElement && this.layout.element.contains(document.activeElement) &&
+            (document.activeElement.classList.contains("b3-text-field") ||
+                (document.activeElement as HTMLElement).getAttribute("contenteditable") === "true")) {
             return;
         }
         const dialogElement = document.querySelector(".b3-dialog") as HTMLElement;

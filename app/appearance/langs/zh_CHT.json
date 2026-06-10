@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "輸入訊息，@引用，/技能，Enter 送出...",
   "agentSend": "送出",
   "agentStop": "停止",
-  "agentToolCall": "工具呼叫",
-  "agentToolResult": "工具結果",
   "editorFontSize": "編輯器字型大小",
   "configGroupBehavior": "行為",
   "configGroupBlockFeatures": "塊特性",

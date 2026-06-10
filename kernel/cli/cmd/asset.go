@@ -55,6 +55,11 @@ var assetUploadCmd = &cobra.Command{
 			files[i] = abs
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would upload %d file(s) to document %s\n", len(files), id)
+			return nil
+		}
+
 		succMap, err := model.InsertLocalAssets(id, files, true)
 		if err != nil {
 			return err
@@ -108,8 +113,17 @@ var assetCleanCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		singlePath, _ := cmd.Flags().GetString("path")
 		if singlePath != "" {
+			if dryRun {
+				fmt.Printf("[dry-run] Would remove unused asset: %s\n", singlePath)
+				return nil
+			}
 			ret := model.RemoveUnusedAsset(singlePath)
 			fmt.Println(ret)
+			return nil
+		}
+
+		if dryRun {
+			fmt.Println("[dry-run] Would clean unused assets")
 			return nil
 		}
 

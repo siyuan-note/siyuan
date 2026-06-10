@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Digita un messaggio, @riferimento, /abilità, Invio per inviare...",
   "agentSend": "Invia",
   "agentStop": "Ferma",
-  "agentToolCall": "Chiamata strumento",
-  "agentToolResult": "Risultato strumento",
   "editorFontSize": "Dimensione del font dell'editor",
   "configGroupBehavior": "Comportamento",
   "configGroupBlockFeatures": "Funzionalità dei blocchi",

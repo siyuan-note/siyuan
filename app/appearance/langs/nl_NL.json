@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Typ een bericht, @referentie, /vaardigheid, Enter om te verzenden...",
   "agentSend": "Verzenden",
   "agentStop": "Stoppen",
-  "agentToolCall": "Tool aanroep",
-  "agentToolResult": "Tool resultaat",
   "editorFontSize": "Editorlettergrootte",
   "configGroupBehavior": "Gedrag",
   "configGroupBlockFeatures": "Blokken",

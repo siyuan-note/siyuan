@@ -95,6 +95,11 @@ var refRefreshCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
+		if dryRun {
+			fmt.Printf("[dry-run] Would refresh backlinks for block %s\n", id)
+			return nil
+		}
+
 		model.RefreshBacklink(id)
 		fmt.Println("ok")
 		return nil

@@ -319,6 +319,7 @@ export class AgentChat extends Model {
         this.sessionTitle = this.defaultTitle;
         this.entries = [];
         this.showWelcome();
+        this.scrollToBottom(true);
     }
 
     private async saveSession() {
@@ -551,6 +552,7 @@ export class AgentChat extends Model {
             this.composer.focus();
         }
         this.showWelcome();
+        this.scrollToBottom(true);
     }
 
     private async deleteSession(id: string) {

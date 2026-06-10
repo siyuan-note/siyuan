@@ -22,6 +22,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -183,7 +184,20 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
-	model.AppendPushReloadProtyleEntry(parentID)
+
+	reloadID := nextID
+	if reloadID == "" {
+		reloadID = previousID
+	}
+	if reloadID == "" {
+		reloadID = parentID
+	}
+	if reloadID != "" {
+		if bt := treenode.GetBlockTree(reloadID); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
+	}
+
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block inserted"}}}, nil
 }
 
@@ -215,7 +229,10 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
-	model.AppendPushReloadProtyleEntry(parentID)
+
+	if bt := treenode.GetBlockTree(parentID); bt != nil {
+		model.AppendPushReloadProtyleEntry(bt.RootID)
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block appended"}}}, nil
 }
 
@@ -247,7 +264,10 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
-	model.AppendPushReloadProtyleEntry(parentID)
+
+	if bt := treenode.GetBlockTree(parentID); bt != nil {
+		model.AppendPushReloadProtyleEntry(bt.RootID)
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block prepended"}}}, nil
 }
 
@@ -279,7 +299,10 @@ func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
-	model.AppendPushReloadProtyleEntry(id)
+
+	if bt := treenode.GetBlockTree(id); bt != nil {
+		model.AppendPushReloadProtyleEntry(bt.RootID)
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block updated"}}}, nil
 }
 
@@ -288,6 +311,8 @@ func blockDelete(args map[string]interface{}) (CallToolResult, error) {
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
+
+	bt := treenode.GetBlockTree(id)
 
 	transactions := []*model.Transaction{{
 		DoOperations: []*model.Operation{{
@@ -298,7 +323,10 @@ func blockDelete(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
-	model.AppendPushReloadProtyleEntry(id)
+
+	if bt != nil {
+		model.AppendPushReloadProtyleEntry(bt.RootID)
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block deleted: " + id}}}, nil
 }
 
@@ -343,7 +371,10 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
-	model.AppendPushReloadProtyleEntry(id)
+
+	if bt := treenode.GetBlockTree(id); bt != nil {
+		model.AppendPushReloadProtyleEntry(bt.RootID)
+	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block moved: " + id}}}, nil
 }
 

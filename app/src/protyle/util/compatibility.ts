@@ -99,7 +99,7 @@ export const openByMobile = (uri: string) => {
     }
 };
 
-export const saveExportFile = async (uri: string) => {
+export const saveExportFile = async (uri: string, msgId?: string) => {
     if (!uri) {
         return;
     }
@@ -135,10 +135,10 @@ export const saveExportFile = async (uri: string) => {
         if (copyResponse.code !== 0) {
             throw new Error(copyResponse.msg);
         }
-        showMessage(window.siyuan.languages.exported);
+        showMessage(window.siyuan.languages.exported, 6000, "info", msgId);
         return;
     } catch (e) {
-        showMessage("saveExportFile failed: " + e);
+        showMessage("saveExportFile failed: " + e, 6000, "error", msgId);
     }
     /// #else
     try {

@@ -129,7 +129,6 @@ export class AgentChat extends Model {
             '<div class="agent-chat__messages fn__flex-1"></div>' +
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
         "</div>" +
-        '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
         '<div class="agent-chat__input-area">' +
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
@@ -140,6 +139,7 @@ export class AgentChat extends Model {
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconCircleStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
+        '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
             "</div>";
 
         this.messagesContainer = panel.querySelector(".agent-chat__messages") as HTMLElement;

@@ -593,8 +593,9 @@
 .agent-chat__input-area {
     background: var(--b3-theme-background);
     border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius-b);
-    margin: 0 16px 12px;
+    border-bottom: none;
+    border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
+    margin: 0 16px;
     padding: 8px;
     flex-shrink: 0;
 }
@@ -871,6 +872,9 @@
     padding: 4px 12px;
     color: var(--b3-card-warning-color);
     background: var(--b3-card-warning-background);
-    border-top: 1px solid var(--b3-card-warning-color);
+    border: 1px solid var(--b3-card-warning-color);
+    border-top: none;
+    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
+    margin: 0 16px 12px;
     flex-shrink: 0;
 }

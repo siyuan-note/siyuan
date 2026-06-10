@@ -86,7 +86,11 @@ export class AgentChat extends Model {
     private pendingConfirms: SessionEntry[] = [];
     private renderedToolNames: Record<string, boolean> = {};
     private hasInterveningCard = false;
-    private modelSelect: HTMLSelectElement;
+    private modelTrigger: HTMLElement;
+    private selectedModel: string;
+    private modelMenu: HTMLElement | null = null;
+    private modelMenuIndex = 0;
+    private modelOptions: Array<{ id: string; name: string }> = [];
     private userScrolledUp = false;
     private scrollBottomBtn: HTMLElement;
 
@@ -129,7 +133,7 @@ export class AgentChat extends Model {
         '<div class="agent-chat__input-area">' +
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
-            '<select class="agent-chat__model b3-select"></select>' +
+            '<span class="agent-chat__model-trigger" tabindex="0"><span class="agent-chat__model-label"></span><svg><use xlink:href="#iconUp"></use></svg></span>' +
             '<span class="agent-chat__tokens fn__none"></span>' +
             '<span class="fn__flex-1"></span>' +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconCirclePlay"></use></svg></button>' +
@@ -146,7 +150,7 @@ export class AgentChat extends Model {
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
-        this.modelSelect = panel.querySelector(".agent-chat__model") as HTMLSelectElement;
+        this.modelTrigger = panel.querySelector(".agent-chat__model-trigger") as HTMLElement;
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
@@ -181,20 +185,105 @@ export class AgentChat extends Model {
 
     private initModelSelect() {
         const aiConfig = window.siyuan.config.ai;
-        const mainName = aiConfig.openAI.name || aiConfig.openAI.apiModel;
-        const providers = aiConfig.providers || [];
-        let html = '<option value="' + aiConfig.openAI.id + '">' + escapeHtml(mainName) + "</option>";
-        for (const p of providers) {
-            if (p.enabled === false) {
-                continue;
-            }
-            html += '<option value="' + p.id + '">' + escapeHtml(p.name || p.apiModel) + "</option>";
+        const displayName = aiConfig.openAI.name || aiConfig.openAI.apiModel;
+        this.modelOptions = [{ id: aiConfig.openAI.id, name: displayName }];
+        for (const p of aiConfig.providers || []) {
+            if (p.enabled === false) { continue; }
+            this.modelOptions.push({ id: p.id, name: p.name || p.apiModel || p.id });
         }
-        this.modelSelect.innerHTML = html;
+        this.selectedModel = aiConfig.openAI.id;
+        this.updateModelLabel();
+        this.modelTrigger.addEventListener("click", (e: MouseEvent) => {
+            e.stopPropagation();
+            if (this.modelMenu) {
+                this.closeModelMenu();
+            } else {
+                this.openModelMenu();
+            }
+        });
+        this.modelTrigger.addEventListener("keydown", (e: KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                if (this.modelMenu) { this.closeModelMenu(); } else { this.openModelMenu(); }
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                if (!this.modelMenu) { this.openModelMenu(); return; }
+                this.modelMenuIndex = (this.modelMenuIndex + 1) % this.modelOptions.length;
+                this.updateModelMenuHighlight();
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                if (!this.modelMenu) { this.openModelMenu(); return; }
+                this.modelMenuIndex = (this.modelMenuIndex - 1 + this.modelOptions.length) % this.modelOptions.length;
+                this.updateModelMenuHighlight();
+            } else if (e.key === "Escape" && this.modelMenu) {
+                this.closeModelMenu();
+            }
+        });
+    }
+
+    private updateModelLabel() {
+        const label = this.modelTrigger.querySelector(".agent-chat__model-label") as HTMLElement;
+        const option = this.modelOptions.find((o) => o.id === this.selectedModel);
+        if (label && option) { label.textContent = option.name; }
+    }
+
+    private openModelMenu() {
+        this.closeModelMenu();
+        this.modelMenuIndex = this.modelOptions.findIndex((o) => o.id === this.selectedModel);
+        if (this.modelMenuIndex < 0) { this.modelMenuIndex = 0; }
+        const menu = document.createElement("div");
+        menu.className = "agent-chat__model-menu";
+        let html = "";
+        for (let i = 0; i < this.modelOptions.length; i++) {
+            const o = this.modelOptions[i];
+            const isSelected = o.id === this.selectedModel;
+            html += '<div class="agent-chat__model-item' + (isSelected ? " agent-chat__model-item--current" : "") + '" data-i="' + i + '" data-id="' + o.id + '">' +
+                '<span>' + escapeHtml(o.name) + "</span>" +
+                '<svg class="agent-chat__model-check"><use xlink:href="#iconCheck2"></use></svg>' +
+            "</div>";
+        }
+        menu.innerHTML = html;
+        this.modelTrigger.appendChild(menu);
+        this.modelMenu = menu;
+        this.updateModelMenuHighlight();
+        menu.addEventListener("click", (e: MouseEvent) => {
+            const item = (e.target as HTMLElement).closest(".agent-chat__model-item") as HTMLElement;
+            if (item) {
+                this.selectedModel = item.getAttribute("data-id") || this.selectedModel;
+                this.updateModelLabel();
+                this.closeModelMenu();
+            }
+        });
+        setTimeout(() => {
+            document.addEventListener("click", this.closeModelMenuHandler);
+        }, 10);
+    }
+
+    private closeModelMenuHandler = () => {
+        this.closeModelMenu();
+        document.removeEventListener("click", this.closeModelMenuHandler);
+    };
+
+    private closeModelMenu() {
+        if (this.modelMenu) {
+            this.modelMenu.remove();
+            this.modelMenu = null;
+        }
+        document.removeEventListener("click", this.closeModelMenuHandler);
+    }
+
+    private updateModelMenuHighlight() {
+        if (!this.modelMenu) { return; }
+        const items = this.modelMenu.querySelectorAll(".agent-chat__model-item");
+        for (let i = 0; i < items.length; i++) {
+            items[i].classList.toggle("agent-chat__model-item--current", i === this.modelMenuIndex);
+        }
+        const current = items[this.modelMenuIndex] as HTMLElement;
+        if (current) { current.scrollIntoView({ block: "nearest" }); }
     }
 
     private getSelectedModel(): string {
-        return this.modelSelect.value;
+        return this.selectedModel;
     }
 
     private showWelcome() {
@@ -274,7 +363,7 @@ export class AgentChat extends Model {
                 getDockByType("agentChat").toggleModel("agentChat", false, true);
                 return;
             }
-            if (t.closest(".agent-chat__model")) {
+            if (t.closest(".agent-chat__model-trigger") || t.closest(".agent-chat__model-menu")) {
                 return;
             }
             if (this.composer) {
@@ -302,7 +391,8 @@ export class AgentChat extends Model {
                 this.sessionCompletionTokens = session.completionTokens || 0;
                 this.sessionTotalDuration = session.totalDuration || 0;
                 if (session.model) {
-                    this.modelSelect.value = session.model;
+                    this.selectedModel = session.model;
+                    this.updateModelLabel();
                 }
                 if (this.composer) {
                     this.composer.restoreHistory(session.messageHistory || []);
@@ -367,7 +457,8 @@ export class AgentChat extends Model {
         this.sessionCompletionTokens = session.completionTokens || 0;
         this.sessionTotalDuration = session.totalDuration || 0;
         if (session.model) {
-            this.modelSelect.value = session.model;
+            this.selectedModel = session.model;
+            this.updateModelLabel();
         }
         if (this.tokenDisplayEl) {
             this.updateTokenDisplay();

@@ -232,16 +232,17 @@ export class AgentChat extends Model {
         this.modelMenuIndex = this.modelOptions.findIndex((o) => o.id === this.selectedModel);
         if (this.modelMenuIndex < 0) { this.modelMenuIndex = 0; }
         const menu = document.createElement("div");
-        menu.className = "agent-chat__model-menu";
-        let html = "";
+        menu.className = "agent-chat__model-menu b3-menu";
+        let html = '<div class="b3-menu__items">';
         for (let i = 0; i < this.modelOptions.length; i++) {
             const o = this.modelOptions[i];
             const isSelected = o.id === this.selectedModel;
-            html += '<div class="agent-chat__model-item' + (isSelected ? " agent-chat__model-item--current" : "") + '" data-i="' + i + '" data-id="' + o.id + '">' +
-                '<span>' + escapeHtml(o.name) + "</span>" +
+            html += '<div class="agent-chat__model-item b3-menu__item' + (isSelected ? " b3-menu__item--current" : "") + '" data-i="' + i + '" data-id="' + o.id + '">' +
+                '<span class="b3-menu__label">' + escapeHtml(o.name) + "</span>" +
                 '<svg class="agent-chat__model-check"><use xlink:href="#iconCheck2"></use></svg>' +
             "</div>";
         }
+        html += "</div>";
         menu.innerHTML = html;
         this.modelTrigger.appendChild(menu);
         this.modelMenu = menu;
@@ -276,7 +277,7 @@ export class AgentChat extends Model {
         if (!this.modelMenu) { return; }
         const items = this.modelMenu.querySelectorAll(".agent-chat__model-item");
         for (let i = 0; i < items.length; i++) {
-            items[i].classList.toggle("agent-chat__model-item--current", i === this.modelMenuIndex);
+            items[i].classList.toggle("b3-menu__item--current", i === this.modelMenuIndex);
         }
         const current = items[this.modelMenuIndex] as HTMLElement;
         if (current) { current.scrollIntoView({ block: "nearest" }); }

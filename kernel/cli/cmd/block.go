@@ -25,6 +25,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
@@ -217,7 +218,9 @@ var blockInsertCmd = &cobra.Command{
 		}}
 		model.PerformTransactions(&transactions)
 		model.FlushTxQueue()
-		model.AppendPushReloadProtyleEntry(parentID)
+		if bt := treenode.GetBlockTree(parentID); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
 		fmt.Println("ok")
 		return nil
 	},
@@ -252,7 +255,9 @@ var blockAppendCmd = &cobra.Command{
 		}}
 		model.PerformTransactions(&transactions)
 		model.FlushTxQueue()
-		model.AppendPushReloadProtyleEntry(parentID)
+		if bt := treenode.GetBlockTree(parentID); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
 		fmt.Println("ok")
 		return nil
 	},
@@ -287,7 +292,9 @@ var blockPrependCmd = &cobra.Command{
 		}}
 		model.PerformTransactions(&transactions)
 		model.FlushTxQueue()
-		model.AppendPushReloadProtyleEntry(parentID)
+		if bt := treenode.GetBlockTree(parentID); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
 		fmt.Println("ok")
 		return nil
 	},
@@ -322,13 +329,15 @@ var blockUpdateCmd = &cobra.Command{
 		}}
 		model.PerformTransactions(&transactions)
 		model.FlushTxQueue()
-		model.AppendPushReloadProtyleEntry(id)
+		if bt := treenode.GetBlockTree(id); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
 		fmt.Println("ok")
 		return nil
 	},
 }
 
-var blockDeleteCmd = &cobra.Command{
+	var blockDeleteCmd = &cobra.Command{
 	Use:   "delete --id <id>",
 	Short: "Delete block",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -342,6 +351,8 @@ var blockDeleteCmd = &cobra.Command{
 			return nil
 		}
 
+		bt := treenode.GetBlockTree(id)
+
 		transactions := []*model.Transaction{{
 			DoOperations: []*model.Operation{{
 				Action: "delete",
@@ -350,7 +361,10 @@ var blockDeleteCmd = &cobra.Command{
 		}}
 		model.PerformTransactions(&transactions)
 		model.FlushTxQueue()
-		model.AppendPushReloadProtyleEntry(id)
+
+		if bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
 		fmt.Println(id)
 		return nil
 	},
@@ -385,7 +399,9 @@ var blockMoveCmd = &cobra.Command{
 		}}
 		model.PerformTransactions(&transactions)
 		model.FlushTxQueue()
-		model.AppendPushReloadProtyleEntry(id)
+		if bt := treenode.GetBlockTree(id); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
 		fmt.Println("ok")
 		return nil
 	},

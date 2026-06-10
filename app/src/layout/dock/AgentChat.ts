@@ -33,7 +33,10 @@ type SessionEntry =
     | {
     type: "assistant";
     content: string;
-    toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>
+    toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>;
+    promptTokens?: number;
+    completionTokens?: number;
+    duration?: number
 }
     | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string };
 
@@ -59,6 +62,8 @@ export class AgentChat extends Model {
     private sessionPromptTokens = 0;
     private sessionCompletionTokens = 0;
     private sessionTotalDuration = 0;
+    private responsePromptTokens = 0;
+    private responseCompletionTokens = 0;
     private sessionCreatedAt = 0;
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
@@ -80,6 +85,7 @@ export class AgentChat extends Model {
     private renderedToolNames: Record<string, boolean> = {};
     private hasInterveningCard = false;
     private modelSelect: HTMLSelectElement;
+    private userScrolledUp = false;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -187,13 +193,9 @@ export class AgentChat extends Model {
             ex.addEventListener("click", () => {
                 const text = ex.getAttribute("data-text") || "";
                 if (text && this.composer) {
-                    // 不支持 setSendText，直接用 sendMessage 发送
+                    this.messagesContainer.innerHTML = "";
                     this.entries.push({type: "user", content: text});
                     this.appendUserMessage(text);
-                    if (!this.hasTitled) {
-                        this.hasTitled = true;
-                        this.generateTitle();
-                    }
                     this.setStreaming(true);
                     const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
                         role: e.type === "user" ? "user" as const : "assistant" as const,
@@ -201,6 +203,7 @@ export class AgentChat extends Model {
                     }));
                     this.abortController = new AbortController();
                     const requestSessionId = this.sessionId;
+                    this.requestStartTime = Date.now();
                     fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
                         (event: ISSEResult) => {
                             if (this.sessionId !== requestSessionId) {
@@ -265,6 +268,11 @@ export class AgentChat extends Model {
                 this.composer.focus();
             }
         });
+
+        this.messagesContainer.addEventListener("scroll", () => {
+            const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
+            this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 50;
+        });
     }
 
     private async initSessions() {
@@ -291,7 +299,7 @@ export class AgentChat extends Model {
                 this.titleElement.textContent = session.title;
                 this.updateTokenDisplay();
                 this.renderLoadedSession(session);
-                this.scrollToBottom();
+                this.scrollToBottom(true);
                 return;
             }
         }
@@ -357,12 +365,12 @@ export class AgentChat extends Model {
             this.messagesContainer.innerHTML = "";
             this.titleElement.textContent = session.title;
             this.renderLoadedSession(session);
-            this.scrollToBottom();
+            this.scrollToBottom(true);
             this.messagesContainer.classList.remove("agent-chat__messages--switching");
         }, {once: true});
     }
 
-    private appendPersistedAssistant(content: string) {
+    private appendPersistedAssistant(content: string, promptTokens?: number, completionTokens?: number, duration?: number) {
         if (!content || !content.trim()) {
             return;
         }
@@ -371,14 +379,14 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         postRender(el);
-        this.addCopyButton(el, content);
+        this.addCopyButton(el, content, promptTokens, completionTokens, duration);
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{
         name: string;
         arguments: Record<string, unknown>;
         result?: string
-    }>) {
+    }>, promptTokens?: number, completionTokens?: number, duration?: number) {
         let hasRendered = false;
         for (let i = 0; i < toolCalls.length; i++) {
             const tc = toolCalls[i];
@@ -391,7 +399,7 @@ export class AgentChat extends Model {
             }
         }
         if (content && content.trim()) {
-            this.appendPersistedAssistant(content);
+            this.appendPersistedAssistant(content, promptTokens, completionTokens, duration);
             hasRendered = true;
         }
         if (!hasRendered) {
@@ -446,14 +454,11 @@ export class AgentChat extends Model {
                     }).steps);
                     break;
                 case "assistant":
-                    if (entry.toolCalls && entry.toolCalls.length > 0) {
-                        this.appendPersistedToolCalls((entry as { content: string }).content, entry.toolCalls as Array<{
-                            name: string;
-                            arguments: Record<string, unknown>;
-                            result?: string
-                        }>);
+                    const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; promptTokens?: number; completionTokens?: number; duration?: number };
+                    if (a.toolCalls && a.toolCalls.length > 0) {
+                        this.appendPersistedToolCalls(a.content, a.toolCalls, a.promptTokens, a.completionTokens, a.duration);
                     } else {
-                        this.appendPersistedAssistant((entry as { content: string }).content);
+                        this.appendPersistedAssistant(a.content, a.promptTokens, a.completionTokens, a.duration);
                     }
                     break;
                 case "confirm":
@@ -513,6 +518,8 @@ export class AgentChat extends Model {
         this.sessionPromptTokens = 0;
         this.sessionCompletionTokens = 0;
         this.sessionTotalDuration = 0;
+        this.responsePromptTokens = 0;
+        this.responseCompletionTokens = 0;
         this.currentToolCalls = [];
         this.renderedToolNames = {};
         this.hasInterveningCard = false;
@@ -567,16 +574,14 @@ export class AgentChat extends Model {
         this.composer.clear();
 
         this.entries.push({type: "user", content: text});
+        if (this.entries.length === 1) {
+            this.messagesContainer.innerHTML = "";
+        }
         this.appendUserMessage(text);
         if (this.composer) {
             this.composer.pushHistory(text);
         }
         await this.saveSession();
-
-        if (!this.hasTitled && this.entries.length === 1) {
-            this.hasTitled = true;
-            this.generateTitle();
-        }
 
         this.requestStartTime = Date.now();
 
@@ -671,7 +676,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--user";
         el.innerHTML = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
         this.messagesContainer.appendChild(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
     }
 
     private createAIMessagePlaceholder(): HTMLElement {
@@ -744,7 +749,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--tool";
         el.innerHTML = renderTodoList(result);
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }
 
@@ -920,12 +925,31 @@ export class AgentChat extends Model {
         reasoningEl.textContent += token;
     }
 
-    private addCopyButton(el: HTMLElement, contentOverride?: string) {
+    private addCopyButton(el: HTMLElement, contentOverride?: string, promptTokens?: number, completionTokens?: number, durationMs?: number) {
         const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__body")?.textContent || "";
         const L = window.siyuan.languages;
 
         const actions = document.createElement("div");
         actions.className = "agent-chat__msg-actions";
+
+        if (promptTokens !== undefined && completionTokens !== undefined && (promptTokens + completionTokens > 0 || (durationMs && durationMs > 0))) {
+            const total = promptTokens + completionTokens;
+            let text = "";
+            if (total > 0) {
+                text = total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString();
+            }
+            if (durationMs) {
+                let seconds = Math.floor(durationMs / 1000);
+                const minutes = Math.floor(seconds / 60);
+                seconds = seconds % 60;
+                if (text) { text += " \u00B7 "; }
+                text += (minutes > 0 ? minutes + "m" : "") + seconds + "s";
+            }
+            const stats = document.createElement("span");
+            stats.className = "agent-chat__msg-stats";
+            stats.textContent = text;
+            actions.appendChild(stats);
+        }
 
         const copyBtn = document.createElement("span");
         copyBtn.className = "block__icon block__icon--show ariaLabel";
@@ -1015,6 +1039,9 @@ export class AgentChat extends Model {
         this.finishActiveThinking();
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
+        const dur = this.requestStartTime ? Date.now() - this.requestStartTime : 0;
+        const rPromptTokens = this.responsePromptTokens;
+        const rCompletionTokens = this.responseCompletionTokens;
         if (!this.currentAIElement && savedContent) {
             const thinkBody = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
             if (thinkBody) {
@@ -1031,7 +1058,7 @@ export class AgentChat extends Model {
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
-            this.addCopyButton(el);
+            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur);
         }
         this.flushThinkingStep();
         if (this.pendingConfirms.length > 0) {
@@ -1044,7 +1071,10 @@ export class AgentChat extends Model {
             this.entries.push({
                 type: "assistant",
                 content: this.currentContent,
-                toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined
+                toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined,
+                promptTokens: rPromptTokens || undefined,
+                completionTokens: rCompletionTokens || undefined,
+                duration: dur || undefined,
             });
         } else if (this.currentToolCalls.length > 0) {
             this.entries.push({type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
@@ -1058,9 +1088,12 @@ export class AgentChat extends Model {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
         }
+        this.responsePromptTokens = 0;
+        this.responseCompletionTokens = 0;
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
+        this.tryGenerateTitle();
     }
 
     private flushThinkingStep() {
@@ -1087,13 +1120,15 @@ export class AgentChat extends Model {
         }
     }
 
-    private generateTitle() {
-        const firstUser = this.entries.find((e) => e.type === "user");
-        const firstMsg = firstUser ? (firstUser as { content: string }).content.slice(0, 500) : "";
+    private tryGenerateTitle() {
+        if (this.hasTitled) { return; }
+        this.hasTitled = true;
+        const userMsg = this.entries.find((e) => e.type === "user")?.content?.slice(0, 500) || "";
+        const aiMsg = this.entries.find((e) => e.type === "assistant")?.content?.slice(0, 500) || "";
         fetch("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: firstMsg}),
+            body: JSON.stringify({message: userMsg, assistantReply: aiMsg}),
         }).then((resp) => resp.json()).then((data) => {
             if (data.code === 0 && data.data && data.data !== this.sessionTitle) {
                 this.sessionTitle = data.data;
@@ -1116,7 +1151,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--error";
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + escapeHtml(message) + "</div>";
         this.messagesContainer.appendChild(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.flushThinkingStep();
         await this.saveSession();
     }
@@ -1130,7 +1165,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--thinking";
         el.innerHTML = renderRetryCardHTML(attempt, maxRetries);
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }
 
@@ -1143,6 +1178,9 @@ export class AgentChat extends Model {
         this.finishActiveThinking();
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
+        const dur = this.requestStartTime ? Date.now() - this.requestStartTime : 0;
+        const rPromptTokens = this.responsePromptTokens;
+        const rCompletionTokens = this.responseCompletionTokens;
         if (!this.currentAIElement && savedContent) {
             const thinkBody = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
             if (thinkBody) {
@@ -1159,13 +1197,17 @@ export class AgentChat extends Model {
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
+            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur);
         }
         this.flushThinkingStep();
         if (this.currentContent) {
             this.entries.push({
                 type: "assistant",
                 content: this.currentContent,
-                toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined
+                toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined,
+                promptTokens: rPromptTokens || undefined,
+                completionTokens: rCompletionTokens || undefined,
+                duration: dur || undefined,
             });
         }
         this.currentAIElement = null;
@@ -1177,6 +1219,8 @@ export class AgentChat extends Model {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
         }
+        this.responsePromptTokens = 0;
+        this.responseCompletionTokens = 0;
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
@@ -1243,7 +1287,7 @@ export class AgentChat extends Model {
             });
         }
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
         this.pendingConfirms.push({type: "confirm", name, args, confirmID, status: "pending"});
     }
@@ -1314,7 +1358,7 @@ export class AgentChat extends Model {
         }
 
         this.insertBeforeAI(el);
-        this.scrollToBottom();
+        this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }
 
@@ -1418,6 +1462,8 @@ export class AgentChat extends Model {
     }
 
     private appendUsage(promptTokens: number, completionTokens: number) {
+        this.responsePromptTokens += promptTokens;
+        this.responseCompletionTokens += completionTokens;
         this.sessionPromptTokens += promptTokens;
         this.sessionCompletionTokens += completionTokens;
         this.updateTokenDisplay();
@@ -1470,7 +1516,8 @@ export class AgentChat extends Model {
         }
     }
 
-    private scrollToBottom() {
+    private scrollToBottom(force = false) {
+        if (!force && this.userScrolledUp) { return; }
         requestAnimationFrame(() => {
             this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
         });

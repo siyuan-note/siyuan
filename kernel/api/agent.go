@@ -174,7 +174,8 @@ func agentChatQuestion(c *gin.Context) {
 }
 
 type agentTitleReq struct {
-	Message string `json:"message"`
+	Message        string `json:"message"`
+	AssistantReply string `json:"assistantReply"`
 }
 
 func agentChatTitle(c *gin.Context) {
@@ -197,7 +198,7 @@ func agentChatTitle(c *gin.Context) {
 		selectedProvider.APIProvider,
 	)
 
-	title := agent.GenerateTitle(client, selectedProvider.APIModel, req.Message)
+	title := agent.GenerateTitle(client, selectedProvider.APIModel, req.Message, req.AssistantReply, model.Conf.Lang)
 	ret := gulu.Ret.NewResult()
 	ret.Data = title
 	c.JSON(http.StatusOK, ret)

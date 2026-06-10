@@ -16,7 +16,7 @@ import {getPageSize} from "../groups";
 import {activeBlur} from "../../../../mobile/util/keyboardToolbar";
 /// #endif
 import {renderKanban} from "../kanban/render";
-import {bindAutoLoadScroll} from "../trim";
+import {initVirtualScroll} from "../virtualScroll";
 
 interface IIds {
     groupId: string,
@@ -275,7 +275,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
             /// #endif
         }
     });
-    bindAutoLoadScroll(options);
+    initVirtualScroll(options);
 };
 
 export const renderGallery = async (options: {

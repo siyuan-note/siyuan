@@ -10,6 +10,40 @@ import {insertGalleryItemAnimation} from "./gallery/item";
 import {clearSelect} from "../../util/clear";
 import {isCustomAttr} from "./blockAttr";
 
+export const getRowHTML = (data: IAVView, row: IAVRow, rowIndex: number, pinIndex: number) => {
+    let html = `<div class="av__row" data-index="${rowIndex}" data-id="${row.id}">`;
+    if (pinIndex > -1) {
+        html += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+    } else {
+        html += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
+    }
+
+    row.cells.forEach((cell, index) => {
+        const column = (data as IAVTable).columns[index];
+        if (column.hidden) {
+            return;
+        }
+        // https://github.com/siyuan-note/siyuan/issues/10262
+        let checkClass = "";
+        if (cell.valueType === "checkbox") {
+            checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
+        }
+        html += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${column.id}" 
+data-wrap="${column.wrap}" 
+data-dtype="${column.type}" 
+${cell.value?.isDetached ? ' data-detached="true"' : ""} 
+style="width: ${column.width || "200px"};
+${cell.valueType === "number" ? "text-align: right;" : ""}
+${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon)}</div>`;
+
+        if (pinIndex === index) {
+            html += "</div>";
+        }
+    });
+    return html + "<div></div></div>";
+};
+
 export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView): string => {
     if (isCustomAttr(cellElement)) {
         return cellElement.getAttribute("data-row-id");

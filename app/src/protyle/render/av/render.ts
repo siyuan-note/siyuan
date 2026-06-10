@@ -1,11 +1,11 @@
 import {fetchSyncPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {addDragFill, cellScrollIntoView, popTextCell, renderCell} from "./cell";
+import {addDragFill, cellScrollIntoView, popTextCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {stickyRow, updateHeader} from "./row";
+import {getRowHTML, stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
 import {addClearButton} from "../../../util/addClearButton";
@@ -23,7 +23,7 @@ import {showMessage} from "../../../dialog/message";
 import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 /// #endif
 import {renderKanban} from "./kanban/render";
-import {bindAutoLoadScroll} from "./trim";
+import {initVirtualScroll} from "./virtualScroll";
 
 interface IIds {
     groupId: string,
@@ -181,7 +181,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
             calcHTML += "</div>";
         }
     });
-    contentHTML += `<div class="block__icons" style="min-height: auto">
+    contentHTML += `<div class="block__icons" style="min-height: auto" data-pinindex="${pinIndex}">
     <div class="block__icon block__icon--show" data-type="av-header-more"><svg><use xlink:href="#iconMore"></use></svg></div>
     <div class="fn__space"></div>
     <div class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.newCol}" data-type="av-header-add" data-position="4south"><svg><use xlink:href="#iconAdd"></use></svg></div>
@@ -193,36 +193,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
-        contentHTML += `<div class="av__row" data-id="${row.id}">`;
-        if (pinIndex > -1) {
-            contentHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
-        } else {
-            contentHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
-        }
-
-        row.cells.forEach((cell, index) => {
-            if (data.columns[index].hidden) {
-                return;
-            }
-            // https://github.com/siyuan-note/siyuan/issues/10262
-            let checkClass = "";
-            if (cell.valueType === "checkbox") {
-                checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
-            }
-            contentHTML += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${data.columns[index].id}" 
-data-wrap="${data.columns[index].wrap}" 
-data-dtype="${data.columns[index].type}" 
-${cell.value?.isDetached ? ' data-detached="true"' : ""} 
-style="width: ${data.columns[index].width || "200px"};
-${cell.valueType === "number" ? "text-align: right;" : ""}
-${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon)}</div>`;
-
-            if (pinIndex === index) {
-                contentHTML += "</div>";
-            }
-        });
-        contentHTML += "<div></div></div>";
+        contentHTML += getRowHTML(data, row, rowIndex, pinIndex);
     });
     return `${contentHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
     <div class="av__colsticky">
@@ -452,7 +423,7 @@ const afterRenderTable = (options: ITableOptions) => {
             /// #endif
         }
     });
-    bindAutoLoadScroll(options);
+    initVirtualScroll(options);
 };
 
 export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, avData?: IAV) => {

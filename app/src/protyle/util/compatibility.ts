@@ -3,7 +3,6 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
-import * as fs from "fs";
 /// #endif
 /// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
@@ -125,24 +124,16 @@ export const saveExportFile = async (uri: string) => {
         if (result.canceled || !result.filePath) {
             return;
         }
-        const response = await fetch(resolved.href);
-        if (!response.ok) {
-            throw new Error(
-                `HTTP ${response.status} ${response.statusText}: ${response.url || resolved.href}`
-            );
-        }
-        const reader = response.body.getReader();
-        const fd = await fs.promises.open(result.filePath, "w");
-        try {
-            while (true) {
-                const {done, value} = await reader.read();
-                if (done) {
-                    break;
-                }
-                await fd.write(value);
-            }
-        } finally {
-            await fd.close();
+        const copyResponse = await (await fetch("/api/export/copyExportFile", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                srcPath: resolved.pathname,
+                dest: result.filePath,
+            }),
+        })).json();
+        if (copyResponse.code !== 0) {
+            throw new Error(copyResponse.msg);
         }
         showMessage(window.siyuan.languages.exported);
         return;

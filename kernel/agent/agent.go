@@ -503,8 +503,8 @@ func GenerateTitle(client *openai.Client, model string, userMsg string, language
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
 		Model: model,
 		Messages: []openai.ChatCompletionMessage{
-			{Role: openai.ChatMessageRoleSystem, Content: "Extract a short title (under 12 words) for the conversation provided by the user. Be specific, not generic. Reply in " + language + "."},
-			{Role: openai.ChatMessageRoleUser, Content: userMsg},
+			{Role: openai.ChatMessageRoleSystem, Content: "You are a title generator. Below is the first message of a conversation. Write a concise title (under 12 words) that summarizes the topic. Output ONLY the title, no other text."},
+			{Role: openai.ChatMessageRoleUser, Content: "Conversation starts with: " + userMsg},
 		},
 		MaxCompletionTokens: 50,
 	})

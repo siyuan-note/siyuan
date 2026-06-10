@@ -13,6 +13,9 @@
 }
 
 .agent-chat__messages-wrap {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
     position: relative;
     display: flex;
     flex-direction: column;

@@ -119,7 +119,7 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconMin"></use></svg>' +
             "</span>" +
             "</div>" +
-        '<div class="agent-chat__messages-wrap fn__flex-1">' +
+        '<div class="agent-chat__messages-wrap">' +
             '<div class="agent-chat__messages fn__flex-1"></div>' +
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
         "</div>" +
@@ -1134,7 +1134,8 @@ export class AgentChat extends Model {
     private tryGenerateTitle() {
         if (this.hasTitled) { return; }
         this.hasTitled = true;
-        const userMsg = this.entries.find((e) => e.type === "user")?.content?.slice(0, 500) || "";
+        const userEntry = this.entries.find((e): e is { type: "user"; content: string } => e.type === "user");
+        const userMsg = userEntry?.content?.slice(0, 500) || "";
         fetch("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},

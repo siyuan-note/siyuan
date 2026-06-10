@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Digite uma mensagem, @referência, /habilidade, Enter para enviar...",
   "agentSend": "Enviar",
   "agentStop": "Parar",
-  "agentToolCall": "Chamada de ferramenta",
-  "agentToolResult": "Resultado da ferramenta",
   "editorFontSize": "Tamanho da Fonte do Editor",
   "configGroupBehavior": "Comportamento",
   "configGroupBlockFeatures": "Recursos de bloco",

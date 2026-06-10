@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "اكتب رسالة، @للإشارة، /مهارة، Enter للإرسال...",
   "agentSend": "إرسال",
   "agentStop": "إيقاف",
-  "agentToolCall": "استدعاء الأداة",
-  "agentToolResult": "نتيجة الأداة",
   "editorFontSize": "حجم خط المحرر",
   "configGroupBehavior": "السلوك",
   "configGroupBlockFeatures": "خصائص الكتلة",

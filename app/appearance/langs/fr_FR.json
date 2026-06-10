@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Tapez un message, @référence, /compétence, Entrée pour envoyer...",
   "agentSend": "Envoyer",
   "agentStop": "Arrêter",
-  "agentToolCall": "Appel d'outil",
-  "agentToolResult": "Résultat d'outil",
   "editorFontSize": "Taille de la police de l'éditeur",
   "configGroupBehavior": "Comportement",
   "configGroupBlockFeatures": "Fonctionnalités des blocs",

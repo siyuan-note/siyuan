@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "संदेश लिखें, @संदर्भ, /कौशल, Enter भेजने के लिए...",
   "agentSend": "भेजें",
   "agentStop": "रोकें",
-  "agentToolCall": "टूल कॉल",
-  "agentToolResult": "टूल परिणाम",
   "editorFontSize": "संपादक फ़ॉन्ट आकार",
   "configGroupBehavior": "व्यवहार",
   "configGroupBlockFeatures": "ब्लॉक सुविधाएँ",

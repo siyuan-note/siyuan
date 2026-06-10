@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Mesaj yazın, @referans, /beceri, Enter ile gönderin...",
   "agentSend": "Gönder",
   "agentStop": "Durdur",
-  "agentToolCall": "Araç çağrısı",
-  "agentToolResult": "Araç sonucu",
   "editorFontSize": "Editör yazı boyutu",
   "configGroupBehavior": "Davranış",
   "configGroupBlockFeatures": "Blok Özellikleri",

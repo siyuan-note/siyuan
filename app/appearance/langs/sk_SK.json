@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Napíšte správu, @odkaz, /zručnosť, Enter na odoslanie...",
   "agentSend": "Odoslať",
   "agentStop": "Zastaviť",
-  "agentToolCall": "Volanie nástroja",
-  "agentToolResult": "Výsledok nástroja",
   "editorFontSize": "Veľkosť písma editora",
   "configGroupBehavior": "Správanie",
   "configGroupBlockFeatures": "Vlastnosti blokov",

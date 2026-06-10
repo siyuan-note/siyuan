@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Ketik pesan, @referensi, /keterampilan, Enter untuk mengirim...",
   "agentSend": "Kirim",
   "agentStop": "Berhenti",
-  "agentToolCall": "Panggilan alat",
-  "agentToolResult": "Hasil alat",
   "editorFontSize": "Ukuran Font Editor",
   "configGroupBehavior": "Perilaku",
   "configGroupBlockFeatures": "Fitur Blok",

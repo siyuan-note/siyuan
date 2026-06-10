@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "メッセージを入力、@で引用、/スキル、Enterで送信...",
   "agentSend": "送信",
   "agentStop": "停止",
-  "agentToolCall": "ツール呼び出し",
-  "agentToolResult": "ツール結果",
   "editorFontSize": "エディターのフォントサイズ",
   "configGroupBehavior": "動作",
   "configGroupBlockFeatures": "ブロック機能",

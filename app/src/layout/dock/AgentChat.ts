@@ -120,8 +120,8 @@ export class AgentChat extends Model {
             '<select class="agent-chat__model b3-select"></select>' +
             '<span class="agent-chat__tokens fn__none"></span>' +
             '<span class="fn__flex-1"></span>' +
-            '<button class="agent-chat__send b3-button b3-button--text">' + (L.agentSend || "Send") + "</button>" +
-            '<button class="agent-chat__stop b3-button b3-button--cancel fn__none">' + (L.agentStop || "Stop") + "</button>" +
+            '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconCirclePlay"></use></svg></button>' +
+            '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconCircleStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
             "</div>";
@@ -1351,7 +1351,6 @@ export class AgentChat extends Model {
         reasoningContent: string;
         content?: string
     }>) {
-        const L = window.siyuan.languages;
         let detail = "";
         const seenTools: Record<string, boolean> = {};
         for (let i = 0; i < steps.length; i++) {
@@ -1362,8 +1361,7 @@ export class AgentChat extends Model {
             if (step.toolCalls.length > 0) {
                 const newTools = step.toolCalls.filter(tc => !seenTools[tc.name]);
                 if (newTools.length > 0) {
-                    const toolCallLabel = (L.agentToolCall || "Tool call") + "s:";
-                    detail += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">${toolCallLabel}</span>`;
+                    detail += `<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>`;
                     for (let j = 0; j < newTools.length; j++) {
                         const tc = newTools[j];
                         seenTools[tc.name] = true;

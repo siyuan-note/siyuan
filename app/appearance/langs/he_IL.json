@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "הקלד הודעה, @להפניה, /מיומנות, Enter לשליחה...",
   "agentSend": "שלח",
   "agentStop": "עצור",
-  "agentToolCall": "קריאת כלי",
-  "agentToolResult": "תוצאת כלי",
   "editorFontSize": "גודל גופן העורך",
   "configGroupBehavior": "התנהגות",
   "configGroupBlockFeatures": "תכונות בלוק",

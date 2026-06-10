@@ -29,8 +29,6 @@
   "agentInputPlaceholder": "Введіть повідомлення, @посилання, /навичка, Enter для надсилання...",
   "agentSend": "Надіслати",
   "agentStop": "Зупинити",
-  "agentToolCall": "Виклик інструменту",
-  "agentToolResult": "Результат інструменту",
   "editorFontSize": "Розмір шрифту редактора",
   "configGroupBehavior": "Поведінка",
   "configGroupBlockFeatures": "Властивості блоків",

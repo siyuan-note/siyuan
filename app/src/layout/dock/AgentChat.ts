@@ -660,12 +660,8 @@ export class AgentChat extends Model {
     }
 
     private async handleError(err: Error) {
-        let message = err.message;
-        if (err.name === "TypeError" && message.includes("fetch")) {
-            message = window.siyuan.languages._kernel[28];
-        }
         this.flushTokenUpdate();
-        this.appendError(message);
+        this.appendError(err.message);
         this.setStreaming(false);
         await this.saveSession();
     }

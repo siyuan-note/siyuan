@@ -119,7 +119,10 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconMin"></use></svg>' +
             "</span>" +
             "</div>" +
-        '<div class="agent-chat__messages fn__flex-1"><span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span></div>' +
+        '<div class="agent-chat__messages-wrap fn__flex-1">' +
+            '<div class="agent-chat__messages fn__flex-1"></div>' +
+            '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
+        "</div>" +
         '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
         '<div class="agent-chat__input-area">' +
             '<div class="agent-chat__composer-host"></div>' +

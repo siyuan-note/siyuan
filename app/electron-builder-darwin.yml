@@ -1,0 +1,70 @@
+productName: "SiYuan"
+appId: "org.b3log.siyuan"
+asar: false
+compression: "normal"
+copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."
+artifactName: "siyuan-${version}-${os}.${ext}"
+extraMetadata:
+  main: "electron/main.js"
+directories:
+  output: "build"
+files:
+  - "electron"
+afterPack: "./scripts/afterPack.js"
+
+mac:
+  identity: "Yunnan Liandi Technology Co., Ltd."
+  provisioningProfile: "../../SiYuan.provisionprofile"
+  icon: "src/assets/icon.icns"
+  gatekeeperAssess: false
+  hardenedRuntime: true
+  entitlements: "../../entitlements.mas.plist"
+  extendInfo:
+    - NSMicrophoneUsageDescription: "This app requires microphone access to record audio."
+  entitlementsInherit: "../../entitlements.mas.plist"
+  minimumSystemVersion: "10.15"
+  protocols:
+    - name: "SiYuan"
+      schemes:
+        - "siyuan"
+  extraResources:
+    - from: "kernel-darwin"
+      to: "kernel"
+  target:
+    - target: "dmg"
+      arch: "x64"
+
+extraResources:
+  - from: "changelogs"
+    to: "changelogs"
+  - from: "stage"
+    to: "stage"
+  - from: "guide"
+    to: "guide"
+    filter: "!**/{.DS_Store,.git,.gitignore,.idea}"
+  - from: "appearance/boot"
+    to: "appearance/boot"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/icons"
+    to: "appearance/icons"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/langs"
+    to: "appearance/langs"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/emojis"
+    to: "appearance/emojis"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/themes/midnight"
+    to: "appearance/themes/midnight"
+    filter: "!**/{.DS_Store,custom.css}"
+  - from: "appearance/themes/daylight"
+    to: "appearance/themes/daylight"
+    filter: "!**/{.DS_Store,custom.css}"
+  - from: "appearance/fonts"
+    to: "appearance/fonts"
+    filter: "!**/{.DS_Store}"
+  - from: "pandoc/pandoc-darwin-amd64.zip"
+    to: "pandoc.zip"
+  - from: "pandoc/pandoc-resources"
+    to: "pandoc-resources"
+    filter: "!**/{.DS_Store}"

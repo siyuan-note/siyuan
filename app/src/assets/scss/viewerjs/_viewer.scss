@@ -1,0 +1,379 @@
+.viewer {
+  &-zoom-in,
+  &-zoom-out,
+  &-one-to-one,
+  &-reset,
+  &-prev,
+  &-play,
+  &-next,
+  &-rotate-left,
+  &-rotate-right,
+  &-flip-horizontal,
+  &-flip-vertical,
+  &-fullscreen,
+  &-fullscreen-exit,
+  &-close {
+    svg {
+      height: 24px;
+      width: 12px;
+      color: var(--b3-tooltips-color);
+    }
+  }
+
+  &-container {
+    bottom: 0;
+    direction: ltr;
+    font-size: 0;
+    left: 0;
+    line-height: 0;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    -webkit-tap-highlight-color: transparent;
+    top: 0;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+
+    &::selection,
+    & *::selection {
+      background-color: transparent;
+    }
+
+    &:focus {
+      outline: 0;
+    }
+
+    & img {
+      display: block;
+      height: auto;
+      max-height: none !important;
+      max-width: none !important;
+      min-height: 0 !important;
+      min-width: 0 !important;
+      width: 100%;
+      pointer-events: none;
+    }
+  }
+
+  &-canvas {
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    & > img {
+      height: auto;
+      margin: 15px auto;
+      max-width: 90% !important;
+      width: auto;
+    }
+  }
+
+  &-footer {
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    text-align: center;
+  }
+
+  &-navbar {
+    background-color: rgba(0, 0, 0, .48);
+    overflow: hidden;
+  }
+
+  &-list {
+    box-sizing: content-box;
+    height: 50px;
+    margin: 0;
+    overflow: hidden;
+    padding: 1px 0;
+
+    & > li {
+      color: transparent;
+      cursor: pointer;
+      float: left;
+      font-size: 0;
+      height: 50px;
+      line-height: 0;
+      opacity: .48;
+      overflow: hidden;
+      transition: opacity .15s;
+      width: 30px;
+
+      &:focus,
+      &:hover {
+        opacity: .78;
+      }
+
+      &:focus {
+        outline: 0;
+      }
+
+      & + li {
+        margin-left: 1px;
+      }
+    }
+
+    & > .viewer-loading {
+      position: relative;
+
+      &::after {
+        border-width: 2px;
+        height: 20px;
+        margin-left: -10px;
+        margin-top: -10px;
+        width: 20px;
+      }
+    }
+
+    & > .viewer-active {
+      &,
+      &:focus,
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  &-player {
+    background-color: #000;
+    bottom: 0;
+    cursor: none;
+    display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 1;
+
+    & > img {
+      left: 0;
+      position: absolute;
+      top: 0;
+    }
+  }
+
+  &-toolbar {
+    & > ul {
+      display: inline-block;
+      margin: 0 auto 5px;
+      overflow: hidden;
+      padding: 6px 3px;
+
+      & > li {
+        background-color: var(--b3-tooltips-background);
+        border-radius: 50%;
+        cursor: pointer;
+        float: left;
+        height: 24px;
+        overflow: hidden;
+        transition: background-color .15s;
+        width: 24px;
+
+        &:focus,
+        &:hover {
+          svg {
+            color: #fff;
+          }
+        }
+
+        &:focus {
+          box-shadow: 0 0 3px #fff;
+          outline: 0;
+          position: relative;
+          z-index: 1;
+        }
+
+        &::before {
+          margin: 2px;
+        }
+
+        & + li {
+          margin-left: 1px;
+        }
+      }
+
+      & > .viewer-small {
+        height: 18px;
+        margin-bottom: 3px;
+        margin-top: 3px;
+        width: 18px;
+
+        &::before {
+          margin: -1px;
+        }
+      }
+
+      & > .viewer-large {
+        height: 30px;
+        margin-bottom: -3px;
+        margin-top: -3px;
+        width: 30px;
+
+        svg {
+          height: 30px;
+          width: 16px;
+        }
+      }
+    }
+  }
+
+  &-tooltip {
+    background-color: var(--b3-tooltips-background);
+    border-radius: var(--b3-border-radius-b);
+    color: var(--b3-tooltips-color);
+    display: none;
+    font-size: 12px;
+    height: 20px;
+    left: 50%;
+    line-height: 20px;
+    margin-left: -25px;
+    margin-top: -10px;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    width: 50px;
+  }
+
+  &-title {
+    color: var(--b3-theme-on-background);
+    display: inline-block;
+    font-size: 12px;
+    line-height: 1.2;
+    margin: 5px 5%;
+    max-width: 90%;
+    min-height: 14px;
+    opacity: 0.8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &-button {
+    background-color: rgba(0, 0, 0, .48);
+    border-radius: 50%;
+    cursor: pointer;
+    height: 80px;
+    overflow: hidden;
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    transition: background-color .15s;
+    width: 80px;
+    -webkit-app-region: no-drag;
+
+    &:focus,
+    &:hover {
+      background-color: var(--b3-mask-background);
+    }
+
+    &:focus {
+      box-shadow: 0 0 3px #fff;
+      outline: 0;
+    }
+
+    &::before {
+      bottom: 15px;
+      left: 15px;
+      position: absolute;
+    }
+  }
+
+  &-fixed {
+    position: fixed;
+  }
+
+  &-open {
+    overflow: hidden;
+  }
+
+  &-show {
+    display: block;
+  }
+
+  &-hide {
+    display: none;
+  }
+
+  &-backdrop {
+    background-color: rgba(0, 0, 0, .24);
+  }
+
+  &-invisible {
+    visibility: hidden;
+  }
+
+  &-move {
+    cursor: move;
+    cursor: grab;
+  }
+
+  &-fade {
+    opacity: 0;
+  }
+
+  &-in {
+    opacity: 1;
+  }
+
+  &-transition {
+    transition: all .3s;
+  }
+
+  @keyframes viewer-spinner {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  &-loading {
+    &::after {
+      animation: viewer-spinner 1s linear infinite;
+      border: 4px solid rgba(255, 255, 255, .1);
+      border-left-color: rgba(255, 255, 255, .5);
+      border-radius: 50%;
+      content: '';
+      display: inline-block;
+      height: 40px;
+      left: 50%;
+      margin-left: -20px;
+      margin-top: -20px;
+      position: absolute;
+      top: 50%;
+      width: 40px;
+      z-index: 1;
+    }
+  }
+
+  @media (max-width: 767px) {
+    &-hide-xs-down {
+      display: none;
+    }
+  }
+
+  @media (max-width: 991px) {
+    &-hide-sm-down {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1199px) {
+    &-hide-md-down {
+      display: none;
+    }
+  }
+}

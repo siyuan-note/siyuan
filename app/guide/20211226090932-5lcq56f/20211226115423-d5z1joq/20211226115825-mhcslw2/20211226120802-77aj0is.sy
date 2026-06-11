@@ -1,0 +1,365 @@
+{
+	"ID": "20211226120802-77aj0is",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226120802-77aj0is",
+		"title": "内容塊屬性",
+		"type": "doc",
+		"updated": "20251201102544"
+	},
+	"Children": [
+		{
+			"ID": "20211226120833-vqd5cic",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120833-vqd5cic",
+				"updated": "20211226000642"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-clw47h2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120833-clw47h2",
+				"updated": "20211226000642"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "屬性以鍵值對（key-value）的形式存在，我們可以通過對內容塊設置屬性來豐富內容塊的內涵。屬性分為內置屬性和自定義屬性。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-wzobna4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120833-wzobna4",
+				"updated": "20211226000642"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內置屬性"
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-5n4ui6o",
+			"Type": "NodeTable",
+			"TableAligns": [
+				2,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20211226120833-5n4ui6o",
+				"updated": "20230630095210"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"TableCellAlign": 2,
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "屬性名"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "描述"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "name"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊的命名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "alias"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊的別名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "memo"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊的備註"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "bookmark"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊的書簽"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-347kbz5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120833-347kbz5",
+				"updated": "20251201102544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自定義屬性"
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-a02rthr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120833-a02rthr",
+				"updated": "20251201102544"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自定義屬性由用戶通過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "塊標菜單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code kbd",
+					"TextMarkTextContent": "屬性"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 進行設置，屬性名稱僅允許使用小寫英文字母和阿拉伯數字並且需要以字母開頭（例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "doing"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "day1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​）。設置後，思源會自動在屬性名前加上前綴 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "custom-"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，以區分內置屬性和自定義屬性。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-srr6kys",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120833-srr6kys",
+				"updated": "20211226000642"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "根據屬性查詢內容塊"
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-t1kekw6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120833-t1kekw6",
+				"updated": "20211226000642"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，當我們為內容塊設置了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "progress=30"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "priority=2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 屬性後，則可以通過 SQL 查詢出所有進度為 30、優先級為 2 的內容塊："
+				}
+			]
+		},
+		{
+			"ID": "20211226120833-q6bnojs",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20211226120833-q6bnojs",
+				"updated": "20211226000642"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"ID": "20220307092237-1yyxq36",
+					"Type": "NodeCodeBlockCode",
+					"Data": "SELECT *\nFROM blocks\nWHERE id IN (\n    SELECT block_id\n    FROM attributes AS a\n    WHERE (a.name = 'custom-progress' AND a.value = '30')\n       OR (a.name = 'custom-priority' AND a.value = '2')\n    GROUP BY block_id\n    HAVING count(block_id) = 2\n);\n",
+					"Properties": {
+						"id": "20220307092237-1yyxq36"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		}
+	]
+}

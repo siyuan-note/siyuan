@@ -1,0 +1,139 @@
+{
+	"ID": "20240530101000-cb37szr",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-lhw2f68",
+		"icon": "1f451",
+		"id": "20240530101000-cb37szr",
+		"title": "メンバーシップサービス",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-yel0kb9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-thjpv6c",
+				"id": "20240530101000-yel0kb9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "メンバーシップサービスは以下の 2 つに分かれています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3uq7zk3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-y5tkfmd",
+				"id": "20240530101000-3uq7zk3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-u7wc84n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-li6dti7",
+						"id": "20240530101000-u7wc84n",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-d83dx8j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-qy8hxz7",
+								"id": "20240530101000-d83dx8j",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "年間サブスクリプションの"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-vhq5afs",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "クラウドサービス"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-y53rw27",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rfb58uf",
+						"id": "20240530101000-y53rw27",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-fn7mpk8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-436xdro",
+								"id": "20240530101000-fn7mpk8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "買い切り型の"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-qf0xtkd",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "有料機能"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nn3qstj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-pljib69",
+				"id": "20240530101000-nn3qstj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "これら 2 つは別々に購入する必要がありますが、年間サブスクリプションには買い切り型の有料機能も含まれており、サブスクリプション期間中はすべての有料機能を使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ikoo99s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ld247if",
+				"id": "20240530101000-ikoo99s"
+			}
+		}
+	]
+}

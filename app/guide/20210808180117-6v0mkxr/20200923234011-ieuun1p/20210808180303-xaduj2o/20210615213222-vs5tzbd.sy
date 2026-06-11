@@ -1,0 +1,1942 @@
+{
+	"ID": "20210615213222-vs5tzbd",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210615213222-vs5tzbd",
+		"title": "Data history",
+		"type": "doc",
+		"updated": "20250115153528"
+	},
+	"Children": [
+		{
+			"ID": "20220501135308-u5qn6iz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220501135308-u5qn6iz",
+				"updated": "20220501135308"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20220615120310-jq1miv3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120310-jq1miv3",
+				"updated": "20220615120310"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data history is mainly used to ensure data security, and even if a misoperation occurs, data can be rolled back through history. The data history is divided into two functions:"
+				}
+			]
+		},
+		{
+			"ID": "20220615120310-64352xf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220615120310-64352xf",
+				"updated": "20220615120310"
+			},
+			"Children": [
+				{
+					"ID": "20220615120310-zyipokx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615120310-zyipokx",
+						"updated": "20220615120310"
+					},
+					"Children": [
+						{
+							"ID": "20220615120310-hxba93x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615120310-hxba93x",
+								"updated": "20220615120310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "File history: saved in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/history/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder as the original file, human-readable, and can be manually copied to the corresponding location of data for recovery"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615120310-ku0y1n6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615120310-ku0y1n6",
+						"updated": "20220615120310"
+					},
+					"Children": [
+						{
+							"ID": "20220615120310-qkv8ygq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615120310-qkv8ygq",
+								"updated": "20220615120310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Data snapshot: partitioned by file, encrypted and compressed and saved in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/repo/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder, unreadable by humans and cannot be manually restored"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615120310-qal3upv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120310-qal3upv",
+				"updated": "20220830225641"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to local data history, data snapshots are also used for cloud "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210721112206-mhr9wxi",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "data synchronization"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220615120326-oxyzckb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220615120326-oxyzckb",
+				"updated": "20220615120330"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "File history"
+				}
+			]
+		},
+		{
+			"ID": "20220615120326-dopr4db",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615120326-dopr4db",
+				"updated": "20220615120326"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "File history generation rules"
+				}
+			]
+		},
+		{
+			"ID": "20220501135308-30uwxvd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220501135308-30uwxvd",
+				"updated": "20240402174245"
+			},
+			"Children": [
+				{
+					"ID": "20220501135308-kwaramc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-kwaramc",
+						"updated": "20220831210614"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-yr7v67z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-yr7v67z",
+								"updated": "20220831210614"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Every 10 minutes, "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history will be generated for the documents updated within these 10 minutes (the interval can be set by "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "History Generation Interval"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ make adjustments), and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-update"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-1xc2m8l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-1xc2m8l",
+						"updated": "20220501135308"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-dmnsr7d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-dmnsr7d",
+								"updated": "20220501135308"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When synchronizing in the cloud, the local data covered by the cloud will generate "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-z09e5tv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-z09e5tv",
+						"updated": "20220503122549"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-pqw5kwp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-pqw5kwp",
+								"updated": "20220503122549"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "History will be generated when manually deleting notebooks, documents and assets, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-0iyl6a6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-0iyl6a6",
+						"updated": "20220830230820"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-9htfn1h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-9htfn1h",
+								"updated": "20220830230820"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210115224203-q8bj2gd",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Cleanup unreferenced assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history will be generated, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-clean"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-wzazz01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-wzazz01",
+						"updated": "20230403114455"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-xldpw4q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-xldpw4q",
+								"updated": "20230403114455"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220628204454-hhxohv5",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Optimize typography"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " history will be generated, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-format"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230403114321-4rwhj6j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230403114321-4rwhj6j",
+						"updated": "20240402174245"
+					},
+					"Children": [
+						{
+							"ID": "20230403114321-tou7etc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230403114321-tou7etc",
+								"updated": "20240402174245"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Search replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, a history will be generated, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240402174218-u5vrt8y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240402174218-u5vrt8y",
+						"updated": "20240402174243"
+					},
+					"Children": [
+						{
+							"ID": "20240402174218-9x6w0bk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240402174218-9x6w0bk",
+								"updated": "20240402174243"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When dragging an outline item in the outline panel, a history will be generated, and the suffix of the history folder is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-outline"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220501135308-2rn9rgb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220501135308-2rn9rgb",
+				"updated": "20250115153512"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Browse file history"
+				}
+			]
+		},
+		{
+			"ID": "20220501135308-3azjqzh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220501135308-3azjqzh",
+				"updated": "20250115153512"
+			},
+			"Children": [
+				{
+					"ID": "20220501135308-itmzgsj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-itmzgsj",
+						"updated": "20250115153512"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-yvsiton",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-yvsiton",
+								"updated": "20250115153512"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data History"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ button on the top toolbar or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to open the data history interface, switch to the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "File History"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ tab, if no historical data is displayed , you can try "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Reindex"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ of this interface"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135308-9uu4udf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135308-9uu4udf",
+						"updated": "20220501135308"
+					},
+					"Children": [
+						{
+							"ID": "20220501135308-5yqjh8u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135308-5yqjh8u",
+								"updated": "20220501135308"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Browse under the filesystem "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/history/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091559-kgrtuyh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091559-kgrtuyh",
+				"updated": "20220615120446"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rollback through file history"
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-qv8l0rm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133808-qv8l0rm",
+				"updated": "20220615120526"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the time list column on the left side of the data history interface, there is a rollback button on the right side of each history record. After clicking, a confirmation dialog box will pop up. If the rollback is confirmed, the existing file will be overwritten with the file history."
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-uopvhd4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133808-uopvhd4",
+				"updated": "20220501133808"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If there are very many files that need to be rolled back, it is recommended to manually copy on the file system. The internal structure of the history folder is the same as the internal structure of data, for example:"
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-aipi33o",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220501133808-aipi33o",
+				"updated": "20220831210527"
+			},
+			"Children": [
+				{
+					"ID": "20220501133808-wxongrk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133808-wxongrk",
+						"updated": "20220501133808"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-tbbutzj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-tbbutzj",
+								"updated": "20220501133808"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Notebook delete: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2022-05-01-091021-delete/20210808180117-czj9bvb/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", i.e. "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "historical generation date-{operation}/{notebook ID}/"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-44fj5ct",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133808-44fj5ct",
+						"updated": "20220501134016"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-y3c9auz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-y3c9auz",
+								"updated": "20220501134016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Document deletion: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2022-05-01-091209-delete/20210808180117-czj9bvb/20200812220555-lj3enxa.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", which is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "historical generation date-{operation}/{notebook ID}/{document path}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-9qkl603",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133808-9qkl603",
+						"updated": "20220831210527"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-caf9m4c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-caf9m4c",
+								"updated": "20220831210527"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Asset file cleanup: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2022-05-01-095621-clean/assets/image-20220501091157-qccp87e.png"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", which is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "historical generation date-{operation}/assets/{asset file name}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-qyb1i5y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133808-qyb1i5y",
+				"updated": "20220501133808"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manual rollback steps:"
+				}
+			]
+		},
+		{
+			"ID": "20220501133808-vpkkff8",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220501133808-vpkkff8",
+				"updated": "20220615111249"
+			},
+			"Children": [
+				{
+					"ID": "20220501133808-u2jd9bs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220501133808-u2jd9bs",
+						"updated": "20220501134035"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-nuxcwdm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-nuxcwdm",
+								"updated": "20220501134035"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Exit SiYuan, and then make a full copy and backup of the entire workspace to avoid data loss caused by subsequent misoperations"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-5op6pre",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220501133808-5op6pre",
+						"updated": "20220501134101"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-wgm1itd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-wgm1itd",
+								"updated": "20220501134101"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/history/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder and copy the data in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "historical generation date-{operation}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " folder directly to the data folder for overwriting"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133808-te5g9yq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220501133808-te5g9yq",
+						"updated": "20220615111249"
+					},
+					"Children": [
+						{
+							"ID": "20220501133808-8md1hk0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133808-8md1hk0",
+								"updated": "20220615111249"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Reindex manually after starting SiYuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-rhii2c7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615120602-rhii2c7",
+				"updated": "20220615120602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Clean up file history"
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-mjy7por",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120602-mjy7por",
+				"updated": "20220615120602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "By default, the history of files generated in the last 30 days is automatically saved, which can be adjusted through "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "History Retention Days"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". History will be automatically deleted."
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-3fqyf3h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120602-3fqyf3h",
+				"updated": "20220830230506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you want to clear all file history data, you can click "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Clear all history"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", or manually delete the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/history/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder, then "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Reindex"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "File History"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-drz9hwc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220615120602-drz9hwc",
+				"updated": "20220615120658"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-iya2886",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615120602-iya2886",
+				"updated": "20220615120602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Initialize key"
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-wipwu6g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120602-wipwu6g",
+				"updated": "20220615120742"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before using the data snapshot for the first time, you need to initialize the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data repo key"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "About"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220722002536-t7qdekm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220722002536-t7qdekm",
+				"updated": "20220722002536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There are three ways to initialize the key:"
+				}
+			]
+		},
+		{
+			"ID": "20220722002536-oh6do47",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220722002536-oh6do47",
+				"updated": "20220722002630"
+			},
+			"Children": [
+				{
+					"ID": "20220722002536-jl5euiu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722002536-jl5euiu",
+						"updated": "20220722002536"
+					},
+					"Children": [
+						{
+							"ID": "20220722002536-6v0g14u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722002536-6v0g14u",
+								"updated": "20220722002536"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Import Key"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Copy the key string from another device to this paste and import"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220722002536-vtknbv8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722002536-vtknbv8",
+						"updated": "20220722002630"
+					},
+					"Children": [
+						{
+							"ID": "20220722002536-ebch8kx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722002536-ebch8kx",
+								"updated": "20220722002630"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Auto-generate key"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Use random text to generate the key, this method only needs to be executed once on one device, and other devices use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Import key"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220722002536-gwbslbg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722002536-gwbslbg",
+						"updated": "20220722002536"
+					},
+					"Children": [
+						{
+							"ID": "20220722002536-iywk7i9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722002536-iywk7i9",
+								"updated": "20220722002536"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Generate key by passphrase"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Use a custom passphrase to generate the key, which requires the same passphrase on all devices"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220722002536-k5ij0q6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220722002536-k5ij0q6",
+				"updated": "20220722002536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "All in all, it is important to ensure that all devices use the same key, otherwise data snapshots will not be available across devices, such as syncing data snapshots through the cloud."
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-wp2lnbq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615120602-wp2lnbq",
+				"updated": "20250115153528"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Create data snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-5r3nl34",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220615120602-5r3nl34",
+				"updated": "20250115153528"
+			},
+			"Children": [
+				{
+					"ID": "20220615120602-a20qin2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220615120602-a20qin2",
+						"updated": "20250115153528"
+					},
+					"Children": [
+						{
+							"ID": "20220615120602-k0xs8n5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615120602-k0xs8n5",
+								"updated": "20250115153528"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data History"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ button on the top toolbar or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to open the data history interface"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615120602-fhbmyhz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220615120602-fhbmyhz",
+						"updated": "20220615120602"
+					},
+					"Children": [
+						{
+							"ID": "20220615120602-rh4nmca",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615120602-rh4nmca",
+								"updated": "20220615120602"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Switch to the last tab "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data snapshot"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615120602-dkrrocp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220615120602-dkrrocp",
+						"updated": "20220615120840"
+					},
+					"Children": [
+						{
+							"ID": "20220615120602-4hggbdj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615120602-4hggbdj",
+								"updated": "20220615120840"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Create Snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", fill in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Memo"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and confirm"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-dwulzmi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120602-dwulzmi",
+				"updated": "20220615120852"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When browsing data snapshots, you can only distinguish between the snapshot creation time and memo, so the memo should be as detailed as possible, so that different data snapshots can be accurately identified in the future."
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-nzrp6gt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615120602-nzrp6gt",
+				"updated": "20230422102109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Browse data snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-13h2vpv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120602-13h2vpv",
+				"updated": "20220615120602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After creating a data snapshot, you can see the snapshot time list on the left, and click different snapshots to browse their notes."
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-cikdh3o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615120602-cikdh3o",
+				"updated": "20220615120602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rollback data snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-zusc5xs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615120602-zusc5xs",
+				"updated": "20220615120602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There is a rollback button on the right side of the snapshot time list entry. After clicking, a confirmation dialog box will pop up. If the rollback is confirmed, the existing data will be completely replaced with the snapshot data."
+				}
+			]
+		},
+		{
+			"ID": "20220615120602-nhnnujh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615120602-nhnnujh",
+				"updated": "20230422102056"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cleanup data snapshot"
+				}
+			]
+		},
+		{
+			"ID": "20230422101614-mdijztr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230422101614-mdijztr",
+				"updated": "20230422102255"
+			},
+			"Children": [
+				{
+					"ID": "20230422101614-5lwp8u3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422101614-5lwp8u3",
+						"updated": "20230422102255"
+					},
+					"Children": [
+						{
+							"ID": "20230422101614-5kvwhn7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422101614-5kvwhn7",
+								"updated": "20230422102255"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "About"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data repo purge"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ will delete all unreferenced snapshots and related data objects. \"Referenced snapshots\" refer to snapshots pointed to under repo/refs/:"
+								}
+							]
+						},
+						{
+							"ID": "20230422101614-ibwplih",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230422101614-ibwplih",
+								"updated": "20230422102025"
+							},
+							"Children": [
+								{
+									"ID": "20230422101614-wqxklla",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422101614-wqxklla",
+										"updated": "20230422102025"
+									},
+									"Children": [
+										{
+											"ID": "20230422101614-uwv2229",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422101614-uwv2229",
+												"updated": "20230422102025"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "latest"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ points to the latest snapshot"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230422101614-tgrdynv",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422101614-tgrdynv",
+										"updated": "20230422102023"
+									},
+									"Children": [
+										{
+											"ID": "20230422101614-tf542fs",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422101614-tf542fs",
+												"updated": "20230422102023"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "tags/*"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ point to manually tagged snapshots"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422101614-ht2yhm0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422101614-ht2yhm0",
+						"updated": "20230422101614"
+					},
+					"Children": [
+						{
+							"ID": "20230422101614-lxjcg2j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422101614-lxjcg2j",
+								"updated": "20230422101614"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Manually delete the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/repo/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ folder to clear all data snapshots"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-l27t5uo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210928101257-l27t5uo",
+				"updated": "20210928101257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ignore files"
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-3m7efdr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210928101257-3m7efdr",
+				"updated": "20210928220616"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to ignore some files during synchronization, please create or edit the text file "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/.siyuan/syncignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on the file system, each line is configured with the relative path of the data folder, which means that the path of the file or folder is ignored and wildcard characters are supported. E.g:"
+				}
+			]
+		},
+		{
+			"ID": "20210928101257-apwzr8j",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210928101257-apwzr8j",
+				"updated": "20211222190049"
+			},
+			"Children": [
+				{
+					"ID": "20210928101257-9rghi7d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928101257-9rghi7d",
+						"updated": "20211222190049"
+					},
+					"Children": [
+						{
+							"ID": "20210928101257-tjmd13g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928101257-tjmd13g",
+								"updated": "20211222190049"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Ignore the data/20210808180117-6v0mkxr notebook"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210928101257-egaymco",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928101257-egaymco"
+					},
+					"Children": [
+						{
+							"ID": "20210928101257-jj2836a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928101257-jj2836a"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "assets/*.pdf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ignore PDF files under data/assets/"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220807180431-h2gd37z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220807180431-h2gd37z",
+				"updated": "20220807180440"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20220807180431-4175cz3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220807180431-4175cz3",
+				"updated": "20220807180431"
+			},
+			"Children": [
+				{
+					"ID": "20220807180431-97qvi51",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220807180431-97qvi51",
+						"updated": "20220807180431"
+					},
+					"Children": [
+						{
+							"ID": "20220807180431-8hzorql",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220807180431-8hzorql",
+								"updated": "20220807180431"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Symlinks and hidden files are not snapshotted"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

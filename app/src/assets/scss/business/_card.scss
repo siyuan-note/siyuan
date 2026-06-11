@@ -1,0 +1,105 @@
+@use "../util/function";
+
+.card {
+  &__main {
+    @extend .fn__flex-column;
+    box-sizing: border-box;
+    max-height: 100%;
+    background-color: var(--b3-theme-surface);
+    border-radius: var(--b3-border-radius-b);
+  }
+
+  &__empty {
+    display: flex;
+    flex: 1;
+    text-align: center;
+    background-color: var(--b3-theme-background);
+    font-size: 16px;
+    box-sizing: border-box;
+    flex-direction: column;
+    justify-content: center;
+    color: var(--b3-theme-on-surface);
+    align-items: center;
+    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
+
+    &--space {
+      padding: 16px;
+    }
+
+    & > div {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+  }
+
+  &__action {
+    padding: 8px;
+    user-select: none;
+
+    .b3-button {
+      padding: 8px 0;
+      display: block;
+      width: 100%;
+    }
+
+    & > div {
+      flex: 1;
+      margin-right: 8px;
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      & > span {
+        display: flex;
+        color: var(--b3-theme-on-surface);
+        text-align: center;
+        font-size: 12px;
+        margin-bottom: 8px;
+        height: 28px;
+        line-height: 14px;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
+
+  &__icon {
+    font-size: 32px;
+    display: block;
+    line-height: 46px;
+    margin-bottom: 4px;
+  }
+
+  &__block {
+    .protyle-wysiwyg:not([data-doc-type="NodeDocument"]) [data-node-id][custom-riff-decks] {
+      box-shadow: none;
+    }
+
+    &--hidemark span[data-type~=mark] {
+      font-size: 0 !important;
+
+      &::before {
+        content: " [...] ";
+        color: var(--b3-theme-primary-light);
+        font-size: initial;
+        font-weight: bold;
+      }
+    }
+
+    &--hideli .list[custom-riff-decks] .li > .list,
+    &--hideli .li[custom-riff-decks] > .list {
+      display: none;
+    }
+
+    &--hidesb .protyle-wysiwyg > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr) {
+      display: none;
+    }
+
+    &--hideh .protyle-wysiwyg > div[data-type="NodeHeading"][custom-riff-decks] ~ div {
+      display: none;
+    }
+  }
+}
+
+

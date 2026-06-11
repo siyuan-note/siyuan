@@ -1,0 +1,232 @@
+{
+	"ID": "20210808180303-h361q1i",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f371",
+		"id": "20210808180303-h361q1i",
+		"title": "Editor",
+		"type": "doc",
+		"updated": "20240508004216"
+	},
+	"Children": [
+		{
+			"ID": "20210419175558-p7doxbn",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210419175558-p7doxbn"
+			},
+			"Children": [
+				{
+					"ID": "20210419175558-f0dh89l",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-f0dh89l"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-rr763ws",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-rr763ws"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Editing and typesetting based on content blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-931w9pb",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-931w9pb"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-1vwlm9o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-1vwlm9o"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List outline, support with or without sub-level indentation"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-oorcy24",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-oorcy24"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-7s6a7wb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-7s6a7wb"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Content block zoom, that is, each content block can be zoomed into focus"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-zqid77i",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-zqid77i"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-b3vziix",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-b3vziix"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Dynamic loading, solving large document jams"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175558-i95hwiv",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175558-i95hwiv"
+					},
+					"Children": [
+						{
+							"ID": "20210419175558-ocap7p2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175558-ocap7p2",
+								"updated": "20210512153240"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Horizontal layout by dragging block icon"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240508004216-2xo697q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004216-2xo697q",
+				"updated": "20240508004216"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924093441-ft2rhps",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Formatting elements"
+				}
+			]
+		},
+		{
+			"ID": "20240508004216-zyuk3yd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004216-zyuk3yd",
+				"updated": "20240508004216"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220628204454-hhxohv5",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Optimize typography"
+				}
+			]
+		},
+		{
+			"ID": "20240508004216-4uhl2nh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004216-4uhl2nh",
+				"updated": "20240508004216"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20221016204105-qx2aq0g",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Outline by Heading and List"
+				}
+			]
+		}
+	]
+}

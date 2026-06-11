@@ -1,0 +1,337 @@
+{
+	"ID": "20240530101000-vhq5afs",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-os6gf4o",
+		"icon": "1f308",
+		"id": "20240530101000-vhq5afs",
+		"title": "クラウドサービス",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-72huu0l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5muls3d",
+				"id": "20240530101000-72huu0l",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドサービスには以下の機能が含まれます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-w4mwfel",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-z8beks1",
+				"id": "20240530101000-w4mwfel",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-x0hy4f7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-xacijid",
+						"id": "20240530101000-x0hy4f7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-q0n7y5v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4g9p1de",
+								"id": "20240530101000-q0n7y5v",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-bb0qktp",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "ストレージ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-660wlyf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rqbnjpw",
+						"id": "20240530101000-660wlyf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-trgmr9g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-sfnpm2p",
+								"id": "20240530101000-trgmr9g",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-wo49zvq",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "データ同期"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-25nuej0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-4cr7v55",
+						"id": "20240530101000-25nuej0",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-j6228uo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-1bexwnw",
+								"id": "20240530101000-j6228uo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-gc0tuyd",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "データバックアップ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-3fzuoag",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nk3x1bw",
+						"id": "20240530101000-3fzuoag",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-xl3vp2x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-mt8s3n6",
+								"id": "20240530101000-xl3vp2x",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-78d5w10",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "アセットホスティング"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-0jbeyih",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-hmphhha",
+						"id": "20240530101000-0jbeyih",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-m369va0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-e9fkd5c",
+								"id": "20240530101000-m369va0",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-vql5s27",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "受信トレイ"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9sdvvlj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ieymh8u",
+				"id": "20240530101000-9sdvvlj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: クラウドサービスに関する"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-75auqcn",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "制限事項"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ss1rx8l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-nbmumxv",
+				"id": "20240530101000-ss1rx8l",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドサービスを利用するには有料サブスクリプションが必要です:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wwwcpgq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-xzlpsql",
+				"id": "20240530101000-wwwcpgq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-hc14t7l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2c3k1c3",
+						"id": "20240530101000-hc14t7l",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-hx4cw2p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-uq7z9ut",
+								"id": "20240530101000-hx4cw2p",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/subscribe/siyuan",
+									"TextMarkTextContent": "料金プランと詳細情報 (英語)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-izo8nyh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-lwf0zis",
+						"id": "20240530101000-izo8nyh",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-1d5fij0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-d8wx06o",
+								"id": "20240530101000-1d5fij0",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/subscribe/siyuan",
+									"TextMarkTextContent": "料金プランと詳細情報 (中国語)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0dyo45g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-r6uopwn",
+				"id": "20240530101000-0dyo45g"
+			}
+		}
+	]
+}

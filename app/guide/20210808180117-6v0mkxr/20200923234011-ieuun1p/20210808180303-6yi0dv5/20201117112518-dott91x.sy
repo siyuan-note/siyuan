@@ -1,0 +1,652 @@
+{
+	"ID": "20201117112518-dott91x",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201117112518-dott91x",
+		"title": "Embed Content Block",
+		"type": "doc",
+		"updated": "20240731204825"
+	},
+	"Children": [
+		{
+			"ID": "20201224120448-6jnrawi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201224120448-6jnrawi",
+				"updated": "20210512154707"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210111230452-5lclhuo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210111230452-5lclhuo",
+				"updated": "20220623201506"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The embed content block is mainly used to summarize the required content blocks, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to wrap SQL scripts on a single line: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{ SELECT * FROM blocks WHERE content LIKE'%Keyword%' }}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", database table please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201117103851-gx21lz6",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "here"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Content Block/Embed"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-8ew9ane",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201224120448-8ew9ane"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Example"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-2uaiqr9",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201224120448-2uaiqr9",
+				"updated": "20210503152127"
+			},
+			"Children": [
+				{
+					"ID": "20201224120448-wkokoaj",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201224120448-wkokoaj"
+					},
+					"Children": [
+						{
+							"ID": "20201224120448-6h7nng9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20201224120448-6h7nng9"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Query list items that contain "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "content block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20201224120448-vogvrc7",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"CodeBlockFenceChar": 96,
+							"CodeBlockFenceLen": 3,
+							"CodeBlockOpenFence": "YGBg",
+							"CodeBlockInfo": "c3Fs",
+							"CodeBlockCloseFence": "YGBg",
+							"Properties": {
+								"id": "20201224120448-vogvrc7"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "c3Fs"
+								},
+								{
+									"ID": "20220307092214-3k8jexy",
+									"Type": "NodeCodeBlockCode",
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%content block%' AND type = 'i' }}\n",
+									"Properties": {
+										"id": "20220307092214-3k8jexy"
+									}
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201224120448-4ke7k9b",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201224120448-4ke7k9b"
+					},
+					"Children": [
+						{
+							"ID": "20201224120448-apivasm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20201224120448-apivasm"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The query content contains both "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "content block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "reference"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " paragraph blocks:"
+								}
+							]
+						},
+						{
+							"ID": "20201224120448-bzzavtn",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"CodeBlockFenceChar": 96,
+							"CodeBlockFenceLen": 3,
+							"CodeBlockOpenFence": "YGBg",
+							"CodeBlockInfo": "c3Fs",
+							"CodeBlockCloseFence": "YGBg",
+							"Properties": {
+								"id": "20201224120448-bzzavtn"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "c3Fs"
+								},
+								{
+									"ID": "20220307092214-0soxi53",
+									"Type": "NodeCodeBlockCode",
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%content block%' AND content LIKE '%reference%' AND type = 'p') }}\n",
+									"Properties": {
+										"id": "20220307092214-0soxi53"
+									}
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201224120448-n2nsjie",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201224120448-n2nsjie"
+					},
+					"Children": [
+						{
+							"ID": "20201224120448-whs65cs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20201224120448-whs65cs",
+								"updated": "20210503152045"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The query content contains heading blocks of both "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "content block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "embed"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", and the first 2 items are selected in descending order of update time:"
+								}
+							]
+						},
+						{
+							"ID": "20201224120448-x2jp7sk",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"CodeBlockFenceChar": 96,
+							"CodeBlockFenceLen": 3,
+							"CodeBlockOpenFence": "YGBg",
+							"CodeBlockInfo": "c3Fs",
+							"CodeBlockCloseFence": "YGBg",
+							"Properties": {
+								"id": "20201224120448-x2jp7sk"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "c3Fs"
+								},
+								{
+									"ID": "20220307092214-ier6phf",
+									"Type": "NodeCodeBlockCode",
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%content block%' AND content LIKE '%embed%' AND type ='h' ORDER BY updated DESC LIMIT 2 }}\n",
+									"Properties": {
+										"id": "20220307092214-ier6phf"
+									}
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-vagdm2b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201224120448-vagdm2b"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Case 1"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-9gbg6ot",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201224120448-9gbg6ot"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The query contains paragraph blocks of both "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "In SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "core concept"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " text, and excludes the current document (otherwise the paragraph block will also be included in the result set, because the current paragraph also contains these two texts. The following case is similar):"
+				}
+			]
+		},
+		{
+			"ID": "20210111231445-gwfrxnl",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20210111231445-gwfrxnl",
+				"style": "height: 1120px;",
+				"updated": "20240508085416"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE content LIKE '%In SiYuan%' AND content LIKE '%core concept%' AND type = 'p' AND hpath NOT LIKE '%Embed Content Block%'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-gx2xvjh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201224120448-gx2xvjh",
+				"updated": "20240731204825"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Case 2"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-e0ohbtq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201224120448-e0ohbtq",
+				"updated": "20240731204825"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Query for paragraph blocks containing the tag "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#Content Block/Embed#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#Content Block/Reference#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-ww21jau",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20201224120448-ww21jau",
+				"updated": "20211222185418"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#Content block/Embed#%' OR content LIKE '%#Content block/Reference#%') AND hpath NOT LIKE '%Embed Content Block%'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-508mr48",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201224120448-508mr48"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Case 3"
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-vralmz9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201224120448-vralmz9"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sometimes we may need to randomly roam and display content blocks to facilitate review."
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-bmpyxnj",
+			"Type": "NodeBlockQueryEmbed",
+			"Data": "{{SELECT * FROM blocks ORDER BY random() LIMIT 3}}\n",
+			"Properties": {
+				"id": "20201224120448-bmpyxnj"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks ORDER BY random() LIMIT 3"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20210630172523-9xe9jj2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210630172523-9xe9jj2",
+				"updated": "20210630172530"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Case 4"
+				}
+			]
+		},
+		{
+			"ID": "20210630172530-nyer3fx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210630172530-nyer3fx",
+				"updated": "20210630172540"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To query the unfinished task list items, you need to use the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "markdown"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " field instead of the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "content"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " field:"
+				}
+			]
+		},
+		{
+			"ID": "20210630172551-xbk6xa8",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20210630172551-xbk6xa8",
+				"updated": "20211008203637"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE markdown LIKE '%[ ]%' AND subtype = 't' AND type = 'i'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		}
+	]
+}

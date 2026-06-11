@@ -1,0 +1,560 @@
+{
+	"ID": "20230106104821-9nfphwm",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230106104821-9nfphwm",
+		"title": "Workspace",
+		"type": "doc",
+		"updated": "20250306083914"
+	},
+	"Children": [
+		{
+			"ID": "20230106105213-sccf0w7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230106105213-sccf0w7",
+				"updated": "20230106105213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230106105213-918yzws",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230106105213-918yzws",
+				"updated": "20230106105213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The workspace is used to save data, history, configuration and files needed at runtime."
+				}
+			]
+		},
+		{
+			"ID": "20230106105213-siz30b7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230106105213-siz30b7",
+				"updated": "20230106105213"
+			},
+			"Children": [
+				{
+					"ID": "20230106105213-5m8namj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-5m8namj",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-qqgifiv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-qqgifiv",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Different workspaces are isolated from each other by file system folders"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106105213-9vw40fa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-9vw40fa",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-6tebdot",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-6tebdot",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "A workspace can only be served by one kernel process"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230109113955-ja8w7gp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230109113955-ja8w7gp",
+				"updated": "20250306083914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Switch workspace"
+				}
+			]
+		},
+		{
+			"ID": "20230109113955-471odxk",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230109113955-471odxk",
+				"updated": "20250306083914"
+			},
+			"Children": [
+				{
+					"ID": "20230109113955-4p8sitz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113955-4p8sitz",
+						"updated": "20250306083853"
+					},
+					"Children": [
+						{
+							"ID": "20230109113955-25acju9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113955-25acju9",
+								"updated": "20230109114014"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "On the desktop, multiple workspaces can be opened in the drop-down menu on the left side of the top bar"
+								}
+							]
+						},
+						{
+							"ID": "20230109113955-f2iskk4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113955-f2iskk4",
+								"updated": "20250306083853"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If your multiple workspaces need to be started frequently, you can consider creating a different startup entry for each workspace and specify the startup parameter "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;Absolute-path-of-the-workspace\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​(Please use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to enclose the path). For example, multiple shortcuts can be copied on a Windows system, and each Shortcut - Property - Target is followed by a workspace path parameter, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. In addition, you can also pass "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--port=12345"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to specify the port that the kernel listens to."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230109113955-gi1ao5j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113955-gi1ao5j",
+						"updated": "20250306083914"
+					},
+					"Children": [
+						{
+							"ID": "20230109113955-hpw3tsz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113955-hpw3tsz",
+								"updated": "20250306083914"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "On the mobile, we can switch between different workspaces in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "About"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the right colum panel"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230106105213-0cv5aqm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230106105213-0cv5aqm",
+				"updated": "20230106105213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "File system structure"
+				}
+			]
+		},
+		{
+			"ID": "20230106105213-jyvy6yn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230106105213-jyvy6yn",
+				"updated": "20230106105213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The structure under the workspace on the file system:"
+				}
+			]
+		},
+		{
+			"ID": "20230106105213-oikeqw9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230106105213-oikeqw9",
+				"updated": "20230106105328"
+			},
+			"Children": [
+				{
+					"ID": "20230106105213-sz2e9h3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-sz2e9h3",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-s7j6pqa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-s7j6pqa",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "conf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save the workspace configuration"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106105213-5f7kqvw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-5f7kqvw",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-wdrdex5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-wdrdex5",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "corrupted"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save corrupted data files"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106105213-jfpgsj9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-jfpgsj9",
+						"updated": "20230106105328"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-69l6mj5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-69l6mj5",
+								"updated": "20230106105328"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save data, please refer to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210428222603-moih9fe",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "here"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " for the specific structure"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106105213-k855fmm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-k855fmm",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-3uynd2z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-3uynd2z",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "history"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save file history"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106105213-dy92yl4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-dy92yl4",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-euyn7zl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-euyn7zl",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "repo"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save data warehouse data"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106105213-mz5yqgi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-mz5yqgi",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-wojh72i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-wojh72i",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "temp"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save temporary files needed at runtime"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106105213-fq2o88m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106105213-fq2o88m",
+						"updated": "20230106105213"
+					},
+					"Children": [
+						{
+							"ID": "20230106105213-biscnbm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106105213-biscnbm",
+								"updated": "20230106105213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".lock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ This file will be created after the kernel process starts to lock the workspace"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

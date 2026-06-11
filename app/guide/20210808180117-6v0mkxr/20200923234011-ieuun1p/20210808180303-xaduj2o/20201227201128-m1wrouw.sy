@@ -1,0 +1,870 @@
+{
+	"ID": "20201227201128-m1wrouw",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201227201128-m1wrouw",
+		"title": "Docker hosting",
+		"type": "doc",
+		"updated": "20250926110627"
+	},
+	"Children": [
+		{
+			"ID": "20220518213259-b7t9g2c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220518213259-b7t9g2c",
+				"updated": "20220518213301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20220521230127-u9wc56q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220521230127-u9wc56q",
+				"updated": "20220521230134"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The easiest way to serve SiYuan on a server is to deploy it through Docker."
+				}
+			]
+		},
+		{
+			"ID": "20220521230127-pkgxgng",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220521230127-pkgxgng",
+				"updated": "20220521230148"
+			},
+			"Children": [
+				{
+					"ID": "20220521230127-6plktw5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220521230127-6plktw5",
+						"updated": "20220521230127"
+					},
+					"Children": [
+						{
+							"ID": "20220521230127-6vx8x3d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220521230127-6vx8x3d",
+								"updated": "20220521230127"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Image name "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "b3log/siyuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220521230127-0xarvlp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220521230127-0xarvlp",
+						"updated": "20220521230148"
+					},
+					"Children": [
+						{
+							"ID": "20220521230127-isuhdfu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220521230127-isuhdfu",
+								"updated": "20220521230148"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://hub.docker.com/r/b3log/siyuan",
+									"TextMarkTextContent": "Image URL"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-w3gbqzd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201227201751-w3gbqzd"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "File structure"
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-oe2am4n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201227201751-oe2am4n"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The overall program is located under "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/opt/siyuan/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", which is basically the structure under the resources folder of the Electron installation package:"
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-ep0guzc",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201227201751-ep0guzc"
+			},
+			"Children": [
+				{
+					"ID": "20201227201751-eu0nvks",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227201751-eu0nvks"
+					},
+					"Children": [
+						{
+							"ID": "20210208152449-owk20ip",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208152449-owk20ip"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "appearance: icon, theme, languages"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227201751-gd22k42",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227201751-gd22k42"
+					},
+					"Children": [
+						{
+							"ID": "20210208152449-qmejh91",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208152449-qmejh91"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "guide: user guide document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227201751-8bhzm9k",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227201751-8bhzm9k"
+					},
+					"Children": [
+						{
+							"ID": "20210208152449-5c6c485",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208152449-5c6c485"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "stage: interface and static resources"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227201751-qy982a8",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227201751-qy982a8"
+					},
+					"Children": [
+						{
+							"ID": "20210208152449-69f23q7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208152449-69f23q7"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "kernel: kernel program"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-5d6snqe",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201227201751-5d6snqe"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Entrypoint"
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-tbpaexo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201227201751-tbpaexo",
+				"updated": "20210301202831"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The entry point is set when building the Docker image: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ENTRYPOINT [\"/opt/siyuan/kernel\" ]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run b3log/siyuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " with parameters to start:"
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-gmofu4a",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20201227201751-gmofu4a",
+				"updated": "20210502171445"
+			},
+			"Children": [
+				{
+					"ID": "20201227201751-n5o2ot2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201227201751-n5o2ot2",
+						"updated": "20210502171445"
+					},
+					"Children": [
+						{
+							"ID": "20210208152449-9gz7jy5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208152449-9gz7jy5",
+								"updated": "20210502171445"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " specifies the workspace folder path, mounted to the container via "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " on the host"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210301202938-prn2v5a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210301202938-prn2v5a",
+				"updated": "20231108220518"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "More parameters can refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100717-yzwzn64",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "here"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". The following is an example of a startup command: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-pt653to",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201227201751-pt653to"
+			},
+			"Children": [
+				{
+					"ID": "20201227201751-8l5oixx",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227201751-8l5oixx"
+					},
+					"Children": [
+						{
+							"ID": "20210208152449-7fj2x6h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208152449-7fj2x6h",
+								"updated": "20210502171530"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": the workspace folder path on the host"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227201751-pw8tdgg",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227201751-pw8tdgg"
+					},
+					"Children": [
+						{
+							"ID": "20210208152449-y2ogxyt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208152449-y2ogxyt",
+								"updated": "20210502171606"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_container"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": The path of the workspace folder in the container, which is the same as specified in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201227201751-yyfayag",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201227201751-yyfayag",
+				"updated": "20231108220523"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_host"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_container"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ are configured as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/siyuan/workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, the corresponding startup commands is: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20211112103107-kqrmi1a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211112103107-kqrmi1a",
+				"updated": "20211112103113"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "User permissions"
+				}
+			]
+		},
+		{
+			"ID": "20211112103104-jfoive7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211112103104-jfoive7",
+				"updated": "20220521231639"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the image, the normal user "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "chown -R 1000:1000 /siyuan/workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". The parameter "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-u 1000:1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is required when starting the container."
+				}
+			]
+		},
+		{
+			"ID": "20210930092059-ifrr6wz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210930092059-ifrr6wz",
+				"updated": "20210930092059"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hidden port"
+				}
+			]
+		},
+		{
+			"ID": "20210930092059-r6bprwz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210930092059-r6bprwz",
+				"updated": "20210930092059"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use NGINX reverse proxy to hide port 6806, please note:"
+				}
+			]
+		},
+		{
+			"ID": "20210930092059-34ljyge",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210930092059-34ljyge",
+				"updated": "20211112103356"
+			},
+			"Children": [
+				{
+					"ID": "20210930092059-om2j2ah",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210930092059-om2j2ah",
+						"updated": "20211112103356"
+					},
+					"Children": [
+						{
+							"ID": "20210930092059-zngp1h9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210930092059-zngp1h9",
+								"updated": "20211112103356"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Configure WebSocket reverse proxy "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-bzg0oxo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230406105311-bzg0oxo",
+				"updated": "20230406105313"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-ryrh0n4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230406105311-ryrh0n4",
+				"updated": "20230406105311"
+			},
+			"Children": [
+				{
+					"ID": "20230406105311-a36930z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-a36930z",
+						"updated": "20230406105311"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-z04t407",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-z04t407",
+								"updated": "20230406105311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Be sure to confirm the correctness of the mounted volume, otherwise the data will be lost after the container is deleted"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406105311-ejgppdg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-ejgppdg",
+						"updated": "20230406105311"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-mem3ai2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-mem3ai2",
+								"updated": "20230406105311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not use URL rewriting for redirection, otherwise there may be problems with authentication, it is recommended to configure a reverse proxy"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-sq5f3qj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230406105311-sq5f3qj",
+				"updated": "20250926110627"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Limitations"
+				}
+			]
+		},
+		{
+			"ID": "20230406105311-jvtmuhi",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230406105311-jvtmuhi",
+				"updated": "20250926110627"
+			},
+			"Children": [
+				{
+					"ID": "20230406105311-qz00ob2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-qz00ob2",
+						"updated": "20230406105311"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-gvr6z7v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-gvr6z7v",
+								"updated": "20230406105311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Does not support desktop and mobile application connections, only supports use on browsers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406105311-rz3umi0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105311-rz3umi0",
+						"updated": "20250926110627"
+					},
+					"Children": [
+						{
+							"ID": "20230406105311-bhdrf8a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105311-bhdrf8a",
+								"updated": "20250926110627"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Does not support exporting to formats such as PDF and Word"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,1433 @@
+{
+	"ID": "20240530101000-vejnh1k",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-0fz0r8l",
+		"id": "20240530101000-vejnh1k",
+		"title": "クエリ構文",
+		"type": "doc",
+		"updated": "20250115150339"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-omyfbt2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-tyyk26i",
+				"id": "20240530101000-omyfbt2",
+				"updated": "20250115150339"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cdbpnhl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-cdbpnhl",
+				"updated": "20250115150339"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "グローバル検索 ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​) はクエリ構文による高度な検索をサポートしています。たとえば、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ というキーワードを含め "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ というキーワードを含めたくない場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo NOT bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ のように論理演算子を使った検索が可能です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-eilt3un",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-rgcipxr",
+				"id": "20240530101000-eilt3un",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クエリ構文を使用する前にその構成について簡単に理解しておきましょう:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-eqsswxv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-s92xja5",
+				"id": "20240530101000-eqsswxv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-zdwmuke",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-k26sjfj",
+						"id": "20240530101000-zdwmuke",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-9gges6r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-h11qq0m",
+								"id": "20240530101000-9gges6r",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "文字列"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 文字、数字、記号などを組み合わせたもの"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-u9hc69u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ajlrokt",
+						"id": "20240530101000-u9hc69u",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-bcdosa8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hth53i6",
+								"id": "20240530101000-bcdosa8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "フレーズ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 複数の文字列を組み合わせたもの"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ghmamy7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-urh84o7",
+						"id": "20240530101000-ghmamy7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-vr3xmew",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-wqbw065",
+								"id": "20240530101000-vr3xmew",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "クエリ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 複数のフレーズを "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "AND"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "OR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "NOT"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ などの論理演算子で組み合わせた検索条件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cby4sig",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-4hw0pz5",
+				"id": "20240530101000-cby4sig",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以下では、それぞれの詳細について説明します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-kt180bu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-0o1hul2",
+				"id": "20240530101000-kt180bu",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文字列"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7mce5bu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ssvyj3g",
+				"id": "20240530101000-7mce5bu",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文字列は以下の 2 つの要件を満たす必要があります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0e6zt6f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-yrc1tk4",
+				"id": "20240530101000-0e6zt6f",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-d5ksxdw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-k0mq0my",
+						"id": "20240530101000-d5ksxdw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-fu8ks02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-1y6xxln",
+								"id": "20240530101000-fu8ks02",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用符 ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​) または ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​) が含まれる文字列はエスケープする: エスケープするには別の種類の引用符で囲むか SQL スタイルのエスケープ (もうひとつの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ または "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を追加する) を使用します。たとえば、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "foo \u0026quot;bar\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ という文字列にマッチさせるには "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "'foo \u0026quot;bar\u0026quot;'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ とするか、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026quot;foo\u0026quot;\u0026quot;bar\u0026quot;\u0026quot;\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ とします。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-l6rtfrj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-905bare",
+						"id": "20240530101000-l6rtfrj",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-sm69xdq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4fqdbfy",
+								"id": "20240530101000-sm69xdq",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "AND"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "OR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "NOT"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を除いた以下の文字を使用する:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-szoz7v3",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-8lmvxrl",
+								"id": "20240530101000-szoz7v3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-f6pelnq",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-f4mzb2g",
+										"id": "20240530101000-f6pelnq",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-1a6hzp2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-ndishjh",
+												"id": "20240530101000-1a6hzp2",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "すべての非 ASCII 文字"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-kc1nz79",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-d0mf087",
+										"id": "20240530101000-kc1nz79",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-gc9hkps",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-tzrqv68",
+												"id": "20240530101000-gc9hkps",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "アルファベット ("
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "A-Za-z"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-7fja7b8",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-yamhg1u",
+										"id": "20240530101000-7fja7b8",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-2bs0xly",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-le5ky9d",
+												"id": "20240530101000-2bs0xly",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "数字 ("
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0-9"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-3hmxaj5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-8ahmols",
+										"id": "20240530101000-3hmxaj5",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-6czhei5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-zm21c1w",
+												"id": "20240530101000-6czhei5",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "アンダースコア ("
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "_"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-v3uxe61",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-bo6xeej",
+										"id": "20240530101000-v3uxe61",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-fezlut1",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-w3xicl0",
+												"id": "20240530101000-fezlut1",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "置換文字 (U+001A)"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wapppt7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-2c6o3kp",
+				"id": "20240530101000-wapppt7",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文字列は常に引用符で囲むことが安全な検索方法です。上記の文字以外 (例: スペース、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "*"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​) が含まれている文字列は必ず全体を引用符で囲んでエスケープする必要があります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vjyfeqv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-tb96zqp",
+				"id": "20240530101000-vjyfeqv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フレーズ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cpv3qpa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-n07cm10",
+				"id": "20240530101000-cpv3qpa",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フレーズは文字列で構成され、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で連結できます。フレーズはトークナイザーによってユーザーが入力したテキストを処理して生成された複数のトークンの組み合わせです。SiYuanでは、中国語の検索を容易にするため (単漢字検索をサポート)、文字単位でトークン化する方式を採用しています。つまり、各漢字や英字はひとつのトークンとして扱われます。これは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ での連結に影響を与えるため、よくわからない場合は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で複数のフレーズを組み合わせないことをお勧めします。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-afrxy9q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-twrdids",
+				"id": "20240530101000-afrxy9q",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クエリ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2ez62mp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fgcf89f",
+				"id": "20240530101000-2ez62mp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クエリは複数のフレーズで構成され、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AND"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "OR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "NOT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 演算子を使って組み合わせることができます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-8hc6p2p",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"ID": "20240530101000-qfft1kq",
+				"colgroup": "|",
+				"id": "20240530101000-8hc6p2p",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "演算子"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "説明"
+										},
+										{
+											"Type": "NodeBr",
+											"Data": "br"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;query1\u0026gt; AND \u0026lt;query2\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "query1 と query2 の両方にマッチする場合"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;query1\u0026gt; OR \u0026lt;query2\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "query1 または query2 のいずれかにマッチする場合"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;query1\u0026gt; NOT \u0026lt;query2\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "query1 にマッチし query2 にマッチしない場合"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5k9v3md",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ek2292x",
+				"id": "20240530101000-5k9v3md",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カッコ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "()"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用してクエリの優先順位を指定します:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4fbhmqz",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"ID": "20240530101000-tc5p4t0",
+				"id": "20240530101000-4fbhmqz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "-- \"one\" または \"two\" のいずれかひとつを含み、\"three\" を含まないドキュメントにマッチします\n'one OR two NOT three'\n\n-- \"one\" を含むすべてのドキュメント、または \"two\" を含み \"three\" を含まないドキュメントにマッチします\n'one OR (two NOT three)'\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bdet9ju",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fj0ul93",
+				"id": "20240530101000-bdet9ju",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スペースで区切られた複数のフレーズはデフォルトで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AND"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で結合されます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-zkldc3i",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"ID": "20240530101000-bfjv9cg",
+				"id": "20240530101000-zkldc3i",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "'one two three'         -- 'one AND two AND three'\n'three \"one two\"'       -- 'three AND \"one two\"'\n'NEAR(one two) three'   -- 'NEAR(one two) AND three'\n'one OR two three'      -- 'one OR two AND three'\n\n'(one OR two) three'    -- 構文エラー！ (カッコ内の OR 演算子はサポートされていません)\n'func(one two)'         -- 構文エラー！ (func 関数はサポートされていません)\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xs3ijea",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-lk1pndp",
+				"id": "20240530101000-xs3ijea",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "技術的な実装"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3wv27et",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-1zjkjd8",
+				"id": "20240530101000-3wv27et",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "グローバル検索は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.sqlite.org/fts5.html",
+					"TextMarkTextContent": "SQLite FTS5"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " によって実装されています。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-s56tsh5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fw96t88",
+				"id": "20240530101000-s56tsh5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "システムが生成するクエリ文は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "MATCH '{content name alias memo}:\u0026quot; + query"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ の形式です。ここでの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "query"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ はユーザーが入力した検索語句で、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{content name alias memo}:"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックの属性"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で指定された検索対象の"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.sqlite.org/fts5.html#fts5_column_filters",
+					"TextMarkTextContent": "カラムフィルタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を表します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4dce4ah",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-h7zhl0n",
+				"id": "20240530101000-4dce4ah",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以下はクエリ構文を活用した埋め込みコンテンツブロックの例です:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-iwnf92m",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20240530101000-iwnf92m",
+				"style": "height: 90px;",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks_fts WHERE blocks_fts MATCH 'content:クエリ構文' AND root_id = '20240530101000-vejnh1k' LIMIT 1"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qp5o4ek",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ljeeoua",
+				"id": "20240530101000-qp5o4ek",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "さらに API を通じて全文検索も可能です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1g2pqf0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-h2bp41f",
+				"id": "20240530101000-1g2pqf0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "大文字と小文字の区別"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-487vhsj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-0g77o70",
+				"id": "20240530101000-487vhsj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検索で大文字と小文字を区別するかどうかは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "大文字と小文字を区別する"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で切り替えられます (デフォルトでは無効)"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-opd2vs9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-0oqxdzy",
+				"id": "20240530101000-opd2vs9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "トークナイザーは大文字と小文字を区別するため、以下の 2 つの仮想テーブルを作成してそれぞれにインデックスを作成しています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-x7la8mo",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-kgf28ta",
+				"id": "20240530101000-x7la8mo",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-75hwibv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-6xvr3xo",
+						"id": "20240530101000-75hwibv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-jcybx7f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-g8irjyx",
+								"id": "20240530101000-jcybx7f",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "blocks_fts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 文字をそのままトークン化します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-pbiaqrk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-hq2l9j2",
+						"id": "20240530101000-pbiaqrk",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-5ak7mpo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-vo2l1nu",
+								"id": "20240530101000-5ak7mpo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "blocks_fts_case_insensitive"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 英字を小文字に変換してトークン化します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1afmxcx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-19tqpom",
+				"id": "20240530101000-1afmxcx",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この方法ではストレージ容量の増加やインデックス作成速度の低下といった課題がありますが、現時点では他に良い方法がないため採用されています。また、発音区別符号付き文字の大文字と小文字を区別した検索は現在サポートされていません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-fb45smk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ocapi8p",
+				"id": "20240530101000-fb45smk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "より良い実装方法がありましたら、ぜひお知らせください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vuagj7j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-xxxpim4",
+				"id": "20240530101000-vuagj7j"
+			}
+		}
+	]
+}

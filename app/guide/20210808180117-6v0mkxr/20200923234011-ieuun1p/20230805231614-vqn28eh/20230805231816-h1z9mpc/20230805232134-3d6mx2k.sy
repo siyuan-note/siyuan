@@ -1,0 +1,701 @@
+{
+	"ID": "20230805232134-3d6mx2k",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230805232134-3d6mx2k",
+		"title": "Search asset content",
+		"type": "doc",
+		"updated": "20250903163017"
+	},
+	"Children": [
+		{
+			"ID": "20230818102341-c9x1xox",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230818102341-c9x1xox",
+				"updated": "20230821123134"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the upper right corner of the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ interface, you can switch the search function to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search asset file content"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Currently, asset content search in the following formats is supported:"
+				}
+			]
+		},
+		{
+			"ID": "20230818102341-ny18orr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230818102341-ny18orr",
+				"updated": "20250903163017"
+			},
+			"Children": [
+				{
+					"ID": "20230818102341-eg8labw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102341-eg8labw",
+						"updated": "20250903163017"
+					},
+					"Children": [
+						{
+							"ID": "20230818102341-izc16tp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102341-izc16tp",
+								"updated": "20250903163017"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text files ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".md"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".markdown"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".json"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sql"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".html"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".xml"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".java"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".h"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".c"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".cpp"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".go"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".rs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".swift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".kt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".py"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".php"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".ts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sh"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".bat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".ini"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".yaml"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".rst"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".adoc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".textile"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".opml"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".org"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".wiki"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".epub"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".cs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102427-os9c4nm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102427-os9c4nm",
+						"updated": "20250903162955"
+					},
+					"Children": [
+						{
+							"ID": "20230818102427-dyojs23",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102427-dyojs23",
+								"updated": "20250903162955"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".docx"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102430-sw9p4uf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102430-sw9p4uf",
+						"updated": "20250903162956"
+					},
+					"Children": [
+						{
+							"ID": "20230818102430-boci4wf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102430-boci4wf",
+								"updated": "20250903162956"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".pptx"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102432-6uclx4n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102432-6uclx4n",
+						"updated": "20250903162957"
+					},
+					"Children": [
+						{
+							"ID": "20230818102432-3n95b7k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102432-3n95b7k",
+								"updated": "20250903162957"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".xlsx"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818102434-9xgwy7r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818102434-9xgwy7r",
+						"updated": "20250903162959"
+					},
+					"Children": [
+						{
+							"ID": "20230818102434-1efdkw9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818102434-1efdkw9",
+								"updated": "20250903162959"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".pdf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230903112419-oart7ii",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230903112419-oart7ii",
+				"updated": "20230903112419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​​:"
+				}
+			]
+		},
+		{
+			"ID": "20230903112419-45ps71g",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230903112419-45ps71g",
+				"updated": "20231026085302"
+			},
+			"Children": [
+				{
+					"ID": "20231025095236-xu5tp9f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095236-xu5tp9f"
+					},
+					"Children": [
+						{
+							"ID": "20231025095236-18gmg9h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095236-18gmg9h",
+								"updated": "20231025095237"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text files larger than 4MB are not supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095244-lpf6spo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095244-lpf6spo",
+						"updated": "20231025095559"
+					},
+					"Children": [
+						{
+							"ID": "20231025095244-m8ut4h2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095244-m8ut4h2",
+								"updated": "20231026085241"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "PDFs larger than 1024 pages are not supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231026085243-o2jstdb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231026085243-o2jstdb",
+						"updated": "20231026085302"
+					},
+					"Children": [
+						{
+							"ID": "20231026085243-3mtefdv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231026085243-3mtefdv",
+								"updated": "20231026085302"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "By default, PDFs larger than 128MB are not supported. You can set the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. The value unit is bytes, for example: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE=256000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to adjust the upper limit to 256MB"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095259-wrlui2y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095259-wrlui2y",
+						"updated": "20231025095300"
+					},
+					"Children": [
+						{
+							"ID": "20231025095259-cm641sa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095259-cm641sa",
+								"updated": "20231025095300"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Android/iOS does not support PDF asset content search"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

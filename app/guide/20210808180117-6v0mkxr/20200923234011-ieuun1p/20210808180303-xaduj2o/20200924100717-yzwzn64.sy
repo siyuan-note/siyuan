@@ -1,0 +1,610 @@
+{
+	"ID": "20200924100717-yzwzn64",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924100717-yzwzn64",
+		"title": "Kernel parameter",
+		"type": "doc",
+		"updated": "20260302173748"
+	},
+	"Children": [
+		{
+			"ID": "20201225172241-237rz9o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201225172241-237rz9o",
+				"updated": "20210502162639"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				}
+			]
+		},
+		{
+			"ID": "20201225172241-p1fcj43",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201225172241-p1fcj43",
+				"updated": "20210502164218"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to specify the workspace folder path, the default value when not specified is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/SiYuan/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20201225172241-m3ffs88",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201225172241-m3ffs88"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--wd"
+				}
+			]
+		},
+		{
+			"ID": "20201225172241-oyntdl9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201225172241-oyntdl9"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Kernel working directory path, automatically obtained according to the kernel executable file entry if it is not specified."
+				}
+			]
+		},
+		{
+			"ID": "20201225172241-asmvg1c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201225172241-asmvg1c"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly"
+				}
+			]
+		},
+		{
+			"ID": "20201225172241-2j3s1dc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201225172241-2j3s1dc"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After specifying with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", the kernel will run in read-only mode and all write operations will be prohibited."
+				}
+			]
+		},
+		{
+			"ID": "20210117224305-alzt1xr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210117224305-alzt1xr",
+				"updated": "20210728171255"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				}
+			]
+		},
+		{
+			"ID": "20210117224305-vyqi75g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210117224305-vyqi75g"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to specify the browser access "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210104091447-3vmymbk",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "lock screen password"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", which will overwrite the authCode in conf.json after setting."
+				}
+			]
+		},
+		{
+			"ID": "20201225172550-cmwure7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201225172550-cmwure7"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl"
+				}
+			]
+		},
+		{
+			"ID": "20201225172550-zxiz2vb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201225172550-zxiz2vb"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After using "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", https and wss protocols will be used for serving."
+				}
+			]
+		},
+		{
+			"ID": "20220517144139-qeoe1f3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220517144139-qeoe1f3",
+				"updated": "20260302173748"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang"
+				}
+			]
+		},
+		{
+			"ID": "20220517144139-7q5hnts",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220517144139-7q5hnts",
+				"updated": "20260302173748"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Using "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang=zh_CN"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ will use Simplified Chinese to initialize the appearance language, the default is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "en_US"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Currently available values: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ar_SA"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "de_DE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "en_US"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "es_ES"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "fr_FR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "he_IL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "it_IT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ja_JP"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ko_KR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pl_PL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pt_BR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ru_RU"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "sk_SK"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tr_TR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "uk_UA"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CHT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CN"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20220601091217-g6ohtlq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220601091217-g6ohtlq",
+				"updated": "20220601091217"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode"
+				}
+			]
+		},
+		{
+			"ID": "20220601091217-monzwye",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220601091217-monzwye",
+				"updated": "20220601091217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode=dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to run in development mode, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode=prod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to run in production mode, default "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "prod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220601091217-nnqyj25",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220601091217-nnqyj25",
+				"updated": "20220601091217"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The main difference between development mode and production mode is that development mode uses "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "working directory/appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " as the appearance folder, while production mode uses "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/conf/appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20221025095658-mbq3mbp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20221025095658-mbq3mbp",
+				"updated": "20221025095658"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20221025095658-gbk6adn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025095658-gbk6adn",
+				"updated": "20221025095658"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to specify the listening port, when not specified:"
+				}
+			]
+		},
+		{
+			"ID": "20221025095658-gek9f6g",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221025095658-gek9f6g",
+				"updated": "20221025095725"
+			},
+			"Children": [
+				{
+					"ID": "20221025095658-a9jiv3h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095658-a9jiv3h",
+						"updated": "20221025095658"
+					},
+					"Children": [
+						{
+							"ID": "20221025095658-dl9lzdj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095658-dl9lzdj",
+								"updated": "20221025095658"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use random port on desktop"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221025095658-nn81h2p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095658-nn81h2p",
+						"updated": "20221025095725"
+					},
+					"Children": [
+						{
+							"ID": "20221025095658-nwhyy7m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095658-nwhyy7m",
+								"updated": "20221025095725"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Docker/mobile uses "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

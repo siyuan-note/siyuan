@@ -1,0 +1,137 @@
+import {transaction, updateTransaction} from "./transaction";
+import {focusByWbr} from "../util/selection";
+import * as dayjs from "dayjs";
+import {decodeHTML, escapeAttr} from "../../util/escape";
+import {Constants} from "../../constants";
+
+export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
+    const html = decodeHTML(editElement.innerHTML);
+    const dataTask = html.substring(0, 3).match(/^[\[【]([^\x80-\uffff\[\]【】])[\]】]$/);
+    if (type !== "NodeCodeBlock" &&
+        // 任务列表首块不需要再更新为任务列表
+        !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&
+        (
+            dataTask ||
+            ["[]", "【】"].includes(html.substring(0, 2))
+        )
+    ) {
+        const contextStar2tIndex = html.indexOf("】") + 1;
+        let contextStartIndex = html.indexOf("]") + 1;
+        if (contextStartIndex === 0) {
+            contextStartIndex = contextStar2tIndex;
+        } else if (contextStartIndex > 0 && contextStar2tIndex > 0) {
+            contextStartIndex = Math.min(contextStartIndex, contextStar2tIndex);
+        }
+        editElement.removeAttribute("placeholder");
+        const isDone = dataTask && dataTask[1] !== " ";
+        if (blockElement.parentElement.classList.contains("li") &&
+            blockElement.parentElement.childElementCount === 3  // https://ld246.com/article/1659315815506
+        ) {
+            // 仅有一项的列表才可转换
+            if (!blockElement.parentElement.parentElement.classList.contains("protyle-wysiwyg") && // https://ld246.com/article/1659315815506
+                blockElement.parentElement.parentElement.childElementCount === 2) {
+                const liElement = blockElement.parentElement.parentElement;
+                const oldHTML = liElement.outerHTML;
+                liElement.setAttribute("data-subtype", "t");
+                liElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                blockElement.parentElement.setAttribute("data-task", dataTask ? dataTask[1] : " ");
+                blockElement.parentElement.setAttribute("data-subtype", "t");
+                if (isDone) {
+                    blockElement.parentElement.classList.add("protyle-task--done");
+                }
+                blockElement.previousElementSibling.outerHTML = `<div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>`;
+                editElement.innerHTML = html.substring(contextStartIndex);
+                updateTransaction(protyle, liElement, oldHTML);
+                focusByWbr(protyle.wysiwyg.element, range);
+                return true;
+            }
+            return false;
+        } else {
+            const id = blockElement.getAttribute("data-node-id");
+            const newId = Lute.NewNodeID();
+            const emptyId = Lute.NewNodeID();
+            const liItemId = Lute.NewNodeID();
+            const oldHTML = blockElement.outerHTML;
+            editElement.innerHTML = html.substring(contextStartIndex);
+            blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            transaction(protyle, [{
+                action: "update",
+                id,
+                data: blockElement.outerHTML,
+            }, {
+                action: "insert",
+                id: newId,
+                data: `<div data-subtype="t" data-node-id="${newId}" updated="${newId.split("-")[0]}" data-type="NodeList" class="list"><div data-task="${dataTask ? escapeAttr(dataTask[1]) : " "}" data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div><div data-node-id="${emptyId}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`,
+                previousID: id,
+            }, {
+                action: "move",
+                id,
+                previousID: emptyId,
+            }, {
+                action: "delete",
+                id: emptyId
+            }], [{
+                action: "move",
+                id,
+                previousID: newId,
+            }, {
+                action: "delete",
+                id: newId
+            }, {
+                action: "update",
+                id,
+                data: oldHTML,
+            }]);
+            blockElement.outerHTML = `<div data-subtype="t" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-task="${dataTask ? escapeAttr(dataTask[1]) : " "}" data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
+            focusByWbr(protyle.wysiwyg.element, range);
+            return true;
+        }
+    }
+    return false;
+};
+
+export const headingTurnIntoList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
+    if (type === "NodeHeading" && ["* ", "- "].includes(editElement.innerHTML.substring(0, 2)) &&
+        blockElement.parentElement.getAttribute("data-type") !== "NodeListItem") {
+        const id = blockElement.getAttribute("data-node-id");
+        const newId = Lute.NewNodeID();
+        const emptyId = Lute.NewNodeID();
+        const liItemId = Lute.NewNodeID();
+        const oldHTML = blockElement.outerHTML;
+        const marker = editElement.innerHTML.substring(0, 1);
+        editElement.innerHTML = editElement.innerHTML.substring(2);
+        blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        transaction(protyle, [{
+            action: "update",
+            id,
+            data: blockElement.outerHTML,
+        }, {
+            action: "insert",
+            id: newId,
+            data: `<div data-subtype="u" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="${marker}" data-subtype="u" data-node-id="${liItemId}" data-type="NodeListItem" class="li" updated="${liItemId.split("-")[0]}"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div><div data-node-id="${emptyId}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`,
+            previousID: id,
+        }, {
+            action: "move",
+            id,
+            previousID: emptyId,
+        }, {
+            action: "delete",
+            id: emptyId
+        }], [{
+            action: "update",
+            id,
+            data: oldHTML,
+        }, {
+            action: "move",
+            id,
+            previousID: newId,
+        }, {
+            action: "delete",
+            id: newId
+        }]);
+        blockElement.outerHTML = `<div data-subtype="u" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="${marker}" data-subtype="u" data-node-id="${liItemId}" data-type="NodeListItem" class="li" updated="${liItemId.split("-")[0]}"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
+        focusByWbr(protyle.wysiwyg.element, range);
+        return true;
+    }
+    return false;
+};

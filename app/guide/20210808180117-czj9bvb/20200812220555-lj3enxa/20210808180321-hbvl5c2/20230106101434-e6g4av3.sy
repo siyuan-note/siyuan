@@ -1,0 +1,550 @@
+{
+	"ID": "20230106101434-e6g4av3",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230106101434-e6g4av3",
+		"title": "工作空间",
+		"type": "doc",
+		"updated": "20250306083454"
+	},
+	"Children": [
+		{
+			"ID": "20230106101434-otjrwff",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230106101434-otjrwff",
+				"updated": "20230106102148"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230106102148-fhchfw0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230106102148-fhchfw0",
+				"updated": "20230106103611"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "工作空间用于保存数据、历史、配置和运行时所需要的文件。"
+				}
+			]
+		},
+		{
+			"ID": "20230106102403-hass9ht",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230106102403-hass9ht",
+				"updated": "20230106102404"
+			},
+			"Children": [
+				{
+					"ID": "20230106102404-3sbp4dm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106102404-3sbp4dm",
+						"updated": "20230106102404"
+					},
+					"Children": [
+						{
+							"ID": "20230106102404-herwk9b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106102404-herwk9b",
+								"updated": "20230106102404"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不同工作空间通过文件系统文件夹相互隔离"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106102409-dkh9txo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106102409-dkh9txo"
+					},
+					"Children": [
+						{
+							"ID": "20230106102409-rwz43qi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106102409-rwz43qi",
+								"updated": "20230106102430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "一个工作空间只能被一个内核进程伺服"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230109113547-eg7zbrh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230109113547-eg7zbrh",
+				"updated": "20250306083454"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "切换工作空间"
+				}
+			]
+		},
+		{
+			"ID": "20230106104300-j6nj9t2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230106104300-j6nj9t2",
+				"updated": "20250306083454"
+			},
+			"Children": [
+				{
+					"ID": "20230109113554-izjti9n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113554-izjti9n",
+						"updated": "20250306083454"
+					},
+					"Children": [
+						{
+							"ID": "20230109113554-4ie5f15",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113554-4ie5f15",
+								"updated": "20230109113624"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端可以在顶栏左侧下拉菜单中打开多个工作空间"
+								}
+							]
+						},
+						{
+							"ID": "20230109113909-5dp3vml",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113909-5dp3vml",
+								"updated": "20250306083454"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果你的多个工作空间需要经常启动，可以考虑为每个工作空间创建不同的启动入口并指定启动参数 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;工作空间绝对路径\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（请使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将路径包裹起来）。比如 Windows 系统上可以复制多个快捷方式，并在每个快捷方式 - 属性 - 目标后跟随工作空间路径参数，例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​。除此以外，还可以通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--port=12345"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 来指定内核监听的端口。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230109113624-du5o3e3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230109113624-du5o3e3",
+						"updated": "20230109113641"
+					},
+					"Children": [
+						{
+							"ID": "20230109113624-zjqzh5l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230109113624-zjqzh5l",
+								"updated": "20230109113641"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移动端可以在右侧栏 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "关于"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ 中切换不同的工作空间"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230106104118-wtvw42w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230106104118-wtvw42w",
+				"updated": "20230106104127"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件系统结构"
+				}
+			]
+		},
+		{
+			"ID": "20230106103624-ueba648",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230106103624-ueba648",
+				"updated": "20230106103649"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件系统上工作空间下的结构："
+				}
+			]
+		},
+		{
+			"ID": "20230106103650-61q8v8i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230106103650-61q8v8i",
+				"updated": "20230106104112"
+			},
+			"Children": [
+				{
+					"ID": "20230106103705-pkx4x41",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106103705-pkx4x41",
+						"updated": "20230106103705"
+					},
+					"Children": [
+						{
+							"ID": "20230106103705-00g0plf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106103705-00g0plf",
+								"updated": "20230106103718"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "conf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存工作空间配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106103718-oib4hy1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106103718-oib4hy1"
+					},
+					"Children": [
+						{
+							"ID": "20230106103718-0adtij4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106103718-0adtij4",
+								"updated": "20230106103744"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "corrupted"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存已经损坏的数据文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106103744-8u9ew8y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106103744-8u9ew8y"
+					},
+					"Children": [
+						{
+							"ID": "20230106103744-93cbakm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106103744-93cbakm",
+								"updated": "20230106103930"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存数据，具体结构请参考"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210428213927-rbcfx2y",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "这里"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106103839-9csp7l8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106103839-9csp7l8"
+					},
+					"Children": [
+						{
+							"ID": "20230106103839-0pp1p1g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106103839-0pp1p1g",
+								"updated": "20230106103951"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "history"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存文件历史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106103948-9qgwhg5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106103948-9qgwhg5"
+					},
+					"Children": [
+						{
+							"ID": "20230106103948-dp7uyzl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106103948-dp7uyzl",
+								"updated": "20230106104007"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "repo"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存数据仓库数据"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104007-r35r46f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104007-r35r46f"
+					},
+					"Children": [
+						{
+							"ID": "20230106104007-y85brhy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104007-y85brhy",
+								"updated": "20230106104035"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "temp"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 用于保存运行时所需的临时文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230106104045-554cvut",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230106104045-554cvut",
+						"updated": "20230106104112"
+					},
+					"Children": [
+						{
+							"ID": "20230106104045-in5r3ot",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230106104045-in5r3ot",
+								"updated": "20230106104112"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".lock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 内核进程启动后会创建该文件，用于锁定工作空间"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

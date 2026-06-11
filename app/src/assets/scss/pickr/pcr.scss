@@ -1,0 +1,20 @@
+@use "../component/text-field";
+
+.pcr-app {
+  box-shadow: var(--b3-dialog-shadow);
+  border: 1px solid var(--b3-theme-surface-lighter);
+  border-radius: var(--b3-border-radius);
+
+  .pcr-interaction .pcr-result {
+    @extend .b3-text-field;
+    background: transparent;
+    font-size: 12px;
+  }
+
+  .pcr-selection .pcr-picker {
+    height: 16px;
+    width: 16px;
+    box-shadow: var(--b3-point-shadow);
+    transition: transform 100ms ease-out;
+  }
+}

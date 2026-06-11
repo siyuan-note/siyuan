@@ -1,0 +1,307 @@
+{
+	"ID": "20210505163537-oo97zov",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210505163537-oo97zov",
+		"title": "剪藏",
+		"type": "doc",
+		"updated": "20230905090027"
+	},
+	"Children": [
+		{
+			"ID": "20210505163604-9bqjti3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210505163604-9bqjti3",
+				"updated": "20210505163607"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210505163537-f04zpvo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210505163537-f04zpvo",
+				"updated": "20210505163740"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“剪藏”是指将 Web 页面上的内容复制到思源中，并尽量保持其原始格式。"
+				}
+			]
+		},
+		{
+			"ID": "20210505163741-w3p5lx5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210505163741-w3p5lx5",
+				"updated": "20210505163757"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20210505164024-uwvunwm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210505164024-uwvunwm",
+				"updated": "20230621111754"
+			},
+			"Children": [
+				{
+					"ID": "20210505164206-jydol2d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210505164206-jydol2d"
+					},
+					"Children": [
+						{
+							"ID": "20210505164206-6jpvjkl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210505164206-6jpvjkl",
+								"updated": "20210505164440"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果不需要将剪藏内容中包含的图片拉取到本地，可直接在浏览器中选择复制，然后在思源中进行粘贴"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210505164209-g9651e2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210505164209-g9651e2",
+						"updated": "20230621111754"
+					},
+					"Children": [
+						{
+							"ID": "20210505164209-s3gbivw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210505164209-s3gbivw",
+								"updated": "20230621111754"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果需要将剪藏内容中包含的图片拉取到本地，可使用"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1629423901669",
+									"TextMarkTextContent": "思源 Chrome 扩展"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210531180555-mcz0ihc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210531180555-mcz0ihc",
+				"updated": "20210724233556"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源 Chrome 扩展"
+				}
+			]
+		},
+		{
+			"ID": "20210531180907-u4jeq2k",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20210531180907-u4jeq2k",
+				"updated": "20210820171805"
+			},
+			"Children": [
+				{
+					"ID": "20210820171356-ky8ms7s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210820171356-ky8ms7s",
+						"updated": "20210820171805"
+					},
+					"Children": [
+						{
+							"ID": "20210820171356-8doieb3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210820171356-8doieb3",
+								"updated": "20210820171805"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "安装扩展，在扩展的选项中配置 API token（token 可在思源设置 - 关于中查看）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210531180907-oidarsc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210531180907-oidarsc"
+					},
+					"Children": [
+						{
+							"ID": "20210531180907-61e9zd1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210531180907-61e9zd1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 Web 页面上选择需要剪藏的内容，然后在右键菜单中选择 “Copy to SiYuan”"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210531180916-9agoxnr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20210531180916-9agoxnr",
+						"updated": "20210531180941"
+					},
+					"Children": [
+						{
+							"ID": "20210531180916-pa8wha1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210531180916-pa8wha1",
+								"updated": "20210531180941"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在思源中粘贴"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211019234857-y3dcex1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211019234857-y3dcex1",
+				"updated": "20211019235043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要剪藏整篇文章，可在扩展上直接点击“Send to SiYuan”。"
+				}
+			]
+		},
+		{
+			"ID": "20220420001516-9rek6if",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220420001516-9rek6if",
+				"updated": "20220420001521"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端剪藏"
+				}
+			]
+		},
+		{
+			"ID": "20220420001522-igble2k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220420001522-igble2k",
+				"updated": "20230905090027"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在手机上进行剪藏，请使用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230808120348-hynr7og",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "收集箱"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

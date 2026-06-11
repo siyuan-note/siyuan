@@ -1,0 +1,652 @@
+{
+	"ID": "20201117101902-2ewjjum",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201117101902-2ewjjum",
+		"title": "嵌入内容块",
+		"type": "doc",
+		"updated": "20240731204712"
+	},
+	"Children": [
+		{
+			"ID": "20210111224435-y1fesd1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210111224435-y1fesd1",
+				"updated": "20210512154656"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-1ros46z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201224120447-1ros46z",
+				"updated": "20210512154659"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入内容块主要用于汇总所需内容块，通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 将 SQL 脚本包裹起来并独占一行："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{ SELECT * FROM blocks WHERE content LIKE '%关键字%' }}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，数据库表请参考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201117103851-l9cahuc",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "这里"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "内容块/嵌入"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-e6zyfti",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201224120447-e6zyfti"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "示例"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-znjkoy5",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201224120447-znjkoy5",
+				"updated": "20210503152123"
+			},
+			"Children": [
+				{
+					"ID": "20201224120447-n30ybcs",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201224120447-n30ybcs"
+					},
+					"Children": [
+						{
+							"ID": "20201224120447-qmgtpok",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20201224120447-qmgtpok"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "查询内容中包含 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 的列表项："
+								}
+							]
+						},
+						{
+							"ID": "20201224120447-7zxu4l5",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"CodeBlockFenceChar": 96,
+							"CodeBlockFenceLen": 3,
+							"CodeBlockOpenFence": "YGBg",
+							"CodeBlockInfo": "c3Fs",
+							"CodeBlockCloseFence": "YGBg",
+							"Properties": {
+								"id": "20201224120447-7zxu4l5"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "c3Fs"
+								},
+								{
+									"ID": "20220307091943-nnvt195",
+									"Type": "NodeCodeBlockCode",
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND type = 'i' }}\n",
+									"Properties": {
+										"id": "20220307091943-nnvt195"
+									}
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201224120447-s8m8new",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201224120447-s8m8new"
+					},
+					"Children": [
+						{
+							"ID": "20201224120447-5c10xrv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20201224120447-5c10xrv"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "查询内容中同时包含 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 段落块："
+								}
+							]
+						},
+						{
+							"ID": "20201224120447-0y91i5d",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"CodeBlockFenceChar": 96,
+							"CodeBlockFenceLen": 3,
+							"CodeBlockOpenFence": "YGBg",
+							"CodeBlockInfo": "c3Fs",
+							"CodeBlockCloseFence": "YGBg",
+							"Properties": {
+								"id": "20201224120447-0y91i5d"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "c3Fs"
+								},
+								{
+									"ID": "20220307091943-yr7wm1v",
+									"Type": "NodeCodeBlockCode",
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%引用%' AND type = 'p') }}\n",
+									"Properties": {
+										"id": "20220307091943-yr7wm1v"
+									}
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201224120447-7lzhgko",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201224120447-7lzhgko"
+					},
+					"Children": [
+						{
+							"ID": "20201224120447-pnqwe31",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20201224120447-pnqwe31",
+								"updated": "20210503151034"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "查询内容中同时包含 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "嵌入"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 的标题块并按更新时间降序结果取前 2 条："
+								}
+							]
+						},
+						{
+							"ID": "20201224120447-zgg5lvx",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"CodeBlockFenceChar": 96,
+							"CodeBlockFenceLen": 3,
+							"CodeBlockOpenFence": "YGBg",
+							"CodeBlockInfo": "c3Fs",
+							"CodeBlockCloseFence": "YGBg",
+							"Properties": {
+								"id": "20201224120447-zgg5lvx"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "c3Fs"
+								},
+								{
+									"ID": "20220307091943-wjxtfog",
+									"Type": "NodeCodeBlockCode",
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%嵌入%' AND type = 'h' ORDER BY updated DESC LIMIT 2 }}\n",
+									"Properties": {
+										"id": "20220307091943-wjxtfog"
+									}
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```",
+									"CodeBlockFenceLen": 3
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-fnapz6h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201224120447-fnapz6h"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "案例一"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-acd7hwp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201224120447-acd7hwp"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查询同时包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "在思源中"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "核心概念"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文本的段落块，并排除当前文档（否则当段落块也会包含到结果集中，因为当前段落同样包含了这两个文本，下面的案例类似）："
+				}
+			]
+		},
+		{
+			"ID": "20210111224926-ju1sd4d",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20210111224926-ju1sd4d",
+				"updated": "20240508085440"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE content LIKE '%在思源中%' AND content LIKE '%核心概念%' AND type = 'p' AND hpath NOT LIKE '%嵌入内容块%'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-ickbh88",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201224120447-ickbh88",
+				"updated": "20240731204712"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "案例二"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-53y8c84",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201224120447-53y8c84",
+				"updated": "20240731204712"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查询包含标签 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#内容块/嵌入#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#内容块/引用#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 的段落块："
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-veyqmvr",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20201224120447-veyqmvr",
+				"style": "height: 100px;",
+				"updated": "20240731204356"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE (content LIKE '%#内容块/嵌入#%' OR content LIKE '%#内容块/引用#%') AND hpath NOT LIKE '%嵌入内容块%'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-v7yfh5v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20201224120447-v7yfh5v"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "案例三"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-s5zmpsa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201224120447-s5zmpsa"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有时候我们可能需要随机漫游显示内容块，以方便回顾。"
+				}
+			]
+		},
+		{
+			"ID": "20201224120447-kewa9nr",
+			"Type": "NodeBlockQueryEmbed",
+			"Data": "{{SELECT * FROM blocks ORDER BY random() LIMIT 3}}\n",
+			"Properties": {
+				"id": "20201224120447-kewa9nr"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks ORDER BY random() LIMIT 3"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20210630172050-m3pgmkt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210630172050-m3pgmkt",
+				"updated": "20210630172057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "案例四"
+				}
+			]
+		},
+		{
+			"ID": "20210630172058-rpr2p31",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210630172058-rpr2p31",
+				"updated": "20210630172500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查询未完成的任务列表项，这里需要使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "markdown"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 字段而不是 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "content"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 字段："
+				}
+			]
+		},
+		{
+			"ID": "20210630172118-iu2hsz3",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20210630172118-iu2hsz3",
+				"updated": "20211008203521"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks WHERE markdown LIKE '%[ ]%' AND subtype = 't' AND type = 'i'"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		}
+	]
+}

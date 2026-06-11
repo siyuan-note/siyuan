@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🏘️ Marketplace package feature request
+    url: https://github.com/siyuan-community/ideas/issues
+    about: Request new features to the community marketplace package developers
+  - name: 🔀 X
+    url: https://x.com/b3logos
+    about: Follow @b3logos on X

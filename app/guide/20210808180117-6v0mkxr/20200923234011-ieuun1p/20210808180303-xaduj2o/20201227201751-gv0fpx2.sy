@@ -1,0 +1,27 @@
+{
+	"ID": "20201227201751-gv0fpx2",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201227201751-gv0fpx2",
+		"title": "Kernel API",
+		"type": "doc",
+		"updated": "20230820185847"
+	},
+	"Children": [
+		{
+			"ID": "20210822164043-6gvv84p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210822164043-6gvv84p",
+				"updated": "20230820185847"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please refer to API Doc (github repo: siyuan-note/siyuan)."
+				}
+			]
+		}
+	]
+}

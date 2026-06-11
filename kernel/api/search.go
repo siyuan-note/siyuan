@@ -1,0 +1,566 @@
+// SiYuan - Refactor your thinking
+// Copyright (c) 2020-present, b3log.org
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+package api
+
+import (
+	"net/http"
+	"strings"
+
+	"github.com/88250/gulu"
+	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+func listInvalidBlockRefs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page := 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	if 0 >= page {
+		page = 1
+	}
+
+	pageSize := 32
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	if 0 >= pageSize {
+		pageSize = 32
+	}
+
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.ListInvalidBlockRefs(page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
+	ret.Data = map[string]any{
+		"blocks":            blocks,
+		"matchedBlockCount": matchedBlockCount,
+		"matchedRootCount":  matchedRootCount,
+		"pageCount":         pageCount,
+	}
+}
+
+func getAssetContent(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	query := arg["query"].(string)
+	queryMethod := int(arg["queryMethod"].(float64))
+	assetContent := model.GetAssetContent(id, query, queryMethod)
+	if model.IsReadOnlyRoleContext(c) && assetContent != nil {
+		publishAccess := model.GetPublishAccess()
+		filteredAssetContents := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
+		if len(filteredAssetContents) > 0 {
+			assetContent = filteredAssetContents[0]
+		} else {
+			assetContent = nil
+		}
+	}
+	ret.Data = map[string]any{
+		"assetContent": assetContent,
+	}
+	return
+}
+
+func fullTextSearchAssetContent(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page, pageSize, query, types, method, orderBy := parseSearchAssetContentArgs(arg)
+	assetContents, matchedAssetCount, pageCount := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		assetContents = model.FilterAssetContentByPublishAccess(c, publishAccess, assetContents)
+	}
+	ret.Data = map[string]any{
+		"assetContents":     assetContents,
+		"matchedAssetCount": matchedAssetCount,
+		"pageCount":         pageCount,
+	}
+}
+
+func findReplace(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	_, _, _, paths, boxes, types, subTypes, method, orderBy, groupBy := parseSearchBlockArgs(arg)
+
+	k := arg["k"].(string)
+	r := arg["r"].(string)
+	idsArg := arg["ids"].([]any)
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+
+	replaceTypes := map[string]bool{}
+	// text, imgText, imgTitle, imgSrc, aText, aTitle, aHref, code, em, strong, inlineMath, inlineMemo, blockRef, fileAnnotationRef kbd, mark, s, sub, sup, tag, u
+	// docTitle, codeBlock, mathBlock, htmlBlock
+	if nil != arg["replaceTypes"] {
+		replaceTypesArg := arg["replaceTypes"].(map[string]any)
+		for t, b := range replaceTypesArg {
+			replaceTypes[t] = b.(bool)
+		}
+	}
+
+	err := model.FindReplace(k, r, replaceTypes, ids, paths, boxes, types, subTypes, method, orderBy, groupBy)
+	if err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+	return
+}
+
+func searchAsset(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	k := arg["k"].(string)
+
+	var exts []string
+	if extsArg := arg["exts"]; nil != extsArg {
+		for _, ext := range extsArg.([]any) {
+			exts = append(exts, ext.(string))
+		}
+	}
+
+	ret.Data = model.SearchAssetsByName(k, exts)
+	return
+}
+
+func searchTag(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	k := arg["k"].(string)
+	tags := model.SearchTags(k)
+	if 1 > len(tags) {
+		tags = []string{}
+	}
+	ret.Data = map[string]any{
+		"tags": tags,
+		"k":    k,
+	}
+}
+
+func searchWidget(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	keyword := arg["k"].(string)
+	widgets := model.SearchWidget(keyword)
+	ret.Data = map[string]any{
+		"widgets": widgets,
+		"k":       keyword,
+	}
+}
+
+func removeTemplate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	err := model.RemoveTemplate(path)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func searchTemplate(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	keyword := arg["k"].(string)
+	templates := model.SearchTemplate(keyword)
+	ret.Data = map[string]any{
+		"templates": templates,
+		"k":         keyword,
+	}
+}
+
+func getEmbedBlock(c *gin.Context) {
+	// Query embed block supports executing JavaScript https://github.com/siyuan-note/siyuan/issues/9648
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	embedBlockID := arg["embedBlockID"].(string)
+	includeIDsArg := arg["includeIDs"].([]any)
+	var includeIDs []string
+	for _, includeID := range includeIDsArg {
+		includeIDs = append(includeIDs, includeID.(string))
+	}
+	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
+	headingModeArg := arg["headingMode"]
+	if nil != headingModeArg {
+		headingMode = int(headingModeArg.(float64))
+	}
+	breadcrumb := false
+	breadcrumbArg := arg["breadcrumb"]
+	if nil != breadcrumbArg {
+		breadcrumb = breadcrumbArg.(bool)
+	}
+
+	blocks := model.GetEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
+	}
+	ret.Data = map[string]any{
+		"blocks": blocks,
+	}
+}
+
+func updateEmbedBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if model.IsReadOnlyRoleContext(c) {
+		return
+	}
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	content := arg["content"].(string)
+
+	err := model.UpdateEmbedBlock(id, content)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func searchEmbedBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	embedBlockID := arg["embedBlockID"].(string)
+	stmt := arg["stmt"].(string)
+	excludeIDsArg := arg["excludeIDs"].([]any)
+	var excludeIDs []string
+	for _, excludeID := range excludeIDsArg {
+		if nil == excludeID {
+			continue
+		}
+		excludeIDs = append(excludeIDs, excludeID.(string))
+	}
+	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
+	headingModeArg := arg["headingMode"]
+	if nil != headingModeArg {
+		headingMode = int(headingModeArg.(float64))
+	}
+	breadcrumb := false
+	breadcrumbArg := arg["breadcrumb"]
+	if nil != breadcrumbArg {
+		breadcrumb = breadcrumbArg.(bool)
+	}
+
+	blocks := model.SearchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
+	}
+	ret.Data = map[string]any{
+		"blocks": blocks,
+	}
+}
+
+func searchRefBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	reqId := arg["reqId"]
+	ret.Data = map[string]any{"reqId": reqId}
+	if nil == arg["id"] {
+		return
+	}
+
+	isSquareBrackets := false
+	if isSquareBracketsArg := arg["isSquareBrackets"]; nil != isSquareBracketsArg {
+		isSquareBrackets = isSquareBracketsArg.(bool)
+	}
+
+	isDatabase := false
+	if isDatabaseArg := arg["isDatabase"]; nil != isDatabaseArg {
+		isDatabase = isDatabaseArg.(bool)
+	}
+
+	rootID := arg["rootID"].(string)
+	id := arg["id"].(string)
+	keyword := arg["k"].(string)
+	beforeLen := int(arg["beforeLen"].(float64))
+	blocks, newDoc := model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
+	ret.Data = map[string]any{
+		"blocks": blocks,
+		"newDoc": newDoc,
+		"k":      util.EscapeHTML(keyword),
+		"reqId":  arg["reqId"],
+	}
+}
+
+func fullTextSearchBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page, pageSize, query, paths, boxes, types, subTypes, method, orderBy, groupBy := parseSearchBlockArgs(arg)
+
+	// SQL mode requires admin privileges, consistent with /api/query/sql
+	if method == 2 && !model.IsAdminRoleContext(c) {
+		ret.Code = -1
+		ret.Msg = "SQL search requires administrator privileges"
+		return
+	}
+
+	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
+	ret.Data = map[string]any{
+		"blocks":            blocks,
+		"matchedBlockCount": matchedBlockCount,
+		"matchedRootCount":  matchedRootCount,
+		"pageCount":         pageCount,
+		"docMode":           docMode,
+	}
+}
+
+func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string, paths, boxes []string, types, subTypes map[string]bool, method, orderBy, groupBy int) {
+	page = 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	if 0 >= page {
+		page = 1
+	}
+
+	pageSize = 32
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	if 0 >= pageSize {
+		pageSize = 32
+	}
+
+	queryArg := arg["query"]
+	if nil != queryArg {
+		query = queryArg.(string)
+	}
+
+	pathsArg := arg["paths"]
+	if nil != pathsArg {
+		for _, p := range pathsArg.([]any) {
+			path := p.(string)
+			box := strings.TrimSpace(strings.Split(path, "/")[0])
+			if "" != box {
+				boxes = append(boxes, box)
+			}
+			path = strings.TrimSpace(strings.TrimPrefix(path, box))
+			if "" != path {
+				paths = append(paths, path)
+			}
+		}
+		paths = gulu.Str.RemoveDuplicatedElem(paths)
+		boxes = gulu.Str.RemoveDuplicatedElem(boxes)
+	}
+
+	if nil != arg["types"] {
+		typesArg := arg["types"].(map[string]any)
+		types = map[string]bool{}
+		for t, b := range typesArg {
+			types[t] = b.(bool)
+		}
+	}
+
+	if nil != arg["subTypes"] {
+		subTypesArg := arg["subTypes"].(map[string]any)
+		subTypes = map[string]bool{}
+		for t, b := range subTypesArg {
+			subTypes[t] = b.(bool)
+		}
+	}
+
+	// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
+	methodArg := arg["method"]
+	if nil != methodArg {
+		method = int(methodArg.(float64))
+	}
+
+	// orderBy：0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
+	orderByArg := arg["orderBy"]
+	if nil != orderByArg {
+		orderBy = int(orderByArg.(float64))
+	}
+
+	// groupBy： 0：不分组，1：按文档分组
+	groupByArg := arg["groupBy"]
+	if nil != groupByArg {
+		groupBy = int(groupByArg.(float64))
+	}
+	return
+}
+
+func parseSearchAssetContentArgs(arg map[string]any) (page, pageSize int, query string, types map[string]bool, method, orderBy int) {
+	page = 1
+	if nil != arg["page"] {
+		page = int(arg["page"].(float64))
+	}
+	if 0 >= page {
+		page = 1
+	}
+
+	pageSize = 32
+	if nil != arg["pageSize"] {
+		pageSize = int(arg["pageSize"].(float64))
+	}
+	if 0 >= pageSize {
+		pageSize = 32
+	}
+
+	queryArg := arg["query"]
+	if nil != queryArg {
+		query = queryArg.(string)
+	}
+
+	if nil != arg["types"] {
+		typesArg := arg["types"].(map[string]any)
+		types = map[string]bool{}
+		for t, b := range typesArg {
+			types[t] = b.(bool)
+		}
+	}
+
+	// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
+	methodArg := arg["method"]
+	if nil != methodArg {
+		method = int(methodArg.(float64))
+	}
+
+	// orderBy：0：按相关度降序，1：按相关度升序，2：按更新时间升序，3：按更新时间降序
+	orderByArg := arg["orderBy"]
+	if nil != orderByArg {
+		orderBy = int(orderByArg.(float64))
+	}
+	return
+}
+
+func semanticSearchBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page, pageSize, query, _, boxes, types, subTypes, _, _, _ := parseSearchBlockArgs(arg)
+
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.SemanticSearchBlock(query, boxes, nil, types, subTypes, page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
+	ret.Data = map[string]any{
+		"blocks":            blocks,
+		"matchedBlockCount": matchedBlockCount,
+		"matchedRootCount":  matchedRootCount,
+		"pageCount":         pageCount,
+	}
+}

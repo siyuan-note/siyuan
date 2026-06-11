@@ -1,0 +1,42 @@
+{
+	"ID": "20201121224345-rc27qvo",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f64f",
+		"id": "20201121224345-rc27qvo",
+		"title": "Acknowledgements",
+		"type": "doc",
+		"updated": "20230821234713"
+	},
+	"Children": [
+		{
+			"ID": "20230820175825-khk2ihn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230820175825-khk2ihn",
+				"updated": "20230821234713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source code kernel/go.mod, app/package.json and project homepage."
+				}
+			]
+		},
+		{
+			"ID": "20230820175825-fvnif0x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230820175825-fvnif0x",
+				"updated": "20230820180114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The growth of SiYuan is inseparable from user feedback and promotion, thank you for everyone's help to SiYuan ❤️"
+				}
+			]
+		}
+	]
+}

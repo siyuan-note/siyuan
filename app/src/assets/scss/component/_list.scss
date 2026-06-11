@@ -1,0 +1,308 @@
+@use "../util/mixin";
+
+.b3-list {
+  mark {
+    background-color: var(--b3-protyle-inline-mark-background);
+    color: var(--b3-protyle-inline-mark-color);
+  }
+
+  &--background .b3-list-item {
+    border-radius: var(--b3-border-radius);
+
+    &:hover:not(.b3-list-item--focus):not(.dragover):not(.dragover__current):not(.dragover__top):not(.dragover__bottom),
+    &--focus {
+      background-color: var(--b3-list-hover);
+    }
+
+    &.dragover,
+    &.dragover__top,
+    &.dragover__bottom {
+      cursor: copy;
+    }
+
+    &.dragover::after {
+      background-color: var(--b3-theme-primary-lightest);
+      position: absolute;
+      height: 100%;
+      content: " ";
+      top: 0;
+      z-index: 3;
+      pointer-events: none;
+      width: calc(100% - var(--file-toggle-width));
+      left: var(--file-toggle-width);
+    }
+
+    &.dragover__top::after,
+    &.dragover__bottom::after {
+      content: "";
+      position: absolute;
+      height: 4px;
+      width: calc(100% - var(--file-toggle-width));
+      left: var(--file-toggle-width);
+      background-color: var(--b3-theme-primary-lighter);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    &.dragover__top::after {
+      top: -3px;
+    }
+
+    &.dragover__bottom::after {
+      bottom: -2px;
+    }
+  }
+
+  &--empty {
+    justify-content: center;
+    color: var(--b3-theme-on-surface);
+    padding: 4px 16px;
+    list-style: none;
+  }
+
+  &--border {
+
+    .b3-list__panel {
+      margin-left: 34px;
+      position: relative;
+    }
+
+    .b3-list__panel::before {
+      content: "";
+      height: 100%;
+      top: 0;
+      position: absolute;
+      border-left: 1px solid var(--b3-theme-background-light);
+      left: -21px;
+    }
+  }
+
+  &-item {
+    line-height: 28px;
+    min-height: 28px;
+    padding: 0 4px;
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    position: relative;
+    background-color: transparent;
+    text-align: left;
+    border: 0;
+    color: var(--b3-theme-on-background);
+    margin: 1px 8px;
+
+    &[draggable="true"]:active {
+      cursor: grabbing;
+    }
+
+    &--narrow {
+      margin: 1px 0;
+    }
+
+    &--big {
+      padding: 16px 24px;
+
+      .b3-list-item__graphic {
+        margin-right: 24px;
+        height: 16px;
+        width: 16px;
+      }
+    }
+
+    &--two {
+      display: block;
+
+      .b3-list-item__first {
+        display: flex;
+        align-items: center;
+      }
+
+      .b3-list-item__meta {
+        margin-left: 0;
+        line-height: 18px;
+      }
+    }
+
+    &--hide-action {
+      .b3-list-item__action {
+        display: none;
+      }
+
+      &:hover > .b3-list-item__action,
+      &:hover > .fn__space {
+        display: flex;
+      }
+    }
+
+    &__toggle {
+      display: flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 2px;
+      color: var(--b3-theme-on-surface-light);
+      transition: var(--b3-transition);
+      border-radius: var(--b3-border-radius);
+
+      &--hl:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
+    }
+
+    // 大纲中有图片 https://github.com/siyuan-note/siyuan/issues/12993
+    .img img {
+      height: 24px;
+      vertical-align: top;
+      margin: 2px 0;
+      width: auto !important;
+    }
+
+    &__icon {
+      svg, img {
+        height: 16px;
+        width: 16px;
+        color: var(--b3-theme-on-surface);
+      }
+
+      text-align: center;
+      font-size: 14px;
+      font-family: var(--b3-font-family-emoji);
+      margin-right: 4px;
+      line-height: 22px;
+      transition: var(--b3-transition);
+      height: 22px;
+      padding: 0 4px;
+      flex-shrink: 0;
+      border-radius: var(--b3-border-radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
+    }
+
+    &__hinttext {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    &__hinticon {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+      color: var(--b3-theme-on-background);
+      align-self: center;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
+    &__graphic {
+      margin-right: 4px;
+      flex-shrink: 0;
+      padding: 0 1px;
+      height: 16px;
+      width: 16px;
+      line-height: 16px;
+      font-size: 12px;
+      font-family: var(--b3-font-family-emoji);
+
+      // doc icon in the bookmark panel
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &__arrow {
+      flex-shrink: 0;
+      height: 14px;
+      width: 14px;
+      transition: transform .15s cubic-bezier(0, 0, .2, 1), opacity 1s cubic-bezier(0, 0, .2, 1);
+
+      &--open {
+        transform: rotate(90deg);
+      }
+    }
+
+    &__text {
+      flex: 1;
+      background-color: transparent;
+      text-align: left;
+      border: 0;
+      padding: 0;
+      color: var(--b3-theme-on-background);
+      @include mixin.text-clamp(1);
+
+      // 搜索列表中自定义图标
+      & > img:not(.emoji),
+      & > .custom-icon {
+        height: 14px;
+        width: 14px;
+        float: left;
+        margin-top: 7px;
+      }
+    }
+
+    &__showall {
+      line-height: 1;
+      word-break: break-all;
+    }
+
+    &__meta {
+      font-size: .75rem;
+      margin-left: 8px;
+      flex-shrink: 0;
+      color: var(--b3-theme-on-surface);
+
+      &--ellipsis {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 50%;
+      }
+    }
+
+    &__action {
+      flex-shrink: 0;
+      align-items: center;
+      color: var(--b3-theme-on-surface-light);
+      height: 22px;
+      padding: 0 3px;
+      margin-left: 4px;
+      display: flex;
+      translate: var(--b3-transition);
+      border-radius: var(--b3-border-radius);
+
+      svg {
+        height: 16px;
+        width: 16px;
+      }
+
+      &:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
+
+      &--warning:hover {
+        color: var(--b3-theme-error);
+      }
+    }
+
+    &__switch {
+      @extend .b3-list-item__icon
+    }
+
+    .counter {
+      cursor: pointer;
+
+      &:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
+    }
+  }
+}

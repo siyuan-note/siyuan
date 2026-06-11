@@ -1,0 +1,237 @@
+{
+	"ID": "20210808180320-abz7w6k",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f371",
+		"id": "20210808180320-abz7w6k",
+		"title": "编辑器",
+		"type": "doc",
+		"updated": "20240507235438"
+	},
+	"Children": [
+		{
+			"ID": "20210419175122-jibfje5",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210419175122-jibfje5",
+				"updated": "20210419175122"
+			},
+			"Children": [
+				{
+					"ID": "20210419175122-vtw796e",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175122-vtw796e"
+					},
+					"Children": [
+						{
+							"ID": "20210419175122-qz9ez8m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175122-qz9ez8m",
+								"updated": "20210419175447"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "基于内容块的编辑排版"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175157-1m5xsqy",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175157-1m5xsqy"
+					},
+					"Children": [
+						{
+							"ID": "20210419175157-qvjvy3k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175157-qvjvy3k",
+								"updated": "20210419175412"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列表大纲，支持带或不带子层级缩进"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175207-90m9nqe",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175207-90m9nqe"
+					},
+					"Children": [
+						{
+							"ID": "20210419175207-qn4ju43",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175207-qn4ju43",
+								"updated": "20210419175240"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块缩放，即每个内容块都可以放大进入聚焦"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175237-lu1fkff",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175237-lu1fkff"
+					},
+					"Children": [
+						{
+							"ID": "20210419175240-uten7i2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175240-uten7i2",
+								"updated": "20210419175533"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "动态加载，解决大文档卡顿"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210419175429-nn2jtk8",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210419175429-nn2jtk8"
+					},
+					"Children": [
+						{
+							"ID": "20210419175429-qr6dv24",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210419175429-qr6dv24",
+								"updated": "20210512153228"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通过拖拽块标进行横向排版"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240507235438-05re3zi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235438-05re3zi",
+				"updated": "20240507235438"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200825162036-4dx365o",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "排版元素"
+				}
+			]
+		},
+		{
+			"ID": "20240507235438-ow9015t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235438-ow9015t",
+				"updated": "20240507235438"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220628204444-9n0y9h2",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "优化排版"
+				}
+			]
+		},
+		{
+			"ID": "20240507235438-dyw2otm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235438-dyw2otm",
+				"updated": "20240507235438"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20221016213308-uz5af79",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "通过标题列表概述"
+				}
+			]
+		}
+	]
+}

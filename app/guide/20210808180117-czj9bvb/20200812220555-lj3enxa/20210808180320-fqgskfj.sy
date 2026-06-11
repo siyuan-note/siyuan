@@ -1,0 +1,133 @@
+{
+	"ID": "20210808180320-fqgskfj",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f36b",
+		"id": "20210808180320-fqgskfj",
+		"title": "内容块",
+		"type": "doc",
+		"updated": "20240507235241"
+	},
+	"Children": [
+		{
+			"ID": "20240507235241-gp3vbz4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235241-gp3vbz4",
+				"updated": "20240507235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200813004931-q4cu8na",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "什么是内容块"
+				}
+			]
+		},
+		{
+			"ID": "20240507235241-cc4dyv2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235241-cc4dyv2",
+				"updated": "20240507235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200905090211-2vixtlf",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "内容块类型"
+				}
+			]
+		},
+		{
+			"ID": "20240507235241-g3chf5d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235241-g3chf5d",
+				"updated": "20240507235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200813013559-sgbzl5k",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "引用内容块"
+				}
+			]
+		},
+		{
+			"ID": "20240507235241-wqz0d0o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235241-wqz0d0o",
+				"updated": "20240507235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200813131152-0wk5akh",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "在内容块中遨游"
+				}
+			]
+		},
+		{
+			"ID": "20240507235241-kczvxta",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235241-kczvxta",
+				"updated": "20240507235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201210103036-1x3vm8t",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "文档块和标题块的转换"
+				}
+			]
+		},
+		{
+			"ID": "20240507235241-snnxghb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235241-snnxghb",
+				"updated": "20240507235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201117101902-2ewjjum",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "嵌入内容块"
+				}
+			]
+		},
+		{
+			"ID": "20240507235241-a37u0gy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240507235241-a37u0gy",
+				"updated": "20240507235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210612224500-ywcms1m",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "内容块属性"
+				}
+			]
+		}
+	]
+}

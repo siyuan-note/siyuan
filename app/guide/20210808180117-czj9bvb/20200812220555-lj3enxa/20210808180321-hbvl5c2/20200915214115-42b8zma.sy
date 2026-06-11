@@ -1,0 +1,1286 @@
+{
+	"ID": "20200915214115-42b8zma",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200915214115-42b8zma",
+		"title": "资源文件",
+		"type": "doc",
+		"updated": "20250115152751"
+	},
+	"Children": [
+		{
+			"ID": "20210503095355-r83044o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210503095355-r83044o",
+				"updated": "20210503095726"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210503095358-zr3uijl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210503095358-zr3uijl",
+				"updated": "20220711121657"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过编辑器插入的附件会被认为是资源文件，默认放置在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/data/assets/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夹下。"
+				}
+			]
+		},
+		{
+			"ID": "20201210194734-lr6v0s2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201210194734-lr6v0s2",
+				"updated": "20250115152740"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入图片或文件"
+				}
+			]
+		},
+		{
+			"ID": "20210104091255-8s7avcx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091255-8s7avcx",
+				"updated": "20220905215650"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在编辑器中可以直接粘贴系统剪切板中复制好的图片或文件（Linux 端不支持），或者通过拖拽图片或文件到编辑器中也可以实现插入。插入时有两个选择："
+				}
+			]
+		},
+		{
+			"ID": "20220824172203-etwu4qu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220824172203-etwu4qu",
+				"updated": "20250115152740"
+			},
+			"Children": [
+				{
+					"ID": "20220824172204-xxh346y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172204-xxh346y",
+						"updated": "20250115152736"
+					},
+					"Children": [
+						{
+							"ID": "20220824172204-fct1t0t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172204-fct1t0t",
+								"updated": "20250115152736"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "复制为资源文件并插入：将图片或文件复制为资源文件并插入，快捷键 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220824172403-agsj358",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172403-agsj358",
+						"updated": "20250115152740"
+					},
+					"Children": [
+						{
+							"ID": "20220824172403-0fkrw8o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172403-0fkrw8o",
+								"updated": "20250115152740"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file://"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 绝对路径并链接：将图片或文件以本地绝对路径方式插入超链接，快捷键 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，或者按住 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 后拖入"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091255-7fwvx7a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091255-7fwvx7a",
+				"updated": "20220824172301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "对于图片，如果排版时指定了图片标题，则标题会被渲染在图片下方作为图注。"
+				}
+			]
+		},
+		{
+			"ID": "20210512171633-u3iy2xx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210512171633-u3iy2xx",
+				"updated": "20230505083901"
+			},
+			"Children": [
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Properties": {
+						"parent-style": "display: block;",
+						"style": "display: block;"
+					},
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "siyuan-128.png"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/siyuan-128-20210604092205-djd749a.png"
+						},
+						{
+							"Type": "NodeLinkSpace"
+						},
+						{
+							"Type": "NodeLinkTitle",
+							"Data": "源于思考，饮水思源"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
+				}
+			]
+		},
+		{
+			"ID": "20230505083902-s5e711d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230505083902-s5e711d",
+				"updated": "20230505083923"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：插入图片不会进行压缩处理，所有图片和文件都以原始数据进行保存。"
+				}
+			]
+		},
+		{
+			"ID": "20210115222011-bzsftun",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210115222011-bzsftun",
+				"updated": "20241027164443"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "清理未引用资源"
+				}
+			]
+		},
+		{
+			"ID": "20210115222053-i62ppkz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210115222053-i62ppkz",
+				"updated": "20210503095856"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“引用”指的是通过超链接、插入图片或者 HTML 标签（例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）的属性 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "src"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 对资源文件进行链接。这里分为两种情况："
+				}
+			]
+		},
+		{
+			"ID": "20210115222514-tqfsawm",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"id": "20210115222514-tqfsawm",
+				"updated": "20241027164024"
+			},
+			"Children": [
+				{
+					"ID": "20210115222515-47r5lop",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210115222515-47r5lop",
+						"updated": "20241027164024"
+					},
+					"Children": [
+						{
+							"ID": "20210204172443-a8xpkb9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210204172443-a8xpkb9",
+								"updated": "20241027164024"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用具体的资源文件，比如图片或者文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210115222545-nilj84d",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210115222545-nilj84d",
+						"updated": "20220711121528"
+					},
+					"Children": [
+						{
+							"ID": "20210204172443-zyll68d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210204172443-zyll68d",
+								"updated": "20220711121528"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用资源文件夹（在 assets 文件夹下的子文件夹），必须以 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 结尾，比如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[foo](assets/bar/)"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。一个资源文件夹如果被引用，则下面所有资源文件无论是否被单独引用，都会被算作已经引用"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210115223610-ffnxstf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210115223610-ffnxstf",
+				"updated": "20241027164443"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "资源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210104090742-hjfornp",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "回滚"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210130103406-8jfbo6k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210130103406-8jfbo6k",
+				"updated": "20210512160659"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：使用绝对路径（本地路径或者是网络路径）不会纳入清理计算。"
+				}
+			]
+		},
+		{
+			"ID": "20230604115545-plxx5iu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230604115545-plxx5iu",
+				"updated": "20250115152751"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查看丢失资源"
+				}
+			]
+		},
+		{
+			"ID": "20230604115552-qqg9s4j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604115552-qqg9s4j",
+				"updated": "20250115152751"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "资源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中可以查看丢失的资源，复制路径后可以在全局搜索中找到引用处。"
+				}
+			]
+		},
+		{
+			"ID": "20230604115950-hru51yy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604115950-hru51yy",
+				"updated": "20230604120815"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：搜索资源文件路径需要先启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "索引"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "资源文件路径"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20210615102657-kampx8a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210615102657-kampx8a",
+				"updated": "20241024163136"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "笔记本级资源文件"
+				}
+			]
+		},
+		{
+			"ID": "20210615102703-7wghhgm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210615102703-7wghhgm",
+				"updated": "20210626153454"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要默认将插入的资源文件放置在文档同级 assets 文件夹下，则需要先手动创建名为 assets 的文件夹，这样思源会优先选择该 assets 文件夹来存放资源文件。"
+				}
+			]
+		},
+		{
+			"ID": "20220503120950-4e9vwxq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220503120950-4e9vwxq",
+				"updated": "20220503121613"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建议尽量不要使用笔记本级资源文件，因为这会带来一些副作用："
+				}
+			]
+		},
+		{
+			"ID": "20220503121213-afjyt05",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220503121213-afjyt05",
+				"updated": "20241024163136"
+			},
+			"Children": [
+				{
+					"ID": "20220503121214-haxyvyt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220503121214-haxyvyt",
+						"updated": "20241024163136"
+					},
+					"Children": [
+						{
+							"ID": "20220503121214-cmqtvby",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220503121214-cmqtvby",
+								"updated": "20241024163136"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "删除该笔记时，为保证跨笔记本资源文件引用正常工作，该笔记引用的资源文件会被批量复制到全局 assets 中"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220503121359-3hqko22",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220503121359-3hqko22",
+						"updated": "20220503121834"
+					},
+					"Children": [
+						{
+							"ID": "20220503121359-amc47nl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220503121359-amc47nl",
+								"updated": "20220503121834"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持在"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据历史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中查看笔记本级资源文件历史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715092717-dbd9ih9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715092717-dbd9ih9",
+						"updated": "20220715092726"
+					},
+					"Children": [
+						{
+							"ID": "20220715092717-btrw2bk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715092717-btrw2bk",
+								"updated": "20220715092726"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/资源"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715105014-5jfe0bz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715105014-5jfe0bz",
+						"updated": "20220715105016"
+					},
+					"Children": [
+						{
+							"ID": "20220715105014-3r1es71",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715105014-3r1es71",
+								"updated": "20220715105016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持重命名"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230117002036-vmc0mx4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230117002036-vmc0mx4",
+				"updated": "20230117002509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "图片 OCR 提取文本"
+				}
+			]
+		},
+		{
+			"ID": "20230117002059-ssmlejt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117002059-ssmlejt",
+				"updated": "20230820185522"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "该特性仅在桌面端支持，并且需要先手动安装 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "em",
+					"TextMarkTextContent": "Tesseract OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 程序。"
+				}
+			]
+		},
+		{
+			"ID": "20230202231304-22lvszc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230202231304-22lvszc",
+				"updated": "20230202231309"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20230202231309-pcjl7c2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230202231309-pcjl7c2",
+				"updated": "20231110112936"
+			},
+			"Children": [
+				{
+					"ID": "20230202231311-7qdk1za",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231311-7qdk1za",
+						"updated": "20231110112936"
+					},
+					"Children": [
+						{
+							"ID": "20230202231311-n1pf7in",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231311-n1pf7in",
+								"updated": "20231110112936"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在安装 Tesseract OCR 时需要勾选你需要的语言包，并将安装后的 Tesseract-OCR 目录路径添加到环境变量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中，这样思源才能直接调用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 命令进行图片 OCR 提取文本。如果安装正常的话，在内核启动日志中可以搜索到 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract-ocr enabled"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​；如果要禁用 OCR，请设置环境变量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_ENABLED=false"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230202231321-q1b1tza",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231321-q1b1tza",
+						"updated": "20230211103207"
+					},
+					"Children": [
+						{
+							"ID": "20230202231321-5ugmgf0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231321-5ugmgf0",
+								"updated": "20230211103207"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思源并不会启用所有已安装的语言包，因为语言包太多的话会导致 OCR 缓慢甚至超时返回空结果，并且占用过多的系统资源，所以默认最多只会启用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eng"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "chi*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "fra"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "spa"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "deu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "rus"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "osd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，如果你需要更准确的语言支持，可以通过配置环境变量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 来指定语言包，比如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS=chi_sim+eng"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102440-0qik4dd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102440-0qik4dd",
+						"updated": "20230211102642"
+					},
+					"Children": [
+						{
+							"ID": "20230211102440-09cmf75",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102440-09cmf75",
+								"updated": "20230211102642"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅支持 png 和 jpg 格式的图片"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102601-ifl3ojm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102601-ifl3ojm",
+						"updated": "20230211102744"
+					},
+					"Children": [
+						{
+							"ID": "20230211102601-npe6hvh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102601-npe6hvh",
+								"updated": "20230211102744"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "默认只对 2MB 以下的图片进行处理，如果需要调整，可以通过环境变量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 设置，值的单位是字节，比如："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE=4000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将上限调整为 4MB"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230117002511-ex9qrjy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117002511-ex9qrjy",
+				"updated": "20230117003207"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "图片 OCR 提取文本过程是自动在后台进行的，目前仅支持 PNG、JPG 图片。提取的文本会被用于搜索功能，这样就能通过文本关键字来定位图片。"
+				}
+			]
+		},
+		{
+			"ID": "20230414202710-a51lo76",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230414202710-a51lo76",
+				"updated": "20230414202726"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动调整 OCR 结果"
+				}
+			]
+		},
+		{
+			"ID": "20230117003118-da7wjvx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117003118-da7wjvx",
+				"updated": "20230414202825"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OCR 的结果保存在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/data/assets/ocr-texts.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中，可通过下面的方式调整 OCR 结果："
+				}
+			]
+		},
+		{
+			"ID": "20230414202215-wv6v759",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230414202215-wv6v759",
+				"updated": "20230414203014"
+			},
+			"Children": [
+				{
+					"ID": "20230414202216-6ib46sp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202216-6ib46sp",
+						"updated": "20230414203014"
+					},
+					"Children": [
+						{
+							"ID": "20230414202216-7lh8lft",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202216-7lh8lft",
+								"updated": "20230414203014"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "退出思源后在文件系统上修改该文件（请注意 JSON 格式的正确性）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230414202222-wbxjz0f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414202222-wbxjz0f",
+						"updated": "20230414202849"
+					},
+					"Children": [
+						{
+							"ID": "20230414202222-oelakfd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414202222-oelakfd",
+								"updated": "20230414202849"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "或者在编辑器中的图片元素菜单中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "OCR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230414202749-qbcnypq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230414202749-qbcnypq",
+				"updated": "20230414202900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "调整完以后需要手动重建索引。"
+				}
+			]
+		}
+	]
+}

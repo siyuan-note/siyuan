@@ -1,0 +1,192 @@
+{
+	"ID": "20210127202655-2334vvv",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210127202655-2334vvv",
+		"title": "PDF 标注",
+		"type": "doc",
+		"updated": "20220502141008"
+	},
+	"Children": [
+		{
+			"ID": "20210923103658-jkmi4k7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210923103658-jkmi4k7",
+				"updated": "20210923103704"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入 PDF 资源文件"
+				}
+			]
+		},
+		{
+			"ID": "20210127202655-eyv25b7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210127202655-eyv25b7",
+				"updated": "20210811224214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将 PDF 文件通过编辑器上传插入以后，PDF 将放到 assets 文件夹下，并在文档内生成形如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的链接。点击该链接可使用思源进行预览。"
+				}
+			]
+		},
+		{
+			"ID": "20210923103705-4cxiau3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210923103705-4cxiau3",
+				"updated": "20210923103716"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "超链接页码跳转"
+				}
+			]
+		},
+		{
+			"ID": "20210127203054-dp9le97",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210127203054-dp9le97"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新页签打开预览 PDF 支持指定页码，需要将链接带上参数 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "page"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，例如需要跳转到第七页，则将链接编辑为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf?page=7)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210923103628-oif5bk8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210923103628-oif5bk8",
+				"updated": "20220502141000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标注"
+				}
+			]
+		},
+		{
+			"ID": "20210923103723-8fz5i0j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210923103723-8fz5i0j",
+				"updated": "20220502141008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF 预览时可使用划选进行标注，标注可复制到文档中形成链接："
+				}
+			]
+		},
+		{
+			"ID": "20210923104112-fheqye1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210923104112-fheqye1",
+				"updated": "20210923104220"
+			},
+			"Children": [
+				{
+					"ID": "20210923104113-am5a0ei",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210923104113-am5a0ei"
+					},
+					"Children": [
+						{
+							"ID": "20210923104113-es0tpkd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210923104113-es0tpkd",
+								"updated": "20210923104134"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在文档中点击引用链接可以打开 PDF 并跳转到标注"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210923104137-p7qk722",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210923104137-p7qk722",
+						"updated": "20210923104220"
+					},
+					"Children": [
+						{
+							"ID": "20210923104137-f2sv4l9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210923104137-f2sv4l9",
+								"updated": "20210923104220"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 PDF 中鼠标悬浮标注可预览引用标注的块"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

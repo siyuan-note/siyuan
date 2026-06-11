@@ -1,0 +1,697 @@
+{
+	"ID": "20240508010647-8nuyk31",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240508010647-8nuyk31",
+		"title": "收集箱",
+		"type": "doc",
+		"updated": "20240508011412"
+	},
+	"Children": [
+		{
+			"ID": "20240508010825-a5ohhsl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240508010825-a5ohhsl",
+				"updated": "20240508010825"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-8vvng9y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508010825-8vvng9y",
+				"updated": "20240508010826"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我們可以通過雲端收集箱對外部數據進行收集，然後在思源中通過收集箱面板從雲端獲取這些數據並發送到筆記本中進行進一步整理。"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-n1qh9ep",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240508010825-n1qh9ep",
+				"updated": "20240508010825"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-qong9t1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508010825-qong9t1",
+				"updated": "20240508010826"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前提供以下兩種方式進行數據接入。"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-saua2mg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20240508010825-saua2mg",
+				"updated": "20240508010826"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "微信輸入"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-zwyfsd0",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20240508010825-zwyfsd0",
+				"updated": "20240508011210"
+			},
+			"Children": [
+				{
+					"ID": "20240508010825-39hxocl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20240508010825-39hxocl",
+						"updated": "20240508010825"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-exlddpe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-exlddpe",
+								"updated": "20240508010825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/settings/account",
+									"TextMarkTextContent": "鏈滴 - 設置 - 賬號"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中綁定微信"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240508010825-3cvt679",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20240508010825-3cvt679",
+						"updated": "20240508011210"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-p7i3zpr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-p7i3zpr",
+								"updated": "20240508011210"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "關註 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log开源"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 公眾號"
+								}
+							]
+						},
+						{
+							"ID": "20240508010825-6j0yi8j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-6j0yi8j",
+								"updated": "20240508011115"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "image.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/image-20240507233205-gidj803.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240508010825-vct5bio",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20240508010825-vct5bio",
+						"updated": "20240508010825"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-v2yx4o9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-v2yx4o9",
+								"updated": "20240508010825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "關註後點擊右下角綁定賬號"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240508010825-8k3begd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20240508010825-8k3begd",
+						"updated": "20240508010825"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-8027gkq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-8027gkq",
+								"updated": "20240508010825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "對該公眾號發送消息（可從收藏中選擇待發送消息），僅支持文本、圖片和超鏈接"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240508010825-o51n5ay",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20240508010825-o51n5ay",
+						"updated": "20240508010825"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-eqcdlnq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-eqcdlnq",
+								"updated": "20240508010825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在思源中打開收集箱面板（Alt+6）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-e5tq32s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508010825-e5tq32s",
+				"updated": "20240508011232"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "關註公眾號並綁定賬號後除了可以通過公眾號輸入，也可以通過添加 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "思源小助手"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 為聯系人後輸入，這樣可以直接轉發聊天記錄。"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-p85yv3d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508010825-p85yv3d",
+				"updated": "20240508011143"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "image"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/image-20240508085927-fg29hvp.png"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-c0ejrb7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508010825-c0ejrb7",
+				"updated": "20240508010826"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支持的消息類型為文本、圖片、語音、視頻和文件，單個圖片、語音、視頻和文件的大小不超過 20MB。"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-pik289x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508010825-pik289x",
+				"updated": "20240508011319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-6jxdqrf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240508010825-6jxdqrf",
+				"updated": "20240508010826"
+			},
+			"Children": [
+				{
+					"ID": "20240508010825-thd1752",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508010825-thd1752",
+						"updated": "20240508010825"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-jlv9f7d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-jlv9f7d",
+								"updated": "20240508010825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "僅限訂閱會員使用，未訂閱或者訂閱過期後聯系人關系會被刪除"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-3ill9v5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20240508010825-3ill9v5",
+				"updated": "20240508010826"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "API"
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-fvc7vnm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240508010825-fvc7vnm",
+				"updated": "20240508011401"
+			},
+			"Children": [
+				{
+					"ID": "20240508010825-bwf2ttf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508010825-bwf2ttf",
+						"updated": "20240508011333"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-ga2w93e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-ga2w93e",
+								"updated": "20240508011333"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "POST "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://ld246.com/apis/siyuan/inbox/addCloudShorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240508010825-cv6df2j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508010825-cv6df2j",
+						"updated": "20240508011341"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-vtk2lql",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-vtk2lql",
+								"updated": "20240508010825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Body"
+								}
+							]
+						},
+						{
+							"ID": "20240508010825-7t3bxt0",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20240508010825-7t3bxt0",
+								"updated": "20240508011341"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "anNvbg=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "{\n    \"title\": \"A simple text title\",\n    \"content\": \"Content with **Markdown**.\"\n}"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240508010825-977fyz4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508010825-977fyz4",
+						"updated": "20240508011401"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-olfkbn4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-olfkbn4",
+								"updated": "20240508011401"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "鑒權方式為 HTTP 請求標頭 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Authorization"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，值為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "token {Your API Token}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（註意大小寫和空格），API Token 可以 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/settings/account",
+									"TextMarkTextContent": "鏈滴 - 設置 - 賬號"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中找到"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-grwgife",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508010825-grwgife",
+				"updated": "20240508011412"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​："
+				}
+			]
+		},
+		{
+			"ID": "20240508010825-tat0cjy",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240508010825-tat0cjy",
+				"updated": "20240508010826"
+			},
+			"Children": [
+				{
+					"ID": "20240508010825-fikzqon",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240508010825-fikzqon",
+						"updated": "20240508010825"
+					},
+					"Children": [
+						{
+							"ID": "20240508010825-asx6c5u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240508010825-asx6c5u",
+								"updated": "20240508010825"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "頻率限製：每 24 小時最多插入 128 條"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,485 @@
+{
+	"ID": "20240530101000-e6z5okf",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-h31xkta",
+		"icon": "1f4f1",
+		"id": "20240530101000-e6z5okf",
+		"title": "モバイルアプリ",
+		"type": "doc",
+		"updated": "20260317202604"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-2nn9stf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-peznsnc",
+				"id": "20240530101000-2nn9stf",
+				"updated": "20250114214341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pnwqee0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-pnwqee0",
+				"updated": "20250114214341"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は Android、iOS、HarmonyOS アプリを提供しており、一部のモバイル アプリ ストアに掲載されています。アプリ ストアで「思源笔记」または「SiYuan」を検索してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tylg3qg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-2lg2mb6",
+				"id": "20240530101000-tylg3qg",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスの利用"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vma8ggh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-stdxnih",
+				"id": "20240530101000-vma8ggh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アプリストアの審査の都合上、現在マーケットプレイスをアプリ上で直接提供することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2ydz6oj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-4ppspg1",
+				"id": "20240530101000-2ydz6oj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスを利用するには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​- "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "情報"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ネットワークサービス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を有効にして、デスクトップブラウザから設定にアクセスしてください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-zx8lkgl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-yx7xlm6",
+				"id": "20240530101000-zx8lkgl",
+				"updated": "20250114215535"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vg6rjty",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-355qyas",
+				"id": "20240530101000-vg6rjty",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-502th4f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-60p9bne",
+						"id": "20240530101000-502th4f",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-gf939t8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4ca3l4l",
+								"id": "20240530101000-gf939t8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アプリをアンインストールするとローカルデータが完全に削除され、復旧できなくなります。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-286lfpp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2vsx7me",
+						"id": "20240530101000-286lfpp",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-w6mhqnc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8e3p06k",
+								"id": "20240530101000-w6mhqnc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アプリを終了するときは、右側のパネルの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリケーションの終了"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から終了してください。スワイプして終了するとデータの同期が行われません。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-yoktfm7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0flh6w7",
+						"id": "20240530101000-yoktfm7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-p0zphjs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-f7stnt5",
+								"id": "20240530101000-p0zphjs",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "iOS でアプリを切り替えると接続が中断されます。確認ボックスのボタンをクリックして手動で再接続してください。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-dvacc03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-e7wxqk0",
+						"id": "20240530101000-dvacc03",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-fcln511",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-e3nl321",
+								"id": "20240530101000-fcln511",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データ同期中はアプリを切り替えず、画面をオンのままにしてください。そうしないとデータ同期が失敗します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260317195514-yho54qh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260317195514-yho54qh",
+				"updated": "20260317202604"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Androidでのカスタム「Keep-Alive」通知"
+				}
+			]
+		},
+		{
+			"ID": "20260317195514-pwmwtf0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260317195514-pwmwtf0",
+				"updated": "20260317195514"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuanがバックグラウンドで動作し続ける機能を最大限に活用したい場合は、以下の手順に従ってください。"
+				}
+			]
+		},
+		{
+			"ID": "20260317195514-87rztvj",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260317195514-87rztvj",
+				"updated": "20260317202604"
+			},
+			"Children": [
+				{
+					"ID": "20260317195514-31osjhv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260317195514-31osjhv",
+						"updated": "20260317202604"
+					},
+					"Children": [
+						{
+							"ID": "20260317195514-r1jpi3g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195514-r1jpi3g",
+								"updated": "20260317202604"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "省電力設定を「無制限」に調整しました。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317195514-y0ftv3q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260317195514-y0ftv3q",
+						"updated": "20260317195514"
+					},
+					"Children": [
+						{
+							"ID": "20260317195514-3yz94lq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195514-3yz94lq",
+								"updated": "20260317195514"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通知機能を有効にします。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317195514-wy353hn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260317195514-wy353hn",
+						"updated": "20260317195514"
+					},
+					"Children": [
+						{
+							"ID": "20260317195514-vc2wyly",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195514-vc2wyly",
+								"updated": "20260317195514"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デスクトップクライアント上で、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/assets/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ フォルダ内に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "android-notification-texts.txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ という名前のテキストファイルを作成します。このファイル内の各行が、通知メッセージのテキストとして使用されます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317195514-7q5zeh1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260317195514-7q5zeh1",
+						"updated": "20260317195538"
+					},
+					"Children": [
+						{
+							"ID": "20260317195514-4xu3rev",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195514-4xu3rev",
+								"updated": "20260317195538"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-wo49zvq",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "データ同期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "機能を使用して、このファイルをAndroidデバイスに同期します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260317195514-6utuus1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260317195514-6utuus1",
+				"updated": "20260317195514"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上記の手順が完了すると、SiYuanは45秒ごとに通知を送信し、バックグラウンドでの動作を維持できるようになります。"
+				}
+			]
+		}
+	]
+}

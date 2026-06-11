@@ -1,0 +1,310 @@
+{
+	"ID": "20240530101000-odye3ea",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-mnfy20w",
+		"id": "20240530101000-odye3ea",
+		"title": "Web クリッピング",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-b130i9t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-cvr803z",
+				"id": "20240530101000-b130i9t",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wgmpvpv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bz0k7ia",
+				"id": "20240530101000-wgmpvpv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Web クリッピングとは、Web ページのコンテンツの形を可能な限り保持して SiYuan にコピーすることを意味します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-idgu5da",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-l4c2a0h",
+				"id": "20240530101000-idgu5da",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mvc3ou1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-8i42udu",
+				"id": "20240530101000-mvc3ou1",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-rwmwn6u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-m207py4",
+						"id": "20240530101000-rwmwn6u",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-gdfuu1h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-jre9syu",
+								"id": "20240530101000-gdfuu1h",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クリップしたコンテンツに含まれる画像をローカルに取り込む必要がない場合は、ブラウザで直接ページをコピーして SiYuan に貼り付けることができます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-m0w5vb7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-p6efkzl",
+						"id": "20240530101000-m0w5vb7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-jddgnrc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-1ay53ln",
+								"id": "20240530101000-jddgnrc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クリップしたコンテンツに含まれる画像をローカルに取り込むある場合は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://chromewebstore.google.com/detail/siyuan/hkcgjbeblifaincobbcfiffbpgoafepk",
+									"TextMarkTextContent": "SiYuan Chrome 拡張機能"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を使用します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-w0jf26z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-zltmk5c",
+				"id": "20240530101000-w0jf26z",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan Chrome 拡張機能"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bekjbcd",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-u4y17sv",
+				"id": "20240530101000-bekjbcd",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-wn2oht8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-u3d71bv",
+						"id": "20240530101000-wn2oht8",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-gb0thjm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-dvz5049",
+								"id": "20240530101000-gb0thjm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "拡張機能をインストールして、設定オプションから API トークンを設定します (トークンは SiYuan の "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "情報"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から確認できます)。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-58a3nm6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-zvxg1s9",
+						"id": "20240530101000-58a3nm6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-25l5gs2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-w4a9jqb",
+								"id": "20240530101000-25l5gs2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Web ページ上でクリップしたいコンテンツを選択し、右クリックメニューから \"Copy to SiYuan\" を選択します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-gdyce89",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-zwchuly",
+						"id": "20240530101000-gdyce89",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tayo89s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-p8bdet5",
+								"id": "20240530101000-tayo89s",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan に貼り付けます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-n55ut3y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ebiht7h",
+				"id": "20240530101000-n55ut3y",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "記事全体をクリップする場合は、拡張機能から直接 \"Send to SiYuan\" をクリックします。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mgqbzz5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-qtur8hl",
+				"id": "20240530101000-mgqbzz5"
+			}
+		}
+	]
+}

@@ -1,0 +1,405 @@
+{
+	"ID": "20200910201551-h4twhas",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200910201551-h4twhas",
+		"title": "书签和标签",
+		"type": "doc",
+		"updated": "20250115151954"
+	},
+	"Children": [
+		{
+			"ID": "20210104091316-ltmnzg9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091316-ltmnzg9",
+				"updated": "20250115151951"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "书签"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-lz5jshd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-lz5jshd",
+				"updated": "20210702231322"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你需要“收藏”内容块，请通过块标菜单打开属性面板，然后就可以在属性面板中设置书签了。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-5vwheuz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-5vwheuz",
+				"updated": "20250115151951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所有收藏过的内容块会在书签页签（ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌃3"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​）中列出。如果要取消收藏，在该内容块标识下拉菜单中选择删除即可。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-zxotarc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091316-zxotarc",
+				"updated": "20250115151954"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "标签"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-2w9o7q2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-2w9o7q2"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标签用于在内容块中对该块进行标记。语法是通过一前一后两个 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 将标签标识包裹起来，像这样 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#标签#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-nehznw8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-nehznw8"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标签支持层级，这样可以更方便地对内容块进行分类整理。不同层级之间使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 分隔，像这样 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#A/B/C#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091316-gt0utcz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091316-gt0utcz",
+				"updated": "20250115151954"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "所有打过标签的内容块会在标签页签（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌃4"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​）中列出。如果需要取消标签，在内容块中删掉该标签即可。"
+				}
+			]
+		},
+		{
+			"ID": "20230928114125-0cw4gus",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230928114125-0cw4gus",
+				"updated": "20230928114129"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230928114129-dirvllf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230928114129-dirvllf",
+				"updated": "20231205225717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "请勿在书签或者标签中使用特殊符号，否则会导致无法全局搜索，也无法在书签/标签面板中重命名和删除。这里的“特殊符号”包括："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "*"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "_"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "["
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "!"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "`"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026amp;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ")"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "="
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		}
+	]
+}

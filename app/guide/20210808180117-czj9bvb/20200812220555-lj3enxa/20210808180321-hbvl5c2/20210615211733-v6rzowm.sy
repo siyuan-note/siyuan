@@ -1,0 +1,1938 @@
+{
+	"ID": "20210615211733-v6rzowm",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210615211733-v6rzowm",
+		"title": "数据历史",
+		"type": "doc",
+		"updated": "20250115153534"
+	},
+	"Children": [
+		{
+			"ID": "20220501134357-003dftr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220501134357-003dftr",
+				"updated": "20230403113939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20220501134418-ql8s90v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501134418-ql8s90v",
+				"updated": "20220615111558"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据历史主要用于保证数据安全，即使发生误操作也能通过历史进行数据回滚。数据历史分为两个功能："
+				}
+			]
+		},
+		{
+			"ID": "20220615111559-oiv8079",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220615111559-oiv8079",
+				"updated": "20220615112117"
+			},
+			"Children": [
+				{
+					"ID": "20220615111600-89ecgx0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615111600-89ecgx0",
+						"updated": "20220615111600"
+					},
+					"Children": [
+						{
+							"ID": "20220615111600-ag04crg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615111600-ag04crg",
+								"updated": "20220615112026"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文件历史：按原始文件方式保存在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/history/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夹下，人类可读，可手动拷贝到 data 对应位置恢复"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615111601-l9ydpwh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220615111601-l9ydpwh",
+						"updated": "20220615112117"
+					},
+					"Children": [
+						{
+							"ID": "20220615111601-8oaj5t3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615111601-8oaj5t3",
+								"updated": "20220615112117"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数据快照：按文件分块、加密并压缩保存在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/repo/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夹下，人类不可读，无法手动恢复"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615112117-57abhen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615112117-57abhen",
+				"updated": "20220830225617"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据快照除了用于本地数据历史，还用于云端"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230808120347-3cob0nb",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "数据同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220615111435-ownalnb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220615111435-ownalnb",
+				"updated": "20220615111459"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件历史"
+				}
+			]
+		},
+		{
+			"ID": "20220615111435-mm5qpqp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615111435-mm5qpqp",
+				"updated": "20220615112944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件历史生成规则"
+				}
+			]
+		},
+		{
+			"ID": "20210403160319-ufy7jta",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210403160319-ufy7jta",
+				"updated": "20240402173808"
+			},
+			"Children": [
+				{
+					"ID": "20210403160319-8uzmero",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210403160319-8uzmero",
+						"updated": "20220831210638"
+					},
+					"Children": [
+						{
+							"ID": "20210524213102-cwl7v2f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210524213102-cwl7v2f",
+								"updated": "20220831210638"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "每隔 10 分钟会对这 10 分钟内更新过的文档生成历史（间隔"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "时间"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "可通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "历史生成间隔"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 进行调整），历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-update"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501134315-6omumob",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501134315-6omumob",
+						"updated": "20220501134735"
+					},
+					"Children": [
+						{
+							"ID": "20220501134315-1h4mvgn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501134315-1h4mvgn",
+								"updated": "20220501134735"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端同步时，本地被云端覆盖的数据会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501134333-kamak39",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501134333-kamak39",
+						"updated": "20220501134747"
+					},
+					"Children": [
+						{
+							"ID": "20220501134333-1f6hbi9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501134333-1f6hbi9",
+								"updated": "20220501134747"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "手动删除笔记本、文档和"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "资源文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "时会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210524213119-wybx1kh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210524213119-wybx1kh",
+						"updated": "20220830225509"
+					},
+					"Children": [
+						{
+							"ID": "20210524213119-ofmb315",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210524213119-ofmb315",
+								"updated": "20220830225509"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210115222011-bzsftun",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "清理未引用资源"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "时会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-clean"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501134920-qb6wh0b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501134920-qb6wh0b",
+						"updated": "20230403114300"
+					},
+					"Children": [
+						{
+							"ID": "20220501134920-k403n1r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501134920-k403n1r",
+								"updated": "20230403114300"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220628204444-9n0y9h2",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "优化排版"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "时会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-format"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230403113929-44xkaoz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230403113929-44xkaoz",
+						"updated": "20230403114310"
+					},
+					"Children": [
+						{
+							"ID": "20230403113929-ud36ubv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230403113929-ud36ubv",
+								"updated": "20230403114310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "搜索替换"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 时会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-replace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240402173746-e726apc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240402173746-e726apc",
+						"updated": "20240402173808"
+					},
+					"Children": [
+						{
+							"ID": "20240402173746-k4p1tqy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240402173746-k4p1tqy",
+								"updated": "20240402173808"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在大纲面板拖拽大纲项目时会生成历史，历史文件夹后缀为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-outline"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090742-f9nkimo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104090742-f9nkimo",
+				"updated": "20250115153518"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "浏览文件历史"
+				}
+			]
+		},
+		{
+			"ID": "20210104090742-8rmcz3i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210104090742-8rmcz3i",
+				"updated": "20250115153518"
+			},
+			"Children": [
+				{
+					"ID": "20220501135052-k47n4ms",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135052-k47n4ms",
+						"updated": "20250115153518"
+					},
+					"Children": [
+						{
+							"ID": "20220501135052-o3r30jj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135052-o3r30jj",
+								"updated": "20250115153518"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击顶部工具栏 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据历史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 按钮或者 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 可打开数据历史界面，切换到 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "文件历史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 页签，如果没有历史数据显示，可以试下该界面的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "重建索引"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501135057-pa9pcyo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501135057-pa9pcyo",
+						"updated": "20220501135111"
+					},
+					"Children": [
+						{
+							"ID": "20220501135057-4hmpdzy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501135057-4hmpdzy",
+								"updated": "20220501135111"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在文件系统 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/history/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夹下浏览"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090742-hjfornp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104090742-hjfornp",
+				"updated": "20220615112957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过文件历史回滚"
+				}
+			]
+		},
+		{
+			"ID": "20210121105921-zdk68jf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210121105921-zdk68jf",
+				"updated": "20220615120058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在数据历史界面左侧时间列表栏中，每一条历史记录右侧都有一个回滚按钮，点击以后将弹出确认对话框，如果确认回滚的话将使用文件历史覆盖现有文件。"
+				}
+			]
+		},
+		{
+			"ID": "20220501133017-3hecoih",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133017-3hecoih",
+				"updated": "20220501133133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果有非常多的文件需要回滚，建议手动在文件系统上复制。历史文件夹的内部结构和 data 内部结构一致，比如："
+				}
+			]
+		},
+		{
+			"ID": "20220501133105-b25vi0a",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220501133105-b25vi0a",
+				"updated": "20220831210446"
+			},
+			"Children": [
+				{
+					"ID": "20220501133105-kzow9y3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133105-kzow9y3",
+						"updated": "20220501133105"
+					},
+					"Children": [
+						{
+							"ID": "20220501133105-1dmg0zl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133105-1dmg0zl",
+								"updated": "20220501133105"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "笔记本删除："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2022-05-01-091021-delete/20210808180117-czj9bvb/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，即 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "历史生成日期-{操作}/{笔记本 ID}/"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133105-ham1o5d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133105-ham1o5d",
+						"updated": "20220501134003"
+					},
+					"Children": [
+						{
+							"ID": "20220501133105-a1rwa0u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133105-a1rwa0u",
+								"updated": "20220501134003"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文档删除："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2022-05-01-091209-delete/20210808180117-czj9bvb/20200812220555-lj3enxa.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，即 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "历史生成日期-{操作}/{笔记本 ID}/{文档路径}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133105-486vgy6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220501133105-486vgy6",
+						"updated": "20220831210446"
+					},
+					"Children": [
+						{
+							"ID": "20220501133105-jqnfpzv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133105-jqnfpzv",
+								"updated": "20220831210446"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "资源文件清理："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2022-05-01-095621-clean/assets/image-20220501091157-qccp87e.png"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，即 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "历史生成日期-{操作}/assets/{资源文件名}"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220501133041-w6ydfgw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501133041-w6ydfgw",
+				"updated": "20220501133251"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手动回滚操作步骤："
+				}
+			]
+		},
+		{
+			"ID": "20220501133237-il09opg",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220501133237-il09opg",
+				"updated": "20220615111149"
+			},
+			"Children": [
+				{
+					"ID": "20220501133254-az0u30r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220501133254-az0u30r",
+						"updated": "20220501133340"
+					},
+					"Children": [
+						{
+							"ID": "20220501133254-4ztj9yt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133254-4ztj9yt",
+								"updated": "20220501133340"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "退出思源，然后全量复制备份一下整个工作空间，避免后续误操作导致数据丢失"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133342-7fu44br",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220501133342-7fu44br",
+						"updated": "20220501133421"
+					},
+					"Children": [
+						{
+							"ID": "20220501133342-j92vqhx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133342-j92vqhx",
+								"updated": "20220501133421"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "进入 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/history/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夹，将 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "历史生成日期-{操作}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件夹下的数据直接复制到 data 文件夹进行覆盖"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220501133422-0nxnwc2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220501133422-0nxnwc2",
+						"updated": "20220615111149"
+					},
+					"Children": [
+						{
+							"ID": "20220501133422-gc6qund",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220501133422-gc6qund",
+								"updated": "20220615111149"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "启动思源后手动执行重建索引"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615115547-2fr6uej",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615115547-2fr6uej",
+				"updated": "20220615115551"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "清理文件历史"
+				}
+			]
+		},
+		{
+			"ID": "20220615115551-u75o5mk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615115551-u75o5mk",
+				"updated": "20220615115618"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "默认自动保存最近 30 天生成的文件历史，可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "历史保留天数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 进行调整，超过该期限的文件历史会被自动删除。"
+				}
+			]
+		},
+		{
+			"ID": "20220615115625-3dx0t1j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615115625-3dx0t1j",
+				"updated": "20220830230414"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你想清空所有文件历史数据，可以点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "清空所有历史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，或者手动删除 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/history/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文件夹，然后在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文件历史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重建索引"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220615112531-5yos96d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220615112531-5yos96d",
+				"updated": "20220615112535"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据快照"
+				}
+			]
+		},
+		{
+			"ID": "20220615113758-i2279ot",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615113758-i2279ot",
+				"updated": "20220615113939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "初始化密钥"
+				}
+			]
+		},
+		{
+			"ID": "20220615113752-lbtlf6j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615113752-lbtlf6j",
+				"updated": "20220615113952"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "第一次使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "数据快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "前需要在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关于"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中初始化 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据仓库密钥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220722001510-mtrrbj0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220722001510-mtrrbj0",
+				"updated": "20220722001555"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "初始化密钥有三种方式："
+				}
+			]
+		},
+		{
+			"ID": "20220722001555-3wcanjb",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220722001555-3wcanjb",
+				"updated": "20220722001917"
+			},
+			"Children": [
+				{
+					"ID": "20220722001556-sjm48yn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722001556-sjm48yn",
+						"updated": "20220722001556"
+					},
+					"Children": [
+						{
+							"ID": "20220722001556-8sc4mqb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722001556-8sc4mqb",
+								"updated": "20220722001656"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导入密钥"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：将其他设备上的密钥字符串复制到此粘贴导入"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220722001657-79plg0z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722001657-79plg0z"
+					},
+					"Children": [
+						{
+							"ID": "20220722001657-gh22p4n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722001657-gh22p4n",
+								"updated": "20220722001831"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "自动生成密钥"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：使用随机数生成密钥，该方式只需在一台设备上执行一次，其他设备使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导入密钥"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220722001834-8kc1pdr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220722001834-8kc1pdr",
+						"updated": "20220722001917"
+					},
+					"Children": [
+						{
+							"ID": "20220722001834-13o5rzz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220722001834-13o5rzz",
+								"updated": "20220722001917"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "通过密码生成密钥"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：使用自定义的密码短语生成密钥，该方式需要在所有设备上都使用相同的密码短语"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615113953-4o3uc9z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615113953-4o3uc9z",
+				"updated": "20220722002029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "总而言之，请务必保证所有设备都使用相同的密钥，否则数据快照将无法跨设备使用，比如无法通过云端同步数据快照。"
+				}
+			]
+		},
+		{
+			"ID": "20220615112535-k8n73hd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615112535-k8n73hd",
+				"updated": "20250115153534"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "创建数据快照"
+				}
+			]
+		},
+		{
+			"ID": "20220615112933-zoh8iyg",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220615112933-zoh8iyg",
+				"updated": "20250115153534"
+			},
+			"Children": [
+				{
+					"ID": "20220615114246-9or7h68",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220615114246-9or7h68",
+						"updated": "20250115153534"
+					},
+					"Children": [
+						{
+							"ID": "20220615114246-lr3ydl0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615114246-lr3ydl0",
+								"updated": "20250115153534"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击顶部工具栏 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据历史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 按钮或者 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 可打开数据历史界面"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615114251-72kaaxr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220615114251-72kaaxr"
+					},
+					"Children": [
+						{
+							"ID": "20220615114251-2y9unt4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615114251-2y9unt4",
+								"updated": "20220615114252"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切换到最后一个页签 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据快照"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220615114253-k4a3tg5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220615114253-k4a3tg5",
+						"updated": "20220615120214"
+					},
+					"Children": [
+						{
+							"ID": "20220615114253-70sfmtn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220615114253-70sfmtn",
+								"updated": "20220615120214"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "创建快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，填写 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "备注"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 并确认"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220615114908-0y5tfv9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615114908-0y5tfv9",
+				"updated": "20220615115114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "浏览数据快照时只能通过快照创建时间和备注进行区别，所以备注信息应该尽量详细一些，以备后续能够准确识别不同的数据快照。"
+				}
+			]
+		},
+		{
+			"ID": "20220615114301-099icf4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615114301-099icf4",
+				"updated": "20220615114632"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "浏览数据快照"
+				}
+			]
+		},
+		{
+			"ID": "20220615114706-5wy741l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615114706-5wy741l",
+				"updated": "20220615115247"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "创建完数据快照后可以在左侧看到快照时间列表，点击不同快照以后可以浏览其备注。"
+				}
+			]
+		},
+		{
+			"ID": "20220615115212-kjebrv4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615115212-kjebrv4",
+				"updated": "20220615115226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "回滚数据快照"
+				}
+			]
+		},
+		{
+			"ID": "20220615115227-oxdlcxq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220615115227-oxdlcxq",
+				"updated": "20220615115452"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在快照时间列表条目右侧都有一个回滚按钮，点击以后将弹出确认对话框，如果确认回滚的话将使用快照数据完全替换现有数据。"
+				}
+			]
+		},
+		{
+			"ID": "20220615115126-z62p36j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220615115126-z62p36j",
+				"updated": "20220615115532"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "清理数据快照"
+				}
+			]
+		},
+		{
+			"ID": "20220615115758-ajl5l83",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220615115758-ajl5l83",
+				"updated": "20230422102226"
+			},
+			"Children": [
+				{
+					"ID": "20230422101107-ihb3kxp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422101107-ihb3kxp",
+						"updated": "20230422102226"
+					},
+					"Children": [
+						{
+							"ID": "20230422101107-zxq6qh2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422101107-zxq6qh2",
+								"updated": "20230422102226"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "关于"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据仓库清理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将删除所有未引用的快照和相关数据对象。“引用的快照”指的是 repo/refs/ 下指向的快照："
+								}
+							]
+						},
+						{
+							"ID": "20230422101343-wvt2y4r",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230422101343-wvt2y4r",
+								"updated": "20230422101936"
+							},
+							"Children": [
+								{
+									"ID": "20230422101343-obxopx6",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422101343-obxopx6",
+										"updated": "20230422101934"
+									},
+									"Children": [
+										{
+											"ID": "20230422101343-f5w2p8p",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422101343-f5w2p8p",
+												"updated": "20230422101934"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "latest"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 指向最新一个快照"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230422101357-4ugrbw1",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422101357-4ugrbw1",
+										"updated": "20230422101936"
+									},
+									"Children": [
+										{
+											"ID": "20230422101357-istm02i",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422101357-istm02i",
+												"updated": "20230422101936"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "tags/*"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 指向手动标记的快照"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422101105-vdd9m4g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422101105-vdd9m4g",
+						"updated": "20230422101105"
+					},
+					"Children": [
+						{
+							"ID": "20230422101105-0csmuf6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422101105-0csmuf6",
+								"updated": "20230422101106"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "手动删除 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/repo/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ 文件夹可以清空全部"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据快照"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210928094544-vg2c2ts",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210928094544-vg2c2ts",
+				"updated": "20210928094608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略文件"
+				}
+			]
+		},
+		{
+			"ID": "20210928094612-rymbb43",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210928094612-rymbb43",
+				"updated": "20240119210241"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在创建快照时忽略一些文件，请在文件系统上创建或编辑文本文件 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/data/.siyuan/syncignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​， 其中每一行使用 data 文件夹的相对路径进行配置，表示忽略文件或文件夹的路径，支持通配符。例如："
+				}
+			]
+		},
+		{
+			"ID": "20210928094821-syjcgbp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210928094821-syjcgbp",
+				"updated": "20211222185741"
+			},
+			"Children": [
+				{
+					"ID": "20210928094822-nn422ie",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928094822-nn422ie",
+						"updated": "20211222185741"
+					},
+					"Children": [
+						{
+							"ID": "20210928094822-ipyjn3n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928094822-ipyjn3n",
+								"updated": "20211222185741"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "： 忽略 data/20210808180117-6v0mkxr 笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210928095121-tyfox35",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210928095121-tyfox35",
+						"updated": "20210928095254"
+					},
+					"Children": [
+						{
+							"ID": "20210928095121-tng5faj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210928095121-tng5faj",
+								"updated": "20210928095254"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "assets/*.pdf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略 data/assets/ 下的 PDF 文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220708101225-a2lxbp0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220708101225-a2lxbp0",
+				"updated": "20220807180307"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20220807180308-7hyw96s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220807180308-7hyw96s",
+				"updated": "20220807180341"
+			},
+			"Children": [
+				{
+					"ID": "20220807180328-2km55lx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220807180328-2km55lx",
+						"updated": "20220807180341"
+					},
+					"Children": [
+						{
+							"ID": "20220807180328-x8lpi2n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220807180328-x8lpi2n",
+								"updated": "20220807180341"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "符号链接和隐藏文件不会被快照"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

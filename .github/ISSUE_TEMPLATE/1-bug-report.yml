@@ -1,0 +1,76 @@
+name: 🐛 Bug report
+description: Report defects to help us improve
+title: "Please enter the title of the bug report"
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: |
+        Please search to see if an issue already exists for the bug you encountered.
+      options:
+        - label: | 
+            I have searched the existing issues
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Can the issue be reproduced with the default theme (daylight/midnight)?
+      description: |
+        Please confirm that the issue can be reproduced with the default theme.
+      options:
+        - label: |
+            I was able to reproduce the issue with the default theme
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Could the issue be due to extensions?
+      description: |
+        Be aware that code snippets, plugins, themes, widgets, or other extensions may cause problems.
+      options:
+        - label: |
+            I've ruled out the possibility that the extension is causing the problem.
+          required: true
+  - type: textarea
+    attributes:
+      label: Describe the problem
+      description: |
+        Please describe the problem you are experiencing as clearly as possible.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected result
+      description: |
+        Please be as clear and accurate as possible to describe the results you are looking for.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Screenshot or screen recording presentation
+      description: |
+        Please try to attach screenshots or videos to describe the problem you are experiencing.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Version environment
+      value: |
+        - Version: 
+        - Operating System: 
+        - Browser (if used): 
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Log file
+      description: |
+        The program log file is located at `workspace/temp/siyuan.log`
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: More information
+      description: |
+        Please provide other additional information to help us diagnose the problem.
+    validations:
+      required: false

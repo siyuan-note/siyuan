@@ -1,0 +1,161 @@
+{
+	"ID": "20210110181011-fbhoesf",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210110181011-fbhoesf",
+		"title": "Daily notes",
+		"type": "doc",
+		"updated": "20241008202033"
+	},
+	"Children": [
+		{
+			"ID": "20210110181041-j47iwxx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110181041-j47iwxx",
+				"updated": "20241008201757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We can quickly create a document through the daily note, and the daily note function entrance is in the top main menu."
+				}
+			]
+		},
+		{
+			"ID": "20210110181041-dnap16f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110181041-dnap16f",
+				"updated": "20241008202033"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before using the daily note, you need to open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in the notebook right-click menu, and configure in the new diary settings:"
+				}
+			]
+		},
+		{
+			"ID": "20210110181041-24ejxr4",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210110181041-24ejxr4",
+				"updated": "20241008202018"
+			},
+			"Children": [
+				{
+					"ID": "20210110181041-3dq1cg4",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110181041-3dq1cg4",
+						"updated": "20241008202018"
+					},
+					"Children": [
+						{
+							"ID": "20210302223720-m8ekt02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223720-m8ekt02",
+								"updated": "20241008202018"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Save path: the path under the notebook, support "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210104091444-c7gg3ak",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "template variables"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210110181041-aqpiznl",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110181041-aqpiznl"
+					},
+					"Children": [
+						{
+							"ID": "20210302223720-no5b8qx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223720-no5b8qx"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Template path (optional): use this template as the initial content when creating the daily note"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210110181041-vntbiya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110181041-vntbiya",
+				"updated": "20210501173308"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tips: Use in the specified template "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201117112518-dott91x",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Embed Content Block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to summarize to-do items or content blocks that need to be viewed daily."
+				}
+			]
+		}
+	]
+}

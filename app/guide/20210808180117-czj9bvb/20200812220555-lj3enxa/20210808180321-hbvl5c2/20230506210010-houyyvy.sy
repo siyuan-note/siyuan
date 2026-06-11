@@ -1,0 +1,188 @@
+{
+	"ID": "20230506210010-houyyvy",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230506210010-houyyvy",
+		"title": "插件",
+		"type": "doc",
+		"updated": "20250115152320"
+	},
+	"Children": [
+		{
+			"ID": "20230506210021-udp6q1j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210021-udp6q1j",
+				"updated": "20230506210021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230506210021-1ngx24g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210021-1ngx24g",
+				"updated": "20230506211757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插件主要用于扩展"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "思源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "整体功能。"
+				}
+			]
+		},
+		{
+			"ID": "20230512170814-itmsfoy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512170814-itmsfoy",
+				"updated": "20230512171323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "相较于"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210824201257-cy7icrc",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "挂件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "而言，插件主要面向程序功能扩展，不面向内容块扩展。"
+				}
+			]
+		},
+		{
+			"ID": "20230506210021-04aesus",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210021-04aesus",
+				"updated": "20250115152320"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230506210021-tk7w2m5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210021-tk7w2m5",
+				"updated": "20250115152320"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插件通过插件集市安装，安装后插件将被放置到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/plugins/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 文件夹下，你可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "集市"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "已下载"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "插件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中启用或禁用插件。"
+				}
+			]
+		},
+		{
+			"ID": "20230506210021-f12gucj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210021-f12gucj",
+				"updated": "20230506210911"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架插件集市"
+				}
+			]
+		},
+		{
+			"ID": "20230506210021-jimdgxy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210021-jimdgxy",
+				"updated": "20230820184204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "请参考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社区集市仓库"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

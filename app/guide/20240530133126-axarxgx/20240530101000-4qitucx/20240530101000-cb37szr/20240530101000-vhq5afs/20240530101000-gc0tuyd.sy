@@ -1,0 +1,418 @@
+{
+	"ID": "20240530101000-gc0tuyd",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-3zs9co4",
+		"id": "20240530101000-gc0tuyd",
+		"title": "データバックアップ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-1071qb0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-06wywfi",
+				"id": "20240530101000-1071qb0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sb8vzo1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cawoxm6",
+				"id": "20240530101000-sb8vzo1",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データバックアップとは"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-sy5cmkg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "データスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "をクラウドにアップロードすることを指します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-k3k2ztd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-8fowrbc",
+				"id": "20240530101000-k3k2ztd",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-t8xga8c",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-0xlt5lu",
+				"id": "20240530101000-t8xga8c",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-pg1unv0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-1suh68v",
+						"id": "20240530101000-pg1unv0",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-w39u57i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-e66hp0l",
+								"id": "20240530101000-w39u57i",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データバックアップを利用するには"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-0fn4grk",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "データリポジトリキーを初期化"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "する必要があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-236te0m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-ho2ujhs",
+						"id": "20240530101000-236te0m",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ao85v8q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-sa1nf4z",
+								"id": "20240530101000-ao85v8q",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ履歴"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ タブを開き、バックアップしたいスナップショットを選択して "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "タグアイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ をクリックします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-za65ndl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-jjg53wa",
+						"id": "20240530101000-za65ndl",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-uv0qj06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-77wtdl0",
+								"id": "20240530101000-uv0qj06",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドロップダウンリストから "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ローカルのタグ付きスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択し、アップロードしたいスナップショットを選択して "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アップロードアイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ をクリックします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-w0h8rba",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-mbwy12q",
+						"id": "20240530101000-w0h8rba",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tdiqm45",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-07hv5ac",
+								"id": "20240530101000-tdiqm45",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アップロードが完了したら、ドロップダウンリストから "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クラウドのタグ付きスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択すると、クラウドにバックアップされたスナップショットが表示されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-jmxnm5t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"ID": "20240530101000-xwfcabo",
+						"id": "20240530101000-jmxnm5t",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-2sdpoz6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-5i2td7j",
+								"id": "20240530101000-2sdpoz6",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クラウドバックアップのスナップショットをローカルにダウンロードした後は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-stu3s9h",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "データスナップショットのロールバック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を行うことでデータを復元できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bfarsjc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-64upot1",
+				"id": "20240530101000-bfarsjc",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "追加情報:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-51ij0r5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-8j37sql",
+				"id": "20240530101000-51ij0r5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-bnhfagc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-kml925i",
+						"id": "20240530101000-bnhfagc",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-9tw018t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-7fjvor1",
+								"id": "20240530101000-9tw018t",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "除外ファイルを設定できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-14kyv52",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-06qk0ld",
+						"id": "20240530101000-14kyv52",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4opb625",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ji2ghuk",
+								"id": "20240530101000-4opb625",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最大 12 個のデータスナップショットをアップロードできます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nwqp7bw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fqcsg12",
+				"id": "20240530101000-nwqp7bw",
+				"updated": "20240530101000"
+			}
+		}
+	]
+}

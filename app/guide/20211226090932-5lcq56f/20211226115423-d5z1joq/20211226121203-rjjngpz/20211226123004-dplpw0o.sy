@@ -1,0 +1,1690 @@
+{
+	"ID": "20211226123004-dplpw0o",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226123004-dplpw0o",
+		"title": "範本片段",
+		"type": "doc",
+		"updated": "20250828155154"
+	},
+	"Children": [
+		{
+			"ID": "20211226123024-6aiti1c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123024-6aiti1c",
+				"updated": "20211225221841"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-sv70lot",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-sv70lot",
+				"updated": "20211228135113"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "範本片段用於在游標插入符位置快速插入之前設置好的文本內容，支援變量。範本片段使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後綴文件，存放在工作空間 data/templates 文件夾下。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-eyagqur",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123024-eyagqur",
+				"updated": "20250828155154"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編寫範本"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-pwx44l4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-pwx44l4",
+				"updated": "20211228140749"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "範本使用的是 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://golang.org/pkg/text/template/",
+					"TextMarkTextContent": "Go 編程語言的文字範本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "進行實作，如果你對此有了解的話，可以實作一些程式邏輯在裡面，比如比較邏輯、叠代邏輯等。另外，為了避免語法沖突，範本語法使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{action}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（而不是 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{action}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-eurqp4g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-eurqp4g",
+				"updated": "20241008201617"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我們通過開原專案 Sprig (GitHub repo: Masterminds/sprig) 內置了一些變量和函數來豐富範本。比如可通過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 來渲染當前時間，更多用法請參考 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "http://masterminds.github.io/sprig/",
+					"TextMarkTextContent": "Sprig 幫助文檔"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-46ipj4k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-46ipj4k",
+				"updated": "20211228124150"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "關於日期時間格式化有個細節需要"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "：Go 程式語言的格式化比較特殊：不是使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "yyyy-MM-dd HH:mm:ss"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，而是使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "2006-01-02 15:04:05"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 這個固定時間格式（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.zhihu.com/question/366830553",
+					"TextMarkTextContent": "知乎討論"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-hcvjosa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-hcvjosa",
+				"updated": "20211228135329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了 Sprig 內置的變量和函數，還支援如下變量和函數："
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-pjvw31z",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226123024-pjvw31z",
+				"updated": "20250828155154"
+			},
+			"Children": [
+				{
+					"ID": "20211226123024-jck7280",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123024-jck7280",
+						"updated": "20211228104250"
+					},
+					"Children": [
+						{
+							"ID": "20211226123024-ezex4bu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123024-ezex4bu",
+								"updated": "20211228104250"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該變量用於插入當前文檔名。比如範本內容為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "# .action{.title}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，則調用後會以一級標題語法插入到當前文檔內容中"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123024-7oozkfr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123024-7oozkfr",
+						"updated": "20211226123024"
+					},
+					"Children": [
+						{
+							"ID": "20211226123024-vy2z5oq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123024-vy2z5oq",
+								"updated": "20211226123024"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該變量用於插入當前文檔 ID"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123024-l1jz2w8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123024-l1jz2w8",
+						"updated": "20211226123024"
+					},
+					"Children": [
+						{
+							"ID": "20211226123024-xx9l8ku",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123024-xx9l8ku",
+								"updated": "20211226123024"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該變量用於插入當前文檔命名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123024-jdmxqwy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123024-jdmxqwy",
+						"updated": "20220605170337"
+					},
+					"Children": [
+						{
+							"ID": "20211226123024-yfk0zfn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123024-yfk0zfn",
+								"updated": "20220605170337"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alias"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該變量用於插入當前文檔別名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240921122413-50618fj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240921122413-50618fj",
+						"updated": "20240921122732"
+					},
+					"Children": [
+						{
+							"ID": "20240921122413-hrexuif",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240921122413-hrexuif",
+								"updated": "20240921122732"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getHPathByID"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該函數用於傳回塊 ID 對應塊的可讀路徑"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123024-e42d7xq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123024-e42d7xq",
+						"updated": "20250801152535"
+					},
+					"Children": [
+						{
+							"ID": "20211226123024-vxjdsno",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123024-vxjdsno",
+								"updated": "20241213215430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "queryBlocks"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 blocks "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
+								}
+							]
+						},
+						{
+							"ID": "20241213215519-mfgruqs",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215519-mfgruqs",
+								"style": "line-height: 22px;",
+								"updated": "20250801152535"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250331163425-s5u08ng",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250331163425-s5u08ng",
+						"updated": "20250801152542"
+					},
+					"Children": [
+						{
+							"ID": "20250331163425-6fe2kvm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250331163425-6fe2kvm",
+								"updated": "20250331163515"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用於根據塊 ID 查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，傳回值為 block"
+								}
+							]
+						},
+						{
+							"ID": "20250331163435-irjmxt9",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20250331163435-irjmxt9",
+								"updated": "20250801152542"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ getBlock \"20250331163425-s5u08ng\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123024-69kddle",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123024-69kddle",
+						"updated": "20250801152548"
+					},
+					"Children": [
+						{
+							"ID": "20211226123024-4qwyf3w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123024-4qwyf3w",
+								"updated": "20241213215431"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySpans"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 spans "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
+								}
+							]
+						},
+						{
+							"ID": "20241213215524-9an3khb",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215524-9an3khb",
+								"style": "line-height: 22px;",
+								"updated": "20250801152548"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ querySpans \"SELECT * FROM spans LIMIT ?\" \"3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241213214930-4votv1n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241213214930-4votv1n",
+						"updated": "20250801152554"
+					},
+					"Children": [
+						{
+							"ID": "20241213214930-dogaks1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241213214930-dogaks1",
+								"updated": "20241213215433"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySQL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，傳回值為結果集"
+								}
+							]
+						},
+						{
+							"ID": "20241213215530-f2iwrjz",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215530-f2iwrjz",
+								"style": "line-height: 22px;",
+								"updated": "20250801152554"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ querySQL \"SELECT * FROM refs LIMIT 3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212102019-gassjqt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212102019-gassjqt",
+						"updated": "20250801152602"
+					},
+					"Children": [
+						{
+							"ID": "20241212102021-54wv84h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212102021-54wv84h",
+								"updated": "20241212164010"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於統計塊內容"
+								}
+							]
+						},
+						{
+							"ID": "20241213215707-lxpmd6b",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215707-lxpmd6b",
+								"style": "line-height: 22px;",
+								"updated": "20250801152602"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ (statBlock .id).RuneCount }\n.action{ (statBlock .id).WordCount }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20241212102021-vj2zyyl",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241212102021-vj2zyyl",
+								"updated": "20241212102021"
+							},
+							"Children": [
+								{
+									"ID": "20241212102021-92gy6t3",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102021-92gy6t3",
+										"updated": "20241212102021"
+									},
+									"Children": [
+										{
+											"ID": "20241212102021-d3lo8xu",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102021-d3lo8xu",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RuneCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102021-n8ufevw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102021-n8ufevw",
+										"updated": "20241212102021"
+									},
+									"Children": [
+										{
+											"ID": "20241212102021-omvwh9v",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102021-omvwh9v",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "WordCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102021-s12eoe7",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102021-s12eoe7",
+										"updated": "20241212102021"
+									},
+									"Children": [
+										{
+											"ID": "20241212102021-518qvnd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102021-518qvnd",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "LinkCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102021-dolb6ct",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102021-dolb6ct",
+										"updated": "20241212102021"
+									},
+									"Children": [
+										{
+											"ID": "20241212102021-dx5rhed",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102021-dx5rhed",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ImageCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102021-yt0q53w",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102021-yt0q53w",
+										"updated": "20241212102021"
+									},
+									"Children": [
+										{
+											"ID": "20241212102021-z97tnzw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102021-z97tnzw",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RefCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102021-npgihna",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102021-npgihna",
+										"updated": "20241212102021"
+									},
+									"Children": [
+										{
+											"ID": "20241212102021-80qheu7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102021-80qheu7",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "BlockCount"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212164016-nxteno5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212164016-nxteno5",
+						"updated": "20241225192757"
+					},
+					"Children": [
+						{
+							"ID": "20241212164016-ot8vo9l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212164016-ot8vo9l",
+								"updated": "20241225192757"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該函數用於傳回字符串中的字符數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241225192712-lunq7os",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241225192712-lunq7os",
+						"updated": "20241225192723"
+					},
+					"Children": [
+						{
+							"ID": "20241225192712-sk60mxv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241225192712-sk60mxv",
+								"updated": "20241225192723"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "wordCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該函數用於傳回字符串中的字數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123024-kca62r8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123024-kca62r8",
+						"updated": "20211226123024"
+					},
+					"Children": [
+						{
+							"ID": "20211226123024-8esfka7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123024-8esfka7",
+								"updated": "20211226123024"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "parseTime"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：該函數用於將時間格式的字符串解析為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 類型，以便使用更多格式化方法渲染該時間"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-8almw0o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-8almw0o",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-l18r65o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-l18r65o",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Weekday"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用來傳回週幾 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=0, Monday=1, ..., Saturday=6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-2qy7ko8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-2qy7ko8",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-6u90ynh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-6u90ynh",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用來傳回週幾 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=日, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-a8vapod",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-a8vapod",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-a18gx3m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-a18gx3m",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：函數用來傳回週幾 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=天, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-qs51tmz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-qs51tmz",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-tde2ifs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-tde2ifs",
+								"updated": "20250828154943"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeek"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回目前週"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154909-wxnydc5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154909-wxnydc5",
+						"updated": "20250828154909"
+					},
+					"Children": [
+						{
+							"ID": "20250828154909-3grwety",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154909-3grwety",
+								"updated": "20250828154910"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOMonth"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回目前月份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154911-8n67tvc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154911-8n67tvc",
+						"updated": "20250828154911"
+					},
+					"Children": [
+						{
+							"ID": "20250828154911-bb7z59o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154911-bb7z59o",
+								"updated": "20250828154916"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOYear"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回目前年份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154949-xhbwn4e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154949-xhbwn4e",
+						"updated": "20250828155154"
+					},
+					"Children": [
+						{
+							"ID": "20250828154949-5lcfpbs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154949-5lcfpbs",
+								"updated": "20250828155154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeekDate"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回指定週幾的日期 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，例如傳回本週四的日期 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ now | ISOWeekDate 4 | date \"2006-01-02\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-zazpf8n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-zazpf8n",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-zp3uf3c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-zp3uf3c",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "pow"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：指數計算，傳回整數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-623n608",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-623n608",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-y7455e1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-y7455e1",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "powf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：指數計算，傳回浮點數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-bilwjys",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-bilwjys",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-m1h6rni",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-m1h6rni",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：對數計算，傳回整數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240308162753-m9aebtw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240308162753-m9aebtw",
+						"updated": "20240308162753"
+					},
+					"Children": [
+						{
+							"ID": "20240308162753-ly9t8ym",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240308162753-ly9t8ym",
+								"updated": "20240308162753"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "logf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：對數計算，傳回浮點數"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-3wiifft",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123024-3wiifft",
+				"updated": "20250115153115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "調用範本"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-wtjurrr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-wtjurrr",
+				"updated": "20250115153115"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在游標插入符位置，通過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 選擇範本來觸發範本搜索，找到需要插入的範本後 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 即可。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-yrgnp4o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123024-yrgnp4o",
+				"updated": "20250801152721"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一個示例"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-s56q5uh",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20211226123024-s56q5uh",
+				"updated": "20250801152721"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{ $before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24) }\n.action{ $after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24) }\n今天是 `.action{ now | date \"2006-01-02\" }`。\n\n* 距離 `2020-02-19` 已經過去 `.action{ $before }` 天\n* 距離 `2048-02-19` 還剩 `.action{ $after }` 天\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-ddwrf29",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-ddwrf29",
+				"updated": "20211225221841"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$before"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$after"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 定義了兩個變量，分別記錄當前日期距離 2020 年和 2048 年的天數。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-4ihq4sa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123024-4ihq4sa",
+				"updated": "20221114173626"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架社區集市"
+				}
+			]
+		},
+		{
+			"ID": "20221114173549-5ie5uaj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221114173549-5ie5uaj",
+				"updated": "20230820184235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請參考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社區集市倉庫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123024-c71b8tn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123024-c71b8tn",
+				"updated": "20211226123024"
+			}
+		}
+	]
+}

@@ -1,0 +1,42 @@
+{
+	"ID": "20211226114929-08ap1r0",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f64f",
+		"id": "20211226114929-08ap1r0",
+		"title": "致謝",
+		"type": "doc",
+		"updated": "20230821234659"
+	},
+	"Children": [
+		{
+			"ID": "20230820175833-d4s3asp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230820175833-d4s3asp",
+				"updated": "20230821234659"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源的誕生離不開眾多的開源項目和貢獻者，請參考項目源代碼 kernel/go.mod、app/package.json 和項目首頁。"
+				}
+			]
+		},
+		{
+			"ID": "20230820175833-yka2sly",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230820175833-yka2sly",
+				"updated": "20230820180117"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源的成長離不開用戶的反饋和宣傳推廣，感謝所有人對思源的幫助 ❤️"
+				}
+			]
+		}
+	]
+}

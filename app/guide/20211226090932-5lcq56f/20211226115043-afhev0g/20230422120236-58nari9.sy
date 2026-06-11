@@ -1,0 +1,534 @@
+{
+	"ID": "20230422120236-58nari9",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230422120236-58nari9",
+		"title": "資料可用性保障",
+		"type": "doc",
+		"updated": "20230630141949"
+	},
+	"Children": [
+		{
+			"ID": "20230422120301-fq8ivta",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422120301-fq8ivta",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地設備"
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-acei6ig",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120301-acei6ig",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在提升本地設備上的資料可用性方面我們做了大量努力："
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-ooxvslf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230422120301-ooxvslf",
+				"updated": "20230422120316"
+			},
+			"Children": [
+				{
+					"ID": "20230422120301-ss6aiad",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-ss6aiad",
+						"updated": "20230422120301"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-rdiwlwy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-rdiwlwy",
+								"updated": "20230422120301"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "編輯器中的內容變更會自動保存到磁碟上，實際寫入磁碟時間會根據文檔大小有所不同，通常情況下 1 秒以內會完成最終保存"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120301-lpatbwv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-lpatbwv",
+						"updated": "20230422120308"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-mbutjue",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-mbutjue",
+								"updated": "20230422120308"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615120005-e50u8z7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "文件歷史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120301-as6yn55",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-as6yn55",
+						"updated": "20230422120316"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-qk3lt59",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-qk3lt59",
+								"updated": "20230422120316"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615120134-cdqs2gt",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "資料快照"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120301-5ioj77c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-5ioj77c",
+						"updated": "20230422120301"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-d5c3lid",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-d5c3lid",
+								"updated": "20230422120301"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持完整導出和導入 Data 壓縮檔"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120301-f7yk58k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-f7yk58k",
+						"updated": "20230422120301"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-rnfnh0a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-rnfnh0a",
+								"updated": "20230422120301"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "禁止通過第三方同步硬碟軟體同步資料以避免造成文件損壞"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-zt905ip",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120301-zt905ip",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通過這些努力，我們已經盡量保障了本地設備上的資料可用性。但請注意的是，這些保障落實的前提是設備磁碟不發生故障和意外。"
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-a1yj8y4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422120301-a1yj8y4",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "雲端同步"
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-ewk4v17",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120301-ewk4v17",
+				"updated": "20230422120403"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "僅僅提升本地設備上的資料可用性是不夠的，因為雲端"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226121438-xaafdo8",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "資料同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "是剛性需求之一。資料同步會影響本地設備資料，所以我們也要盡量保障同步後資料的可用性："
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-4tinfy7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230422120301-4tinfy7",
+				"updated": "20230422120445"
+			},
+			"Children": [
+				{
+					"ID": "20230422120301-oe7flh1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-oe7flh1",
+						"updated": "20230422120301"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-76ojm7f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-76ojm7f",
+								"updated": "20230422120301"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步前生成資料快照，如果出現非預期的同步結果則可以通過該快照回復"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120301-c2hgawf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-c2hgawf",
+						"updated": "20230422120426"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-ifhsls7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-ifhsls7",
+								"updated": "20230422120301"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步時如果發生文件衝突"
+								}
+							]
+						},
+						{
+							"ID": "20230422120301-2sx5b7x",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230422120301-2sx5b7x",
+								"updated": "20230422120426"
+							},
+							"Children": [
+								{
+									"ID": "20230422120301-v1ugz3c",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422120301-v1ugz3c",
+										"updated": "20230422120301"
+									},
+									"Children": [
+										{
+											"ID": "20230422120301-gan2m26",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422120301-gan2m26",
+												"updated": "20230422120301"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "自動生成文件歷史，可以通過文件歷史回復"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230422120301-z8l8tpp",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422120301-z8l8tpp",
+										"updated": "20230422120426"
+									},
+									"Children": [
+										{
+											"ID": "20230422120301-a82nm5r",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422120301-a82nm5r",
+												"updated": "20230422120426"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "也可以在 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "設置"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "雲端"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 中開啟 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "同步衝突時生成衝突文檔"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120301-he36u56",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120301-he36u56",
+						"updated": "20230422120445"
+					},
+					"Children": [
+						{
+							"ID": "20230422120301-uqcd85n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120301-uqcd85n",
+								"updated": "20230422120445"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "資料歷史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "資料快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "雲端快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中瀏覽和下載雲端快照"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-b5cgc38",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422120301-b5cgc38",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "總結"
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-gs54x5s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120301-gs54x5s",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通過以上保障措施，希望你不再對資料可用性方面產生太多顧慮，請放心使用。"
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-xc64ugj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120301-xc64ugj",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儘管如此，我們依然建議你參考 321 備份原則（至少 3 個副本、2 種介質和 1 個異地存儲）進行定期資料備份。"
+				}
+			]
+		},
+		{
+			"ID": "20230422120301-sham0cc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120301-sham0cc",
+				"updated": "20230422120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "歡迎給我們反饋更多建議，資料可用性是重中之重，期待在大家的努力下不斷提高它。"
+				}
+			]
+		}
+	]
+}

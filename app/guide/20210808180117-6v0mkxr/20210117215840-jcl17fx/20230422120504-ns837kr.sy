@@ -1,0 +1,550 @@
+{
+	"ID": "20230422120504-ns837kr",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230422120504-ns837kr",
+		"title": "Data Availability Guarantee",
+		"type": "doc",
+		"updated": "20230422122821"
+	},
+	"Children": [
+		{
+			"ID": "20230422120505-6clcdod",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422120505-6clcdod",
+				"updated": "20230422120520"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local device"
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-fbpi1wh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120505-fbpi1wh",
+				"updated": "20230422120505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We've put a lot of effort into improving data availability on local devices:"
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-b6bd8z1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230422120505-b6bd8z1",
+				"updated": "20230422122458"
+			},
+			"Children": [
+				{
+					"ID": "20230422120505-cn1xuuw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-cn1xuuw",
+						"updated": "20230422120505"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-jq3kipw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-jq3kipw",
+								"updated": "20230422120505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The content changes in the editor will be automatically saved to the disk, and the actual writing time to the disk will vary according to the size of the document. Usually, the final save will be completed within 1 second"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120505-dbhi4gi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-dbhi4gi",
+						"updated": "20230422122447"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-vch6lgs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-vch6lgs",
+								"updated": "20230422122447"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Support "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615120326-oxyzckb",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "File history"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120505-vve84oe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-vve84oe",
+						"updated": "20230422122458"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-mepcqaq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-mepcqaq",
+								"updated": "20230422122458"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Support "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615120602-drz9hwc",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Data snapshot"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120505-10hmek5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-10hmek5",
+						"updated": "20230422120505"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-fuhzgkv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-fuhzgkv",
+								"updated": "20230422120505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Support complete export and import of Data compressed package"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120505-xtjiycl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-xtjiycl",
+						"updated": "20230422120505"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-9i1p1rl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-9i1p1rl",
+								"updated": "20230422120505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "It is forbidden to synchronize data through third-party sync disk software to avoid file damage"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-p4nj9au",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120505-p4nj9au",
+				"updated": "20230422120505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Through these efforts, we have tried our best to ensure the availability of data on the local device. But please note that the premise of these guarantees is that the device disk is free from failures and accidents."
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-kest28r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422120505-kest28r",
+				"updated": "20230422120505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cloud sync"
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-put393c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120505-put393c",
+				"updated": "20230422122519"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It is not enough to improve the availability of data on the local device, because the "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210721112206-mhr9wxi",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "data synchronization"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is one of the rigid requirements. "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Data synchronization"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " will affect local device data, so we should try our best to ensure the availability of data after synchronization:"
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-g2ke8sd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230422120505-g2ke8sd",
+				"updated": "20230422122724"
+			},
+			"Children": [
+				{
+					"ID": "20230422120505-4wsflto",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-4wsflto",
+						"updated": "20230422120505"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-7ckz0sn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-7ckz0sn",
+								"updated": "20230422120505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Generate a data snapshot before synchronization, if unexpected synchronization results occur, you can roll back through the snapshot"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120505-5ca5hhc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-5ca5hhc",
+						"updated": "20230422122629"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-gdukytd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-gdukytd",
+								"updated": "20230422120505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If a file conflict occurs during synchronization"
+								}
+							]
+						},
+						{
+							"ID": "20230422120505-hxty2gi",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230422120505-hxty2gi",
+								"updated": "20230422122629"
+							},
+							"Children": [
+								{
+									"ID": "20230422120505-dd3jdaq",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422120505-dd3jdaq",
+										"updated": "20230422120505"
+									},
+									"Children": [
+										{
+											"ID": "20230422120505-5ztp90u",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422120505-5ztp90u",
+												"updated": "20230422120505"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Automatically generate file history, you can roll back through file history"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230422120505-68rfrop",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422120505-68rfrop",
+										"updated": "20230422122629"
+									},
+									"Children": [
+										{
+											"ID": "20230422120505-5n9yyyk",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422120505-5n9yyyk",
+												"updated": "20230422122629"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "You can also enable  "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Settings"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Cloud"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Generate conflict documentation when syncing conflicts"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422120505-48cniaa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422120505-48cniaa",
+						"updated": "20230422122724"
+					},
+					"Children": [
+						{
+							"ID": "20230422120505-9w5jgvm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422120505-9w5jgvm",
+								"updated": "20230422122724"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Support browsing and downloading cloud snapshots in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data History"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cloud snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-nki8wlu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422120505-nki8wlu",
+				"updated": "20230422120505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Summarize"
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-t9ql366",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120505-t9ql366",
+				"updated": "20230422122731"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Through the above safeguards, we hope you will no longer have too many concerns about data availability, please feel free to use it."
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-l9yz7a8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120505-l9yz7a8",
+				"updated": "20230422122821"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Nevertheless, we still recommend that you refer to the 321 Backup Guidelines (Minimum 3 copies, 2 media, and 1 offline storage)."
+				}
+			]
+		},
+		{
+			"ID": "20230422120505-8v46db1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422120505-8v46db1",
+				"updated": "20230422120505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Welcome to give us more feedback and suggestions, data availability is the top priority, and we look forward to continuously improving it with everyone's efforts."
+				}
+			]
+		}
+	]
+}

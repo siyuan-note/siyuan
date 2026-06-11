@@ -1,0 +1,331 @@
+{
+	"ID": "20230808120347-mw3qrwy",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230808120347-mw3qrwy",
+		"title": "资源文件图床",
+		"type": "doc",
+		"updated": "20250115151416"
+	},
+	"Children": [
+		{
+			"ID": "20230808120347-2713rg4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120347-2713rg4",
+				"updated": "20210721154740"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源提供了云端图床服务，主要用于将文档带资源文件复制到微信公众号、知乎和语雀等平台，这些平台的编辑器在粘贴时会自动拉取资源文件到它们的平台上。"
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-soszgko",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120347-soszgko",
+				"updated": "20250115151416"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-7xqohup",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20230808120347-7xqohup",
+				"updated": "20250115151416"
+			},
+			"Children": [
+				{
+					"ID": "20230808120347-x7ay8gk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20230808120347-x7ay8gk",
+						"updated": "20250115151416"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-syf4oz0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-syf4oz0",
+								"updated": "20250115151416"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文档右上角 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 更多菜单中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "上传资源文件到云端图床"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120347-9p7ik6i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230808120347-9p7ik6i"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-7k3hbxj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-7k3hbxj",
+								"updated": "20210721154926"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "模式切换"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "导出预览"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120347-gjbpriz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20230808120347-gjbpriz"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-3falfpg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-3falfpg",
+								"updated": "20210721155046"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "复制到公众号"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "复制到知乎"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "复制到语雀"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120347-ksmk08n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230808120347-ksmk08n",
+						"updated": "20210721155054"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-s1drfow",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-s1drfow",
+								"updated": "20210721155054"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "到目标平台编辑器上粘贴"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-y2c62jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120347-y2c62jx",
+				"updated": "20220408192950"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要删除云端图床中的资源文件，请到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/settings/file?type=3",
+					"TextMarkTextContent": "链滴 - 设置 - 文件 - 笔记端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 操作。删除后该文件占用的云端存储空间会立即释放，但是 CDN 缓存清理可能无法及时生效，这会导致该文件 URL 依然可以访问，直到 CDN 缓存 30 天以后自动过期。"
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-54p3fg5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120347-54p3fg5",
+				"updated": "20211127232947"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20230808120347-j8xikmg",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230808120347-j8xikmg",
+				"updated": "20211127232738"
+			},
+			"Children": [
+				{
+					"ID": "20230808120347-0u9rmi0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120347-0u9rmi0",
+						"updated": "20211127232738"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-0x7k640",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-0x7k640",
+								"updated": "20211127232738"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "请勿直接在其他平台使用云端图床提供的外链地址，这个地址不稳定，可能会因为换域名而影响可用性"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120347-6bsbk9l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120347-6bsbk9l",
+						"updated": "20211127232638"
+					},
+					"Children": [
+						{
+							"ID": "20230808120347-sv4tm4e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120347-sv4tm4e",
+								"updated": "20211127232638"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "请勿上传违法违规或敏感资源文件，上传的资源文件会通过第三方提供的服务进行审核（色情、暴恐、敏感人物等）。如果发现使用者上传违规资源文件，使用者账号会被永久封禁，并承担相应的法律责任"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

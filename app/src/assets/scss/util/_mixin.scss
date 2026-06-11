@@ -1,0 +1,8 @@
+@mixin text-clamp($line: 2) {
+  word-break: break-all;
+  -webkit-line-clamp: $line;
+  overflow: hidden !important;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+}

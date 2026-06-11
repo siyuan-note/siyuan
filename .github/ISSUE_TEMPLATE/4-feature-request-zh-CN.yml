@@ -1,0 +1,32 @@
+name: ✨ 新功能请求
+description: 提出您期望的功能
+title: "请输入功能请求标题"
+body:
+  - type: textarea
+    attributes:
+      label: 您在什么场景下需要这个功能？
+      description: |
+        请尽可能清晰准确地描述您期望的功能和应用场景。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 描述最优解决方案
+      description: |
+        请尝试描述最佳解决方案。可能有其他软件实现了此功能，请一并列出以供我们参考。
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 描述候选解决方案
+      description: |
+        请尽可能清晰准确地描述您可以接受的候选解决方案。
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 其他信息
+      description: |
+        请提供有关此功能建议的任何附加信息。
+    validations:
+      required: false

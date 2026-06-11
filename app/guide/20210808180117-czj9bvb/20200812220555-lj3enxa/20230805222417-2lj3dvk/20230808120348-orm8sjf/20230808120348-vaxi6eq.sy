@@ -1,0 +1,355 @@
+{
+	"ID": "20230808120348-vaxi6eq",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230808120348-vaxi6eq",
+		"title": "微信提醒",
+		"type": "doc",
+		"updated": "20220420002356"
+	},
+	"Children": [
+		{
+			"ID": "20230808120348-xn6zn6o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120348-xn6zn6o",
+				"updated": "20220119225836"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-cukxubh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120348-cukxubh",
+				"updated": "20220119231215"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "微信提醒功能用于将内容块发送到云端，到期时通过微信公众号模板消息推送到用户微信。"
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-n6646qy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120348-n6646qy",
+				"updated": "20220119225840"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-gwrvws3",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20230808120348-gwrvws3",
+				"updated": "20220420002356"
+			},
+			"Children": [
+				{
+					"ID": "20230808120348-22a2mf7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20230808120348-22a2mf7",
+						"updated": "20220420002356"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-4pjhjr2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-4pjhjr2",
+								"updated": "20220420002356"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/settings/account",
+									"TextMarkTextContent": "链滴 - 设置 - 账号"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中绑定微信"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-bv7a48s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230808120348-bv7a48s",
+						"updated": "20220119231854"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-tdu16m9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-tdu16m9",
+								"updated": "20220119231854"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "关注 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log开源"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 公众号"
+								}
+							]
+						},
+						{
+							"ID": "20230808120348-wrzl0im",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-wrzl0im",
+								"updated": "20220119231125"
+							},
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "image.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/image-20220119231125-qt2ooye.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-qw6digo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20230808120348-qw6digo"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-9be9mwr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-9be9mwr"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "关注后点击右下角绑定账号"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-fvenayo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230808120348-fvenayo",
+						"updated": "20220119231455"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-87fve0i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-87fve0i",
+								"updated": "20220119231455"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在思源中通过块标菜单设置提醒"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-bn8ekex",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120348-bn8ekex",
+				"updated": "20220119230900"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-s0gs9b6",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230808120348-s0gs9b6",
+				"updated": "20220119232232"
+			},
+			"Children": [
+				{
+					"ID": "20230808120348-b65sit9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-b65sit9"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-5hhrbls",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-5hhrbls",
+								"updated": "20220119231540"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "提醒时间误差大概在 10 秒左右"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-ymlap34",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-ymlap34",
+						"updated": "20220119232232"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-r963usq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-r963usq",
+								"updated": "20220119232232"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块会以明文的形式发送到云端，且仅发送文本，不发送资源文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-nk3ozhp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-nk3ozhp"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-3nggk1g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-3nggk1g",
+								"updated": "20220119231716"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "请勿设置提醒违法违规或敏感内容，否则账号会被永久封禁，并承担相应的法律责任"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

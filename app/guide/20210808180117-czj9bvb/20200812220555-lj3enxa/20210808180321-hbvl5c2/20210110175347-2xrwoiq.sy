@@ -1,0 +1,158 @@
+{
+	"ID": "20210110175347-2xrwoiq",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210110175347-2xrwoiq",
+		"title": "日记",
+		"type": "doc",
+		"updated": "20241008201419"
+	},
+	"Children": [
+		{
+			"ID": "20210110175347-jvtq2ap",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110175347-jvtq2ap",
+				"updated": "20241008201121"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我们可以通过日记来快速创建文档，日记功能入口在顶部主菜单中。"
+				}
+			]
+		},
+		{
+			"ID": "20210110175631-umo8b4h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110175631-umo8b4h",
+				"updated": "20241008201419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用日记前，需要在笔记本右键菜单中打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ，在新建日记设置中配置："
+				}
+			]
+		},
+		{
+			"ID": "20210110175837-55w4xt5",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210110175837-55w4xt5"
+			},
+			"Children": [
+				{
+					"ID": "20210110175920-qtdl64h",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110175920-qtdl64h"
+					},
+					"Children": [
+						{
+							"ID": "20210302223636-tqjhcf4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223636-tqjhcf4"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "存放路径：笔记本下的路径，支持"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210104091309-mvyh081",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "模板变量"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210110180130-mnk70fh",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210110180130-mnk70fh"
+					},
+					"Children": [
+						{
+							"ID": "20210302223636-w27ek0t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223636-w27ek0t"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "模板路径（可选）：创建日记时使用该模板作为初始内容"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210110180249-yz7jbt6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210110180249-yz7jbt6",
+				"updated": "20210501172601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "小提示：在指定的模板使用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201117101902-2ewjjum",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "嵌入内容块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以汇总待办事项或者需要每日查看的内容块。"
+				}
+			]
+		}
+	]
+}

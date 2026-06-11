@@ -1,0 +1,152 @@
+.b3-chips {
+  display: flex;
+  padding: 4px;
+  flex-wrap: wrap;
+
+  .b3-chip {
+    margin: 4px;
+    transition: transform 0.2s;
+  }
+
+  &__doctag {
+    padding: 0;
+
+    .b3-chip {
+      margin: 0 8px 8px 0;
+    }
+  }
+}
+
+.b3-chip {
+  background-color: var(--b3-list-hover);
+  color: var(--b3-theme-on-background);
+  line-height: 16px;
+  font-weight: 400;
+  font-size: .8125rem;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border-radius: var(--b3-border-radius);
+  transition: var(--b3-color-transition), var(--b3-background-transition);
+  text-decoration: none;
+
+  &--hover {
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: var(--b3-button-shadow);
+      text-decoration: none;
+    }
+  }
+
+  &--small {
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  &--list {
+    padding: 0 4px;
+    margin-right: 4px;
+    font-family: var(--b3-font-family-code);
+  }
+
+  &--secondary {
+    background-color: var(--b3-theme-secondary);
+    color: var(--b3-theme-on-secondary);
+  }
+
+  &--primary,
+  &--current {
+    background-color: var(--b3-theme-primary);
+    color: var(--b3-theme-on-primary);
+  }
+
+  &--pink {
+    color: var(--b3-theme-on-secondary);
+    background-color: #ea4aaa;
+  }
+
+  &--info {
+    color: var(--b3-card-info-color);
+    background-color: var(--b3-card-info-background);
+  }
+
+  &--warning {
+    color: var(--b3-card-warning-color);
+    background-color: var(--b3-card-warning-background);
+  }
+
+  &--error {
+    color: var(--b3-card-error-color);
+    background-color: var(--b3-card-error-background);
+  }
+
+  &--success {
+    color: var(--b3-card-success-color);
+    background-color: var(--b3-card-success-background);
+  }
+
+  &--pointer {
+    cursor: pointer;
+    opacity: .86;
+
+    &:hover {
+      // 不明原因 https://github.com/siyuan-note/siyuan/issues/7756#issuecomment-1484057954
+      opacity: .99;
+    }
+  }
+
+  &--dragging,
+  &--dragging:hover {
+    opacity: .38;
+  }
+
+  &--dragclone {
+    opacity: .38;
+  }
+
+  &--insert-after {
+    box-shadow: inset -2px 0 0 0 var(--b3-theme-primary-lighter);
+  }
+
+  svg:not(.b3-chip__close) {
+    margin-right: 6px;
+    margin-left: -5px;
+    height: 16px;
+    width: 16px;
+  }
+
+  &__close {
+    margin-right: -5px;
+    margin-left: 6px;
+    border-radius: var(--b3-border-radius-b);
+    height: 12px;
+    width: 12px;
+    transition: var(--b3-transition);
+    cursor: pointer;
+    opacity: .68;
+    flex-shrink: 0;
+    padding: 2px;
+
+    &:hover {
+      // 不明原因 https://github.com/siyuan-note/siyuan/issues/7756#issuecomment-1484057954
+      opacity: .99;
+      background-color: var(--b3-list-icon-hover);
+    }
+  }
+
+  &--middle {
+    padding: 4px 6px;
+
+    .b3-chip__close {
+      margin-right: -2px;
+      margin-left: 3px;
+    }
+
+    svg:not(.b3-chip__close) {
+      margin-right: 3px;
+      margin-left: -2px;
+    }
+  }
+}

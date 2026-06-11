@@ -1,0 +1,260 @@
+{
+	"ID": "20211226123241-51pujtr",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226123241-51pujtr",
+		"title": "剪藏",
+		"type": "doc",
+		"updated": "20230630112320"
+	},
+	"Children": [
+		{
+			"ID": "20211226123253-t5g675w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123253-t5g675w",
+				"updated": "20230630112320"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226123253-7n22kwr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123253-7n22kwr",
+				"updated": "20211226015456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“剪藏”是指將 Web 頁面上的內容複製到思源中，並盡量保持其原始格式。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123253-gk7woqu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123253-gk7woqu",
+				"updated": "20211226014655"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20211226123253-w0g1yfz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226123253-w0g1yfz",
+				"updated": "20230621111802"
+			},
+			"Children": [
+				{
+					"ID": "20211226123253-hjvr0ps",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123253-hjvr0ps",
+						"updated": "20211226015439"
+					},
+					"Children": [
+						{
+							"ID": "20211226123253-dpxgyov",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123253-dpxgyov",
+								"updated": "20211226015439"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果不需要將剪藏內容中包含的圖片拉取到本地，可直接在瀏覽器中選擇複製，然後在思源中進行貼上"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123253-w41egg7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123253-w41egg7",
+						"updated": "20230621111802"
+					},
+					"Children": [
+						{
+							"ID": "20211226123253-526m8gm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123253-526m8gm",
+								"updated": "20230621111802"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果需要將剪藏內容中包含的圖片拉取到本地，可使用"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1629423901669",
+									"TextMarkTextContent": "思源 Chrome 擴充"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226123253-m0sjvk6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226123253-m0sjvk6",
+				"updated": "20211228142730"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源 Chrome 擴充"
+				}
+			]
+		},
+		{
+			"ID": "20211226123253-kp9r1b0",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20211226123253-kp9r1b0",
+				"updated": "20211228142735"
+			},
+			"Children": [
+				{
+					"ID": "20211226123253-vk8aww0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20211226123253-vk8aww0",
+						"updated": "20211228142735"
+					},
+					"Children": [
+						{
+							"ID": "20211226123253-0fzt493",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123253-0fzt493",
+								"updated": "20211228142735"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "安裝擴充，在擴充的選項中配置 API token（token 可在思源設置 - 關於中查看）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123253-9olp7va",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20211226123253-9olp7va"
+					},
+					"Children": [
+						{
+							"ID": "20211226123253-s0ro53n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123253-s0ro53n"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 Web 頁面上選擇需要剪藏的內容，然後在右鍵菜單中選擇 “Copy to SiYuan”"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123253-f11qmyu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20211226123253-f11qmyu",
+						"updated": "20211226014733"
+					},
+					"Children": [
+						{
+							"ID": "20211226123253-k0u5qy6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123253-k0u5qy6",
+								"updated": "20211226014733"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在思源中貼上"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226123253-79os888",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123253-79os888",
+				"updated": "20211228142738"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要剪藏整篇文章，可在擴充上直接點擊“Send to SiYuan”。"
+				}
+			]
+		}
+	]
+}

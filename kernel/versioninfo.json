@@ -1,0 +1,29 @@
+{
+  "FixedFileInfo": {
+    "FileFlagsMask": "3f",
+    "FileFlags ": "00",
+    "FileOS": "040004",
+    "FileType": "01",
+    "FileSubType": "00"
+  },
+  "StringFileInfo": {
+    "Comments": "",
+    "CompanyName": "Yunnan Liandi Technology Co., Ltd.",
+    "FileDescription": "SiYuan Kernel",
+    "FileVersion": "",
+    "InternalName": "",
+    "LegalCopyright": "© 2020-present Yunnan Liandi Technology Co., Ltd.",
+    "LegalTrademarks": "",
+    "OriginalFilename": "",
+    "PrivateBuild": "",
+    "ProductName": "",
+    "ProductVersion": "",
+    "SpecialBuild": ""
+  },
+  "VarFileInfo": {
+    "Translation": {
+      "LangID": "0409",
+      "CharsetID": "04B0"
+    }
+  }
+}

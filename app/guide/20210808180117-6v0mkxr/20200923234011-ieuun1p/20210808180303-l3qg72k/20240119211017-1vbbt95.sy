@@ -1,0 +1,205 @@
+{
+	"ID": "20240119211017-1vbbt95",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240119211017-1vbbt95",
+		"title": "Ignore indexing",
+		"type": "doc",
+		"updated": "20241001011235"
+	},
+	"Children": [
+		{
+			"ID": "20240119211037-qomzc0b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119211037-qomzc0b",
+				"updated": "20240119211037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20240119211037-r5fn0e2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119211037-r5fn0e2",
+				"updated": "20240119211045"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ignore indexing means not indexing document data into the database, making the data completely unsearchable and reducing database size."
+				}
+			]
+		},
+		{
+			"ID": "20240119211037-cjq7aer",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119211037-cjq7aer",
+				"updated": "20241001011235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20240119211037-3xkmy4c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119211037-3xkmy4c",
+				"updated": "20240119211121"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manually create or edit the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/.siyuan/indexignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ text file on the file system, where each line serves as an ignore path and supports gitignore syntax. For example:"
+				}
+			]
+		},
+		{
+			"ID": "20241001010953-34lxthr",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20241001010953-34lxthr",
+				"updated": "20241001010953"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20240119211037-putkxu9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240119211037-putkxu9",
+				"updated": "20240119211442"
+			},
+			"Children": [
+				{
+					"ID": "20240119211037-s3rhrly",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119211037-s3rhrly",
+						"updated": "20240119211416"
+					},
+					"Children": [
+						{
+							"ID": "20240119211037-246r9a5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119211037-246r9a5",
+								"updated": "20240119211416"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore indexing the 20200923234011-ieuun1p.sy document under the data/20210808180117-6v0mkxr notebook"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240119211037-uqdk9a1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119211037-uqdk9a1",
+						"updated": "20240119211442"
+					},
+					"Children": [
+						{
+							"ID": "20240119211037-av6j2xj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119211037-av6j2xj",
+								"updated": "20240119211442"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore indexing all documents under the data/20210808180117-6v0mkxr notebook"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240202105425-d8fq0vu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105425-d8fq0vu",
+				"updated": "20241001011235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You need to manually rebuild the index after modifying the configuration file."
+				}
+			]
+		}
+	]
+}

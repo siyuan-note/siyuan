@@ -1,0 +1,251 @@
+{
+	"ID": "20201004184819-nj8ibyg",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201004184819-nj8ibyg",
+		"title": "在浏览器上使用",
+		"type": "doc",
+		"updated": "20221025093126"
+	},
+	"Children": [
+		{
+			"ID": "20210104090909-6pyfjgx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090909-6pyfjgx",
+				"updated": "20210501194730"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "浏览器用法"
+				}
+			]
+		},
+		{
+			"ID": "20221025092410-jsrv6gc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025092410-jsrv6gc",
+				"updated": "20221025092711"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关于"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在浏览器上使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打开浏览器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 后就可以直接在浏览器上使用了，如果需要在局域网内使用，将 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 换成局域网 IP 地址即可。"
+				}
+			]
+		},
+		{
+			"ID": "20221025092746-xsahzmh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025092746-xsahzmh",
+				"updated": "20221025093126"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了本地局域网使用，通过以下两个方法可以实现公网使用："
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-dcl5tif",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090909-dcl5tif"
+			},
+			"Children": [
+				{
+					"ID": "20210104090909-qoham0m",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090909-qoham0m"
+					},
+					"Children": [
+						{
+							"ID": "20210302223610-18yksf1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223610-18yksf1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通过“内网穿透”技术将本地内核服务发布在公网上（较为麻烦且不稳定，不推荐）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090909-mtbso6l",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090909-mtbso6l"
+					},
+					"Children": [
+						{
+							"ID": "20210302223610-l2uqi6m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223610-l2uqi6m"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自行搭建思源服务端（推荐）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-9ldxx4v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090909-9ldxx4v",
+				"updated": "20210522214253"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在着手前，请从了解"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/article/1619868273581#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84",
+					"TextMarkTextContent": "思源笔记技术架构"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "开始。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-9x9sqe8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104090909-9x9sqe8"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "锁屏密码"
+				}
+			]
+		},
+		{
+			"ID": "20210104090909-20f2hvi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090909-20f2hvi",
+				"updated": "20210522214354"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关于"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可配置浏览器锁屏密码，留空表示不启用。这在开放网络（比如办公场所和公网）会比较有用，只有密码验证通过后才能进入工作空间。"
+				}
+			]
+		}
+	]
+}

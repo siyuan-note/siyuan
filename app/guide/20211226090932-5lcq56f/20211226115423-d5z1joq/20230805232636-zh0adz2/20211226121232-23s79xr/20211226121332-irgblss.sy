@@ -1,0 +1,329 @@
+{
+	"ID": "20211226121332-irgblss",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226121332-irgblss",
+		"title": "資料文件圖庫",
+		"type": "doc",
+		"updated": "20250115151323"
+	},
+	"Children": [
+		{
+			"ID": "20220407085912-m2tn931",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220407085912-m2tn931",
+				"updated": "20220407085913"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源提供了雲端圖庫服務，主要用於將文檔帶資源文件複製到微信公眾號、知乎和語雀等平台，這些平台的編輯器在貼上時會自動拉取資源文件到它們的平台上。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121407-ka3cqan",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121407-ka3cqan",
+				"updated": "20250115151323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20211226121407-iocuon0",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20211226121407-iocuon0",
+				"updated": "20250115151323"
+			},
+			"Children": [
+				{
+					"ID": "20220407085934-xbaj5uv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220407085934-xbaj5uv",
+						"updated": "20250115151323"
+					},
+					"Children": [
+						{
+							"ID": "20220407085934-94nitto",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220407085934-94nitto",
+								"updated": "20250115151323"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文檔右上角 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 更多菜單中選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "上傳資料檔到雲端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121407-yacgq1d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20211226121407-yacgq1d"
+					},
+					"Children": [
+						{
+							"ID": "20211226121407-ewnyach",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121407-ewnyach"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "模式切換"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中選擇 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "導出預覽"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121407-7vd7fyn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20211226121407-7vd7fyn"
+					},
+					"Children": [
+						{
+							"ID": "20211226121407-fdf0unn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121407-fdf0unn"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "點擊 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製到公眾號"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製到知乎"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製到語雀"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121407-z8sg3s7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20211226121407-z8sg3s7",
+						"updated": "20230630142403"
+					},
+					"Children": [
+						{
+							"ID": "20211226121407-z2zq7g9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121407-z2zq7g9",
+								"updated": "20230630142403"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "到目標平台編輯器上貼上"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220407085826-xy79zah",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220407085826-xy79zah",
+				"updated": "20220408193132"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要刪除雲端圖庫中的資源文件，請到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/settings/file?type=3",
+					"TextMarkTextContent": "鏈滴 - 設置 - 文件 - 筆記端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 操作。刪除後該文件佔用的雲端存儲空間會立即釋放，但是 CDN 快取清理可能無法及時生效，這會導致該文件 URL 依然可以訪問，直到 CDN 快取 30 天以後自動過期。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121407-sebgp4q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121407-sebgp4q",
+				"updated": "20211226010854"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20211226121407-vggperb",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121407-vggperb",
+				"updated": "20211228140125"
+			},
+			"Children": [
+				{
+					"ID": "20211226121407-ehj3ooe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121407-ehj3ooe",
+						"updated": "20211228140125"
+					},
+					"Children": [
+						{
+							"ID": "20211226121407-fq62d32",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121407-fq62d32",
+								"updated": "20211228140125"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "請勿直接在其他平台使用雲端圖庫提供的外連位址，這個位址不穩定，可能會因為換域名而影響可用性"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121407-odieqe8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121407-odieqe8",
+						"updated": "20211228104759"
+					},
+					"Children": [
+						{
+							"ID": "20211226121407-a3bquy9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121407-a3bquy9",
+								"updated": "20211228104759"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "請勿上傳違法違規或敏感資料文件，上傳的資料文件會通過第三方提供的服務進行審核（色情、暴恐、敏感人物等）。如果發現使用者上傳違規資料文件，使用者賬號會被永久封禁，並承擔相應的法律責任"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

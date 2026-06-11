@@ -1,0 +1,2865 @@
+{
+	"ID": "20200924101225-k254i8g",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924101225-k254i8g",
+		"title": "Content Block Type",
+		"type": "doc",
+		"updated": "20251021230320"
+	},
+	"Children": [
+		{
+			"ID": "20210104091538-4b3n4al",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091538-4b3n4al",
+				"updated": "20260425181345"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Content Block type cheatsheet"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-ngfa912",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-ngfa912",
+				"updated": "20210302223854"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hover the mouse over the content block and the corresponding icon will appear on the left side of the content block. For format usage, please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924093441-ft2rhps",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Markdown Complete Demo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-le8t1ci",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20210104091538-le8t1ci",
+				"updated": "20260425181345"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Icon"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Type"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "block-ref",
+											"TextMarkBlockRefID": "20200925102736-x94e40g",
+											"TextMarkBlockRefSubtype": "s",
+											"TextMarkTextContent": "Meta Type"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "paragraph"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/paragraph-block-20260425165426-oay2mn8.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Paragraph block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "heading"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/heading-block-20260425165426-u0noubu.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Heading block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "math-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/formula-block-20260425165426-wompa7r.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Math Formula block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "code-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/code-block-20260425165426-coms7xv.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Code block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "table"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/table-block-20260425165426-knfl9o2.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Table block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "embed-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/embed-block-20260425165426-1m1ufx0.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Embed block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "html-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/html-block-20260425165426-qje2gkf.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "HTML block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "database"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/database-block-20260425165426-vgzt70f.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Database block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "unordered-list"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/unordered-list-block-20260425165426-nr12e3p.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Unordered List block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "ordered-list"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/ordered-list-block-20260425165426-xju1xnf.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ordered List block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "task-list"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/task-list-block-20260425165426-641pl4h.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Task list block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "list-item"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/listitem-block-20260425175517-4uac18s.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List Item block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "blockquote"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/blockquote-block-20260425165426-hdgswh2.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Blockquote block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "callout"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/callout-block-20260425165426-n22bky2.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Callout block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "super-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/super-block-20260425165426-ae8e5uq.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Super block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "doc"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/doc-block-20260425165426-b4lweek.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Document block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-a55chyw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091538-a55chyw",
+				"updated": "20250330192531"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Details of content block types"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-a61xzjz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-a61xzjz",
+				"updated": "20220623201527"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Below we introduce the details of these content block types. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Content Block/Type"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-67s659i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-67s659i",
+				"updated": "20250330192531"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Paragraph block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-v7dhyea",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-v7dhyea"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Here is a sample paragraph."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-u96pio8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-u96pio8",
+				"updated": "20250115153235"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ directly after a paragraph to form a new paragraph."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-d5t39y5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-d5t39y5",
+				"updated": "20250330192535"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Heading block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-o0ti5xd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-o0ti5xd",
+				"updated": "20210104091538"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The above is the heading block, which supports level one to six."
+				}
+			]
+		},
+		{
+			"ID": "20240513101855-fukkugx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513101855-fukkugx",
+				"updated": "20240513101900"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240513101855-sh0lm1f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240513101855-sh0lm1f",
+				"updated": "20240513102037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It is not recommended to use first-level headings in the text. It is recommended to use second-level heading as top-level headings. In this way, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Export"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add document title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, the overall heading hierarchy will comply with normal logic when exported."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-u3ku9wo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-u3ku9wo",
+				"updated": "20250330192536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mathematical formula block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-ko666d2",
+			"Type": "NodeMathBlock",
+			"Properties": {
+				"id": "20210104091538-ko666d2"
+			},
+			"Children": [
+				{
+					"Type": "NodeMathBlockOpenMarker"
+				},
+				{
+					"ID": "20220307092214-9cbplct",
+					"Type": "NodeMathBlockContent",
+					"Data": "a^2 + b^2 = c^2",
+					"Properties": {
+						"id": "20220307092214-9cbplct"
+					}
+				},
+				{
+					"Type": "NodeMathBlockCloseMarker"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-fa7y245",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-fa7y245",
+				"updated": "20250330192539"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Code block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-xsj6knt",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anM=",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20210104091538-xsj6knt"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"ID": "20220307092214-wl4mg3v",
+					"Type": "NodeCodeBlockCode",
+					"Data": "function hello() {}\n",
+					"Properties": {
+						"id": "20220307092214-wl4mg3v"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-38bsz5r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-38bsz5r",
+				"updated": "20260222162325"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Table block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-pbqg66x",
+			"Type": "NodeTable",
+			"Data": "| Column 1           | Column 2           |\n| -------------------- | -------------------- |\n| Row One Column One | Row One Column Two |\n| Row Two Column One | Row Two Column Two |",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20210104091538-pbqg66x"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Column 1"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Column 2"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Row One Column One"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Row One Column Two"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Row Two Column One"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Row Two Column Two"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240818174819-qu6xbk1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818174819-qu6xbk1",
+				"updated": "20240818180003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "|"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in a table block, please use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ to escape it, that is, you need to enter "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\|"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20240818174819-rfu3puw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818174819-rfu3puw",
+				"updated": "20251230163004"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To insert a line break within a cell, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20260222162028-4qi1oj4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260222162028-4qi1oj4",
+				"updated": "20260222162325"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the table contains merged cells or headers, it will be copied as HTML or exported as Markdown."
+				}
+			]
+		},
+		{
+			"ID": "20250330191912-6gqtj5b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20250330191912-6gqtj5b",
+				"updated": "20250330192550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Embed block"
+				}
+			]
+		},
+		{
+			"ID": "20250330191921-575c2st",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250330191921-575c2st",
+				"updated": "20250330192006"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201117112518-dott91x",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Embed Content Block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220429115218-ydwuros",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220429115218-ydwuros",
+				"updated": "20251230141912"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HTML block"
+				}
+			]
+		},
+		{
+			"ID": "20220429115221-kc5rrg5",
+			"Type": "NodeHTMLBlock",
+			"Data": "\u003cruby\u003e\n你\u003crt\u003enǐ\u003c/rt\u003e\n　好\u003crt\u003e　hǎo\u003c/rt\u003e\n　世\u003crt\u003e　shì\u003c/rt\u003e\n　界\u003crt\u003e　jiè\u003c/rt\u003e\n\u003c/ruby\u003e\u003cbr\u003e\nHello World",
+			"Properties": {
+				"id": "20220429115221-kc5rrg5",
+				"updated": "20220429115221"
+			}
+		},
+		{
+			"ID": "20220429115221-suekrrv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220429115221-suekrrv",
+				"updated": "20240427231027"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240427231112-lcwev4m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240427231112-lcwev4m",
+				"updated": "20240427231144"
+			},
+			"Children": [
+				{
+					"ID": "20240427231112-q60pwo8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427231112-q60pwo8",
+						"updated": "20240427231144"
+					},
+					"Children": [
+						{
+							"ID": "20240427231112-e7j3mqt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427231112-e7j3mqt",
+								"updated": "20240427231144"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using HTML blocks, the code in them will be security filtered by default. If filtering is not required, please enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Allow execution of scripts within HTML blocks"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, but please confirm that the code is safe before opening it to avoid cross-site scripting attacks (XSS)."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240427231112-o1imtjo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240427231112-o1imtjo",
+						"updated": "20240427231112"
+					},
+					"Children": [
+						{
+							"ID": "20240427231112-3txbq9w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240427231112-3txbq9w",
+								"updated": "20240427231112"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Because the Markdown specification has complicated parsing rules for HTML blocks, it is recommended to use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to wrap HTML code and remove blank lines."
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251230141911-udqgcrm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20251230141911-udqgcrm",
+				"updated": "20251230162958"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Database block"
+				}
+			]
+		},
+		{
+			"ID": "20251230141917-1ljqnn4",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"custom-sy-av-view": "20251230141929-ogkqgga",
+				"id": "20251230141917-1ljqnn4",
+				"updated": "20251230141929"
+			},
+			"AttributeViewID": "20251230141929-2trv0vl",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20251230162952-v98vteh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251230162952-v98vteh",
+				"updated": "20251230162958"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To insert a line break within a cell, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-cddpqkl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-cddpqkl",
+				"updated": "20250330192552"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unordered List Block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-g2v9tfm",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091538-g2v9tfm"
+			},
+			"Children": [
+				{
+					"ID": "20210104091538-60hsat5",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091538-60hsat5"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-9vz2n9a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-9vz2n9a"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List item one"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091538-ocml6u6",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091538-ocml6u6"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-q996hlf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-q996hlf"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List item two"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-9zkv22k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-9zkv22k",
+				"updated": "20210104091538"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The unordered list block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20240510235622-zfu6ujw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235622-zfu6ujw",
+				"updated": "20240510235721"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The unordered list block can only contain list item blocks, and neighboring unordered list blocks are widely spaced."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-jhbekfn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-jhbekfn",
+				"updated": "20250330192555"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ordered List Block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-qy3j9yk",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"id": "20210104091538-qy3j9yk"
+			},
+			"Children": [
+				{
+					"ID": "20210104091538-s49jwy3",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210104091538-s49jwy3"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-w2smsmh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-w2smsmh"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List item one"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091538-cqk5t72",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210104091538-cqk5t72"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-1p5ob4q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-1p5ob4q"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List item two"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-1ix6ueu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-1ix6ueu",
+				"updated": "20240510235637"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The ordered list block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20240510235620-trltkc3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235620-trltkc3",
+				"updated": "20240510235659"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The ordered list block can only contain list item blocks, and neighboring ordered list blocks are widely spaced."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-uz0na96",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-uz0na96",
+				"updated": "20250330192556"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Task list block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-d5chiez",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 3,
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Checked": true,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091538-d5chiez"
+			},
+			"Children": [
+				{
+					"ID": "20210104091538-urtl418",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Typ": 3,
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Checked": true,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091538-urtl418"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker",
+							"Data": "[X]",
+							"TaskListItemChecked": true
+						},
+						{
+							"ID": "20210302223851-99onwrg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-99onwrg"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "To do one"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091538-cwwt4j5",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Typ": 3,
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091538-cwwt4j5"
+					},
+					"Children": [
+						{
+							"Type": "NodeTaskListItemMarker",
+							"Data": "[ ]"
+						},
+						{
+							"ID": "20210302223851-gzah6cx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-gzah6cx"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "To do two"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-tw00i00",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-tw00i00",
+				"updated": "20210503220216"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The task list block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20240510235512-za4depm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235512-za4depm",
+				"updated": "20240510235706"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The task list block can only contain list item blocks, and neighboring task list blocks are widely spaced."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-wqiaxdu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-wqiaxdu",
+				"updated": "20251020145747"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "List item block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-lbf2al4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-lbf2al4",
+				"updated": "20210104091538"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The basic usage of outline notes can be realized through the list item block. The list item block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20240510235301-s4nj22e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240510235301-s4nj22e",
+				"updated": "20240510235356"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "List item blocks are contained within a list block, and neighboring list item blocks are less widely spaced."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-lb00enw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-lb00enw",
+				"updated": "20250115145248"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to wrap a line in a list item, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20251020145738-y544vzd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251020145738-y544vzd",
+				"updated": "20251020145747"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "List items can be moved between lists."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-w91ot9s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-w91ot9s",
+				"updated": "20251209212605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Blockquote block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-jl60vah",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20210104091538-jl60vah"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e "
+				},
+				{
+					"ID": "20210104091538-osgy8b0",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20210104091538-osgy8b0"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Note that it is not a content block ref, but a block quote (Blockquote)."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-lz7s79p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-lz7s79p",
+				"updated": "20251209212605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The blockquote block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20251209212515-3lib7cs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20251209212515-3lib7cs",
+				"updated": "20251209213552"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Callout block"
+				}
+			]
+		},
+		{
+			"ID": "20251209212525-2wk5uk3",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251209212525-2wk5uk3",
+				"updated": "20251209212713"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251209212538-xc4i50d",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251209212538-xc4i50d",
+						"updated": "20251209212547"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A prominent message!"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209212713-ubfmwls",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251209212713-ubfmwls",
+				"updated": "20251209212720"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The callout block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-lubwy1k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-lubwy1k",
+				"updated": "20250330192603"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Super block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-hpihzah",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-hpihzah",
+				"updated": "20210503220329"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The super block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". It can be used to combine continuous content blocks in a document, and also to support horizontal typesetting."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-clx67q4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091538-clx67q4",
+				"updated": "20251021230320"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document block"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-mg5xa52",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-mg5xa52"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The entire document is a block, and the document block is a type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200925102736-x94e40g",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "container block"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20200925102736-x94e40g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200925102736-x94e40g",
+				"updated": "20251209212756"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Content Block meta type"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-36hcqp1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-36hcqp1"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The content block is logically divided into a leaf block and a container block. The leaf block cannot contain other blocks, and the container block can contain other blocks:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-3pi7fbf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210104091538-3pi7fbf",
+				"updated": "20251209212756"
+			},
+			"Children": [
+				{
+					"ID": "20210104091538-7ux94d1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104091538-7ux94d1",
+						"updated": "20210104091538"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-6sw8cbv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-6sw8cbv",
+								"updated": "20210302223851"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List block: can only contain list item blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091538-qj0m5z6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104091538-qj0m5z6",
+						"updated": "20210104091538"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-ra0j9je",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-ra0j9je",
+								"updated": "20210302223851"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "List item block: can contain any other non-document blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091538-as7s34n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104091538-as7s34n",
+						"updated": "20210104091538"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-orfn1qc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-orfn1qc",
+								"updated": "20210302223851"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Blockquote block: can contain any non-document blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20251209212748-58d4f77",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20251209212748-58d4f77",
+						"updated": "20251209212756"
+					},
+					"Children": [
+						{
+							"ID": "20251209212748-kogqfuj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20251209212748-kogqfuj",
+								"updated": "20251209212756"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Callout block: can contain any non-document blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091538-66zs0qu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104091538-66zs0qu",
+						"updated": "20210104091538"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-xuok2cn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-xuok2cn",
+								"updated": "20210302223851"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Super block: can contain any non-document blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091538-frbdtaw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104091538-frbdtaw",
+						"updated": "20210104091538"
+					},
+					"Children": [
+						{
+							"ID": "20210302223851-9b5hb4i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223851-9b5hb4i",
+								"updated": "20210302223851"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Document block: can contain any non-document blocks"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

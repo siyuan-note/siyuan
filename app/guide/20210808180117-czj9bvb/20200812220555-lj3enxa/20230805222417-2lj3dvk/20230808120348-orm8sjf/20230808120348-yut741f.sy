@@ -1,0 +1,363 @@
+{
+	"ID": "20230808120348-yut741f",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230808120348-yut741f",
+		"title": "限制",
+		"type": "doc",
+		"updated": "20241010010937"
+	},
+	"Children": [
+		{
+			"ID": "20230808120348-fti66eq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230808120348-fti66eq",
+				"updated": "20241010010937"
+			},
+			"Children": [
+				{
+					"ID": "20230808120348-or1vtrh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-or1vtrh",
+						"updated": "20230808120348"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-pbvrmeh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-pbvrmeh",
+								"updated": "20220105101036"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最多支持创建 7 个云端同步目录"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-9ngxdux",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-9ngxdux",
+						"updated": "20220722230325"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-x74k537",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-x74k537",
+								"updated": "20220722230325"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最多支持保存 12 个数据快照"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-hi0prll",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-hi0prll",
+						"updated": "20220105101103"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-c7k156s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-c7k156s",
+								"updated": "20220105101103"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端存储空间初始化总大小为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8G"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241010010525-v947wk6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241010010525-v947wk6",
+						"updated": "20241010010937"
+					},
+					"Children": [
+						{
+							"ID": "20241010010525-ufbwxie",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241010010525-ufbwxie",
+								"updated": "20241010010653"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端存储中的数据快照最长保留 30 天，即 30 天之前的未引用快照会被自动清理"
+								}
+							]
+						},
+						{
+							"ID": "20241010010721-h2nxf9s",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241010010721-h2nxf9s",
+								"updated": "20241010010937"
+							},
+							"Children": [
+								{
+									"ID": "20241010010720-gdh7tx0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010720-gdh7tx0",
+										"updated": "20241010010937"
+									},
+									"Children": [
+										{
+											"ID": "20241010010720-q53dcr4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010720-q53dcr4",
+												"updated": "20241010010937"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "每次数据同步后的最新快照不会被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010727-fa6g8uw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010727-fa6g8uw",
+										"updated": "20241010010727"
+									},
+									"Children": [
+										{
+											"ID": "20241010010727-sm3elkr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010727-sm3elkr",
+												"updated": "20241010010734"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "手动标记备份上传到云端的快照不会被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010735-1sh1m73",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010735-1sh1m73",
+										"updated": "20241010010808"
+									},
+									"Children": [
+										{
+											"ID": "20241010010735-z4sgvdd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010735-z4sgvdd",
+												"updated": "20241010010808"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "30 天内的快照不会被清理"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-34cmomp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-34cmomp",
+						"updated": "20230808220435"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-v22d8of",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-v22d8of",
+								"updated": "20230526090018"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "付费订阅到期以后，云端存储会被彻底删除"
+								}
+							]
+						},
+						{
+							"ID": "20230808120348-sfmxfq9",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230808120348-sfmxfq9",
+								"updated": "20230808220435"
+							},
+							"Children": [
+								{
+									"ID": "20230808120348-ovfk4gl",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230808120348-ovfk4gl",
+										"updated": "20230808120348"
+									},
+									"Children": [
+										{
+											"ID": "20230808120348-t1m1iy0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230808120348-t1m1iy0",
+												"updated": "20230526090645"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "从到期前 15 天，每次打开软件都会弹出到期提醒，到期 2 天后停止提醒"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230808120348-gv9fu0a",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230808120348-gv9fu0a",
+										"updated": "20230808220435"
+									},
+									"Children": [
+										{
+											"ID": "20230808120348-o7wtrws",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230808120348-o7wtrws",
+												"updated": "20230808220435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "到期前 1 天，会推送一次短信提醒到账号绑定的手机上"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230808120348-zpnwcgg",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230808120348-zpnwcgg",
+										"updated": "20230526091115"
+									},
+									"Children": [
+										{
+											"ID": "20230808120348-eaav3ra",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230808120348-eaav3ra",
+												"updated": "20230526091115"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "删除云端存储不影响本地数据"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

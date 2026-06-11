@@ -1,0 +1,480 @@
+{
+	"ID": "20240610233601-ylh1mvk",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240610233601-ylh1mvk",
+		"title": "サービスを公開",
+		"type": "doc",
+		"updated": "20260427075628"
+	},
+	"Children": [
+		{
+			"ID": "20260315160203-gp059wg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260315160203-gp059wg",
+				"updated": "20260315160209"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260315160203-7di44mu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260315160203-7di44mu",
+				"updated": "20260315160209"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は、現在のワークスペースの内容をローカルエリアネットワーク（LAN）経由で、読み取り専用モードにて公開する機能をサポートしています。"
+				}
+			]
+		},
+		{
+			"ID": "20260315160203-l0m0q2g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260315160203-l0m0q2g",
+				"updated": "20260427075628"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "利用方法"
+				}
+			]
+		},
+		{
+			"ID": "20260315160203-kmbr9ic",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260315160203-kmbr9ic",
+				"updated": "20260427075628"
+			},
+			"Children": [
+				{
+					"ID": "20260315160203-ugghh1z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160203-ugghh1z",
+						"updated": "20260315160458"
+					},
+					"Children": [
+						{
+							"ID": "20260315160203-zxnr2s3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160203-zxnr2s3",
+								"updated": "20260315160458"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ \u003e "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "公開"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を開き、公開サービスの設定パネルにアクセスします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160203-wpb8mft",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160203-wpb8mft",
+						"updated": "20260315160458"
+					},
+					"Children": [
+						{
+							"ID": "20260315160203-t62ktxr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160203-t62ktxr",
+								"updated": "20260315160458"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "サービスポート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を設定します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160203-ws1iee3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160203-ws1iee3",
+						"updated": "20260315160459"
+					},
+					"Children": [
+						{
+							"ID": "20260315160203-aarfptq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160203-aarfptq",
+								"updated": "20260315160459"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デフォルトのポート番号は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6808"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ です"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160203-f2zv2gp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160203-f2zv2gp",
+						"updated": "20260315160459"
+					},
+					"Children": [
+						{
+							"ID": "20260315160203-95tqotk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160203-95tqotk",
+								"updated": "20260315160459"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ポート番号を "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "0"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ に設定した場合、ランダムなポート番号が使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160203-vdn5uhk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160203-vdn5uhk",
+						"updated": "20260315160500"
+					},
+					"Children": [
+						{
+							"ID": "20260315160203-nsbl4jk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160203-nsbl4jk",
+								"updated": "20260315160500"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "公開サービス"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ のスイッチをオンに切り替えます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160203-f3fj1m0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160203-f3fj1m0",
+						"updated": "20260427075628"
+					},
+					"Children": [
+						{
+							"ID": "20260315160203-scvg9m1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160203-scvg9m1",
+								"updated": "20260315160405"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公開サービスへのアクセス制御が必要な場合"
+								}
+							]
+						},
+						{
+							"ID": "20260315160406-950zvew",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260315160406-950zvew",
+								"updated": "20260427075628"
+							},
+							"Children": [
+								{
+									"ID": "20260315160203-d5za8yr",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260315160203-d5za8yr",
+										"updated": "20260317200509"
+									},
+									"Children": [
+										{
+											"ID": "20260315160203-p5z33e4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260315160203-p5z33e4",
+												"updated": "20260317200509"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "サービス基本認証"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ のスイッチをオンにし、"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "認証アカウント"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を追加します。これにより、"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://developer.mozilla.org/ja/docs/Web/HTTP/Guides/Authentication#basic_%E8%AA%8D%E8%A8%BC%E6%96%B9%E5%BC%8F",
+													"TextMarkTextContent": "Basic 認証方式"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "を使用して訪問者の認証を行います。訪問者は、"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "認証アカウント"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ セクションで設定されたユーザー名とパスワードを正しく入力して初めて、公開されたコンテンツを閲覧できるようになります"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260315160203-ctlex3g",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260315160203-ctlex3g",
+										"updated": "20260427075628"
+									},
+									"Children": [
+										{
+											"ID": "20260315160203-obefee6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260315160203-obefee6",
+												"updated": "20260427075628"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "ドキュメントパネル"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ \u003e "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "その他"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ \u003e "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "公開アクセス制御"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を開き、ノートブックまたはドキュメントの横にあるアイコンをクリックして、ノートブック単位またはドキュメント単位でのアクセス制御を設定します"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260315160203-o0mb6s0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260315160203-o0mb6s0",
+				"updated": "20260315160203"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20260315160203-76kennn",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260315160203-76kennn",
+				"updated": "20260315160203"
+			},
+			"Children": [
+				{
+					"ID": "20260315160203-7cgv07k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160203-7cgv07k",
+						"updated": "20260315160203"
+					},
+					"Children": [
+						{
+							"ID": "20260315160203-sh39px3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160203-sh39px3",
+								"updated": "20260315160203"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公開サービスを有効にすると、デフォルトでは訪問者がワークスペース内のすべてのコンテンツにアクセスできるようになります。ワークスペース内に機密情報が含まれていないか、必ずご確認ください。"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

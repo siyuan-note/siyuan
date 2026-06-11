@@ -1,0 +1,205 @@
+{
+	"ID": "20240119210914-a2tm8c4",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240119210914-a2tm8c4",
+		"title": "忽略索引",
+		"type": "doc",
+		"updated": "20241001010916"
+	},
+	"Children": [
+		{
+			"ID": "20240119210951-u0m4t2c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119210951-u0m4t2c",
+				"updated": "20240119210951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20240119210951-4i7z99o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119210951-4i7z99o",
+				"updated": "20240119210952"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略索引指的是不將文件資料編入資料庫，這樣資料將完全無法搜尋到，並且減少資料庫大小。"
+				}
+			]
+		},
+		{
+			"ID": "20240119210951-1kvqt8q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119210951-1kvqt8q",
+				"updated": "20241001010916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20240119210951-yko39kg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119210951-yko39kg",
+				"updated": "20240119210951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在檔案系統上手動建立或編輯 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/data/.siyuan/indexignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 文字文件，其中每一行作為一個忽略路徑，支援 gitignore 語法。 例如："
+				}
+			]
+		},
+		{
+			"ID": "20241001010551-nq64uj3",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20241001010551-nq64uj3",
+				"updated": "20241001010551"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20240119210951-vx7e7y1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240119210951-vx7e7y1",
+				"updated": "20240119211344"
+			},
+			"Children": [
+				{
+					"ID": "20240119210951-qru8h6q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119210951-qru8h6q",
+						"updated": "20240119211344"
+					},
+					"Children": [
+						{
+							"ID": "20240119210951-z7rnlq6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119210951-z7rnlq6",
+								"updated": "20240119211344"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：忽略 data/20210808180117-6v0mkxr 筆記本下的 20200923234011-ieuun1p.sy 文件編入索引"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240119210951-5kjp805",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119210951-5kjp805",
+						"updated": "20240119210951"
+					},
+					"Children": [
+						{
+							"ID": "20240119210951-uxj4o4t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119210951-uxj4o4t",
+								"updated": "20240119210951"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：忽略 data/20210808180117-6v0mkxr 筆記本下的所有文件編入索引"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240202105413-xsnd9kd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105413-xsnd9kd",
+				"updated": "20241001010916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定文件修改儲存後需要手動重建索引。"
+				}
+			]
+		}
+	]
+}

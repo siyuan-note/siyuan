@@ -1,0 +1,361 @@
+{
+	"ID": "20240530101000-h0cp5vx",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-0x18xq3",
+		"id": "20240530101000-h0cp5vx",
+		"title": "検索から除外",
+		"type": "doc",
+		"updated": "20241001012251"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-r8fnyhr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-eud1jvp",
+				"id": "20240530101000-r8fnyhr",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vwkuuxg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-6ml8ucn",
+				"id": "20240530101000-vwkuuxg",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検索結果から不要な結果を除外します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-62fpa7t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-r7bkwtd",
+				"id": "20240530101000-62fpa7t",
+				"updated": "20241001012251"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r72s0bl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5aaijh2",
+				"id": "20240530101000-r72s0bl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "グローバル検索の除外設定と参照検索の除外設定は個別に設定する必要があります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-blvmnp4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-0tyh92s",
+				"id": "20240530101000-blvmnp4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-2ohb3u0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-a3gjvf0",
+						"id": "20240530101000-2ohb3u0",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-06jx41g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-m0fxssb",
+								"id": "20240530101000-06jx41g",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "グローバル検索から除外"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ファイルシステム上に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/.siyuan/searchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ というテキストファイルを作成して編集します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-nwv11oi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2a2vhhg",
+						"id": "20240530101000-nwv11oi",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-i4nbr2d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-04h867c",
+								"id": "20240530101000-i4nbr2d",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "参照検索から除外"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ファイルシステム上に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/.siyuan/refsearchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ というテキストファイルを作成して編集します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ga5amb3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-efd7z58",
+				"id": "20240530101000-ga5amb3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "これらの除外設定ファイルの各行は、SQL の \"NOT LIKE\" 条件として使用されます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-p9cdnfi",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20240530101000-p9cdnfi",
+				"updated": "20241001011918"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20241001012056-yh11ojl",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241001012056-yh11ojl",
+				"updated": "20241001012134"
+			},
+			"Children": [
+				{
+					"ID": "20241001012056-sy6m197",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001012056-sy6m197",
+						"updated": "20241001012056"
+					},
+					"Children": [
+						{
+							"ID": "20241001012056-om1aeg6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001012056-om1aeg6",
+								"updated": "20241001012056"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: ドキュメント パスが /20210808180117-6v0mkxr で始まるコンテンツ ブロック検索を無視します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001012056-8rmsast",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001012056-8rmsast",
+						"updated": "20241001012056"
+					},
+					"Children": [
+						{
+							"ID": "20241001012056-ls5m9jw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001012056-ls5m9jw",
+								"updated": "20241001012056"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "box != '20210808180117-czj9bvb'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: data/20210808180117-czj9bvb ノートブックの下のコンテンツ ブロック検索を無視します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001012056-ypwh8j1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001012056-ypwh8j1",
+						"updated": "20241001012134"
+					},
+					"Children": [
+						{
+							"ID": "20241001012056-lax86ok",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001012056-lax86ok",
+								"updated": "20241001012134"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id != '20200923234011-ieuun1p'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: id 20200923234011-ieuun1p のコンテンツ ブロック検索を無視します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-lmzi6qj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-lmzi6qj",
+				"updated": "20241001012251"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "構成ファイルの変更を保存した後、変更が有効になるまで 30 秒待つ必要があります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0hmkls7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cwbaq1z",
+				"id": "20240530101000-0hmkls7"
+			}
+		}
+	]
+}

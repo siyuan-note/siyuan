@@ -1,0 +1,332 @@
+{
+	"ID": "20210721112159-9p645xm",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210721112159-9p645xm",
+		"title": "Storage",
+		"type": "doc",
+		"updated": "20230912091621"
+	},
+	"Children": [
+		{
+			"ID": "20210721112251-nlv1v47",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721112251-nlv1v47",
+				"updated": "20220703223420"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The cloud storage space is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "8G"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", divided into the following sections:"
+				}
+			]
+		},
+		{
+			"ID": "20210721112251-y58mwa8",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721112251-y58mwa8",
+				"updated": "20220708103624"
+			},
+			"Children": [
+				{
+					"ID": "20210721112251-2g73fn6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112251-2g73fn6",
+						"updated": "20220708103549"
+					},
+					"Children": [
+						{
+							"ID": "20210721112251-9zy3gnn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112251-9zy3gnn",
+								"updated": "20220708103549"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Syn data: Provided to the synchronization function, the data is encrypted"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708103542-jeyq7kc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220708103542-jeyq7kc",
+						"updated": "20220708103559"
+					},
+					"Children": [
+						{
+							"ID": "20220708103542-ecomprl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103542-ecomprl",
+								"updated": "20220708103559"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Backup data: Provided to the backup function, the data is encrypted"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721112251-mbp661h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721112251-mbp661h",
+						"updated": "20220708103624"
+					},
+					"Children": [
+						{
+							"ID": "20210721112251-fj4dru0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721112251-fj4dru0",
+								"updated": "20220708103624"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Assets: Provided for copying to the Wechat MP, Zhihu and Yuque, etc., HTTPS CDN"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091521-5avsor2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091521-5avsor2",
+				"updated": "20230912091601"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Usage can be viewed in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20210721112229-fp97j3c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721112229-fp97j3c",
+				"title": "End-to-end Encryption",
+				"updated": "20220708103533"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "End-to-end Encryption"
+				}
+			]
+		},
+		{
+			"ID": "20220703223157-9xwnaxy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220703223157-9xwnaxy",
+				"updated": "20220703223157"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data synchronization is transmitted through end-to-end encryption, and the cloud does not store any plaintext data."
+				}
+			]
+		},
+		{
+			"ID": "20220703223157-z6lmqw5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220703223157-z6lmqw5",
+				"updated": "20220703223157"
+			},
+			"Children": [
+				{
+					"ID": "20220703223157-mzolzze",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223157-mzolzze",
+						"updated": "20220703223157"
+					},
+					"Children": [
+						{
+							"ID": "20220703223157-80pgm8w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223157-80pgm8w",
+								"updated": "20220703223157"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The key is only stored locally and will not be uploaded to the cloud"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223157-6qldbi9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223157-6qldbi9",
+						"updated": "20220703223157"
+					},
+					"Children": [
+						{
+							"ID": "20220703223157-4t6fh6p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223157-4t6fh6p",
+								"updated": "20220703223157"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Encryption and decryption process is performed entirely on the local device"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223157-dpfgnuy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223157-dpfgnuy",
+						"updated": "20220703223157"
+					},
+					"Children": [
+						{
+							"ID": "20220703223157-gh25cti",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223157-gh25cti",
+								"updated": "20220703223157"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The encryption algorithm is the industry-recognized and secure AES GCM"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091615-fx813ol",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230912091615-fx813ol",
+				"updated": "20230912091621"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "FAQ"
+				}
+			]
+		},
+		{
+			"ID": "20230912091615-gzjc8vp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230912091615-gzjc8vp",
+				"updated": "20230912091615"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Can developers decrypt my cloud data?"
+				}
+			]
+		},
+		{
+			"ID": "20230912091615-cexuk4h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091615-cexuk4h",
+				"updated": "20230912091615"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Unable to decrypt. If you lose your key, no one (including developers) can help you recover your data from the cloud."
+				}
+			]
+		}
+	]
+}

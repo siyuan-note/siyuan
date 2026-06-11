@@ -1,0 +1,700 @@
+{
+	"ID": "20211226122358-hctqcn5",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226122358-hctqcn5",
+		"title": "Kernel 參數",
+		"type": "doc",
+		"updated": "20260302173650"
+	},
+	"Children": [
+		{
+			"ID": "20211226122447-mz36qeo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122447-mz36qeo",
+				"updated": "20211226011025"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--workspace"
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-zrnua6j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122447-zrnua6j",
+				"updated": "20211228132920"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於指定工作空間文件夾路徑，不指定時的預設值是 ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/SiYuan/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-zfdaq9r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122447-zfdaq9r",
+				"updated": "20211226011025"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--wd"
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-8jh9v5s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122447-8jh9v5s",
+				"updated": "20211226122436"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Kernel 工作目錄路徑，不指定時按 Kernel 可執行文件入口自動獲取。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-bs6e25j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122447-bs6e25j",
+				"updated": "20211226011025"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly"
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-3obspkw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122447-3obspkw",
+				"updated": "20220517144244"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 指定後 Kernel 將以唯讀模式運行，所有寫入作業將被禁止。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-k8827y1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122447-k8827y1",
+				"updated": "20211226011025"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-5lookgq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122447-5lookgq",
+				"updated": "20211228125034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於指定瀏覽器存取",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122545-lsv6dhu",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "鎖屏密碼"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，設置後會覆蓋 conf.json 中的 authCode。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-0c1fqp7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122447-0c1fqp7",
+				"updated": "20211226011025"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl"
+				}
+			]
+		},
+		{
+			"ID": "20211226122447-rpubgbb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122447-rpubgbb",
+				"updated": "20211226011025"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl=true"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後將使用 https 和 wss 協議進行伺服。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20220517144220-400hbxb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220517144220-400hbxb",
+				"updated": "20260302173650"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang"
+				}
+			]
+		},
+		{
+			"ID": "20220517144220-5dryt3i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220517144220-5dryt3i",
+				"updated": "20260302173650"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang=zh_CN"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 後將使用簡體中文初始化外觀語言，預設 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "en_US"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。目前可選值："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ar_SA"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "de_DE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "en_US"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "es_ES"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "fr_FR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "he_IL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "it_IT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ja_JP"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ko_KR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pl_PL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pt_BR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ru_RU"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "sk_SK"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tr_TR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "uk_UA"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CHT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CN"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20220601091152-z1gdkxi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220601091152-z1gdkxi",
+				"updated": "20220601091152"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode"
+				}
+			]
+		},
+		{
+			"ID": "20220601091152-fx2ojfv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220601091152-fx2ojfv",
+				"updated": "20220601091200"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode=dev"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後將使用開發模式運行，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode=prod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 將使用生產模式運行，預設 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "prod"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220601091152-7qrn8ca",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220601091152-7qrn8ca",
+				"updated": "20220601091152"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開發模式和生產模式的主要區別開發模式會使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作目錄/appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 作為外觀文件夾，而生產模式使用的是 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/conf/appearance/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-g0ka4wv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20221025095644-g0ka4wv",
+				"updated": "20221025095644"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-7uijx77",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025095644-7uijx77",
+				"updated": "20221025095644"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於指定偵聽埠，不指定時："
+				}
+			]
+		},
+		{
+			"ID": "20221025095644-yxap136",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221025095644-yxap136",
+				"updated": "20221025095721"
+			},
+			"Children": [
+				{
+					"ID": "20221025095644-4yq1w95",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095644-4yq1w95",
+						"updated": "20221025095644"
+					},
+					"Children": [
+						{
+							"ID": "20221025095644-rf1ldjb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095644-rf1ldjb",
+								"updated": "20221025095644"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端使用隨機埠"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221025095644-weqayss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221025095644-weqayss",
+						"updated": "20221025095721"
+					},
+					"Children": [
+						{
+							"ID": "20221025095644-uhgv2bx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221025095644-uhgv2bx",
+								"updated": "20221025095721"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Docker/移動端使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "6806"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

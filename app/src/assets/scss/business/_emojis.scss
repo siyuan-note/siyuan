@@ -1,0 +1,116 @@
+
+.emojis {
+  word-break: break-all;
+  white-space: normal;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  height: 100%;
+  box-sizing: border-box;
+
+  &__tabheader {
+    display: flex;
+    border-bottom: 1px solid var(--b3-border-color);
+    padding: 0 8px 8px;
+  }
+
+  &__tabbody {
+    flex: 1;
+    overflow: auto;
+
+    div[data-type="tab-emoji"] {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+  }
+
+  .emoji__dynamic {
+    &-item {
+      width: 73px;
+      margin: 8px;
+      cursor: pointer;
+      transition: var(--b3-transition);
+
+      &:hover,
+      &--current {
+        background-color: var(--b3-theme-background);
+        border-radius: var(--b3-border-radius);
+        box-shadow: 0 0 0 1px var(--b3-list-hover) inset, 0 0 0 4px var(--b3-theme-background);
+      }
+    }
+
+    &-color {
+      padding: 8px 8px 4px 4px;
+    }
+  }
+
+  &__item {
+    font-size: 19px;
+    font-family: var(--b3-font-family-emoji);
+    text-align: center;
+    height: 32px;
+    padding: 4px;
+    cursor: pointer;
+    display: inline-block;
+    transition: var(--b3-transition);
+    background-color: transparent;
+    border: 0;
+    margin: 1px;
+    overflow: hidden;
+    border-radius: var(--b3-border-radius);
+    width: 32px;
+
+    img, svg {
+      height: 24px;
+      display: block;
+      width: 24px;
+    }
+
+    &--current,
+    &:hover {
+      background: var(--b3-list-hover);
+    }
+  }
+
+  &__title {
+    color: var(--b3-theme-on-surface);
+    padding: 8px 4px 4px 4px;
+  }
+
+  &__panel {
+    flex: 1;
+    overflow: auto;
+    padding: 0 8px;
+  }
+
+  &__content {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &__type {
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    line-height: 28px;
+    transition: var(--b3-list-hover);
+    font-size: 16px;
+    background-color: transparent;
+    border: 0;
+    padding: 0;
+    font-family: var(--b3-font-family-emoji);
+
+    &:hover {
+      background-color: var(--b3-theme-surface-lighter);
+    }
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+}

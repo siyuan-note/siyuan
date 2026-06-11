@@ -1,0 +1,108 @@
+// SiYuan - Refactor your thinking
+// Copyright (c) 2020-present, b3log.org
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+package conf
+
+import "github.com/siyuan-note/siyuan/kernel/util"
+
+type Editor struct {
+	AllowSVGScript                  bool           `json:"allowSVGScript"`                  // 允许执行 SVG 内脚本
+	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 块内脚本
+	FontSize                        int            `json:"fontSize"`                        // 字体大小
+	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 字体大小是否支持滚轮缩放
+	FontFamily                      string         `json:"fontFamily"`                      // 字体
+	FontWeight                      int            `json:"fontWeight"`                      // 字重
+	CodeSyntaxHighlightLineNum      bool           `json:"codeSyntaxHighlightLineNum"`      // 代码块是否显示行号
+	CodeTabSpaces                   int            `json:"codeTabSpaces"`                   // 代码块中 Tab 转换空格数，配置为 0 则表示不转换
+	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行
+	CodeLigatures                   bool           `json:"codeLigatures"`                   // 代码块是否连字
+	DisplayBookmarkIcon             bool           `json:"displayBookmarkIcon"`             // 是否显示内容块角标
+	DisplayNetImgMark               bool           `json:"displayNetImgMark"`               // 是否显示网络图片角标
+	GenerateHistoryInterval         int            `json:"generateHistoryInterval"`         // 生成历史时间间隔，单位：分钟
+	HistoryRetentionDays            int            `json:"historyRetentionDays"`            // 历史保留天数
+	Emoji                           []string       `json:"emoji"`                           // 常用表情
+	VirtualBlockRef                 bool           `json:"virtualBlockRef"`                 // 是否启用虚拟引用
+	VirtualBlockRefExclude          string         `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
+	VirtualBlockRefInclude          string         `json:"virtualBlockRefInclude"`          // 虚拟引用关键字包含列表
+	BlockRefDynamicAnchorTextMaxLen int            `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
+	PlantUMLServePath               string         `json:"plantUMLServePath"`               // PlantUML 伺服地址
+	FullWidth                       bool           `json:"fullWidth"`                       // 是否使用最大宽度
+	KaTexMacros                     string         `json:"katexMacros"`                     // KeTex 宏定义
+	ReadOnly                        bool           `json:"readOnly"`                        // 只读模式
+	EmbedBlockBreadcrumb            bool           `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
+	ListLogicalOutdent              bool           `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
+	ListItemDotNumberClickFocus     bool           `json:"listItemDotNumberClickFocus"`     // 单击列表项标记聚焦
+	FloatWindowMode                 int            `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停，2：不触发浮窗
+	FloatWindowDelay                *int           `json:"floatWindowDelay"`                // 浮窗悬停触发延迟，单位：毫秒，默认 620，nil 表示未设置
+	DynamicLoadBlocks               int            `json:"dynamicLoadBlocks"`               // 块动态数，可配置区间 [48, 1024]
+	Justify                         bool           `json:"justify"`                         // 是否两端对齐
+	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
+	Spellcheck                      bool           `json:"spellcheck"`                      // 是否启用拼写检查
+	SpellcheckLanguages             []string       `json:"spellcheckLanguages"`             // 拼写检查语言
+	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
+	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
+	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
+	BacklinkContainChildren         bool           `json:"backlinkContainChildren"`         // 反向链接是否包含子块进行计算
+	BacklinkSort                    *int           `json:"backlinkSort"`                    // 反向链接排序方式
+	BackmentionSort                 *int           `json:"backmentionSort"`                 // 反链提及排序方式
+	HeadingEmbedMode                int            `json:"headingEmbedMode"`                // 标题嵌入块模式，0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
+	PasteURLAutoConvert             bool           `json:"pasteURLAutoConvert"`             // 粘贴网址时自动转为链接
+	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
+}
+
+const (
+	MinDynamicLoadBlocks = 48
+)
+
+func NewEditor() *Editor {
+	return &Editor{
+		FontSize:                        16,
+		FontSizeScrollZoom:              false,
+		CodeSyntaxHighlightLineNum:      false,
+		CodeTabSpaces:                   0,
+		CodeLineWrap:                    false,
+		CodeLigatures:                   false,
+		DisplayBookmarkIcon:             true,
+		DisplayNetImgMark:               true,
+		GenerateHistoryInterval:         10,
+		HistoryRetentionDays:            30,
+		Emoji:                           []string{},
+		VirtualBlockRef:                 false,
+		BlockRefDynamicAnchorTextMaxLen: 96,
+		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
+		FullWidth:                       true,
+		KaTexMacros:                     "{}",
+		ReadOnly:                        false,
+		EmbedBlockBreadcrumb:            false,
+		ListLogicalOutdent:              false,
+		ListItemDotNumberClickFocus:     true,
+		FloatWindowMode:                 0,
+		FloatWindowDelay:                func() *int { v := 620; return &v }(),
+		DynamicLoadBlocks:               192,
+		Justify:                         false,
+		RTL:                             false,
+		Spellcheck:                      false,
+		SpellcheckLanguages:             []string{"en-US"},
+		BacklinkExpandCount:             8,
+		BackmentionExpandCount:          -1,
+		BacklinkContainChildren:         true,
+		BacklinkSort:                    func() *int { v := util.SortModeUpdatedDESC; return &v }(),
+		BackmentionSort:                 func() *int { v := util.SortModeUpdatedDESC; return &v }(),
+		HeadingEmbedMode:                0,
+		PasteURLAutoConvert:             false,
+		Markdown:                        util.MarkdownSettings,
+	}
+}

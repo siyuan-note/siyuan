@@ -1,0 +1,427 @@
+{
+	"ID": "20220628204454-hhxohv5",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220628204454-hhxohv5",
+		"title": "Optimize typography",
+		"type": "doc",
+		"updated": "20250115151312"
+	},
+	"Children": [
+		{
+			"ID": "20220628215200-ngjb7uu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628215200-ngjb7uu",
+				"updated": "20220628215200"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20220628215200-yi30jo7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215200-yi30jo7",
+				"updated": "20220628215227"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In order to record the content quickly, we often ignore some typographic details, such as the lack of spaces before and after inline codes or bolds, and the lack of spaces between Chinese and Western texts."
+				}
+			]
+		},
+		{
+			"ID": "20220628215200-o0bidjn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215200-o0bidjn",
+				"updated": "20220628215255"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This will cause the content typography to look less refined, and there will be some visual distraction when browsing the content in the future. Of course, this is just our feeling, maybe this is not a problem, and even such a compact typesetting is needed in the first place."
+				}
+			]
+		},
+		{
+			"ID": "20220628215200-efn43ah",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628215200-efn43ah",
+				"updated": "20250115151312"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20220628215200-11bzo6r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215200-11bzo6r",
+				"updated": "20250115151312"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Optimized Typesetting"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ menu in the upper right corner of the editor. After processing, a space will be automatically inserted before and after the following elements in the document:"
+				}
+			]
+		},
+		{
+			"ID": "20220628215200-rkz9o7o",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220628215200-rkz9o7o",
+				"updated": "20240506230150"
+			},
+			"Children": [
+				{
+					"ID": "20220628215200-jdgcfne",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220628215200-jdgcfne",
+						"updated": "20240506230145"
+					},
+					"Children": [
+						{
+							"ID": "20220628215200-6pyhpe4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220628215200-6pyhpe4",
+								"updated": "20240506230145"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Inline code: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Code"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220628215200-ojyqca0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220628215200-ojyqca0",
+						"updated": "20240506230150"
+					},
+					"Children": [
+						{
+							"ID": "20220628215200-vokqsi7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220628215200-vokqsi7",
+								"updated": "20240506230150"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Inline formula: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-math",
+									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220630211201-ggozvjz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220630211201-ggozvjz",
+				"updated": "20220630211201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition, a space will be automatically inserted between Chinese and Western languages in the following elements:"
+				}
+			]
+		},
+		{
+			"ID": "20220630211201-d80xx42",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220630211201-d80xx42",
+				"updated": "20240506230917"
+			},
+			"Children": [
+				{
+					"ID": "20220630211201-xvvr6cb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-xvvr6cb",
+						"updated": "20240506230917"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-s03kxsh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-s03kxsh",
+								"updated": "20240506230917"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "Mark"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-lxnn7r2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-lxnn7r2",
+						"updated": "20240506230054"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-5gsz1zv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-5gsz1zv",
+								"updated": "20240506230054"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "s",
+									"TextMarkTextContent": "Strikethrough"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-vg75q8p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-vg75q8p",
+						"updated": "20240506230115"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-wryew45",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-wryew45",
+								"updated": "20240506230115"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io",
+									"TextMarkTextContent": "Hyperlink anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-yhpbga9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-yhpbga9",
+						"updated": "20220630211216"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-6rx4x4p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-6rx4x4p",
+								"updated": "20220630211216"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Normal text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-6po0hz5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-6po0hz5",
+						"updated": "20240506230121"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-z7c6px5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-z7c6px5",
+								"updated": "20240506230121"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "Italic"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220630211201-4aezon3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220630211201-4aezon3",
+						"updated": "20240506230123"
+					},
+					"Children": [
+						{
+							"ID": "20220630211201-4n0bq1l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220630211201-4n0bq1l",
+								"updated": "20240506230123"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Bold"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220628215200-f974ft7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220628215200-f974ft7",
+				"updated": "20220628215200"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatic backup"
+				}
+			]
+		},
+		{
+			"ID": "20220628215200-dkde3is",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220628215200-dkde3is",
+				"updated": "20220628215421"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before the actual execution of optimized typesetting, SiYuan will automatically back up the original document once, so that if the optimization result is not satisfied, it can be rolled back through "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210615213222-vs5tzbd",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Data history"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

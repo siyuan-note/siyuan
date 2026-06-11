@@ -1,0 +1,871 @@
+@use "../util/mixin";
+
+.protyle-wysiwyg {
+  padding: 16px 16px 16px 24px;
+  cursor: text;
+  box-sizing: border-box;
+  user-select: auto;
+  overflow-x: clip;
+
+  &--empty:empty::before {
+    color: var(--b3-empty-color);
+    content: attr(placeholder);
+  }
+
+  .protyle-breadcrumb__bar {
+    font-size: 14px;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  [data-node-id] {
+    position: relative;
+
+    &.dragover {
+      &__left::after,
+      &__right::after,
+      &__top::after,
+      &__bottom::after {
+        content: '';
+        position: absolute;
+        background-color: var(--b3-theme-primary-lighter);
+        pointer-events: none;
+      }
+
+      &__top::after,
+      &__bottom::after {
+        left: 0;
+        right: 0;
+        height: 4px;
+      }
+
+      &__top::after {
+        top: -4px;
+      }
+
+      &__bottom::after {
+        bottom: -4px;
+        top: auto;
+      }
+
+      &__left::after,
+      &__right::after {
+        top: 0;
+        bottom: 0;
+        width: 4px;
+      }
+
+      &__left::after {
+        left: -4px;
+      }
+
+      &__right::after {
+        right: -4px;
+      }
+    }
+
+    &[custom-riff-decks] {
+      box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
+    }
+
+    [spellcheck] {
+      min-height: 1.625em;
+      word-break: break-word;
+      // https://github.com/siyuan-note/siyuan/issues/10483
+      white-space: break-spaces;
+
+      &:focus {
+        outline: none;
+      }
+    }
+
+    &.hr {
+      cursor: pointer;
+
+      & > div {
+        padding-left: 100%;
+        position: relative;
+        min-height: 1.625em;
+
+        &::after {
+          position: absolute;
+          content: " ";
+          height: calc(1em / 16);
+          background-color: var(--b3-theme-background-light);
+          width: calc(100% - 1px);
+          left: 0;
+          top: calc(1.625em / 2);
+        }
+      }
+    }
+
+    &.list {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+
+      & > .li:first-child {
+        margin-top: 0;
+      }
+
+      & > div:nth-last-child(2) {
+        margin-bottom: 0;
+      }
+    }
+
+    &.li {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(1.625em + 8px);
+
+      &::before {
+        content: "";
+        position: absolute;
+        border-left: .5px solid var(--b3-theme-background-light);
+        left: 17px;
+        height: calc(100% - 1em * 1.625 - 12px);
+        top: calc(1em * 1.625 + 12px);
+      }
+
+      &:hover::before {
+        border-left-color: var(--b3-scroll-color);
+      }
+
+      & > [data-node-id] {
+        margin-left: 34px;
+      }
+
+      & > [data-node-id]:not(.p):not(.code-block) {
+        padding-right: 0;
+      }
+
+      & > div:nth-child(2) {
+        margin-top: 0;
+      }
+
+      & > div:nth-last-child(2) {
+        margin-bottom: 0;
+      }
+
+      &[fold="1"] {
+        &::before {
+          content: none;
+        }
+
+        & > .protyle-action::after {
+          background-color: var(--b3-list-hover);
+        }
+
+        & > div:nth-child(2) {
+          margin-bottom: 0;
+        }
+
+        & > div:nth-child(3):not(.protyle-attr),
+        & > div:nth-child(3) ~ div:not(.protyle-attr) {
+          display: none;
+        }
+      }
+
+      & > .protyle-action {
+        left: 0;
+        position: absolute;
+        width: 34px;
+        top: 0;
+        transition: var(--b3-transition);
+        color: var(--b3-theme-on-surface);
+        justify-content: center;
+        display: flex;
+        align-items: center;
+        word-break: keep-all;
+        height: calc(1.625em + 8px);
+        line-height: calc(1.625em + 8px);
+        touch-action: none;
+
+        & ~ [data-type="NodeHeading"] {
+          &.h1 {
+            line-height: calc(1.625em / 1.75);
+          }
+
+          &.h2 {
+            line-height: calc(1.625em / 1.55);
+          }
+
+          &.h3 {
+            line-height: calc(1.625em / 1.38);
+          }
+
+          &.h4 {
+            line-height: calc(1.625em / 1.25);
+          }
+
+          &.h5 {
+            line-height: calc(1.625em / 1.13);
+          }
+
+          &.h6 {
+            line-height: 1.625em;
+          }
+
+          & > [spellcheck] {
+            min-height: 1em;
+          }
+        }
+
+        &::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          height: max(14px, 1em);
+          width: max(14px, 1em);
+          margin: min(-7px, -.5em) 0 0 min(-7px, -.5em);
+          border-radius: 50%;
+          transition: var(--b3-transition);
+        }
+
+        svg {
+          width: 34px;
+          height: max(14px, 1em - 8px);
+          display: block;
+          z-index: 1;
+          position: relative;
+          pointer-events: none;
+        }
+
+        &--order::after {
+          border-radius: var(--b3-border-radius);
+        }
+      }
+
+      & > div[fold="1"][data-type="NodeHeading"]::before {
+        left: -6px;
+        height: 7px;
+        width: 7px;
+        margin-top: -4px;
+      }
+    }
+
+    &[style*="direction: rtl"] {
+      .li > .protyle-action,
+      & > .protyle-action {
+        right: 0;
+        left: auto;
+        direction: rtl;
+      }
+
+      .li > [data-node-id],
+      & > [data-node-id] {
+        margin-right: 34px;
+        margin-left: 0;
+      }
+
+      .li::before,
+      &::before {
+        right: 17px;
+        left: auto;
+      }
+    }
+
+    &.sb {
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      max-width: 100%;
+
+      &[data-sb-layout="col"] {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        column-gap: 1.5em;
+
+        & > div {
+          flex: 1 0 10%;
+          box-sizing: border-box;
+          min-width: 1px;
+
+          &:nth-last-child(2),
+          &:last-child {
+            margin-right: 0;
+          }
+        }
+
+        .sb {
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+
+        & > div .protyle-attr--refcount {
+          position: initial;
+          margin-left: 4px;
+        }
+      }
+    }
+
+    span[data-type~="tag"] {
+      // https://github.com/siyuan-note/siyuan/issues/12305
+      padding-left: 1px;
+      padding-right: 1px;
+      border-bottom: 1px solid;
+      color: var(--b3-protyle-inline-tag-color);
+      transition: var(--b3-transition);
+      cursor: pointer; // 预览导出无此元素，只读和编辑状态都需要点击 https://github.com/siyuan-note/siyuan/issues/11854
+    }
+
+    span[data-type~="a"] {
+      color: var(--b3-protyle-inline-link-color);
+      cursor: pointer;
+      transition: var(--b3-transition);
+
+      &:hover {
+        border-bottom: 1px solid;
+      }
+    }
+
+    span[data-type~="search-mark"] {
+      background-color: var(--b3-protyle-inline-mark-background);
+      color: var(--b3-protyle-inline-mark-color);
+
+      &.search-mark--hl {
+        background-color: var(--b3-theme-primary-lighter);
+        box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
+      }
+    }
+
+    span[data-type="virtual-block-ref"] {
+      border-bottom: 1px dashed var(--b3-theme-on-surface);
+      transition: var(--b3-transition);
+
+      &:hover {
+        border-color: var(--b3-theme-on-background);
+      }
+    }
+
+    .def--mark {
+      background-color: var(--b3-theme-secondary);
+    }
+
+    span[data-type~="block-ref"]:not(.av__celltext),
+    span[data-type~="file-annotation-ref"] {
+      color: var(--b3-protyle-inline-blockref-color);
+      opacity: .86;
+      transition: var(--b3-transition);
+    }
+
+    span[data-type~="file-annotation-ref"] {
+      color: var(--b3-protyle-inline-fileref-color);
+    }
+
+    span[data-type~="block-ref"],
+    span[data-type~="file-annotation-ref"] {
+      cursor: pointer;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    &.render-node {
+      min-height: 32px;
+
+      &:hover > .protyle-icons {
+        opacity: .86;
+      }
+
+      &[data-type="NodeBlockQueryEmbed"] {
+        background-color: var(--b3-embed-background);
+        border: 1px dashed var(--b3-theme-on-surface-light);
+        max-width: 100%;
+        padding: 2px 4px;
+
+        /* 选中块的高亮覆盖 border */
+        &.protyle-wysiwyg--select::after,
+        &.protyle-wysiwyg--hl::after {
+          width: calc(100% + 2px);
+          height: calc(100% + 2px);
+          left: -1px;
+          top: -1px;
+        }
+
+        // https://github.com/siyuan-note/siyuan/issues/8715 & https://ld246.com/article/1689063197687 第一点无法进行以下设置
+        //.protyle-attr--refcount {right: 0;}
+
+        & > .protyle-wysiwyg__embed {
+          border-top: 1px dashed var(--b3-theme-on-surface-light);
+          position: relative;
+
+          .code-block:hover .protyle-icon,
+          .render-node:hover .protyle-icons {
+            opacity: 0 !important;
+          }
+        }
+
+        & > .protyle-icons {
+          // https://github.com/siyuan-note/siyuan/issues/14678
+          z-index: 2;
+
+          & + .protyle-wysiwyg__embed {
+            border-top: 0;
+          }
+        }
+      }
+    }
+
+    code:not(.hljs):empty {
+      padding: 0;
+    }
+
+    &.table[custom-pinthead="true"] {
+      table {
+        max-height: 50vh;
+      }
+
+      thead {
+        position: sticky;
+        top: 1px;
+        z-index: 2;
+        box-shadow: 0 -1px 0 var(--b3-border-color) inset, 0 -1px 0 0 var(--b3-border-color);
+        background-color: var(--b3-parent-background);
+
+        th {
+          border-top: 0;
+        }
+      }
+    }
+
+    &.table table {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .img {
+
+      user-select: none;
+      // 不能放在 typography 下 https://github.com/siyuan-note/siyuan/issues/9844
+      &:not([style]) {
+        display: initial;
+      }
+
+      &--select {
+        filter: brightness(.68);
+      }
+
+      &--drag > span::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .protyle-action__drag {
+        height: 30%;
+        width: 4px;
+        background: var(--b3-theme-surface);
+        display: none;
+        border-radius: var(--b3-border-radius);
+        cursor: col-resize;
+        transition: var(--b3-transition);
+        touch-action: none;
+        position: absolute;
+        top: 35%;
+        margin-left: -8px;
+        box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
+        box-sizing: border-box;
+        z-index: 1;
+
+        &:hover {
+          background-color: var(--b3-theme-background);
+          box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
+        }
+
+        &::before,
+        &::after {
+          position: absolute;
+          width: 4px;
+          content: "";
+          height: 100%;
+          left: -4px;
+        }
+
+        &::after {
+          left: 4px;
+          width: 8px
+        }
+      }
+
+      &__net {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        color: var(--b3-theme-primary);
+        background-color: var(--b3-theme-surface-lighter);
+        padding: 4px;
+        border-radius: var(--b3-border-radius);
+
+        svg {
+          height: 12px;
+          width: 12px;
+          float: left;
+        }
+      }
+    }
+
+    &.iframe {
+      // https://ld246.com/article/1644827326901
+      // https://github.com/siyuan-note/siyuan/issues/4172
+      &[data-type="NodeWidget"],
+      &[data-type="NodeIFrame"] {
+        .iframe-content {
+          -webkit-user-modify: read-only;
+        }
+      }
+
+      &--drag {
+        .iframe-content::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      .protyle-action__drag {
+        height: 32px;
+        width: 4px;
+        background-color: var(--b3-theme-surface);
+        display: none;
+        border-radius: var(--b3-border-radius);
+        cursor: nwse-resize;
+        transition: var(--b3-transition);
+        position: absolute;
+        right: -4px;
+        bottom: 0;
+        box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
+        box-sizing: border-box;
+
+        &::after {
+          content: "";
+          background-color: var(--b3-theme-surface);
+          width: 32px;
+          height: 4px;
+          display: block;
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          border-radius: var(--b3-border-radius);
+          box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
+          box-sizing: border-box;
+          cursor: nwse-resize;
+        }
+
+        &:hover,
+        &:hover::after {
+          background-color: var(--b3-theme-background);
+          box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
+        }
+      }
+    }
+  }
+
+  &--select::after,
+  &--hl::after {
+    background-color: var(--b3-theme-primary-lightest);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    content: " ";
+    left: 0;
+    top: 0;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: var(--b3-border-radius);
+  }
+
+  &--hl {
+    transition: var(--b3-background-transition);
+  }
+
+  &--hiderange {
+    ::selection {
+      background-color: transparent;
+    }
+
+    .hljs ::selection {
+      background-color: transparent;
+      color: inherit;
+    }
+  }
+
+  // https://github.com/siyuan-note/siyuan/issues/11589
+  .hljs wbr {
+    display: none;
+  }
+
+  &--attr .protyle-attr {
+    opacity: 1;
+
+    & > div {
+      &.protyle-attr--memo {
+        cursor: pointer;
+      }
+
+      &:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
+        cursor: pointer;
+        @include mixin.text-clamp(1);
+        max-width: 25vw;
+      }
+    }
+
+    .b3-tooltips::after {
+      max-width: var(--b3-width-protyle-wysiwyg);
+    }
+  }
+
+  &--animate {
+    animation: bottom2Top .3s ease-in-out;
+  }
+
+  div[data-type="NodeMathBlock"] {
+    min-height: 62px !important;
+  }
+
+  div[data-type="NodeHTMLBlock"] {
+    min-height: 26px !important;
+  }
+
+  div[fold="1"][data-type="NodeHeading"]::before {
+    content: "";
+    height: 16px;
+    width: 16px;
+    background-color: var(--b3-theme-surface-lighter);
+    display: block;
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    border-radius: var(--b3-border-radius-b);
+    margin-top: -8px;
+    border-left: 0 !important;
+  }
+
+  .bq > div[fold="1"][data-type="NodeHeading"]::before,
+  .callout-content > div[fold="1"][data-type="NodeHeading"]::before {
+    left: -26px;
+  }
+
+  [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
+    @include mixin.text-clamp(1);
+    opacity: .38;
+    font-size: 16px;
+    height: 26px;
+    line-height: 26px;
+
+    .protyle-attr {
+      opacity: 0;
+    }
+
+    &.list {
+      height: 34px;
+
+      .li:first-child {
+        overflow: hidden;
+        height: 34px;
+      }
+    }
+
+    &[data-type="NodeBlockQueryEmbed"] {
+      height: 42px;
+
+      .protyle-wysiwyg__embed {
+        height: 34px;
+        overflow: hidden;
+      }
+    }
+
+    &.av {
+      height: 109px;
+    }
+
+    &.sb,
+    &.table {
+      height: 36px;
+    }
+
+    &.bq {
+      height: 42px;
+
+      & > div:first-child {
+        font-size: 16px;
+        height: 26px;
+        line-height: 26px;
+        overflow: hidden;
+      }
+    }
+
+    &.code-block {
+      line-height: 1.625;
+      height: 25px;
+
+      .protyle-action__language {
+        opacity: .86;
+        user-select: none;
+      }
+
+      .protyle-action__copy,
+      .protyle-action__menu {
+        margin-top: -2px;
+      }
+    }
+  }
+}
+
+.protyle .protyle-wysiwyg {
+  // 只读情况下列表前的圆点需要可以点击进行缩放
+  .li[data-subtype="o"] > .protyle-action,
+  .li[data-subtype="u"] > .protyle-action,
+  &[data-readonly="false"] .li[data-subtype="t"] > .protyle-action {
+    cursor: pointer;
+
+    &:hover {
+      &::after {
+        background-color: var(--b3-list-icon-hover);
+      }
+
+      color: var(--b3-theme-on-background);
+    }
+  }
+
+  // 复制粘贴序号会状态异常 https://ld246.com/article/1762691143057
+  .li > .protyle-action {
+    user-select: none;
+  }
+}
+
+// 在思源中，不论只读模式还是预览点击图片都可以进行预览
+.protyle .img > span:nth-child(2) {
+  cursor: pointer;
+}
+
+// 导出 html 不需要编辑样式
+.protyle-wysiwyg[data-readonly="false"] {
+  span[data-type~="inline-math"],
+  .protyle-action__language,
+  .render-node:not([data-type="NodeBlockQueryEmbed"]) {
+    cursor: pointer;
+  }
+
+  span[data-type~="tag"]:hover {
+    background-color: var(--b3-theme-surface-lighter);
+  }
+
+
+  .img:hover .protyle-action__drag,
+  .iframe:hover .protyle-action__drag {
+    display: inline-block;
+  }
+
+  .code-block .protyle-action {
+    -webkit-user-modify: read-only;
+
+    .protyle-action__language {
+      &:hover {
+        color: var(--b3-theme-on-background);
+      }
+
+      &:empty::after {
+        content: "language";
+        opacity: .68;
+      }
+    }
+  }
+
+  .img:hover .protyle-icons {
+    opacity: .86;
+  }
+
+  .callout-icon {
+    cursor: pointer;
+    transition: var(--b3-background-transition);
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+    }
+  }
+
+  .callout-title {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.protyle-wysiwyg:not([contenteditable]),
+.protyle-wysiwyg[data-readonly="true"] {
+  .img:hover .protyle-icons {
+    display: none;
+  }
+
+  .av {
+    .b3-chip[data-type="block-more"],
+    .av__row--util:not(.av__readonly--show),
+    .av__row--footer:not(.av__readonly--show),
+    .av__row--util .b3-button[data-type="av-add-bottom"],
+    .av__row--util svg[data-type="set-page-size"],
+    .av__row--header > .block__icons,
+    .av__views .fn__space,
+    .av__views .block__icon:not([data-type="av-search-icon"]),
+    .av__widthdrag,
+    .av__gallery-actions,
+    .av__gallery-add {
+      display: none;
+    }
+
+    .av__row--util:not(.av__readonly--show) + .av__row--footer.av__readonly--show {
+      border-top-color: transparent;
+    }
+
+    .av__row > div:nth-last-child(-n + 2) {
+      border-right-color: transparent;
+    }
+
+    .av__row--footer:hover .av__calc:not(.av__calc--ashow) {
+      opacity: 0;
+    }
+
+    &:hover .av__group-icon--hover {
+      display: none;
+    }
+
+    .av__row--footer .av__calc:hover,
+    .av__cell--header:hover {
+      background-color: transparent;
+    }
+
+    .av__cell {
+      cursor: inherit;
+
+      &text--url,
+      &assetimg {
+        cursor: pointer;
+      }
+    }
+
+    .av__row .av__cell[data-dtype="block"] > .block__icon[data-type="copy"] {
+      display: flex;
+    }
+  }
+}
+
+// export pdf 中需要使用 https://github.com/siyuan-note/siyuan/issues/14548
+.protyle-cursor {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

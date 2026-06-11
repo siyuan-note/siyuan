@@ -1,0 +1,232 @@
+{
+	"ID": "20211010212318-3wx2kqb",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211010212318-3wx2kqb",
+		"title": "Virtual reference",
+		"type": "doc",
+		"updated": "20240228164101"
+	},
+	"Children": [
+		{
+			"ID": "20211010212319-jz4ue2g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211010212319-jz4ue2g",
+				"updated": "20211010212319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20211010212319-b0948bh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211010212319-b0948bh",
+				"updated": "20211010212551"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Virtual reference is a kind of \"block ref\" that is automatically detected based on the anchor text of the existing block ref or the name of the block, but it is not actually linked to the block, but only marked in the editor, and supports floating window preview ."
+				}
+			]
+		},
+		{
+			"ID": "20211010212319-glx3lpn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211010212319-glx3lpn",
+				"updated": "20211010212319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20211010212319-bnndiez",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211010212319-bnndiez",
+				"updated": "20211010212456"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Virtual Reference"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " switch."
+				}
+			]
+		},
+		{
+			"ID": "20211010212319-oy401ib",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211010212319-oy401ib",
+				"updated": "20211010212319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Detection rules"
+				}
+			]
+		},
+		{
+			"ID": "20211010212319-iwf94dv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211010212319-iwf94dv",
+				"updated": "20211010212537"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Search based on the anchor text/definition block text of the existing block ref, the name and alias of the block as keywords. If these keywords are searched on the plain text element of the current content block, it will be used as a virtual reference."
+				}
+			]
+		},
+		{
+			"ID": "20240228164044-aohxrm3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240228164044-aohxrm3",
+				"updated": "20240228164101"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The keyword search scope can be adjusted in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Virtual reference"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20221003214846-p9q1wvx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221003214846-p9q1wvx",
+				"updated": "20221003214853"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20221003214937-bqvm7yz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221003214937-bqvm7yz",
+				"updated": "20221003214948"
+			},
+			"Children": [
+				{
+					"ID": "20221003214937-hfdshei",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221003214937-hfdshei",
+						"updated": "20221003214948"
+					},
+					"Children": [
+						{
+							"ID": "20221003214937-w913xwl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221003214937-w913xwl",
+								"updated": "20221003214948"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "For performance reasons, virtual references do not take effect immediately. If they are not displayed, you can try to refresh the current document via "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "F5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

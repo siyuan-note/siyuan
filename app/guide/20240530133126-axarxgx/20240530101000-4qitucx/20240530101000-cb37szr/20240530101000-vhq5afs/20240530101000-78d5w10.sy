@@ -1,0 +1,380 @@
+{
+	"ID": "20240530101000-78d5w10",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-q0s3tu3",
+		"id": "20240530101000-78d5w10",
+		"title": "アセットホスティング",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-h0v1ctx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-k6lplay",
+				"id": "20240530101000-h0v1ctx",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan で作成したドキュメントを WeChat、Zhihu、Yuque などのプラットフォームにコピー＆ペーストすると、ドキュメント内の画像が自動的に各プラットフォームにアップロードされ、適切な形式で表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5rrdfrz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-rd42um3",
+				"id": "20240530101000-5rrdfrz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-w9xuy3u",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-fcjevz0",
+				"id": "20240530101000-w9xuy3u",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-2g1xzbb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-iknrpyk",
+						"id": "20240530101000-2g1xzbb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-yxeujy4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-10mwf79",
+								"id": "20240530101000-yxeujy4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "エディタの右上にある "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ メニューから、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アセットファイルをクラウドにアップロード"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-pfgcrvs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-flwv030",
+						"id": "20240530101000-pfgcrvs",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-vc2njp3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-0thes2v",
+								"id": "20240530101000-vc2njp3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "編集モードの切り替え"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "プレビュー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ypn2358",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-tgsvla7",
+						"id": "20240530101000-ypn2358",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-uailv91",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-06asqct",
+								"id": "20240530101000-uailv91",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ツールバーの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Wechat MP にコピーする"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Zhihu にコピーする"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Yuque にコピーする"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ アイコンをクリックします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-3o1k9k6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-g2ofb58",
+						"id": "20240530101000-3o1k9k6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-7niin4z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-1u22hru",
+								"id": "20240530101000-7niin4z",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "コピーした内容を目的のプラットフォームのエディタに貼り付けます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-gur67bm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-axpb2on",
+				"id": "20240530101000-gur67bm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アセットホスティング内のファイルを削除する必要がある場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://liuyun.io/settings/file?type=3",
+					"TextMarkTextContent": "[LiuYun] - [設定] - [ファイル] - [ノート]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " から操作してください。削除するとファイルが占有していたストレージスペースは直ちに解放されますが、CDN キャッシュの都合上ファイルの URL は最大 30 日間アクセス可能なままになります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5ng7hla",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-y3gd7mc",
+				"id": "20240530101000-5ng7hla",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0z5wh2a",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-6eb90o9",
+				"id": "20240530101000-0z5wh2a",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-0vcuo8g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rxadxva",
+						"id": "20240530101000-0vcuo8g",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-1pybwrk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-weh0maq",
+								"id": "20240530101000-1pybwrk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "他のプラットフォームからクラウド上の画像ホスティングサービスが提供する外部リンクを使用しないでください。これらのアドレスは不安定で、ドメイン変更により利用できなくなる可能性があります。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-se8z170",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-fbrv6pw",
+						"id": "20240530101000-se8z170",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-lnpyixz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-0mmr6tb",
+								"id": "20240530101000-lnpyixz",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "違法または機密性の高いファイル (ポルノ、暴力、テロ、個人情報など) はアップロードしないでください。アップロードされたファイルは第三者機関が提供するサービスを通じて審査されます。違法なファイルをアップロードした場合はアカウントが永久に停止され、法的責任を負う可能性があります。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xnvsy4q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-thkqbl6",
+				"id": "20240530101000-xnvsy4q"
+			}
+		}
+	]
+}

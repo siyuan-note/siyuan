@@ -1,0 +1,48 @@
+{
+	"ID": "20211226121109-f060fkg",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f3a8",
+		"id": "20211226121109-f060fkg",
+		"title": "自定義外觀",
+		"type": "doc",
+		"updated": "20240508002918"
+	},
+	"Children": [
+		{
+			"ID": "20240508002918-f2jmry7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002918-f2jmry7",
+				"updated": "20240508002918"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226121633-qa2fjpl",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "圖示"
+				}
+			]
+		},
+		{
+			"ID": "20240508002918-i3a6dzu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002918-i3a6dzu",
+				"updated": "20240508002918"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226121326-v5kpxfp",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "主題"
+				}
+			]
+		}
+	]
+}

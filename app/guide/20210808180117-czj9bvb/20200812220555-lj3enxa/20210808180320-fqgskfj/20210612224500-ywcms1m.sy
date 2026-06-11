@@ -1,0 +1,364 @@
+{
+	"ID": "20210612224500-ywcms1m",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210612224500-ywcms1m",
+		"title": "内容块属性",
+		"type": "doc",
+		"updated": "20251201102135"
+	},
+	"Children": [
+		{
+			"ID": "20210612224500-ftupo06",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210612224500-ftupo06",
+				"updated": "20210613000110"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210613000111-kj7vhlk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613000111-kj7vhlk",
+				"updated": "20210613105556"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "属性以键值对（key-value）的形式存在，我们可以通过对内容块设置属性来丰富内容块的内涵。属性分为内置属性和自定义属性。"
+				}
+			]
+		},
+		{
+			"ID": "20210613004126-79loyta",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210613004126-79loyta",
+				"updated": "20210613004130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内置属性"
+				}
+			]
+		},
+		{
+			"ID": "20210613004249-56e0c6r",
+			"Type": "NodeTable",
+			"TableAligns": [
+				2,
+				0
+			],
+			"Properties": {
+				"id": "20210613004249-56e0c6r",
+				"updated": "20210613120805"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"TableCellAlign": 2,
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "属性名"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "描述"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "name"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块的命名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "alias"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块的别名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "memo"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块的备注"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"TableCellAlign": 2,
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "bookmark"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "内容块的书签"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210613004117-1jnl9m0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210613004117-1jnl9m0",
+				"updated": "20251201102135"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自定义属性"
+				}
+			]
+		},
+		{
+			"ID": "20210613004135-7td7u1o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613004135-7td7u1o",
+				"updated": "20251201102135"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自定义属性由用户通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code kbd",
+					"TextMarkTextContent": "块标菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code kbd",
+					"TextMarkTextContent": "属性"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 进行设置，属性名仅允许使用小写英文字母和阿拉伯数字并且需要以字母开头（例如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "doing"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "day1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​）。设置后，思源会自动在属性名前加上前缀 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "custom-"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，以区分内置属性和自定义属性。"
+				}
+			]
+		},
+		{
+			"ID": "20210613105627-xbzpkz0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210613105627-xbzpkz0",
+				"updated": "20210613105851"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "根据属性查询内容块"
+				}
+			]
+		},
+		{
+			"ID": "20210613010047-clw1kra",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210613010047-clw1kra",
+				"updated": "20210613102634"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例如，当我们为内容块设置了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "progress=30"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "priority=2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 属性后，则可以通过 SQL 查询出所有进度为 30、优先级为 2 的内容块："
+				}
+			]
+		},
+		{
+			"ID": "20210613012911-qdrxc6w",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20210613012911-qdrxc6w",
+				"updated": "20210613105821"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"ID": "20220307091943-a9eflzg",
+					"Type": "NodeCodeBlockCode",
+					"Data": "SELECT *\nFROM blocks\nWHERE id IN (\n    SELECT block_id\n    FROM attributes AS a\n    WHERE (a.name = 'custom-progress' AND a.value = '30')\n       OR (a.name = 'custom-priority' AND a.value = '2')\n    GROUP BY block_id\n    HAVING count(block_id) = 2\n);\n",
+					"Properties": {
+						"id": "20220307091943-a9eflzg"
+					}
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		}
+	]
+}

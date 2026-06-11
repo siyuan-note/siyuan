@@ -1,0 +1,510 @@
+{
+	"ID": "20200924101200-gss5vee",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924101200-gss5vee",
+		"title": "Navigate in the Content Block",
+		"type": "doc",
+		"updated": "20250115164053"
+	},
+	"Children": [
+		{
+			"ID": "20210104091546-1flsvp0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091546-1flsvp0"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Link"
+				}
+			]
+		},
+		{
+			"ID": "20210104091546-cccr56d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091546-cccr56d",
+				"updated": "20210302223903"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "There are two types of links in the document content:"
+				}
+			]
+		},
+		{
+			"ID": "20210205173431-dis2g0v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210205173431-dis2g0v",
+				"updated": "20210428224830"
+			}
+		},
+		{
+			"ID": "20210428224834-ten8yt5",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210428224834-ten8yt5",
+				"updated": "20221105220127"
+			},
+			"Children": [
+				{
+					"ID": "20210428224834-114qwev",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210428224834-114qwev"
+					},
+					"Children": [
+						{
+							"ID": "20210428224834-vbkml67",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428224834-vbkml67"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Standard URL hyperlinks, opened with a browser, used for Internet resource access"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210428224834-dn1cwlq",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210428224834-dn1cwlq",
+						"updated": "20221105220127"
+					},
+					"Children": [
+						{
+							"ID": "20210428224834-3i7y0fu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428224834-3i7y0fu",
+								"updated": "20221105220127"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The content block link established by "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924101256-f8b1sbi",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ref"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " is used for two-way linking within SiYuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210428225947-bkizd86",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210428225947-bkizd86",
+				"updated": "20210428225952"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Zoom focus"
+				}
+			]
+		},
+		{
+			"ID": "20210428225949-bxqb5mb",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210428225949-bxqb5mb",
+				"updated": "20220312233028"
+			},
+			"Children": [
+				{
+					"ID": "20210428225949-q8mwfo8",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210428225949-q8mwfo8",
+						"updated": "20220312233028"
+					},
+					"Children": [
+						{
+							"ID": "20210428225949-m2e7vgq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428225949-m2e7vgq",
+								"updated": "20220312233028"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After selecting focus in the right-click drop-down menu on the block icon, the editor will focus on the content block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210428225949-em0qjd7",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210428225949-em0qjd7"
+					},
+					"Children": [
+						{
+							"ID": "20210428225949-vmw0m2j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428225949-vmw0m2j"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Jump in context through the breadcrumb navigation at the top of the editor"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20200924101210-zwf8ags",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200924101210-zwf8ags",
+				"updated": "20250115164053"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Graph"
+				}
+			]
+		},
+		{
+			"ID": "20210104091546-k8f7caz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091546-k8f7caz",
+				"updated": "20210428225413"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The relationship diagram is divided into document level and global. The relationship diagram of the document is expanded based on the current document block and presents all the content blocks (forward links and reverse links) related to the document; the global relationship diagram is all the block and link relationships in all notebooks."
+				}
+			]
+		},
+		{
+			"ID": "20210205173507-dhy0k9l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210205173507-dhy0k9l"
+			}
+		},
+		{
+			"ID": "20210428225309-l9hqxpz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210428225309-l9hqxpz",
+				"updated": "20250115164053"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hold down "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and click on the node: jump to the node."
+				}
+			]
+		},
+		{
+			"ID": "20200924101210-3qfiiat",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200924101210-3qfiiat"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Backlinks"
+				}
+			]
+		},
+		{
+			"ID": "20210106204930-m073dyq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210106204930-m073dyq"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Backlinks are document-level, listing the blocks in the current document where content blocks are quoted and mentioned."
+				}
+			]
+		},
+		{
+			"ID": "20210104091546-2gmpeq4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091546-2gmpeq4",
+				"updated": "20210104091546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Links"
+				}
+			]
+		},
+		{
+			"ID": "20210908144725-sfn6vd8",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210908144725-sfn6vd8",
+				"updated": "20210908144757"
+			},
+			"Children": [
+				{
+					"ID": "20210908144725-so6cwba",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210908144725-so6cwba",
+						"updated": "20210908144757"
+					},
+					"Children": [
+						{
+							"ID": "20210908144725-cgcu1ut",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210908144725-cgcu1ut",
+								"updated": "20210908144757"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Hovering the mouse over the reference block icon will pop up a preview floating window"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210908144725-sg5v7te",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210908144725-sg5v7te",
+						"updated": "20210908144735"
+					},
+					"Children": [
+						{
+							"ID": "20210908144725-q0swjhw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210908144725-q0swjhw",
+								"updated": "20210908144735"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click the reference block in the backlink list to jump"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210106204950-gjw62fp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210106204950-gjw62fp"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Mentions"
+				}
+			]
+		},
+		{
+			"ID": "20210106204954-rpwfh3i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210106204954-rpwfh3i",
+				"updated": "20221026221426"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mentions are searched using the content block name, alias, reference anchor text and document name in the current document as keywords (the search scope can be set in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Backlink mentions"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​), the search results are blocks of content that contain these keywords."
+				}
+			]
+		},
+		{
+			"ID": "20221026222024-1ug5zq4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221026222024-1ug5zq4",
+				"updated": "20221026222138"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: Mention search will only search in normal text, not in line-level elements such as bold and italics, and block-level elements such as code blocks and charts. The rule are the same as the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211010212319-oy401ib",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "detection rules of virtual reference"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

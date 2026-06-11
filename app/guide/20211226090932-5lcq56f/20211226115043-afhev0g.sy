@@ -1,0 +1,1131 @@
+{
+	"ID": "20211226115043-afhev0g",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50f",
+		"id": "20211226115043-afhev0g",
+		"title": "資料安全",
+		"type": "doc",
+		"updated": "20230422123349"
+	},
+	"Children": [
+		{
+			"ID": "20211226115155-regsto0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115155-regsto0",
+				"updated": "20211225214451"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-pjw3jlt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115155-pjw3jlt",
+				"updated": "20211228141106"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資料安全主要分為兩方面："
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-2bnjxep",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226115155-2bnjxep",
+				"updated": "20230422123349"
+			},
+			"Children": [
+				{
+					"ID": "20211226115155-r4hwqlr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115155-r4hwqlr",
+						"updated": "20230422123349"
+					},
+					"Children": [
+						{
+							"ID": "20211226115155-n4d8iqg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115155-n4d8iqg",
+								"updated": "20230422123349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230422120236-58nari9",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "可用性"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：資料不遺失，保持資料的完整和一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115155-0r6gtqb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115155-0r6gtqb",
+						"updated": "20211228141111"
+					},
+					"Children": [
+						{
+							"ID": "20211226115155-tqfo7hf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115155-tqfo7hf",
+								"updated": "20211228141111"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "機密性：資料不被泄漏、不被篡改"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-kznvu4y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115155-kznvu4y",
+				"updated": "20211228141118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源對這兩方面都進行了一定支援，下面是關於資料安全方面的說明。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-ckjrbi2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115155-ckjrbi2",
+				"updated": "20211225214451"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "明文存儲"
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-1b2wvyo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115155-1b2wvyo",
+				"updated": "20211228141121"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源使用明文方式將資料存儲在本地文件系統上，這意味著："
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-nyex7qa",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226115155-nyex7qa",
+				"updated": "20211228141131"
+			},
+			"Children": [
+				{
+					"ID": "20211226115155-6ukijuv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115155-6ukijuv",
+						"updated": "20211228141126"
+					},
+					"Children": [
+						{
+							"ID": "20211226115155-g95jxwm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115155-g95jxwm",
+								"updated": "20211228141126"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "任何能夠使用作業系統的人或軟體都讀取其中的資料"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115155-kn5bnm5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115155-kn5bnm5",
+						"updated": "20211228141131"
+					},
+					"Children": [
+						{
+							"ID": "20211226115155-9wsafkf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115155-9wsafkf",
+								"updated": "20211228141131"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資料的可用性依賴於硬體磁碟和作業系統的可用性"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-jq28hup",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115155-jq28hup",
+				"updated": "20211225214451"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "端到端加密"
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-04oj3rp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226115155-04oj3rp",
+				"updated": "20220703223003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源雲端同步使用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211227210109-0f92zh2",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "端到端加密"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，密碼在本地通過內置密鑰加密保存，除使用者之外的任何第三方均無法在雲端獲得明文資料。"
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-b3gy3p8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226115155-b3gy3p8",
+				"updated": "20211225214451"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建議"
+				}
+			]
+		},
+		{
+			"ID": "20211226115155-z39qt19",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226115155-z39qt19",
+				"updated": "20220703223919"
+			},
+			"Children": [
+				{
+					"ID": "20211226115155-h7jnnu0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115155-h7jnnu0",
+						"updated": "20220703223919"
+					},
+					"Children": [
+						{
+							"ID": "20211226115155-vyt8fzz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115155-vyt8fzz",
+								"updated": "20220703223919"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "定期備份資料，參考 321 備份原則（至少 3 個副本、2 種介質和 1 個異地存儲）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226115155-80w2cr0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226115155-80w2cr0",
+						"updated": "20211228124700"
+					},
+					"Children": [
+						{
+							"ID": "20211226115155-6y3o6jb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226115155-6y3o6jb",
+								"updated": "20211228124700"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重要密碼、密鑰或者Kernel機密等建議使用專用軟體、設備或者離線保存"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-in5zyhv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220626214021-in5zyhv",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "威脅模型"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-6tofzu0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214021-6tofzu0",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主要針對本地資料安全和思源雲端存儲安全進行評估。"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-viqft4z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214021-viqft4z",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "前提假設"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-x8i173y",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214021-x8i173y",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"ID": "20220626214021-7gox8eu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-7gox8eu",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-2wsjz7h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-2wsjz7h",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本地操作系統是完全受信任的環境。這是資料安全最基礎的前提，基於該前提才能保證"
+								}
+							]
+						},
+						{
+							"ID": "20220626214021-vlffl2a",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220626214021-vlffl2a",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"ID": "20220626214021-dsnclyw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220626214021-dsnclyw",
+										"updated": "20220626214021"
+									},
+									"Children": [
+										{
+											"ID": "20220626214021-1n601ag",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220626214021-1n601ag",
+												"updated": "20220626214021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "原始資料的可用性"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220626214021-w7t53bu",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220626214021-w7t53bu",
+										"updated": "20220626214021"
+									},
+									"Children": [
+										{
+											"ID": "20220626214021-ahy7fhq",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220626214021-ahy7fhq",
+												"updated": "20220626214021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "原始資料不被洩漏"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220626214021-y8k9lz5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220626214021-y8k9lz5",
+										"updated": "20220626214021"
+									},
+									"Children": [
+										{
+											"ID": "20220626214021-h2gyyuo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220626214021-h2gyyuo",
+												"updated": "20220626214021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "密鑰的安全性"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-ergkh2g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-ergkh2g",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-hao852y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-hao852y",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "用戶不洩漏密鑰給攻擊者"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-g0xbo70",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-g0xbo70",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-tblyjo1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-tblyjo1",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "雲端存儲中的資料不被刪除"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-xdngup7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-xdngup7",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-lebj0c9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-lebj0c9",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "AES-GCM 加密算法未被攻破"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-axp1ikp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-axp1ikp",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-jdn7lut",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-jdn7lut",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "攻擊者無法提供暴力破解所需算力"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-75a1qb0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214021-75a1qb0",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "雲端存儲能夠保證"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-gz8p50i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214021-gz8p50i",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"ID": "20220626214021-6mh42fa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-6mh42fa",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-3268c0b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-3268c0b",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "只有通過正確的密鑰才能解密資料"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-6qmxb8n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-6qmxb8n",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-b8dnd5h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-b8dnd5h",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資料被篡改後無法解密"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-k0l9w1q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214021-k0l9w1q",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正常示例"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-h6pm7s8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214021-h6pm7s8",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基於上述假設和保證，下面是攻擊者能夠達成的目標示例。"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-n88bvde",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214021-n88bvde",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果攻擊者對雲端存儲具有隻讀權限，那麼他能夠："
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-bu1nuv1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214021-bu1nuv1",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"ID": "20220626214021-3i7p5ux",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-3i7p5ux",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-u08ygc7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-u08ygc7",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "獲取到已經加密的資料，嘗試暴力破解"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-udnvdb5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-udnvdb5",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-v3l2lpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-v3l2lpa",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過索引信息推斷出資料大小"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-v7wq31z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214021-v7wq31z",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果攻擊者能夠劫持網絡，那麼他能夠："
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-o83u6yc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214021-o83u6yc",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"ID": "20220626214021-ly7r5qb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-ly7r5qb",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-3utkkjt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-3utkkjt",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "篡改資料造成資料不可用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-lr58bwm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-lr58bwm",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-qmq9vxb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-qmq9vxb",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "獲得用戶 ID 信息"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-i53soj1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-i53soj1",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-8nqmuhl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-8nqmuhl",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過流量推斷出資料大小"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-v89v1l5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214021-v89v1l5",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "異常示例"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-07gbtjr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214021-07gbtjr",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果違反了上述假設或保證，下面是攻擊者能夠達成的目標和示例。"
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-5mz1301",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214021-5mz1301",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果攻擊者能夠入侵本地操作系統，那麼他能夠："
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-57coq7j",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214021-57coq7j",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"ID": "20220626214021-m7n7mzh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-m7n7mzh",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-j7hqbfp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-j7hqbfp",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "修改或刪除原始資料，造成原始資料不可用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-2b6ovit",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-2b6ovit",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-giszicf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-giszicf",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "獲得原始資料"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214021-54puka1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-54puka1",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-mcxeo69",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-mcxeo69",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "獲得密鑰"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-oxtgu33",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214021-oxtgu33",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果攻擊者對雲端存儲具有寫入權限，那麼他能夠："
+				}
+			]
+		},
+		{
+			"ID": "20220626214021-8dj1v35",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214021-8dj1v35",
+				"updated": "20220626214021"
+			},
+			"Children": [
+				{
+					"ID": "20220626214021-i8s5ai0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214021-i8s5ai0",
+						"updated": "20220626214021"
+					},
+					"Children": [
+						{
+							"ID": "20220626214021-ye9pf1i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214021-ye9pf1i",
+								"updated": "20220626214021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "修改或刪除雲端存儲，造成雲端存儲資料不可用"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

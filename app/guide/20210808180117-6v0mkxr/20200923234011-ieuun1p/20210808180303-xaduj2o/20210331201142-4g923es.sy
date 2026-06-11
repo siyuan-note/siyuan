@@ -1,0 +1,482 @@
+{
+	"ID": "20210331201142-4g923es",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210331201142-4g923es",
+		"title": "Hyperlink",
+		"type": "doc",
+		"updated": "20250115153437"
+	},
+	"Children": [
+		{
+			"ID": "20210331201142-dwke6pz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210331201142-dwke6pz",
+				"updated": "20210331201208"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210331201206-pqjejoj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210331201206-pqjejoj",
+				"updated": "20210331201214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to pull up the SiYuan desktop application in other places (such as a browser or software that supports hyperlinks), you can use the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " hyperlink."
+				}
+			]
+		},
+		{
+			"ID": "20210331201206-uas6ebz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210331201206-uas6ebz"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Link format"
+				}
+			]
+		},
+		{
+			"ID": "20210331201206-ozhui09",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210331201206-ozhui09",
+				"updated": "20210502203113"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ": Open the content block directly, and the notebook where the block is located is already open."
+				}
+			]
+		},
+		{
+			"ID": "20220312232923-7df11yf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220312232923-7df11yf",
+				"updated": "20220312232923"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Add query string parameter "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "focus=1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}?focus=1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ") to indicate focus is on."
+				}
+			]
+		},
+		{
+			"ID": "20210331201206-o84lpl5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210331201206-o84lpl5",
+				"updated": "20250115153437"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20210331201206-rkvtd1b",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210331201206-rkvtd1b",
+				"updated": "20250115153437"
+			},
+			"Children": [
+				{
+					"ID": "20210331201206-xoqqqbg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210331201206-xoqqqbg"
+					},
+					"Children": [
+						{
+							"ID": "20210331201206-9iow0ri",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210331201206-9iow0ri",
+								"updated": "20220407101343"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After startup on Windows and macOS, it will automatically apply to the system for registration of the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan://"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " protocol"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220407101343-vd9llkw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220407101343-vd9llkw",
+						"updated": "20220407101410"
+					},
+					"Children": [
+						{
+							"ID": "20220407101344-lzfkfby",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220407101344-lzfkfby",
+								"updated": "20220407101344"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "On Linux try the following steps"
+								}
+							]
+						},
+						{
+							"ID": "20220407101344-deo5hik",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220407101344-deo5hik",
+								"updated": "20220407101410"
+							},
+							"Children": [
+								{
+									"ID": "20220407101344-ml7oa9j",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220407101344-ml7oa9j"
+									},
+									"Children": [
+										{
+											"ID": "20220407101344-eex45w7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220407101344-eex45w7"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Create or find the "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "siyuan.desktop"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " file and open it for editing"
+												}
+											]
+										},
+										{
+											"ID": "20220407101344-t4jebj9",
+											"Type": "NodeList",
+											"ListData": {},
+											"Properties": {
+												"id": "20220407101344-t4jebj9"
+											},
+											"Children": [
+												{
+													"ID": "20220407101344-5xe1jqu",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20220407101344-5xe1jqu"
+													},
+													"Children": [
+														{
+															"ID": "20220407101344-8strkrw",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20220407101344-8strkrw"
+															},
+															"Children": [
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "MimeType=MimeType=x-scheme-handler/siyuan;"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20220407101344-ie6ni77",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20220407101344-ie6ni77"
+													},
+													"Children": [
+														{
+															"ID": "20220407101344-59gg2ye",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20220407101344-59gg2ye"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "Add "
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "%u"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": " at the end of "
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": ", that is, "
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec=executable file path %u"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220407101344-dekuz0i",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220407101344-dekuz0i",
+										"updated": "20220407101410"
+									},
+									"Children": [
+										{
+											"ID": "20220407101344-hhptxkd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220407101344-hhptxkd",
+												"updated": "20220407101410"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Execute the following commands"
+												}
+											]
+										},
+										{
+											"ID": "20220407101344-9bjuq8i",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"id": "20220407101344-9bjuq8i"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "amF2YQ=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "sudo update-desktop-database\nxdg-mime default siyuan.desktop x-scheme-handler/siyuan\nxdg-settings set default-url-scheme-handler siyuan siyuan.desktop\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										},
+										{
+											"ID": "20220407101344-x47q6cj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220407101344-x47q6cj"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "For more details, refer to "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://www.freedesktop.org/wiki/Software/xdg-utils/",
+													"TextMarkTextContent": "xdg-utils"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "."
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210331201206-u9iykb3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210331201206-u9iykb3",
+						"updated": "20250115153437"
+					},
+					"Children": [
+						{
+							"ID": "20210331201206-zibhjts",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210331201206-zibhjts",
+								"updated": "20250115153437"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Block icon menu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Copy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Copy block hyperlink"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,705 @@
+{
+	"ID": "20230805230218-aea8icj",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230805230218-aea8icj",
+		"title": "搜索资源文件内容",
+		"type": "doc",
+		"updated": "20250903162923"
+	},
+	"Children": [
+		{
+			"ID": "20230818101510-yjc0r0h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230818101510-yjc0r0h",
+				"updated": "20230821123142"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 界面右上角可以将搜索功能切换到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索资源文件内容"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，目前支持如下格式的资源文件内容搜索："
+				}
+			]
+		},
+		{
+			"ID": "20230818101450-4a6lzdg",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230818101450-4a6lzdg",
+				"updated": "20250903162923"
+			},
+			"Children": [
+				{
+					"ID": "20230818101510-rfacaaf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818101510-rfacaaf",
+						"updated": "20250903162915"
+					},
+					"Children": [
+						{
+							"ID": "20230818101510-duzarcy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818101510-duzarcy",
+								"updated": "20250903162915"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文本文件（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".md"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".markdown"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".json"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sql"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".html"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".xml"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".java"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".h"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".c"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".cpp"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".go"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".rs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".swift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".kt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".py"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".php"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".ts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sh"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".bat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".ini"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".yaml"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".rst"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".adoc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".textile"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".opml"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".org"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".wiki"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".epub"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".cs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818101513-x5baw16",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818101513-x5baw16",
+						"updated": "20250903162918"
+					},
+					"Children": [
+						{
+							"ID": "20230818101513-558ntbl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818101513-558ntbl",
+								"updated": "20250903162918"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".docx"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818101521-n1r8yqv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818101521-n1r8yqv",
+						"updated": "20250903162920"
+					},
+					"Children": [
+						{
+							"ID": "20230818101521-mutuxqo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818101521-mutuxqo",
+								"updated": "20250903162920"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".pptx"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818101526-oortrwo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818101526-oortrwo",
+						"updated": "20250903162921"
+					},
+					"Children": [
+						{
+							"ID": "20230818101526-t4uvb3w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818101526-t4uvb3w",
+								"updated": "20250903162921"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".xlsx"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230818101543-ejcoq3j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230818101543-ejcoq3j",
+						"updated": "20250903162923"
+					},
+					"Children": [
+						{
+							"ID": "20230818101543-36waszk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230818101543-36waszk",
+								"updated": "20250903162923"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".pdf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230903112236-sl6rni1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230903112236-sl6rni1",
+				"updated": "20230903112241"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​​："
+				}
+			]
+		},
+		{
+			"ID": "20230903112243-pwm33kc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230903112243-pwm33kc",
+				"updated": "20231026085139"
+			},
+			"Children": [
+				{
+					"ID": "20231025095048-l224arr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095048-l224arr"
+					},
+					"Children": [
+						{
+							"ID": "20231025095048-u6ge0ue",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095048-u6ge0ue",
+								"updated": "20231025095053"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持大于 4MB 的文本文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095053-a0quwv1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095053-a0quwv1",
+						"updated": "20231025095556"
+					},
+					"Children": [
+						{
+							"ID": "20231025095053-ee3etgb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095053-ee3etgb",
+								"updated": "20231026085014"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持大于 1024 页的 PDF"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231026085015-163ec6r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231026085015-163ec6r",
+						"updated": "20231026085139"
+					},
+					"Children": [
+						{
+							"ID": "20231026085015-9kucsof",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231026085015-9kucsof",
+								"updated": "20231026085139"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "默认不支持大于 128MB 的 PDF，可通过环境变量 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 设置，值的单位是字节，比如："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE=256000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将上限调整为 256MB"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231025095306-wro7c1x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231025095306-wro7c1x",
+						"updated": "20231025095306"
+					},
+					"Children": [
+						{
+							"ID": "20231025095306-6gcc6ba",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231025095306-6gcc6ba",
+								"updated": "20231025095306"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Android/iOS 端不支持 PDF "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "资源文件内容搜索"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,323 @@
+{
+	"ID": "20230304000547-ibldj1z",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230304000547-ibldj1z",
+		"title": "Artificial Intelligence",
+		"type": "doc",
+		"updated": "20250115153814"
+	},
+	"Children": [
+		{
+			"ID": "20230308213723-d3esro1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230308213723-d3esro1",
+				"updated": "20230308213723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230308213723-q8a5kbd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230308213723-q8a5kbd",
+				"updated": "20230324161738"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Supports text dialogue through "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://openai.com/",
+					"TextMarkTextContent": "OpenAI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Chat API."
+				}
+			]
+		},
+		{
+			"ID": "20230308213723-gznor89",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230308213723-gznor89",
+				"updated": "20250115153814"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20230308213723-r46h6mw",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20230308213723-r46h6mw",
+				"updated": "20250115153814"
+			},
+			"Children": [
+				{
+					"ID": "20230308213723-9yri7ka",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20230308213723-9yri7ka",
+						"updated": "20230308213723"
+					},
+					"Children": [
+						{
+							"ID": "20230308213723-wgq5x45",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213723-wgq5x45",
+								"updated": "20230308213723"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Register an OpenAI account and create an API Key"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230308213723-obctww8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230308213723-obctww8",
+						"updated": "20230324161801"
+					},
+					"Children": [
+						{
+							"ID": "20230308213723-rerhr3p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213723-rerhr3p",
+								"updated": "20230324161801"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Configure in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230308213723-5m7aqfs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20230308213723-5m7aqfs",
+						"updated": "20250115153814"
+					},
+					"Children": [
+						{
+							"ID": "20230308213723-i5y2zf5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213723-i5y2zf5",
+								"updated": "20250115153814"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "/AI writing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to call up the dialog box, enter a question or demand and confirm"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230308213723-la05np0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230308213723-la05np0",
+						"updated": "20230324161818"
+					},
+					"Children": [
+						{
+							"ID": "20230308213723-mjv4wg6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213723-mjv4wg6",
+								"updated": "20230324161818"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Perform more operations through the block menu "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Artificial Intelligence"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230308213723-50hrqrb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230308213723-50hrqrb",
+				"updated": "20230308213745"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230308213723-ji4g66t",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230308213723-ji4g66t",
+				"updated": "20230308213723"
+			},
+			"Children": [
+				{
+					"ID": "20230308213723-5vbcwdu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230308213723-5vbcwdu",
+						"updated": "20230308213723"
+					},
+					"Children": [
+						{
+							"ID": "20230308213723-ekc7o7y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213723-ekc7o7y",
+								"updated": "20230308213723"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "This function will send the relevant text to OpenAI"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230308213723-7su9wm3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230308213723-7su9wm3",
+						"updated": "20230308213723"
+					},
+					"Children": [
+						{
+							"ID": "20230308213723-yb9xt3u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213723-yb9xt3u",
+								"updated": "20230308213723"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "There will be a fee for calling the OpenAI API"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

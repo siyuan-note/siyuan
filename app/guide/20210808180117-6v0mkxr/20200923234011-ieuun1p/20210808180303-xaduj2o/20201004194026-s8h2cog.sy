@@ -1,0 +1,250 @@
+{
+	"ID": "20201004194026-s8h2cog",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201004194026-s8h2cog",
+		"title": "Use on browser",
+		"type": "doc",
+		"updated": "20231022211844"
+	},
+	"Children": [
+		{
+			"ID": "20210104091447-8iiuxlt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091447-8iiuxlt"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Browser usage"
+				}
+			]
+		},
+		{
+			"ID": "20221025092947-gd0wmbi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025092947-gd0wmbi",
+				"updated": "20221025093054"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "About"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Use on browser"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Open browser"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, you can directly use SiYuan on the browser, if you need to use it in the local area network, replace "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ with the local area network IP address."
+				}
+			]
+		},
+		{
+			"ID": "20221025092947-5m97t0e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025092947-5m97t0e",
+				"updated": "20231022211844"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to the use of the local LAN, the use of the public network can be achieved by the following two methods:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091447-6y4386v",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091447-6y4386v",
+				"updated": "20221025093157"
+			},
+			"Children": [
+				{
+					"ID": "20210104091447-2wey9jj",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091447-2wey9jj"
+					},
+					"Children": [
+						{
+							"ID": "20210302223802-1mbrz5a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223802-1mbrz5a"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Publish local kernel services on the public network through the \"intranet penetration\" technology (more troublesome and unstable, not recommended)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091447-oo5sodh",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091447-oo5sodh",
+						"updated": "20221025093157"
+					},
+					"Children": [
+						{
+							"ID": "20210302223802-ghpurq7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223802-ghpurq7",
+								"updated": "20221025093157"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Build your own SiYuan Server (recommended)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091447-br9zpri",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091447-br9zpri",
+				"updated": "20230820191236"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before embarking on these two solutions, please start with understanding SiYuan Technical Architecture (github repo: siyuan-note/siyuan)."
+				}
+			]
+		},
+		{
+			"ID": "20210104091447-dluat0m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210104091447-dluat0m"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Lock screen password"
+				}
+			]
+		},
+		{
+			"ID": "20210104091447-3vmymbk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091447-3vmymbk",
+				"updated": "20210522214406"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "About"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", you can configure the browser lock screen password. Leaving it blank means that it is not enabled. This is more useful in open networks (such as office spaces and public networks), and only after password verification can you enter the work space."
+				}
+			]
+		},
+		{
+			"ID": "20210117211053-tq2km4f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210117211053-tq2km4f"
+			}
+		}
+	]
+}

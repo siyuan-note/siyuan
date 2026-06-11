@@ -1,0 +1,35 @@
+<html>
+<head>
+    <style>
+        #emojiGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 360px);
+            grid-gap: 8px;
+        }
+
+        .emoji__item {
+            display: flex;
+            align-items: center;
+        }
+
+        .emoji__item img {
+            height: 1em;
+            width: 1em;
+        }
+    </style>
+    <script src="../../stage/protyle/js/lute/lute.min.js"></script>
+</head>
+<body>
+<h2>SiYuan</h2>
+<div id="emojiGrid"></div>
+<script>
+    const emoji = Lute.New().GetEmojis()
+    let emojiHTML = ''
+    Object.keys(emoji).forEach((key) => {
+        const value = emoji[key].indexOf('http') > -1 ? `<img src="${emoji[key]}"/>` : emoji[key]
+        emojiHTML += `<div class="emoji__item">${value}&nbsp;:${key}:</div>`
+    })
+    document.getElementById('emojiGrid').innerHTML = emojiHTML
+</script>
+</body>
+</html>

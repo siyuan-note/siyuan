@@ -1,0 +1,164 @@
+{
+	"spec": 1,
+	"id": "20240208171654-5egzrvx",
+	"name": "作者",
+	"keyValues": [
+		{
+			"key": {
+				"id": "20240208171654-pr1t0t1",
+				"name": "作者名",
+				"type": "block",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"id": "20240208171930-w26w3jn",
+					"keyID": "20240208171654-pr1t0t1",
+					"blockID": "20240208171929-lje6qns",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707383970000,
+					"updatedAt": 1707383970000,
+					"block": {
+						"id": "20240208171929-lje6qns",
+						"icon": "",
+						"content": "儒勒·凡爾納",
+						"created": 1707383970101,
+						"updated": 1707383985867
+					}
+				},
+				{
+					"id": "20240208171942-11fet7j",
+					"keyID": "20240208171654-pr1t0t1",
+					"blockID": "20240208171941-crh3hx3",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707383982000,
+					"updatedAt": 1707383982000,
+					"block": {
+						"id": "20240208171941-crh3hx3",
+						"icon": "",
+						"content": "劉慈欣",
+						"created": 1707383982511,
+						"updated": 1707383997024
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"id": "20240208171851-z6j6nj0",
+				"name": "作品",
+				"type": "relation",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": "",
+				"relation": {
+					"avID": "20240208171724-zfkzgwi",
+					"isTwoWay": true,
+					"backKeyID": "20240208171913-wcpom5u"
+				}
+			},
+			"values": [
+				{
+					"id": "20240208171943-dlhacb4",
+					"keyID": "20240208171851-z6j6nj0",
+					"blockID": "20240208171929-lje6qns",
+					"type": "relation",
+					"createdAt": 1707383983000,
+					"updatedAt": 1707383983000,
+					"relation": {
+						"blockIDs": [
+							"20240208171751-wmphpet"
+						],
+						"contents": null
+					}
+				},
+				{
+					"id": "20240208171946-l2fpwi2",
+					"keyID": "20240208171851-z6j6nj0",
+					"blockID": "20240208171941-crh3hx3",
+					"type": "relation",
+					"createdAt": 1707383986000,
+					"updatedAt": 1707383986000,
+					"relation": {
+						"blockIDs": [
+							"20240208171807-wbmr1ps",
+							"20240208171759-zc76r72"
+						],
+						"contents": null
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"id": "20240208172002-ur5nb91",
+				"name": "作品數",
+				"type": "rollup",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": "",
+				"rollup": {
+					"relationKeyID": "20240208171851-z6j6nj0",
+					"keyID": "20240208171724-j0vptez",
+					"calc": {
+						"operator": "Count all",
+						"result": null
+					}
+				}
+			}
+		}
+	],
+	"keyIDs": null,
+	"viewID": "20240208171654-8n7f3og",
+	"views": [
+		{
+			"id": "20240208171654-8n7f3og",
+			"icon": "",
+			"name": "表格",
+			"hideAttrViewName": false,
+			"desc": "",
+			"type": "table",
+			"table": {
+				"spec": 0,
+				"id": "20240208171654-mk6w6id",
+				"columns": [
+					{
+						"id": "20240208171654-pr1t0t1",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					},
+					{
+						"id": "20240208171851-z6j6nj0",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					},
+					{
+						"id": "20240208172002-ur5nb91",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					}
+				],
+				"rowIds": [
+					"20240208171929-lje6qns",
+					"20240208171941-crh3hx3"
+				],
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50
+			}
+		}
+	]
+}

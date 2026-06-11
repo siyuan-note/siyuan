@@ -1,0 +1,457 @@
+{
+	"ID": "20211226120349-rbkmozu",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226120349-rbkmozu",
+		"title": "在内容塊中遨遊",
+		"type": "doc",
+		"updated": "20250115164121"
+	},
+	"Children": [
+		{
+			"ID": "20211226120415-pn9ywnd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120415-pn9ywnd",
+				"updated": "20211226152205"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "連結"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-kniu1ri",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120415-kniu1ri",
+				"updated": "20211226152202"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文檔內容中的連結分為兩種："
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-fqj39l7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"fold": "0",
+				"id": "20211226120415-fqj39l7",
+				"updated": "20221105220040"
+			},
+			"Children": [
+				{
+					"ID": "20211226120415-m1k2tab",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120415-m1k2tab",
+						"updated": "20211228125040"
+					},
+					"Children": [
+						{
+							"ID": "20211226120415-ecxzbl7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120415-ecxzbl7",
+								"updated": "20211228125040"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "標準 URL 超連結，使用瀏覽器打開，用於網際網路資料存取"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120415-e5u2lvx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120415-e5u2lvx",
+						"updated": "20221105220040"
+					},
+					"Children": [
+						{
+							"ID": "20211226120415-0k71jr7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120415-0k71jr7",
+								"updated": "20221105220040"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226120247-63nd8y5",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "建立的內容塊連結，用於在思源內部進行雙連"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-oalx1x3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120415-oalx1x3",
+				"updated": "20211225232427"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "縮放聚焦"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-x0dza6r",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"fold": "0",
+				"id": "20211226120415-x0dza6r",
+				"updated": "20220312233003"
+			},
+			"Children": [
+				{
+					"ID": "20211226120415-o9zkmbm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120415-o9zkmbm",
+						"updated": "20220312233003"
+					},
+					"Children": [
+						{
+							"ID": "20211226120415-kqz15j6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120415-kqz15j6",
+								"updated": "20220312233003"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在塊標上右鍵下拉菜單中選擇聚焦後，編輯器會聚焦到該內容塊上"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120415-miu5l7s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120415-miu5l7s",
+						"updated": "20211225232741"
+					},
+					"Children": [
+						{
+							"ID": "20211226120415-0ailfby",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120415-0ailfby",
+								"updated": "20211225232741"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過編輯器頂部的頁面路徑導覽列能夠在上下文中進行跳轉"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-akhb2fd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120415-akhb2fd",
+				"updated": "20250115164121"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "關系圖"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-k3bqje1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120415-k3bqje1",
+				"updated": "20211226152233"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "關系圖分為文檔級和全域。文檔的關系圖是以當前文檔塊展開，並呈現所有和該文檔有關聯的（正向連結和反向連結）內容塊；全域關系圖是所有筆記本中所有的塊和連結關系。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-p7ccdta",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120415-p7ccdta",
+				"updated": "20250115164121"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 單擊節點：跳轉到該節點。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-p3ajlx2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226120415-p3ajlx2",
+				"updated": "20211226152238"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "反向連結"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-xb01abh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120415-xb01abh",
+				"updated": "20211226152244"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "反向連結是文檔級的，列出當前文檔中內容塊被引用和被提及所在的塊。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-id98kff",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226120415-id98kff",
+				"updated": "20211226152249"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "連結"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-b7xvx0p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226120415-b7xvx0p",
+				"updated": "20211228134731"
+			},
+			"Children": [
+				{
+					"ID": "20211226120415-806dm3p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120415-806dm3p",
+						"updated": "20211228134731"
+					},
+					"Children": [
+						{
+							"ID": "20211226120415-b4ufivw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120415-b4ufivw",
+								"updated": "20211228134731"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "滑鼠懸浮塊引用前面的標識會彈出預覽浮窗"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120415-2yrs5sh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120415-2yrs5sh",
+						"updated": "20211228134546"
+					},
+					"Children": [
+						{
+							"ID": "20211226120415-xuanj0d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120415-xuanj0d",
+								"updated": "20211228134546"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "單擊反連列表中的塊引用進行跳轉"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-kqk522d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226120415-kqk522d",
+				"updated": "20211225232427"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提及"
+				}
+			]
+		},
+		{
+			"ID": "20211226120415-k8yvb62",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120415-k8yvb62",
+				"updated": "20221026221359"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提及使用當前文檔中內容塊命名、別名、引用錨文字和文檔名作為關鍵字進行搜索（可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反連提及"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中設置搜索範圍），搜索結果為包含這些關鍵字的內容塊。"
+				}
+			]
+		},
+		{
+			"ID": "20211228134547-inyam43",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211228134547-inyam43",
+				"updated": "20221026222236"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：提及搜索僅會在普通文字中搜索，不會在粗體、斜體等行級元素和代碼塊、圖表等塊級元素中搜索，這一點和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122825-w6wxq0c",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "虛擬引用探測規則"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "是相同的。"
+				}
+			]
+		}
+	]
+}

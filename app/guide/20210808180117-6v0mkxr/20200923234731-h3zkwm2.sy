@@ -1,0 +1,1354 @@
+{
+	"ID": "20200923234731-h3zkwm2",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "2753",
+		"id": "20200923234731-h3zkwm2",
+		"title": "FAQ",
+		"type": "doc",
+		"updated": "20250518103440"
+	},
+	"Children": [
+		{
+			"ID": "20210428222532-nfvnq4d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210428222532-nfvnq4d",
+				"updated": "20210428222834"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "How does SiYuan store data?"
+				}
+			]
+		},
+		{
+			"ID": "20210428222603-g1752n7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210428222603-g1752n7",
+				"updated": "20230112002556"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The data is saved in the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230106104821-9nfphwm",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder, in the workspace/data/ folder:"
+				}
+			]
+		},
+		{
+			"ID": "20210428222603-moih9fe",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210428222603-moih9fe",
+				"updated": "20230622164128"
+			},
+			"Children": [
+				{
+					"ID": "20210428222603-gxgx3vi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210428222603-gxgx3vi",
+						"updated": "20230622164117"
+					},
+					"Children": [
+						{
+							"ID": "20210428222603-0goch51",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428222603-0goch51",
+								"updated": "20230622164117"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save all inserted "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924100744-br924ar",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "assets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214756-6a5qi9y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214756-6a5qi9y",
+						"updated": "20230622164118"
+					},
+					"Children": [
+						{
+							"ID": "20221202214756-polklnd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214756-polklnd",
+								"updated": "20230622164118"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "emojis"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save emoji images"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214758-dtqv6vc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214758-dtqv6vc",
+						"updated": "20230622164121"
+					},
+					"Children": [
+						{
+							"ID": "20221202214758-5u6jitp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214758-5u6jitp",
+								"updated": "20230622164121"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "snippets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save code snippets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221202214811-2s26txl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221202214811-2s26txl",
+						"updated": "20230622164122"
+					},
+					"Children": [
+						{
+							"ID": "20221202214811-p1eevpi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221202214811-p1eevpi",
+								"updated": "20230622164122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "storage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save query conditions, layouts and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20221223221636-ms2b4w9",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "flashcards"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", etc."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210428222603-vtr89xq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210428222603-vtr89xq",
+						"updated": "20230622164124"
+					},
+					"Children": [
+						{
+							"ID": "20210428222603-criebuv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428222603-criebuv",
+								"updated": "20230622164124"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "templates"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "template snippets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210428222603-456vgdh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210428222603-456vgdh",
+						"updated": "20230622164126"
+					},
+					"Children": [
+						{
+							"ID": "20210428222603-m3djncm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428222603-m3djncm",
+								"updated": "20230622164126"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "widgets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210824202056-udkf7wg",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "widgets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230512170526-zvfzhdo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230512170526-zvfzhdo",
+						"updated": "20230622164127"
+					},
+					"Children": [
+						{
+							"ID": "20230512170526-3ivxdkg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230512170526-3ivxdkg",
+								"updated": "20230622164127"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "plugins"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230506205948-yah52eb",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "plugins"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230622163438-rv3hdrd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230622163438-rv3hdrd",
+						"updated": "20230622164128"
+					},
+					"Children": [
+						{
+							"ID": "20230622163438-7doq6me",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230622163438-7doq6me",
+								"updated": "20230622164128"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "public"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ is used to save public data"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210428222603-27so3jy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210428222603-27so3jy"
+					},
+					"Children": [
+						{
+							"ID": "20210428222603-pwyr56t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428222603-pwyr56t",
+								"updated": "20210512152423"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The rest of the folders are the notebook folders created by the user, files with the suffix of "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​​​ in the notebook folder are used to save the document data, and the data format is JSON"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220808181753-3ligpvz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220808181753-3ligpvz",
+				"updated": "20250518103440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Does it support data synchronization through a third-party sync disk?"
+				}
+			]
+		},
+		{
+			"ID": "20220808181718-tcv74v2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220808181718-tcv74v2",
+				"updated": "20220808181719"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted. "
+				}
+			]
+		},
+		{
+			"ID": "20221112205611-eafvvel",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221112205611-eafvvel",
+				"updated": "20230805233206"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Although it does not support third-party sync disks, it supports "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230805232018-hgrq0ju",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Connect with third-party cloud storage"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20221112210525-icjpxq3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221112210525-icjpxq3",
+				"updated": "20221112210600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition, you can also consider manually exporting and importing data to achieve data synchronization:"
+				}
+			]
+		},
+		{
+			"ID": "20220619172044-z4myy48",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220619172044-z4myy48",
+				"updated": "20220619172044"
+			},
+			"Children": [
+				{
+					"ID": "20220619172044-451fqpf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220619172044-451fqpf",
+						"updated": "20220619172044"
+					},
+					"Children": [
+						{
+							"ID": "20220619172044-bx4v3iz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220619172044-bx4v3iz",
+								"updated": "20220619172044"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Desktop: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Import Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220619172044-r6xfdvm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220619172044-r6xfdvm",
+						"updated": "20220619172044"
+					},
+					"Children": [
+						{
+							"ID": "20220619172044-ccusmko",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220619172044-ccusmko",
+								"updated": "20220619172044"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mobile: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Right column"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "About"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Import Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20250518103412-4mf2mer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250518103412-4mf2mer",
+				"updated": "20250518103440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On macOS, SiYuan will access the Desktop, Documents, and iCloud drive folders to detect whether the workspace is placed under the iCloud synchronization path. Please rest assured that SiYuan will never snoop on your personal data."
+				}
+			]
+		},
+		{
+			"ID": "20211129190925-mzmhh3v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211129190925-mzmhh3v",
+				"updated": "20211129190928"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Is SiYuan open source?"
+				}
+			]
+		},
+		{
+			"ID": "20220526112843-3ufaqy8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220526112843-3ufaqy8",
+				"updated": "20230820183340"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan is completely open source, and the complete source code can be found on GitHub."
+				}
+			]
+		},
+		{
+			"ID": "20220909100946-x94gyft",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220909100946-x94gyft",
+				"updated": "20220909100946"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to upgrade to a new version?"
+				}
+			]
+		},
+		{
+			"ID": "20220909100946-nieof3y",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220909100946-nieof3y",
+				"updated": "20220909101032"
+			},
+			"Children": [
+				{
+					"ID": "20220909100946-zpelmha",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100946-zpelmha",
+						"updated": "20220909100946"
+					},
+					"Children": [
+						{
+							"ID": "20220909100946-8qnhzi2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100946-8qnhzi2",
+								"updated": "20220909100946"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If installed via app store, please update via app store"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220909100946-ej9yi4j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100946-ej9yi4j",
+						"updated": "20220909101032"
+					},
+					"Children": [
+						{
+							"ID": "20220909100946-n3d5619",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100946-n3d5619",
+								"updated": "20220909101032"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If it is installed through the installation package on the desktop, you can open the option of "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "About"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Automatically download update installation package"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", so that SiYuan will automatically download The latest version of the installation package and prompts to install"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220909100946-kw38sog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220909100946-kw38sog",
+						"updated": "20220909100946"
+					},
+					"Children": [
+						{
+							"ID": "20220909100946-3n9cy34",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220909100946-3n9cy34",
+								"updated": "20220909100946"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If it is installed by manual installation package, please download the installation package again to install"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220909100946-9eyc3uh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220909100946-9eyc3uh",
+				"updated": "20230820182932"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Check update"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "About"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Current Version"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, or pay attention to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/",
+					"TextMarkTextContent": "Official website"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to get the new version."
+				}
+			]
+		},
+		{
+			"ID": "20220501231348-sx3l5qp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220501231348-sx3l5qp",
+				"updated": "20220501231357"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "What if some blocks (such as paragraph blocks in list items) cannot find the block icon?"
+				}
+			]
+		},
+		{
+			"ID": "20220501231348-bfslmf5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220501231348-bfslmf5",
+				"updated": "20220501231419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ."
+				}
+			]
+		},
+		{
+			"ID": "20220708111435-xmj42q4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220708111435-xmj42q4",
+				"updated": "20250115163037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "What should I do if the data repo key is lost?"
+				}
+			]
+		},
+		{
+			"ID": "20220708111435-a2z4tpd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220708111435-a2z4tpd",
+				"updated": "20250115163037"
+			},
+			"Children": [
+				{
+					"ID": "20220708111435-kw4fp2b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220708111435-kw4fp2b",
+						"updated": "20220708111614"
+					},
+					"Children": [
+						{
+							"ID": "20220708111435-2ozs1pt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708111435-2ozs1pt",
+								"updated": "20220708111614"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If the data repo key is correctly initialized on multiple devices before, the key is the same on all devices and can be set in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "About"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data repo key"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Copy key string"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " retrieve"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708111435-ptoqng0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220708111435-ptoqng0",
+						"updated": "20250115163037"
+					},
+					"Children": [
+						{
+							"ID": "20220708111435-vqcxyea",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708111435-vqcxyea",
+								"updated": "20220708111435"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:"
+								}
+							]
+						},
+						{
+							"ID": "20220708111435-w2hbl28",
+							"Type": "NodeList",
+							"ListData": {
+								"Typ": 1
+							},
+							"Properties": {
+								"id": "20220708111435-w2hbl28",
+								"updated": "20250115163037"
+							},
+							"Children": [
+								{
+									"ID": "20220708111435-nev43mp",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "MS4=",
+										"Num": 1
+									},
+									"Properties": {
+										"id": "20220708111435-nev43mp",
+										"updated": "20250115163037"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-zrahxh3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-zrahxh3",
+												"updated": "20250115163037"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Manually back up the data, you can use "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Export Data"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ or directly copy the "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "workspace/data/"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ folder on the file system"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-extloil",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "Mi4=",
+										"Num": 2
+									},
+									"Properties": {
+										"id": "20220708111435-extloil",
+										"updated": "20220708111603"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-cjteir8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-cjteir8",
+												"updated": "20220708111603"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Settings"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "About"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Data rep key"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Reset data repo"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-29zhnwl",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "My4=",
+										"Num": 3
+									},
+									"Properties": {
+										"id": "20220708111435-29zhnwl",
+										"updated": "20220708111456"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-pfbzbnj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-pfbzbnj",
+												"updated": "20220708111456"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Reinitialize the data repo key. After initializing the key on one device, other devices import the key"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-rsas3a7",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "NC4=",
+										"Num": 4
+									},
+									"Properties": {
+										"id": "20220708111435-rsas3a7",
+										"updated": "20220708111435"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-i8ykkah",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-i8ykkah",
+												"updated": "20220708111435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "The cloud uses the new synchronization directory, the old synchronization directory is no longer available and can be deleted"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220708111435-jjdh23m",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "NS4=",
+										"Num": 5
+									},
+									"Properties": {
+										"id": "20220708111435-jjdh23m",
+										"updated": "20220708111435"
+									},
+									"Children": [
+										{
+											"ID": "20220708111435-yrc4wlj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220708111435-yrc4wlj",
+												"updated": "20220708111435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "The existing cloud snapshots are no longer available and can be deleted"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201224120448-0rqote3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201224120448-0rqote3"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Do I need to pay for it?"
+				}
+			]
+		},
+		{
+			"ID": "20230406111519-ro0o3iv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230406111519-ro0o3iv",
+				"updated": "20230802130902"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Most features are free, even for commercial use."
+				}
+			]
+		},
+		{
+			"ID": "20230627215819-kfmomdw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230627215819-kfmomdw",
+				"updated": "20230806004444"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230805231614-vqn28eh",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Member\u0026apos;s privileges"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " can only be used after payment, please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/pricing.html",
+					"TextMarkTextContent": "Pricing"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20230415111951-vt4y4gg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230415111951-vt4y4gg",
+				"updated": "20230415112008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Origin of the name \"SiYuan\""
+				}
+			]
+		},
+		{
+			"ID": "20230415112018-2o1sxi9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230415112018-2o1sxi9",
+				"updated": "20230415112018"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The name \"SiYuan\" comes from the Chinese idiom \"饮水思源\", which means \"when drinking water, one should remember where it comes from\" and is used to describe the virtues of not forgetting one's roots and gratitude."
+				}
+			]
+		},
+		{
+			"ID": "20230415112018-tl4v3cu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230415112018-tl4v3cu",
+				"updated": "20230415112018"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We hope that users of SiYuan note-taking software for knowledge management will not forget the sources and connections of their knowledge, and more importantly, will not forget to contribute to society and all of humanity with what they have learned."
+				}
+			]
+		}
+	]
+}

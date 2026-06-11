@@ -1,0 +1,100 @@
+{
+	"ID": "20200924100906-0u4zfq3",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924100906-0u4zfq3",
+		"title": "Window and Tab",
+		"type": "doc",
+		"updated": "20230128004654"
+	},
+	"Children": [
+		{
+			"ID": "20210104091452-gnto7hk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091452-gnto7hk",
+				"updated": "20210302223809"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan supports multiple windows and multiple tabs, so that you can edit and view documents easily."
+				}
+			]
+		},
+		{
+			"ID": "20210104091452-z9t1xak",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091452-z9t1xak"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The tabs support up and down and left and right split screens, and all open tabs are synchronized in real time. For example, if you open multiple tabs for the same document, after editing and saving one of the tabs, the other tabs will also automatically synchronize the latest content to avoid dirty data overwriting while enjoying the convenience of multiple openings."
+				}
+			]
+		},
+		{
+			"ID": "20210104091452-2y1e7m4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091452-2y1e7m4"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Except that the document is saved synchronously, the associated rendering generated after saving is also synchronous. The preview of the content block and the relationship diagram related to the document are refreshed in real time, which can eliminate interference to the minimum and let us focus on the notebook."
+				}
+			]
+		},
+		{
+			"ID": "20210104091452-w1rg9or",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091452-w1rg9or"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to split-screen operation, the tabs also support drag and drop, so that we can arrange the entire interface as we want, record notes and organize knowledge in our most comfortable layout."
+				}
+			]
+		},
+		{
+			"ID": "20210104091452-2iom04i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091452-2iom04i",
+				"updated": "20230128004654"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the screen of the device you are using is small, you can consider "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201004194026-s8h2cog",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "use on browser"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", in this way, the overall interface switching can be performed through the browser instance. If you only need to convert the tab into an independent window, you can right-click on the tab "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Move to New Window"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, or drag the tab to a place outside the current window and release the drag, this also converts the tab into a separate window."
+				}
+			]
+		}
+	]
+}

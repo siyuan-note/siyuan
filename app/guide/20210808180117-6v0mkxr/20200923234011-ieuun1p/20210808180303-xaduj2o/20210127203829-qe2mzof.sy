@@ -1,0 +1,191 @@
+{
+	"ID": "20210127203829-qe2mzof",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210127203829-qe2mzof",
+		"title": "PDF annotation",
+		"type": "doc",
+		"updated": "20220502141039"
+	},
+	"Children": [
+		{
+			"ID": "20210923104343-69c6qn3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210923104343-69c6qn3",
+				"updated": "20210923104349"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Insert PDF asset"
+				}
+			]
+		},
+		{
+			"ID": "20210127203829-pgeb2cg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210127203829-pgeb2cg",
+				"updated": "20210923104359"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the PDF file is uploaded and inserted through the editor, the PDF will be placed in the assets folder, and a link in the form of "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " will be generated in the document. Click the link to use SiYuan for preview."
+				}
+			]
+		},
+		{
+			"ID": "20210923104400-zd9cymb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210923104400-zd9cymb",
+				"updated": "20210923104417"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Hyperlink page jump"
+				}
+			]
+		},
+		{
+			"ID": "20210127203843-1gpz3u0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210127203843-1gpz3u0"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the new tab to preview the PDF and support the specified page number. You need to add the parameter "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "page"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to the link. For example, if you need to jump to the seventh page, edit the link to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf?page=7)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ."
+				}
+			]
+		},
+		{
+			"ID": "20210923104413-csbeop3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210923104413-csbeop3",
+				"updated": "20220502141027"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Annotation"
+				}
+			]
+		},
+		{
+			"ID": "20210923104454-1f7keq6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210923104454-1f7keq6",
+				"updated": "20220502141025"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The PDF preview can be marked by selection, and the annotation can be copied to the document:"
+				}
+			]
+		},
+		{
+			"ID": "20210923104454-ltkpsaa",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210923104454-ltkpsaa",
+				"updated": "20210923104540"
+			},
+			"Children": [
+				{
+					"ID": "20210923104454-mpxyw97",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210923104454-mpxyw97"
+					},
+					"Children": [
+						{
+							"ID": "20210923104454-6qow8vv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210923104454-6qow8vv"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click the reference link in the document to open the PDF and jump to the annotation"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210923104454-tmvmpnq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210923104454-tmvmpnq",
+						"updated": "20210923104540"
+					},
+					"Children": [
+						{
+							"ID": "20210923104454-5rzj3lu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210923104454-5rzj3lu",
+								"updated": "20210923104540"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Hover the mark in the PDF to preview the ref block"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

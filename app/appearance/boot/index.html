@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <style>
+        html {
+            overflow: hidden;
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            background: #1e1e1e;
+            font-size: 12px;
+            font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+        }
+    </style>
+</head>
+<body>
+<div id="bg" style="width: 100%;display: flex;justify-content: space-around;height: 100%;">
+    <img style="width:36vh;align-self: center;" src="icon.png"/>
+</div>
+<div style="position: absolute;bottom: 0;width: 100%;">
+    <div style="position: absolute;height: 1px;background-color: #3b3e43;width: 100%;top:0"></div>
+    <div id="progress"
+         style="position: absolute;height: 1px;background-color: #d23f31;transition: width 50ms cubic-bezier(0, 0, 0.2, 1);top:0"></div>
+    <div id="details"
+         style="color: #9aa0a6;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;padding: 8px;"></div>
+</div>
+<script>
+    const sleep = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    const getSearch = (key) => {
+        if (window.location.search.indexOf('?') === -1) {
+            return ''
+        }
+        let value = ''
+        const data = window.location.search.split('?')[1].split('&')
+        data.find(item => {
+            const keyValue = item.split('=')
+            if (keyValue[0] === key) {
+                value = keyValue[1]
+                return true
+            }
+        })
+        return value
+    }
+
+    const redirect = () => {
+        const uri = 'http://127.0.0.1:' + location.port
+        window.location.replace(uri)
+    }
+    (async () => {
+        const v = getSearch('v')
+        document.getElementById('details').textContent = "v" + v + ' Booting kernel...'
+        let progressing = false
+        while (!progressing) {
+            try {
+                const progressResult = await fetch('http://127.0.0.1:' + location.port + '/api/system/bootProgress')
+                const progressData = await progressResult.json()
+                document.getElementById('progress').style.width = progressData.data.progress + '%'
+                document.getElementById('details').textContent = progressData.data.details
+                if (progressData.data.progress >= 100) {
+                    progressing = true
+                    if (navigator.userAgent.indexOf('Electron') === -1) {
+                        redirect()
+                    }
+                } else {
+                    await sleep(100)
+                }
+            } catch (e) {
+                await sleep(100)
+            }
+        }
+    })()
+</script>
+</body>
+</html>

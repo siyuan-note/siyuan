@@ -1,0 +1,954 @@
+{
+	"ID": "20200924101256-f8b1sbi",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924101256-f8b1sbi",
+		"title": "Ref Content Block",
+		"type": "doc",
+		"updated": "20250115145507"
+	},
+	"Children": [
+		{
+			"ID": "20200924101312-jj4e0v3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200924101312-jj4e0v3",
+				"updated": "20210512154431"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20220623200920-67ob14v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623200920-67ob14v",
+				"updated": "20220623201408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After entering "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", the content block reference search will be triggered. Continue to input as the search keyword. In the search results, use the up and down keys to select and press Enter to complete the content block reference. After the content block reference is established, hover the mouse. After the anchor text is placed, the preview layer will pop up, showing the referenced content block (definition block). "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Content Block/Reference"
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-v1yca4p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104091542-v1yca4p",
+				"updated": "20210512154424"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Direction of the ref link"
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-9h3i9dh",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091542-9h3i9dh"
+			},
+			"Children": [
+				{
+					"ID": "20210104091542-ctguz9s",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-ctguz9s"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-grgney1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-grgney1"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Forwardlink, that is, which other content blocks are used in the current content block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091542-7fy85lw",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-7fy85lw"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-qk6hr9b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-qk6hr9b"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Backlink, that is, the current content block is used by those other content blocks"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-hbzfsn5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091542-hbzfsn5"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The forward link is included in the content of the current block, which we can see intuitively. Backlinks need to be searched in other documents to know, and it is precisely this information that is more valuable to us. We can use the following two ways to help us better grasp the knowledge points or diverge ideas:"
+				}
+			]
+		},
+		{
+			"ID": "20210104091542-rlv1299",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104091542-rlv1299"
+			},
+			"Children": [
+				{
+					"ID": "20210104091542-1ryw6y3",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-1ryw6y3"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-ngw7ijw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-ngw7ijw"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924101210-zwf8ags",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Graph"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": browse forward and backward link relationships between content blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104091542-40sj7jl",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104091542-40sj7jl"
+					},
+					"Children": [
+						{
+							"ID": "20210302223856-y92ousb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223856-y92ousb",
+								"updated": "20210512154524"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924101210-3qfiiat",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Backlinks"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Display the backlinks of the current content block as a text list"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-is3nn7u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623201008-is3nn7u",
+				"updated": "20250115145507"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Anchor text"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-piboygr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-piboygr",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Anchor text is the text you see when rendering a reference. It is divided into static anchor text and dynamic anchor text:"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-h2pdjtl",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623201008-h2pdjtl",
+				"updated": "20220623201147"
+			},
+			"Children": [
+				{
+					"ID": "20220623201008-ay77217",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-ay77217",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-1oosx3r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-1oosx3r",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Static anchor text: It will not change with the content of the definition block, that is, the specified content will be displayed fixedly"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-zy2xzyl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-zy2xzyl",
+						"updated": "20220623201147"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-l0p1dr3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-l0p1dr3",
+								"updated": "20220623201147"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Dynamic anchor text: follow the content of the defined block, the maximum length can be set in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "The maximum length of block ref dynamic anchor text"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " , supports up to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "5120"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " characters"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-xeb8r8l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-xeb8r8l",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Here's how to modify anchor text:"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-i8gh5d4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623201008-i8gh5d4",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"ID": "20220623201008-lgp3it0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-lgp3it0",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-0o5ttfn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-0o5ttfn",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Move the cursor caret into the reference element and modify the content directly, which will set the reference's anchor text to static anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-ni0hyaa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-ni0hyaa",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-6h4smq5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-6h4smq5",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Right-click the reference element and modify the anchor text in the pop-up menu, so that the anchor text obtained is also static anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-taaeskp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-taaeskp",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-gkk2l3p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-gkk2l3p",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Clear the anchor text in the pop-up menu after right-clicking the reference element, this will use dynamic anchor text"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230420185940-emsw72v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230420185940-emsw72v",
+				"updated": "20230420185940"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ search result list:"
+				}
+			]
+		},
+		{
+			"ID": "20230420185940-z74ufig",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230420185940-z74ufig",
+				"updated": "20250115145507"
+			},
+			"Children": [
+				{
+					"ID": "20230420185940-g8mpohi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185940-g8mpohi",
+						"updated": "20230420190018"
+					},
+					"Children": [
+						{
+							"ID": "20230420185940-ro5d977",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185940-ro5d977",
+								"updated": "20230420190018"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Direct "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ will use dynamic anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230420185940-ksegxpq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185940-ksegxpq",
+						"updated": "20250115145507"
+					},
+					"Children": [
+						{
+							"ID": "20230420185940-ajmbc76",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185940-ajmbc76",
+								"updated": "20250115145507"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Press "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to use static anchor text"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230420123242-xsz318y",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230420123242-xsz318y",
+				"updated": "20230420123245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Filter"
+				}
+			]
+		},
+		{
+			"ID": "20230518100549-bu599ue",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230518100549-bu599ue",
+				"updated": "20230518100627"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After enabling "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "[[ only search documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: "
+				}
+			]
+		},
+		{
+			"ID": "20230420123242-7uymi9i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230420123242-7uymi9i",
+				"updated": "20230820102811"
+			},
+			"Children": [
+				{
+					"ID": "20230420123242-gn62yz6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420123242-gn62yz6",
+						"updated": "20230820102811"
+					},
+					"Children": [
+						{
+							"ID": "20230420123242-sbvr7xx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420123242-sbvr7xx",
+								"updated": "20230820102811"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "(("
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ to search in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924101225-k254i8g",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "all types of blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230420123242-gm0o5hw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420123242-gm0o5hw",
+						"updated": "20230820102741"
+					},
+					"Children": [
+						{
+							"ID": "20230420123242-ba8ysjk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420123242-ba8ysjk",
+								"updated": "20230820102741"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to search only "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210104091538-clx67q4",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "doc blocks"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-0h3iwvb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623201008-0h3iwvb",
+				"updated": "20220623201232"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Syntax"
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-5f0sylr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-5f0sylr",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to using "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to trigger a reference search, you can also use the syntax "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "((id \"anchor text\"))"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " directly."
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-7waqp1i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623201008-7waqp1i",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"ID": "20220623201008-u8tx1ot",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-u8tx1ot",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-w28mhoy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-w28mhoy",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to wrap anchor text as static anchor text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623201008-ua4wzzm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623201008-ua4wzzm",
+						"updated": "20220623201008"
+					},
+					"Children": [
+						{
+							"ID": "20220623201008-sh8z9bb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623201008-sh8z9bb",
+								"updated": "20220623201008"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to wrap anchor text as dynamic anchor text, it will be automatically rewritten when the index is rebuilt"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623201008-zjpwqy3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623201008-zjpwqy3",
+				"updated": "20220623201008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The main scenario of using the syntax directly is to create a reference through an external tool or API. In most cases, we mainly use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to trigger a reference search to create a reference."
+				}
+			]
+		}
+	]
+}

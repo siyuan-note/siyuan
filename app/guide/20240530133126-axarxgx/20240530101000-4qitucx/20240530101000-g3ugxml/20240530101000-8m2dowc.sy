@@ -1,0 +1,187 @@
+{
+	"ID": "20240530101000-8m2dowc",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-dfouzze",
+		"id": "20240530101000-8m2dowc",
+		"title": "プラグイン",
+		"type": "doc",
+		"updated": "20250115152435"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-fgati7g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-snvin0o",
+				"id": "20240530101000-fgati7g",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-m4hfer3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-k82nhnh",
+				"id": "20240530101000-m4hfer3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プラグインは SiYuan の全体的な機能を拡張します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ccujclu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-43z1vel",
+				"id": "20240530101000-ccujclu",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-5gi76ax",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ウィジェット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "と比較してプラグインは主にプログラムの拡張機能であり、コンテンツブロックの拡張は対象としていません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qt554cl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-ofwsgnj",
+				"id": "20240530101000-qt554cl",
+				"updated": "20250115152435"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7g50y4t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-7g50y4t",
+				"updated": "20250115152435"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プラグインはプラグインマーケットプレイスからインストールされ、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/plugins/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ フォルダに配置されます。有効と無効の切り替えは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "マーケットプレイス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ダウンロード済み"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "プラグイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ から行います。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yhkv0tv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-tfbnlkd",
+				"id": "20240530101000-yhkv0tv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスにプラグインを公開する"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-e2jw7by",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-r6csz4b",
+				"id": "20240530101000-e2jw7by",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-u0nf7k8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-nmsej5t",
+				"id": "20240530101000-u0nf7k8"
+			}
+		}
+	]
+}

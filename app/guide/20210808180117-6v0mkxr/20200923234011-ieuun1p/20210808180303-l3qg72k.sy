@@ -1,0 +1,99 @@
+{
+	"ID": "20210808180303-l3qg72k",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50d",
+		"id": "20210808180303-l3qg72k",
+		"title": "Advanced search",
+		"type": "doc",
+		"updated": "20240508004303"
+	},
+	"Children": [
+		{
+			"ID": "20240508004303-nqo982y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004303-nqo982y",
+				"updated": "20240508004303"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220415232231-pqcizol",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Query syntax"
+				}
+			]
+		},
+		{
+			"ID": "20240508004303-cfhkbkf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004303-cfhkbkf",
+				"updated": "20240508004303"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201222100339-i5hzcph",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Database table"
+				}
+			]
+		},
+		{
+			"ID": "20240508004303-ybxo9fy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004303-ybxo9fy",
+				"updated": "20240508004303"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201222100222-q47d64s",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Type filtering"
+				}
+			]
+		},
+		{
+			"ID": "20240508004303-is7baf3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004303-is7baf3",
+				"updated": "20240508004303"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240119211017-1vbbt95",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Ignore indexing"
+				}
+			]
+		},
+		{
+			"ID": "20240508004303-axo1h8z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004303-axo1h8z",
+				"updated": "20240508004303"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240119212048-0huuevw",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Ignore search"
+				}
+			]
+		}
+	]
+}

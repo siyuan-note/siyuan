@@ -1,0 +1,170 @@
+{
+	"ID": "20240530101000-5gi76ax",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-hzwbghn",
+		"id": "20240530101000-5gi76ax",
+		"title": "ウィジェット",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-3ccwwa1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-wih8sqk",
+				"id": "20240530101000-3ccwwa1",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6u5tdvq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-mfbsor1",
+				"id": "20240530101000-6u5tdvq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ウィジェットは、SiYuan Kernel サーバーによって提供される静的な Web ページです。API を介してデータにアクセスし、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ によってレンダリングされます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-67e53xx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-0cc63jw",
+				"id": "20240530101000-67e53xx",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-8m2dowc",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "プラグイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "と比較してウィジェットは一種のコンテンツブロックであり、ブロックのインデックスとレンダリングのルールに従います。ウィジェットは主にコンテンツブロックの拡張を対象としており、プログラム機能の拡張は対象としていません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-51f06sm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-hw8mkkp",
+				"id": "20240530101000-51f06sm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r9kvt7c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fu57jks",
+				"id": "20240530101000-r9kvt7c",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ウィジェットはウィジェットマーケットプレイスからインストールされ、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/widgets/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ フォルダに配置されます。エディタで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ コマンドで呼び出した/メニューから必要なウィジェットを選択すると、ウィジェットブロックとしてドキュメントに挿入されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-v1ifwqn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-s7dbm5x",
+				"id": "20240530101000-v1ifwqn",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスにウィジェットを公開する"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-655y9d4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-rvdkvi7",
+				"id": "20240530101000-655y9d4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7d0tpqa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-47a2kji",
+				"id": "20240530101000-7d0tpqa"
+			}
+		}
+	]
+}

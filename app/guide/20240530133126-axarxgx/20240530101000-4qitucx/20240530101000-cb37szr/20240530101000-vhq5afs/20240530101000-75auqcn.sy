@@ -1,0 +1,308 @@
+{
+	"ID": "20240530101000-75auqcn",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-y6q5wbj",
+		"id": "20240530101000-75auqcn",
+		"title": "制限事項",
+		"type": "doc",
+		"updated": "20241010011243"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-gs98xjs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240530101000-gs98xjs",
+				"updated": "20241010011243"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-1ldjmxw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-1ldjmxw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-k4tmkoy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-k4tmkoy",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最大 7 つのクラウド同期ディレクトリを作成できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-31v7zil",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-31v7zil",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6lnnawp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-6lnnawp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最大 12 個のデータスナップショットを保存できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-m0pbgr7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-m0pbgr7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-e3qi05u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-e3qi05u",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クラウドストレージのサイズは "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8GB"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ です"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241010011243-a8jj7la",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241010011243-a8jj7la",
+						"updated": "20241010011243"
+					},
+					"Children": [
+						{
+							"ID": "20241010011243-4gbdfrc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241010011243-4gbdfrc",
+								"updated": "20241010011243"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クラウド ストレージ内のデータ スナップショットは最大 30 日間保持されます。つまり、30 日を超えた参照されていないスナップショットは自動的に消去されます。"
+								}
+							]
+						},
+						{
+							"ID": "20241010011243-katv66y",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241010011243-katv66y",
+								"updated": "20241010011243"
+							},
+							"Children": [
+								{
+									"ID": "20241010011243-iqx3ljw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011243-iqx3ljw",
+										"updated": "20241010011243"
+									},
+									"Children": [
+										{
+											"ID": "20241010011243-6nf99yb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011243-6nf99yb",
+												"updated": "20241010011243"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "各データ同期後の最新のスナップショットは消去されません"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010011243-jltcyg6",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011243-jltcyg6",
+										"updated": "20241010011243"
+									},
+									"Children": [
+										{
+											"ID": "20241010011243-k36yn7x",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011243-k36yn7x",
+												"updated": "20241010011243"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "手動でマークされたバックアップからクラウドにアップロードされたスナップショットはクリーンアップされません\n*30 日以内のスナップショットは消去されません"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-bqjzt8r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-bqjzt8r",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-45my39a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-45my39a",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "有料購読が終了するとクラウドストレージは完全に削除されます"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-8gw40ck",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20240530101000-8gw40ck",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-gombjin",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240530101000-gombjin",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-n8i54lo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240530101000-n8i54lo",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "有効期限の 15 日前からソフトウェアを開くたびに有効期限のリマインダーがポップアップで表示され、有効期限の 2 日後にリマインダーが停止します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-xdtc36l",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240530101000-xdtc36l",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-7pjypdm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240530101000-7pjypdm",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "クラウドストレージを削除してもローカルデータには影響しません"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

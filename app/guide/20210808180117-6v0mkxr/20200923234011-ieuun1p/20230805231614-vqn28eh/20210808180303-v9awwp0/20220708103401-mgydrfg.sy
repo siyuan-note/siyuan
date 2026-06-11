@@ -1,0 +1,376 @@
+{
+	"ID": "20220708103401-mgydrfg",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220708103401-mgydrfg",
+		"title": "Data backup",
+		"type": "doc",
+		"updated": "20220708104612"
+	},
+	"Children": [
+		{
+			"ID": "20220708103921-t25la2x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220708103921-t25la2x",
+				"updated": "20220708103921"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20220708103921-2vmuuiv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220708103921-2vmuuiv",
+				"updated": "20220708104201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data backup refers to uploading "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220615120602-drz9hwc",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Data snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to the cloud."
+				}
+			]
+		},
+		{
+			"ID": "20220708103921-qto3e6p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220708103921-qto3e6p",
+				"updated": "20220708103921"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20220708103921-cdo52rq",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20220708103921-cdo52rq",
+				"updated": "20220708104612"
+			},
+			"Children": [
+				{
+					"ID": "20220708103921-tvg552v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20220708103921-tvg552v",
+						"updated": "20220708104612"
+					},
+					"Children": [
+						{
+							"ID": "20220708103921-y47bxfj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103921-y47bxfj",
+								"updated": "20220708104612"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615120602-iya2886",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "initializing the data repo key"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", if all goes well, the backup has been configured"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708103921-zjs6xun",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20220708103921-zjs6xun",
+						"updated": "20220708104321"
+					},
+					"Children": [
+						{
+							"ID": "20220708103921-utd4r4b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103921-utd4r4b",
+								"updated": "20220708104321"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Open the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data History"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " tab, select the snapshot to be backed up and click "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tag Snapshot"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708103921-8683oue",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20220708103921-8683oue",
+						"updated": "20220708104416"
+					},
+					"Children": [
+						{
+							"ID": "20220708103921-mqrg0q3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103921-mqrg0q3",
+								"updated": "20220708104416"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Locally tag snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the filter drop-down list, select the snapshot to upload and click "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Upload"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708103921-mcdvar5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20220708103921-mcdvar5",
+						"updated": "20220708104422"
+					},
+					"Children": [
+						{
+							"ID": "20220708103921-t0fi1cl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103921-t0fi1cl",
+								"updated": "20220708104422"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After the upload is complete, select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cloud tag snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " from the filter drop-down list to see the snapshots just backed up to the cloud"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708103921-xy155ga",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20220708103921-xy155ga",
+						"updated": "20220708104454"
+					},
+					"Children": [
+						{
+							"ID": "20220708103921-8rnghsa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103921-8rnghsa",
+								"updated": "20220708104454"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After the snapshot of the cloud backup is downloaded to the local, you can restore the data by "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615120602-cikdh3o",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Rollback data snapshot"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220708103921-6chdef2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220708103921-6chdef2",
+				"updated": "20220708104458"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition:"
+				}
+			]
+		},
+		{
+			"ID": "20220708103921-1h033iu",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220708103921-1h033iu",
+				"updated": "20220708104516"
+			},
+			"Children": [
+				{
+					"ID": "20220708103921-adae5k6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220708103921-adae5k6",
+						"updated": "20220708104516"
+					},
+					"Children": [
+						{
+							"ID": "20220708103921-r8fkd7j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103921-r8fkd7j",
+								"updated": "20220708104516"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ignore files"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708103921-suugdiz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220708103921-suugdiz",
+						"updated": "20220708103921"
+					},
+					"Children": [
+						{
+							"ID": "20220708103921-9tyiwtp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103921-9tyiwtp",
+								"updated": "20220708103921"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The cloud supports saving up to 12 data snapshots"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

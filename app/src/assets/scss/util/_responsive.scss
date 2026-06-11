@@ -1,0 +1,85 @@
+@media (max-width: 750px) {
+  .config {
+    &__panel {
+      & > .config__side {
+        width: auto;
+
+        .b3-list-item__text,
+        .b3-form__icon {
+          display: none;
+        }
+
+        .b3-list-item__graphic {
+          padding-right: 5px;
+        }
+
+        .config__tab-title {
+          height: 25px;
+        }
+      }
+
+      .config-account {
+        flex-direction: column;
+        min-height: 100%;
+      }
+    }
+
+    &__item {
+      flex-wrap: wrap;
+
+      & > .b3-text-field,
+      & > .b3-select,
+      .b3-slider,
+      & > .b3-button,
+      & > .b3-tooltips,
+      & > .b3-form__icona,
+      &-line,
+      .searchByKeyLabel {
+        width: 100%;
+        margin-top: 8px;
+      }
+    }
+
+    &-keymap {
+      label.b3-list-item {
+        flex-wrap: wrap;
+      }
+
+      .b3-list-item__action {
+        display: flex;
+      }
+
+      .config-keymap__key,
+      .b3-text-field {
+        width: 100%;
+        margin-left: 0 !important;
+        text-align: center;
+      }
+    }
+  }
+
+  .history {
+    &__panel {
+      flex-direction: column;
+
+      & > .fn__flex-column {
+        min-height: auto;
+        border-radius: var(--b3-border-radius-b);
+      }
+
+      & > .history__side {
+        height: 40%;
+        overflow: auto;
+        padding-bottom: 8px;
+        width: auto !important;
+        border-bottom: 1px solid var(--b3-border-color);
+      }
+    }
+  }
+
+  .export-img__space {
+    flex: auto;
+    height: 8px;
+    width: 100%;
+  }
+}

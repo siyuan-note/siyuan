@@ -1,0 +1,467 @@
+{
+	"ID": "20230104151953-48hwkwf",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230104151953-48hwkwf",
+		"title": "分享文檔",
+		"type": "doc",
+		"updated": "20250115162319"
+	},
+	"Children": [
+		{
+			"ID": "20230104151954-rsdvv3l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104151954-rsdvv3l",
+				"updated": "20230104151954"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230104151954-kenzsk2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230104151954-kenzsk2",
+				"updated": "20230104151954"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將單篇文檔以 Markdown 格式分享到"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com",
+					"TextMarkTextContent": "鏈滴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "作為帖子發布。"
+				}
+			]
+		},
+		{
+			"ID": "20230104151954-i8wz140",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104151954-i8wz140",
+				"updated": "20250115162319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230104151954-2z1tu4k",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104151954-2z1tu4k",
+				"updated": "20250115162319"
+			},
+			"Children": [
+				{
+					"ID": "20230104151954-oajsj20",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151954-oajsj20",
+						"updated": "20230104151954"
+					},
+					"Children": [
+						{
+							"ID": "20230104151954-hrgcwx8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151954-hrgcwx8",
+								"updated": "20230104151954"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要註冊並登錄鏈滴賬號"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104151954-fcw8i4u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151954-fcw8i4u",
+						"updated": "20250115162319"
+					},
+					"Children": [
+						{
+							"ID": "20230104151954-j18rxht",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151954-j18rxht",
+								"updated": "20250115162319"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "點擊編輯器 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 菜單 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "分享到鏈滴"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20230104151954-v78ecbm",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230104151954-v78ecbm",
+								"updated": "20230104151954"
+							},
+							"Children": [
+								{
+									"ID": "20230104151954-77swn6f",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104151954-77swn6f",
+										"updated": "20230104151954"
+									},
+									"Children": [
+										{
+											"ID": "20230104151954-br1lk6r",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104151954-br1lk6r",
+												"updated": "20230104151954"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "文檔標題作為帖子標題"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230104151954-9qqedrt",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104151954-9qqedrt",
+										"updated": "20230104151954"
+									},
+									"Children": [
+										{
+											"ID": "20230104151954-q9lxkvx",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104151954-q9lxkvx",
+												"updated": "20230104151954"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "文檔標籤作為帖子標籤"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230104151954-ek4zc2f",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104151954-ek4zc2f",
+										"updated": "20230104151954"
+									},
+									"Children": [
+										{
+											"ID": "20230104151954-b09miy1",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104151954-b09miy1",
+												"updated": "20230104151954"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "文檔導出的 Markdown 作為帖子內容，其中引用轉換為腳註"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104151954-6uj16rw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151954-6uj16rw",
+						"updated": "20230104151954"
+					},
+					"Children": [
+						{
+							"ID": "20230104151954-nmmwbf4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151954-nmmwbf4",
+								"updated": "20230104151954"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "分享完畢後對文檔寫入屬性 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleid"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（原為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleId"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ）用於關聯鏈滴帖子 ID"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230104151954-zncy5y5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230104151954-zncy5y5",
+				"updated": "20230104151954"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文檔中的資源文件會被自動上傳到雲端圖庫："
+				}
+			]
+		},
+		{
+			"ID": "20230104151954-8ueop81",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104151954-8ueop81",
+				"updated": "20230104151954"
+			},
+			"Children": [
+				{
+					"ID": "20230104151954-qr9g223",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151954-qr9g223",
+						"updated": "20230104151954"
+					},
+					"Children": [
+						{
+							"ID": "20230104151954-1tltlj8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151954-1tltlj8",
+								"updated": "20230104151954"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "免費用戶單個文件小於 3MB"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104151954-ioceh17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151954-ioceh17",
+						"updated": "20230104151954"
+					},
+					"Children": [
+						{
+							"ID": "20230104151954-ba43w5q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151954-ba43w5q",
+								"updated": "20230104151954"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "訂閱用戶單個文件小於 10MB"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230104151954-pd0lmxx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104151954-pd0lmxx",
+				"updated": "20230104151954"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230104151954-3xouceb",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104151954-3xouceb",
+				"updated": "20230104151954"
+			},
+			"Children": [
+				{
+					"ID": "20230104151954-96e5cea",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151954-96e5cea",
+						"updated": "20230104151954"
+					},
+					"Children": [
+						{
+							"ID": "20230104151954-4mun79t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151954-4mun79t",
+								"updated": "20230104151954"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "分享文檔到鏈滴需要積分，請參考"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1441724208848",
+									"TextMarkTextContent": "積分規則"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104151954-g4fkn3c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151954-g4fkn3c",
+						"updated": "20230104151954"
+					},
+					"Children": [
+						{
+							"ID": "20230104151954-9dgfebb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151954-9dgfebb",
+								"updated": "20230104151954"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "分享上傳到雲端圖庫的資源文件無法刪除"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

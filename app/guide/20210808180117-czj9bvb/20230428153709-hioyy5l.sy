@@ -1,0 +1,931 @@
+{
+	"ID": "20230428153709-hioyy5l",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f3d8",
+		"id": "20230428153709-hioyy5l",
+		"title": "社区资源",
+		"type": "doc",
+		"updated": "20230428161325"
+	},
+	"Children": [
+		{
+			"ID": "20230428153709-sc7nv54",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230428153709-sc7nv54",
+				"updated": "20230428154439"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230428155850-lreo3ks",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230428155850-lreo3ks",
+				"updated": "20230428162411"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我们整理了一些来自社区的优秀资源。如果你发现了其他精彩内容，欢迎"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/article/1649901726096",
+					"TextMarkTextContent": "反馈"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "给我们。"
+				}
+			]
+		},
+		{
+			"ID": "20230428160824-2zaws9q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230428160824-2zaws9q",
+				"updated": "20240906162515"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "入门视频教程"
+				}
+			]
+		},
+		{
+			"ID": "20230428160746-7mf4j39",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230428160746-7mf4j39",
+				"updated": "20240906162515"
+			},
+			"Children": [
+				{
+					"ID": "20230428160708-py6jj6o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428160708-py6jj6o",
+						"updated": "20240906162504"
+					},
+					"Children": [
+						{
+							"ID": "20230428160708-akcnwbc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428160708-akcnwbc",
+								"updated": "20240906162504"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1M24y1k7Qb/",
+									"TextMarkTextContent": "① 基本介绍"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428160742-w37bddv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428160742-w37bddv",
+						"updated": "20240906162501"
+					},
+					"Children": [
+						{
+							"ID": "20230428160742-c3ifz2n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428160742-c3ifz2n",
+								"updated": "20240906162501"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1nR4y1k7RL/",
+									"TextMarkTextContent": "② 通用操作"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428160851-wrfsv24",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428160851-wrfsv24",
+						"updated": "20240906162510"
+					},
+					"Children": [
+						{
+							"ID": "20230428160851-q871vgc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428160851-q871vgc",
+								"updated": "20240906162510"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV16M411h7cG/",
+									"TextMarkTextContent": "③ 云端功能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428160852-enxz1n9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428160852-enxz1n9",
+						"updated": "20240906162515"
+					},
+					"Children": [
+						{
+							"ID": "20230428160852-zm80tug",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428160852-zm80tug",
+								"updated": "20240906162515"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1bv4y1r7tA/",
+									"TextMarkTextContent": "④ 专业功能"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240906161923-3hl60in",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240906161923-3hl60in",
+				"updated": "20240906162641"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "从入门到精通使用视频教程"
+				}
+			]
+		},
+		{
+			"ID": "20240906162026-xpq2055",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240906162026-xpq2055",
+				"updated": "20240906162540"
+			},
+			"Children": [
+				{
+					"ID": "20240906162027-zcgy1a1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162027-zcgy1a1",
+						"updated": "20240906162526"
+					},
+					"Children": [
+						{
+							"ID": "20240906162027-sreprlq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162027-sreprlq",
+								"updated": "20240906162526"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1Wg4y1K7ro/",
+									"TextMarkTextContent": "① 基础知识"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162059-ims6yjl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162059-ims6yjl",
+						"updated": "20240906162530"
+					},
+					"Children": [
+						{
+							"ID": "20240906162059-kbf1m4g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162059-kbf1m4g",
+								"updated": "20240906162530"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1zF411X7zh/",
+									"TextMarkTextContent": "② 文字编辑"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162157-mgvea6r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162157-mgvea6r",
+						"updated": "20240906162534"
+					},
+					"Children": [
+						{
+							"ID": "20240906162157-khwnx0s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162157-khwnx0s",
+								"updated": "20240906162534"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1Ez4y1p7bg/",
+									"TextMarkTextContent": "③ 内容块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162203-phz42dy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162203-phz42dy",
+						"updated": "20240906162540"
+					},
+					"Children": [
+						{
+							"ID": "20240906162203-4ci51pi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162203-4ci51pi",
+								"updated": "20240906162540"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1uG411o7vb/",
+									"TextMarkTextContent": "④ 双向连接"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162222-2d2xd59",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162222-2d2xd59",
+						"updated": "20240906162222"
+					},
+					"Children": [
+						{
+							"ID": "20240906162222-y1elt4b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162222-y1elt4b",
+								"updated": "20240906162236"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1SM411Z7eU/",
+									"TextMarkTextContent": "⑤ 通用操作一"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162237-ztzy5mn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162237-ztzy5mn",
+						"updated": "20240906162237"
+					},
+					"Children": [
+						{
+							"ID": "20240906162237-1ckrwma",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162237-1ckrwma",
+								"updated": "20240906162250"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1mw4m1Y7r6/",
+									"TextMarkTextContent": "⑥ 通用操作二"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162250-uee671h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162250-uee671h",
+						"updated": "20240906162250"
+					},
+					"Children": [
+						{
+							"ID": "20240906162250-oyc0n91",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162250-oyc0n91",
+								"updated": "20240906162303"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1tCWdesELS/",
+									"TextMarkTextContent": "⑦ 数据库与搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162303-ymaek4h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162303-ymaek4h",
+						"updated": "20240906162303"
+					},
+					"Children": [
+						{
+							"ID": "20240906162303-d5v0qr5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162303-d5v0qr5",
+								"updated": "20240906162317"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1tHsKeJEN4/",
+									"TextMarkTextContent": "⑧ 云端服务"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162317-aradl20",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162317-aradl20",
+						"updated": "20240906162317"
+					},
+					"Children": [
+						{
+							"ID": "20240906162317-755h9h7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162317-755h9h7",
+								"updated": "20240906162335"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV191HbenExk/",
+									"TextMarkTextContent": "⑨ 专业块输入"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240906162335-mkc1i0p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240906162335-mkc1i0p",
+						"updated": "20240906162347"
+					},
+					"Children": [
+						{
+							"ID": "20240906162335-ilbwref",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240906162335-ilbwref",
+								"updated": "20240906162347"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.bilibili.com/video/BV1ZepGemEvC/",
+									"TextMarkTextContent": "⑩ 集市功能"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230428161034-wh3fgdb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230428161034-wh3fgdb",
+				"updated": "20230428161325"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新手图文教程"
+				}
+			]
+		},
+		{
+			"ID": "20230428160143-kwwryq7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230428160143-kwwryq7",
+				"updated": "20230428161325"
+			},
+			"Children": [
+				{
+					"ID": "20230428160143-hn4s23b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428160143-hn4s23b",
+						"updated": "20230428160143"
+					},
+					"Children": [
+						{
+							"ID": "20230428160143-7ays0os",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428160143-7ays0os",
+								"updated": "20230428160250"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/u25584857/ryp75p/cd49lz",
+									"TextMarkTextContent": "思源笔记基本功能详解"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428160143-8p3g5e5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428160143-8p3g5e5",
+						"updated": "20230428160143"
+					},
+					"Children": [
+						{
+							"ID": "20230428160143-elphmyf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428160143-elphmyf",
+								"updated": "20230428160255"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/u25584857/ryp75p/tcv57u",
+									"TextMarkTextContent": "思源笔记双链使用详解"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428160143-mzer8mj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428160143-mzer8mj",
+						"updated": "20230428160143"
+					},
+					"Children": [
+						{
+							"ID": "20230428160143-r3pu1lz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428160143-r3pu1lz",
+								"updated": "20230428160258"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/u25584857/ryp75p/sgf58w",
+									"TextMarkTextContent": "思源笔记外观修改详解"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428161306-xb5am8h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428161306-xb5am8h",
+						"updated": "20230428161325"
+					},
+					"Children": [
+						{
+							"ID": "20230428161306-kjsk9cl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428161306-kjsk9cl",
+								"updated": "20230428161325"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/siyuannote/docs",
+									"TextMarkTextContent": "思源笔记教程合辑"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230428161812-12t1s5h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230428161812-12t1s5h",
+				"updated": "20230428161816"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用心得"
+				}
+			]
+		},
+		{
+			"ID": "20230428161816-wy53vqr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230428161816-wy53vqr",
+				"updated": "20230428162255"
+			},
+			"Children": [
+				{
+					"ID": "20230428162248-yfavw0i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428162248-yfavw0i",
+						"updated": "20230428162255"
+					},
+					"Children": [
+						{
+							"ID": "20230428162248-dzjll18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428162248-dzjll18",
+								"updated": "20230428162255"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1668217980464",
+									"TextMarkTextContent": "思源笔记快乐手册"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428162127-yec9y7r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428162127-yec9y7r"
+					},
+					"Children": [
+						{
+							"ID": "20230428162127-agdrr7v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428162127-agdrr7v",
+								"updated": "20230428162138"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1658109483457",
+									"TextMarkTextContent": "我的 dailynote 流程"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428161938-11lcw1i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428161938-11lcw1i"
+					},
+					"Children": [
+						{
+							"ID": "20230428161938-ocgqy9o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428161938-ocgqy9o",
+								"updated": "20230428161944"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1679134353655",
+									"TextMarkTextContent": "使用虚拟引用功能阅读超长篇小说《冰与火之歌》"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230428162527-x1sgqxi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230428162527-x1sgqxi",
+				"updated": "20230428162527"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "知识管理方法论"
+				}
+			]
+		},
+		{
+			"ID": "20230428162527-zil49lr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230428162527-zil49lr",
+				"updated": "20230428162527"
+			},
+			"Children": [
+				{
+					"ID": "20230428162527-n9hk7po",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428162527-n9hk7po",
+						"updated": "20230428162527"
+					},
+					"Children": [
+						{
+							"ID": "20230428162527-yq3ojas",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428162527-yq3ojas",
+								"updated": "20230428162527"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/deerain/gannbs/ffqk2e",
+									"TextMarkTextContent": "双向链接时代的快速无压记录"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428162527-b5g0yxm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428162527-b5g0yxm",
+						"updated": "20230428162527"
+					},
+					"Children": [
+						{
+							"ID": "20230428162527-a3a32nz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428162527-a3a32nz",
+								"updated": "20230428162527"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://www.yuque.com/deerain/gannbs/hb0gsd",
+									"TextMarkTextContent": "MOC - 管理链接而非本体"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428162527-yrne3zj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428162527-yrne3zj",
+						"updated": "20230428162527"
+					},
+					"Children": [
+						{
+							"ID": "20230428162527-g5qqsfc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428162527-g5qqsfc",
+								"updated": "20230428162527"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1633719399031",
+									"TextMarkTextContent": "实践中对双链和写作的一些思考"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230428162527-i2k2l9z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230428162527-i2k2l9z",
+						"updated": "20230428162527"
+					},
+					"Children": [
+						{
+							"ID": "20230428162527-asb700r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230428162527-asb700r",
+								"updated": "20230428162527"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1681801981651",
+									"TextMarkTextContent": "一次漫游：学习中的快乐与束缚"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,104 @@
+.b3-switch {
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  width: 26px;
+  height: 16px;
+  border: 1px solid var(--b3-switch-border);
+  border-radius: var(--b3-border-radius-b);
+  margin: 0;
+  outline: none;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  background-color: var(--b3-switch-background);
+  overflow: inherit;
+  user-select: none;
+
+  &--side {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+  &--menu {
+    margin: 2px 2px 2px 0;
+    align-self: center;
+  }
+
+  &::after {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    content: "";
+    background-color: var(--b3-switch-border);
+    display: block;
+    left: 7px;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: left 80ms linear, background-color 80ms linear, width 80ms linear, height 80ms linear;
+  }
+
+  &::before {
+    z-index: 2;
+    content: "";
+    left: 7px;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background-color: var(--b3-switch-hover);
+    display: none;
+    border-radius: 50%;
+    transition: background-color 80ms linear;
+  }
+
+  &:checked {
+    background-color: var(--b3-switch-checked-background);
+    border-color: transparent;
+
+    &::after {
+      background-color: var(--b3-switch-checked);
+      height: 12px;
+      width: 12px;
+    }
+
+    &::before,
+    &::after {
+      left: 17px;
+    }
+
+    &:active:not(:disabled)::after {
+      height: 14px;
+      width: 14px;
+    }
+  }
+
+  &:disabled {
+    opacity: .38;
+    cursor: not-allowed;
+  }
+
+  &:active:not(:disabled)::after {
+    height: 10px;
+    width: 10px;
+  }
+}
+
+label:hover .b3-switch:not(:disabled)::before,
+.b3-switch:hover:not(:disabled)::before {
+  display: inline-block;
+}
+
+label:hover .b3-switch:checked:not(:disabled),
+.b3-switch:checked:hover:not(:disabled) {
+  &::after {
+    background-color: var(--b3-switch-checked-hover);
+  }
+
+  &::before {
+    background-color: var(--b3-switch-checked-hover2);
+  }
+}

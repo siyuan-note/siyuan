@@ -1,0 +1,96 @@
+{
+  "name": "SiYuan",
+  "version": "3.6.5",
+  "description": "Refactor your thinking",
+  "homepage": "https://b3log.org/siyuan",
+  "main": "./electron/main.js",
+  "packageManager": "pnpm@11.4.0",
+  "scripts": {
+    "lint": "eslint . --fix --cache",
+    "dev": "webpack --mode development",
+    "dev:mobile": "webpack --mode development --config webpack.mobile.js",
+    "dev:desktop": "webpack --mode development --config webpack.desktop.js",
+    "dev:export": "webpack --mode development --config webpack.export.js",
+    "build": "pnpm run /build:.*/",
+    "build:app": "webpack --mode production",
+    "build:mobile": "webpack --mode production --config webpack.mobile.js",
+    "build:desktop": "webpack --mode production --config webpack.desktop.js",
+    "build:export": "webpack --mode production --config webpack.export.js",
+    "gen:types": "tsc -d",
+    "start": "cross-env NODE_ENV=development electron ./electron/main.js",
+    "dist": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
+    "dist-arm64": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --config electron-builder-arm64.yml --publish=never",
+    "dist-darwin": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",
+    "dist-darwin-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml --publish=never",
+    "dist-linux": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml --publish=never",
+    "dist-linux-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --linux --config electron-builder-linux-arm64.yml --publish=never"
+  },
+  "keywords": [
+    "markdown",
+    "note-taking",
+    "notebook"
+  ],
+  "author": {
+    "name": "Yunnan Liandi Technology Co., Ltd.",
+    "email": "845765@qq.com",
+    "url": "https://ld246.com"
+  },
+  "maintainers": [
+    {
+      "name": "Liang Ding",
+      "email": "845765@qq.com",
+      "url": "https://ld246.com/member/88250"
+    },
+    {
+      "name": "Liyuan Li",
+      "email": "84588990@qq.com",
+      "url": "https://ld246.com/member/Vanessa"
+    }
+  ],
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^18.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "blueimp-md5": "^2.19.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "cross-env": "^10.1.0",
+    "css-loader": "^7.1.2",
+    "dayjs": "^1.11.5",
+    "electron": "41.7.1",
+    "electron-builder": "26.0.12",
+    "encoding": "^0.1.13",
+    "esbuild-loader": "^3.0.1",
+    "eslint": "^9.15.0",
+    "file-loader": "^6.2.0",
+    "filesize": "^11.0.13",
+    "globals": "^15.12.0",
+    "html-loader": "^2.1.2",
+    "html-webpack-plugin": "^5.5.0",
+    "iconv-lite": "^0.6.3",
+    "ifdef-loader": "^2.3.2",
+    "mini-css-extract-plugin": "2.9.2",
+    "path-browserify": "^1.0.1",
+    "safer-buffer": "^2.1.2",
+    "sass": "^1.89.2",
+    "sass-loader": "^16.0.5",
+    "typescript": "^4.9.5",
+    "webpack": "^5.104.1",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-cli": "^4.10.0",
+    "@tiptap/core": "^3.24.0",
+    "@tiptap/extension-document": "^3.24.0",
+    "@tiptap/extension-hard-break": "^3.24.0",
+    "@tiptap/extension-history": "^3.24.0",
+    "@tiptap/extension-mention": "^3.24.0",
+    "@tiptap/extension-paragraph": "^3.24.0",
+    "@tiptap/extension-placeholder": "^3.24.0",
+    "@tiptap/extension-text": "^3.24.0",
+    "@tiptap/pm": "^3.24.0",
+    "@tiptap/suggestion": "^3.24.0"
+  },
+  "dependencies": {
+    "@electron/remote": "^2.1.3"
+  }
+}

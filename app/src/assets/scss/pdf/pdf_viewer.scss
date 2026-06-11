@@ -1,0 +1,219 @@
+/* Copyright 2014 Mozilla Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+@use "annotation_layer_builder" as *;
+@use "text_layer_builder" as *;
+@use "xfa_layer_builder" as *;
+
+:root {
+  --viewer-container-height: 0;
+  --pdfViewer-padding-bottom: 0;
+  --page-margin: 1px auto -8px;
+  --page-border: 9px solid transparent;
+  --spreadHorizontalWrapped-margin-LR: -3.5px;
+  --loading-icon-delay: 400ms;
+}
+
+@media screen and (forced-colors: active) {
+  :root {
+    --pdfViewer-padding-bottom: 9px;
+    --page-margin: 8px auto -1px;
+    --page-border: 1px solid CanvasText;
+    --spreadHorizontalWrapped-margin-LR: 3.5px;
+  }
+}
+
+[data-main-rotation="90"] {
+  transform: rotate(90deg) translateY(-100%);
+}
+[data-main-rotation="180"] {
+  transform: rotate(180deg) translate(-100%, -100%);
+}
+[data-main-rotation="270"] {
+  transform: rotate(270deg) translateX(-100%);
+}
+
+#hiddenCopyElement,
+.hiddenCanvasElement {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.pdfViewer {
+  /* Define this variable here and not in :root to avoid to reflow all the UI
+     when scaling (see #15929). */
+  --scale-factor: 1;
+  --page-bg-color: unset;
+
+  padding-bottom: var(--pdfViewer-padding-bottom);
+
+  --hcm-highlight-filter: none;
+  --hcm-highlight-selected-filter: none;
+
+  @media screen and (forced-colors: active) {
+    --hcm-highlight-filter: invert(100%);
+  }
+
+  &.copyAll {
+    cursor: wait;
+  }
+
+  .canvasWrapper {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+
+    canvas {
+      margin: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+
+      &[hidden] {
+        display: none;
+      }
+
+      &[zooming] {
+        width: 100%;
+        height: 100%;
+      }
+
+      .structTree {
+        contain: strict;
+      }
+    }
+  }
+}
+
+.pdfViewer .page {
+  --scale-round-x: 1px;
+  --scale-round-y: 1px;
+
+  direction: ltr;
+  width: 816px;
+  height: 1056px;
+  margin: var(--page-margin);
+  position: relative;
+  overflow: visible;
+  border: var(--page-border);
+  background-clip: content-box;
+  background-color: var(--page-bg-color, rgb(255 255 255));
+}
+
+.pdfViewer .dummyPage {
+  position: relative;
+  width: 0;
+  height: var(--viewer-container-height);
+}
+
+.pdfViewer.noUserSelect {
+  user-select: none;
+}
+
+/*#if GENERIC*/
+.pdfViewer.removePageBorders .page {
+  margin: 0 auto 10px;
+  border: none;
+}
+/*#endif*/
+
+/*#if COMPONENTS*/
+.pdfViewer.singlePageView {
+  display: inline-block;
+}
+
+.pdfViewer.singlePageView .page {
+  margin: 0;
+  border: none;
+}
+/*#endif*/
+
+.pdfViewer:is(.scrollHorizontal, .scrollWrapped),
+.spread {
+  margin-inline: 3.5px;
+  text-align: center;
+}
+
+.pdfViewer.scrollHorizontal,
+.spread {
+  white-space: nowrap;
+}
+
+/*#if GENERIC*/
+.pdfViewer.removePageBorders,
+  /*#endif*/
+.pdfViewer:is(.scrollHorizontal, .scrollWrapped) .spread {
+  margin-inline: 0;
+}
+
+.spread :is(.page, .dummyPage),
+.pdfViewer:is(.scrollHorizontal, .scrollWrapped) :is(.page, .spread) {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.spread .page,
+.pdfViewer:is(.scrollHorizontal, .scrollWrapped) .page {
+  margin-inline: var(--spreadHorizontalWrapped-margin-LR);
+}
+
+/*#if GENERIC*/
+.pdfViewer.removePageBorders .spread .page,
+.pdfViewer.removePageBorders:is(.scrollHorizontal, .scrollWrapped) .page {
+  margin-inline: 5px;
+}
+/*#endif*/
+
+.pdfViewer .page.loadingIcon::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  content: "";
+  width: 100%;
+  height: 100%;
+  // NOTE background: url("images/loading-icon.gif") center no-repeat;
+  display: none;
+  /* Using a delay with background-image doesn't work,
+     consequently we use the display. */
+  transition-property: display;
+  transition-delay: var(--loading-icon-delay);
+  z-index: 5;
+  contain: strict;
+}
+
+.pdfViewer .page.loading::after {
+  display: block;
+}
+
+.pdfViewer .page:not(.loading)::after {
+  transition-property: none;
+  display: none;
+}
+
+.pdfPresentationMode .pdfViewer {
+  padding-bottom: 0;
+}
+
+.pdfPresentationMode .spread {
+  margin: 0;
+}
+
+.pdfPresentationMode .pdfViewer .page {
+  margin: 0 auto;
+  border: 2px solid transparent;
+}

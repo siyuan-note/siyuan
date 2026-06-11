@@ -1,0 +1,529 @@
+{
+	"ID": "20240317202444-5txwumu",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f9d1-200d-1f4bb",
+		"id": "20240317202444-5txwumu",
+		"title": "Extend development",
+		"type": "doc",
+		"updated": "20240407172201"
+	},
+	"Children": [
+		{
+			"ID": "20240317202544-xj5ch3g",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240317202544-xj5ch3g",
+				"updated": "20240317202645"
+			},
+			"Children": [
+				{
+					"ID": "20240317202544-c5z54x1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202544-c5z54x1",
+						"updated": "20240317202620"
+					},
+					"Children": [
+						{
+							"ID": "20240317202544-0hekcrm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202544-0hekcrm",
+								"updated": "20240317202620"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924095938-a9p5450",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Theme"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " Sample project github repo: siyuan-note/theme-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202544-b8jcmff",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202544-b8jcmff",
+						"updated": "20240317202612"
+					},
+					"Children": [
+						{
+							"ID": "20240317202544-v0hh22d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202544-v0hh22d",
+								"updated": "20240317202612"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200924100110-vcg96wy",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Icon"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " Sample project github repo: siyuan-note/icon-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202544-umh6dog",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202544-umh6dog",
+						"updated": "20240317202632"
+					},
+					"Children": [
+						{
+							"ID": "20240317202544-8f0b1zo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202544-8f0b1zo",
+								"updated": "20240317202632"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210824202056-udkf7wg",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Widget"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " Sample project github repo: siyuan-note/widget-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202544-avlrd3r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202544-avlrd3r",
+						"updated": "20240317202639"
+					},
+					"Children": [
+						{
+							"ID": "20240317202544-w7tf3lc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202544-w7tf3lc",
+								"updated": "20240317202639"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230506205948-yah52eb",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Plugin"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " Sample project github repo: siyuan-note/plugin-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202544-fcp6rlc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202544-fcp6rlc",
+						"updated": "20240317202645"
+					},
+					"Children": [
+						{
+							"ID": "20240317202544-5enqxgk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202544-5enqxgk",
+								"updated": "20240317202645"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Template"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " Sample project github repo: siyuan-note/template-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202544-g1fapz8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202544-g1fapz8",
+						"updated": "20240317202552"
+					},
+					"Children": [
+						{
+							"ID": "20240317202544-eztxfoj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202544-eztxfoj",
+								"updated": "20240317202552"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Marketplace github repo: siyuan-note/bazaar"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202544-qdnea4l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202544-qdnea4l",
+						"updated": "20240317202544"
+					},
+					"Children": [
+						{
+							"ID": "20240317202544-qkqfisa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202544-qkqfisa",
+								"updated": "20240317202544"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://docs.siyuan-note.club/",
+									"TextMarkTextContent": "Community Developer Resources"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240317202653-yk5we0e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240317202653-yk5we0e",
+				"updated": "20240317202701"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240317202702-wczm3on",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240317202702-wczm3on",
+				"updated": "20240407172201"
+			},
+			"Children": [
+				{
+					"ID": "20240317202705-o9fbjsh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202705-o9fbjsh",
+						"updated": "20240317202840"
+					},
+					"Children": [
+						{
+							"ID": "20240317202745-905fln5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202745-905fln5",
+								"updated": "20240317202840"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If plugins or external extensions require direct reading or writing of files under the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ directory, please use the kernel API to achieve this. "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Do not call"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong code",
+									"TextMarkTextContent": "fs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "or other electron or nodejs APIs directly"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", as it may result in data loss during synchronization and cause damage to cloud data. Related APIs can be found at: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (e.g., "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/getFile"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240317202755-i4ttgax",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240317202755-i4ttgax",
+						"updated": "20240407172201"
+					},
+					"Children": [
+						{
+							"ID": "20240317202837-vjq99pf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202837-vjq99pf",
+								"updated": "20240317202837"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When creating a daily note in SiYuan, a custom-dailynote-yyyymmdd attribute will be automatically added to the document to distinguish it from regular documents."
+								}
+							]
+						},
+						{
+							"ID": "20240317202837-ahu56j5",
+							"Type": "NodeBlockquote",
+							"Properties": {
+								"id": "20240317202837-ahu56j5",
+								"updated": "20240407172201"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockquoteMarker",
+									"Data": "\u003e"
+								},
+								{
+									"ID": "20240317202837-83ygog5",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20240317202837-83ygog5",
+										"updated": "20240407172201"
+									},
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "For more details, please refer to Github Issue #9807."
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20240317202837-p15b4he",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240317202837-p15b4he",
+								"updated": "20240317202837"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Developers should pay attention to the following when developing the functionality to manually create Daily Notes:"
+								}
+							]
+						},
+						{
+							"ID": "20240317202837-fhu7g1g",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20240317202837-fhu7g1g",
+								"updated": "20240317202837"
+							},
+							"Children": [
+								{
+									"ID": "20240317202837-qqhlmxo",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240317202837-qqhlmxo",
+										"updated": "20240317202837"
+									},
+									"Children": [
+										{
+											"ID": "20240317202837-wrlpddy",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240317202837-wrlpddy",
+												"updated": "20240317202837"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "If "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/api/filetree/createDailyNote"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ is called to create a daily note, the attribute will be automatically added to the document, and developers do not need to handle it separately"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240317202837-tv1v9sd",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20240317202837-tv1v9sd",
+										"updated": "20240317202837"
+									},
+									"Children": [
+										{
+											"ID": "20240317202837-kimmeqd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240317202837-kimmeqd",
+												"updated": "20240317202837"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "If a document is created manually by developer's code (e.g., using the "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "createDocWithMd"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ API to create a daily note), please manually add this attribute to the document"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

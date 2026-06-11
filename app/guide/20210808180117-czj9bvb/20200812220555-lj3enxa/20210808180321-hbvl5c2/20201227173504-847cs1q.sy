@@ -1,0 +1,878 @@
+{
+	"ID": "20201227173504-847cs1q",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20201227173504-847cs1q",
+		"title": "Docker 伺服",
+		"type": "doc",
+		"updated": "20250926110513"
+	},
+	"Children": [
+		{
+			"ID": "20220518213304-k4jos4j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220518213304-k4jos4j",
+				"updated": "20220518213306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20220521230037-88non27",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220521230037-88non27",
+				"updated": "20220521230037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在服务器上伺服思源最简单的方案是通过 Docker 部署。"
+				}
+			]
+		},
+		{
+			"ID": "20220521230037-om41ir0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220521230037-om41ir0",
+				"updated": "20220521230037"
+			},
+			"Children": [
+				{
+					"ID": "20220521230037-eywv3c8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220521230037-eywv3c8",
+						"updated": "20220521230037"
+					},
+					"Children": [
+						{
+							"ID": "20220521230037-gbdcmqs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220521230037-gbdcmqs",
+								"updated": "20220521230037"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "镜像名称 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "b3log/siyuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220521230037-cgc39jg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220521230037-cgc39jg",
+						"updated": "20220521230037"
+					},
+					"Children": [
+						{
+							"ID": "20220521230037-ssjdnm5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220521230037-ssjdnm5",
+								"updated": "20220521230037"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://hub.docker.com/r/b3log/siyuan",
+									"TextMarkTextContent": "镜像地址"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201227174700-39dg7ur",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201227174700-39dg7ur"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "文件结构"
+				}
+			]
+		},
+		{
+			"ID": "20201227174134-hptryqy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201227174134-hptryqy"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "整体程序位于 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/opt/siyuan/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 下，基本上就是 Electron 安装包 resources 文件夹下的结构："
+				}
+			]
+		},
+		{
+			"ID": "20201227174705-0hl54vz",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201227174705-0hl54vz"
+			},
+			"Children": [
+				{
+					"ID": "20201227174714-t7ew8rk",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227174714-t7ew8rk"
+					},
+					"Children": [
+						{
+							"ID": "20210208145140-jwvzb91",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208145140-jwvzb91"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "appearance：图标、主题、多语言"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227174726-zztkpj2",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227174726-zztkpj2"
+					},
+					"Children": [
+						{
+							"ID": "20210208145140-em39k3o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208145140-em39k3o"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "guide：帮助文档"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227174744-z7qo4j2",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227174744-z7qo4j2"
+					},
+					"Children": [
+						{
+							"ID": "20210208145140-1tyrmez",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208145140-1tyrmez"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "stage：界面和静态资源"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227174842-tr8u7q0",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227174842-tr8u7q0"
+					},
+					"Children": [
+						{
+							"ID": "20210208145140-99h8xv0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208145140-99h8xv0"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "kernel：内核程序"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201227174908-s19h988",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201227174908-s19h988"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "启动入口"
+				}
+			]
+		},
+		{
+			"ID": "20201227180709-rglrztt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201227180709-rglrztt",
+				"updated": "20210301202239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "构建 Docker 镜像时设置了入口："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ENTRYPOINT [ \"/opt/siyuan/kernel\" ]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run b3log/siyuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 并带参即可启动："
+				}
+			]
+		},
+		{
+			"ID": "20201227201453-yh75kqd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20201227201453-yh75kqd",
+				"updated": "20210502164159"
+			},
+			"Children": [
+				{
+					"ID": "20201227201514-c7brkss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201227201514-c7brkss",
+						"updated": "20210502164159"
+					},
+					"Children": [
+						{
+							"ID": "20210208145140-7f45i9c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208145140-7f45i9c",
+								"updated": "20210502164159"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 指定工作空间文件夹路径，在宿主机上通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 挂载到容器中"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210301201353-sffb1m7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210301201353-sffb1m7",
+				"updated": "20231108220447"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更多的参数可参考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200828105441-r76vmu5",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "这里"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。下面是一条启动命令示例："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20201227174657-0k1ruhd",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20201227174657-0k1ruhd"
+			},
+			"Children": [
+				{
+					"ID": "20201227193950-dp2hioi",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227193950-dp2hioi"
+					},
+					"Children": [
+						{
+							"ID": "20210208145140-w9i02jr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208145140-w9i02jr",
+								"updated": "20210502164152"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_host"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：宿主机上的工作空间文件夹路径"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201227194032-68h45ue",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20201227194032-68h45ue"
+					},
+					"Children": [
+						{
+							"ID": "20210208145140-2ave4tv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210208145140-2ave4tv",
+								"updated": "20210502164311"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace_dir_container"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：容器内工作空间文件夹路径，和后面 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 指定成一样的"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20201227194509-hdnzkry",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20201227194509-hdnzkry",
+				"updated": "20231108220452"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "为了简化，建议将 workspace 文件夹路径在宿主机和容器上配置为一致的，比如将 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_host"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace_dir_container"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 都配置为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/siyuan/workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，对应的启动命令示例："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20211112102027-wpzhq6h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211112102027-wpzhq6h",
+				"updated": "20211112102725"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用户权限"
+				}
+			]
+		},
+		{
+			"ID": "20211112102355-akc01dd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211112102355-akc01dd",
+				"updated": "20211112103316"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "镜像中是使用默认创建的普通用户 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（uid 1000/gid 1000）来启动内核进程的，所以在宿主机创建工作空间文件夹时请注意设置该文件夹所属用户组："
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "chown -R 1000:1000 /siyuan/workspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，在启动容器时需要带参数 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-u 1000:1000"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20210930091350-4oy2gq8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210930091350-4oy2gq8",
+				"updated": "20210930091414"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "隐藏端口"
+				}
+			]
+		},
+		{
+			"ID": "20210930091415-2hpf0dh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210930091415-2hpf0dh",
+				"updated": "20210930092037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 NGINX 反向代理可以隐藏 6806 端口，请注意："
+				}
+			]
+		},
+		{
+			"ID": "20210930091550-c9aemmk",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210930091550-c9aemmk",
+				"updated": "20211112103359"
+			},
+			"Children": [
+				{
+					"ID": "20210930091552-6ng73bf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210930091552-6ng73bf",
+						"updated": "20211112103359"
+					},
+					"Children": [
+						{
+							"ID": "20210930091552-81uy57d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210930091552-81uy57d",
+								"updated": "20211112103359"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "配置 WebSocket 反代 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/ws"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230406104726-hhdyre4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230406104726-hhdyre4",
+				"updated": "20230406104734"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230406104729-slpoivj",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230406104729-slpoivj",
+				"updated": "20230406105236"
+			},
+			"Children": [
+				{
+					"ID": "20230406104740-m2vmsfl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406104740-m2vmsfl",
+						"updated": "20230406104740"
+					},
+					"Children": [
+						{
+							"ID": "20230406104740-fv49tp9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406104740-fv49tp9",
+								"updated": "20230406105003"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "请务必确认挂载卷的正确性，否则容器删除后数据会丢失"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406105020-zfsb9jk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406105020-zfsb9jk",
+						"updated": "20230406105236"
+					},
+					"Children": [
+						{
+							"ID": "20230406105020-lxhhaqe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406105020-lxhhaqe",
+								"updated": "20230406105236"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要使用 URL 重写进行重定向，否则鉴权可能会有问题，建议配置反向代理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230406104141-6o5jpu6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230406104141-6o5jpu6",
+				"updated": "20250926110513"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "限制"
+				}
+			]
+		},
+		{
+			"ID": "20230406104201-nbfn2p9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230406104201-nbfn2p9",
+				"updated": "20250926110513"
+			},
+			"Children": [
+				{
+					"ID": "20230406104217-8m58gpo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406104217-8m58gpo",
+						"updated": "20230406104217"
+					},
+					"Children": [
+						{
+							"ID": "20230406104217-42a91na",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406104217-42a91na",
+								"updated": "20230406104310"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持桌面端和移动端应用连接，仅支持在浏览器上使用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230406104247-qyrt1tz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230406104247-qyrt1tz",
+						"updated": "20250926110513"
+					},
+					"Children": [
+						{
+							"ID": "20230406104247-vrslzoi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230406104247-vrslzoi",
+								"updated": "20250926110513"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持导出 PDF 和 Word 等格式"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

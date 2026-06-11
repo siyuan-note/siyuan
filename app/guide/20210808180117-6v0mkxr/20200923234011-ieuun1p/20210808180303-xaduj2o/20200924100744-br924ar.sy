@@ -1,0 +1,1277 @@
+{
+	"ID": "20200924100744-br924ar",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200924100744-br924ar",
+		"title": "Assets",
+		"type": "doc",
+		"updated": "20250115152723"
+	},
+	"Children": [
+		{
+			"ID": "20210503095708-2g6bgl4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210503095708-2g6bgl4",
+				"updated": "20210503095731"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210503095710-1vp1uxw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210503095710-1vp1uxw",
+				"updated": "20220711121739"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Attachments inserted through the editor will be regarded as asset files and will be placed in the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/assets/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " folder by default."
+				}
+			]
+		},
+		{
+			"ID": "20201210194734-v2rmiaq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201210194734-v2rmiaq",
+				"updated": "20250115152723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Insert picture or file"
+				}
+			]
+		},
+		{
+			"ID": "20220824172815-s8znsau",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220824172815-s8znsau",
+				"updated": "20220905215835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the editor, you can directly paste the copied picture or file in the system clipboard (not supported on Linux), or insert it by dragging and dropping the picture or file into the editor. There are two options when inserting:"
+				}
+			]
+		},
+		{
+			"ID": "20220824172815-ckivl7c",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220824172815-ckivl7c",
+				"updated": "20250115152723"
+			},
+			"Children": [
+				{
+					"ID": "20220824172815-q1oeusj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172815-q1oeusj",
+						"updated": "20250115152714"
+					},
+					"Children": [
+						{
+							"ID": "20220824172815-fqyy0l6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172815-fqyy0l6",
+								"updated": "20250115152714"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Copy as an asset and insert: Copy a picture or file as a resource file and insert, shortcut key "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220824172815-0lsclx1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220824172815-0lsclx1",
+						"updated": "20250115152723"
+					},
+					"Children": [
+						{
+							"ID": "20220824172815-dqfasin",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220824172815-dqfasin",
+								"updated": "20250115152723"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file://"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ absolute path and link: Insert a picture or file into a hyperlink as a local absolute path, shortcut key "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, or hold down "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ and drag in"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220824172815-6f3pj5z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220824172815-6f3pj5z",
+				"updated": "20220824172910"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For pictures, if a picture title is specified during layout, the title will be rendered below the picture as a legend."
+				}
+			]
+		},
+		{
+			"ID": "20210104091430-yd3zyeu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091430-yd3zyeu",
+				"updated": "20220824172752"
+			},
+			"Children": [
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Properties": {
+						"parent-style": "display: block;",
+						"style": "display: block;"
+					},
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "siyuan-128.png"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/siyuan-128-20210604092437-7iqzf90.png"
+						},
+						{
+							"Type": "NodeLinkSpace"
+						},
+						{
+							"Type": "NodeLinkTitle",
+							"Data": "When one drinks water, one must not forget where it comes from"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeKramdownSpanIAL",
+					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
+				}
+			]
+		},
+		{
+			"ID": "20230505084028-ztfxqzm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230505084028-ztfxqzm",
+				"updated": "20230505084035"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: Inserting pictures will not be compressed, and all pictures and files will be saved as original data.\n"
+				}
+			]
+		},
+		{
+			"ID": "20210115224203-q8bj2gd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210115224203-q8bj2gd",
+				"updated": "20241027164345"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Cleanup unreferenced assets"
+				}
+			]
+		},
+		{
+			"ID": "20220920003905-soehefi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220920003905-soehefi",
+				"updated": "20220920003954"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A \"Reference\" refers to a link to a asset file via a hyperlink, an inserted image, or the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "src"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " attribute of an HTML tag (such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;img\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "). There are two cases here:"
+				}
+			]
+		},
+		{
+			"ID": "20210115224203-r3mwskz",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"id": "20210115224203-r3mwskz",
+				"updated": "20241027164345"
+			},
+			"Children": [
+				{
+					"ID": "20210115224203-1g8zvdg",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210115224203-1g8zvdg",
+						"updated": "20241027164342"
+					},
+					"Children": [
+						{
+							"ID": "20210204172630-7rtyepg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210204172630-7rtyepg",
+								"updated": "20241027164342"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Reference to a specific asset file, such as a picture or a file"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210115224203-xb0ycqg",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210115224203-xb0ycqg",
+						"updated": "20241027164345"
+					},
+					"Children": [
+						{
+							"ID": "20210204172630-kq680iv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210204172630-kq680iv",
+								"updated": "20241027164345"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Reference to a asset folder (a subfolder under the assets folder) must end with "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[foo](assets/bar/)"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. If a asset folder is referenced, all the following asset files will be counted as already referenced regardless of whether they are individually referenced"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210115224203-e03wglt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210115224203-e03wglt",
+				"updated": "20210512160530"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", you can clean up unreferenced assets by one-click. If you need to retrieve files that have been deleted by mistake, please via "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210104091559-kgrtuyh",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Rollback"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20210130103832-93r5ddp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210130103832-93r5ddp",
+				"updated": "20210130103832"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: Using absolute paths (local or network paths) will not be included Clean up calculations."
+				}
+			]
+		},
+		{
+			"ID": "20230604120616-qjigoyt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230604120616-qjigoyt",
+				"updated": "20230604120623"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "List missing assets"
+				}
+			]
+		},
+		{
+			"ID": "20230604120616-95dv931",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604120616-95dv931",
+				"updated": "20230604120637"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can view the missing resources in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, and you can find the references in the global search after copying the path."
+				}
+			]
+		},
+		{
+			"ID": "20230604120616-tjs4mx0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230604120616-tjs4mx0",
+				"updated": "20230604120806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: To search asset paths, you need to enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Index"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Asset Path"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20220503122349-eacedlu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220503122349-eacedlu",
+				"updated": "20241024163243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Notebook-level assets"
+				}
+			]
+		},
+		{
+			"ID": "20220503122349-0xq3b7m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220503122349-0xq3b7m",
+				"updated": "20220503122433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to place the inserted assets in the assets folder at the same level as the document by default, you need to manually create a folder named assets first, so that SiYuan will preferentially select the assets folder to store the assets."
+				}
+			]
+		},
+		{
+			"ID": "20220503122349-b6tsifa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220503122349-b6tsifa",
+				"updated": "20220503122459"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It is recommended not to use notebook-level assets as much as possible, as this has some side effects:"
+				}
+			]
+		},
+		{
+			"ID": "20220503122349-o26mvnq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220503122349-o26mvnq",
+				"updated": "20241024163243"
+			},
+			"Children": [
+				{
+					"ID": "20220503122349-192fehc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220503122349-192fehc",
+						"updated": "20241024163243"
+					},
+					"Children": [
+						{
+							"ID": "20220503122349-ye6haas",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220503122349-ye6haas",
+								"updated": "20241024163243"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When deleting the doc, the assets referenced by the doc will be copied to the global assets in batches to ensure the normal operation of cross-notebook asset references"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220503122349-9g5a9ha",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220503122349-9g5a9ha",
+						"updated": "20220503122525"
+					},
+					"Children": [
+						{
+							"ID": "20220503122349-v2v1554",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220503122349-v2v1554",
+								"updated": "20220503122525"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Does not support viewing notebook-level assets history in data history"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715092756-f5azf15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715092756-f5azf15",
+						"updated": "20220715105117"
+					},
+					"Children": [
+						{
+							"ID": "20220715092756-4bzibji",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715092756-4bzibji",
+								"updated": "20220715105117"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Dose not support search by "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/Assets"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220715105056-8d652vx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220715105056-8d652vx",
+						"updated": "20220715105100"
+					},
+					"Children": [
+						{
+							"ID": "20220715105056-a6p3fg7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220715105056-a6p3fg7",
+								"updated": "20220715105100"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Dose not support rename"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230117003636-epvk98g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230117003636-epvk98g",
+				"updated": "20230117003636"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Image OCR to extract text"
+				}
+			]
+		},
+		{
+			"ID": "20230117003636-0buf00n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117003636-0buf00n",
+				"updated": "20230820185510"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This feature is only supported on the desktop, and the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "em",
+					"TextMarkTextContent": "Tesseract OCR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " program needs to be manually installed first. "
+				}
+			]
+		},
+		{
+			"ID": "20230202231728-0z5bs0m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230202231728-0z5bs0m",
+				"updated": "20230801231949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20230202231731-bdh7lab",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230202231731-bdh7lab",
+				"updated": "20231110112758"
+			},
+			"Children": [
+				{
+					"ID": "20230202231732-n7z8jth",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231732-n7z8jth",
+						"updated": "20231110112758"
+					},
+					"Children": [
+						{
+							"ID": "20230202231732-f3jkj7p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231732-f3jkj7p",
+								"updated": "20231110112758"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When installing Tesseract OCR, you need to check the language pack you need, and add the installed Tesseract-OCR directory path to the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, so that SiYuan can directly call the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ command to extract text from image OCR. If the installation is normal, you can search for "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tesseract-ocr enabled"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the kernel boot log; If you want to disable OCR, set the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN\\_TESSERACT\\_ENABLED=false"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230202231800-z8hswmk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230202231800-z8hswmk",
+						"updated": "20230211103154"
+					},
+					"Children": [
+						{
+							"ID": "20230202231800-c3x45ky",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230202231800-c3x45ky",
+								"updated": "20230211103154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " does not enable all installed language packs, because too many language packs will cause OCR to be slow or even timeout and return empty results, and take up too many system resources, so by default only "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eng"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "chi*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "fra"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "spa"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "deu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "rus"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "osd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ will be enabled at most, if you need more accurate language support, you can specify the language pack by configuring the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_LANGS=chi_sim+eng"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102830-9azqf9m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102830-9azqf9m"
+					},
+					"Children": [
+						{
+							"ID": "20230211102830-sbchex4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102830-sbchex4",
+								"updated": "20230211102832"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Only images in png and jpg formats are supported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230211102834-fx3o5su",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230211102834-fx3o5su",
+						"updated": "20230211102928"
+					},
+					"Children": [
+						{
+							"ID": "20230211102834-3jzjdrv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230211102834-3jzjdrv",
+								"updated": "20230211102928"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "By default, only images below 2MB are processed. If you need to adjust, you can set the environment variable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​, the unit of value is bytes, for example: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_TESSERACT_MAX_SIZE=4000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ adjust the upper limit to 4MB"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230117003636-ouxlaen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230117003636-ouxlaen",
+				"updated": "20230117003636"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Image OCR extracts text automatically in the background, currently only supports PNG and JPG images. The extracted text is used in the search function, so that images can be located by text keywords."
+				}
+			]
+		},
+		{
+			"ID": "20230414202934-1h96or8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230414202934-1h96or8",
+				"updated": "20230414202934"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Manually adjust OCR results"
+				}
+			]
+		},
+		{
+			"ID": "20230414203027-6py4l9z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230414203027-6py4l9z",
+				"updated": "20230414203027"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The OCR results are saved in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/assets/ocr-texts.json"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, and the OCR results can be adjusted in the following ways:"
+				}
+			]
+		},
+		{
+			"ID": "20230414203027-ga8zni5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230414203027-ga8zni5",
+				"updated": "20230414203046"
+			},
+			"Children": [
+				{
+					"ID": "20230414203027-n8cc4ra",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414203027-n8cc4ra",
+						"updated": "20230414203036"
+					},
+					"Children": [
+						{
+							"ID": "20230414203027-epcrauz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414203027-epcrauz",
+								"updated": "20230414203036"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After exiting SiYuan, modify the file on the file system (please pay attention to the correctness of the JSON format)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230414203027-zdq3yuf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230414203027-zdq3yuf",
+						"updated": "20230414203046"
+					},
+					"Children": [
+						{
+							"ID": "20230414203027-ouvsa2g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230414203027-ouvsa2g",
+								"updated": "20230414203046"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Or select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "OCR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ from the image element menu in the editor"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230414203027-chylp3d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230414203027-chylp3d",
+				"updated": "20230414203027"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the adjustment, you need to manually rebuild the index."
+				}
+			]
+		}
+	]
+}

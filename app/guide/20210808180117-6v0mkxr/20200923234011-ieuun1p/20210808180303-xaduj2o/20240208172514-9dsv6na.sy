@@ -1,0 +1,687 @@
+{
+	"ID": "20240208172514-9dsv6na",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f5c3-fe0f",
+		"id": "20240208172514-9dsv6na",
+		"title": "Database",
+		"type": "doc",
+		"updated": "20251224102024"
+	},
+	"Children": [
+		{
+			"ID": "20251224101749-fnv59m7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251224101749-fnv59m7",
+				"updated": "20251224101813"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20251224101749-zd1sdj7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251224101749-zd1sdj7",
+				"updated": "20251224101813"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Databases consist of content blocks or non-content block data, and are presented in different views, such as table view, kanban view, and card view."
+				}
+			]
+		},
+		{
+			"ID": "20251224101749-zybcbjk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251224101749-zybcbjk",
+				"updated": "20251224102024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Views"
+				}
+			]
+		},
+		{
+			"ID": "20251224101749-2wip2q0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20251224101749-2wip2q0",
+				"updated": "20251224102024"
+			},
+			"Children": [
+				{
+					"ID": "20251224101749-uwmt93g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20251224101749-uwmt93g",
+						"updated": "20251224102024"
+					},
+					"Children": [
+						{
+							"ID": "20251224101749-3kfa3pl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20251224101749-3kfa3pl",
+								"updated": "20251224102024"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Created via "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/Database"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, the default view is table view, which can be switched in the layout settings"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20251224101749-8kvjim8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20251224101749-8kvjim8",
+						"updated": "20251224101749"
+					},
+					"Children": [
+						{
+							"ID": "20251224101749-9lhbaoa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20251224101749-9lhbaoa",
+								"updated": "20251224101749"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Add fields"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20251224101749-84xl4iu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20251224101749-84xl4iu",
+						"updated": "20251224101758"
+					},
+					"Children": [
+						{
+							"ID": "20251224101749-5q162y6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20251224101749-5q162y6",
+								"updated": "20251224101749"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Add entries"
+								}
+							]
+						},
+						{
+							"ID": "20251224101752-lliid56",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20251224101752-lliid56",
+								"updated": "20251224101758"
+							},
+							"Children": [
+								{
+									"ID": "20251224101749-um93vvj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20251224101749-um93vvj",
+										"updated": "20251224101757"
+									},
+									"Children": [
+										{
+											"ID": "20251224101749-swzbe1k",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20251224101749-swzbe1k",
+												"updated": "20251224101757"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Non-content blocks: Entries added directly in the view, not bound to any content block"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20251224101749-ruv39ej",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20251224101749-ruv39ej",
+										"updated": "20251224101758"
+									},
+									"Children": [
+										{
+											"ID": "20251224101749-b75ktu6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20251224101749-b75ktu6",
+												"updated": "20251224101758"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Content blocks: Entries added by dragging them into the view, or added via the block menu "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "Add to database"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20251224101749-cne35ka",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20251224101749-cne35ka",
+						"updated": "20251224101800"
+					},
+					"Children": [
+						{
+							"ID": "20251224101749-yq8hy89",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20251224101749-yq8hy89",
+								"updated": "20251224101800"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Set filtering and sorting as needed"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20251224101749-xo73xct",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20251224101749-xo73xct",
+						"updated": "20251224101802"
+					},
+					"Children": [
+						{
+							"ID": "20251224101749-sulkv7q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20251224101749-sulkv7q",
+								"updated": "20251224101802"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Multiple views can be added to the same database; all views share the same data, but filtering and sorting settings are independent of each other"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240208172555-x0jaxkf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240208172555-x0jaxkf",
+				"updated": "20240208172555"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mirror database"
+				}
+			]
+		},
+		{
+			"ID": "20240208172555-0t0kfx3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240208172555-0t0kfx3",
+				"updated": "20240208172556"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Copying and pasting a database block will form a mirror database, that is, these database blocks share the same database data. Modifying the data of any database block will be synchronized to all other mirrors."
+				}
+			]
+		},
+		{
+			"ID": "20240208172555-hv2afdr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240208172555-hv2afdr",
+				"updated": "20250615172312"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Relation and Rollup"
+				}
+			]
+		},
+		{
+			"ID": "20240208172555-la22eum",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240208172555-la22eum",
+				"updated": "20240208172713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The two databases can be connected through "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Relation"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ to facilitate linkage management. For example, the relationship between the two databases "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Authors"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Books"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240208172714-us6azzg",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"id": "20240208172714-us6azzg",
+				"updated": "20240208173234"
+			},
+			"AttributeViewID": "20240208172719-6qv16cr",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20240208172736-zavxwgi",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"custom-sy-av-view": "20250615171046-3ucugf9",
+				"id": "20240208172736-zavxwgi",
+				"updated": "20250615172312"
+			},
+			"AttributeViewID": "20240208172742-57vwxqw",
+			"AttributeViewType": "gallery"
+		},
+		{
+			"ID": "20240208172751-izg8evh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240208172751-izg8evh",
+				"updated": "20240208173355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Author"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ database, the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Works count"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ is summarized and statistics are made on its "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Works"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, and the statistics method is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Count all"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20240208173416-t51ome2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240208173416-t51ome2",
+				"updated": "20250101093657"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Template"
+				}
+			]
+		},
+		{
+			"ID": "20240208173416-hk4z3px",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240208173416-hk4z3px",
+				"updated": "20240208173511"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Templates can access, calculate and render the values of other fields in the same piece of data through the syntax introduced in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Template snippet"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ":"
+				}
+			]
+		},
+		{
+			"ID": "20240208173416-7jev6h7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240208173416-7jev6h7",
+				"updated": "20240208173523"
+			},
+			"Children": [
+				{
+					"ID": "20240208173416-rv4pte3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240208173416-rv4pte3",
+						"updated": "20240208173517"
+					},
+					"Children": [
+						{
+							"ID": "20240208173416-8oq1his",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240208173416-8oq1his",
+								"updated": "20240208173517"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .field }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access view properties"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240208173416-p9ol6f8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240208173416-p9ol6f8",
+						"updated": "20240208173523"
+					},
+					"Children": [
+						{
+							"ID": "20240208173416-c79727p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240208173416-c79727p",
+								"updated": "20240208173523"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index . \u0026quot;custom-xxx\u0026quot; }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access content block custom attributes"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240208173416-r12kam0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240208173416-r12kam0",
+				"updated": "20240208173710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For example, the following "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Bills"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ database "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ field demonstrates the sum of "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Food"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Clothing"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240208173526-0q14afa",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"id": "20240208173526-0q14afa",
+				"updated": "20250101093657"
+			},
+			"AttributeViewID": "20240208173528-oq4elsj",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20240818174922-r0eubvc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240818174922-r0eubvc",
+				"updated": "20250115145238"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240818175612-1oygtbw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818175612-1oygtbw",
+				"updated": "20250115145238"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to wrap a line in a database cell, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ."
+				}
+			]
+		}
+	]
+}

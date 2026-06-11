@@ -1,0 +1,223 @@
+{
+	"ID": "20240530101000-to5uvpi",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-am0hzhl",
+		"id": "20240530101000-to5uvpi",
+		"title": "PDF 注釈",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-iq2axf5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-maq6y7a",
+				"id": "20240530101000-iq2axf5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF にアセットを挿入する"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5rk861g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-mkvf89t",
+				"id": "20240530101000-5rk861g",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタから PDF ファイルをアップロードして挿入すると、PDF は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ フォルダに配置され、ドキュメントに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[ファイル名](assets/ファイル名.pdf)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ という形式のリンクが生成されます。このリンクをクリックすることで PDF のプレビューが可能です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-13mj9sw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-9r3zr62",
+				"id": "20240530101000-13mj9sw",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ハイパーリンクによるページ移動"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-lgcn6ue",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-capzsfj",
+				"id": "20240530101000-lgcn6ue",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新しいタブで PDF のプレビューを開く際に、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "page"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ パラメータを付けることで特定のページを指定できます。たとえば、7 ページ目に移動したい場合はリンクを "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[ファイル名](assets/ファイル名.pdf?page=7)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ のように編集します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-02yxu30",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-3lm9n0v",
+				"id": "20240530101000-02yxu30",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注釈"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-w0bkqq7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-kjy8ml3",
+				"id": "20240530101000-w0bkqq7",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF のプレビュー中に選択範囲して注釈を付けることができ、注釈をドキュメントに貼り付けて参照リンクを作成できます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-edooehv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-cb21qf8",
+				"id": "20240530101000-edooehv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-d21npay",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-u80mf3l",
+						"id": "20240530101000-d21npay",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-um1t7f5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-qv0nbrb",
+								"id": "20240530101000-um1t7f5",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントの参照リンクをクリックすると、PDF が開いて注釈箇所に移動します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-0azyt9t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-1ubfsjc",
+						"id": "20240530101000-0azyt9t",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4a9vr1m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-w2dxr42",
+								"id": "20240530101000-4a9vr1m",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "PDF 注釈にマウスカーソルを合わせると、注釈のブロック参照がプレビューされます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-e5wciqn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-s4opk5m",
+				"id": "20240530101000-e5wciqn"
+			}
+		}
+	]
+}

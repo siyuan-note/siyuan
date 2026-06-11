@@ -1,0 +1,51 @@
+.history {
+  &__action {
+    overflow: auto;
+    border-bottom: 1px solid var(--b3-border-color);
+  }
+
+  &__text {
+    background-color: var(--b3-theme-background);
+    padding: 16px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 0 0 var(--b3-border-radius-b) 0;
+    resize: none;
+    color: var(--b3-theme-on-background);
+  }
+
+  &__repo {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
+  }
+
+  &__date {
+    text-align: center;
+    line-height: 20px;
+    color: var(--b3-theme-on-surface);
+    background: var(--b3-theme-background);
+  }
+
+  &__side {
+    width: 256px;
+    padding: 8px 0;
+    overflow: auto;
+    user-select: none;
+  }
+
+  &__resize {
+    cursor: col-resize;
+    box-shadow: 2px 0 0 0 var(--b3-theme-background) inset, 3px 0 0 0 var(--b3-border-color) inset;
+    width: 5px;
+    margin-left: -2px;
+  }
+
+  &__panel {
+    .protyle-title__input {
+      margin-top: 8px;
+    }
+  }
+}

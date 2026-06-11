@@ -1,0 +1,54 @@
+{
+	"ID": "20211226114339-dk0gtpr",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4c4",
+		"id": "20211226114339-dk0gtpr",
+		"title": "隱私政策和用戶協議",
+		"type": "doc",
+		"updated": "20250620101417"
+	},
+	"Children": [
+		{
+			"ID": "20250620101405-wco6pfv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250620101405-wco6pfv",
+				"updated": "20250620101410"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/privacy.html",
+					"TextMarkTextContent": "隱私政策"
+				}
+			]
+		},
+		{
+			"ID": "20250620101405-zgdv26u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250620101405-zgdv26u",
+				"updated": "20250620101414"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/eula.html",
+					"TextMarkTextContent": "用戶協議"
+				}
+			]
+		},
+		{
+			"ID": "20250620101417-80s65hz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250620101417-80s65hz",
+				"updated": "20250620101417"
+			}
+		}
+	]
+}

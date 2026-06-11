@@ -1,0 +1,157 @@
+{
+	"ID": "20211226123154-fd5e001",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226123154-fd5e001",
+		"title": "日記",
+		"type": "doc",
+		"updated": "20241008201536"
+	},
+	"Children": [
+		{
+			"ID": "20211226123205-0lxrjll",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123205-0lxrjll",
+				"updated": "20241008201536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我們可以通過日記來快速建立文檔，日記功能入口在頂部主菜單中。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123205-aik13in",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123205-aik13in",
+				"updated": "20241008201420"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用日記前，需要在筆記本右鍵菜單中開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ，在新建日記設置中配置："
+				}
+			]
+		},
+		{
+			"ID": "20211226123205-z6iq719",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226123205-z6iq719",
+				"updated": "20211228134943"
+			},
+			"Children": [
+				{
+					"ID": "20211226123205-m33wq5g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123205-m33wq5g",
+						"updated": "20211228134943"
+					},
+					"Children": [
+						{
+							"ID": "20211226123205-7hdzedw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123205-7hdzedw",
+								"updated": "20211228134943"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "存放路徑：筆記本下的路徑，支援"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226123024-eurqp4g",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "範本變量"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226123205-zcokeqs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226123205-zcokeqs",
+						"updated": "20211228104419"
+					},
+					"Children": [
+						{
+							"ID": "20211226123205-3nhpi4n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226123205-3nhpi4n",
+								"updated": "20211228104419"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "範本路徑（可選）：建立日記時使用該範本作為初始內容"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226123205-rg4x2of",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123205-rg4x2of",
+				"updated": "20211228104422"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "小提示：在指定的範本使用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226120508-yzh70eh",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "嵌入內容塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以匯總待辦事項或者需要每日查看的內容塊。"
+				}
+			]
+		},
+		{
+			"ID": "20211226145417-yyd4r3p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226145417-yyd4r3p",
+				"updated": "20211226145417"
+			}
+		}
+	]
+}

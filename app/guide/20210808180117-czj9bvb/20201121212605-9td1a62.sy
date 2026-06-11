@@ -1,0 +1,42 @@
+{
+	"ID": "20201121212605-9td1a62",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f64f",
+		"id": "20201121212605-9td1a62",
+		"title": "致谢",
+		"type": "doc",
+		"updated": "20230821234646"
+	},
+	"Children": [
+		{
+			"ID": "20210924163203-lxaclhb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210924163203-lxaclhb",
+				"updated": "20230821234646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源的诞生离不开众多的开源项目和贡献者，请参考项目源代码 kernel/go.mod、app/package.json 和项目首页。"
+				}
+			]
+		},
+		{
+			"ID": "20230820173510-7yqgjxi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230820173510-7yqgjxi",
+				"updated": "20230820175936"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源的成长离不开用户的反馈和宣传推广，感谢所有人对思源的帮助 ❤"
+				}
+			]
+		}
+	]
+}

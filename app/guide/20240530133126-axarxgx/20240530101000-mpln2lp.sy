@@ -1,0 +1,1044 @@
+{
+	"ID": "20240530101000-mpln2lp",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-ptnuh23",
+		"icon": "1f5c2",
+		"id": "20240530101000-mpln2lp",
+		"title": "用語集",
+		"type": "doc",
+		"updated": "20250115163249"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-jvis6t0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-jq8jkpa",
+				"id": "20240530101000-jvis6t0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-dsq1inp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-0czawoj",
+				"id": "20240530101000-dsq1inp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan では一部に複雑な専門用語が使用されているため、分かりにくい箇所があるかもしれません。本章ではこれらの用語をひとつずつ解説し、SiYuan の理解と活用を深めていただくことを目指します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yhf1b7l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5te4ctj",
+				"id": "20240530101000-yhf1b7l",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: 具体的な機能はデスクトップ版を例に紹介します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-fidycup",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-232agxh",
+				"id": "20240530101000-fidycup",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xrjohag",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-7h710cb",
+				"id": "20240530101000-xrjohag",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "パンくずリスト"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6wzp9bk",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"ID": "20240530101000-2b9mh4i",
+				"id": "20240530101000-6wzp9bk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20240530101000-0fplbka",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"ID": "20240530101000-i4qhols",
+						"id": "20240530101000-0fplbka",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "パンくずリストは、アプリケーションのナビゲーションを補助する要素で、通常ページ上部の水平列に表示されます。ユーザーの現在位置までのパスを示し、ナビゲーション中の便利な手がかりと方向感を提供します。これにより、ユーザーはサイトの構造をより把握しやすくなり、前のページや上位ページへの素早い移動が可能になり、無駄なクリックや迷子になる可能性が減ります。パンくずリストはユーザーエクスペリエンス設計の一部として、アプリケーションの使いやすさと操作性を向上させる役割を果たします。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mwlyp22",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-no1adfs",
+				"id": "20240530101000-mwlyp22",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan でのパンくずリストはエディタ上部に右矢印で繫がれたブロックのパスを指し、ブロック構造内でのナビゲーションに使われます。各階層はブロックアイコンで始まり、アイコンにマウスカーソルを合わせるとフローティングウィンドウでプレビューが開きます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qgxgqf9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-7x1rsjj",
+				"id": "20240530101000-qgxgqf9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アンカーテキスト"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ep8q9yc",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"ID": "20240530101000-8err3nm",
+				"id": "20240530101000-ep8q9yc",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20240530101000-cb9gqhn",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"ID": "20240530101000-m7ss1sf",
+						"id": "20240530101000-cb9gqhn",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "アンカーテキストは、ハイパーリンク内でクリックされるテキスト部分のことを指し、通常は青色で表示されます。アンカーテキストは、ハイパーリンクの URL アドレスと関連付けられており、ユーザーがアンカーテキストをクリックすると、対応する Web ページやファイルに自動的に移動します。アンカーテキストは任意の文字やフレーズを使用できますが、通常はリンク先のコンテンツに関連するもので、一般的には移動先のコンテンツのタイトルが使われます。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-f0sz19e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ue7k9hj",
+				"id": "20240530101000-f0sz19e",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan では通常のハイパーリンク要素に加えて、ブロック参照や PDF 注釈の参照要素にもアンカーテキストの概念を拡張しています。特に、ブロック参照要素のアンカーテキストは、静的アンカーテキストと動的アンカーテキストに分けられます。詳しくは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-k5rp4xa",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "コンテンツブロックのアンカーテキストセクション"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-urpx8am",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-96ap24d",
+				"id": "20240530101000-urpx8am",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編集モード"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-dqt8frl",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-0aqnivs",
+				"id": "20240530101000-dqt8frl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-7gymzrk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-cpu2a40",
+						"id": "20240530101000-7gymzrk",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-70yb26k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-kf88ubq",
+								"id": "20240530101000-70yb26k",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "WYSIWYG"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 通常の編集画面"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-8wr2fkj",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-zd0aw2a",
+								"id": "20240530101000-8wr2fkj",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-fsx8g1o",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-86hi60m",
+										"id": "20240530101000-fsx8g1o",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-i2kryek",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-xh064bx",
+												"id": "20240530101000-i2kryek",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "編集可能: 内容の修正が可能"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-bwap9b1",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-kmjn9yk",
+										"id": "20240530101000-bwap9b1",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-i0q317e",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-prwffq6",
+												"id": "20240530101000-i0q317e",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "読み取り専用: 内容の閲覧のみ可能、修正不可"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-naiag7x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ecr61gc",
+						"id": "20240530101000-naiag7x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-f499abb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-a0ho4rm",
+								"id": "20240530101000-f499abb",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "プレビュー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Markdown に変換後のプレビュー"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-17rtvfz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-95puqko",
+				"id": "20240530101000-17rtvfz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編集モードと読み取りモードの切り替えはエディタ右上の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ メニューから行います。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-s5b0r81",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-5kjhu1a",
+				"id": "20240530101000-s5b0r81",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データリポジトリ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r7jdcms",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-7yi55my",
+				"id": "20240530101000-r7jdcms",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キー"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-hillvxs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-c3oimhp",
+				"id": "20240530101000-hillvxs",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "キーはデータスナップショットの暗号化に使用されます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-gohibke",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "3 種類の生成方法"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "がありますが、通常はパスワードを使用して生成することをお勧めします。同じパスワードは他のデバイスでも同じキーを生成するため、データ同期の初期化が容易に行えます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nrw2esd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-0ile6s4",
+				"id": "20240530101000-nrw2esd",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ローカルスナップショット"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tkpujkm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-yj5dhex",
+				"id": "20240530101000-tkpujkm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ローカルデバイスに保存されているデータスナップショットです。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ptjbd3x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-v1cozc4",
+				"id": "20240530101000-ptjbd3x",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ローカルのタグ付きスナップショット"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-41itaql",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-xbyaini",
+				"id": "20240530101000-41itaql",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動でタグ付けされたローカルスナップショットです。タグ付けの目的は検索を容易にすることにあり、意味のあるタグ名はスナップショットをロールバックする際のヒントになります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-67aciwk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-wo555lc",
+				"id": "20240530101000-67aciwk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドスナップショット"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r46grsh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-uutjkg6",
+				"id": "20240530101000-r46grsh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドストレージに保存されているデータスナップショットです。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rturqxy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-i9ge6g3",
+				"id": "20240530101000-rturqxy",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドのタグ付きスナップショット"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ppikiul",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-zahhtm0",
+				"id": "20240530101000-ppikiul",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドにアップロードされたローカルのタグ付きスナップショットです。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cuzmq47",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-3p714h4",
+				"id": "20240530101000-cuzmq47",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "インターフェース"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-lro6ixm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-qzz0e3u",
+				"id": "20240530101000-lro6ixm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドック"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1ycubqa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bk56nwf",
+				"id": "20240530101000-1ycubqa",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "メインインターフェースの左側、右側、下側にあるバーで、パネルのエントリボタンを配置するために使用されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ssty64i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-e26sr7g",
+				"id": "20240530101000-ssty64i",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "パネル"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7sl1svq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-o6uzq8h",
+				"id": "20240530101000-7sl1svq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントツリー、アウトライン、バックリンクなど、ドックから開かれる機能領域を指します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wn4yzvj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-tvnywd0",
+				"id": "20240530101000-wn4yzvj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wye0icf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-6mb8m13",
+				"id": "20240530101000-wye0icf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブラウザのタブに似ており、タブの種類によって機能が異なります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0zkran0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"ID": "20240530101000-7dv3cdv",
+				"id": "20240530101000-0zkran0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタタブ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-msdw4r8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-vgr5ors",
+				"id": "20240530101000-msdw4r8",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントエディタを読み込むために使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3z9dhh2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"ID": "20240530101000-fm58z1l",
+				"id": "20240530101000-3z9dhh2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF タブ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-402bzze",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-47a6znc",
+				"id": "20240530101000-402bzze",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF を読み込むために使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-leoj76n",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"ID": "20240530101000-ynd8yr6",
+				"id": "20240530101000-leoj76n",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検索タブ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mywe0w2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-pkiiolv",
+				"id": "20240530101000-mywe0w2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検索インターフェースをタブで開いて他のタブと同時に使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-aig5rgo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"ID": "20240530101000-7qfeahc",
+				"id": "20240530101000-aig5rgo",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "復習タブ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-97xnyw6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fbo9bs1",
+				"id": "20240530101000-97xnyw6",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "復習インターフェースをタブで開いて他のタブと同時に使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-uodm275",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-ilqxitl",
+				"id": "20240530101000-uodm275",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ウィンドウ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0ert27u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-gexmcsc",
+				"id": "20240530101000-0ert27u",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ上の右クリックメニューから "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新しいウィンドウに移動"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を選ぶことで、メインインターフェースから独立したウィンドウに変換できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sjijinn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-38efo4p",
+				"id": "20240530101000-sjijinn",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "独立したウィンドウはメニューバーのピンアイコンから最前面配置の切り替えができます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-unjptfm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-zu4jzku",
+				"id": "20240530101000-unjptfm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "レイアウト"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pwg15ok",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-xj16s65",
+				"id": "20240530101000-pwg15ok",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "現在のインターフェースのドック、タブ、パネルの状態がレイアウトを構成し、メインメニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "レイアウト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ から保存と切り替えができます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-b4l3ltr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-n230loy",
+				"id": "20240530101000-b4l3ltr",
+				"updated": "20250115163249"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックアイコン"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-91br7eq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-au8qnky",
+				"id": "20240530101000-91br7eq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックにマウスカーソルを合わせると左側に表示されるアイコンです。パネル (アウトラインパネル、バックリンクパネルなど) に表示されるブロックアイコンにマウスカーソルを合わせると、フローティングウィンドウでプレビューが開かれます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0svfhj0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-0svfhj0",
+				"updated": "20250115163249"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックアイコンにマウスカーソルを合わせると表示されるプレビューに加えて、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クリック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ でタブを開くこともできます。これは、バックリンクパネルからコンテキストに移動する場合に便利です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9mcnl5p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-3m9drx0",
+				"id": "20240530101000-9mcnl5p",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "その他"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yikp9my",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-a3ifxlm",
+				"id": "20240530101000-yikp9my",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サービス"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r6ymde7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-zanjben",
+				"id": "20240530101000-r6ymde7",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan カーネルが提供するサービス機能を利用して"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-40hohog",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ブラウザで使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "できます。"
+				}
+			]
+		}
+	]
+}

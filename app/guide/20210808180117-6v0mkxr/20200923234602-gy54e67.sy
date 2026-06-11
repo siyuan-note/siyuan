@@ -1,0 +1,54 @@
+{
+	"ID": "20200923234602-gy54e67",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4c4",
+		"id": "20200923234602-gy54e67",
+		"title": "Privacy Policy and User Agreement",
+		"type": "doc",
+		"updated": "20250620101418"
+	},
+	"Children": [
+		{
+			"ID": "20250620101219-gb30b4i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250620101219-gb30b4i",
+				"updated": "20250620101347"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/privacy.html",
+					"TextMarkTextContent": "SiYuan Privacy Policy"
+				}
+			]
+		},
+		{
+			"ID": "20250620101348-9k2g0ii",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250620101348-9k2g0ii",
+				"updated": "20250620101354"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/eula.html",
+					"TextMarkTextContent": "User Agreement"
+				}
+			]
+		},
+		{
+			"ID": "20250620101418-78whfgr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250620101418-78whfgr",
+				"updated": "20250620101418"
+			}
+		}
+	]
+}

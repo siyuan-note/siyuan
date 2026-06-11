@@ -1,0 +1,917 @@
+{
+	"ID": "20221223221636-ms2b4w9",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f4f8",
+		"id": "20221223221636-ms2b4w9",
+		"title": "Flashcards",
+		"type": "doc",
+		"updated": "20260426180051"
+	},
+	"Children": [
+		{
+			"ID": "20221223221639-cllnc0l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-cllnc0l",
+				"updated": "20221223221639"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-ii0381j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221223221639-ii0381j",
+				"updated": "20230820185231"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After setting the content block as a flashcard, it will automatically arrange the review through the spaced repetition algorithm FSRS (github repo: open-spaced-repetition/free-spaced-repetition-scheduler)."
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-0ovzqis",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-0ovzqis",
+				"updated": "20221223221639"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-6povnxy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219092249-6povnxy",
+				"updated": "20230219092249"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Content Block"
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-6fpd419",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219092249-6fpd419",
+				"updated": "20230219092249"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before starting the official card making, let us introduce some basic rules of card making:"
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-yzjjb1o",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219092249-yzjjb1o",
+				"updated": "20240326165536"
+			},
+			"Children": [
+				{
+					"ID": "20230219092249-duyx8hb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-duyx8hb",
+						"updated": "20230219092854"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-j18dirv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-j18dirv",
+								"updated": "20230219092854"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "mark"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " elements in content blocks will be treated as knockout answers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092249-xdxmusm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-xdxmusm",
+						"updated": "20231013103949"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-04pxvxk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-04pxvxk",
+								"updated": "20231013103949"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If a super block is set as a flashcard, the first sub-block of the super block will be regarded as a question, and the rest of the sub-blocks will be regarded as an answer"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092249-tq1ea3b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-tq1ea3b",
+						"updated": "20230219092249"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-j50cmev",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-j50cmev",
+								"updated": "20230219092249"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If a list or list item is set as a flashcard, non-sublists will be treated as questions and sublists will be treated as answers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20231013103926-u4hxd38",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20231013103926-u4hxd38",
+						"updated": "20240326165536"
+					},
+					"Children": [
+						{
+							"ID": "20231013103926-o3y1n5a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20231013103926-o3y1n5a",
+								"updated": "20240326165536"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If a heading block is set as a flashcard, the heading block will be treated as a question and the blocks below it will be treated answers"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230324110955-eznqs9u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230324110955-eznqs9u",
+				"updated": "20230328100306"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The above rules can be adjusted in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcard"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-3oeqj8o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219092249-3oeqj8o",
+				"updated": "20260426180051"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Based on doc"
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-9l69wsr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219092249-9l69wsr",
+				"updated": "20230324110951"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The document-based usage method does not need to pay attention to the card deck, and supports parent-child document review."
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-wbyos2h",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219092249-wbyos2h",
+				"updated": "20260426180051"
+			},
+			"Children": [
+				{
+					"ID": "20230219092249-675n7hy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-675n7hy",
+						"updated": "20230219092802"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-u07ihhi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-u07ihhi",
+								"updated": "20230219092802"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Quick make card"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the block icon menu to make a card"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092249-omjyd3g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-omjyd3g",
+						"updated": "20260426180051"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-2wpj6jk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-2wpj6jk",
+								"updated": "20260426180051"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Right-click the doc in the document panel or click the document block icon "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Flashcard"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the editor to enter the review"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-l3b55a9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230219092249-l3b55a9",
+				"updated": "20230219092431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Based on card deck"
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-4f5q0yn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230219092249-4f5q0yn",
+				"updated": "20230219092602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Based on the use of card deck, the content blocks in different documents can be carded and put into a unified card pack for review."
+				}
+			]
+		},
+		{
+			"ID": "20230219092249-adkmzaf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230219092249-adkmzaf",
+				"updated": "20230219092718"
+			},
+			"Children": [
+				{
+					"ID": "20230219092249-w4nnmee",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-w4nnmee",
+						"updated": "20230219092718"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-3h4zeve",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-3h4zeve",
+								"updated": "20230219092718"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Add to card deck..."
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ in the block label menu, and then add the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "content block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to a card deck to complete the card making"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230219092249-cf49472",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230219092249-cf49472",
+						"updated": "20230219092643"
+					},
+					"Children": [
+						{
+							"ID": "20230219092249-gtv3hbr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230219092249-gtv3hbr",
+								"updated": "20230219092643"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Access review by clicking "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Flashcard"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ in the top bar menu"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230324111120-9sfynhi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230324111120-9sfynhi",
+				"updated": "20230324111319"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This mode of use is disabled by default. If necessary, it can be enabled in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcard"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Deck"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. However, it is not recommended to use flashcards based on card deck, because the card deck are fixed and not as flexible as using flashcards based on documents."
+				}
+			]
+		},
+		{
+			"ID": "20240128112003-595bhoa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240128112003-595bhoa",
+				"updated": "20240128112005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Settings"
+				}
+			]
+		},
+		{
+			"ID": "20240128112016-je04b7i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128112016-je04b7i",
+				"updated": "20240224103857"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can adjust the global configuration related to flashcards in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Flashcard"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, including "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New Card Limit"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Old Card Limit"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ can be overridden using document block custom attributes:"
+				}
+			]
+		},
+		{
+			"ID": "20240128112016-aa4ipl9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240128112016-aa4ipl9",
+				"updated": "20240128112016"
+			},
+			"Children": [
+				{
+					"ID": "20240128112016-ta1n5t2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128112016-ta1n5t2",
+						"updated": "20240128112016"
+					},
+					"Children": [
+						{
+							"ID": "20240128112016-jm62abq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128112016-jm62abq",
+								"updated": "20240128112016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "riff-new-card-limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240128112016-3s0opfu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128112016-3s0opfu",
+						"updated": "20240128112016"
+					},
+					"Children": [
+						{
+							"ID": "20240128112016-ozz5ukr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128112016-ozz5ukr",
+								"updated": "20240128112016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "riff-review-card-limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240128112146-85828oq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128112146-85828oq",
+				"updated": "20240128113415"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "image"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/image-20240128113001-pee8l86.png"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240128112208-ulxm0sf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240128112208-ulxm0sf",
+				"updated": "20240128112214"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "They are configured separately on different documents and do not affect each other. For example, if the parent document is configured as 5 and the sub-document is 10, then it will be 5 when reviewing from the parent document, and the configuration of the sub-document will not be superimposed."
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-djlafd4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-djlafd4",
+				"updated": "20230304000717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-ycrps4p",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221639-ycrps4p",
+				"updated": "20240128112834"
+			},
+			"Children": [
+				{
+					"ID": "20221223221639-k6sg60p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-k6sg60p",
+						"updated": "20221223221824"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-sudl568",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-sudl568",
+								"updated": "20221223221824"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After the content block is deleted (or the ID is changed), the corresponding flashcard will become invalid"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240128112355-nzfivrh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240128112355-nzfivrh",
+						"updated": "20240128112834"
+					},
+					"Children": [
+						{
+							"ID": "20240128112355-ie927dm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240128112355-ie927dm",
+								"updated": "20240128112834"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "It is not recommended to enable card decks. This method has been deprecated. If you continue to use it, you may encounter unsolvable problems"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-llefimn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20221223221639-llefimn",
+				"updated": "20221223221804"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Technical implementation"
+				}
+			]
+		},
+		{
+			"ID": "20221223221639-6l0aw8c",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20221223221639-6l0aw8c",
+				"updated": "20221223221949"
+			},
+			"Children": [
+				{
+					"ID": "20221223221639-4e7uw7m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-4e7uw7m",
+						"updated": "20221223221940"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-y3f8vtv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-y3f8vtv",
+								"updated": "20221223221940"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The card deck data is stored in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/storage/riff/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ folder through the MessagePack serialization protocol"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20221223221639-tplv5uh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20221223221639-tplv5uh",
+						"updated": "20221223221949"
+					},
+					"Children": [
+						{
+							"ID": "20221223221639-cfvh72w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20221223221639-cfvh72w",
+								"updated": "20221223221949"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Load all card deck data to the memory at startup, and reload once after the data is downloaded synchronously"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,265 @@
+{
+	"ID": "20210505164949-c085p1d",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210505164949-c085p1d",
+		"title": "Web Clipping",
+		"type": "doc",
+		"updated": "20230621111806"
+	},
+	"Children": [
+		{
+			"ID": "20210505165011-7ovy57s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210505165011-7ovy57s"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210505165011-6extglt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210505165011-6extglt",
+				"updated": "20210505165028"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "\"Web Clipping\" refers to copying the content on the Web page to SiYuan, and keeping its original format as much as possible."
+				}
+			]
+		},
+		{
+			"ID": "20210505165011-h715v6a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210505165011-h715v6a"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20210505165011-7ik6g6y",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210505165011-7ik6g6y",
+				"updated": "20230621111806"
+			},
+			"Children": [
+				{
+					"ID": "20210505165011-jccqwcs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210505165011-jccqwcs"
+					},
+					"Children": [
+						{
+							"ID": "20210505165011-2u488l9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210505165011-2u488l9",
+								"updated": "20210505165046"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If you do not need to pull the pictures contained in the clipped content to the local, you can directly select copy in the browser, and then paste it in SiYuan"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210505165011-h6wqx9o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210505165011-h6wqx9o",
+						"updated": "20230621111806"
+					},
+					"Children": [
+						{
+							"ID": "20210505165011-crzzegk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210505165011-crzzegk",
+								"updated": "20230621111806"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If you need to pull the pictures contained in the clipped content to the local, you can use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/article/1692529862454",
+									"TextMarkTextContent": "SiYuan Chrome Extension"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210531181045-0x2syfg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210531181045-0x2syfg",
+				"updated": "20210531181057"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan Chrome Extension"
+				}
+			]
+		},
+		{
+			"ID": "20210820171625-1k4iq6x",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20210820171625-1k4iq6x",
+				"updated": "20210820171820"
+			},
+			"Children": [
+				{
+					"ID": "20210820171625-vjo1bcb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210820171625-vjo1bcb",
+						"updated": "20210820171820"
+					},
+					"Children": [
+						{
+							"ID": "20210820171625-cerwawc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210820171625-cerwawc",
+								"updated": "20210820171820"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Install the extension, configure the API token in the extended options (token can be viewed in SiYuan Settings - About)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210820171625-0cvfa1x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210820171625-0cvfa1x"
+					},
+					"Children": [
+						{
+							"ID": "20210820171625-3e12m8o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210820171625-3e12m8o"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select the content to be clipped on the web page, and then select \"Copy to SiYuan\" from the right-click menu"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210820171625-bqu13fj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20210820171625-bqu13fj",
+						"updated": "20210820171638"
+					},
+					"Children": [
+						{
+							"ID": "20210820171625-8d8as7l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210820171625-8d8as7l",
+								"updated": "20210820171638"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Paste in SiYuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211019235143-bsm6wqx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211019235143-bsm6wqx",
+				"updated": "20211019235241"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to clip the entire article, you can click \"Send to SiYuan\" directly on the extension."
+				}
+			]
+		}
+	]
+}

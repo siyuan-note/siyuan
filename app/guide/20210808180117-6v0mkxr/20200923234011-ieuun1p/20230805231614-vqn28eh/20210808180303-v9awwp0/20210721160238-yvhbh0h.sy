@@ -1,0 +1,367 @@
+{
+	"ID": "20210721160238-yvhbh0h",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210721160238-yvhbh0h",
+		"title": "Assets hosting",
+		"type": "doc",
+		"updated": "20250115151337"
+	},
+	"Children": [
+		{
+			"ID": "20210721160254-thunmzr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721160254-thunmzr",
+				"updated": "20220708103429"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan provides cloud assets hosting, which is mainly used to copy documents and asset files to platforms such as WeChat MP, Zhihu and Yuque. The editors of these platforms will automatically pull resource files to their platforms when pasting."
+				}
+			]
+		},
+		{
+			"ID": "20210721160254-4t8mham",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721160254-4t8mham",
+				"updated": "20250115151337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20210721160254-2ssi3ws",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20210721160254-2ssi3ws",
+				"updated": "20250115151337"
+			},
+			"Children": [
+				{
+					"ID": "20210721160254-kqzcayi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20210721160254-kqzcayi",
+						"updated": "20250115151337"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-ynqg7sy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-ynqg7sy",
+								"updated": "20250115151337"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the upper right corner of the document, select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the More menu and select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Upload asset files to cloud"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721160254-hrltn03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20210721160254-hrltn03",
+						"updated": "20210721160432"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-v4468pn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-v4468pn",
+								"updated": "20210721160432"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Export Preview"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Toogle Mode"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721160254-p8h304m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20210721160254-p8h304m",
+						"updated": "20210721160517"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-5a7y91o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-5a7y91o",
+								"updated": "20210721160517"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Copy to Wechat MP"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Copy to Zhihu"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Copy to Yuque"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721160254-uf874va",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20210721160254-uf874va"
+					},
+					"Children": [
+						{
+							"ID": "20210721160254-w1cr40w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721160254-w1cr40w"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Paste into the target platform editor"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220407085720-uruuriu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220407085720-uruuriu",
+				"updated": "20230621111510"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to delete the files in the "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " hosting, please go to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://liuyun.io/settings/file?type=3",
+					"TextMarkTextContent": "LiuYun - Settings - File - Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to operate. After deletion, the "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "cloud"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "storage"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " space occupied by the file will be released immediately, but the CDN cache cleaning may not take effect in time, which will cause the file URL to remain accessible until the CDN cache expires automatically after 30 days."
+				}
+			]
+		},
+		{
+			"ID": "20210721160254-s3pqp62",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721160254-s3pqp62",
+				"updated": "20211127233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20211127232925-9w2c55m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211127232925-9w2c55m",
+				"updated": "20211127233055"
+			},
+			"Children": [
+				{
+					"ID": "20211127232925-5wk0g8k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211127232925-5wk0g8k",
+						"updated": "20211127233016"
+					},
+					"Children": [
+						{
+							"ID": "20211127232925-v3v5uup",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211127232925-v3v5uup",
+								"updated": "20211127233016"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Please do not directly use the external link address provided by cloud assets on other platforms. This address is unstable and may affect the availability due to the domain name change"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211127232925-f6or56l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211127232925-f6or56l",
+						"updated": "20211127233055"
+					},
+					"Children": [
+						{
+							"ID": "20211127232925-smtbm06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211127232925-smtbm06",
+								"updated": "20211127233055"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Please do not upload illegal or sensitive files. The uploaded files will be reviewed through services provided by third parties (pornography, violent terrorism, sensitive people, etc.). If a user is found to upload illegal files, the user account will be permanently banned, and the corresponding legal responsibility will be assumed"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,153 @@
+{
+	"ID": "20211226123101-qjw03ab",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226123101-qjw03ab",
+		"title": "小工具",
+		"type": "doc",
+		"updated": "20230820184228"
+	},
+	"Children": [
+		{
+			"ID": "20211226123118-0v3r4kb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123118-0v3r4kb",
+				"updated": "20211226005327"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20211226123118-jglr3dm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123118-jglr3dm",
+				"updated": "20211228141612"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "小工具是思源Kernel伺服的靜態網頁，它通過 API 存取資料，通過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 進行渲染展現。"
+				}
+			]
+		},
+		{
+			"ID": "20230512195228-movvk6h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512195228-movvk6h",
+				"updated": "20230512195243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "相較於"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230506211210-1roopyo",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "插件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "而言，小工具是一種內容塊，遵循塊的索引和渲染規則，小工具主要面向內容塊擴展，不面向程序功能擴展。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123118-fqy6ibk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123118-fqy6ibk",
+				"updated": "20211226005327"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20211226123118-4dtjsok",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123118-4dtjsok",
+				"updated": "20230506210742"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "小工具通過小工具集市安裝，安裝後小工具將被放置到 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/widgets/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 文件夾下。在編輯器中使用斜桿菜單觸發調用搜索，選擇需要的小工具後就會以小工具塊的形式插入到文檔中。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123118-9luabq8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226123118-9luabq8",
+				"updated": "20221114173622"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架社區集市"
+				}
+			]
+		},
+		{
+			"ID": "20221114173603-zms87ks",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221114173603-zms87ks",
+				"updated": "20230820184228"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請參考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社區集市倉庫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

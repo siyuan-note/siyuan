@@ -1,0 +1,491 @@
+{
+	"ID": "20240517031028-xqinazo",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240517031028-xqinazo",
+		"title": "发布服务",
+		"type": "doc",
+		"updated": "20260426175433"
+	},
+	"Children": [
+		{
+			"ID": "20260315160139-f7uwjbl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260315160139-f7uwjbl",
+				"updated": "20260315160022"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260315160139-lntfcpb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260315160139-lntfcpb",
+				"updated": "20260315160022"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源笔记支持以只读模式在局域网中发布当前工作空间的内容。"
+				}
+			]
+		},
+		{
+			"ID": "20260315160139-adeko8a",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260315160139-adeko8a",
+				"updated": "20260426175433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20260315160139-at1ed35",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260315160139-at1ed35",
+				"updated": "20260426175433"
+			},
+			"Children": [
+				{
+					"ID": "20260315160139-wx28byy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160139-wx28byy",
+						"updated": "20260315160022"
+					},
+					"Children": [
+						{
+							"ID": "20260315160139-u2qtl1j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160139-u2qtl1j",
+								"updated": "20260315160022"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "打开 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "发布"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 进入发布服务的设置面板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160139-b1xi49d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160139-b1xi49d",
+						"updated": "20260315160022"
+					},
+					"Children": [
+						{
+							"ID": "20260315160139-m3hulv3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160139-m3hulv3",
+								"updated": "20260315160022"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "设置 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "服务端口号"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20260315160139-s6g9em2",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260315160139-s6g9em2",
+								"updated": "20260315160022"
+							},
+							"Children": [
+								{
+									"ID": "20260315160139-mrop3l5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260315160139-mrop3l5",
+										"updated": "20260315160022"
+									},
+									"Children": [
+										{
+											"ID": "20260315160139-qvpt75f",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260315160139-qvpt75f",
+												"updated": "20260315160022"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "默认的端口号为 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "6808"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260315160139-cp8674z",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260315160139-cp8674z",
+										"updated": "20260315160022"
+									},
+									"Children": [
+										{
+											"ID": "20260315160139-gv6ww6w",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260315160139-gv6ww6w",
+												"updated": "20260315160022"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "若端口号设置为 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 将使用随机端口"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160139-bh5jcvr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160139-bh5jcvr",
+						"updated": "20260315160022"
+					},
+					"Children": [
+						{
+							"ID": "20260315160139-l7mnitj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160139-l7mnitj",
+								"updated": "20260315160022"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "开启 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "发布服务"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 开关"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260315160139-f15jf3z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160139-f15jf3z",
+						"updated": "20260426175433"
+					},
+					"Children": [
+						{
+							"ID": "20260315160139-3z9v2te",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160139-3z9v2te",
+								"updated": "20260315160022"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "若需要对发布服务进行访问控制"
+								}
+							]
+						},
+						{
+							"ID": "20260315160139-218sjzk",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260315160139-218sjzk",
+								"updated": "20260426175433"
+							},
+							"Children": [
+								{
+									"ID": "20260315160139-vopqsrs",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260315160139-vopqsrs",
+										"updated": "20260317200616"
+									},
+									"Children": [
+										{
+											"ID": "20260315160139-1fy74tq",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260315160139-1fy74tq",
+												"updated": "20260317200616"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "开启 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "服务 Basic 认证"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 开关并添加 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "认证账户"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​：将使用 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/Authentication#basic_%E9%AA%8C%E8%AF%81%E6%96%B9%E6%A1%88",
+													"TextMarkTextContent": "Basic 验证方案"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "对访问者进行认证。访问者在浏览发布内容前必须正确输入 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "认证账户"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 中设置的用户名与密码"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260315160139-izelxt7",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260315160139-izelxt7",
+										"updated": "20260426175433"
+									},
+									"Children": [
+										{
+											"ID": "20260315160139-12doctk",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260315160139-12doctk",
+												"updated": "20260426175433"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "打开 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "文档面板"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "更多"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "发布访问控制"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​，点击笔记本或文档前的图标配置笔记本或文档级别的访问控制"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260315160139-tx9ddyn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260315160139-tx9ddyn",
+				"updated": "20260315160022"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20260315160139-ey0hoeh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260315160139-ey0hoeh",
+				"updated": "20260315160022"
+			},
+			"Children": [
+				{
+					"ID": "20260315160139-nybcanh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260315160139-nybcanh",
+						"updated": "20260315160022"
+					},
+					"Children": [
+						{
+							"ID": "20260315160139-kg8j82g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260315160139-kg8j82g",
+								"updated": "20260315160022"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "开启发布服务后，访问者默认可以获取整个工作空间的内容，请确保工作空间中不包含敏感信息"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,242 @@
+/// #if !MOBILE
+import {getDockByType} from "./tabUtil";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {fetchPost} from "../util/fetch";
+import {mountHelp} from "../util/mount";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
+/// #endif
+import {MenuItem} from "../menus/Menu";
+import {Constants} from "../constants";
+import {toggleDockBar} from "./dock/util";
+import {isIPad, updateHotkeyTip} from "../protyle/util/compatibility";
+
+export const initStatus = (isWindow = false) => {
+    /// #if !MOBILE
+    let barDockHTML = "";
+    if (!isWindow) {
+        barDockHTML = `<div id="barDock" class="toolbar__item ariaLabel${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.languages.toggleDock} ${updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom)}">
+    <svg>
+        <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
+    </svg>
+</div>`;
+    }
+    document.getElementById("status").innerHTML = `${barDockHTML}
+<div class="status__msg"></div>
+<div class="fn__flex-1"></div>
+<div class="status__backgroundtask fn__none"></div>
+<div class="status__counter"></div>
+<div id="statusHelp" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.help}">
+    <svg><use xlink:href="#iconHelp"></use></svg>
+</div>`;
+    document.querySelector("#status").addEventListener("click", (event) => {
+        let target = event.target as HTMLElement;
+        while (target.id !== "status") {
+            if (target.id === "barDock") {
+                toggleDockBar(target.firstElementChild.firstElementChild);
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("status__backgroundtask")) {
+                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_STATUS_BACKGROUND_TASK) {
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
+                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_BACKGROUND_TASK);
+                JSON.parse(target.getAttribute("data-tasks")).forEach((item: { action: string }) => {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        type: "readonly",
+                        iconHTML: "",
+                        label: item.action
+                    }).element);
+                });
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.top, isLeft: true});
+                event.stopPropagation();
+                break;
+            } else if (target.id === "statusHelp") {
+                if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_STATUS_HELP) {
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
+                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_HELP);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.userGuide,
+                    icon: "iconHelp",
+                    ignore: isIPad() || window.siyuan.config.readonly,
+                    click: () => {
+                        mountHelp();
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.feedback,
+                    icon: "iconFeedback",
+                    click: () => {
+                        if ("zh_CN" === window.siyuan.config.lang || "zh_CHT" === window.siyuan.config.lang) {
+                            window.open("https://ld246.com/article/1649901726096");
+                        } else {
+                            window.open("https://liuyun.io/article/1686530886208");
+                        }
+                    }
+                }).element);
+                /// #if !BROWSER
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages.debug,
+                    icon: "iconBug",
+                    click: () => {
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "openDevTools");
+                    }
+                }).element);
+                /// #endif
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages["_trayMenu"].officialWebsite,
+                    icon: "iconSiYuan",
+                    click: () => {
+                        window.open("https://b3log.org/siyuan");
+                    }
+                }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    label: window.siyuan.languages["_trayMenu"].openSource,
+                    icon: "iconGithub",
+                    click: () => {
+                        window.open("https://github.com/siyuan-note/siyuan");
+                    }
+                }).element);
+                const rect = target.getBoundingClientRect();
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.top, isLeft: true});
+                event.stopPropagation();
+                break;
+            } else if (target.classList.contains("b3-menu__item")) {
+                const type = target.getAttribute("data-type");
+                getDockByType(type).toggleModel(type);
+                if (type === "file" && getSelection().rangeCount > 0) {
+                    const range = getSelection().getRangeAt(0);
+                    const wysiwygElement = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
+                    if (wysiwygElement) {
+                        wysiwygElement.blur();
+                    }
+                }
+                target.parentElement.classList.add("fn__none");
+                event.stopPropagation();
+                break;
+            }
+            target = target.parentElement;
+        }
+    });
+    if (window.siyuan.config.appearance.hideStatusBar) {
+        document.getElementById("status").classList.add("fn__none");
+    }
+    /// #endif
+};
+
+let countTimeout: number;
+let countAbortController: AbortController | null = null;
+let lastRootId: string;
+
+const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) => {
+    clearTimeout(countTimeout);
+    countTimeout = window.setTimeout(() => {
+        if (countAbortController) {
+            countAbortController.abort();
+            countAbortController = null;
+        }
+        countAbortController = new AbortController();
+        const signal = countAbortController.signal;
+        const capturedController = countAbortController;
+
+        const onFetched = (response: IWebSocketData) => {
+            if (signal.aborted) {
+                return;
+            }
+            renderStatusbarCounter(response.data.stat);
+            if (countAbortController === capturedController) {
+                countAbortController = null;
+            }
+        };
+
+        if (content) {
+            fetchPost("/api/block/getContentWordCount", {content}, onFetched, undefined, undefined, signal);
+            lastRootId = null;
+        } else if (ids && ids.length > 0) {
+            fetchPost("/api/block/getBlocksWordCount", {ids}, onFetched, undefined, undefined, signal);
+            lastRootId = null;
+        } else if (rootID && lastRootId !== rootID) {
+            lastRootId = rootID;
+            fetchPost("/api/block/getTreeStat", {id: rootID}, onFetched, undefined, undefined, signal);
+        } else {
+            lastRootId = null;
+        }
+    }, Constants.TIMEOUT_COUNT);
+};
+
+export const countSelectWord = (range: Range, rootID?: string) => {
+    /// #if !MOBILE
+    if (document.getElementById("status").classList.contains("fn__none")) {
+        return;
+    }
+    scheduleStatusStat(rootID, range.toString());
+    /// #endif
+};
+
+export const countBlockWord = (ids: string[], rootID?: string, clearCache = false) => {
+    /// #if !MOBILE
+    if (document.getElementById("status").classList.contains("fn__none")) {
+        return;
+    }
+    if (clearCache) {
+        lastRootId = null;
+    }
+    if (ids.length > 0) {
+        scheduleStatusStat(rootID, undefined, ids);
+        return;
+    }
+    const selectText = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0).toString() : "";
+    if (selectText) {
+        scheduleStatusStat(rootID, selectText);
+        return;
+    }
+    scheduleStatusStat(rootID);
+    /// #endif
+};
+
+export const clearCounter = () => {
+    lastRootId = null;
+    clearTimeout(countTimeout);
+    if (countAbortController) {
+        countAbortController.abort();
+        countAbortController = null;
+    }
+    document.querySelector("#status .status__counter").innerHTML = "";
+};
+
+export const renderStatusbarCounter = (stat: {
+    runeCount: number,
+    wordCount: number,
+    linkCount: number,
+    imageCount: number,
+    refCount: number,
+    blockCount: number,
+}) => {
+    if (!stat) {
+        return;
+    }
+    let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
+<span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`;
+    if (0 < stat.linkCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.linkCount}</span>&nbsp;${stat.linkCount}<span class="fn__space"></span>`;
+    }
+    if (0 < stat.imageCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.imgCount}</span>&nbsp;${stat.imageCount}<span class="fn__space"></span>`;
+    }
+    if (0 < stat.refCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.refCount}</span>&nbsp;${stat.refCount}<span class="fn__space"></span>`;
+    }
+    if (0 < stat.blockCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.blockCount}</span>&nbsp;${stat.blockCount}<span class="fn__space"></span>`;
+    }
+    document.querySelector("#status .status__counter").innerHTML = html;
+};

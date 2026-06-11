@@ -1,0 +1,335 @@
+{
+	"ID": "20220105101227-n5zpr1a",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220105101227-n5zpr1a",
+		"title": "Limitations",
+		"type": "doc",
+		"updated": "20241010011042"
+	},
+	"Children": [
+		{
+			"ID": "20220105101254-dhwb8a1",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220105101254-dhwb8a1",
+				"updated": "20241010011042"
+			},
+			"Children": [
+				{
+					"ID": "20220105101254-jmyydpw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-jmyydpw",
+						"updated": "20220722230453"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-gm1ctyf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-gm1ctyf",
+								"updated": "20220722230453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Supports saving up to 12 data snapshots"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101254-hqgvkpw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-hqgvkpw",
+						"updated": "20220105101254"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-9uc9ujk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-9uc9ujk",
+								"updated": "20220105101254"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Supports the creation of up to 7 cloud synchronization directories"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101254-7efd0tf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-7efd0tf",
+						"updated": "20220105101254"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-2pos3yt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-2pos3yt",
+								"updated": "20220105101254"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The initial total size of cloud storage space is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8G"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241010010954-pclixbt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241010010954-pclixbt",
+						"updated": "20241010011042"
+					},
+					"Children": [
+						{
+							"ID": "20241010010955-t8t3map",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241010010955-t8t3map",
+								"updated": "20241010010955"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Data snapshots in cloud storage are retained for up to 30 days, that is, unreferenced snapshots older than 30 days will be automatically cleaned up"
+								}
+							]
+						},
+						{
+							"ID": "20241010010955-9lsrcx5",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241010010955-9lsrcx5",
+								"updated": "20241010011042"
+							},
+							"Children": [
+								{
+									"ID": "20241010010955-ztvcl95",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010955-ztvcl95",
+										"updated": "20241010010955"
+									},
+									"Children": [
+										{
+											"ID": "20241010010955-gju74g2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010955-gju74g2",
+												"updated": "20241010010955"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "The latest snapshot after each data synchronization will not be cleaned up"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010955-3tlm4gr",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010955-3tlm4gr",
+										"updated": "20241010011042"
+									},
+									"Children": [
+										{
+											"ID": "20241010010955-xaxm8k4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010955-xaxm8k4",
+												"updated": "20241010011042"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Snapshots manually tagged for backup and uploaded to the cloud will not be cleaned up"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010955-zi1t1um",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010955-zi1t1um",
+										"updated": "20241010010955"
+									},
+									"Children": [
+										{
+											"ID": "20241010010955-vt9tf3b",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010955-vt9tf3b",
+												"updated": "20241010010955"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Snapshots within 30 days will not be cleaned up"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101254-fvel6pz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101254-fvel6pz",
+						"updated": "20230526091044"
+					},
+					"Children": [
+						{
+							"ID": "20220105101254-523epu0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101254-523epu0",
+								"updated": "20220325115334"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After the paid subscription expires, the cloud storage will be completely deleted"
+								}
+							]
+						},
+						{
+							"ID": "20230526091044-hit1355",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230526091044-hit1355",
+								"updated": "20230526091044"
+							},
+							"Children": [
+								{
+									"ID": "20230526091044-cw80vzc",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230526091044-cw80vzc",
+										"updated": "20230526091044"
+									},
+									"Children": [
+										{
+											"ID": "20230526091044-sucdt8y",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230526091044-sucdt8y",
+												"updated": "20230526091044"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "From 15 days before the expiration, the expiration reminder will pop up every time you open the software, and the reminder will stop after 2 days of expiration"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230526091044-711agmy",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230526091044-711agmy",
+										"updated": "20230526091133"
+									},
+									"Children": [
+										{
+											"ID": "20230526091044-p3wzf5n",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230526091044-p3wzf5n",
+												"updated": "20230526091133"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Deleting cloud storage does not affect local data"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

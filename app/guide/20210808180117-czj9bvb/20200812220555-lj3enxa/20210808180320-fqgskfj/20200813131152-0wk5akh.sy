@@ -1,0 +1,509 @@
+{
+	"ID": "20200813131152-0wk5akh",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200813131152-0wk5akh",
+		"title": "在内容块中遨游",
+		"type": "doc",
+		"updated": "20250115164127"
+	},
+	"Children": [
+		{
+			"ID": "20210104090757-ig8gk5o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090757-ig8gk5o"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "链接"
+				}
+			]
+		},
+		{
+			"ID": "20210104090757-ajr6umn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090757-ajr6umn"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档内容中的链接分为两种："
+				}
+			]
+		},
+		{
+			"ID": "20210104090757-w6to47w",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090757-w6to47w",
+				"updated": "20221105215950"
+			},
+			"Children": [
+				{
+					"ID": "20210104090757-27h302w",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090757-27h302w"
+					},
+					"Children": [
+						{
+							"ID": "20210205172718-c7l1vxg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210205172718-c7l1vxg",
+								"updated": "20210428224645"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "标准 URL 超链接，使用浏览器打开，用于互联网资源访问"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090757-z6d1fdd",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090757-z6d1fdd",
+						"updated": "20221105215950"
+					},
+					"Children": [
+						{
+							"ID": "20210205172718-uuj8gsc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210205172718-uuj8gsc",
+								"updated": "20221105215950"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通过"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200813013559-sgbzl5k",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "建立的内容块链接，用于在思源内部进行双链"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210428224949-wtjqkhb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210428224949-wtjqkhb",
+				"updated": "20210428224956"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "缩放聚焦"
+				}
+			]
+		},
+		{
+			"ID": "20210428224957-oo7psl0",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210428224957-oo7psl0",
+				"updated": "20220312233009"
+			},
+			"Children": [
+				{
+					"ID": "20210428225914-90sbntd",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210428225914-90sbntd",
+						"updated": "20220312233009"
+					},
+					"Children": [
+						{
+							"ID": "20210428225914-t100jk1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428225914-t100jk1",
+								"updated": "20220312233009"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在块标上右键下拉菜单中选择聚焦后，编辑器会聚焦到该内容块上"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210428225915-c8p6fu0",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210428225915-c8p6fu0"
+					},
+					"Children": [
+						{
+							"ID": "20210428225915-fkvjyrr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210428225915-fkvjyrr",
+								"updated": "20210428225925"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通过编辑器顶部的面包屑导航能够在上下文中进行跳转"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090757-xwom8ia",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090757-xwom8ia",
+				"updated": "20250115164127"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "关系图"
+				}
+			]
+		},
+		{
+			"ID": "20200813132813-66ai5qn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20200813132813-66ai5qn",
+				"updated": "20210428225419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "关系图分为文档级和全局。文档的关系图是以当前文档块展开，并呈现所有和该文档有关联的（正向链接和反向链接）内容块；全局关系图是所有笔记本中所有的块和链接关系。"
+				}
+			]
+		},
+		{
+			"ID": "20210428225151-3kj13k3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210428225151-3kj13k3",
+				"updated": "20250115164127"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 单击节点：跳转到该节点。"
+				}
+			]
+		},
+		{
+			"ID": "20200920194146-psjundj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200920194146-psjundj"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "反向链接"
+				}
+			]
+		},
+		{
+			"ID": "20210106201752-1nedfs6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210106201752-1nedfs6"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "反向链接是文档级的，列出当前文档中内容块被引用和被提及所在的块。"
+				}
+			]
+		},
+		{
+			"ID": "20210106201308-l8nlq6w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210106201308-l8nlq6w"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "链接"
+				}
+			]
+		},
+		{
+			"ID": "20210104090757-g5onw59",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090757-g5onw59",
+				"updated": "20210908144139"
+			},
+			"Children": [
+				{
+					"ID": "20210104090757-pb550rg",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090757-pb550rg",
+						"updated": "20210908144139"
+					},
+					"Children": [
+						{
+							"ID": "20210205172718-90wokcr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210205172718-90wokcr",
+								"updated": "20210908144139"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "鼠标悬浮块引用前面的标识会弹出预览浮窗"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090757-91fwrlj",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090757-91fwrlj",
+						"updated": "20210908144057"
+					},
+					"Children": [
+						{
+							"ID": "20210205172718-s191x9n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210205172718-s191x9n",
+								"updated": "20210908144057"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "单击反链列表中的块引用进行跳转"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210106201736-oyu11fw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20210106201736-oyu11fw"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "### "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "提及"
+				}
+			]
+		},
+		{
+			"ID": "20210106201743-z1iz0ce",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210106201743-z1iz0ce",
+				"updated": "20221026221118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提及使用当前文档中内容块命名、别名、引用锚文本和文档名作为关键字进行搜索（可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反链提及"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中设置搜索范围），搜索结果为包含这些关键字的内容块。"
+				}
+			]
+		},
+		{
+			"ID": "20221026221105-dyj8l8n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221026221105-dyj8l8n",
+				"updated": "20221026222004"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​：提及搜索仅会在普通文本中搜索，不会在粗体、斜体等行级元素和代码块、图表等块级元素中搜索，这一点和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211010211708-0qn8cpl",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "虚拟引用探测规则"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "是相同的。"
+				}
+			]
+		}
+	]
+}

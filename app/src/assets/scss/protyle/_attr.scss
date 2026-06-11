@@ -1,0 +1,68 @@
+.protyle-attr {
+  display: flex;
+  position: absolute;
+  right: 0;
+  top: -12px;
+  opacity: 0;
+  font-size: 12px;
+  font-weight: normal;
+  align-items: center;
+  line-height: 16px;
+  // 会导致 https://github.com/siyuan-note/siyuan/issues/16829 先移除 user-select: none;
+
+  &--av span:hover {
+    color: var(--b3-protyle-inline-blockref-color);
+  }
+
+  & > div.protyle-attr--bookmark {
+    flex: 1;
+  }
+
+  & > div:not(.protyle-attr--refcount) {
+    margin: 0 4px;
+    line-height: 16px;
+    color: var(--b3-theme-on-surface);
+    min-width: 12px;
+
+    &.protyle-attr--memo svg {
+      margin-right: 0;
+    }
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+    }
+
+    svg {
+      height: 12px;
+      width: 12px;
+      margin: 2px 2px 2px 0;
+      float: left;
+    }
+  }
+
+  &--refcount {
+    right: -16px;
+    top: 12px; // https://github.com/siyuan-note/siyuan/issues/8784
+    position: absolute;
+    line-height: 16px;
+    padding: 0 4px;
+    color: var(--b3-theme-on-surface);
+    border-radius: var(--b3-border-radius);
+    font-size: 12px;
+    user-select: none;
+    cursor: pointer;
+    height: 16px;
+    background-color: var(--b3-theme-surface);
+    z-index: 1; // 防止被 protyle-scroll 遮挡
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+      background-color: var(--b3-theme-surface-lighter);
+    }
+  }
+
+  &:empty {
+    display: none;
+  }
+}

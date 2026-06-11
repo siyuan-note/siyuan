@@ -1,0 +1,53 @@
+{
+	"ID": "20240530101000-znj103k",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-i852kt2",
+		"icon": "1f64f",
+		"id": "20240530101000-znj103k",
+		"title": "感謝の言葉",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-tgqo8nb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-y6zwbsy",
+				"id": "20240530101000-tgqo8nb",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は、多くのオープンソースプロジェクトと貢献者の方々のご協力なしには誕生しませんでした。興味があれば、ソースコードにある kernel/go.mod と app/package.json、そしてプロジェクトのホームページをご覧ください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-l01i29e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ps5atxx",
+				"id": "20240530101000-l01i29e",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "そして SiYuan ここまで成長できたのは、ユーザーの皆さんのフィードバックと宣伝のおかげです。本当にありがとう❤️"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-jmqfdgy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-7ws8nmo",
+				"id": "20240530101000-jmqfdgy"
+			}
+		}
+	]
+}

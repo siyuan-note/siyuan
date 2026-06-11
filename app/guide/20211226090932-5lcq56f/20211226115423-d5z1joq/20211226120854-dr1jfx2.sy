@@ -1,0 +1,208 @@
+{
+	"ID": "20211226120854-dr1jfx2",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f371",
+		"id": "20211226120854-dr1jfx2",
+		"title": "編輯器",
+		"type": "doc",
+		"updated": "20240508002750"
+	},
+	"Children": [
+		{
+			"ID": "20211226120929-w3xe2c2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226120929-w3xe2c2",
+				"updated": "20211228134934"
+			},
+			"Children": [
+				{
+					"ID": "20211226120929-btprmx1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120929-btprmx1"
+					},
+					"Children": [
+						{
+							"ID": "20211226120929-cgh5ydf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120929-cgh5ydf"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "基於內容塊的編輯排版"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120929-6aoskrv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120929-6aoskrv",
+						"updated": "20211228134934"
+					},
+					"Children": [
+						{
+							"ID": "20211226120929-t7gyqbj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120929-t7gyqbj",
+								"updated": "20211228134934"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列表大綱，支援帶或不帶子層級縮進"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120929-ix7bsgq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120929-ix7bsgq"
+					},
+					"Children": [
+						{
+							"ID": "20211226120929-j8rvpt2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120929-j8rvpt2"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "內容塊縮放，即每個內容塊都可以放大進入聚焦"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120929-orei0b9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120929-orei0b9"
+					},
+					"Children": [
+						{
+							"ID": "20211226120929-x0hrp4q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120929-x0hrp4q"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "動態加載，解決大文檔卡頓"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226120929-ge34t9q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226120929-ge34t9q"
+					},
+					"Children": [
+						{
+							"ID": "20211226120929-f00kf3z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226120929-f00kf3z"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過拖拽塊標進行橫向排版"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240508002750-y6o1hwr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002750-y6o1hwr",
+				"updated": "20240508002750"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226121319-emrk2yy",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "排版元素"
+				}
+			]
+		},
+		{
+			"ID": "20240508002750-etdih28",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002750-etdih28",
+				"updated": "20240508002750"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220628204420-ui79vkt",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "最佳化排版"
+				}
+			]
+		},
+		{
+			"ID": "20240508002750-46n6fhm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508002750-46n6fhm",
+				"updated": "20240508002750"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20221016213639-1nag9jj",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "通過標題列表概述"
+				}
+			]
+		}
+	]
+}

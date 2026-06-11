@@ -1,0 +1,327 @@
+{
+	"ID": "20230303235619-ex5l63e",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230303235619-ex5l63e",
+		"title": "人工智能",
+		"type": "doc",
+		"updated": "20250115153728"
+	},
+	"Children": [
+		{
+			"ID": "20230303235619-xwwiur1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230303235619-xwwiur1",
+				"updated": "20230303235638"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230303235639-lx58u3y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230303235639-lx58u3y",
+				"updated": "20230324161449"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://openai.com/",
+					"TextMarkTextContent": "OpenAI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Chat API 实现文本对话。"
+				}
+			]
+		},
+		{
+			"ID": "20230303235744-d5gf0ti",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230303235744-d5gf0ti",
+				"updated": "20250115153728"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230303235749-kurfjky",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20230303235749-kurfjky",
+				"updated": "20250115153728"
+			},
+			"Children": [
+				{
+					"ID": "20230303235807-xcyl1bg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20230303235807-xcyl1bg",
+						"updated": "20230303235807"
+					},
+					"Children": [
+						{
+							"ID": "20230303235807-qxbizml",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230303235807-qxbizml",
+								"updated": "20230303235818"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "注册 OpenAI 账号，并创建 API Key"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230303235819-0o648f9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230303235819-0o648f9",
+						"updated": "20230324161532"
+					},
+					"Children": [
+						{
+							"ID": "20230303235819-87dmjqq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230303235819-87dmjqq",
+								"updated": "20230324161532"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中进行相关配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230303235958-fxi5kan",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20230303235958-fxi5kan",
+						"updated": "20250115153728"
+					},
+					"Children": [
+						{
+							"ID": "20230303235958-1ksxnm3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230303235958-1ksxnm3",
+								"updated": "20250115153728"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "/AI 编写"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 唤起对话框，输入提问或者需求后确认"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230308213345-fid8dlp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230308213345-fid8dlp",
+						"updated": "20230308213454"
+					},
+					"Children": [
+						{
+							"ID": "20230308213345-qp2zzeg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230308213345-qp2zzeg",
+								"updated": "20230308213454"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "也可以通过块标菜单 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "人工智能"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 进行更多操作"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230303235720-jz6h38o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230303235720-jz6h38o",
+				"updated": "20230304000753"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230304000206-b18o0sx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230304000206-b18o0sx",
+				"updated": "20230308213530"
+			},
+			"Children": [
+				{
+					"ID": "20230304000230-nh7oris",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230304000230-nh7oris",
+						"updated": "20230308213519"
+					},
+					"Children": [
+						{
+							"ID": "20230304000230-ageb8a2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230304000230-ageb8a2",
+								"updated": "20230308213519"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "该功能会将相关文本发送至 OpenAI"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230304000207-89ot2j9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230304000207-89ot2j9",
+						"updated": "20230308213530"
+					},
+					"Children": [
+						{
+							"ID": "20230304000207-34w52pv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230304000207-34w52pv",
+								"updated": "20230308213530"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "调用 OpenAI API 会产生一定费用"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

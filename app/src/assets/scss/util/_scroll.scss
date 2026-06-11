@@ -1,0 +1,20 @@
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  box-sizing: content-box;
+  border: 4px solid transparent;
+  border-radius: var(--b3-border-radius);
+  box-shadow: inset 0 0 5px 5px var(--b3-scroll-color);
+  cursor: default;
+
+  &:hover {
+    border-width: 1px;
+  }
+}

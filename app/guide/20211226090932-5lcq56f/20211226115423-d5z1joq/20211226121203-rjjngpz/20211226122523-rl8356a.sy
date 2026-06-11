@@ -1,0 +1,237 @@
+{
+	"ID": "20211226122523-rl8356a",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226122523-rl8356a",
+		"title": "在瀏覽器上使用",
+		"type": "doc",
+		"updated": "20221025093344"
+	},
+	"Children": [
+		{
+			"ID": "20211226122545-a65v8e1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122545-a65v8e1",
+				"updated": "20211225220755"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "瀏覽器用法"
+				}
+			]
+		},
+		{
+			"ID": "20221025093315-nlguzfi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025093315-nlguzfi",
+				"updated": "20221025093344"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關於"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "在瀏覽器上使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "打開瀏覽器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 後就可以直接在瀏覽器上使用了，如果需要在區域網內使用，將 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 換成區域網 IP 地址即可。"
+				}
+			]
+		},
+		{
+			"ID": "20221025093315-v89zg6i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221025093315-v89zg6i",
+				"updated": "20221025093315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了本地區域網使用，通過以下兩個方法可以實現公網使用："
+				}
+			]
+		},
+		{
+			"ID": "20211226122545-nuvz7sx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226122545-nuvz7sx",
+				"updated": "20211225220908"
+			},
+			"Children": [
+				{
+					"ID": "20211226122545-mwaiuig",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226122545-mwaiuig",
+						"updated": "20211225220908"
+					},
+					"Children": [
+						{
+							"ID": "20211226122545-kvl0ygy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226122545-kvl0ygy",
+								"updated": "20211225220908"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過“內網穿透”技術將本地Kernel服務發布在公網上（較為麻煩且不穩定，不推薦）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226122545-zfewb0a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226122545-zfewb0a"
+					},
+					"Children": [
+						{
+							"ID": "20211226122545-6hpy0ps",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226122545-6hpy0ps"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自行搭建思源服務端（推薦）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226122545-osuo24x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122545-osuo24x",
+				"updated": "20211225220755"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在著手前，請從了解"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com/article/1619868273581#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84",
+					"TextMarkTextContent": "思源筆記技術架構"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "開始。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122545-lsv6dhu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226122545-lsv6dhu",
+				"updated": "20211226011452"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "鎖屏密碼"
+				}
+			]
+		},
+		{
+			"ID": "20211226122545-psqbx03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122545-psqbx03",
+				"updated": "20211228125029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "關於"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可配置瀏覽器鎖屏密碼，留空表示不啟用。這在開放網絡（比如辦公場所和公網）會比較有用，只有密碼驗證通過後才能進入工作空間。"
+				}
+			]
+		}
+	]
+}

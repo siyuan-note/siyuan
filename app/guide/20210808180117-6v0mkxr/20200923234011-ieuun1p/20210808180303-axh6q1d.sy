@@ -1,0 +1,48 @@
+{
+	"ID": "20210808180303-axh6q1d",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f3a8",
+		"id": "20210808180303-axh6q1d",
+		"title": "Custom Appearance",
+		"type": "doc",
+		"updated": "20240508004341"
+	},
+	"Children": [
+		{
+			"ID": "20240508004341-z4ugefi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004341-z4ugefi",
+				"updated": "20240508004341"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924100110-vcg96wy",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Icon"
+				}
+			]
+		},
+		{
+			"ID": "20240508004341-6pgvimp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240508004341-6pgvimp",
+				"updated": "20240508004341"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924095938-a9p5450",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Theme"
+				}
+			]
+		}
+	]
+}

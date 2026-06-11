@@ -1,0 +1,77 @@
+{
+    "name": "SiYuan",
+    "short_name": "siyuan",
+    "description": "SiYuan is a privacy-first personal knowledge management system, support fine-grained block-level reference and Markdown WYSIWYG.",
+    "lang": "en",
+    "id": "/",
+    "start_url": "/",
+    "scope": "/",
+    "display": "fullscreen",
+    "display_override": [
+        "window-controls-overlay",
+        "fullscreen",
+        "standalone",
+        "minimal-ui",
+        "browser"
+    ],
+    "categories": [
+        "education",
+        "productivity",
+        "utilities"
+    ],
+    "icons": [
+        {
+            "src": "favicon.ico",
+            "type": "image/png",
+            "sizes": "any",
+            "purpose": "any"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "SiYuan Desktop",
+            "description": "Desktop web side for SiYuan",
+            "url": "/stage/build/desktop/",
+            "icons": [
+                {
+                    "src": "favicon.ico",
+                    "type": "image/png",
+                    "sizes": "512x512"
+                }
+            ]
+        },
+        {
+            "name": "SiYuan Mobile",
+            "description": "Mobile web side for SiYuan",
+            "url": "/stage/build/mobile/",
+            "icons": [
+                {
+                    "src": "favicon.ico",
+                    "type": "image/png",
+                    "sizes": "512x512"
+                }
+            ]
+        }
+    ],
+    "related_applications": [
+        {
+            "platform": "windows",
+            "url": "https://apps.microsoft.com/store/detail/siyuan/9P7HPMXP73K4"
+        },
+        {
+            "platform": "play",
+            "url": "https://play.google.com/store/apps/details?id=org.b3log.siyuan",
+            "id": "org.b3log.siyuan"
+        },
+        {
+            "platform": "itunes",
+            "url": "https://itunes.apple.com/app/siyuan/id1583226508"
+        }
+    ],
+    "protocol_handlers": [
+        {
+            "protocol": "web+siyuan",
+            "url": "/?url=%s"
+        }
+    ]
+}

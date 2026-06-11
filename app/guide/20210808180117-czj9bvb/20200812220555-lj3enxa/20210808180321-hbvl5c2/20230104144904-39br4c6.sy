@@ -1,0 +1,471 @@
+{
+	"ID": "20230104144904-39br4c6",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230104144904-39br4c6",
+		"title": "分享文档",
+		"type": "doc",
+		"updated": "20250115162314"
+	},
+	"Children": [
+		{
+			"ID": "20230104144904-x8ercy0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104144904-x8ercy0",
+				"updated": "20230104144943"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230104144943-w6iyk79",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230104144943-w6iyk79",
+				"updated": "20230104145040"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将单篇文档以 Markdown 格式分享到"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com",
+					"TextMarkTextContent": "链滴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "作为帖子发布。"
+				}
+			]
+		},
+		{
+			"ID": "20230104145023-wn3mydg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104145023-wn3mydg",
+				"updated": "20250115162314"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230104150624-lcrjopw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104150624-lcrjopw",
+				"updated": "20250115162314"
+			},
+			"Children": [
+				{
+					"ID": "20230104150624-b9l823k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104150624-b9l823k",
+						"updated": "20230104150624"
+					},
+					"Children": [
+						{
+							"ID": "20230104150624-ddukdfe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104150624-ddukdfe",
+								"updated": "20230104150624"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要注册并登录链滴账号"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104150624-o50xdl0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104150624-o50xdl0",
+						"updated": "20250115162314"
+					},
+					"Children": [
+						{
+							"ID": "20230104150624-mo2pi2i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104150624-mo2pi2i",
+								"updated": "20250115162314"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击编辑器 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 菜单 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "分享到链滴"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20230104150624-ydcsvvm",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230104150624-ydcsvvm",
+								"updated": "20230104150624"
+							},
+							"Children": [
+								{
+									"ID": "20230104150624-yej8t7a",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104150624-yej8t7a",
+										"updated": "20230104150624"
+									},
+									"Children": [
+										{
+											"ID": "20230104150624-mjaucrb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104150624-mjaucrb",
+												"updated": "20230104150624"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "文档标题作为帖子标题"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230104150624-uxghoga",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104150624-uxghoga",
+										"updated": "20230104150624"
+									},
+									"Children": [
+										{
+											"ID": "20230104150624-9xsrmxw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104150624-9xsrmxw",
+												"updated": "20230104150624"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "文档标签作为帖子标签"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230104150624-hywttn5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104150624-hywttn5",
+										"updated": "20230104150624"
+									},
+									"Children": [
+										{
+											"ID": "20230104150624-vypb5im",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104150624-vypb5im",
+												"updated": "20230104150624"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "文档导出的 Markdown 作为帖子内容，其中引用转换为脚注"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104150624-pqzp2j0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104150624-pqzp2j0",
+						"updated": "20230104150624"
+					},
+					"Children": [
+						{
+							"ID": "20230104150624-h8b4fpf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104150624-h8b4fpf",
+								"updated": "20230104150624"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "分享完毕后对文档写入属性 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleid"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（原为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleId"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ）用于关联链滴帖子 ID"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230104150756-ofodcde",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230104150756-ofodcde",
+				"updated": "20230104150902"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档中的资源文件会被自动上传到云端图床："
+				}
+			]
+		},
+		{
+			"ID": "20230104150624-xz7vcgc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104150624-xz7vcgc",
+				"updated": "20230104150843"
+			},
+			"Children": [
+				{
+					"ID": "20230104150624-7seqfl7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104150624-7seqfl7",
+						"updated": "20230104150624"
+					},
+					"Children": [
+						{
+							"ID": "20230104150624-vrnrmi5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104150624-vrnrmi5",
+								"updated": "20230104150624"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "免费用户单个文件小于 3MB"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104150624-tn0cq3g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104150624-tn0cq3g",
+						"updated": "20230104150624"
+					},
+					"Children": [
+						{
+							"ID": "20230104150624-ddo2ids",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104150624-ddo2ids",
+								"updated": "20230104150624"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "订阅用户单个文件小于 10MB"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230104151133-g7f115r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104151133-g7f115r",
+				"updated": "20230104151226"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230104151212-kfez5m3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104151212-kfez5m3",
+				"updated": "20230104151613"
+			},
+			"Children": [
+				{
+					"ID": "20230104151230-j9zzy5g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151230-j9zzy5g",
+						"updated": "20230104151230"
+					},
+					"Children": [
+						{
+							"ID": "20230104151230-ywamjso",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151230-ywamjso",
+								"updated": "20230104151348"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "分享文档到链滴需要积分，请参考"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/article/1441724208848",
+									"TextMarkTextContent": "积分规则"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104151348-r8jbrm5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104151348-r8jbrm5",
+						"updated": "20230104151613"
+					},
+					"Children": [
+						{
+							"ID": "20230104151348-g8x761x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104151348-g8x761x",
+								"updated": "20230104151613"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "分享上传到云端图床的资源文件无法删除"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,332 @@
+{
+	"ID": "20240119212048-0huuevw",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240119212048-0huuevw",
+		"title": "Ignore search",
+		"type": "doc",
+		"updated": "20241001011905"
+	},
+	"Children": [
+		{
+			"ID": "20240119212104-j7ffhxi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119212104-j7ffhxi",
+				"updated": "20240119212104"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20240119212104-hl35w6g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119212104-hl35w6g",
+				"updated": "20240119212104"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ignoring searches refers to filtering out certain unwanted results when searching."
+				}
+			]
+		},
+		{
+			"ID": "20240119212104-9fehl3c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119212104-9fehl3c",
+				"updated": "20241001011905"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20240119212104-dx5x8bt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119212104-dx5x8bt",
+				"updated": "20240119212108"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ignoring global search and ignoring reference search need to be configured separately:"
+				}
+			]
+		},
+		{
+			"ID": "20240119212104-te1z48c",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240119212104-te1z48c",
+				"updated": "20240119212145"
+			},
+			"Children": [
+				{
+					"ID": "20240119212104-xvdl5uv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119212104-xvdl5uv",
+						"updated": "20240119212104"
+					},
+					"Children": [
+						{
+							"ID": "20240119212104-19qxeob",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119212104-19qxeob",
+								"updated": "20240119212104"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ignore global search: manually create or edit the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/.siyuan/searchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ text file on the file system"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240119212104-vd4ztbi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119212104-vd4ztbi",
+						"updated": "20240119212145"
+					},
+					"Children": [
+						{
+							"ID": "20240119212104-yxf89nn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119212104-yxf89nn",
+								"updated": "20240119212145"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Ignore reference search: manually create or edit the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/.siyuan/refsearchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ text file on the file system"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240119212104-w5aqumm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119212104-w5aqumm",
+				"updated": "20240119212108"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each line in these ignore configuration files will be used as a condition for SQL path NOT LIKE, for example:"
+				}
+			]
+		},
+		{
+			"ID": "20240119212104-tepuwbm",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20240119212104-tepuwbm",
+				"updated": "20241001011008"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20241001011027-qi6o51q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241001011027-qi6o51q",
+				"updated": "20241001011905"
+			},
+			"Children": [
+				{
+					"ID": "20241001011027-2kgpqv7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001011027-2kgpqv7",
+						"updated": "20241001011838"
+					},
+					"Children": [
+						{
+							"ID": "20241001011027-rc5tn93",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001011027-rc5tn93",
+								"updated": "20241001011838"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore content block searches where the document path begins with ​/20210808180117-6v0mkxr"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001011027-jsngmc7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001011027-jsngmc7",
+						"updated": "20241001011854"
+					},
+					"Children": [
+						{
+							"ID": "20241001011027-tn2cjwl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001011027-tn2cjwl",
+								"updated": "20241001011854"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "box != '20210808180117-czj9bvb'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore content block searches under the notebook data/20210808180117-czj9bvb"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001011027-02lmjzy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001011027-02lmjzy",
+						"updated": "20241001011905"
+					},
+					"Children": [
+						{
+							"ID": "20241001011027-qsadi2j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001011027-qsadi2j",
+								"updated": "20241001011905"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id != '20200923234011-ieuun1p'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore content block searches with id ​20200923234011-ieuun1p"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240202105459-q4d3ttn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105459-q4d3ttn",
+				"updated": "20240202105500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It will take 30 seconds to take effect after modifying the configuration file."
+				}
+			]
+		}
+	]
+}

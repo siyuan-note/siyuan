@@ -1,0 +1,43 @@
+{
+	"ID": "20240530101000-dytmky4",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-59h05vt",
+		"id": "20240530101000-dytmky4",
+		"title": "カーネル API",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-33dv38y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-eh1yj9i",
+				"id": "20240530101000-33dv38y",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan/blob/master/API.md",
+					"TextMarkTextContent": "API ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-d6shb6a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-thrtp8y",
+				"id": "20240530101000-d6shb6a"
+			}
+		}
+	]
+}

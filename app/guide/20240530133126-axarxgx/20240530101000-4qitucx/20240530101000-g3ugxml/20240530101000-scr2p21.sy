@@ -1,0 +1,201 @@
+{
+	"ID": "20240530101000-scr2p21",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-ya2tgbk",
+		"id": "20240530101000-scr2p21",
+		"title": "デイリーノート",
+		"type": "doc",
+		"updated": "20241008202730"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-bzkce2v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-bzkce2v",
+				"updated": "20241008202730"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デイリーノートを通じて素早く文書を作成できる、デイリーノート機能への入り口は上部のメインメニュにあります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-efq2rys",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-efq2rys",
+				"updated": "20241008202721"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デイリーノート機能を使用する前にノートブックを右クリックするか、名前の横の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ メニューから "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を選択してデイリーノートの構成を行う必要があります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-111m8e8",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-voi46yb",
+				"id": "20240530101000-111m8e8",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-vc0r6k5",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-1728f2g",
+						"id": "20240530101000-vc0r6k5",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-kvqlmu5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8eho9tm",
+								"id": "20240530101000-kvqlmu5",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "保存パス"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ノートブック配下のパスで"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-hf0p1cl",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "テンプレート変数"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "をサポートしています"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-angh67v",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-8treyg9",
+						"id": "20240530101000-angh67v",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-2kvpd3c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-dncfakg",
+								"id": "20240530101000-2kvpd3c",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "テンプレートパス (オプション)"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 指定するとデイリーノートを作成する際の初期コンテンツとして使用されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-5xrl4u3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ez01ww6",
+				"id": "20240530101000-5xrl4u3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ヒント: テンプレートで"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-1vvnhju",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "埋め込みコンテンツブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を使用すると、To-Do リストや毎日確認が必要なコンテンツブロックをまとめることができます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-u3n65qy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bed7bvz",
+				"id": "20240530101000-u3n65qy"
+			}
+		}
+	]
+}

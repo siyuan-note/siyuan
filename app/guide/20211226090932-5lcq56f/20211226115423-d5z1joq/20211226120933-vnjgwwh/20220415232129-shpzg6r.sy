@@ -1,0 +1,1306 @@
+{
+	"ID": "20220415232129-shpzg6r",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220415232129-shpzg6r",
+		"title": "查詢語法",
+		"type": "doc",
+		"updated": "20250115150514"
+	},
+	"Children": [
+		{
+			"ID": "20220415232130-xmz5ru1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232130-xmz5ru1",
+				"updated": "20250115150350"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-5qj6u53",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-5qj6u53",
+				"updated": "20250115150350"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全域搜索 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 支持通過查詢語法（Query Syntax）進行高級搜索，以便實現一些邏輯操作，比如包含關鍵字 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 並且不包含關鍵字 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 的查詢語法為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo NOT bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-53umaqt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-53umaqt",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在使用查詢語法之前，我們先大致了解一下該語法的構成："
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-sjv3dwi",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220415232130-sjv3dwi",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"ID": "20220415232130-9b4w3og",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232130-9b4w3og",
+						"updated": "20220415232130"
+					},
+					"Children": [
+						{
+							"ID": "20220415232130-qy976q2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232130-qy976q2",
+								"updated": "20220415232130"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "字符串（String）：由字母、數字等構成"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415232130-ej603q9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232130-ej603q9",
+						"updated": "20220415232130"
+					},
+					"Children": [
+						{
+							"ID": "20220415232130-vx8dy47",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232130-vx8dy47",
+								"updated": "20220415232130"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "短語（Phrase）：由字符串構成"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415232130-4kci7nt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232130-4kci7nt",
+						"updated": "20220415232130"
+					},
+					"Children": [
+						{
+							"ID": "20220415232130-nmaaomd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232130-nmaaomd",
+								"updated": "20220415232130"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "查詢（Query）：由短語構成，多個查詢可通過 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "AND"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "OR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "NOT"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 組合為新的查詢"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-rvoj3hc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-rvoj3hc",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "下面我們分別介紹它們的細節。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-9kj1wuk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232130-9kj1wuk",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "字符串"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-vagd1i0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-vagd1i0",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "字符串可由兩種方式指定："
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-yakp8k5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220415232130-yakp8k5",
+				"updated": "20220415232540"
+			},
+			"Children": [
+				{
+					"ID": "20220415232130-8hskkz0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232130-8hskkz0",
+						"updated": "20220415232130"
+					},
+					"Children": [
+						{
+							"ID": "20220415232130-0vqgg1n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232130-0vqgg1n",
+								"updated": "20220415232130"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通過英文雙引號 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 包裹起來的字符。其中如果需要使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 本身，則可通過 SQL 風格轉義（再加一個"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": "），例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\"foo\"\"bar\"\"\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 將搜索命中 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "foo\"bar\""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415232130-bcu3zgh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232130-bcu3zgh",
+						"updated": "20220415232540"
+					},
+					"Children": [
+						{
+							"ID": "20220415232130-uww9hbt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232130-uww9hbt",
+								"updated": "20220415232540"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "由非 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "AND"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "OR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "NOT"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 字符組成，並且這些字符必須是："
+								}
+							]
+						},
+						{
+							"ID": "20220415232130-wpjyda1",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220415232130-wpjyda1",
+								"updated": "20220415232130"
+							},
+							"Children": [
+								{
+									"ID": "20220415232130-bu8gsv3",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232130-bu8gsv3",
+										"updated": "20220415232130"
+									},
+									"Children": [
+										{
+											"ID": "20220415232130-6wfi1an",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232130-6wfi1an",
+												"updated": "20220415232130"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "所有非 ASCII 字符，或者"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232130-6bqogq0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232130-6bqogq0",
+										"updated": "20220415232130"
+									},
+									"Children": [
+										{
+											"ID": "20220415232130-l58rfkk",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232130-l58rfkk",
+												"updated": "20220415232130"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "屬於 52 個大小寫英文字符（"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "A-Za-z"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "），或者"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232130-oa75cwl",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232130-oa75cwl",
+										"updated": "20220415232130"
+									},
+									"Children": [
+										{
+											"ID": "20220415232130-ywrok9g",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232130-ywrok9g",
+												"updated": "20220415232130"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "屬於 10 個 ASCII 數字字符（"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0-9"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "），或者"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232130-nitrkva",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232130-nitrkva",
+										"updated": "20220415232130"
+									},
+									"Children": [
+										{
+											"ID": "20220415232130-sueyqbn",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232130-sueyqbn",
+												"updated": "20220415232130"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "是下劃線 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "_"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "，或者"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232130-w7gxvjj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232130-w7gxvjj",
+										"updated": "20220415232130"
+									},
+									"Children": [
+										{
+											"ID": "20220415232130-4y6q8k3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232130-4y6q8k3",
+												"updated": "20220415232130"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "是替換符（ASCII 26）"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-epl1ak1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-epl1ak1",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "對於非上述的其他字符構成的字符串，必須使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 包裹起來，比如包含了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "*"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等符號的字符串。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-oob09dq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232130-oob09dq",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "短語"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-go31ixg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-go31ixg",
+				"updated": "20230820184809"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "短語由字符串構成，可由 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 進行連接。一個短語是由一些記號（Token）有序構成，這些記號由用戶的輸入文字通過分詞器處理得到。思源使用的分詞器為了讓中文搜索好用（支持單字搜索），所以實現方式是按照字分詞的，也就是說每個漢字或者英文字母都會被拆分為一個記號。這對 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 連接會產生一些影響，所以如果不確定的話，建議不要使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 組合多個短語。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-6qdgw35",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232130-6qdgw35",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查詢"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-koepoda",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-koepoda",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查詢由多個短語構成，可通過操作符 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AND"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "OR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "NOT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 組合為新的查詢。"
+				}
+			]
+		},
+		{
+			"ID": "20220415233043-ic38ywg",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20220415233043-ic38ywg",
+				"updated": "20220415233043"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "操作符"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "功能"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u003cquery1\u003e AND \u003cquery2\u003e"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "query1 和 query2 同時匹配"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u003cquery1\u003e OR \u003cquery2\u003e"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "query1 或者 query2 匹配"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u003cquery1\u003e NOT \u003cquery2\u003e"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "query1 匹配同時 query2 不匹配"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-365q5as",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-365q5as",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用英文圓括號 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "()"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可以組合查詢的優先級，例如："
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-8ymwyjm",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20220415232130-8ymwyjm",
+				"updated": "20220502163553"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "-- 匹配包含 \"one\" 或者 \"two\" 的塊，不匹配包含 \"three\" 的塊\n'one OR two NOT three'\n\n-- 匹配包含 \"one\" 或者包含 \"two\" 且不包含 \"three\" 的塊\n'one OR (two NOT three)'\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-7a9cd6e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-7a9cd6e",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用空格分隔的多個短語預設使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AND"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 連接，比如："
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-mdy457p",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20220415232130-mdy457p",
+				"updated": "20220502163604"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "'one two three'         -- 'one AND two AND three'\n'three \"one two\"'       -- 'three AND \"one two\"'\n'one OR two three'      -- 'one OR two AND three'\n\n'(one OR two) three'    -- 語法錯誤！\n'func(one two)'         -- 語法錯誤！\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-1juhjxd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232130-1juhjxd",
+				"updated": "20250115150514"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "技術實現"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-1w366ul",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-1w366ul",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "我們通過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.sqlite.org/fts5.html",
+					"TextMarkTextContent": "SQLite FTS5"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 實現了全域搜索。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-kdii2n4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-kdii2n4",
+				"updated": "20250115150514"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "系統生成的查詢語句關鍵部分大致是 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "MATCH '{content name alias memo}:\u0026quot; + query"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "query"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 即用戶輸入部分，對於"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.sqlite.org/fts5.html#fts5_column_filters",
+					"TextMarkTextContent": "列過濾器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{content name alias memo}:"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 是通過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "屬性"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 生成的。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-ecl8s30",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-ecl8s30",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "了解到這些以後，我們就可以通過查詢語法來實現查詢嵌入塊，這樣查詢性能會更好："
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-b00vpj4",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20220415232130-b00vpj4",
+				"updated": "20220415234510"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks_fts WHERE blocks_fts MATCH 'content:Query Syntax' AND root_id = '20220415232129-shpzg6r' LIMIT 1"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-rbkk4ko",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-rbkk4ko",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除此以外，API 也支持使用 FTS 查詢。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-8ia0bhj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220415232130-8ia0bhj",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "大小寫敏感"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-xwpb33n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-xwpb33n",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果開啟了 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區分大小寫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選項，則搜索會區分大小寫，預設該選項是關閉的，即不區分大小寫。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-z1fwurj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-z1fwurj",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "由於分詞器是區分大小寫的，所以我們構建了兩張虛擬表來分別索引："
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-83f3pq6",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220415232130-83f3pq6",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"ID": "20220415232130-fr8nexn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232130-fr8nexn",
+						"updated": "20220415232130"
+					},
+					"Children": [
+						{
+							"ID": "20220415232130-ivobyfz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232130-ivobyfz",
+								"updated": "20220415232130"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "blocks_fts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按字符原樣分詞"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415232130-1r29zfb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232130-1r29zfb",
+						"updated": "20220415232130"
+					},
+					"Children": [
+						{
+							"ID": "20220415232130-j4oaowk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232130-j4oaowk",
+								"updated": "20220415232130"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "blocks_fts_case_insensitive"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：將英文字母轉換為小寫分詞"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-yjj7ba6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-yjj7ba6",
+				"updated": "20230802221509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "這樣做的缺點是增加了磁碟空間佔用和降低了索引性能，但是目前暫時沒有更好的方案，所以只能先這樣了。另外，不支持變音符號，僅支持忽略大小寫。"
+				}
+			]
+		},
+		{
+			"ID": "20220415232130-t5o6exk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232130-t5o6exk",
+				"updated": "20220415232130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你有更好的實現方案，歡迎告訴我們，非常感謝。"
+				}
+			]
+		}
+	]
+}

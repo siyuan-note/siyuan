@@ -1,0 +1,529 @@
+{
+	"ID": "20230422103807-d46wjhs",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230422103807-d46wjhs",
+		"title": "数据可用性保障",
+		"type": "doc",
+		"updated": "20230422120121"
+	},
+	"Children": [
+		{
+			"ID": "20230422112334-gs95gig",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422112334-gs95gig",
+				"updated": "20230422112337"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地设备"
+				}
+			]
+		},
+		{
+			"ID": "20230422103807-3y0po58",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422103807-3y0po58",
+				"updated": "20230422112614"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在提升本地设备上的数据可用性方面我们做了大量努力："
+				}
+			]
+		},
+		{
+			"ID": "20230422103932-75ctqj2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230422103932-75ctqj2",
+				"updated": "20230422110554"
+			},
+			"Children": [
+				{
+					"ID": "20230422103933-a30frix",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422103933-a30frix",
+						"updated": "20230422105840"
+					},
+					"Children": [
+						{
+							"ID": "20230422103933-lzz8fzf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422103933-lzz8fzf",
+								"updated": "20230422105840"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "编辑器中的内容变更会自动保存到磁盘上，实际写入磁盘时间会根据文档大小有所不同，通常情况下 1 秒以内会完成最终保存"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422104539-ggakha5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422104539-ggakha5",
+						"updated": "20230422110554"
+					},
+					"Children": [
+						{
+							"ID": "20230422104539-6lrglh5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422104539-6lrglh5",
+								"updated": "20230422110554"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615111435-ownalnb",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "文件历史"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422105131-lnuf75q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422105131-lnuf75q",
+						"updated": "20230422110550"
+					},
+					"Children": [
+						{
+							"ID": "20230422105131-7q6xxdg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422105131-7q6xxdg",
+								"updated": "20230422110550"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615112531-5yos96d",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "数据快照"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422105520-57ndqxi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422105520-57ndqxi",
+						"updated": "20230422105534"
+					},
+					"Children": [
+						{
+							"ID": "20230422105520-ot34p72",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422105520-ot34p72",
+								"updated": "20230422105534"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持完整导出和导入 Data 压缩包"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422105258-oj5avjn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422105258-oj5avjn",
+						"updated": "20230422105556"
+					},
+					"Children": [
+						{
+							"ID": "20230422105258-qgwd6ti",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422105258-qgwd6ti",
+								"updated": "20230422105556"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "禁止通过第三方同步盘软件同步数据以避免造成文件损坏"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230422110315-sv2rsvh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422110315-sv2rsvh",
+				"updated": "20230422120114"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过这些努力，我们已经尽量保障了本地设备上的数据可用性。但请注意的是，这些保障落实的前提是设备磁盘不发生故障和意外。"
+				}
+			]
+		},
+		{
+			"ID": "20230422112342-lf07rux",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422112342-lf07rux",
+				"updated": "20230422112545"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "云端同步"
+				}
+			]
+		},
+		{
+			"ID": "20230422110805-kprcrel",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422110805-kprcrel",
+				"updated": "20230422120121"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "仅仅提升本地设备上的数据可用性是不够的，因为云端"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230808120347-3cob0nb",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "数据同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "是刚性需求之一。数据同步会影响本地设备数据，所以我们也要尽量保障同步后数据的可用性："
+				}
+			]
+		},
+		{
+			"ID": "20230422105530-t203zzx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230422105530-t203zzx",
+				"updated": "20230422111009"
+			},
+			"Children": [
+				{
+					"ID": "20230422111009-aum0wmg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422111009-aum0wmg",
+						"updated": "20230422111009"
+					},
+					"Children": [
+						{
+							"ID": "20230422111009-3zbriwj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422111009-3zbriwj",
+								"updated": "20230422112940"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步前生成数据快照，如果出现非预期的同步结果则可以通过该快照回滚"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422111101-87ev2o5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422111101-87ev2o5"
+					},
+					"Children": [
+						{
+							"ID": "20230422111101-0r12nnu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422111101-0r12nnu",
+								"updated": "20230422111514"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步时如果发生文件冲突"
+								}
+							]
+						},
+						{
+							"ID": "20230422111237-jl4ylxp",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230422111237-jl4ylxp"
+							},
+							"Children": [
+								{
+									"ID": "20230422111237-qjf48w4",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422111237-qjf48w4"
+									},
+									"Children": [
+										{
+											"ID": "20230422111237-bibelfs",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422111237-bibelfs",
+												"updated": "20230422111245"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "自动生成文件历史，可以通过文件历史回滚"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230422111247-182j3sj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230422111247-182j3sj"
+									},
+									"Children": [
+										{
+											"ID": "20230422111247-djwfifo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230422111247-djwfifo",
+												"updated": "20230422111356"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "也可以在 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "设置"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "云端"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 中开启 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "同步冲突时生成冲突文档"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230422111357-fljcvsw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230422111357-fljcvsw"
+					},
+					"Children": [
+						{
+							"ID": "20230422111357-nzhi5p1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230422111357-nzhi5p1",
+								"updated": "20230422113002"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据历史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "云端快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中浏览和下载云端快照"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230422113341-bhsow86",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230422113341-bhsow86",
+				"updated": "20230422113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "总结"
+				}
+			]
+		},
+		{
+			"ID": "20230422113915-snwmnoi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422113915-snwmnoi",
+				"updated": "20230422115400"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过以上保障措施，希望你不再对数据可用性方面产生太多顾虑，请放心使用。"
+				}
+			]
+		},
+		{
+			"ID": "20230422114701-u3eikhs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422114701-u3eikhs",
+				"updated": "20230422115415"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "尽管如此，我们依然建议你参考 321 备份原则（至少 3 个副本、2 种介质和 1 个异地存储）进行定期数据备份。"
+				}
+			]
+		},
+		{
+			"ID": "20230422103921-3f5n674",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230422103921-3f5n674",
+				"updated": "20230422115541"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "欢迎给我们反馈更多建议，数据可用性是重中之重，期待在大家的努力下不断提高它。"
+				}
+			]
+		}
+	]
+}

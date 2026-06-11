@@ -1,0 +1,180 @@
+.b3-form {
+  &__space {
+    margin: 16px 24px;
+
+    &--small {
+      margin: 8px 16px;
+    }
+  }
+
+  &__icon {
+    position: relative;
+    color: var(--b3-theme-on-surface);
+
+    &-icon {
+      position: absolute;
+      left: 9px;
+      top: 6px;
+      height: 16px;
+      width: 16px;
+    }
+
+    &-list {
+      height: 28px;
+      width: 42px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+    }
+
+    &-input {
+      padding-left: 35px !important;
+    }
+
+    &--small {
+      .b3-form__icon-icon {
+        left: 5px;
+        top: 4px;
+        height: 14px;
+        width: 14px;
+      }
+
+      .b3-form__icon-input {
+        padding-left: 25px !important;
+      }
+    }
+  }
+
+  &__icon-clear {
+    position: absolute;
+    height: 18px;
+    width: 16px;
+    opacity: .68;
+    transition: var(--b3-transition);
+    right: 0;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  // repo password & av description
+  &__icona {
+    position: relative;
+    color: var(--b3-theme-on-surface);
+    line-height: normal;
+
+    &-icon {
+      position: absolute;
+      right: 1px;
+      top: 1px;
+      height: 16px;
+      width: 16px;
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 0 calc(var(--b3-border-radius) - 1px) calc(var(--b3-border-radius) - 1px) 0;
+
+      &:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
+    }
+
+    &-input {
+      width: 100%;
+      padding-right: 35px !important;
+    }
+  }
+
+  &__img {
+    position: relative;
+
+    img {
+      position: absolute;
+      left: 1px;
+      top: 1px;
+      height: 28px;
+      border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
+    }
+
+    input {
+      padding-left: 93px;
+    }
+  }
+
+  &__upload {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: .001;
+    overflow: hidden;
+    cursor: pointer;
+    font-size: 0;
+  }
+}
+
+.b3-label {
+  border-bottom: 1px solid var(--b3-border-color);
+  padding: 16px 24px;
+  line-height: 20px;
+
+  &__text {
+    // import 的话会导致设置关于中 ft__error 无效
+    color: var(--b3-theme-on-surface);
+    font-size: 14px !important;
+    margin-top: 4px;
+    overflow: hidden !important;
+  }
+
+  &__icon {
+    width: 36px;
+    height: 36px;
+    align-self: center;
+    margin-right: 16px;
+    color: var(--b3-theme-on-surface);
+  }
+
+  &--inner {
+    border-bottom: 0;
+    padding: 0 0 16px 0;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
+
+  &:last-child,
+  &--noborder {
+    border-bottom: 0;
+  }
+
+  &--bordr {
+    border-bottom: 1px solid var(--b3-border-color) !important;
+  }
+}
+
+
+@media screen and (max-width: 750px) {
+  .b3-label--inner {
+    flex-wrap: wrap;
+
+    & > .b3-text-field,
+    & > .b3-select,
+    & > .b3-form__icona {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    & > .b3-button {
+      width: 100%;
+
+      &:not(:first-child) {
+        margin-top: 16px;
+      }
+    }
+  }
+}

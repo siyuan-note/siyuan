@@ -1,0 +1,32 @@
+name: ✨ Request new features
+description: Come up with the features you expected
+title: "Please enter the title of the feature request"
+body:
+  - type: textarea
+    attributes:
+      label: In what scenarios do you need this feature?
+      description: |
+        Please describe the functions and application scenarios you expect as clearly and accurately as possible.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the optimal solution
+      description: |
+        Please try to describe the best solution. There may be similar software that implements this feature. Please also list it for our reference.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the candidate solution
+      description: |
+        Please describe the candidate solutions you can accept as clearly and accurately as possible.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Other information
+      description: |
+        Please provide any additional information about this feature suggestion.
+    validations:
+      required: false

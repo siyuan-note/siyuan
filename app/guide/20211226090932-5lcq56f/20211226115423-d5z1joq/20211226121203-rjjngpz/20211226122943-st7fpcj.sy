@@ -1,0 +1,194 @@
+{
+	"ID": "20211226122943-st7fpcj",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226122943-st7fpcj",
+		"title": "PDF 標注",
+		"type": "doc",
+		"updated": "20220502141013"
+	},
+	"Children": [
+		{
+			"ID": "20211226122955-zjvh3ib",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122955-zjvh3ib",
+				"updated": "20211228104749"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "插入 PDF 資料文件"
+				}
+			]
+		},
+		{
+			"ID": "20211226122955-s6venrx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122955-s6venrx",
+				"updated": "20211226153717"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將 PDF 文件通過編輯器上傳插入以後，PDF 將放到 assets 文件夾下，並在文檔內生成形如 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的連結。點擊該連結可使用思源進行預覽。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122955-njq23zb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122955-njq23zb",
+				"updated": "20211226153626"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "超連結頁碼跳轉"
+				}
+			]
+		},
+		{
+			"ID": "20211226122955-u97ras6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122955-u97ras6",
+				"updated": "20211228135006"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "新分頁打開預覽 PDF 支援指定頁碼，需要將連結帶上參數 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "page"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，例如需要跳轉到第七頁，則將連結編輯為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "[filename](assets/filename.pdf?page=7)"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226122955-ganeraz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226122955-ganeraz",
+				"updated": "20220502141013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "標註"
+				}
+			]
+		},
+		{
+			"ID": "20211226122955-qghj4a6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226122955-qghj4a6",
+				"updated": "20220502141012"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "PDF 預覽時可使用劃選進行標注，標注可複製到文檔中形成連結："
+				}
+			]
+		},
+		{
+			"ID": "20211226122955-e19k3aw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226122955-e19k3aw",
+				"updated": "20211228134751"
+			},
+			"Children": [
+				{
+					"ID": "20211226122955-9m76h5k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226122955-9m76h5k",
+						"updated": "20211226153651"
+					},
+					"Children": [
+						{
+							"ID": "20211226122955-hwq6zz8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226122955-hwq6zz8",
+								"updated": "20211226153651"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在文檔中點擊引用連結可以打開 PDF 並跳轉到標注"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226122955-kp6rxde",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226122955-kp6rxde",
+						"updated": "20211228134751"
+					},
+					"Children": [
+						{
+							"ID": "20211226122955-8w63jyh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226122955-8w63jyh",
+								"updated": "20211228134751"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 PDF 中滑鼠懸浮標注可預覽引用標注的塊"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

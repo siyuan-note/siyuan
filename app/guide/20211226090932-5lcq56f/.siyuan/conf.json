@@ -1,0 +1,13 @@
+{
+  "name": "思源筆記用戶指南",
+  "sort": 2,
+  "icon": "1f4d4",
+  "closed": false,
+  "refCreateSaveBox": "",
+  "refCreateSavePath": "",
+  "docCreateSaveBox": "",
+  "docCreateSavePath": "",
+  "dailyNoteSavePath": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}",
+  "dailyNoteTemplatePath": "",
+  "sortMode": 15
+}

@@ -1,0 +1,76 @@
+name: Release Docker Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: '镜像标签，留空则使用 package.json 中的版本号。务必注意：请确认选择了正确的分支。完整输入示例：3.0.11-rc0 '
+        required: true
+        default: ''
+  push:
+    branches:
+      - master
+
+# ref https://docs.github.com/zh/actions/learn-github-actions/variables
+env:
+  package_json: "app/package.json"
+  docker_hub_owner: "b3log"
+  docker_hub_repo: "siyuan"
+
+jobs:
+  build:
+    if: ${{ github.repository_owner == 'siyuan-note' }}
+    name: build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.ref }}
+          submodules: recursive
+
+      - name: Extract version from package.json
+        id: version
+        run: |
+          echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+
+          # all of these default to true, but feel free to set to
+          # "false" if necessary for your workflow
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_PWD }}
+
+      - name: Build the Docker image use Workflow Dispatch inputs' version
+        if: ${{ github.event_name == 'workflow_dispatch' && !github.event.inputs.image_tag == '' }}
+        run: |
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ github.event.inputs.image_tag }} .
+      - name: Build the Docker image use package_json version
+        if: ${{ github.event_name == 'push' || github.event.inputs.image_tag == '' }}
+        run: |
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .

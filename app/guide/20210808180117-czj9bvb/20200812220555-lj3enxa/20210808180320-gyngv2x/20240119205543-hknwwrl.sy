@@ -1,0 +1,332 @@
+{
+	"ID": "20240119205543-hknwwrl",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20240119205543-hknwwrl",
+		"title": "忽略搜索",
+		"type": "doc",
+		"updated": "20240202105344"
+	},
+	"Children": [
+		{
+			"ID": "20240119205543-l3ps21p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119205543-l3ps21p",
+				"updated": "20240119211508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20240119211508-1e8306w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119211508-1e8306w",
+				"updated": "20240119211746"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略搜索指的是在搜索时过滤掉某些不需要的结果。"
+				}
+			]
+		},
+		{
+			"ID": "20240119211553-6upakii",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240119211553-6upakii",
+				"updated": "20240202105344"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20240119211747-xxv4fvc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119211747-xxv4fvc",
+				"updated": "20240119211750"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略全局搜索和忽略引用搜索需要分开配置："
+				}
+			]
+		},
+		{
+			"ID": "20240119211559-5p7cozp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240119211559-5p7cozp",
+				"updated": "20240119211754"
+			},
+			"Children": [
+				{
+					"ID": "20240119211754-154c4si",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119211754-154c4si",
+						"updated": "20240119211754"
+					},
+					"Children": [
+						{
+							"ID": "20240119211754-yyw3k6d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119211754-yyw3k6d",
+								"updated": "20240119211824"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "忽略全局搜索：在文件系统上手动创建或编辑 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/data/.siyuan/searchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文本文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240119211819-l20dsvi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240119211819-l20dsvi"
+					},
+					"Children": [
+						{
+							"ID": "20240119211819-a95wlzh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240119211819-a95wlzh",
+								"updated": "20240119211839"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "忽略引用搜索：在文件系统上手动创建或编辑 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空间/data/.siyuan/refsearchignore"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文本文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240119211847-akaulr6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240119211847-akaulr6",
+				"updated": "20240119211907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "这些 ignore 配置文件中的每一行会被作为 SQL path NOT LIKE 的一个条件，例如："
+				}
+			]
+		},
+		{
+			"ID": "20240119211847-z4gfqvm",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20240119211847-z4gfqvm",
+				"style": "line-height: 23px;",
+				"updated": "20240930232841"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20241001005929-9mim2k7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241001005929-9mim2k7",
+				"updated": "20241001011736"
+			},
+			"Children": [
+				{
+					"ID": "20241001005929-wi0c464",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001005929-wi0c464",
+						"updated": "20241001011643"
+					},
+					"Children": [
+						{
+							"ID": "20241001005929-l3trb25",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001005929-l3trb25",
+								"updated": "20241001011643"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：忽略所在文档路径以 ​/20210808180117-6v0mkxr 开头的内容块搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001010246-jezhqit",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001010246-jezhqit",
+						"updated": "20241001011638"
+					},
+					"Children": [
+						{
+							"ID": "20241001010246-wryqxp4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001010246-wryqxp4",
+								"updated": "20241001011638"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "box != '20210808180117-czj9bvb'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：忽略 data/20210808180117-czj9bvb 笔记本下的内容块搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001005929-cnkj6yh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001005929-cnkj6yh",
+						"updated": "20241001011736"
+					},
+					"Children": [
+						{
+							"ID": "20241001005929-2etqzdc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001005929-2etqzdc",
+								"updated": "20241001011736"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id != '20200923234011-ieuun1p'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：忽略 id 为 20200923234011-ieuun1p 的内容块搜索"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240202105344-67d8k4w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240202105344-67d8k4w",
+				"updated": "20240202105344"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置文件修改保存后需要等待 30 秒才会生效。"
+				}
+			]
+		}
+	]
+}

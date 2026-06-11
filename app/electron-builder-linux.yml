@@ -1,0 +1,72 @@
+productName: "SiYuan"
+appId: "org.b3log.siyuan"
+asar: false
+compression: "normal"
+copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."
+artifactName: "siyuan-${version}-${os}.${ext}"
+extraMetadata:
+  main: "electron/main.js"
+directories:
+  output: "build"
+files:
+  - "electron"
+afterPack: "./scripts/afterPack.js"
+extraFiles:
+  - from: "../LICENSE"
+    to: "LICENSE"
+
+linux:
+  icon: "src/assets/icon/"
+  category: "Utility"
+  executableName: "siyuan"
+  desktop: {
+    entry: {
+      Name: "SiYuan",
+      Comment: "Refactor your thinking",
+      Type: "Application",
+      Categories: "Utility;"
+    }
+  }
+  extraResources:
+    - from: "kernel-linux"
+      to: "kernel"
+  target:
+    - target: "tar.gz"
+    - target: "AppImage"
+    - target: "deb"
+    - target: "rpm"
+
+extraResources:
+  - from: "changelogs"
+    to: "changelogs"
+  - from: "stage"
+    to: "stage"
+  - from: "guide"
+    to: "guide"
+    filter: "!**/{.DS_Store,.git,.gitignore,.idea}"
+  - from: "appearance/boot"
+    to: "appearance/boot"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/icons"
+    to: "appearance/icons"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/langs"
+    to: "appearance/langs"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/emojis"
+    to: "appearance/emojis"
+    filter: "!**/{.DS_Store}"
+  - from: "appearance/themes/midnight"
+    to: "appearance/themes/midnight"
+    filter: "!**/{.DS_Store,custom.css}"
+  - from: "appearance/themes/daylight"
+    to: "appearance/themes/daylight"
+    filter: "!**/{.DS_Store,custom.css}"
+  - from: "appearance/fonts"
+    to: "appearance/fonts"
+    filter: "!**/{.DS_Store}"
+  - from: "pandoc/pandoc-linux-amd64.zip"
+    to: "pandoc.zip"
+  - from: "pandoc/pandoc-resources"
+    to: "pandoc-resources"
+    filter: "!**/{.DS_Store}"

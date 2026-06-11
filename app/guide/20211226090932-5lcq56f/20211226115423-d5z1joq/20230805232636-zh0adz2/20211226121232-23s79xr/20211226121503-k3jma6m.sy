@@ -1,0 +1,331 @@
+{
+	"ID": "20211226121503-k3jma6m",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226121503-k3jma6m",
+		"title": "存儲空間",
+		"type": "doc",
+		"updated": "20230912091726"
+	},
+	"Children": [
+		{
+			"ID": "20211226121514-9r4k5e3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121514-9r4k5e3",
+				"updated": "20220703223401"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "雲端存儲空間大小為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "8G"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，分為以下部分："
+				}
+			]
+		},
+		{
+			"ID": "20211226121514-hmpy0lc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121514-hmpy0lc",
+				"updated": "20220708103705"
+			},
+			"Children": [
+				{
+					"ID": "20211226121514-pn19r60",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121514-pn19r60",
+						"updated": "20211228141328"
+					},
+					"Children": [
+						{
+							"ID": "20211226121514-t2bmmoj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121514-t2bmmoj",
+								"updated": "20211228141328"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同步資料：提供給同步功能使用，資料是加密的"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220708103641-gmrskka",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220708103641-gmrskka",
+						"updated": "20220708103705"
+					},
+					"Children": [
+						{
+							"ID": "20220708103641-7wgcstg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220708103641-7wgcstg",
+								"updated": "20220708103705"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "備份資料：提供給備份功能使用，資料是加密的"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121514-tq33ai6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121514-tq33ai6",
+						"updated": "20211228104804"
+					},
+					"Children": [
+						{
+							"ID": "20211226121514-0a8n57l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121514-0a8n57l",
+								"updated": "20211228104804"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資料文件：提供給複製到公眾號、知乎和語雀等使用，HTTPS CDN"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091715-21sakbc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091715-21sakbc",
+				"updated": "20230912091726"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用量可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雲端"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中查看。"
+				}
+			]
+		},
+		{
+			"ID": "20211227210109-0f92zh2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211227210109-0f92zh2",
+				"title": "端到端加密",
+				"updated": "20220708102204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "端到端加密"
+				}
+			]
+		},
+		{
+			"ID": "20220703223050-c15s118",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220703223050-c15s118"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資料同步通過端到端加密傳輸，雲端不保存任何明文資料。"
+				}
+			]
+		},
+		{
+			"ID": "20220703223050-mrhujtt",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220703223050-mrhujtt",
+				"updated": "20220703223050"
+			},
+			"Children": [
+				{
+					"ID": "20220703223050-bc8yax3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-bc8yax3",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-hb3id1r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-hb3id1r",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "密鑰僅存儲在本地，不會上傳到雲端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223050-r6ah4qz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-r6ah4qz",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-z2k2sr1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-z2k2sr1",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密和解密過程完全在本地設備上進行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220703223050-cwpobbf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220703223050-cwpobbf",
+						"updated": "20220703223050"
+					},
+					"Children": [
+						{
+							"ID": "20220703223050-3ot9kpq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220703223050-3ot9kpq",
+								"updated": "20220703223050"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密算法為業界公認安全的 AES GCM"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230912091703-1zitmba",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230912091703-1zitmba",
+				"updated": "20230912091703"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "常見問題"
+				}
+			]
+		},
+		{
+			"ID": "20230912091703-w5ikrgk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20230912091703-w5ikrgk",
+				"updated": "20230912091703"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開發者是否能夠解密我的雲端數據？"
+				}
+			]
+		},
+		{
+			"ID": "20230912091703-yno8j38",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230912091703-yno8j38",
+				"updated": "20230912091703"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "無法解密。如果遺失密鑰，任何人（包括開發者）都無法幫你從雲端恢復數據。"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,103 @@
+{
+	"ID": "20211226123216-tlxw66f",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226123216-tlxw66f",
+		"title": "視窗和分頁",
+		"type": "doc",
+		"updated": "20230630130211"
+	},
+	"Children": [
+		{
+			"ID": "20211226123228-as6lbiy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123228-as6lbiy",
+				"updated": "20211228143051"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源支援多視窗和多分頁，這樣可以方便地進行文檔編輯和查看。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123228-b7c7ump",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123228-b7c7ump",
+				"updated": "20211228141516"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "分頁支援上下和左右分畫面，打開的所有分頁是實時同步內容的。比如對於相同一份文檔進行多開分頁，在其中一個分頁中編輯保存後，其他分頁也會自動同步最新內容，在享受多開的便利時避免髒資料覆蓋。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123228-4e3ridj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123228-4e3ridj",
+				"updated": "20211228124016"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了文檔保存是同步的，保存後產生的關聯渲染也是同步的，文檔相關的內容塊預覽以及關系圖都是即重新整理，這樣能在最小限度上排除幹擾，讓我們將注意力集中在筆記內容上。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123228-ueb09c1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123228-ueb09c1",
+				"updated": "20230630130211"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了並排顯示，分頁也支援拖拽，這樣我們能夠隨心所欲地布置整個界面，在自己最舒服的佈局下記錄筆記和整理知識。"
+				}
+			]
+		},
+		{
+			"ID": "20211226123228-679kzyd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226123228-679kzyd",
+				"updated": "20230128004525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你正在使用的設備螢幕較小，可以考慮"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122523-rl8356a",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "通過瀏覽器使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，這樣就能通過瀏覽器實例進行整體界面切換。如果你只需要將分頁轉換為獨立的視窗，可以在分頁上右鍵點擊 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "移動到新窗口"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，或者將分頁拖拽到當前視窗之外的地方後釋放拖拽，這樣也能將該分頁轉換為獨立的視窗。"
+				}
+			]
+		}
+	]
+}

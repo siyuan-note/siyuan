@@ -1,0 +1,180 @@
+{
+	"ID": "20230506205948-yah52eb",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230506205948-yah52eb",
+		"title": "Plugins",
+		"type": "doc",
+		"updated": "20250115152404"
+	},
+	"Children": [
+		{
+			"ID": "20230506210937-ubi5da4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210937-ubi5da4",
+				"updated": "20230506210937"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-bt48731",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210937-bt48731",
+				"updated": "20230512195419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plugins are mainly used to expand the overall functions of SiYuan."
+				}
+			]
+		},
+		{
+			"ID": "20230512195420-9550ilh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512195420-9550ilh",
+				"updated": "20230512195433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Compared with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210824202056-udkf7wg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "widgets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", the plugin is mainly for program function extension, not for content block extension."
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-yel1yei",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210937-yel1yei",
+				"updated": "20250115152404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-v1ki1ir",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210937-v1ki1ir",
+				"updated": "20250115152404"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The plugin is installed through the plugin marketplace. After installation, the plugin will be placed in the folder "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/plugins/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. You can enable or disable plugins in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Marketplace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Downloaded"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Plugin"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-jxzxwz7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230506210937-jxzxwz7",
+				"updated": "20230506211146"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Push on plugin marketplace"
+				}
+			]
+		},
+		{
+			"ID": "20230506210937-i9vqw4g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230506210937-i9vqw4g",
+				"updated": "20230820184257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "Community marketplace repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

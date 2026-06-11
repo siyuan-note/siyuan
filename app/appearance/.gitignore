@@ -1,0 +1,8 @@
+themes/*/custom.css
+themes/*
+!themes/daylight/
+!themes/midnight/
+
+icons/*
+!icons/litheness/
+!icons/index.html

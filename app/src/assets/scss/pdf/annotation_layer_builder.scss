@@ -1,0 +1,389 @@
+/* Copyright 2014 Mozilla Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.annotationLayer {
+  --annotation-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>");
+  --input-focus-border-color: Highlight;
+  --input-focus-outline: 1px solid Canvas;
+  --input-unfocused-border-color: transparent;
+  --input-disabled-border-color: transparent;
+  --input-hover-border-color: black;
+  --link-outline: none;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+
+  @media screen and (forced-colors: active) {
+    --input-focus-border-color: CanvasText;
+    --input-unfocused-border-color: ActiveText;
+    --input-disabled-border-color: GrayText;
+    --input-hover-border-color: Highlight;
+    --link-outline: 1.5px solid LinkText;
+
+    .textWidgetAnnotation :is(input, textarea):required,
+    .choiceWidgetAnnotation select:required,
+    .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:required {
+      outline: 1.5px solid selectedItem;
+    }
+
+    .linkAnnotation {
+      outline: var(--link-outline);
+
+      &:hover {
+        backdrop-filter: var(--hcm-highlight-filter);
+      }
+
+      & > a:hover {
+        opacity: 0 !important;
+        background: none !important;
+        box-shadow: none;
+      }
+    }
+
+    .popupAnnotation .popup {
+      outline: calc(1.5px * var(--scale-factor)) solid CanvasText !important;
+      background-color: ButtonFace !important;
+      color: ButtonText !important;
+    }
+
+    .highlightArea:hover::after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: var(--hcm-highlight-filter);
+      content: "";
+      pointer-events: none;
+    }
+
+    .popupAnnotation.focused .popup {
+      outline: calc(3px * var(--scale-factor)) solid Highlight !important;
+    }
+  }
+
+  &[data-main-rotation="90"] .norotate {
+    transform: rotate(270deg) translateX(-100%);
+  }
+  &[data-main-rotation="180"] .norotate {
+    transform: rotate(180deg) translate(-100%, -100%);
+  }
+  &[data-main-rotation="270"] .norotate {
+    transform: rotate(90deg) translateY(-100%);
+  }
+
+  &.disabled {
+    section,
+    .popup {
+      pointer-events: none;
+    }
+  }
+
+  .annotationContent {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+
+    &.freetext {
+      background: transparent;
+      border: none;
+      inset: 0;
+      overflow: visible;
+      white-space: nowrap;
+      font: 10px sans-serif;
+      line-height: 1.35;
+      user-select: none;
+    }
+  }
+
+  section {
+    position: absolute;
+    text-align: initial;
+    pointer-events: auto;
+    box-sizing: border-box;
+    transform-origin: 0 0;
+
+    &:has(div.annotationContent) {
+      canvas.annotationContent {
+        display: none;
+      }
+    }
+  }
+
+  .textLayer.selecting ~ & section {
+    pointer-events: none;
+  }
+
+  :is(.linkAnnotation, .buttonWidgetAnnotation.pushButton) > a {
+    position: absolute;
+    font-size: 1em;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  :is(.linkAnnotation, .buttonWidgetAnnotation.pushButton):not(.hasBorder)
+  > a:hover {
+    opacity: 0.2;
+    background-color: rgb(255 255 0);
+    box-shadow: 0 2px 10px rgb(255 255 0);
+  }
+
+  .linkAnnotation.hasBorder:hover {
+    background-color: rgb(255 255 0 / 0.2);
+  }
+
+  .hasBorder {
+    background-size: 100% 100%;
+  }
+
+  .textAnnotation img {
+    position: absolute;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  .textWidgetAnnotation :is(input, textarea),
+  .choiceWidgetAnnotation select,
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton) input {
+    background-color: rgba(0, 54, 255, .13); // NOTE
+    border: 2px solid var(--input-unfocused-border-color);
+    box-sizing: border-box;
+    font: calc(9px * var(--scale-factor)) sans-serif;
+    height: 100%;
+    margin: 0;
+    vertical-align: top;
+    width: 100%;
+  }
+
+  .textWidgetAnnotation :is(input, textarea):required,
+  .choiceWidgetAnnotation select:required,
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:required {
+    outline: 1.5px solid red;
+  }
+
+  .choiceWidgetAnnotation select option {
+    padding: 0;
+  }
+
+  .buttonWidgetAnnotation.radioButton input {
+    border-radius: 50%;
+  }
+
+  .textWidgetAnnotation textarea {
+    resize: none;
+  }
+
+  .textWidgetAnnotation :is(input, textarea)[disabled],
+  .choiceWidgetAnnotation select[disabled],
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton) input[disabled] {
+    background: none;
+    border: 2px solid var(--input-disabled-border-color);
+    cursor: not-allowed;
+  }
+
+  .textWidgetAnnotation :is(input, textarea):hover,
+  .choiceWidgetAnnotation select:hover,
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton) input:hover {
+    border: 2px solid var(--input-hover-border-color);
+  }
+  .textWidgetAnnotation :is(input, textarea):hover,
+  .choiceWidgetAnnotation select:hover,
+  .buttonWidgetAnnotation.checkBox input:hover {
+    border-radius: 2px;
+  }
+
+  .textWidgetAnnotation :is(input, textarea):focus,
+  .choiceWidgetAnnotation select:focus {
+    background: none;
+    border: 2px solid var(--input-focus-border-color);
+    border-radius: 2px;
+    outline: var(--input-focus-outline);
+  }
+
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton) :focus {
+    background-image: none;
+    background-color: transparent;
+  }
+
+  .buttonWidgetAnnotation.checkBox :focus {
+    border: 2px solid var(--input-focus-border-color);
+    border-radius: 2px;
+    outline: var(--input-focus-outline);
+  }
+
+  .buttonWidgetAnnotation.radioButton :focus {
+    border: 2px solid var(--input-focus-border-color);
+    outline: var(--input-focus-outline);
+  }
+
+  .buttonWidgetAnnotation.checkBox input:checked::before,
+  .buttonWidgetAnnotation.checkBox input:checked::after,
+  .buttonWidgetAnnotation.radioButton input:checked::before {
+    background-color: rgba(0, 0, 0, 1); // NOTE
+    content: "";
+    display: block;
+    position: absolute;
+  }
+
+  .buttonWidgetAnnotation.checkBox input:checked::before,
+  .buttonWidgetAnnotation.checkBox input:checked::after {
+    height: 80%;
+    left: 45%;
+    width: 1px;
+  }
+
+  .buttonWidgetAnnotation.checkBox input:checked::before {
+    transform: rotate(45deg);
+  }
+
+  .buttonWidgetAnnotation.checkBox input:checked::after {
+    transform: rotate(-45deg);
+  }
+
+  .buttonWidgetAnnotation.radioButton input:checked::before {
+    border-radius: 50%;
+    height: 50%;
+    left: 25%;
+    top: 25%;
+    width: 50%;
+  }
+
+  .textWidgetAnnotation input.comb {
+    font-family: monospace;
+    padding-left: 2px;
+    padding-right: 0;
+  }
+
+  .textWidgetAnnotation input.comb:focus {
+    /*
+     * Letter spacing is placed on the right side of each character. Hence, the
+     * letter spacing of the last character may be placed outside the visible
+     * area, causing horizontal scrolling. We avoid this by extending the width
+     * when the element has focus and revert this when it loses focus.
+     */
+    width: 103%;
+  }
+
+  .buttonWidgetAnnotation:is(.checkBox, .radioButton) input {
+    appearance: none;
+  }
+
+  .fileAttachmentAnnotation .popupTriggerArea {
+    height: 100%;
+    width: 100%;
+  }
+
+  .popupAnnotation {
+    position: absolute;
+    font-size: calc(9px * var(--scale-factor));
+    pointer-events: none;
+    width: max-content;
+    max-width: 45%;
+    height: auto;
+  }
+
+  .popup {
+    background-color: rgb(255 255 153);
+    box-shadow: 0 calc(2px * var(--scale-factor))
+    calc(5px * var(--scale-factor)) rgb(136 136 136);
+    border-radius: calc(2px * var(--scale-factor));
+    outline: 1.5px solid rgb(255 255 74);
+    padding: calc(6px * var(--scale-factor));
+    cursor: pointer;
+    font: message-box;
+    white-space: normal;
+    word-wrap: break-word;
+    pointer-events: auto;
+  }
+
+  .popupAnnotation.focused .popup {
+    outline-width: 3px;
+  }
+
+  .popup * {
+    font-size: calc(9px * var(--scale-factor));
+  }
+
+  .popup > .header {
+    display: inline-block;
+  }
+
+  .popup > .header h1 {
+    display: inline;
+  }
+
+  .popup > .header .popupDate {
+    display: inline-block;
+    margin-left: calc(5px * var(--scale-factor));
+    width: fit-content;
+  }
+
+  .popupContent {
+    border-top: 1px solid rgb(51 51 51);
+    margin-top: calc(2px * var(--scale-factor));
+    padding-top: calc(2px * var(--scale-factor));
+  }
+
+  .richText > * {
+    white-space: pre-wrap;
+    font-size: calc(9px * var(--scale-factor));
+  }
+
+  .popupTriggerArea {
+    cursor: pointer;
+  }
+
+  section svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  .annotationTextContent {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    color: transparent;
+    user-select: none;
+    pointer-events: none;
+
+    span {
+      width: 100%;
+      display: inline-block;
+    }
+  }
+
+  svg.quadrilateralsContainer {
+    contain: strict;
+    width: 0;
+    height: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+  }
+}

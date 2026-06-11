@@ -1,0 +1,429 @@
+{
+	"ID": "20240530101000-xc13cm6",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-fswowem",
+		"id": "20240530101000-xc13cm6",
+		"title": "ブックマークとタグ",
+		"type": "doc",
+		"updated": "20250115151944"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-hprjkt6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-pvnwpym",
+				"id": "20240530101000-hprjkt6",
+				"updated": "20250115151931"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブックマーク"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-lzmfgny",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-pqnex1k",
+				"id": "20240530101000-lzmfgny",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツブロックをブックマークに追加するには、ブロックメニューから属性を開いてブックマークの名前を設定します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-knmtutw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-knmtutw",
+				"updated": "20250115151931"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブックマークに追加したすべてのコンテンツブロックはブックマークタブ ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌃3"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​) に一覧表示されます。ブックマークを解除するには、対象のブックマークを右クリックするかドロップダウンメニューから削除を選ぶか、ブロックメニューから属性を開いてブックマーク欄を空にします。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-hm4v83l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-jxde0hd",
+				"id": "20240530101000-hm4v83l",
+				"updated": "20250115151944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3km22xj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-qec15ab",
+				"id": "20240530101000-3km22xj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグはコンテンツブロックにマークを付けるためのもので、タグとなる文字列を選択してフローティングツールバーからタグ付けするか、文字列の前後を "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#タグ名#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ のように囲みます (これは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ の Markdown インラインタグ構文が有効である有効である必要があります)。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1llvzhg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-r7crqu2",
+				"id": "20240530101000-1llvzhg",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグは階層構造をサポートしているため、コンテンツブロックを簡単に分類・整理できます。異なる階層を区切るには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用します (例: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#A/B/C#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​)。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-hyy7lip",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240530101000-hyy7lip",
+				"updated": "20250115151944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグ付けされたコンテンツブロックはタグタブ ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌃4"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​) に一覧表示されます。タグを解除するには、対象のブックマークを右クリックするかドロップダウンメニューから削除を選ぶか、コンテンツブロック内のタグを削除します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-stn83j3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-0ao0iv9",
+				"id": "20240530101000-stn83j3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2rbdegz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fvylnn8",
+				"id": "20240530101000-2rbdegz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブックマークやタグには次の特殊記号を使用しないでください。これらの特殊記号を使用するとグローバル検索の対象外となり、ブックマーク/タグパネルから名前の変更や削除ができなくなります: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "*"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "_"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "["
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "!"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\\"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "`"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026amp;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ")"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "="
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "#"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mncd4tp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-xo8zzg2",
+				"id": "20240530101000-mncd4tp",
+				"updated": "20240530101000"
+			}
+		}
+	]
+}

@@ -1,0 +1,1714 @@
+{
+	"ID": "20240530101000-6x9ivi7",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-7ykakbe",
+		"id": "20240530101000-6x9ivi7",
+		"title": "テンプレートスニペット",
+		"type": "doc",
+		"updated": "20250828155138"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-3ihd6qh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-tozyly3",
+				"id": "20240530101000-3ihd6qh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ig1ly4b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-975g92o",
+				"id": "20240530101000-ig1ly4b",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートスニペットは、事前に設定した定型文をカーソル位置にすばやく挿入するためのものです。これは変数をサポートしており、拡張子が "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ のファイルをワークスペースの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ フォルダに保存して使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pi05yzt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-5nvn9ad",
+				"id": "20240530101000-pi05yzt",
+				"updated": "20250828155138"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートの作成"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-8ocp61l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-jyik9sh",
+				"id": "20240530101000-8ocp61l",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://golang.org/pkg/text/template/",
+					"TextMarkTextContent": "Go 言語のテキストテンプレート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で実装されているため、このテンプレートの仕組みについての理解があれば、比較ロジックや反復ロジックなどのプログラムロジックを実装できます。また、構文の競合を避けるため、テンプレート構文では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{{action}}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ の代わりに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{action}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-hf0p1cl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-9aulmd0",
+				"id": "20240530101000-hf0p1cl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "オープンソースプロジェクトの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/Masterminds/sprig",
+					"TextMarkTextContent": "Sprig"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を通じて、いくつかの変数と関数を組み込んでテンプレートを充実させています。たとえば、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{now | date \u0026quot;2006-01-02 15:04:05\u0026quot;}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用すると現在時刻を表示できます。より詳しい使用方法は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://masterminds.github.io/sprig/",
+					"TextMarkTextContent": "Sprig のドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ukwm932",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cx9afxf",
+				"id": "20240530101000-ukwm932",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: Go 言語の日時フォーマットは、通常よくある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "yyyy-MM-dd HH:mm:ss"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ではなく、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a code",
+					"TextMarkAHref": "https://pkg.go.dev/time#pkg-constants",
+					"TextMarkTextContent": "2006-01-02 15:04:05"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ という固定されたフォーマットを使用する点に注意が必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4rh43gg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-1e7ozk3",
+				"id": "20240530101000-4rh43gg",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sprig に組み込まれている変数と関数に加えて、以下の変数と関数もサポートされています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-by5hqnb",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20240530101000-by5hqnb",
+				"updated": "20250828155138"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-bua0yt4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-bua0yt4",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ktp2f1l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-ktp2f1l",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この変数は現在のドキュメント名を挿入します。たとえば、"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "テンプレート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "の内容が "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "# .action{.title}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ の場合、呼び出し後にレベル 1 の見出しとしてドキュメント名が挿入されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-wx2hcib",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-wx2hcib",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ilxclyp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-ilxclyp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この変数は現在のドキュメント ID を挿入します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-k46zytu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-k46zytu",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-v63d69b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-v63d69b",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この変数は現在のドキュメント名を挿入します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-2xrfh9j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-2xrfh9j",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ag584e3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-ag584e3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alias"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この変数は現在のドキュメントのエイリアスを挿入します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240921122700-o8mea2f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240921122700-o8mea2f",
+						"updated": "20240921123108"
+					},
+					"Children": [
+						{
+							"ID": "20240921122700-gol6drn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240921122700-gol6drn",
+								"updated": "20240921123108"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getHPathByID"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は、ブロック ID に対応するブロックの可読パスを返すために使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-0y2zlji",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-0y2zlji",
+						"updated": "20250801152859"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-obb5zo9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-obb5zo9",
+								"updated": "20241213215612"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "queryBlocks"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "をクエリしてブロックのリストを返します"
+								}
+							]
+						},
+						{
+							"ID": "20241213215628-5gixpmp",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215628-5gixpmp",
+								"style": "line-height: 22px;",
+								"updated": "20250801152859"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250331163610-n3e9zft",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250331163610-n3e9zft",
+						"updated": "20250801152903"
+					},
+					"Children": [
+						{
+							"ID": "20250331163610-nbmwe90",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250331163610-nbmwe90",
+								"updated": "20250331163621"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数はブロックIDに基づいて"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を照会するために使用され、戻り値はブロックです"
+								}
+							]
+						},
+						{
+							"ID": "20250331163621-j4iofxv",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20250331163621-j4iofxv",
+								"updated": "20250801152903"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ getBlock \"20250331163610-n3e9zft\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-238ctfi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-238ctfi",
+						"updated": "20250801152909"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4wi25sk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-4wi25sk",
+								"updated": "20241213215614"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySpans"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "をクエリしてスパンのリストを返します"
+								}
+							]
+						},
+						{
+							"ID": "20241213215619-gkqs282",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215619-gkqs282",
+								"style": "line-height: 22px;",
+								"updated": "20250801152909"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ querySpans \"SELECT * FROM spans LIMIT ?\" \"3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241213215009-qrtc56j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241213215009-qrtc56j",
+						"updated": "20250801152915"
+					},
+					"Children": [
+						{
+							"ID": "20241213215009-fev1gao",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241213215009-fev1gao",
+								"updated": "20241213215617"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySQL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "へのクエリに使用され、戻り値は結果セットです"
+								}
+							]
+						},
+						{
+							"ID": "20241213215633-69ltmv1",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215633-69ltmv1",
+								"style": "line-height: 22px;",
+								"updated": "20250801152915"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ querySQL \"SELECT * FROM refs LIMIT 3\" }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212102033-rn9u6t8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212102033-rn9u6t8",
+						"updated": "20250801152922"
+					},
+					"Children": [
+						{
+							"ID": "20241212102033-d4azb7k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212102033-d4azb7k",
+								"updated": "20241212163936"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：この関数はブロックの内容を数えるために使用されます"
+								}
+							]
+						},
+						{
+							"ID": "20241213215720-ueqpsna",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215720-ueqpsna",
+								"style": "line-height: 22px;",
+								"updated": "20250801152922"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ (statBlock .id).RuneCount }\n.action{ (statBlock .id).WordCount }\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20241212102033-ib8fdwx",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241212102033-ib8fdwx",
+								"updated": "20241212102033"
+							},
+							"Children": [
+								{
+									"ID": "20241212102033-lijk8pe",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-lijk8pe",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-ch66lvd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-ch66lvd",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RuneCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-527kxt0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-527kxt0",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-7iop2es",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-7iop2es",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "WordCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-zicftlk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-zicftlk",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-871ju7g",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-871ju7g",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "LinkCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-2k2gz3h",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-2k2gz3h",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-1ss2d9y",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-1ss2d9y",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ImageCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-905g5ga",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-905g5ga",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-k7jgqz4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-k7jgqz4",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RefCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-xbpy9ew",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-xbpy9ew",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-kvquhrn",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-kvquhrn",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "BlockCount"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212163938-ewajrsj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212163938-ewajrsj",
+						"updated": "20241212163955"
+					},
+					"Children": [
+						{
+							"ID": "20241212163938-y1al3b9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212163938-y1al3b9",
+								"updated": "20241225192824"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は文字列内の文字数を返すために使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241225192825-vi77q0u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241225192825-vi77q0u",
+						"updated": "20241225192831"
+					},
+					"Children": [
+						{
+							"ID": "20241225192825-uicespl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241225192825-uicespl",
+								"updated": "20241225192831"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "wordCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：この関数は文字列内の単語数を返すために使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-xhrxvp5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-xhrxvp5",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-wuj9ay8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-wuj9ay8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "parseTime"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は時間のフォーマット文字列を "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 型にパースします。これにより、より多くの書式によって時刻を表すことができます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-kh0a938",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-kh0a938",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-mvxsseo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-mvxsseo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Weekday"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は曜日を数値で返します ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=0, Monday=1, ..., Saturday=6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-tri1ybg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-tri1ybg",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-trzydfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-trzydfr",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は曜日を中国語の文字列で返します ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=日, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-5mr7f95",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-5mr7f95",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-5zpnush",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-5zpnush",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "WeekdayCN2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は曜日を中国語の別の文字列で返します ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Sunday=天, Monday=一, ..., Saturday=六"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-28r34vb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-28r34vb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ktm1kij",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-ktm1kij",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeek"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は週番号を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155049-69k1o8n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155049-69k1o8n",
+						"updated": "20250828155049"
+					},
+					"Children": [
+						{
+							"ID": "20250828155049-vbcmh76",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155049-vbcmh76",
+								"updated": "20250828155051"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOMonth"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は現在の月を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155051-8r71644",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155051-8r71644",
+						"updated": "20250828155051"
+					},
+					"Children": [
+						{
+							"ID": "20250828155051-d8e3faa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155051-d8e3faa",
+								"updated": "20250828155057"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOYear"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は現在の年を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155057-hqlahyc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155057-hqlahyc",
+						"updated": "20250828155138"
+					},
+					"Children": [
+						{
+							"ID": "20250828155057-s2ugs9d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155057-s2ugs9d",
+								"updated": "20250828155138"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeekDate"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を使用して指定された曜日の日付を返します。例えば、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{now | ISOWeekDate 4 | date \"2006-01-02\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ は今週の木曜日の日付を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-q2rf0ys",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-q2rf0ys",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-iom0qak",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-iom0qak",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "pow"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 指数計算を行い整数を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-w5jc0fz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-w5jc0fz",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-eymmw85",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-eymmw85",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "powf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 指数計算を行い浮動小数点数を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-1ff3zeb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-1ff3zeb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6jhy040",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-6jhy040",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "log"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 対数計算を行い整数を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-fkeji33",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240530101000-fkeji33",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4lrarz6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-4lrarz6",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "logf"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 対数計算を行い浮動小数点数を返します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ud82uol",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-f4c1izj",
+				"id": "20240530101000-ud82uol",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートの呼び出し"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-28u2ufi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-2pcv6i6",
+				"id": "20240530101000-28u2ufi",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カーソル位置で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を入力してテンプレート検索を起動し、挿入したいテンプレートを選んで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ キーを押します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3jhyboz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-h8k78jq",
+				"id": "20240530101000-3jhyboz",
+				"updated": "20250801152939"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用例"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-v44hxz6",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20240530101000-v44hxz6",
+				"updated": "20250801152939"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{ $before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24) }\n.action{ $after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24) }\n今日は `.action{ now | date \"2006-01-02\" }` 日です。\n\n* `2020-02-19` 日から `.action{ $before }` 日経過しました\n* `2048-02-19` 日まであと `.action{ $after }` 日です\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-as2oksv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bwb40b3",
+				"id": "20240530101000-as2oksv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$before"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "$after"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ は、現在の日付から 2020 年と 2048 年までの日数を記録する 2 つの変数を定義しています。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bkqjdmt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-41fyx9q",
+				"id": "20240530101000-bkqjdmt",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスに公開する"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-y8h9h7d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-x3uff8u",
+				"id": "20240530101000-y8h9h7d",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6htu6hr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ysh7guz",
+				"id": "20240530101000-6htu6hr"
+			}
+		}
+	]
+}

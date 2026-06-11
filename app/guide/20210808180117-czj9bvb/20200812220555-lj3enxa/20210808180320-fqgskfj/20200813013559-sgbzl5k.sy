@@ -1,0 +1,1029 @@
+{
+	"ID": "20200813013559-sgbzl5k",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200813013559-sgbzl5k",
+		"title": "引用内容块",
+		"type": "doc",
+		"updated": "20250311200002"
+	},
+	"Children": [
+		{
+			"ID": "20200817123136-in6y5m1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20200817123136-in6y5m1",
+				"updated": "20210512154105"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-575kpbp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090557-575kpbp",
+				"updated": "20220623200602"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后将触发内容块引用搜索，继续输入作为搜索关键字，在搜索结果中使用上下键选定后回车就可以完成内容块的引用了。建立好内容块引用后，鼠标悬浮在锚文本上后将弹出预览浮层，展现被引用的内容块（定义块）。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "内容块/引用"
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-841hf2w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210104090557-841hf2w",
+				"updated": "20210512154248"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "链接方向"
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-jjkb0dx",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20210104090557-jjkb0dx"
+			},
+			"Children": [
+				{
+					"ID": "20210104090557-b5ngr4n",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090557-b5ngr4n"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-qqrbyfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-qqrbyfr"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "正向链接（Forwardlink），即当前内容块使用了哪些其他内容块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090557-v1h50ji",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20210104090557-v1h50ji"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-0o8gbmc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-0o8gbmc"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "反向链接（Backlink），即当前内容块被那些其他内容块使用了"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-gyj2den",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090557-gyj2den"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "正向链接包含在当前块的内容中，我们可以很直观的看到。反向链接需要在其他文档中搜索才能知道，而恰恰是这些信息对我们比较有价值。我们可以通过以下两种方式来帮助我们更好的掌握知识点或者发散思路："
+				}
+			]
+		},
+		{
+			"ID": "20210104090557-7zvf09v",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210104090557-7zvf09v",
+				"updated": "20220623195720"
+			},
+			"Children": [
+				{
+					"ID": "20210104090557-oiry1d1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104090557-oiry1d1"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-njoyflf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-njoyflf"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210104090757-xwom8ia",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "关系图"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：浏览"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "之间的正向和"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "反向链接"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "关系"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210104090557-2qggmq4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210104090557-2qggmq4",
+						"updated": "20220623195720"
+					},
+					"Children": [
+						{
+							"ID": "20210302223302-ifcbul4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210302223302-ifcbul4",
+								"updated": "20220623195720"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200920194146-psjundj",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "反向链接"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：以文本列表的方式展现当前"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "的"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "反向链接"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623194755-30vtsr7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623194755-30vtsr7",
+				"updated": "20250311200002"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "锚文本"
+				}
+			]
+		},
+		{
+			"ID": "20220623194759-un63o8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623194759-un63o8s",
+				"updated": "20220623195050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "锚文本即渲染引用时看到的文本，分为静态锚文本和动态锚文本："
+				}
+			]
+		},
+		{
+			"ID": "20220623195050-mpcd3br",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623195050-mpcd3br",
+				"updated": "20220623195233"
+			},
+			"Children": [
+				{
+					"ID": "20220623195051-q6iegdm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195051-q6iegdm",
+						"updated": "20220623195135"
+					},
+					"Children": [
+						{
+							"ID": "20220623195051-ijrhvi2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195051-ijrhvi2",
+								"updated": "20220623195417"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "静态锚文本：不会跟随定义块内容变化，即固定展现指定的内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623195125-kapn1my",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195125-kapn1my",
+						"updated": "20220623195233"
+					},
+					"Children": [
+						{
+							"ID": "20220623195125-51yt5os",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195125-51yt5os",
+								"updated": "20220623195328"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "动态锚文本：跟随定义块内容变化，最大长度可在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "块引动态锚文本最大长度"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中设置，最长支持 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "5120"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 个字符"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623195419-mc5y2rl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623195419-mc5y2rl",
+				"updated": "20220623195748"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改锚文本的方式如下："
+				}
+			]
+		},
+		{
+			"ID": "20220623195559-r0greck",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623195559-r0greck",
+				"updated": "20230420185816"
+			},
+			"Children": [
+				{
+					"ID": "20220623195600-uawu5gj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195600-uawu5gj",
+						"updated": "20220623195600"
+					},
+					"Children": [
+						{
+							"ID": "20220623195600-7hw6t6b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195600-7hw6t6b",
+								"updated": "20220623195659"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "将光标插入符移入"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "元素，直接修改内容，这样会将该"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "的锚文本设置为静态锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623195701-obv1sdb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195701-obv1sdb"
+					},
+					"Children": [
+						{
+							"ID": "20220623195701-akeq453",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195701-akeq453",
+								"updated": "20220623195737"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "右键单击"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "元素后在弹出的菜单中修改锚文本，这样得到的锚文本也是静态锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623195738-5zwao6z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623195738-5zwao6z",
+						"updated": "20220623195906"
+					},
+					"Children": [
+						{
+							"ID": "20220623195738-7bxe56c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623195738-7bxe56c",
+								"updated": "20220623195906"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "右键单击"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "元素后在弹出的菜单中清空锚文本，这样将使用动态锚文本"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230420185651-fqx6ww6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230420185651-fqx6ww6",
+				"updated": "20230420185832"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 搜索结果列表中："
+				}
+			]
+		},
+		{
+			"ID": "20230420185742-g0vtyx7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230420185742-g0vtyx7",
+				"updated": "20250311200002"
+			},
+			"Children": [
+				{
+					"ID": "20230420185742-14djxj3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185742-14djxj3",
+						"updated": "20250311200000"
+					},
+					"Children": [
+						{
+							"ID": "20230420185742-brqgayg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185742-brqgayg",
+								"updated": "20250311200000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "直接 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "回车"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 或者 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "点击"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将使用动态锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230420185748-ehr9h7w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420185748-ehr9h7w",
+						"updated": "20250311200002"
+					},
+					"Children": [
+						{
+							"ID": "20230420185748-sb1thir",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420185748-sb1thir",
+								"updated": "20250311200002"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按住 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "回车"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 或者 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "点击"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将使用静态锚文本"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230420122954-zw10k6f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230420122954-zw10k6f",
+				"updated": "20230420122957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "筛选"
+				}
+			]
+		},
+		{
+			"ID": "20230518100357-4wadf96",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230518100357-4wadf96",
+				"updated": "20230518100526"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 中启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "[[ 仅搜索文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 后："
+				}
+			]
+		},
+		{
+			"ID": "20230420123112-keq7tik",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230420123112-keq7tik",
+				"updated": "20230820103525"
+			},
+			"Children": [
+				{
+					"ID": "20230420123137-dju5jji",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420123137-dju5jji",
+						"updated": "20230820102949"
+					},
+					"Children": [
+						{
+							"ID": "20230420123137-61yxpkv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420123137-61yxpkv",
+								"updated": "20230820102949"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "(("
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​​ 在"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20200905090211-2vixtlf",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "所有类型的块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "中进行搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230420123140-08i801q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230420123140-08i801q",
+						"updated": "20230820103525"
+					},
+					"Children": [
+						{
+							"ID": "20230420123140-ghbasee",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230420123140-ghbasee",
+								"updated": "20230820103525"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 仅搜索"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210104090624-5abfwla",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "文档块"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623194610-9i15h8j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220623194610-9i15h8j",
+				"updated": "20220623194926"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "语法"
+				}
+			]
+		},
+		{
+			"ID": "20220623194617-93ho3r1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623194617-93ho3r1",
+				"updated": "20220623200842"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 触发引用搜索外，也可以直接使用语法 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "((id \"锚文本\"))"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20220623200042-wi0fnoq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220623200042-wi0fnoq",
+				"updated": "20221007175038"
+			},
+			"Children": [
+				{
+					"ID": "20220623200048-ksp1pha",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200048-ksp1pha",
+						"updated": "20220623200048"
+					},
+					"Children": [
+						{
+							"ID": "20220623200048-khk1tas",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200048-khk1tas",
+								"updated": "20220623200105"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 包裹锚文为静态锚文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220623200105-p2p4qu7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220623200105-p2p4qu7",
+						"updated": "20221007175038"
+					},
+					"Children": [
+						{
+							"ID": "20220623200105-fpr7anp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220623200105-fpr7anp",
+								"updated": "20221007175038"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026apos;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 包裹锚文本为动态锚文本，会在重建索引时自动重写"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220623200140-527rg7n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220623200140-527rg7n",
+				"updated": "20220623200426"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "直接使用语法的主要场景是通过外部工具或者 API 建立"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，大部分情况下我们主要还是直接使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 触发"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "搜索来建立"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		}
+	]
+}

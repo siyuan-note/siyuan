@@ -1,0 +1,1302 @@
+{
+	"ID": "20220415232231-pqcizol",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220415232231-pqcizol",
+		"title": "Query syntax",
+		"type": "doc",
+		"updated": "20250115150346"
+	},
+	"Children": [
+		{
+			"ID": "20220415232239-abvrkg2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232239-abvrkg2",
+				"updated": "20250115150346"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-xvsiw7v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-xvsiw7v",
+				"updated": "20250115150346"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Global search  "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ supports advanced search through query syntax, in order to implement some logical operations, such as the query syntax that contains the keyword "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and does not contain the keyword "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ is "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "foo NOT bar"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-bf83mru",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-bf83mru",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before using the query syntax, let's have a general understanding of its composition:"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-2eww0wd",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220415232239-2eww0wd",
+				"updated": "20220415232402"
+			},
+			"Children": [
+				{
+					"ID": "20220415232239-pt2gqk2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232239-pt2gqk2",
+						"updated": "20220415232402"
+					},
+					"Children": [
+						{
+							"ID": "20220415232239-o9y45xb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232239-o9y45xb",
+								"updated": "20220415232402"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "String: composed of letters, numbers, etc."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415232239-vz9o00o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232239-vz9o00o",
+						"updated": "20220415232239"
+					},
+					"Children": [
+						{
+							"ID": "20220415232239-couxrbd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232239-couxrbd",
+								"updated": "20220415232239"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Phrase: composed of strings"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415232239-7lyjjlg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232239-7lyjjlg",
+						"updated": "20220415232239"
+					},
+					"Children": [
+						{
+							"ID": "20220415232239-ecoeyl1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232239-ecoeyl1",
+								"updated": "20220415232239"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Query: composed of phrases, multiple queries can be combined into a new query through "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "AND"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "OR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "NOT"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-91we456",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-91we456",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Below we introduce their details respectively."
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-9x4gcsx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232239-9x4gcsx",
+				"updated": "20220415232431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Strings"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-iffq145",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-iffq145",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Strings can be specified in two ways:"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-bf52gq4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220415232239-bf52gq4",
+				"updated": "20220415232616"
+			},
+			"Children": [
+				{
+					"ID": "20220415232239-9obi3e2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232239-9obi3e2",
+						"updated": "20220415232500"
+					},
+					"Children": [
+						{
+							"ID": "20220415232239-o7glmzf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232239-o7glmzf",
+								"updated": "20220415232500"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Characters enclosed in English double quotes "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". If "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " itself needs to be used, it can be escaped by SQL-style (plus a "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": "), for example "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\"foo\"\"bar\"\"\""
+								},
+								{
+									"Type": "NodeText",
+									"Data": " will hits "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "foo \"bar\""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415232239-7znuuq7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415232239-7znuuq7",
+						"updated": "20220415232616"
+					},
+					"Children": [
+						{
+							"ID": "20220415232239-21ckvvg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415232239-21ckvvg",
+								"updated": "20220415232537"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Consists of non "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "AND"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "OR"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "NOT"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " characters, and these characters must be:"
+								}
+							]
+						},
+						{
+							"ID": "20220415232239-yrossym",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220415232239-yrossym",
+								"updated": "20220415232616"
+							},
+							"Children": [
+								{
+									"ID": "20220415232239-eyybo63",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232239-eyybo63",
+										"updated": "20220415232603"
+									},
+									"Children": [
+										{
+											"ID": "20220415232239-13cj18b",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232239-13cj18b",
+												"updated": "20220415232603"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "All non-ASCII characters, or"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232239-55fpsg3",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232239-55fpsg3",
+										"updated": "20220415232239"
+									},
+									"Children": [
+										{
+											"ID": "20220415232239-eu59o1h",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232239-eu59o1h",
+												"updated": "20220415232239"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Belongs to 52 uppercase and lowercase English characters ("
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "A-Za-z"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "), or"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232239-yvsjx0l",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232239-yvsjx0l",
+										"updated": "20220415232239"
+									},
+									"Children": [
+										{
+											"ID": "20220415232239-9gzzt33",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232239-9gzzt33",
+												"updated": "20220415232239"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Belongs to 10 ASCII numeric characters ("
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "0-9"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "), or"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232239-77g2mfa",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232239-77g2mfa",
+										"updated": "20220415232615"
+									},
+									"Children": [
+										{
+											"ID": "20220415232239-4d0b287",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232239-4d0b287",
+												"updated": "20220415232615"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Is an underscore "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "_"
+												},
+												{
+													"Type": "NodeText",
+													"Data": ", or"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220415232239-gtmvftf",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220415232239-gtmvftf",
+										"updated": "20220415232616"
+									},
+									"Children": [
+										{
+											"ID": "20220415232239-lalwhj7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220415232239-lalwhj7",
+												"updated": "20220415232616"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Is the replacement character (ASCII 26)"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-3nnn6m9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-3nnn6m9",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For strings that are not composed of other characters mentioned above, they must be wrapped with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\""
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", such as strings containing "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "-"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "*"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and other symbols."
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-nln4l9x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232239-nln4l9x",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Phrases"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-eewj58z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-eewj58z",
+				"updated": "20230820184820"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Phrases consist of strings, which can be concatenated by "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. A phrase is composed of some tokens in order, and these tokens are processed by the user's input text through the tokenizer. The tokenizer used by SiYuan is to make Chinese search easy to use (supports single-word search), so the implementation is based on word segmentation, which means that each Chinese character or English letter will be split into a token. This has some effect on "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ concatenation, so it is recommended not to use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "+"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ to combine multiple phrases if unsure."
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-rrjlw3p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415232239-rrjlw3p",
+				"updated": "20220415232435"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Queries"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-37vz7jx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-37vz7jx",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A query consists of multiple phrases, which can be combined into a new query by the operators "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AND"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "OR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "NOT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220415232838-yxo6xjb",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20220415232838-yxo6xjb",
+				"updated": "20220415233221"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Operator"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Function"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u003cquery1\u003e AND \u003cquery2\u003e"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Matches if both query1 and query2 match"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u003cquery1\u003e OR \u003cquery2\u003e"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Matches if either query1 or query2 match"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u003cquery1\u003e NOT \u003cquery2\u003e"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Matches if query1 matches and query2 does not match"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-muzrygb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-muzrygb",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use parentheses "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "()"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to combine query priorities, for example:"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-3z0w5v1",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20220415232239-3z0w5v1",
+				"updated": "20220502163630"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "-- Matches documents that contain at least one instance of either \"one\" or \"two\", but do not contain any instances of token \"three\".\n'one OR two NOT three'\n\n-- Match all documents that contain the token \"two\" but not \"three\", or contain the token \"one\".\n'one OR (two NOT three)'\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-sjz7nbl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415232239-sjz7nbl",
+				"updated": "20220415232239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Multiple phrases separated by spaces use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "AND"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " by default, for example:"
+				}
+			]
+		},
+		{
+			"ID": "20220415232239-axj842d",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20220415232239-axj842d",
+				"updated": "20220502163624"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "c3Fs"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "'one two three'         -- 'one AND two AND three'\n'three \"one two\"'       -- 'three AND \"one two\"'\n'NEAR(one two) three'   -- 'NEAR(one two) AND three'\n'one OR two three'      -- 'one OR two AND three'\n\n'(one OR two) three'    -- Syntax error!\n'func(one two)'         -- Syntax error!\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-mnuypxn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220415233433-mnuypxn",
+				"updated": "20220415234726"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Technical implementation"
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-qwsmc8y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-qwsmc8y",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "We implement global search through "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.sqlite.org/fts5.html",
+					"TextMarkTextContent": "SQLite FTS5"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-63nplm9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-63nplm9",
+				"updated": "20220415233534"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The key part of the query statement generated by the system is roughly "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "MATCH '{content name alias memo}:\" + query"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "query"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is the user input part, for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.sqlite.org/fts5 .html#fts5_column_filters",
+					"TextMarkTextContent": "column filter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "{content name alias memo}:"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is generated by "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Attribute"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-n86851p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-n86851p",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After knowing these, we can implement the query embedding block through the query syntax, so that the query performance will be better:"
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-411i0bp",
+			"Type": "NodeBlockQueryEmbed",
+			"Properties": {
+				"id": "20220415233433-411i0bp",
+				"updated": "20220415234441"
+			},
+			"Children": [
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeOpenBrace"
+				},
+				{
+					"Type": "NodeBlockQueryEmbedScript",
+					"Data": "SELECT * FROM blocks_fts WHERE blocks_fts MATCH 'content:query syntax' AND root_id = '20220415232231-pqcizol' LIMIT 1\n"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				},
+				{
+					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-y5pcphn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-y5pcphn",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to this, the API also supports querying using FTS."
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-g35tpdb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220415233433-g35tpdb",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Case Sensitive"
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-sux85ge",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-sux85ge",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Case Sensitivity"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " option is enabled, the search will be case-sensitive. By default, this option is disabled, that is, insensitive upper and lower case."
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-i4kcfj4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-i4kcfj4",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Since the tokenizer is case-sensitive, we build two virtual tables to index separately:"
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-f30zc20",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220415233433-f30zc20",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"ID": "20220415233433-t271q5k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415233433-t271q5k",
+						"updated": "20220415233433"
+					},
+					"Children": [
+						{
+							"ID": "20220415233433-90wb0ni",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415233433-90wb0ni",
+								"updated": "20220415233433"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "blocks_fts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": word segmentation by character"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220415233433-1tgbpan",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220415233433-1tgbpan",
+						"updated": "20220415233433"
+					},
+					"Children": [
+						{
+							"ID": "20220415233433-dctynln",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220415233433-dctynln",
+								"updated": "20220415233433"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "blocks_fts_case_insensitive"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Convert English letters to lowercase participles"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-tcac279",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-tcac279",
+				"updated": "20230802221616"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The disadvantage of this is that it increases disk space usage and reduces indexing performance, but there is currently no better solution, so it can only be done first. In addition, diacritics are not supported, only supported case insensitive."
+				}
+			]
+		},
+		{
+			"ID": "20220415233433-hexjxcl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220415233433-hexjxcl",
+				"updated": "20220415233433"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you have a better implementation, please let us know, thank you very much."
+				}
+			]
+		}
+	]
+}

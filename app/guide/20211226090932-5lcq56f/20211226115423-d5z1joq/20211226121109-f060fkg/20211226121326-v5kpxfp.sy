@@ -1,0 +1,1293 @@
+{
+	"ID": "20211226121326-v5kpxfp",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20211226121326-v5kpxfp",
+		"title": "主題",
+		"type": "doc",
+		"updated": "20230821210822"
+	},
+	"Children": [
+		{
+			"ID": "20230418093600-j6ii2qs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230418093600-j6ii2qs",
+				"updated": "20230418093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230418093600-savcdrb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093600-savcdrb",
+				"updated": "20230418093600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有兩種方式自定義主題："
+				}
+			]
+		},
+		{
+			"ID": "20230418093600-pvpd2nw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230418093600-pvpd2nw",
+				"updated": "20230418093600"
+			},
+			"Children": [
+				{
+					"ID": "20230418093600-3l1xco0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093600-3l1xco0",
+						"updated": "20230418093600"
+					},
+					"Children": [
+						{
+							"ID": "20230418093600-uuj8og1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093600-uuj8og1",
+								"updated": "20230418093600"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "代碼片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230418093600-axttrrp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230418093600-axttrrp",
+						"updated": "20230418093600"
+					},
+					"Children": [
+						{
+							"ID": "20230418093600-3ogagqr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230418093600-3ogagqr",
+								"updated": "20230418093600"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主題包"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220806105512-qod53ij",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220806105512-qod53ij",
+				"updated": "20230418093608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "代碼片段"
+				}
+			]
+		},
+		{
+			"ID": "20230417141958-yemp12k",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20230417141958-yemp12k",
+				"updated": "20230417141958"
+			},
+			"Children": [
+				{
+					"ID": "20230417141958-141fdej",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20230417141958-141fdej",
+						"updated": "20230417142023"
+					},
+					"Children": [
+						{
+							"ID": "20230417141958-m3qhlu1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141958-m3qhlu1",
+								"updated": "20230417142023"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "打開  "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外觀"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，點擊 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "代碼片段設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，選中 CSS 分頁"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141958-slzg8hh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230417141958-slzg8hh",
+						"updated": "20230417141958"
+					},
+					"Children": [
+						{
+							"ID": "20230417141958-9xigs5p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141958-9xigs5p",
+								"updated": "20230417141958"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "填入標題"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141958-r7aflkw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20230417141958-r7aflkw",
+						"updated": "20230417141958"
+					},
+					"Children": [
+						{
+							"ID": "20230417141958-oonruqo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141958-oonruqo",
+								"updated": "20230417141958"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "根據主題和 theme.css 中的變量參照如下寫法進行編碼後填入代碼片段中"
+								}
+							]
+						},
+						{
+							"ID": "20230417141958-fzl7p5c",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20230417141958-fzl7p5c",
+								"updated": "20230417141958"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "Y3Nz"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "html[data-light-theme=\"daylight\"][data-theme-mode=\"light\"] {\n    --b3-theme-primary: red;\n}\n\nhtml[data-light-theme=\"daylight\"][data-theme-mode=\"dark\"] {\n    --b3-theme-primary: blue;\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141958-lti6wgc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230417141958-lti6wgc",
+						"updated": "20230417141958"
+					},
+					"Children": [
+						{
+							"ID": "20230417141958-rit2pvw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141958-rit2pvw",
+								"updated": "20230417141958"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開啟該代碼片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230417141958-088cu1s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20230417141958-088cu1s",
+						"updated": "20230417141958"
+					},
+					"Children": [
+						{
+							"ID": "20230417141958-wjn3w7f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230417141958-wjn3w7f",
+								"updated": "20230417141958"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "點擊確定按鈕"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230418093635-7nkc3rv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230418093635-7nkc3rv",
+				"updated": "20230418093635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主題包"
+				}
+			]
+		},
+		{
+			"ID": "20230418093635-r9dyxtr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230418093635-r9dyxtr",
+				"updated": "20230418093635"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主題包可以從社區集市下載或者手動安裝。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-afma4ct",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226121625-afma4ct",
+				"updated": "20211226004500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "社區集市"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-yv8muau",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121625-yv8muau",
+				"updated": "20230418094608"
+			},
+			"Children": [
+				{
+					"ID": "20211226121625-vu61b5u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-vu61b5u",
+						"updated": "20230418094608"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-63qu17b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-63qu17b",
+								"updated": "20230418094608"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外觀"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "集市"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "主題"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中線上瀏覽社區開發者貢獻的主題"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-2vzqih2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-2vzqih2",
+						"updated": "20211228125156"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-5aqcun6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-5aqcun6",
+								"updated": "20211228125156"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選擇所需主題線上安裝或者更新"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-9gvolt7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226121625-9gvolt7",
+				"updated": "20230418093711"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動安裝"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-u23xqp9",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20211226121625-u23xqp9",
+				"updated": "20211226004500"
+			},
+			"Children": [
+				{
+					"ID": "20211226121625-vjong8l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20211226121625-vjong8l"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-khx8p0a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-khx8p0a"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "從某處獲取主題並解壓"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-oratfx2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20211226121625-oratfx2"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-bmkfnlq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-bmkfnlq"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外觀"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "主題"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "打開主題文件夾"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-821m3kl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20211226121625-821m3kl"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-1dfljpj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-1dfljpj"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "將主題拷貝到該文件夾中"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-8azw5px",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20211226121625-8azw5px"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-qz7pauj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-qz7pauj"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重啟後在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外觀"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "主題"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中選擇所需主題"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-vzxo6di",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226121625-vzxo6di",
+				"updated": "20230418094752"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開發"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-htodsm6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226121625-htodsm6",
+				"updated": "20211226004500"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "步驟"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-pcuvzd2",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20211226121625-pcuvzd2",
+				"updated": "20230821210822"
+			},
+			"Children": [
+				{
+					"ID": "20211226121625-cmmoral",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20211226121625-cmmoral"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-vac2mdg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-vac2mdg"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "為你的主題取一個好聽的名字，如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-8k8dqpo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20211226121625-8k8dqpo"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-qx7mu6y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-qx7mu6y"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外觀"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "主題"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "打開主題文件夾"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-dwa3a7v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20211226121625-dwa3a7v",
+						"updated": "20230821210822"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-e64xwyp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-e64xwyp",
+								"updated": "20230821210822"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在打開的文件夾中新建文件夾 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中新建 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.json"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文件，具體示例請參考 github repo: siyuan-note/theme-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-l7suafz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20211226121625-l7suafz"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-9gbm8ox",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-9gbm8ox"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "打開 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 文件，開啟你的編碼旅程"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-red31uo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20211226121625-red31uo",
+						"updated": "20211226004500"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-5znyi1k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-5znyi1k",
+								"updated": "20211226004500"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重啟後在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "外觀"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "主題"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中選擇安裝好的主題"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-kirhoib",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20211226121625-kirhoib",
+				"updated": "20211226004835"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編碼"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-tvni8h7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20211226121625-tvni8h7",
+				"updated": "20211226004905"
+			},
+			"Children": [
+				{
+					"ID": "20211226121625-xnu9zz8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-xnu9zz8"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-wa11tdn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-wa11tdn"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "熟悉 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/CSS",
+									"TextMarkTextContent": "CSS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 基礎知識"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-i9negbq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-i9negbq"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-61yh93j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-61yh93j"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "修改 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ":root{...}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中的配色。⚠️ 不可刪除官方中原有的變量項"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-yssmpht",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-yssmpht"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-4zsm2ws",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-4zsm2ws"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按照圖中 1-4 步不斷進行修改\n"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "custom-theme1.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/custom-theme1-20210512172221-x541iq1.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-sry8m9g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-sry8m9g",
+						"updated": "20211226004905"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-nosgk2u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-nosgk2u",
+								"updated": "20211226004905"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "將修改後的內容複製貼入 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中並保存"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20211226121625-4wnr5ps",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20211226121625-4wnr5ps"
+					},
+					"Children": [
+						{
+							"ID": "20211226121625-4woz4wx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20211226121625-4woz4wx"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中勾選 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 後運行 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "window.location.reload()"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 以查看最終效果\n"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "custom-theme2.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/custom-theme2-20210512172239-pcnzes0.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-3wjcf6l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121625-3wjcf6l",
+				"updated": "20221114173638"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上架社區集市"
+				}
+			]
+		},
+		{
+			"ID": "20221114173540-jb1qizj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221114173540-jb1qizj",
+				"updated": "20230820184013"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請參考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkTextContent": "社區集市倉庫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121625-pyeijeb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121625-pyeijeb",
+				"updated": "20211226121625"
+			}
+		}
+	]
+}

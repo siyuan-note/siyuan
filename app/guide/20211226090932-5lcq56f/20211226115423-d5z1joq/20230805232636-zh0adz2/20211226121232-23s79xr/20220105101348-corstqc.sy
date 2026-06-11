@@ -1,0 +1,363 @@
+{
+	"ID": "20220105101348-corstqc",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20220105101348-corstqc",
+		"title": "限制",
+		"type": "doc",
+		"updated": "20241010011131"
+	},
+	"Children": [
+		{
+			"ID": "20220105101409-es213ce",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220105101409-es213ce",
+				"updated": "20241010011131"
+			},
+			"Children": [
+				{
+					"ID": "20220105101409-r9z7pa7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-r9z7pa7",
+						"updated": "20220722230405"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-jfva42o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-jfva42o",
+								"updated": "20220722230405"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最多支持保存 12 個資料快照"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101409-0c3wlyv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-0c3wlyv",
+						"updated": "20220105101409"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-2awkety",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-2awkety",
+								"updated": "20220105101409"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最多支持建立 7 個雲端同步目錄"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101409-7pgt847",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-7pgt847",
+						"updated": "20220105101409"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-7009hm1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-7009hm1",
+								"updated": "20220105101409"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "雲端存儲空間初始化總大小為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "8G"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241010011126-lo7wzgl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241010011126-lo7wzgl",
+						"updated": "20241010011131"
+					},
+					"Children": [
+						{
+							"ID": "20241010011131-1bdnqa3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241010011131-1bdnqa3",
+								"updated": "20241010011131"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "雲端儲存中的資料快照最長保留 30 天，即 30 天之前的未引用快照會自動清理"
+								}
+							]
+						},
+						{
+							"ID": "20241010011131-2egibp2",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241010011131-2egibp2",
+								"updated": "20241010011131"
+							},
+							"Children": [
+								{
+									"ID": "20241010011131-saf8vu8",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011131-saf8vu8",
+										"updated": "20241010011131"
+									},
+									"Children": [
+										{
+											"ID": "20241010011131-8yhnff8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011131-8yhnff8",
+												"updated": "20241010011131"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "每次資料同步後的最新快照不會被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010011131-cpuww84",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011131-cpuww84",
+										"updated": "20241010011131"
+									},
+									"Children": [
+										{
+											"ID": "20241010011131-l03qyip",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011131-l03qyip",
+												"updated": "20241010011131"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "手動標記備份上傳到雲端的快照不會被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010011131-g5u8rek",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011131-g5u8rek",
+										"updated": "20241010011131"
+									},
+									"Children": [
+										{
+											"ID": "20241010011131-miuu9d9",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011131-miuu9d9",
+												"updated": "20241010011131"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "30 天內的快照不會被清理"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220105101409-7he9vg5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220105101409-7he9vg5",
+						"updated": "20230808220451"
+					},
+					"Children": [
+						{
+							"ID": "20220105101409-xyalcc9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220105101409-xyalcc9",
+								"updated": "20220325115431"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "付費訂閱到期以後，雲端存儲會被徹底刪除"
+								}
+							]
+						},
+						{
+							"ID": "20230526090813-n13j66a",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230526090813-n13j66a",
+								"updated": "20230808220451"
+							},
+							"Children": [
+								{
+									"ID": "20230526090813-mfumx36",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230526090813-mfumx36",
+										"updated": "20230526090813"
+									},
+									"Children": [
+										{
+											"ID": "20230526090813-vb2arin",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230526090813-vb2arin",
+												"updated": "20230526090813"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "從到期前 15 天，每次打開軟體都會彈出到期提醒，到期 2 天后停止提醒"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230526090813-18hhanu",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230526090813-18hhanu",
+										"updated": "20230808220451"
+									},
+									"Children": [
+										{
+											"ID": "20230526090813-3or6hwd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230526090813-3or6hwd",
+												"updated": "20230808220451"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "到期前 1 天，會推送一次簡訊提醒到賬號綁定的手機上"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230526090813-tkeoo35",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230526090813-tkeoo35",
+										"updated": "20230526091143"
+									},
+									"Children": [
+										{
+											"ID": "20230526090813-1ft916s",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230526090813-1ft916s",
+												"updated": "20230526091143"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "刪除雲端存儲不影響本地資料"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

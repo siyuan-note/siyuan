@@ -1,0 +1,283 @@
+{
+	"ID": "20230519105228-hm0y74i",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f6e3",
+		"id": "20230519105228-hm0y74i",
+		"title": "最新进展",
+		"type": "doc",
+		"updated": "20230617085456"
+	},
+	"Children": [
+		{
+			"ID": "20230519110202-1k238kq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230519110202-1k238kq",
+				"updated": "20230617085456"
+			},
+			"Children": [
+				{
+					"ID": "20230519110330-3wo6me7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519110330-3wo6me7",
+						"updated": "20230519112131"
+					},
+					"Children": [
+						{
+							"ID": "20230519110330-gcjb0yi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519110330-gcjb0yi",
+								"updated": "20230519110341"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "微信公众号 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log开源"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20230519110335-l2v1hcq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519110335-l2v1hcq",
+								"updated": "20230519112131"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Properties": {
+										"parent-style": "max-width: 140px;",
+										"style": "width: 130px;"
+									},
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "image.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/image-20220119231125-qt2ooye.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeKramdownSpanIAL",
+									"Data": "{: style=\"width: 130px;\" parent-style=\"max-width: 140px;\"}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519110343-w05bgc1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519110343-w05bgc1",
+						"updated": "20230519112121"
+					},
+					"Children": [
+						{
+							"ID": "20230519110343-5a34m79",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519110343-5a34m79",
+								"updated": "20230519111105"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "微博 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log开源社区"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://weibo.com/b3log",
+									"TextMarkTextContent": "https://weibo.com/b3log"
+								}
+							]
+						},
+						{
+							"ID": "20230519111041-cnvj53y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111041-cnvj53y",
+								"updated": "20230519112121"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "weibo"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/weibo-20230519111041-ezla9f8.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519111123-ra6yjat",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111123-ra6yjat"
+					},
+					"Children": [
+						{
+							"ID": "20230519111123-jwmarc1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111123-jwmarc1",
+								"updated": "20230519111143"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Twitter "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log Open Source"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://twitter.com/b3logos",
+									"TextMarkTextContent": "https://twitter.com/b3logos"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230519111239-83o3a2y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230519111239-83o3a2y",
+						"updated": "20230617085456"
+					},
+					"Children": [
+						{
+							"ID": "20230519111239-2guijgg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230519111239-2guijgg",
+								"updated": "20230617085456"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "链滴 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://ld246.com/tag/siyuan",
+									"TextMarkTextContent": "https://ld246.com/tag/siyuan"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230519111423-06jsy8x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230519111423-06jsy8x",
+				"updated": "20230519111932"
+			}
+		}
+	]
+}

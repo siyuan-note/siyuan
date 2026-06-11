@@ -1,0 +1,1027 @@
+{
+	"ID": "20240530101000-uxno1yp",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-gnt7pgy",
+		"id": "20240530101000-uxno1yp",
+		"title": "コンテンツブロックの参照",
+		"type": "doc",
+		"updated": "20250115145444"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-ggy8jav",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-3mutq27",
+				"id": "20240530101000-ggy8jav",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-l17d6vk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-dfzn09m",
+				"id": "20240530101000-l17d6vk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ と入力すると、コンテンツブロックの検索が開始され、続けて入力する文字が検索キーワードになります。検索結果から上下キーで選択し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ キーを押すと選択したコンテンツブロックの参照が挿入されます。参照されたコンテンツブロックのアンカーテキストにマウスカーソルを合わせると、プレビューウィンドウにその内容が表示されます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "コンテンツブロック/参照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-avpxozm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-at31i2r",
+				"id": "20240530101000-avpxozm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "参照リンクの方向"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-87trl0a",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-166c48u",
+				"id": "20240530101000-87trl0a",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-67ewvk5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-cynf8im",
+						"id": "20240530101000-67ewvk5",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6i4ynp5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-dq4uyy9",
+								"id": "20240530101000-6i4ynp5",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "フォワードリンク"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 現在のコンテンツブロックからリンク (参照) されている他のコンテンツブロック"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-jnvf630",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ktp2rly",
+						"id": "20240530101000-jnvf630",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-0s0t1a2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-54vb5ht",
+								"id": "20240530101000-0s0t1a2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "バックリンク"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 現在のコンテンツブロックをリンク (参照) している他のコンテンツブロック"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-zxan094",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-g3aca9j",
+				"id": "20240530101000-zxan094",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フォワードリンクは現在のブロックに含まれているため簡単に確認できます。一方、バックリンクは他のドキュメントに散在しているため見つけることは容易ではありませんが、そこに価値が潜んでいます。以下の 2 つの方法でバックリンクを活用することで、新たな視点で多角的に思考できます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-hs9esji",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-2vj79h7",
+				"id": "20240530101000-hs9esji",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-cjtu4xy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ye2vyid",
+						"id": "20240530101000-cjtu4xy",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-11295rb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-nxtxky4",
+								"id": "20240530101000-11295rb",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref strong",
+									"TextMarkBlockRefID": "20240530101000-0ljj6fo",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "グラフパネル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": コンテンツブロック間のフォワードリンクとバックリンクの関係図を閲覧する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-qsb9lno",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-upk0ox6",
+						"id": "20240530101000-qsb9lno",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-di54jcn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-gsov81q",
+								"id": "20240530101000-di54jcn",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref strong",
+									"TextMarkBlockRefID": "20240530101000-mclq02e",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "バックリンクパネル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 現在のコンテンツブロックのバックリンクと逆参照を一覧表示する"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-k5rp4xa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-j9s9jy7",
+				"id": "20240530101000-k5rp4xa",
+				"updated": "20250115145444"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アンカーテキスト"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xxnblmf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-6ierqnl",
+				"id": "20240530101000-xxnblmf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アンカーテキストとは、参照をレンダリングした際に表示されるテキストで、静的アンカーテキストと動的アンカーテキストの 2 種類があります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1g2xgik",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-8aawvbp",
+				"id": "20240530101000-1g2xgik",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-zpo6wdv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-fip9cqf",
+						"id": "20240530101000-zpo6wdv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-e1ekf9q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-g8xuibz",
+								"id": "20240530101000-e1ekf9q",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "静的アンカーテキスト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ブロック参照を作成する際にユーザーが手動で入力したテキストです。定義ブロック (参照元のブロック) の内容が変わっても、このテキストは常に同じ内容が表示されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-wv6tqfe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rtfyrw5",
+						"id": "20240530101000-wv6tqfe",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-o9hcbto",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-icz4tux",
+								"id": "20240530101000-o9hcbto",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "動的アンカーテキスト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": 定義ブロック (参照元のブロック) の内容に応じて変化します。最大長は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エディタ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ブロック参照の動的アンカーテキストの最大長"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で設定できます (最大 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "5120"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 文字まで)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-b56njfd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bj1zx1v",
+				"id": "20240530101000-b56njfd",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アンカーテキストを変更する方法は以下の通りです:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bomwod6",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-olu13rn",
+				"id": "20240530101000-bomwod6",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-h4tjz0l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-dqfg0h0",
+						"id": "20240530101000-h4tjz0l",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-32yh8rc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-wta3ree",
+								"id": "20240530101000-32yh8rc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リンクテキストを直接編集すると静的アンカーテキストとして設定されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-vksu8vb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-zeo1vuc",
+						"id": "20240530101000-vksu8vb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tzesmnu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-w5ouyet",
+								"id": "20240530101000-tzesmnu",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リンクテキストを右クリックして表示されるポップアップメニューからアンカーテキストを設定または変更すると、静的アンカーテキストとして設定されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-27i2yss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-3imy3fi",
+						"id": "20240530101000-27i2yss",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-yralx3j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-87fqalk",
+								"id": "20240530101000-yralx3j",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リンクテキストを右クリックして表示されるポップアップメニューのアンカーテキストを空にすると、動的アンカーテキストとして設定されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-gq8t787",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-kb45yae",
+				"id": "20240530101000-gq8t787",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ によるブロック検索の結果リスト:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xyetie0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-h0tinst",
+				"id": "20240530101000-xyetie0",
+				"updated": "20250115145444"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-3f0hj25",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-egtzvuc",
+						"id": "20240530101000-3f0hj25",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-sxtrak5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-fy43wng",
+								"id": "20240530101000-sxtrak5",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ または "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クリック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で動的アンカーテキストに設定されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-rtu2oun",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-wje8t7e",
+						"id": "20240530101000-rtu2oun",
+						"updated": "20250115145444"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-gufqr40",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-gufqr40",
+								"updated": "20250115145444"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ または "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クリック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で静的アンカーテキストに設定されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ycwkmzo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-mhi5yzq",
+				"id": "20240530101000-ycwkmzo",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フィルタ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-trz1fni",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-7gm83g3",
+				"id": "20240530101000-trz1fni",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エディタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメント名のみを検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を有効にすると:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-29nodpc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-yvxuky7",
+				"id": "20240530101000-29nodpc",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-ymu17af",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-c64r7uc",
+						"id": "20240530101000-ymu17af",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-szugcpe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-5z2419f",
+								"id": "20240530101000-szugcpe",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "(("
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を使用すると"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-35bbvcx",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "すべての種類のブロック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を検索します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-fhj3qzp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-6ivrvdy",
+						"id": "20240530101000-fhj3qzp",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-71np5tv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-nw5ykpq",
+								"id": "20240530101000-71np5tv",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を使用すると"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-gtx9sbs",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ドキュメントブロック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "のみを検索します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-hczvgbx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-jzo2uyn",
+				"id": "20240530101000-hczvgbx",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "構文"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-550q2np",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-tyi7ddi",
+				"id": "20240530101000-550q2np",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使って参照するブロックを検索する以外にも、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "((id \u0026quot;アンカーテキスト\u0026quot;))"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ という構文で直接ブロックを参照できます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-crsm76x",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-fpxglls",
+				"id": "20240530101000-crsm76x",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-4ujlxnf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rwb6zze",
+						"id": "20240530101000-4ujlxnf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-lv04gan",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-xhrhtxv",
+								"id": "20240530101000-lv04gan",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アンカーテキストを "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で囲むと静的アンカーテキストとして設定されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-jfaek6m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-u47eoor",
+						"id": "20240530101000-jfaek6m",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-r76t5ed",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-bw1nrwh",
+								"id": "20240530101000-r76t5ed",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アンカーテキストを "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で囲むと動的アンカーテキストとして設定されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9i72maf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-a8qlooq",
+				"id": "20240530101000-9i72maf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この構文は外部ツールや API を介してコンテンツブロックを参照する際に使用します。通常は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用して参照したいコンテンツブロックを検索します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wy5bmdm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-y7be6xd",
+				"id": "20240530101000-wy5bmdm"
+			}
+		}
+	]
+}

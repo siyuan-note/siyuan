@@ -1,0 +1,161 @@
+{
+	"ID": "20210824202056-udkf7wg",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20210824202056-udkf7wg",
+		"title": "Widgets",
+		"type": "doc",
+		"updated": "20230820184255"
+	},
+	"Children": [
+		{
+			"ID": "20210824202107-oi62h64",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210824202107-oi62h64",
+				"updated": "20210824202107"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210824202107-faidvkw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210824202107-faidvkw",
+				"updated": "20211230224034"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The widget is a static webpage served by "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " Kernel. It accesses data through API and renders it through "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "\u0026lt;iframe\u0026gt;"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20230512195321-tin4qpv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230512195321-tin4qpv",
+				"updated": "20230512195357"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Compared with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20230506205948-yah52eb",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "plugins"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", a widget is a kind of content block, which follows the indexing and rendering rules of the block. The widget is mainly oriented to content block extension, not to program function extension."
+				}
+			]
+		},
+		{
+			"ID": "20210824202107-3zt4469",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210824202107-3zt4469",
+				"updated": "20210824202323"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20210824202107-cmsetzk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210824202107-cmsetzk",
+				"updated": "20230506210716"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The widgets are installed through the widget marketplace. After installation, the widgets will be placed in the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/widgets/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ folder. In the editor, use the slash menu to trigger the call search. After selecting the widget you need, the widget will be inserted into the document in the form of a widget block."
+				}
+			]
+		},
+		{
+			"ID": "20211222095842-700ar7j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211222095842-700ar7j",
+				"updated": "20230418085731"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Push to widget marketplace"
+				}
+			]
+		},
+		{
+			"ID": "20221114173356-q17x02u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20221114173356-q17x02u",
+				"updated": "20230820184255"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Please refer to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "Community marketplace repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		}
+	]
+}

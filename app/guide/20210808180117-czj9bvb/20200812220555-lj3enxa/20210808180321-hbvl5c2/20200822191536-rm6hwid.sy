@@ -1,0 +1,100 @@
+{
+	"ID": "20200822191536-rm6hwid",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20200822191536-rm6hwid",
+		"title": "窗口和页签",
+		"type": "doc",
+		"updated": "20230128004223"
+	},
+	"Children": [
+		{
+			"ID": "20210104091259-0s2m8p3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091259-0s2m8p3",
+				"updated": "20210302223646"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源支持多窗口和多页签，这样可以方便地进行文档编辑和查看。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091259-avxiiqx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091259-avxiiqx"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签上支持上下和左右分屏，打开的所有页签是实时同步内容的。比如对于相同一份文档进行多开页签，在其中一个页签中编辑保存后，其他页签也会自动同步最新内容，在享受多开的便利时避免脏数据覆盖。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091259-0hewfsu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091259-0hewfsu"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了文档保存是同步的，保存后产生的关联渲染也是同步的，文档相关的内容块预览以及关系图都是实时刷新，这样能在最小限度上排除干扰，让我们将注意力集中在笔记内容上。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091259-k921oy3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091259-k921oy3"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了分屏操作，页签也支持拖拽，这样我们能够随心所欲地布置整个界面，在自己最舒服的布局下记录笔记和整理知识。"
+				}
+			]
+		},
+		{
+			"ID": "20210104091259-86iaf33",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091259-86iaf33",
+				"updated": "20230128004223"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果你正在使用的设备屏幕较小，可以考虑"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201004184819-nj8ibyg",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "通过浏览器使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，这样就能通过浏览器实例进行整体界面切换。如果你只需要将页签转换为独立的窗口，可以在页签上右键点击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "移动到新窗口"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，或者将页签拖拽到当前窗口之外的地方后释放拖拽，这样也能将该页签转换为独立的窗口。"
+				}
+			]
+		}
+	]
+}

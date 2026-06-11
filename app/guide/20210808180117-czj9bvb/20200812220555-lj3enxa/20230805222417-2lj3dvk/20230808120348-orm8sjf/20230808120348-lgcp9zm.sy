@@ -1,0 +1,384 @@
+{
+	"ID": "20230808120348-lgcp9zm",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230808120348-lgcp9zm",
+		"title": "数据备份",
+		"type": "doc",
+		"updated": "20220708103950"
+	},
+	"Children": [
+		{
+			"ID": "20230808120348-jzidvij",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120348-jzidvij",
+				"updated": "20220708095359"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-t1mk2y9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120348-t1mk2y9",
+				"updated": "20220708103950"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据备份指的是将"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20220615112531-5yos96d",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "数据快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "上传到云端。"
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-zi8ct0p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230808120348-zi8ct0p",
+				"updated": "20220708100015"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-645onmt",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20230808120348-645onmt",
+				"updated": "20220708102922"
+			},
+			"Children": [
+				{
+					"ID": "20230808120348-mq3qxqd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20230808120348-mq3qxqd",
+						"updated": "20220708100929"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-ktnbdwv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-ktnbdwv",
+								"updated": "20220708100937"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615113758-i2279ot",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "初始化数据仓库密钥"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "后如果一切正常就已经配置好备份了"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-totosr9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20230808120348-totosr9",
+						"updated": "20220708102811"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-td2yby1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-td2yby1",
+								"updated": "20220708102811"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "打开 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据历史"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 页签，选择需要备份的快照点击 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "标记快照"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-pa30615",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20230808120348-pa30615"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-d2nxsko",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-d2nxsko",
+								"updated": "20220708101018"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "筛选下拉列表中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "本地标记的快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，选择需要上传的快照点击 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "上传"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-jybz6et",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20230808120348-jybz6et",
+						"updated": "20220708102922"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-m0re4pa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-m0re4pa",
+								"updated": "20220708102922"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "上传完成以后，筛选下拉列表中选择 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "云端标记的快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 可以看到刚刚备份到云端的快照"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-ag2s56w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20230808120348-ag2s56w"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-tbzcgy7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-tbzcgy7",
+								"updated": "20220708101644"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端备份的快照下载到本地后可以通过"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20220615115212-kjebrv4",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "回滚数据快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "恢复数据"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-5qkf6po",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120348-5qkf6po",
+				"updated": "20220708101922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另外："
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-3h1cxja",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230808120348-3h1cxja",
+				"updated": "20220708101943"
+			},
+			"Children": [
+				{
+					"ID": "20230808120348-xwlnuv3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-xwlnuv3",
+						"updated": "20220708101943"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-tlm1dq0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-tlm1dq0",
+								"updated": "20220708101943"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210928094544-vg2c2ts",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "忽略文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230808120348-7m3us1s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230808120348-7m3us1s",
+						"updated": "20220708101925"
+					},
+					"Children": [
+						{
+							"ID": "20230808120348-3umvlw3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230808120348-3umvlw3",
+								"updated": "20220708101925"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端最多支持保存 12 个数据快照"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230808120348-c017oom",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230808120348-c017oom"
+			}
+		}
+	]
+}

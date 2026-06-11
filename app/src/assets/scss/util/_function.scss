@@ -1,0 +1,230 @@
+@use "mixin";
+
+.fn {
+  &__hidescrollbar {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    overflow: auto;
+  }
+
+  &__ellipsis {
+    @include mixin.text-clamp(1);
+    display: block; // 集市挂件名称过长遮挡星标 https://github.com/siyuan-note/siyuan/issues/4782
+  }
+
+  &__space {
+    width: 8px;
+    display: inline-block;
+    flex-shrink: 0;
+
+    &--small {
+      width: 4px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    &--5 {
+      width: 5px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+  }
+
+  &__hr {
+    height: 8px;
+    display: block;
+    flex-shrink: 0;
+
+    &--b {
+      display: block;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    &--small {
+      height: 4px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__flex {
+    display: flex;
+
+    &-center {
+      align-self: center;
+    }
+
+    &-1 {
+      flex: 1;
+      min-width: .1px;
+      overflow: auto;
+      min-height: .1px;
+    }
+
+    &-column {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &-shrink {
+      flex-shrink: 0;
+    }
+
+    &-wrap {
+      flex-wrap: wrap;
+    }
+  }
+
+  &__pointer {
+    cursor: pointer;
+  }
+
+  &__grab {
+    cursor: grab;
+  }
+
+  &__none {
+    display: none !important;
+  }
+
+  &__hidden {
+    visibility: hidden;
+  }
+
+  &__a {
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+    }
+  }
+
+  &__block {
+    width: 100%;
+  }
+
+  &__size200 {
+    width: 200px;
+    flex-shrink: 0;
+  }
+
+  &__size96 {
+    width: 96px;
+  }
+
+  &__rotate {
+    animation: rotate 2s infinite linear;
+  }
+
+  &__loading {
+    position: absolute;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    bottom: 0;
+    align-content: center;
+    z-index: 3; // 需大于 database table view
+    align-items: center;
+  }
+
+  &__code {
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    border-radius: var(--b3-border-radius);
+    font-family: var(--b3-font-family-code);
+    word-break: break-word;
+    background-size: 20px 20px;
+    white-space: pre-wrap;
+    background-color: var(--b3-protyle-code-background);
+  }
+
+  &__kbd {
+    padding: 2px 4px;
+    font: 75% var(--b3-font-family-kbd);
+    font-variant-emoji: text;
+    line-height: 1;
+    color: var(--b3-theme-on-surface);
+    vertical-align: middle;
+    background-color: var(--b3-theme-surface);
+    border: solid 1px var(--b3-theme-surface-lighter);
+    border-radius: var(--b3-border-radius);
+    box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
+  }
+
+  &__list {
+    padding-left: 2em;
+  }
+
+  &__progress {
+    height: 4px;
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+    background-color: #fff;
+    width: 64px;
+    align-self: center;
+    margin: 0 8px 0 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    & > div {
+      background-color: var(--b3-theme-primary-light);
+      height: 4px;
+      background-image: linear-gradient(-45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent);
+      animation: stripMove 450ms linear infinite;
+      background-size: 50px 50px;
+    }
+  }
+}
+
+.ft {
+
+  &__breakword {
+    word-break: break-word;
+  }
+
+  &__smaller {
+    font-size: 12px;
+  }
+
+  &__center {
+    text-align: center;
+  }
+
+  &__on-background {
+    color: var(--b3-theme-on-background);
+  }
+
+  &__on-surface {
+    color: var(--b3-theme-on-surface);
+  }
+
+  &__pink {
+    color: #ea4aaa;
+  }
+
+  &__error {
+    color: var(--b3-theme-error) !important;
+  }
+
+  &__primary {
+    color: var(--b3-theme-primary);
+  }
+
+  &__success {
+    color: var(--b3-theme-success);
+  }
+
+  &__secondary {
+    color: var(--b3-theme-secondary);
+  }
+
+  &__selectnone {
+    user-select: none;
+  }
+}

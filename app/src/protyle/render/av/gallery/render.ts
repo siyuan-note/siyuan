@@ -1,0 +1,350 @@
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
+import {Constants} from "../../../../constants";
+import {fetchSyncPost} from "../../../../util/fetch";
+import {escapeAttr} from "../../../../util/escape";
+import {unicode2Emoji} from "../../../../emoji";
+import {cellValueIsEmpty, renderCell} from "../cell";
+import {focusBlock} from "../../../util/selection";
+import {electronUndo} from "../../../undo";
+import {addClearButton} from "../../../../util/addClearButton";
+import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
+import {processRender} from "../../../util/processCode";
+import {getColIconByType, getColNameByType} from "../col";
+import {getCompressURL} from "../../../../util/image";
+import {getPageSize} from "../groups";
+/// #if MOBILE
+import {activeBlur} from "../../../../mobile/util/keyboardToolbar";
+/// #endif
+import {renderKanban} from "../kanban/render";
+import {initVirtualScroll} from "../virtualScroll";
+import {getRowHTML} from "../row";
+
+interface IIds {
+    groupId: string,
+    fieldId: string,
+}
+
+interface ITableOptions {
+    protyle: IProtyle,
+    blockElement: HTMLElement,
+    cb: (data: IAV) => void,
+    data: IAV,
+    renderAll: boolean,
+    resetData: {
+        alignSelf: string,
+        selectItemIds: IIds[],
+        editIds: IIds[],
+        isSearching: boolean,
+        pageSizes: { [key: string]: string },
+        query: string,
+        oldOffset: number,
+        left?: number,
+        virtualData: { [key: string]: IAVVirtualData },
+    }
+}
+
+const getGalleryHTML = (data: IAVGallery, e: HTMLElement, virtualData: IAVVirtualData) => {
+    let galleryHTML = "";
+    // body
+    data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
+        if (virtualData && virtualData.renderedEnd) {
+            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
+                return;
+            }
+        } else if (data.pageSize > 100 && rowIndex > 99) {
+            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            return true;
+        }
+        galleryHTML += getRowHTML({data, row: item, rowIndex, type: "gallery"});
+    });
+    galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newRow}</div>`;
+    return `<div class="av__gallery${data.cardSize === 0 ? " av__gallery--small" : (data.cardSize === 2 ? " av__gallery--big" : "")}">
+    ${galleryHTML}
+</div>
+<div class="av__gallery-load${data.cardCount > data.cards.length ? "" : " fn__none"}">
+    <button class="b3-button av__button" data-type="av-load-more">
+        <svg><use xlink:href="#iconArrowDown"></use></svg>
+        <span>${window.siyuan.languages.loadMore}</span>
+        <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
+    </button>
+</div>`;
+};
+
+const renderGroupGallery = (options: ITableOptions) => {
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
+    const isSearching = searchInputElement && document.activeElement === searchInputElement;
+    const query = searchInputElement?.textContent || "";
+
+    let avBodyHTML = "";
+    options.data.view.groups.forEach((group: IAVGallery) => {
+        if (group.groupHidden === 0) {
+            avBodyHTML += `${getGroupTitleHTML(group, group.cardCount)}
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
+        }
+    });
+    if (options.renderAll) {
+        options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
+    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    <div>
+        ${avBodyHTML}
+    </div>
+    <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
+</div>`;
+    } else {
+        options.blockElement.querySelector(".av__header").nextElementSibling.innerHTML = avBodyHTML;
+    }
+    afterRenderGallery(options);
+};
+
+export const afterRenderGallery = (options: ITableOptions) => {
+    const view = options.data.view as IAVGallery;
+    if (view.coverFrom === 1 || view.coverFrom === 3) {
+        processRender(options.blockElement);
+    }
+    if (typeof options.resetData.oldOffset === "number") {
+        options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
+    }
+    if (options.blockElement.getAttribute("data-need-focus") === "true") {
+        focusBlock(options.blockElement);
+        options.blockElement.removeAttribute("data-need-focus");
+    }
+    options.blockElement.setAttribute("data-render", "true");
+    if (options.resetData.alignSelf) {
+        options.blockElement.style.alignSelf = options.resetData.alignSelf;
+    }
+    if (options.resetData.left) {
+        options.blockElement.querySelector(".av__kanban").scrollLeft = options.resetData.left;
+    }
+    options.resetData.selectItemIds.find(selectId => {
+        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        if (!itemElement) {
+            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        }
+        if (itemElement) {
+            itemElement.classList.add("av__gallery-item--select");
+        }
+    });
+    options.resetData.editIds.find(selectId => {
+        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        if (!itemElement) {
+            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        }
+        if (itemElement) {
+            itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+            itemElement.querySelector('.protyle-icon[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
+        }
+    });
+    Object.keys(options.resetData.pageSizes).forEach((groupId) => {
+        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId === "unGroup" ? "" : groupId}"]`) as HTMLElement;
+        if (bodyElement) {
+            bodyElement.dataset.pageSize = options.resetData.pageSizes[groupId];
+        }
+    });
+    if (getSelection().rangeCount > 0) {
+        // 修改表头后光标重新定位
+        const range = getSelection().getRangeAt(0);
+        if (!hasClosestByClassName(range.startContainer, "av__title")) {
+            const blockElement = hasClosestBlock(range.startContainer);
+            if (blockElement && options.blockElement === blockElement && !options.resetData.isSearching) {
+                focusBlock(options.blockElement);
+            }
+        }
+    }
+    options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
+    if (options.cb) {
+        options.cb(options.data);
+    }
+    if (!options.renderAll) {
+        return;
+    }
+    const viewsElement = options.blockElement.querySelector(".av__views") as HTMLElement;
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLElement;
+    searchInputElement.textContent = options.resetData.query || "";
+    if (options.resetData.isSearching) {
+        searchInputElement.focus();
+    }
+    searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
+        event.stopPropagation();
+    });
+    searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        electronUndo(event);
+    });
+    searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
+        event.stopPropagation();
+        if (event.isComposing) {
+            return;
+        }
+        if (searchInputElement.textContent || document.activeElement === searchInputElement) {
+            viewsElement.classList.add("av__views--show");
+        } else {
+            viewsElement.classList.remove("av__views--show");
+        }
+        updateSearch(options.blockElement, options.protyle);
+    });
+    searchInputElement.addEventListener("compositionend", () => {
+        updateSearch(options.blockElement, options.protyle);
+    });
+    searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (!searchInputElement.textContent) {
+            viewsElement.classList.remove("av__views--show");
+            searchInputElement.style.width = "0";
+            searchInputElement.style.paddingLeft = "0";
+            searchInputElement.style.marginRight = "0";
+        }
+    });
+    addClearButton({
+        inputElement: searchInputElement,
+        right: 0,
+        width: "1em",
+        height: searchInputElement.clientHeight,
+        clearCB() {
+            viewsElement.classList.remove("av__views--show");
+            searchInputElement.style.width = "0";
+            searchInputElement.style.paddingLeft = "0";
+            searchInputElement.style.marginRight = "0";
+            focusBlock(options.blockElement);
+            updateSearch(options.blockElement, options.protyle);
+            /// #if MOBILE
+            activeBlur();
+            /// #endif
+        }
+    });
+    initVirtualScroll(options);
+};
+
+export const renderGallery = async (options: {
+    blockElement: HTMLElement,
+    protyle: IProtyle,
+    cb?: (data: IAV) => void,
+    renderAll: boolean,
+    data?: IAV,
+}) => {
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
+    const editIds: IIds[] = [];
+    options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
+        editIds.push({
+            groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
+            fieldId: item.parentElement.getAttribute("data-id"),
+        });
+    });
+    const selectItemIds: IIds[] = [];
+    options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(galleryItem => {
+        const fieldId = galleryItem.getAttribute("data-id");
+        if (fieldId) {
+            selectItemIds.push({
+                groupId: (hasClosestByClassName(galleryItem, "av__body") as HTMLElement).dataset.groupId || "",
+                fieldId
+            });
+        }
+    });
+    const pageSizes: { [key: string]: string } = {};
+    const virtualData: { [key: string]: IAVVirtualData } = {};
+    options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+        if (!item.querySelector(".av__gallery-item")) {
+            return;
+        }
+        virtualData[item.getAttribute("data-group-id") || "all"] = ({
+            renderedStart: parseInt(item.querySelector(".av__gallery-item").getAttribute("data-index")),
+            renderedEnd: parseInt(item.querySelector(".av__gallery-add").previousElementSibling.getAttribute("data-index")),
+            topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
+        });
+    });
+    const resetData = {
+        isSearching: searchInputElement && document.activeElement === searchInputElement,
+        query: searchInputElement?.textContent || "",
+        alignSelf: options.blockElement.style.alignSelf,
+        oldOffset: options.protyle.contentElement.scrollTop,
+        editIds,
+        selectItemIds,
+        pageSizes,
+        virtualData
+    };
+    if (options.blockElement.firstElementChild.innerHTML === "") {
+        options.blockElement.style.alignSelf = "";
+        options.blockElement.firstElementChild.outerHTML = `<div class="av__gallery">
+    <span style="width: 100%;height: 178px;" class="av__pulse"></span>
+    <span style="width: 100%;height: 178px;" class="av__pulse"></span>
+    <span style="width: 100%;height: 178px;" class="av__pulse"></span>
+</div>`;
+    }
+    const created = options.protyle.options.history?.created;
+    const snapshot = options.protyle.options.history?.snapshot;
+
+    let data: IAV = options.data;
+    if (!data) {
+        const avPageSize = getPageSize(options.blockElement);
+        const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
+            id: options.blockElement.getAttribute("data-av-id"),
+            created,
+            snapshot,
+            pageSize: avPageSize.unGroupPageSize,
+            groupPaging: avPageSize.groupPageSize,
+            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            query: resetData.query.trim()
+        });
+        data = response.data;
+    }
+    if (data.viewType === "table") {
+        options.blockElement.setAttribute("data-av-type", data.viewType);
+        avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
+        return;
+    }
+    if (data.viewType === "kanban") {
+        options.blockElement.setAttribute("data-av-type", data.viewType);
+        renderKanban({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data
+        });
+        return;
+    }
+    const view: IAVGallery = data.view as IAVGallery;
+    if (view.groups?.length > 0) {
+        renderGroupGallery({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data,
+            resetData
+        });
+        return;
+    }
+    const bodyHTML = getGalleryHTML(view, options.blockElement, virtualData.all);
+    if (options.renderAll) {
+        options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    <div>
+        <div class="av__body" data-group-id="" data-page-size="${view.pageSize}">
+            ${bodyHTML}
+        </div>
+    </div>
+    <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
+</div>`;
+    } else {
+        const bodyElement = options.blockElement.querySelector(".av__body") as HTMLElement;
+        bodyElement.innerHTML = bodyHTML;
+        bodyElement.dataset.pageSize = view.pageSize.toString();
+    }
+    afterRenderGallery({
+        resetData,
+        renderAll: options.renderAll,
+        data,
+        cb: options.cb,
+        protyle: options.protyle,
+        blockElement: options.blockElement,
+    });
+    if (view.hideAttrViewName) {
+        options.blockElement.querySelector(".av__gallery").classList.add("av__gallery--top");
+    }
+};

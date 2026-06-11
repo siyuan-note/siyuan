@@ -1,0 +1,467 @@
+{
+	"ID": "20230104152135-1iei0xa",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20230104152135-1iei0xa",
+		"title": "Share document",
+		"type": "doc",
+		"updated": "20250115162330"
+	},
+	"Children": [
+		{
+			"ID": "20230104152142-rmqe7vt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104152142-rmqe7vt",
+				"updated": "20230104152142"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20230104152142-hk6claf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230104152142-hk6claf",
+				"updated": "20230104152142"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Share a single document in Markdown format to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://ld246.com",
+					"TextMarkTextContent": "Liandi"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " as a post."
+				}
+			]
+		},
+		{
+			"ID": "20230104152142-ffu9ddj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104152142-ffu9ddj",
+				"updated": "20250115162330"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20230104152142-5whzbmo",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104152142-5whzbmo",
+				"updated": "20250115162330"
+			},
+			"Children": [
+				{
+					"ID": "20230104152142-i2xkriy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152142-i2xkriy",
+						"updated": "20230104152142"
+					},
+					"Children": [
+						{
+							"ID": "20230104152142-sjznahd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152142-sjznahd",
+								"updated": "20230104152142"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "You need to register and log in to your Liandi account"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104152142-r0zanmc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152142-r0zanmc",
+						"updated": "20250115162330"
+					},
+					"Children": [
+						{
+							"ID": "20230104152142-9hf2y34",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152142-9hf2y34",
+								"updated": "20250115162330"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click the editor "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ menu "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Share to Liandi"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"ID": "20230104152142-zehcrat",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20230104152142-zehcrat",
+								"updated": "20230104152204"
+							},
+							"Children": [
+								{
+									"ID": "20230104152142-3b86zbu",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104152142-3b86zbu",
+										"updated": "20230104152204"
+									},
+									"Children": [
+										{
+											"ID": "20230104152142-rb6w1rn",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104152142-rb6w1rn",
+												"updated": "20230104152204"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Document title as post title"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230104152142-o8p2qb9",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104152142-o8p2qb9",
+										"updated": "20230104152142"
+									},
+									"Children": [
+										{
+											"ID": "20230104152142-8hhweqd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104152142-8hhweqd",
+												"updated": "20230104152142"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Document tags as post tags"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20230104152142-4n9qvjj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20230104152142-4n9qvjj",
+										"updated": "20230104152142"
+									},
+									"Children": [
+										{
+											"ID": "20230104152142-vlbrnqh",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20230104152142-vlbrnqh",
+												"updated": "20230104152142"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Documentation exported Markdown as post content with references converted to footnotes"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104152142-1bqvmk9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152142-1bqvmk9",
+						"updated": "20230104152142"
+					},
+					"Children": [
+						{
+							"ID": "20230104152142-10g0vrg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152142-10g0vrg",
+								"updated": "20230104152142"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "After sharing, write the attribute "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleid"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (previously "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleId"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ) to the document to associate the link post ID"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230104152142-xyhgano",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20230104152142-xyhgano",
+				"updated": "20230104152223"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The assets in the document will be automatically uploaded to the cloud:"
+				}
+			]
+		},
+		{
+			"ID": "20230104152142-v2a1mld",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104152142-v2a1mld",
+				"updated": "20230104152142"
+			},
+			"Children": [
+				{
+					"ID": "20230104152142-hgi5ovd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152142-hgi5ovd",
+						"updated": "20230104152142"
+					},
+					"Children": [
+						{
+							"ID": "20230104152142-9dny0v9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152142-9dny0v9",
+								"updated": "20230104152142"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "A single file for free users is less than 3MB"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104152142-id98tnx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152142-id98tnx",
+						"updated": "20230104152142"
+					},
+					"Children": [
+						{
+							"ID": "20230104152142-jcf89uj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152142-jcf89uj",
+								"updated": "20230104152142"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "A single file for subscribers is less than 10MB"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20230104152142-9t7oojd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20230104152142-9t7oojd",
+				"updated": "20230104152234"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "Note"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20230104152142-l7x5k2g",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20230104152142-l7x5k2g",
+				"updated": "20230621111843"
+			},
+			"Children": [
+				{
+					"ID": "20230104152142-z9vvov0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152142-z9vvov0",
+						"updated": "20230621111843"
+					},
+					"Children": [
+						{
+							"ID": "20230104152142-2uwf36x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152142-2uwf36x",
+								"updated": "20230621111843"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Points are required to share documents to LiuYun, please refer to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/article/1685240430351",
+									"TextMarkTextContent": "point rules"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20230104152142-b5o3qpm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20230104152142-b5o3qpm",
+						"updated": "20230104152253"
+					},
+					"Children": [
+						{
+							"ID": "20230104152142-ozxm2wp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20230104152142-ozxm2wp",
+								"updated": "20230104152253"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Shared assets uploaded to the cloud cannot be deleted"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

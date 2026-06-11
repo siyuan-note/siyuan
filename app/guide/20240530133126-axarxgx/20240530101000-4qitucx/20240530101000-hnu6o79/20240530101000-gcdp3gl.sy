@@ -1,0 +1,463 @@
+{
+	"ID": "20240530101000-gcdp3gl",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-8z7hcyt",
+		"id": "20240530101000-gcdp3gl",
+		"title": "見出しとリストによるアウトライン",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-f15cgx9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-13v8b6q",
+				"id": "20240530101000-f15cgx9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "見出しとリストを組み合わせてアウトラインを作成する例です:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xcguubs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-509q2iw",
+				"id": "20240530101000-xcguubs",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-n7xxz8r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-p8d1l3n",
+						"id": "20240530101000-n7xxz8r",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-x5740qe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-69ohw2y",
+								"id": "20240530101000-x5740qe",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リスト項目 1"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-nvj1rax",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-yu5lb1p",
+								"id": "20240530101000-nvj1rax",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "見出し 2"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-obbdd8k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-twjqzqs",
+								"id": "20240530101000-obbdd8k",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "シンプルな段落です。"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-mdtbltb",
+							"Type": "NodeBlockquote",
+							"Properties": {
+								"ID": "20240530101000-13vepcr",
+								"id": "20240530101000-mdtbltb",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockquoteMarker",
+									"Data": "\u003e"
+								},
+								{
+									"ID": "20240530101000-hxaxr2f",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"ID": "20240530101000-ng8ji39",
+										"id": "20240530101000-hxaxr2f",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "ブロック引用"
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-bdbw6dq",
+									"Type": "NodeList",
+									"ListData": {},
+									"Properties": {
+										"ID": "20240530101000-4ctlkhz",
+										"id": "20240530101000-bdbw6dq",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-ayrpeoe",
+											"Type": "NodeListItem",
+											"ListData": {
+												"BulletChar": 42,
+												"Marker": "Kg=="
+											},
+											"Properties": {
+												"ID": "20240530101000-dl567z8",
+												"id": "20240530101000-ayrpeoe",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"ID": "20240530101000-w1djcul",
+													"Type": "NodeParagraph",
+													"Properties": {
+														"ID": "20240530101000-o88e783",
+														"id": "20240530101000-w1djcul",
+														"updated": "20240530101000"
+													},
+													"Children": [
+														{
+															"Type": "NodeText",
+															"Data": "ブロック引用内のリスト項目"
+														}
+													]
+												},
+												{
+													"ID": "20240530101000-a3xm5qi",
+													"Type": "NodeList",
+													"ListData": {},
+													"Properties": {
+														"ID": "20240530101000-u07w1bh",
+														"id": "20240530101000-a3xm5qi",
+														"updated": "20240530101000"
+													},
+													"Children": [
+														{
+															"ID": "20240530101000-j5k1h7a",
+															"Type": "NodeListItem",
+															"ListData": {
+																"BulletChar": 42,
+																"Marker": "Kg=="
+															},
+															"Properties": {
+																"ID": "20240530101000-z9wwpg5",
+																"id": "20240530101000-j5k1h7a",
+																"updated": "20240530101000"
+															},
+															"Children": [
+																{
+																	"ID": "20240530101000-s6e5r4e",
+																	"Type": "NodeParagraph",
+																	"Properties": {
+																		"ID": "20240530101000-bru9910",
+																		"id": "20240530101000-s6e5r4e",
+																		"updated": "20240530101000"
+																	},
+																	"Children": [
+																		{
+																			"Type": "NodeText",
+																			"Data": "サブリスト項目 1"
+																		}
+																	]
+																}
+															]
+														},
+														{
+															"ID": "20240530101000-ecnbvmd",
+															"Type": "NodeListItem",
+															"ListData": {
+																"BulletChar": 42,
+																"Marker": "Kg=="
+															},
+															"Properties": {
+																"ID": "20240530101000-766w470",
+																"id": "20240530101000-ecnbvmd",
+																"updated": "20240530101000"
+															},
+															"Children": [
+																{
+																	"ID": "20240530101000-w6ujwes",
+																	"Type": "NodeParagraph",
+																	"Properties": {
+																		"ID": "20240530101000-gjttkpr",
+																		"id": "20240530101000-w6ujwes",
+																		"updated": "20240530101000"
+																	},
+																	"Children": [
+																		{
+																			"Type": "NodeText",
+																			"Data": "サブリスト項目 2"
+																		}
+																	]
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-g1lp4ef",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-t4vkuwe",
+								"id": "20240530101000-g1lp4ef",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-go074r9",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-8aq6jdg",
+										"id": "20240530101000-go074r9",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-5tnt74v",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-1ueky90",
+												"id": "20240530101000-5tnt74v",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "サブリスト項目 1"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-afc9cdb",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-p688v6k",
+										"id": "20240530101000-afc9cdb",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-la114dx",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-azk7o3k",
+												"id": "20240530101000-la114dx",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "サブリスト項目 2"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-8omzupb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-hu5q16y",
+						"id": "20240530101000-8omzupb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-yacqp00",
+							"Type": "NodeHeading",
+							"HeadingLevel": 2,
+							"Properties": {
+								"ID": "20240530101000-0bi18uu",
+								"id": "20240530101000-yacqp00",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リスト項目 2"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-k83qbe3",
+							"Type": "NodeList",
+							"ListData": {
+								"Typ": 1
+							},
+							"Properties": {
+								"ID": "20240530101000-op78jhu",
+								"id": "20240530101000-k83qbe3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-vejx1bu",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "MS4=",
+										"Num": 1
+									},
+									"Properties": {
+										"ID": "20240530101000-ud0t2np",
+										"id": "20240530101000-vejx1bu",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-7211ipn",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-2aruzcr",
+												"id": "20240530101000-7211ipn",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "順序付きリスト項目 1"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-pwldpym",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"ID": "20240530101000-n65stae",
+												"id": "20240530101000-pwldpym",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "Z28="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\tfmt.Println(\"Hello, 世界\")\n}\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-bawlt3r",
+									"Type": "NodeListItem",
+									"ListData": {
+										"Typ": 1,
+										"Delimiter": 46,
+										"Marker": "Mi4=",
+										"Num": 2
+									},
+									"Properties": {
+										"ID": "20240530101000-ga9xkwd",
+										"id": "20240530101000-bawlt3r",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-nb6m560",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-0mrvyub",
+												"id": "20240530101000-nb6m560",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "順序付きリスト項目 2"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3skd7nk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-8pfwifz",
+				"id": "20240530101000-3skd7nk"
+			}
+		}
+	]
+}

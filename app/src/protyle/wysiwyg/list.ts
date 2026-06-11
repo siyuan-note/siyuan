@@ -1,0 +1,892 @@
+import {focusByWbr} from "../util/selection";
+import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
+import {genEmptyBlock} from "../../block/util";
+import * as dayjs from "dayjs";
+import {Constants} from "../../constants";
+import {moveToPrevious, removeBlock} from "./remove";
+import {hasClosestByClassName, isBlockElement} from "../util/hasClosest";
+import {getParentBlock} from "./getBlock";
+import {setFold} from "../util/blockFold";
+import {scrollCenter} from "../../util/highlightById";
+
+const getLastChildBlock = (element: Element) => {
+    if (!element || !element.lastElementChild) {
+        return null;
+    }
+    let current = element.lastElementChild.previousElementSibling;
+    while (current) {
+        if (isBlockElement(current)) {
+            return current;
+        }
+        current = current.previousElementSibling;
+    }
+    return null;
+};
+
+const unfoldElements = (protyle: IProtyle, elements: Element[]) => {
+    elements.forEach(item => {
+        if (item.getAttribute("fold") === "1") {
+            setFold(protyle, item, true);
+        }
+    });
+};
+
+export const updateListOrder = (listElement: Element, sIndex?: number) => {
+    if (listElement.getAttribute("data-subtype") !== "o") {
+        return;
+    }
+    let starIndex: number;
+    Array.from(listElement.children).forEach((item, index) => {
+        // https://github.com/siyuan-note/siyuan/issues/16315 第三点会有为空的情况
+        if (!item.classList.contains("li")) {
+            return;
+        }
+        if (index === 0) {
+            if (sIndex) {
+                starIndex = sIndex;
+                item.setAttribute("data-marker", (starIndex) + ".");
+                item.querySelector(".protyle-action--order").textContent = (starIndex) + ".";
+            } else {
+                starIndex = parseInt(item.getAttribute("data-marker"));
+            }
+        } else if (item.classList.contains("li")) {
+            // 保证列表项的缩放和常规列表属性的存在
+            starIndex++;
+            item.setAttribute("data-marker", (starIndex) + ".");
+            item.querySelector(".protyle-action--order").textContent = (starIndex) + ".";
+        }
+    });
+};
+
+export const genListItemElement = (listItemElement: Element, offset = 0, wbr = false, startIndex?: number) => {
+    const element = document.createElement("template");
+    const type = listItemElement.getAttribute("data-subtype");
+    if (type === "o") {
+        const index = startIndex !== undefined ? startIndex : parseInt(listItemElement.getAttribute("data-marker")) + offset + 1;
+        element.innerHTML = `<div data-marker="${index}." data-subtype="o" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div contenteditable="false" class="protyle-action protyle-action--order" draggable="true">${index}.</div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
+    } else if (type === "t") {
+        element.innerHTML = `<div data-task=" " data-marker="*" data-subtype="t" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#iconUncheck"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
+    } else {
+        element.innerHTML = `<div data-marker="*" data-subtype="u" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
+    }
+    return element.content.firstElementChild as HTMLElement;
+};
+
+export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range) => {
+    const parentItemElement = hasClosestByClassName(nodeElement, "li");
+    if (!parentItemElement) {
+        return false;
+    }
+    const subListElement = parentItemElement.querySelector(".list");
+    // 无列表块：在列表项块的最后一个子块后面插入新的列表块
+    if (!subListElement) {
+        const lastElement = getLastChildBlock(parentItemElement);
+        if (!lastElement) {
+            return false;
+        }
+        const id = Lute.NewNodeID();
+        const newListItemElement = genListItemElement(parentItemElement, 0, true, 1);
+        const newListHTML = `<div data-subtype="${parentItemElement.getAttribute("data-subtype")}" data-node-id="${id}" data-type="NodeList" class="list" updated="${dayjs().format("YYYYMMDDHHmmss")}">${newListItemElement.outerHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+        lastElement.insertAdjacentHTML("afterend", newListHTML);
+        unfoldElements(protyle, [parentItemElement]);
+        transaction(protyle, [{
+            action: "insert",
+            id,
+            data: newListHTML,
+            previousID: lastElement.getAttribute("data-node-id"),
+        }], [{
+            action: "delete",
+            id,
+        }]);
+        focusByWbr(lastElement.nextElementSibling, range);
+        scrollCenter(protyle, lastElement.nextElementSibling);
+        return true;
+    }
+
+    // 有列表块：在列表块的最后一个列表项块后插入新的列表项块
+    const lastSubItem = getLastChildBlock(subListElement);
+    if (!lastSubItem) {
+        return false;
+    }
+    const newListElement = genListItemElement(lastSubItem, 0, true);
+    const id = newListElement.getAttribute("data-node-id");
+    lastSubItem.after(newListElement);
+    unfoldElements(protyle, [lastSubItem.parentElement, parentItemElement]);
+    transaction(protyle, [{
+        action: "insert",
+        id,
+        data: newListElement.outerHTML,
+        previousID: lastSubItem.getAttribute("data-node-id"),
+    }], [{
+        action: "delete",
+        id,
+    }]);
+    focusByWbr(newListElement, range);
+    scrollCenter(protyle, newListElement);
+    return true;
+};
+
+export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {
+    liItemElements.forEach(item => {
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
+    });
+    if (!liItemElements[0].classList.contains("li")) {
+        if (liItemElements[0].parentElement.childElementCount === liItemElements.length + 2) {
+            liItemElements = [liItemElements[0].parentElement];
+        } else {
+            return;
+        }
+    }
+    const previousElement = liItemElements[0].previousElementSibling as HTMLElement;
+    if (!previousElement) {
+        return;
+    }
+    range.collapse(false);
+    range.insertNode(document.createElement("wbr"));
+    const html = previousElement.parentElement.outerHTML;
+    const lastPreviousElement = getLastChildBlock(previousElement);
+    if (lastPreviousElement && lastPreviousElement.getAttribute("data-type") === "NodeList") {
+        // 上一个列表的最后一项为子列表
+        const previousLastListHTML = lastPreviousElement.outerHTML;
+
+        const doOperations: IOperation[] = [];
+        const undoOperations: IOperation[] = [];
+
+        const subtype = lastPreviousElement.getAttribute("data-subtype");
+        let previousID = getLastChildBlock(lastPreviousElement)?.getAttribute("data-node-id");
+        liItemElements.forEach((item, index) => {
+            doOperations.push({
+                action: "move",
+                id: item.getAttribute("data-node-id"),
+                previousID
+            });
+            undoOperations.push({
+                action: "move",
+                id: item.getAttribute("data-node-id"),
+                previousID: index === 0 ? previousElement.getAttribute("data-node-id") : previousID,
+            });
+            previousID = item.getAttribute("data-node-id");
+            item.setAttribute("data-subtype", subtype);
+            const actionElement = item.querySelector(".protyle-action");
+            if (subtype === "o") {
+                item.removeAttribute("data-task");
+                actionElement.classList.add("protyle-action--order");
+                actionElement.classList.remove("protyle-action--task");
+                lastPreviousElement.lastElementChild.before(item);
+            } else if (subtype === "t") {
+                item.setAttribute("data-marker", "*");
+                item.setAttribute("data-task", " ");
+                actionElement.innerHTML = `<svg><use xlink:href="#icon${item.classList.contains("protyle-task--done") ? "Check" : "Uncheck"}"></use></svg>`;
+                actionElement.classList.remove("protyle-action--order");
+                actionElement.classList.add("protyle-action--task");
+                lastPreviousElement.lastElementChild.before(item);
+            } else {
+                item.removeAttribute("data-task");
+                item.setAttribute("data-marker", "*");
+                actionElement.innerHTML = '<svg><use xlink:href="#iconDot"></use></svg>';
+                actionElement.classList.remove("protyle-action--order", "protyle-action--task");
+                lastPreviousElement.lastElementChild.before(item);
+            }
+        });
+
+        if (subtype === "o") {
+            updateListOrder(lastPreviousElement);
+            updateListOrder(previousElement.parentElement);
+        } else if (previousElement.getAttribute("data-subtype") === "o") {
+            updateListOrder(previousElement.parentElement);
+        }
+
+        if (previousElement.parentElement.classList.contains("protyle-wysiwyg")) {
+            const newLastPreviousElement = getLastChildBlock(previousElement);
+            doOperations.push({
+                action: "update",
+                data: newLastPreviousElement.outerHTML,
+                id: newLastPreviousElement.getAttribute("data-node-id")
+            });
+            undoOperations.push({
+                action: "update",
+                data: previousLastListHTML,
+                id: newLastPreviousElement.getAttribute("data-node-id")
+            });
+            transaction(protyle, doOperations, undoOperations);
+        }
+    } else {
+        const previousHTML = previousElement.outerHTML;
+        const subType = liItemElements[0].getAttribute("data-subtype");
+        const newListElement = document.createElement("div");
+        const newListId = Lute.NewNodeID();
+        newListElement.setAttribute("data-node-id", newListId);
+        newListElement.setAttribute("data-type", "NodeList");
+        newListElement.setAttribute("class", "list");
+        newListElement.setAttribute("data-subtype", subType);
+        newListElement.innerHTML = '<div class="protyle-attr" contenteditable="false"></div>';
+        let foldElement: Element;
+        if (lastPreviousElement?.getAttribute("fold") === "1" &&
+            lastPreviousElement?.getAttribute("data-type") === "NodeHeading") {
+            foldElement = lastPreviousElement;
+        }
+        const doOperations: IOperation[] = [{
+            action: "insert",
+            context: {ignoreProcess: foldElement ? "true" : "false"},
+            data: newListElement.outerHTML,
+            id: newListId,
+            previousID: lastPreviousElement?.getAttribute("data-node-id")
+        }];
+        if (!foldElement) {
+            previousElement.lastElementChild.before(newListElement);
+        }
+        const undoOperations: IOperation[] = [];
+        let previousID: string;
+        liItemElements.forEach((item, index) => {
+            doOperations.push({
+                action: "move",
+                id: item.getAttribute("data-node-id"),
+                parentID: newListId,
+                previousID
+            });
+            undoOperations.push({
+                action: "move",
+                id: item.getAttribute("data-node-id"),
+                previousID: index === 0 ? previousElement.getAttribute("data-node-id") : previousID,
+            });
+            previousID = item.getAttribute("data-node-id");
+            newListElement.lastElementChild.before(item);
+        });
+        undoOperations.push({
+            action: "delete",
+            id: newListId
+        });
+        if (foldElement) {
+            if (previousElement.getAttribute("data-subtype") === "o") {
+                let nextElement = previousElement.nextElementSibling;
+                while (nextElement && !nextElement.classList.contains("protyle-attr")) {
+                    const nextId = nextElement.getAttribute("data-node-id");
+                    undoOperations.push({
+                        action: "update",
+                        id: nextId,
+                        data: nextElement.outerHTML
+                    });
+                    const count = parseInt(nextElement.getAttribute("data-marker")) - 1 + ".";
+                    nextElement.setAttribute("data-marker", count);
+                    nextElement.querySelector(".protyle-action--order").textContent = count;
+                    doOperations.push({
+                        action: "update",
+                        id: nextId,
+                        data: nextElement.outerHTML
+                    });
+                    nextElement = nextElement.nextElementSibling;
+                }
+
+                Array.from(newListElement.children).forEach((item, index) => {
+                    if (item.classList.contains("protyle-attr")) {
+                        return;
+                    }
+                    const itemId = item.getAttribute("data-node-id");
+                    undoOperations.push({
+                        action: "update",
+                        id: itemId,
+                        data: item.outerHTML
+                    });
+                    const count = index + 1 + ".";
+                    item.setAttribute("data-marker", count);
+                    item.querySelector(".protyle-action--order").textContent = count;
+                    item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+                    doOperations.push({
+                        action: "update",
+                        id: itemId,
+                        data: item.outerHTML
+                    });
+                });
+            }
+            const foldOperations = setFold(protyle, foldElement, true, false, false, true);
+            doOperations.push(...foldOperations.doOperations);
+            undoOperations.push(...foldOperations.undoOperations);
+            transaction(protyle, doOperations, undoOperations);
+            focusByWbr(previousElement, range);
+            return;
+        }
+        if (subType === "o") {
+            updateListOrder(newListElement, 1);
+            updateListOrder(previousElement.parentElement);
+        }
+        if (previousElement.parentElement.classList.contains("protyle-wysiwyg")) {
+            doOperations.push({
+                action: "update",
+                data: previousElement.outerHTML,
+                id: previousElement.getAttribute("data-node-id")
+            });
+            undoOperations.push({
+                action: "update",
+                data: previousHTML,
+                id: previousElement.getAttribute("data-node-id")
+            });
+            transaction(protyle, doOperations, undoOperations);
+        }
+    }
+    if (!previousElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        updateTransaction(protyle, previousElement.parentElement, html);
+    }
+    focusByWbr(previousElement, range);
+};
+
+export const breakList = (protyle: IProtyle, blockElement: Element, range: Range) => {
+    const listItemElement = blockElement.parentElement;
+    if (!listItemElement.previousElementSibling) {
+        removeBlock(protyle, blockElement, range, "Backspace");
+        return;
+    }
+    const listItemId = listItemElement.getAttribute("data-node-id");
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+
+    range.insertNode(document.createElement("wbr"));
+    const newListId = Lute.NewNodeID();
+    let newListHTML = "";
+    let hasFind = 0;
+    Array.from(listItemElement.parentElement.children).forEach(item => {
+        if (!hasFind && item === listItemElement) {
+            hasFind = 1;
+        } else if (hasFind && !item.classList.contains("protyle-attr")) {
+            undoOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "move",
+                previousID: listItemId,
+            });
+            doOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "delete",
+            });
+            if (item.getAttribute("data-subtype") === "o") {
+                undoOperations.push({
+                    id: item.getAttribute("data-node-id"),
+                    action: "update",
+                    data: item.outerHTML,
+                });
+                item.setAttribute("data-marker", hasFind + ".");
+                item.firstElementChild.innerHTML = hasFind + ".";
+            }
+            newListHTML += item.outerHTML;
+            item.remove();
+            hasFind++;
+        }
+    });
+    undoOperations.reverse();
+    newListHTML = `<div data-subtype="${listItemElement.getAttribute("data-subtype")}" data-node-id="${newListId}" data-type="NodeList" class="list" updated="${dayjs().format("YYYYMMDDHHmmss")}">${newListHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+    listItemElement.parentElement.insertAdjacentHTML("afterend", newListHTML);
+    doOperations.push({
+        id: newListId,
+        action: "insert",
+        previousID: listItemElement.parentElement.getAttribute("data-node-id"),
+        data: newListHTML
+    });
+    undoOperations.push({
+        id: newListId,
+        action: "delete"
+    });
+
+    Array.from(listItemElement.children).reverse().forEach((item, index) => {
+        if (!item.classList.contains("protyle-action") && !item.classList.contains("protyle-attr")) {
+            doOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "move",
+                previousID: listItemElement.parentElement.getAttribute("data-node-id")
+            });
+            undoOperations.push({
+                id: item.getAttribute("data-node-id"),
+                action: "move",
+                parentID: listItemId,
+                data: index === listItemElement.childElementCount - 2 ? "focus" : null
+            });
+            listItemElement.parentElement.after(item);
+        }
+    });
+
+    const parentId = listItemElement.parentElement.getAttribute("data-node-id");
+    if (listItemElement.parentElement.childElementCount === 2) {
+        undoOperations.splice(0, 0, {
+            id: parentId,
+            action: "insert",
+            data: listItemElement.parentElement.outerHTML,
+            previousID: listItemElement.parentElement.previousElementSibling?.getAttribute("data-node-id"),
+            parentID: listItemElement.parentElement.parentElement.getAttribute("data-node-id") || protyle.block.rootID
+        });
+        listItemElement.parentElement.remove();
+        doOperations.push({
+            id: parentId,
+            action: "delete",
+        });
+    } else {
+        undoOperations.splice(0, 0, {
+            id: listItemId,
+            action: "insert",
+            data: listItemElement.outerHTML,
+            previousID: listItemElement.previousElementSibling?.getAttribute("data-node-id"),
+            parentID: parentId
+        });
+        listItemElement.remove();
+        doOperations.push({
+            id: listItemId,
+            action: "delete",
+        });
+    }
+
+    transaction(protyle, doOperations, undoOperations);
+    focusByWbr(protyle.wysiwyg.element, range);
+};
+
+/**
+ * 反向缩进列表
+ * @param protyle
+ * @param liItemElements
+ * @param range
+ * @param isDelete
+ * @param deleteElement 末尾反向删除时才会传入
+ */
+export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement?: Element) => {
+    liItemElements.forEach(item => {
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
+    });
+    if (!liItemElements[0].classList.contains("li")) {
+        if (liItemElements[0].parentElement.childElementCount === liItemElements.length + 2) {
+            liItemElements = [liItemElements[0].parentElement];
+        } else {
+            return;
+        }
+    }
+    const liElement = liItemElements[0].parentElement;
+    const liId = liElement.getAttribute("data-node-id");
+    if (!liId) {
+        // zoom in 列表项
+        return;
+    }
+    const parentLiItemElement = getParentBlock(liElement);
+    const parentParentElement = parentLiItemElement.parentElement;
+    if (parentLiItemElement.classList.contains("protyle-wysiwyg__embed") ||
+        parentParentElement.classList.contains("protyle-wysiwyg__embed")) {
+        return;
+    }
+    if (liElement.previousElementSibling?.classList.contains("protyle-action") && !parentParentElement.getAttribute("data-node-id")) {
+        // https://ld246.com/article/1691981936960 情况下 zoom in 列表项
+        return;
+    }
+    if (parentLiItemElement.classList.contains("protyle-wysiwyg") || parentLiItemElement.classList.contains("sb") ||
+        parentLiItemElement.classList.contains("bq") || parentLiItemElement.classList.contains("callout")) {
+        // 顶层列表
+        const topDoOperations: IOperation[] = [];
+        const topUndoOperations: IOperation[] = [];
+        range.collapse(false);
+        moveToPrevious(deleteElement, range, isDelete);
+        range.insertNode(document.createElement("wbr"));
+        let startIndex;
+        if (!liItemElements[0].previousElementSibling && liElement.getAttribute("data-subtype") === "o") {
+            startIndex = parseInt(liItemElements[0].getAttribute("data-marker"));
+        }
+        let topPreviousID = liId;
+        let previousElement: Element = liElement;
+        let nextElement = liItemElements[liItemElements.length - 1].nextElementSibling;
+        let lastBlockElement = getLastChildBlock(liItemElements[liItemElements.length - 1]);
+        liItemElements.forEach(item => {
+            Array.from(item.children).forEach((blockElement, index) => {
+                const id = blockElement.getAttribute("data-node-id");
+                if (!id) {
+                    return;
+                }
+                topDoOperations.push({
+                    action: "move",
+                    id,
+                    previousID: topPreviousID,
+                    parentID: parentLiItemElement.getAttribute("data-node-id") || protyle.block.parentID
+                });
+                topUndoOperations.push({
+                    action: "move",
+                    id,
+                    previousID: index === 1 ? undefined : topPreviousID,
+                    parentID: item.getAttribute("data-node-id"),
+                    data: blockElement.contains(range.startContainer) ? "focus" : "" // 标记需要 focus，https://ld246.com/article/1650018446988/comment/1650081404993?r=Vanessa#comments
+                });
+                topPreviousID = id;
+                previousElement.after(blockElement);
+                previousElement = blockElement;
+            });
+        });
+        if (!window.siyuan.config.editor.listLogicalOutdent && !nextElement.classList.contains("protyle-attr")) {
+            // 传统缩进
+            let newId;
+            if (!lastBlockElement || lastBlockElement.getAttribute("data-subtype") !== nextElement.getAttribute("data-subtype")) {
+                newId = Lute.NewNodeID();
+                lastBlockElement = document.createElement("div");
+                lastBlockElement.classList.add("list");
+                lastBlockElement.setAttribute("data-subtype", nextElement.getAttribute("data-subtype"));
+                lastBlockElement.setAttribute("data-node-id", newId);
+                lastBlockElement.setAttribute("data-type", "NodeList");
+                lastBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                lastBlockElement.innerHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
+                previousElement.after(lastBlockElement);
+                topDoOperations.push({
+                    action: "insert",
+                    id: newId,
+                    data: lastBlockElement.outerHTML,
+                    previousID: previousElement.getAttribute("data-node-id"),
+                });
+            }
+            let topOldPreviousID;
+            while (nextElement && !nextElement.classList.contains("protyle-attr")) {
+                topDoOperations.push({
+                    action: "move",
+                    id: nextElement.getAttribute("data-node-id"),
+                    previousID: topOldPreviousID || getLastChildBlock(lastBlockElement)?.getAttribute("data-node-id"),
+                    parentID: lastBlockElement.getAttribute("data-node-id")
+                });
+                topUndoOperations.push({
+                    action: "move",
+                    id: nextElement.getAttribute("data-node-id"),
+                    parentID: lastBlockElement.getAttribute("data-node-id"),
+                    previousID: topOldPreviousID || nextElement.previousElementSibling?.getAttribute("data-node-id"),
+                });
+                topOldPreviousID = nextElement.getAttribute("data-node-id");
+                const tempElement = nextElement;
+                nextElement = nextElement.nextElementSibling;
+                lastBlockElement.lastElementChild.before(tempElement);
+            }
+            if (lastBlockElement.getAttribute("data-subtype") === "o") {
+                Array.from(lastBlockElement.children).forEach(orderItem => {
+                    const id = orderItem.getAttribute("data-node-id");
+                    if (id) {
+                        topUndoOperations.push({
+                            action: "update",
+                            id,
+                            data: orderItem.outerHTML,
+                        });
+                    }
+                });
+                updateListOrder(lastBlockElement, 1);
+                Array.from(lastBlockElement.children).forEach(orderItem => {
+                    const id = orderItem.getAttribute("data-node-id");
+                    if (id) {
+                        topDoOperations.push({
+                            action: "update",
+                            id,
+                            data: orderItem.outerHTML,
+                        });
+                    }
+                });
+            }
+            if (newId) {
+                topUndoOperations.push({
+                    action: "delete",
+                    id: newId
+                });
+            }
+        }
+        const movedHTML = liElement.outerHTML;
+        liItemElements.forEach(item => {
+            item.remove();
+        });
+
+        if (liElement.childElementCount === 1) {
+            // 列表只有一项
+            topDoOperations.push({
+                action: "delete",
+                id: liId
+            });
+            // 聚焦列表，第一个列表项反向缩进后刷新会关闭页签
+            if (liId === protyle.block.id) {
+                protyle.block.id = protyle.block.parentID;
+            }
+            topUndoOperations.splice(0, 0, {
+                action: "insert",
+                data: movedHTML,
+                id: liId,
+                previousID: liElement.previousElementSibling?.getAttribute("data-node-id"),
+                parentID: parentLiItemElement.getAttribute("data-node-id") || protyle.block.parentID
+            });
+            liElement.remove();
+        } else {
+            if (liElement.getAttribute("data-subtype") === "o") {
+                updateListOrder(liElement, startIndex);
+            }
+            topDoOperations.push({
+                action: "update",
+                id: liId,
+                data: liElement.outerHTML
+            });
+            topUndoOperations.splice(0, 0, {
+                action: "update",
+                id: liId,
+                data: movedHTML,
+            });
+        }
+        transaction(protyle, topDoOperations, topUndoOperations);
+        if (liElement.childElementCount !== 1 && parentLiItemElement.classList.contains("sb") &&
+            parentLiItemElement.getAttribute("data-sb-layout") === "col") {
+            turnsIntoOneTransaction({
+                protyle,
+                selectsElement: [liElement, liElement.nextElementSibling],
+                type: "BlocksMergeSuperBlock",
+                level: "row",
+                unfocus: true,
+            });
+        }
+        focusByWbr(parentLiItemElement, range);
+        return;
+    }
+
+    if (liElement.childElementCount === 2 && parentLiItemElement.childElementCount === 3) {
+        // 列表项里仅有包含一个列表项的列表，如 1. 1. 1 https://github.com/siyuan-note/insider/issues/494
+        range.collapse(false);
+        moveToPrevious(deleteElement, range, isDelete);
+        range.insertNode(document.createElement("wbr"));
+        const html = parentLiItemElement.outerHTML;
+        liItemElements[0].firstElementChild.remove();
+        liItemElements[0].lastElementChild.remove();
+        liElement.outerHTML = liItemElements[0].innerHTML;
+        updateTransaction(protyle, parentLiItemElement, html);
+        focusByWbr(parentLiItemElement, range);
+        return;
+    }
+
+    range.collapse(false);
+    moveToPrevious(deleteElement, range, isDelete);
+    range.insertNode(document.createElement("wbr"));
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const previousID = liItemElements[0].previousElementSibling?.getAttribute("data-node-id");
+    let startIndex;
+    if (!liItemElements[0].previousElementSibling && liElement.getAttribute("data-subtype") === "o") {
+        startIndex = parseInt(liItemElements[0].getAttribute("data-marker"));
+    }
+    const html = parentLiItemElement.parentElement.outerHTML;
+    let nextElement = liItemElements[liItemElements.length - 1].nextElementSibling;
+    let lastBlockElement = getLastChildBlock(liItemElements[liItemElements.length - 1]);
+    liItemElements.reverse().forEach(item => {
+        const itemId = item.getAttribute("data-node-id");
+        doOperations.push({
+            action: "move",
+            id: itemId,
+            previousID: parentLiItemElement.getAttribute("data-node-id")
+        });
+        undoOperations.push({
+            action: "move",
+            id: itemId,
+            previousID,
+            parentID: liElement.getAttribute("data-node-id")
+        });
+        parentLiItemElement.after(item);
+        if ((item.getAttribute("data-subtype") === "o" || item.getAttribute("data-subtype") === "t") &&
+            parentLiItemElement.getAttribute("data-subtype") === "u") {
+            undoOperations.push({
+                action: "update",
+                id: itemId,
+                data: item.outerHTML
+            });
+            item.querySelector(".protyle-action").outerHTML = '<div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>';
+            item.setAttribute("data-subtype", "u");
+            item.setAttribute("data-marker", "*");
+            item.removeAttribute("data-task");
+            item.classList.remove("protyle-task--done");
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            doOperations.push({
+                action: "update",
+                id: itemId,
+                data: item.outerHTML
+            });
+        } else if ((item.getAttribute("data-subtype") === "u" || item.getAttribute("data-subtype") === "t") &&
+            parentLiItemElement.getAttribute("data-subtype") === "o") {
+            undoOperations.push({
+                action: "update",
+                id: itemId,
+                data: item.outerHTML
+            });
+            item.querySelector(".protyle-action").outerHTML = '<div contenteditable="false" draggable="true" class="protyle-action protyle-action--order">1.</div>';
+            item.setAttribute("data-subtype", "o");
+            item.setAttribute("data-marker", "1.");
+            item.removeAttribute("data-task");
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            doOperations.push({
+                action: "update",
+                id: itemId,
+                data: item.outerHTML
+            });
+        } else if ((item.getAttribute("data-subtype") === "u" || item.getAttribute("data-subtype") === "o") &&
+            parentLiItemElement.getAttribute("data-subtype") === "t") {
+            undoOperations.push({
+                action: "update",
+                id: itemId,
+                data: item.outerHTML
+            });
+            item.querySelector(".protyle-action").outerHTML = '<div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+            item.setAttribute("data-subtype", "t");
+            item.setAttribute("data-marker", "*");
+            item.setAttribute("data-task", " ");
+            item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            doOperations.push({
+                action: "update",
+                id: itemId,
+                data: item.outerHTML
+            });
+        }
+    });
+    if (!window.siyuan.config.editor.listLogicalOutdent && !nextElement.classList.contains("protyle-attr")) {
+        // 传统缩进
+        let newId;
+        if (!lastBlockElement || !lastBlockElement.classList.contains("list")) {
+            newId = Lute.NewNodeID();
+            lastBlockElement = document.createElement("div");
+            lastBlockElement.classList.add("list");
+            lastBlockElement.setAttribute("data-subtype", nextElement.getAttribute("data-subtype"));
+            lastBlockElement.setAttribute("data-node-id", newId);
+            lastBlockElement.setAttribute("data-type", "NodeList");
+            lastBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+            lastBlockElement.innerHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
+            doOperations.push({
+                action: "insert",
+                id: newId,
+                data: lastBlockElement.outerHTML,
+                previousID: getLastChildBlock(liItemElements[0])?.getAttribute("data-node-id"),
+            });
+            liItemElements[0].lastElementChild.before(lastBlockElement);
+        }
+        let subPreviousID;
+        while (nextElement && !nextElement.classList.contains("protyle-attr")) {
+            const nextId = nextElement.getAttribute("data-node-id");
+            if (nextElement.getAttribute("data-subtype") !== lastBlockElement.getAttribute("data-subtype")) {
+                undoOperations.push({
+                    action: "update",
+                    id: nextId,
+                    data: nextElement.outerHTML
+                });
+                nextElement.querySelector(".protyle-action").outerHTML = lastBlockElement.querySelector(".protyle-action").outerHTML;
+                nextElement.setAttribute("data-subtype", lastBlockElement.getAttribute("data-subtype"));
+                nextElement.setAttribute("data-marker", lastBlockElement.getAttribute("data-marker"));
+                if (lastBlockElement.hasAttribute("data-task")) {
+                    nextElement.setAttribute("data-task", lastBlockElement.getAttribute("data-task"));
+                } else {
+                    nextElement.removeAttribute("data-task");
+                }
+                doOperations.push({
+                    action: "update",
+                    id: nextId,
+                    data: nextElement.outerHTML
+                });
+            }
+            doOperations.push({
+                action: "move",
+                id: nextId,
+                previousID: subPreviousID || getLastChildBlock(lastBlockElement)?.getAttribute("data-node-id"),
+                parentID: lastBlockElement.getAttribute("data-node-id")
+            });
+            undoOperations.push({
+                action: "move",
+                id: nextId,
+                previousID: subPreviousID || lastBlockElement.parentElement?.getAttribute("data-node-id"),
+            });
+            subPreviousID = nextId;
+            const tempElement = nextElement;
+            nextElement = nextElement.nextElementSibling;
+            lastBlockElement.lastElementChild.before(tempElement);
+        }
+        if (lastBlockElement.getAttribute("data-subtype") === "o") {
+            Array.from(lastBlockElement.children).forEach(orderItem => {
+                const id = orderItem.getAttribute("data-node-id");
+                if (id) {
+                    undoOperations.push({
+                        action: "update",
+                        id,
+                        data: orderItem.outerHTML,
+                    });
+                }
+            });
+            updateListOrder(lastBlockElement, 1);
+            Array.from(lastBlockElement.children).forEach(orderItem => {
+                const id = orderItem.getAttribute("data-node-id");
+                if (id) {
+                    doOperations.push({
+                        action: "update",
+                        id,
+                        data: orderItem.outerHTML,
+                    });
+                }
+            });
+        }
+        if (newId) {
+            undoOperations.push({
+                action: "delete",
+                id: newId
+            });
+        }
+    }
+    if (!window.siyuan.config.editor.listLogicalOutdent && liElement.nextElementSibling) {
+        // https://github.com/siyuan-note/siyuan/issues/9226
+        nextElement = liElement.nextElementSibling;
+        let subBlockPreviousID;
+        while (nextElement && !nextElement.classList.contains("protyle-attr")) {
+            const nextId = nextElement.getAttribute("data-node-id");
+            doOperations.push({
+                action: "move",
+                id: nextId,
+                previousID: subBlockPreviousID || lastBlockElement.getAttribute("data-node-id"),
+            });
+            undoOperations.push({
+                action: "move",
+                id: nextId,
+                previousID: subBlockPreviousID || liElement.getAttribute("data-node-id"),
+            });
+            subBlockPreviousID = nextId;
+            const tempElement = nextElement;
+            nextElement = nextElement.nextElementSibling;
+            lastBlockElement.after(tempElement);
+            lastBlockElement = tempElement;
+        }
+    }
+    if (liElement.childElementCount === 1 && parentLiItemElement.childElementCount === 3) {
+        // https://ld246.com/article/1691981936960
+        doOperations.push({
+            action: "delete",
+            id: parentLiItemElement.getAttribute("data-node-id")
+        });
+        undoOperations.splice(0, 0, {
+            action: "insert",
+            id: parentLiItemElement.getAttribute("data-node-id"),
+            data: parentLiItemElement.outerHTML,
+            previousID: parentLiItemElement.previousElementSibling?.getAttribute("data-node-id"),
+            // https://github.com/siyuan-note/siyuan/issues/9237 无 previousID
+            parentID: parentLiItemElement.parentElement.getAttribute("data-node-id"),
+        });
+        parentLiItemElement.remove();
+    } else if (liElement.childElementCount === 1) {
+        doOperations.push({
+            action: "delete",
+            id: liElement.getAttribute("data-node-id")
+        });
+        undoOperations.splice(0, 0, {
+            action: "insert",
+            id: liElement.getAttribute("data-node-id"),
+            data: liElement.outerHTML,
+            previousID: liElement.previousElementSibling.getAttribute("data-node-id")
+        });
+        liElement.remove();
+    } else if (liElement.getAttribute("data-subtype") === "o") {
+        undoOperations.splice(0, 0, {
+            action: "update",
+            data: liElement.outerHTML,
+            id: liElement.getAttribute("data-node-id"),
+        });
+        updateListOrder(liElement, startIndex);
+        doOperations.push({
+            action: "update",
+            data: liElement.outerHTML,
+            id: liElement.getAttribute("data-node-id"),
+        });
+    }
+    if (parentParentElement.classList.contains("protyle-wysiwyg")) {
+        transaction(protyle, doOperations, undoOperations);
+    } else {
+        if (parentLiItemElement && parentLiItemElement.getAttribute("data-subtype") === "o") {
+            updateListOrder(parentParentElement);
+        }
+        updateTransaction(protyle, parentParentElement, html);
+    }
+    focusByWbr(parentParentElement, range);
+};

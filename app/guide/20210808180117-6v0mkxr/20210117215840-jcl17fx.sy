@@ -1,0 +1,1123 @@
+{
+	"ID": "20210117215840-jcl17fx",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f50f",
+		"id": "20210117215840-jcl17fx",
+		"title": "Data Security",
+		"type": "doc",
+		"updated": "20230422123335"
+	},
+	"Children": [
+		{
+			"ID": "20210721113914-ncefrsq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-ncefrsq",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-myj5bf9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-myj5bf9",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data security is mainly divided into two aspects:"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-eyp2qea",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721113914-eyp2qea",
+				"updated": "20230422123335"
+			},
+			"Children": [
+				{
+					"ID": "20210721113914-l3m6qaz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-l3m6qaz",
+						"updated": "20230422123335"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-tv2xupw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-tv2xupw",
+								"updated": "20230422123335"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20230422120504-ns837kr",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "Availability"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": no data loss, keep the data complete and consistent"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721113914-4n8h1s2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-4n8h1s2"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-rly8yqn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-rly8yqn"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Confidentiality: data will not be leaked or tampered with"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-rmgqqcr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-rmgqqcr",
+				"updated": "20210721114140"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan supports both of these aspects. The following is an explanation about data security."
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-z3cmj85",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-z3cmj85",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Plaintext storage"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-3zwi0oa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-3zwi0oa",
+				"updated": "20210721114144"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan uses plaintext to store data on the local file system, which means:"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-cpc36qq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721113914-cpc36qq",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"ID": "20210721113914-9g01tnu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-9g01tnu"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-bkvbciw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-bkvbciw"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Anyone or software who can use the operating system can read the data in it"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721113914-diinbpv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-diinbpv"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-s8qsqi2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-s8qsqi2"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The availability of data depends on the availability of hardware disks and operating systems"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-ccvr8nz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-ccvr8nz",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "End-to-end encryption"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-knx9uy7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210721113914-knx9uy7",
+				"updated": "20220703223247"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan cloud synchronization use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210721112229-fp97j3c",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "End-to-end Encryption"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", the password is stored locally with a built-in key encryption, any third party other than the user cannot get the plaintext in the cloud data."
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-yk8x9s1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20210721113914-yk8x9s1",
+				"updated": "20210721113914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Suggest"
+				}
+			]
+		},
+		{
+			"ID": "20210721113914-m1bcp7i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20210721113914-m1bcp7i",
+				"updated": "20230422122808"
+			},
+			"Children": [
+				{
+					"ID": "20210721113914-fg1idfp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-fg1idfp",
+						"updated": "20230422122808"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-rmfboog",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-rmfboog",
+								"updated": "20230422122808"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Regularly back up data, refer to 321 Backup Guidelines (Minimum 3 copies, 2 media, and 1 offline storage)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20210721113914-sszurje",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20210721113914-sszurje"
+					},
+					"Children": [
+						{
+							"ID": "20210721113914-zzp6rxb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210721113914-zzp6rxb"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "It is recommended to use special software, equipment or offline storage for important passwords, keys or core secrets"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-sz90qpf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20220626214041-sz90qpf",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Threat Model"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-68ld138",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214041-68ld138",
+				"updated": "20220626214048"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "It mainly evaluates local data security and SiYuan cloud storage security."
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-mu28gc4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214041-mu28gc4",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Premise"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-susd3su",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214041-susd3su",
+				"updated": "20220626214653"
+			},
+			"Children": [
+				{
+					"ID": "20220626214041-r7wqevv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-r7wqevv",
+						"updated": "20220626214653"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-0ji5vg8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-0ji5vg8",
+								"updated": "20220626214131"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The local host operating system is a fully trusted environment. This is the most basic premise of data security, and it can only be guaranteed based on this premise."
+								}
+							]
+						},
+						{
+							"ID": "20220626214041-0m7kunu",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20220626214041-0m7kunu",
+								"updated": "20220626214653"
+							},
+							"Children": [
+								{
+									"ID": "20220626214041-v8p0as0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220626214041-v8p0as0",
+										"updated": "20220626214653"
+									},
+									"Children": [
+										{
+											"ID": "20220626214041-asg2zwy",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220626214041-asg2zwy",
+												"updated": "20220626214653"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Availability of original data"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220626214041-4a0wgmi",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220626214041-4a0wgmi",
+										"updated": "20220626214649"
+									},
+									"Children": [
+										{
+											"ID": "20220626214041-xd159p7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220626214041-xd159p7",
+												"updated": "20220626214649"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Rriginal data is not leaked"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20220626214041-7x7h5tv",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20220626214041-7x7h5tv",
+										"updated": "20220626214041"
+									},
+									"Children": [
+										{
+											"ID": "20220626214041-trypmwy",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20220626214041-trypmwy",
+												"updated": "20220626214041"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Key security"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-walongz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-walongz",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-qmyo4ov",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-qmyo4ov",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Users do not leak keys to attackers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-r0gnkdl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-r0gnkdl",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-rtbhm04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-rtbhm04",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Data in cloud storage will not be deleted"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-w7h0sju",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-w7h0sju",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-2s2zb0n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-2s2zb0n",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "AES-GCM encryption algorithm is not broken"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-ttywl0b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-ttywl0b",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-3eek7k1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-3eek7k1",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The attacker cannot provide the computing power required for brute force cracking"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-ku1495e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214041-ku1495e",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Cloud storage can guarantee"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-pmwe9u7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214041-pmwe9u7",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"ID": "20220626214041-dcrtsao",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-dcrtsao",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-1ozs7g3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-1ozs7g3",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Data can only be decrypted with the correct key"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-n2epubs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-n2epubs",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-ofy8fcf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-ofy8fcf",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Data cannot be decrypted after being tampered with"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-2i5mpyi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214041-2i5mpyi",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Normal example"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-hxlxq6f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214041-hxlxq6f",
+				"updated": "20220626214555"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Based on the above premises and guarantees, the following are examples of what an attacker can achieve."
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-zhwz3ln",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214041-zhwz3ln",
+				"updated": "20220626214434"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If an attacker has read-only access to cloud storage, he can:"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-7fc1xei",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214041-7fc1xei",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"ID": "20220626214041-3w8hwp2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-3w8hwp2",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-f2315iq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-f2315iq",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Get the encrypted data and try brute force cracking"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-zx44bbo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-zx44bbo",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-9424m7p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-9424m7p",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Infer data size from index information"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-m3wwddi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214041-m3wwddi",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If an attacker is able to hijack the network, then he can:"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-mz2bu3y",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214041-mz2bu3y",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"ID": "20220626214041-3eofuvg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-3eofuvg",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-ml4720h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-ml4720h",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tampering with data makes data unavailable"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-v1d69l9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-v1d69l9",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-66rla1o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-66rla1o",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Get user ID information"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-4sk5r3x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-4sk5r3x",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-495954g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-495954g",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Infer data size from traffic"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-eikbmi8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20220626214041-eikbmi8",
+				"updated": "20220626214222"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Exception example"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-844aaoz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214041-844aaoz",
+				"updated": "20220626214558"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the above premises or guarantees are violated, the following are examples of what an attacker can achieve."
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-tqyy2wg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214041-tqyy2wg",
+				"updated": "20220626214626"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If an attacker is able to compromise the local host operating system, then he can:"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-t2pukqz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214041-t2pukqz",
+				"updated": "20220626214644"
+			},
+			"Children": [
+				{
+					"ID": "20220626214041-vqdjcfd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-vqdjcfd",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-55vp65s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-55vp65s",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Modify or delete the original data, making the original data unavailable"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-081qsim",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-081qsim",
+						"updated": "20220626214642"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-csmhiio",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-csmhiio",
+								"updated": "20220626214642"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Get original data"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20220626214041-77tr01l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-77tr01l",
+						"updated": "20220626214644"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-wo4tkf4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-wo4tkf4",
+								"updated": "20220626214644"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Get the key"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-9sz5qad",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20220626214041-9sz5qad",
+				"updated": "20220626214710"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If an attacker has write access to cloud storage, he can:"
+				}
+			]
+		},
+		{
+			"ID": "20220626214041-bfgt82v",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20220626214041-bfgt82v",
+				"updated": "20220626214041"
+			},
+			"Children": [
+				{
+					"ID": "20220626214041-qjop563",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20220626214041-qjop563",
+						"updated": "20220626214041"
+					},
+					"Children": [
+						{
+							"ID": "20220626214041-pu5jrjr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20220626214041-pu5jrjr",
+								"updated": "20220626214041"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Modify or delete cloud storage, causing cloud storage data to be unavailable"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

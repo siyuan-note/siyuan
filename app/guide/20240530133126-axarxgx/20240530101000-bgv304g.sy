@@ -1,0 +1,594 @@
+{
+	"ID": "20240530101000-bgv304g",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-2r7fdzj",
+		"icon": "1f9d1-200d-1f4bb",
+		"id": "20240530101000-bgv304g",
+		"title": "拡張機能の開発",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-fsbbc8j",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-koir7y7",
+				"id": "20240530101000-fsbbc8j",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-oe3hs1t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-251vwi5",
+						"id": "20240530101000-oe3hs1t",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-fcrarv5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-7ti2m1i",
+								"id": "20240530101000-fcrarv5",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-bpj42r0",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "テーマ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/theme-sample",
+									"TextMarkTextContent": "siyuan-note/theme-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-wcrplsz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-fqveu4o",
+						"id": "20240530101000-wcrplsz",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-kq0ujbf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ywayiv5",
+								"id": "20240530101000-kq0ujbf",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-hq9sn3k",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "アイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/icon-sample",
+									"TextMarkTextContent": "siyuan-note/icon-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-dboomaq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-amghiyh",
+						"id": "20240530101000-dboomaq",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-9bernsq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-d7efx1z",
+								"id": "20240530101000-9bernsq",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-5gi76ax",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ウィジェット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/widget-sample",
+									"TextMarkTextContent": "siyuan-note/widget-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-iaenqu1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-yaicnji",
+						"id": "20240530101000-iaenqu1",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-82wzq7c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-y07qj5a",
+								"id": "20240530101000-82wzq7c",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-8m2dowc",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "プラグイン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/plugin-sample",
+									"TextMarkTextContent": "siyuan-note/plugin-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-flrpo8c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-wj41mdk",
+						"id": "20240530101000-flrpo8c",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-it5d5lp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-i74mgau",
+								"id": "20240530101000-it5d5lp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-6x9ivi7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "テンプレート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/template-sample",
+									"TextMarkTextContent": "siyuan-note/template-sample"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ohqu6o7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-8w4sun7",
+						"id": "20240530101000-ohqu6o7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-hmleqk8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-y940x5x",
+								"id": "20240530101000-hmleqk8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マーケットプレイスのサンプル GitHub リポジトリ: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
+									"TextMarkTextContent": "siyuan-note/bazaar"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-zgpk0v5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-9lgu0a6",
+						"id": "20240530101000-zgpk0v5",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-f1tl08i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8dhl0t3",
+								"id": "20240530101000-f1tl08i",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://docs.siyuan-note.club/",
+									"TextMarkTextContent": "コミュニティ開発者用のリソース"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-uh55ojh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fykwqee",
+				"id": "20240530101000-uh55ojh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qnks6ak",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-b2725rd",
+				"id": "20240530101000-qnks6ak",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-vw761x6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-w9a9or6",
+						"id": "20240530101000-vw761x6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-2lsfraz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2f7rrl9",
+								"id": "20240530101000-2lsfraz",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "プラグインや外部拡張機能が "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ディレクトリ内のファイルの直接的な読み書きを必要とする場合はカーネル API を使用し、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code strong",
+									"TextMarkTextContent": "fs"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "やその他の electron や nodejs の API を直接呼び出さないでください"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。そうすると同期中のデータ損失やクラウドデータの破損につながる可能性があります。関連 API は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (例: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/file/getFile"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​) にあります。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-10khdl7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-zxgq11b",
+						"id": "20240530101000-10khdl7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-lcopw4s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-cvbwf47",
+								"id": "20240530101000-lcopw4s",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan でデイリーノートを作成すると、通常のドキュメントと区別するために custom-dailynote-yyyymmdd 属性が自動的にドキュメントに追加されます。"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-kkp18xy",
+							"Type": "NodeBlockquote",
+							"Properties": {
+								"ID": "20240530101000-hdmojvl",
+								"id": "20240530101000-kkp18xy",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeBlockquoteMarker",
+									"Data": "\u003e"
+								},
+								{
+									"ID": "20240530101000-8vs5yaq",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"ID": "20240530101000-v3xpnln",
+										"id": "20240530101000-8vs5yaq",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "詳細は Github Issue #9807 を参照してください"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-srolhfo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2fa9u5q",
+								"id": "20240530101000-srolhfo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デイリーノートを作成する機能を開発する場合は以下の点に注意してください:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-3gajnbn",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-lnk2lza",
+								"id": "20240530101000-3gajnbn",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-w2p5h5n",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-9tzeclm",
+										"id": "20240530101000-w2p5h5n",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-zf72q03",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-p184iy6",
+												"id": "20240530101000-zf72q03",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "デイリーノートを作成するために "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/api/filetree/createDailyNote"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を呼び出した場合、この属性は自動的にドキュメントに追加されます。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-ub6zr8n",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-tvt19xb",
+										"id": "20240530101000-ub6zr8n",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-xeefrc5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-ut0krre",
+												"id": "20240530101000-xeefrc5",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "createDocWithMd"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ API を使用してデイリーノートを作成する場合などは、この属性が自動的に追加されません。そのため、この属性を追加するコードも実装してください。"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2fqcyrj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-xsw3k05",
+				"id": "20240530101000-2fqcyrj"
+			}
+		}
+	]
+}

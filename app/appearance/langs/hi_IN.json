@@ -16,6 +16,8 @@
   "agentActionDelete": "हटाएं",
   "agentActionCreate": "बनाएं",
   "agentActionMove": "स्थानांतरित करें",
+  "agentNotifyConfirm": "SiYuan एजेंट को आपकी पुष्टि चाहिए",
+  "agentNotifyDone": "SiYuan एजेंट ने उत्तर दिया",
   "agentActionRename": "नाम बदलें",
   "agentConfirmApprove": "स्वीकृत करें",
   "agentConfirmReject": "अस्वीकृत करें",

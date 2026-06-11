@@ -16,6 +16,8 @@
   "agentActionDelete": "verwijderen",
   "agentActionCreate": "aanmaken",
   "agentActionMove": "verplaatsen",
+  "agentNotifyConfirm": "SiYuan agent heeft uw bevestiging nodig",
+  "agentNotifyDone": "SiYuan agent heeft gereageerd",
   "agentActionRename": "hernoemen",
   "agentConfirmApprove": "Goedkeuren",
   "agentConfirmReject": "Afwijzen",

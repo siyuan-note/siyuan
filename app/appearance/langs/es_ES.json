@@ -16,6 +16,8 @@
   "agentActionDelete": "eliminar",
   "agentActionCreate": "crear",
   "agentActionMove": "mover",
+  "agentNotifyConfirm": "El agente SiYuan necesita tu confirmación",
+  "agentNotifyDone": "El agente SiYuan ha respondido",
   "agentActionRename": "renombrar",
   "agentConfirmApprove": "Aprobar",
   "agentConfirmReject": "Rechazar",

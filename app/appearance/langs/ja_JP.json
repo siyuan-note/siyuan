@@ -16,6 +16,8 @@
   "agentActionDelete": "削除",
   "agentActionCreate": "作成",
   "agentActionMove": "移動",
+  "agentNotifyConfirm": "SiYuan エージェントが確認を必要としています",
+  "agentNotifyDone": "SiYuan エージェントが応答しました",
   "agentActionRename": "名前変更",
   "agentConfirmApprove": "承認",
   "agentConfirmReject": "拒否",

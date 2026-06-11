@@ -16,6 +16,8 @@
   "agentActionDelete": "zmazať",
   "agentActionCreate": "vytvoriť",
   "agentActionMove": "presunúť",
+  "agentNotifyConfirm": "Agent SiYuan potrebuje vaše potvrdenie",
+  "agentNotifyDone": "Agent SiYuan odpovedal",
   "agentActionRename": "premenovať",
   "agentConfirmApprove": "Schváliť",
   "agentConfirmReject": "Odmietnuť",

@@ -16,6 +16,8 @@
   "agentActionDelete": "删除",
   "agentActionCreate": "创建",
   "agentActionMove": "移动",
+  "agentNotifyConfirm": "思源智能体需要你的确认",
+  "agentNotifyDone": "思源智能体已回复",
   "agentActionRename": "重命名",
   "agentConfirmApprove": "确认执行",
   "agentConfirmReject": "拒绝",

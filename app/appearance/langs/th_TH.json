@@ -16,6 +16,8 @@
   "agentActionDelete": "ลบ",
   "agentActionCreate": "สร้าง",
   "agentActionMove": "ย้าย",
+  "agentNotifyConfirm": "เอเจนต์ SiYuan ต้องการการยืนยันจากคุณ",
+  "agentNotifyDone": "เอเจนต์ SiYuan ตอบกลับแล้ว",
   "agentActionRename": "เปลี่ยนชื่อ",
   "agentConfirmApprove": "อนุมัติ",
   "agentConfirmReject": "ปฏิเสธ",

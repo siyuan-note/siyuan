@@ -11,6 +11,7 @@ import {escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import * as dayjs from "dayjs";
+import {sendNotification} from "../../plugin/platformUtils";
 import {
     bindThinkingCardToggle,
     createThinkingCardElement,
@@ -1232,6 +1233,10 @@ export class AgentChat extends Model {
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
+        if (savedContent && (!document.hasFocus() || document.hidden)) {
+            const L = window.siyuan.languages;
+            sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
+        }
     }
 
     private flushThinkingStep() {
@@ -1453,6 +1458,9 @@ export class AgentChat extends Model {
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
         this.pendingConfirms.push({type: "confirm", name, args, confirmID, status: "pending"});
+        if (!document.hasFocus() || document.hidden) {
+            sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
+        }
     }
 
     private async postConfirm(confirmID: string, approved: boolean, always?: boolean) {
@@ -1715,4 +1723,5 @@ export class AgentChat extends Model {
         }
         return d.format("YYYY-MM-DD HH:mm");
     }
+
 }

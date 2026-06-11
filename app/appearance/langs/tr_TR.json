@@ -16,6 +16,8 @@
   "agentActionDelete": "sil",
   "agentActionCreate": "oluştur",
   "agentActionMove": "taşı",
+  "agentNotifyConfirm": "SiYuan ajanı onayınızı bekliyor",
+  "agentNotifyDone": "SiYuan ajanı yanıtladı",
   "agentActionRename": "yeniden adlandır",
   "agentConfirmApprove": "Onayla",
   "agentConfirmReject": "Reddet",

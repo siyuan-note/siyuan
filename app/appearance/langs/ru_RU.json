@@ -16,6 +16,8 @@
   "agentActionDelete": "удалить",
   "agentActionCreate": "создать",
   "agentActionMove": "переместить",
+  "agentNotifyConfirm": "Агент SiYuan нуждается в подтверждении",
+  "agentNotifyDone": "Агент SiYuan ответил",
   "agentActionRename": "переименовать",
   "agentConfirmApprove": "Одобрить",
   "agentConfirmReject": "Отклонить",

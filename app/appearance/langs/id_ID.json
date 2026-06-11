@@ -16,6 +16,8 @@
   "agentActionDelete": "hapus",
   "agentActionCreate": "buat",
   "agentActionMove": "pindahkan",
+  "agentNotifyConfirm": "Agen SiYuan butuh konfirmasi Anda",
+  "agentNotifyDone": "Agen SiYuan telah merespons",
   "agentActionRename": "ganti nama",
   "agentConfirmApprove": "Setujui",
   "agentConfirmReject": "Tolak",

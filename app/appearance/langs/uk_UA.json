@@ -16,6 +16,8 @@
   "agentActionDelete": "видалити",
   "agentActionCreate": "створити",
   "agentActionMove": "перемістити",
+  "agentNotifyConfirm": "Агент SiYuan потребує підтвердження",
+  "agentNotifyDone": "Агент SiYuan відповів",
   "agentActionRename": "перейменувати",
   "agentConfirmApprove": "Підтвердити",
   "agentConfirmReject": "Відхилити",

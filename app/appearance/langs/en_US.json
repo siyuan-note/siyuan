@@ -16,6 +16,8 @@
   "agentActionDelete": "delete",
   "agentActionCreate": "create",
   "agentActionMove": "move",
+  "agentNotifyConfirm": "SiYuan agent needs your confirmation",
+  "agentNotifyDone": "SiYuan agent has responded",
   "agentActionRename": "rename",
   "agentConfirmApprove": "Approve",
   "agentConfirmReject": "Reject",

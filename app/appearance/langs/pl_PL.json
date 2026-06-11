@@ -16,6 +16,8 @@
   "agentActionDelete": "usuń",
   "agentActionCreate": "utwórz",
   "agentActionMove": "przenieś",
+  "agentNotifyConfirm": "Agent SiYuan potrzebuje Twojego potwierdzenia",
+  "agentNotifyDone": "Agent SiYuan odpowiedział",
   "agentActionRename": "zmień nazwę",
   "agentConfirmApprove": "Zatwierdź",
   "agentConfirmReject": "Odrzuć",

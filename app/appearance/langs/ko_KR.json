@@ -16,6 +16,8 @@
   "agentActionDelete": "삭제",
   "agentActionCreate": "생성",
   "agentActionMove": "이동",
+  "agentNotifyConfirm": "SiYuan 에이전트가 확인이 필요합니다",
+  "agentNotifyDone": "SiYuan 에이전트가 응답했습니다",
   "agentActionRename": "이름 변경",
   "agentConfirmApprove": "승인",
   "agentConfirmReject": "거부",

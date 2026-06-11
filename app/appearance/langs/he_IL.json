@@ -16,6 +16,8 @@
   "agentActionDelete": "מחק",
   "agentActionCreate": "צור",
   "agentActionMove": "העבר",
+  "agentNotifyConfirm": "סוכן SiYuan זקוק לאישורך",
+  "agentNotifyDone": "סוכן SiYuan הגיב",
   "agentActionRename": "שנה שם",
   "agentConfirmApprove": "אשר",
   "agentConfirmReject": "דחה",

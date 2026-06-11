@@ -45,6 +45,7 @@ import {
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
+import {toggleTaskListItem} from "./list";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -3079,19 +3080,12 @@ export class WYSIWYG {
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             if (!protyle.disabled) {
-                                const html = actionElement.parentElement.outerHTML;
-                                if (actionElement.parentElement.classList.contains("protyle-task--done")) {
-                                    actionElement.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                                    actionElement.parentElement.classList.remove("protyle-task--done");
-                                    actionElement.parentElement.setAttribute("data-task", " ");
-                                } else {
-                                    actionElement.querySelector("use").setAttribute("xlink:href", "#iconCheck");
-                                    actionElement.parentElement.classList.add("protyle-task--done");
-                                    actionElement.parentElement.setAttribute("data-task", "X");
-                                }
-                                actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                                actionElement.parentElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-                                updateTransaction(protyle, actionElement.parentElement, html);
+                                const taskItemElement = actionElement.parentElement;
+                                const html = taskItemElement.outerHTML;
+                                toggleTaskListItem(taskItemElement);
+                                taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                                taskItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+                                updateTransaction(protyle, taskItemElement, html);
                             }
                         } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {
                             if (protyle.block.showAll && protyle.block.id === actionId) {

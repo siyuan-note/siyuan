@@ -58,6 +58,20 @@ export const updateListOrder = (listElement: Element, sIndex?: number) => {
     });
 };
 
+export const toggleTaskListItem = (taskItemElement: Element): void => {
+    const marker = taskItemElement.getAttribute("data-task");
+    const useElement = taskItemElement.querySelector("use");
+    if (marker !== null && marker !== " ") {
+        taskItemElement.setAttribute("data-task", " ");
+        taskItemElement.classList.remove("protyle-task--done");
+        useElement?.setAttribute("xlink:href", "#iconUncheck");
+    } else {
+        taskItemElement.setAttribute("data-task", "X");
+        taskItemElement.classList.add("protyle-task--done");
+        useElement?.setAttribute("xlink:href", "#iconCheck");
+    }
+};
+
 export const genListItemElement = (listItemElement: Element, offset = 0, wbr = false, startIndex?: number) => {
     const element = document.createElement("template");
     const type = listItemElement.getAttribute("data-subtype");
@@ -167,6 +181,10 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
                 previousID: index === 0 ? previousElement.getAttribute("data-node-id") : previousID,
             });
             previousID = item.getAttribute("data-node-id");
+            if (item.getAttribute("data-subtype") === subtype) {
+                lastPreviousElement.lastElementChild.before(item);
+                return;
+            }
             item.setAttribute("data-subtype", subtype);
             const actionElement = item.querySelector(".protyle-action");
             if (subtype === "o") {

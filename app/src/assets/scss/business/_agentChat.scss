@@ -305,7 +305,7 @@
         }
 
         td, th {
-            padding: 4px 8px;
+    padding: 4px 0;
             border: 1px solid var(--b3-theme-surface-lighter);
             box-sizing: border-box;
             max-width: 620px;
@@ -428,7 +428,6 @@
 .agent-chat__thinking-card {
     border: none;
     border-radius: var(--b3-border-radius);
-    overflow: auto;
     background: transparent;
 }
 
@@ -439,16 +438,12 @@
 .agent-chat__thinking-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
+    gap: 0;
+    padding: 4px 0;
     cursor: pointer;
     background: transparent;
     color: var(--b3-theme-on-surface-light);
     user-select: none;
-}
-
-.agent-chat__thinking-header:hover {
-    background: var(--b3-theme-surface-light);
 }
 
 .agent-chat__thinking-dot {
@@ -458,6 +453,7 @@
     background: var(--b3-theme-primary-light);
     animation: agentThinkingPulse 1.4s ease-in-out infinite;
     flex-shrink: 0;
+    margin-right: 8px;
 }
 
 .agent-chat__thinking-text {
@@ -482,7 +478,7 @@
     contain: layout paint;
     background: transparent;
     border-top: 1px solid transparent;
-    padding: 0 12px;
+    padding: 0;
     transition: max-height 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
 
     & > *:last-child {
@@ -492,7 +488,7 @@
 
 .agent-chat__thinking-body--expanded {
     max-height: 2000px;
-    padding: 8px 12px;
+    padding: 8px 0;
     border-top-color: var(--b3-border-color);
 }
 

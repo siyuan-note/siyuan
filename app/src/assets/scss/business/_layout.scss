@@ -59,14 +59,14 @@
     &.layout__dockl {
       border-radius: 0 var(--b3-border-radius-b) var(--b3-border-radius-b) 0;
       overflow: hidden;
-      box-shadow: 8px 0 24px rgb(140 149 159 / 20%);
+      box-shadow: 8px 0 24px var(--b3-dock-shadow-color);
       top: 112px;
       bottom: 82px;
       left: 0;
     }
 
     &.layout__dockr {
-      box-shadow: -8px 0 24px rgb(140 149 159 / 20%);
+      box-shadow: -8px 0 24px var(--b3-dock-shadow-color);
       border-radius: var(--b3-border-radius-b) 0 0 var(--b3-border-radius-b);
       overflow: hidden;
       top: 112px;
@@ -79,7 +79,7 @@
     }
 
     &.layout__dockb {
-      box-shadow: 0 -8px 24px rgb(140 149 159 / 20%);
+      box-shadow: 0 -8px 24px var(--b3-dock-shadow-color);
       left: 0;
       right: 0;
       bottom: 0;

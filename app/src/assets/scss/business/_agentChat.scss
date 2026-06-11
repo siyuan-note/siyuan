@@ -390,17 +390,12 @@
 }
 
 .agent-chat__snapshot-icon {
-    width: 14px;
-    height: 14px;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 
     svg {
         display: block;
-        width: 100%;
-        height: 100%;
+        width: 14px;
+        height: 14px;
     }
 }
 

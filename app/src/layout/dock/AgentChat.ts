@@ -120,8 +120,8 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconAdd"></use></svg>' +
             "</span>" +
             '<span class="fn__space"></span>' +
-            '<span data-type="session-menu" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.more || "More") + '">' +
-            '<svg><use xlink:href="#iconMore"></use></svg>' +
+            '<span data-type="session-menu" class="block__icon ariaLabel" data-position="north" aria-label="' + L.manageSessions + '">' +
+            '<svg><use xlink:href="#iconFolderClock"></use></svg>' +
             "</span>" +
             '<span class="fn__space"></span>' +
             '<span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.min + updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom) + '">' +
@@ -535,8 +535,9 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm agent-chat__msg--confirmed";
         const argsStr = JSON.stringify(entry.args, null, 2);
-        const action = (entry.args.action as string) || entry.name;
-        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(entry.name));
+        const action = this.toolActionLabel((entry.args.action as string) || entry.name);
+        const objName = this.objectLabel(entry.args);
+        const desc = (L.agentConfirmDesc || "Agent will {action}: {name}").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(objName));
         let statusLabel = "";
         if (entry.status === "approved") {
             statusLabel = L.agentConfirmApprove || "Approved";
@@ -805,7 +806,7 @@ export class AgentChat extends Model {
         let html = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
         html += '<div class="agent-chat__msg-actions">';
         if (timestamp) {
-            html += '<span class="agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
+            html += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
         }
         html += '<span class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
         "</div>";
@@ -1063,7 +1064,7 @@ export class AgentChat extends Model {
 
         if (timestamp) {
             const timeSpan = document.createElement("span");
-            timeSpan.className = "agent-chat__msg-time--ai";
+            timeSpan.className = "agent-chat__msg-meta agent-chat__msg-time--ai";
             timeSpan.textContent = this.formatMessageTime(timestamp);
             actions.appendChild(timeSpan);
         }
@@ -1082,7 +1083,7 @@ export class AgentChat extends Model {
                 text += (minutes > 0 ? minutes + "m" : "") + seconds + "s";
             }
             const stats = document.createElement("span");
-            stats.className = "agent-chat__msg-stats";
+            stats.className = "agent-chat__msg-meta agent-chat__msg-stats";
             stats.textContent = text;
             actions.appendChild(stats);
         }
@@ -1314,7 +1315,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__snapshot-body">' +
             '<svg class="agent-chat__snapshot-icon"><use xlink:href="#iconHistory"></use></svg>' +
             '<span class="agent-chat__snapshot-text">' + escapeHtml((L.snapshotAutoCreated || "Auto snapshot created") + " " + shortID) + "</span>" +
-            '<button class="b3-button b3-button--text agent-chat__snapshot-rollback">' + escapeHtml(L.rollback || "Rollback") + "</button>" +
+            '<button class="b3-button b3-button--text agent-chat__snapshot-rollback b3-tooltips b3-tooltips__n" aria-label="' + (L.rollback || "Rollback") + '"><svg><use xlink:href="#iconUndo"></use></svg></button>' +
             "</div>";
         const rollbackBtn = el.querySelector(".agent-chat__snapshot-rollback") as HTMLButtonElement;
         rollbackBtn.addEventListener("click", () => {
@@ -1400,8 +1401,9 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm";
         const argsStr = JSON.stringify(args, null, 2);
-        const action = (args.action as string) || name;
-        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(name));
+        const action = this.toolActionLabel((args.action as string) || name);
+        const objName = this.objectLabel(args);
+        const desc = (L.agentConfirmDesc || "Agent will {action}: {name}").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(objName));
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
             '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
@@ -1687,6 +1689,23 @@ export class AgentChat extends Model {
         requestAnimationFrame(() => {
             this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
         });
+    }
+
+    private objectLabel(args: Record<string, unknown>): string {
+        return (args.name || args.title || args.path || args.id || "") as string;
+    }
+
+    private toolActionLabel(action: string): string {
+        const L = window.siyuan.languages;
+        const labels: Record<string, string> = {
+            "append": L.agentActionAppend || "add content",
+            "update": L.agentActionUpdate || "modify",
+            "delete": L.agentActionDelete || "delete",
+            "create": L.agentActionCreate || "create",
+            "move": L.agentActionMove || "move",
+            "rename": L.agentActionRename || "rename",
+        };
+        return labels[action] || action;
     }
 
     private formatMessageTime(ts: number): string {

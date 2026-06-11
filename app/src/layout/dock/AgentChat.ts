@@ -847,7 +847,9 @@ export class AgentChat extends Model {
             }
             chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
             postRender(chatEl);
-            this.scrollToBottom();
+            if (!this.userScrolledUp) {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
             return;
         }
 
@@ -863,7 +865,10 @@ export class AgentChat extends Model {
                 if (bodyEl) {
                     bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
                     postRender(bodyEl);
-                    this.scrollToBottom();
+                    void bodyEl.offsetHeight; // force reflow
+                    if (!this.userScrolledUp) {
+                        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+                    }
                 }
             });
         }
@@ -1198,6 +1203,7 @@ export class AgentChat extends Model {
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
+            this.scrollToBottom(true);
         }
         this.flushThinkingStep();
         if (this.pendingConfirms.length > 0) {
@@ -1364,6 +1370,7 @@ export class AgentChat extends Model {
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
+            this.scrollToBottom(true);
         }
         this.flushThinkingStep();
         if (this.currentContent) {

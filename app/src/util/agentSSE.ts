@@ -37,6 +37,9 @@ export type ISSEResult = {
 } | {
     type: "reasoning";
     token: string;
+} | {
+    type: "snapshot";
+    snapshotID: string;
 };
 
 export async function fetchAgentSSE(
@@ -183,6 +186,8 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
             };
         case "reasoning":
             return {type: "reasoning", token: data.token as string};
+        case "snapshot":
+            return {type: "snapshot", snapshotID: data.snapshotID as string};
         default:
             return null;
     }

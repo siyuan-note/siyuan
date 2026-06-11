@@ -8,6 +8,8 @@ import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
+import {fetchPost} from "../../util/fetch";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import * as dayjs from "dayjs";
 import {
     bindThinkingCardToggle,
@@ -40,7 +42,8 @@ type SessionEntry =
     duration?: number;
     timestamp?: number
 }
-    | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string };
+    | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string }
+    | { type: "snapshot"; snapshotID: string };
 
 export class AgentChat extends Model {
     private messagesContainer: HTMLElement;
@@ -575,6 +578,9 @@ export class AgentChat extends Model {
                         status?: string
                     });
                     break;
+                case "snapshot":
+                    this.appendSnapshotInfo((entry as { snapshotID: string }).snapshotID);
+                    break;
             }
         }
     }
@@ -764,6 +770,10 @@ export class AgentChat extends Model {
                     break;
                 case "reasoning":
                     this.appendReasoning(event.token);
+                    break;
+                case "snapshot":
+                    this.entries.push({type: "snapshot", snapshotID: event.snapshotID});
+                    this.appendSnapshotInfo(event.snapshotID);
                     break;
             }
         } catch (e) {
@@ -1281,6 +1291,28 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--thinking";
         el.innerHTML = renderRetryCardHTML(attempt, maxRetries);
+        this.insertBeforeAI(el);
+        this.scrollToBottom(true);
+        this.hasInterveningCard = true;
+    }
+
+    private appendSnapshotInfo(snapshotID: string) {
+        const L = window.siyuan.languages;
+        const shortID = snapshotID.length > 7 ? snapshotID.substring(0, 7) : snapshotID;
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--snapshot";
+        el.innerHTML = '<div class="agent-chat__snapshot-body">' +
+            '<svg class="agent-chat__snapshot-icon"><use xlink:href="#iconHistory"></use></svg>' +
+            '<span class="agent-chat__snapshot-text">' + escapeHtml((L.snapshotAutoCreated || "Auto snapshot created") + " " + shortID) + "</span>" +
+            '<button class="b3-button b3-button--text agent-chat__snapshot-rollback">' + escapeHtml(L.rollback || "Rollback") + "</button>" +
+            "</div>";
+        const rollbackBtn = el.querySelector(".agent-chat__snapshot-rollback") as HTMLButtonElement;
+        rollbackBtn.addEventListener("click", () => {
+            const confirmText = (L.rollbackConfirm || "Rollback cannot be undone").replace("${name}", L.dataSnapshot || "Snapshot").replace("${time}", shortID);
+            confirmDialog("⚠ " + (L.rollback || "Rollback"), confirmText, () => {
+                fetchPost("/api/repo/checkoutRepo", {id: snapshotID}, () => {});
+            });
+        });
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;

@@ -379,6 +379,31 @@
     word-break: break-word;
 }
 
+.agent-chat__snapshot-body {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    font-size: 85%;
+    color: var(--b3-theme-on-surface-light);
+    border-left: 3px solid var(--b3-theme-primary-light);
+}
+
+.agent-chat__snapshot-icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.agent-chat__snapshot-text {
+    flex: 1;
+}
+
+.agent-chat__snapshot-rollback {
+    font-size: 85%;
+    flex-shrink: 0;
+}
+
 .agent-chat__msg--tool {
     align-items: stretch;
 }

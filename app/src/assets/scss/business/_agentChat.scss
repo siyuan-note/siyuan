@@ -372,11 +372,18 @@
 }
 
 .agent-chat__msg--error .agent-chat__body {
+    display: flex; align-items: flex-start; gap: 6px;
     color: var(--b3-theme-error);
-    padding-left: 8px;
-    border-left: 3px solid var(--b3-theme-error);
     background: var(--b3-theme-error-light);
     word-break: break-word;
+    padding: 4px 8px;
+    border-radius: var(--b3-border-radius);
+}
+
+.agent-chat__error-icon {
+    width: 16px; height: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
 
 .agent-chat__snapshot-body {
@@ -386,7 +393,6 @@
     padding: 4px 8px;
     font-size: 85%;
     color: var(--b3-theme-on-surface-light);
-    border-left: 3px solid var(--b3-theme-primary-light);
 }
 
 .agent-chat__snapshot-icon {

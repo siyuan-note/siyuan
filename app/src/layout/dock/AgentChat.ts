@@ -1286,7 +1286,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
-        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + escapeHtml(message) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error"><svg class="agent-chat__error-icon"><use xlink:href="#iconTriangleAlert"></use></svg><span>' + escapeHtml(message) + "</span></div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom(true);
         this.flushThinkingStep();

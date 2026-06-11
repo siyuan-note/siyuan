@@ -92,6 +92,12 @@ func notebookCreate(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "create notebook failed: " + err.Error()}}, IsError: true}, nil
 	}
 
+	if box := model.Conf.Box(id); nil != box {
+		evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
+		evt.Data = map[string]any{"box": box}
+		util.PushEvent(evt)
+	}
+
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook created: " + name + " (id: " + id + ")"}}}, nil
 }
 
@@ -106,6 +112,10 @@ func notebookRename(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "rename notebook failed: " + err.Error()}}, IsError: true}, nil
 	}
 
+	evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
+	evt.Data = map[string]any{"box": id}
+	util.PushEvent(evt)
+
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook renamed: " + id + " -> " + name}}}, nil
 }
 
@@ -118,6 +128,10 @@ func notebookRemove(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.RemoveBox(id); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "remove notebook failed: " + err.Error()}}, IsError: true}, nil
 	}
+
+	evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
+	evt.Data = map[string]any{"box": id}
+	util.PushEvent(evt)
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook removed: " + id}}}, nil
 }

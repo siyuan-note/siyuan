@@ -43,7 +43,7 @@ export type ISSEResult = {
 };
 
 export async function fetchAgentSSE(
-    messages: Array<{role: string; content: string}>,
+    message: string,
     language: string,
     references: Array<{id: string; title: string}>,
     onEvent: (event: ISSEResult) => void | Promise<void>,
@@ -51,11 +51,13 @@ export async function fetchAgentSSE(
     signal?: AbortSignal,
     sessionID?: string,
     model?: string,
+    regenerate?: boolean,
 ): Promise<void> {
     try {
-        const body: Record<string, unknown> = {messages: messages, language: language, references: references};
+        const body: Record<string, unknown> = {message: message, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
         if (model) { body.model = model; }
+        if (regenerate) { body.regenerate = regenerate; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",
@@ -132,7 +134,12 @@ export async function fetchAgentSSE(
     } catch (err) {
         const e = err as Error;
         if (e.name !== "AbortError") {
-            onError(new Error(window.siyuan.languages._kernel[28]));
+            const msg = e.message.toLowerCase();
+            if (msg.indexOf("timeout") !== -1 || msg.indexOf("deadline") !== -1) {
+                onError(new Error(window.siyuan.languages._kernel[24]));
+            } else {
+                onError(new Error(window.siyuan.languages._kernel[28]));
+            }
         }
     }
 }

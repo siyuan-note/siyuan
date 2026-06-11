@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Откат завершён",
   "snapshotAutoCreated": "Автоматический снимок создан",
   "agentThinkingDoneTime": "Обдумано: %s",
   "agentThinking": "Думает...",

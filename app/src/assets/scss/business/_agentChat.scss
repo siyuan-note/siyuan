@@ -396,6 +396,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+
+    svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .agent-chat__snapshot-text {
@@ -464,6 +470,7 @@
     animation: agentThinkingPulse 1.4s ease-in-out infinite;
     flex-shrink: 0;
     margin-right: 6px;
+    cursor: pointer;
 }
 
 .agent-chat__thinking-text {
@@ -472,11 +479,10 @@
 
 .agent-chat__thinking-arrow {
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
     color: var(--b3-theme-on-surface-light);
 
     svg {
+        display: block;
         width: 14px;
         height: 14px;
     }
@@ -855,14 +861,14 @@
 
 .agent-chat__question-option {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
     padding: 6px 8px;
     border-radius: var(--b3-border-radius);
     cursor: pointer;
     transition: var(--b3-transition);
     &:hover { background: var(--b3-theme-surface-light); }
-    input { flex-shrink: 0; margin-top: 2px; }
+    input { flex-shrink: 0; }
 }
 
 .agent-chat__question-option-label {

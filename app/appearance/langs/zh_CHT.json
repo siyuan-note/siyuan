@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "已完成回滾",
   "snapshotAutoCreated": "已自動創建資料快照",
   "agentThinkingDoneTime": "已思考：%s",
   "agentThinking": "思考中...",

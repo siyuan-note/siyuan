@@ -54,9 +54,10 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Exploring structure: document.list (see child documents under an hPath) → document.get (read document metadata and content) → block.get_children (list blocks inside a document) → block.get (read a specific block). Use breadcrumb to trace a block's location path.
 - Creating content: document.create specifies the target notebook and hPath to create a document → block.append/prepend/insert to add blocks into the document. Use dataType "markdown" for text content.
 - Creating diary/dailynote: dailynote.create with notebook ID to create or open today's daily note → dailynote.append/prepend to add content. Do not use document.create for diary/dailynote requests.
-- Modifying content: block.update replaces a single block's content with new markdown. To insert multiple new blocks into a document, use block.append/block.prepend (add to parent) or block.insert (add between siblings). Do NOT use block.update to add new blocks.
+- Modifying content: block.update ONLY replaces a SINGLE existing block's content with new markdown — it does NOT create or append new blocks. If you need to append new content after modifying an existing block, you MUST use TWO separate calls: first block.update to modify the existing block, then block.append/block.prepend (add to parent) or block.insert (add between siblings) to add new blocks. Never pass multiple blocks of content to block.update expecting them to be appended.
 - Organizing: document.move (full document relocation to a new hPath, needs notebook ID from document.get). document.rename changes a document's title (hPath follows). block.move repositions a single block under a new parent — for content blocks, not entire documents. document.delete removes a document by ID.
-- Attributes/properties: use attr.get/set to read/write custom attributes on any block. Use database tools for spreadsheets/attribute views.
+- Attributes/properties: use attr.get/set to read/write custom attributes on any block.
+- Database/attribute views: use database.item_add to add rows, database.key_add to add columns, database.render to view tables. To create a database block, use database tools — do NOT use the file tool to construct database JSON files.
 
 ## Response Guidelines
 - Reply in the language indicated by the user.
@@ -96,9 +97,13 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - The log file may contain stack traces, error codes, and timestamps that help pinpoint the issue.
 - After reading the log, summarize the relevant errors before attempting any fixes.
 
+## Tool Output Limits
+- All file list/find/grep/read operations default to a limit of 200 entries/lines. Use the limit parameter to increase or decrease this. For file.read, always use offset and limit to read specific portions instead of the entire file.
+- When a tool output indicates content was truncated with a file path, use file.read with offset/limit to retrieve more of that specific output file if needed.
+
 ## Safety
-- Confirm before deleting documents, blocks, or data.
-- Confirm before moving or renaming important items.
+- WARNING: The file tool is for reading logs and debugging ONLY. NEVER use file.read/write/list/find to bypass the structured tools (block, document, notebook, database, etc.) for creating or modifying workspace data. Always prefer the dedicated domain tools. The file tool may only be used when the user explicitly requests file-level operations or when debugging via the log (see Debugging section).
+- Confirm before creating, updating, moving, renaming, or deleting data.
 - Read operations (get, list, search, query) are always safe and do not need confirmation.
 - Do not expose or log API keys, passwords, or sensitive configuration.`
 
@@ -167,11 +172,6 @@ type AgentEvent struct {
 	SnapshotID       string
 }
 
-type UserMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
 type AgentMessage struct {
 	Role      string          `json:"role"`
 	Content   string          `json:"content"`
@@ -179,6 +179,7 @@ type AgentMessage struct {
 }
 
 type AgentToolCall struct {
+	ID        string                 `json:"id,omitempty"`
 	Name      string                 `json:"name"`
 	Arguments map[string]interface{} `json:"arguments"`
 	Result    string                 `json:"result,omitempty"`
@@ -217,7 +218,7 @@ type agentCheckpoint struct {
 	Snapshots        []string                 `json:"snapshots,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, history []UserMessage, language string, references []Reference, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 100)
 
 	go func() {
@@ -234,7 +235,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		}
 
 		tools := convertMCPToolsToOpenAI()
-		messages := buildMessages(history, language, references)
+		var messages []openai.ChatCompletionMessage
+		var checkpointMsgs []AgentMessage
 		var totalPrompt, totalCompletion int
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
@@ -242,9 +244,30 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var compactCount int
 		var snapshotIDs []string
 
-		checkpointMsgs := make([]AgentMessage, 0, len(history))
-		for _, h := range history {
-			checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: h.Role, Content: h.Content})
+		if sessionID != "" {
+			if cp := loadCheckpoint(sessionID); cp != nil && len(cp.Messages) > 0 {
+				truncated := cp.Messages
+				if regenerate {
+					lastUserIdx := -1
+					for i := len(truncated) - 1; i >= 0; i-- {
+						if truncated[i].Role == "user" {
+							lastUserIdx = i
+							break
+						}
+					}
+					if lastUserIdx >= 0 && truncated[lastUserIdx].Content == userMessage {
+						truncated = truncated[:lastUserIdx]
+					}
+				}
+				checkpointMsgs = truncated
+				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
+				messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references)
+			}
+		}
+
+		if messages == nil {
+			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage}}
+			messages = buildInitialMessages(userMessage, language, references)
 		}
 
 		for round := 0; round < maxToolCallRounds; round++ {
@@ -283,7 +306,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					continue
 				}
 		logging.LogErrorf("agent API request failed: %s", streamErr.Error())
-		sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+		sendEvent(ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
 			return
 			}
@@ -299,7 +322,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						break
 					}
 			logging.LogErrorf("agent stream error: %s", recvErr.Error())
-			sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			sendEvent(ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(recvErr)})
 			return
 				}
 
@@ -359,6 +382,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				}
 				for _, tc := range aggregatedToolCalls {
 					checkpointMsg.ToolCalls = append(checkpointMsg.ToolCalls, AgentToolCall{
+						ID:        tc.ID,
 						Name:      tc.Function.Name,
 						Arguments: parseToolArgs(tc.Function.Arguments),
 					})
@@ -549,10 +573,16 @@ func GenerateTitle(client *openai.Client, model string, userMsg string) string {
 
 var safeActions = map[string]bool{
 	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
-	"tree_stat": true,
-	"list":      true, "read": true, "search_docs": true, "fulltext": true, "backlinks": true,
-	"mentions": true, "labels": true, "status": true, "version": true,
-	"current_time": true, "workspace": true, "md": true, "query": true,
+	"tree_stat": true, "dom": true, "batch_get": true, "batch_kramdown": true,
+	"list": true, "read": true, "search_docs": true, "fulltext": true, "semantic": true, "search": true,
+	"backlinks": true, "mentions": true, "refresh": true,
+	"labels": true, "status": true, "version": true,
+	"current_time": true, "workspace": true, "info": true,
+	"grep": true, "find": true, "stat": true, "unused": true,
+	"keys": true, "render": true, "diff": true,
+	"file_get": true, "file_open": true, "file_export": true,
+	"open": true, "close": true, "batch-get": true, "question": true, "todo_write": true,
+	"md": true, "query": true,
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
@@ -567,6 +597,9 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 	}
 	if toolName == "sync" && action == "status" {
 		return false
+	}
+	if toolName == "import" && action == "md" {
+		return true
 	}
 	return true
 }
@@ -610,7 +643,7 @@ func handleQuestion(argsJSON string, ch chan<- AgentEvent, timeout time.Duration
 	return strings.Join(answer.Answers, ", ")
 }
 
-func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
+func buildSystemPrompt(language string, references []Reference) string {
 	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>"
 
 	skills := util.DiscoverSkills()
@@ -635,20 +668,97 @@ func buildMessages(history []UserMessage, language string, references []Referenc
 		}
 		prompt += "Use the block tools to fetch their actual content before responding."
 	}
-	messages := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: prompt},
+	return prompt
+}
+
+func buildInitialMessages(userMessage string, language string, references []Reference) []openai.ChatCompletionMessage {
+	return []openai.ChatCompletionMessage{
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+		{Role: openai.ChatMessageRoleUser, Content: userMessage},
 	}
-	for _, msg := range history {
-		content := msg.Content
-		if content == "" {
-			content = " "
+}
+
+func loadCheckpoint(sessionID string) *agentCheckpoint {
+	if sessionID == "" {
+		return nil
+	}
+	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID)
+	path := filepath.Join(dir, "session.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var cp agentCheckpoint
+	if gulu.JSON.UnmarshalJSON(data, &cp) != nil {
+		return nil
+	}
+	return &cp
+}
+
+func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference) []openai.ChatCompletionMessage {
+	msgs := []openai.ChatCompletionMessage{
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+	}
+
+	for cmi := range checkpointMsgs {
+		cm := &checkpointMsgs[cmi]
+		switch cm.Role {
+		case "user":
+			content := cm.Content
+			if content == "" {
+				content = " "
+			}
+			msgs = append(msgs, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: content,
+			})
+		case "assistant":
+			if len(cm.ToolCalls) == 0 {
+				content := cm.Content
+				if content == "" {
+					content = " "
+				}
+				msgs = append(msgs, openai.ChatCompletionMessage{
+					Role:    openai.ChatMessageRoleAssistant,
+					Content: content,
+				})
+			} else {
+				for j := range cm.ToolCalls {
+					if cm.ToolCalls[j].ID == "" {
+						cm.ToolCalls[j].ID = fmt.Sprintf("call_cp_%d_%d", cmi, j)
+					}
+				}
+
+				toolCalls := make([]openai.ToolCall, 0, len(cm.ToolCalls))
+				for _, tc := range cm.ToolCalls {
+					argsJSON, _ := gulu.JSON.MarshalJSON(tc.Arguments)
+					toolCalls = append(toolCalls, openai.ToolCall{
+						ID:   tc.ID,
+						Type: openai.ToolTypeFunction,
+						Function: openai.FunctionCall{
+							Name:      tc.Name,
+							Arguments: string(argsJSON),
+						},
+					})
+				}
+				msgs = append(msgs, openai.ChatCompletionMessage{
+					Role:      openai.ChatMessageRoleAssistant,
+					Content:   cm.Content,
+					ToolCalls: toolCalls,
+				})
+				for _, tc := range cm.ToolCalls {
+					if tc.Result != "" {
+						msgs = append(msgs, openai.ChatCompletionMessage{
+							Role:       openai.ChatMessageRoleTool,
+							Content:    tc.Result,
+							ToolCallID: tc.ID,
+						})
+					}
+				}
+			}
 		}
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    msg.Role,
-			Content: content,
-		})
 	}
-	return messages
+	return msgs
 }
 
 func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string) {
@@ -775,6 +885,14 @@ func classifyRetry(err error) string {
 		return "fatal"
 	}
 	return "network"
+}
+
+func getAgentErrorMessage(err error) string {
+	msg := strings.ToLower(err.Error())
+	if strings.Contains(msg, "context deadline exceeded") || strings.Contains(msg, "context canceled") || strings.Contains(msg, "timeout") || strings.Contains(msg, "exceeded while awaiting") {
+		return kernelModel.Conf.Language(24)
+	}
+	return kernelModel.Conf.Language(28)
 }
 
 func delayForCategory(category string, attempt int) time.Duration {

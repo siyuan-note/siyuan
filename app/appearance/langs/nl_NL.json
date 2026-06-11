@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Automatische snapshot gemaakt",
   "agentThinkingDoneTime": "Nagedacht: %s",
   "agentThinking": "Denkt na...",

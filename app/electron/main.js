@@ -973,13 +973,19 @@ app.whenReady().then(() => {
             case "showItemInFolder":
                 shell.showItemInFolder(data.filePath);
                 break;
-            case "notification":
-                new Notification({
+            case "notification": {
+                const n = new Notification({
                     title: data.title,
                     body: data.body,
                     timeoutType: data.timeoutType,
-                }).show();
+                });
+                n.on("click", () => {
+                    currentWindow.focus();
+                    currentWindow.show();
+                });
+                n.show();
                 break;
+            }
             case "setSpellCheckerLanguages":
                 BrowserWindow.getAllWindows().forEach(item => {
                     item.webContents.session.setSpellCheckerLanguages(data.languages);

@@ -1012,6 +1012,9 @@ func checkoutRepo(id string) {
 	syncEnabled := Conf.Sync.Enabled
 	Conf.Sync.Enabled = false
 	Conf.Save()
+	if syncEnabled {
+		util.PushMsg(Conf.Language(134), 0)
+	}
 
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
@@ -1033,10 +1036,9 @@ func checkoutRepo(id string) {
 	}
 
 	FullReindexDirect()
-
-	if syncEnabled {
-		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
-	}
+	time.Sleep(time.Second)
+	FlushTxQueue()
+	task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
 	return
 }
 

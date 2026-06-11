@@ -8,7 +8,10 @@ import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
+import {fetchPost} from "../../util/fetch";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import * as dayjs from "dayjs";
+import {sendNotification} from "../../plugin/platformUtils";
 import {
     bindThinkingCardToggle,
     createThinkingCardElement,
@@ -40,7 +43,8 @@ type SessionEntry =
     duration?: number;
     timestamp?: number
 }
-    | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string };
+    | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string }
+    | { type: "snapshot"; snapshotID: string };
 
 export class AgentChat extends Model {
     private messagesContainer: HTMLElement;
@@ -117,8 +121,8 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconAdd"></use></svg>' +
             "</span>" +
             '<span class="fn__space"></span>' +
-            '<span data-type="session-menu" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.more || "More") + '">' +
-            '<svg><use xlink:href="#iconMore"></use></svg>' +
+            '<span data-type="session-menu" class="block__icon ariaLabel" data-position="north" aria-label="' + L.manageSessions + '">' +
+            '<svg><use xlink:href="#iconFolderClock"></use></svg>' +
             "</span>" +
             '<span class="fn__space"></span>' +
             '<span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.min + updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom) + '">' +
@@ -204,7 +208,16 @@ export class AgentChat extends Model {
         this.modelTrigger.addEventListener("keydown", (e: KeyboardEvent) => {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                if (this.modelMenu) { this.closeModelMenu(); } else { this.openModelMenu(); }
+                if (this.modelMenu) {
+                    const option = this.modelOptions[this.modelMenuIndex];
+                    if (option) {
+                        this.selectedModel = option.id;
+                        this.updateModelLabel();
+                    }
+                    this.closeModelMenu();
+                } else {
+                    this.openModelMenu();
+                }
             } else if (e.key === "ArrowDown") {
                 e.preventDefault();
                 if (!this.modelMenu) { this.openModelMenu(); return; }
@@ -248,6 +261,7 @@ export class AgentChat extends Model {
         this.modelMenu = menu;
         this.updateModelMenuHighlight();
         menu.addEventListener("click", (e: MouseEvent) => {
+            e.stopPropagation();
             const item = (e.target as HTMLElement).closest(".agent-chat__model-item") as HTMLElement;
             if (item) {
                 this.selectedModel = item.getAttribute("data-id") || this.selectedModel;
@@ -277,7 +291,7 @@ export class AgentChat extends Model {
         if (!this.modelMenu) { return; }
         const items = this.modelMenu.querySelectorAll(".agent-chat__model-item");
         for (let i = 0; i < items.length; i++) {
-            items[i].classList.toggle("b3-menu__item--current", i === this.modelMenuIndex);
+            items[i].classList.toggle("b3-menu__item--highlight", i === this.modelMenuIndex);
         }
         const current = items[this.modelMenuIndex] as HTMLElement;
         if (current) { current.scrollIntoView({ block: "nearest" }); }
@@ -522,8 +536,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm agent-chat__msg--confirmed";
         const argsStr = JSON.stringify(entry.args, null, 2);
-        const action = (entry.args.action as string) || entry.name;
-        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(entry.name));
+        const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(entry.name)));
         let statusLabel = "";
         if (entry.status === "approved") {
             statusLabel = L.agentConfirmApprove || "Approved";
@@ -574,6 +587,9 @@ export class AgentChat extends Model {
                         confirmID: string;
                         status?: string
                     });
+                    break;
+                case "snapshot":
+                    this.appendSnapshotInfo((entry as { snapshotID: string }).snapshotID);
                     break;
             }
         }
@@ -765,6 +781,10 @@ export class AgentChat extends Model {
                 case "reasoning":
                     this.appendReasoning(event.token);
                     break;
+                case "snapshot":
+                    this.entries.push({type: "snapshot", snapshotID: event.snapshotID});
+                    this.appendSnapshotInfo(event.snapshotID);
+                    break;
             }
         } catch (e) {
             console.error("agent SSE event handler error:", e, event);
@@ -785,7 +805,7 @@ export class AgentChat extends Model {
         let html = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
         html += '<div class="agent-chat__msg-actions">';
         if (timestamp) {
-            html += '<span class="agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
+            html += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
         }
         html += '<span class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
         "</div>";
@@ -825,7 +845,9 @@ export class AgentChat extends Model {
             }
             chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
             postRender(chatEl);
-            this.scrollToBottom();
+            if (!this.userScrolledUp) {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
             return;
         }
 
@@ -841,7 +863,10 @@ export class AgentChat extends Model {
                 if (bodyEl) {
                     bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
                     postRender(bodyEl);
-                    this.scrollToBottom();
+                    void bodyEl.offsetHeight; // force reflow
+                    if (!this.userScrolledUp) {
+                        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+                    }
                 }
             });
         }
@@ -1043,7 +1068,7 @@ export class AgentChat extends Model {
 
         if (timestamp) {
             const timeSpan = document.createElement("span");
-            timeSpan.className = "agent-chat__msg-time--ai";
+            timeSpan.className = "agent-chat__msg-meta agent-chat__msg-time--ai";
             timeSpan.textContent = this.formatMessageTime(timestamp);
             actions.appendChild(timeSpan);
         }
@@ -1062,7 +1087,7 @@ export class AgentChat extends Model {
                 text += (minutes > 0 ? minutes + "m" : "") + seconds + "s";
             }
             const stats = document.createElement("span");
-            stats.className = "agent-chat__msg-stats";
+            stats.className = "agent-chat__msg-meta agent-chat__msg-stats";
             stats.textContent = text;
             actions.appendChild(stats);
         }
@@ -1176,6 +1201,7 @@ export class AgentChat extends Model {
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
+            this.scrollToBottom(true);
         }
         this.flushThinkingStep();
         if (this.pendingConfirms.length > 0) {
@@ -1211,6 +1237,10 @@ export class AgentChat extends Model {
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
+        if (savedContent && (!document.hasFocus() || document.hidden)) {
+            const L = window.siyuan.languages;
+            sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
+        }
     }
 
     private flushThinkingStep() {
@@ -1266,7 +1296,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
-        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' + escapeHtml(message) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--error"><svg class="agent-chat__error-icon"><use xlink:href="#iconTriangleAlert"></use></svg><span>' + escapeHtml(message) + "</span></div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom(true);
         this.flushThinkingStep();
@@ -1281,6 +1311,28 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--thinking";
         el.innerHTML = renderRetryCardHTML(attempt, maxRetries);
+        this.insertBeforeAI(el);
+        this.scrollToBottom(true);
+        this.hasInterveningCard = true;
+    }
+
+    private appendSnapshotInfo(snapshotID: string) {
+        const L = window.siyuan.languages;
+        const shortID = snapshotID.length > 7 ? snapshotID.substring(0, 7) : snapshotID;
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--snapshot";
+        el.innerHTML = '<div class="agent-chat__snapshot-body">' +
+            '<svg class="agent-chat__snapshot-icon"><use xlink:href="#iconHistory"></use></svg>' +
+            '<span class="agent-chat__snapshot-text">' + escapeHtml((L.snapshotAutoCreated || "Auto snapshot created") + " " + shortID) + "</span>" +
+            '<button class="b3-button b3-button--text agent-chat__snapshot-rollback b3-tooltips b3-tooltips__n" aria-label="' + (L.rollback || "Rollback") + '"><svg><use xlink:href="#iconUndo"></use></svg></button>' +
+            "</div>";
+        const rollbackBtn = el.querySelector(".agent-chat__snapshot-rollback") as HTMLButtonElement;
+        rollbackBtn.addEventListener("click", () => {
+            const confirmText = (L.rollbackConfirm || "Rollback cannot be undone").replace("${name}", L.dataSnapshot || "Snapshot").replace("${time}", shortID);
+            confirmDialog("⚠️ " + (L.rollback || "Rollback"), confirmText, () => {
+                fetchPost("/api/repo/checkoutRepo", {id: snapshotID}, () => {});
+            });
+        });
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
@@ -1316,6 +1368,7 @@ export class AgentChat extends Model {
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
+            this.scrollToBottom(true);
         }
         this.flushThinkingStep();
         if (this.currentContent) {
@@ -1354,12 +1407,13 @@ export class AgentChat extends Model {
     }
 
     private async appendConfirm(name: string, args: Record<string, unknown>, confirmID: string) {
+        this.finishActiveThinking();
+        this.flushThinkingStep();
         const L = window.siyuan.languages;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm";
         const argsStr = JSON.stringify(args, null, 2);
-        const action = (args.action as string) || name;
-        const desc = (L.agentConfirmDesc || "Confirm {action} on: {name}?").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(name));
+        const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(name)));
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
             '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
@@ -1409,6 +1463,9 @@ export class AgentChat extends Model {
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
         this.pendingConfirms.push({type: "confirm", name, args, confirmID, status: "pending"});
+        if (!document.hasFocus() || document.hidden) {
+            sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
+        }
     }
 
     private async postConfirm(confirmID: string, approved: boolean, always?: boolean) {
@@ -1438,6 +1495,8 @@ export class AgentChat extends Model {
     }
 
     private appendQuestion(questionID: string, args: Record<string, unknown>) {
+        this.finishActiveThinking();
+        this.flushThinkingStep();
         const L = window.siyuan.languages;
         const rawQuestions = args.questions as Array<Record<string, unknown>>;
         if (!rawQuestions || rawQuestions.length === 0) {
@@ -1647,6 +1706,20 @@ export class AgentChat extends Model {
         });
     }
 
+    private toolCategory(name: string): string {
+        const L = window.siyuan.languages;
+        const m: Record<string, string | undefined> = {
+            "block": L.agentCatBlock, "document": L.agentCatDoc,
+            "notebook": L.agentCatNotebook, "tag": L.agentCatTag,
+            "bookmark": L.agentCatBookmark, "file": L.agentCatFile,
+            "asset": L.agentCatAsset, "attr": L.agentCatAttr,
+            "dailynote": L.agentCatDailynote, "import": L.agentCatImport,
+            "repo": L.agentCatRepo, "history": L.agentCatHistory,
+            "sync": L.agentCatSync, "database": L.agentCatDatabase,
+        };
+        return m[name] || L.agentCatDefault;
+    }
+
     private formatMessageTime(ts: number): string {
         const d = dayjs(ts);
         if (d.format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD")) {
@@ -1654,4 +1727,5 @@ export class AgentChat extends Model {
         }
         return d.format("YYYY-MM-DD HH:mm");
     }
+
 }

@@ -331,6 +331,8 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			"questionID": event.QuestionID,
 			"arguments":  event.Arguments,
 		})
+	case "snapshot":
+		return writeSSEEvent(c, "snapshot", map[string]string{"snapshotID": event.SnapshotID})
 	}
 	return nil
 }

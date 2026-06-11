@@ -315,14 +315,10 @@ export class AgentChat extends Model {
                     this.appendUserMessage(text, Date.now());
                     this.tryGenerateTitle();
                     this.setStreaming(true);
-                    const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
-                        role: e.type === "user" ? "user" as const : "assistant" as const,
-                        content: (e as { content: string }).content
-                    }));
                     this.abortController = new AbortController();
                     const requestSessionId = this.sessionId;
                     this.requestStartTime = Date.now();
-                    fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
+                    fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
                         (event: ISSEResult) => {
                             if (this.sessionId !== requestSessionId) {
                                 return;
@@ -610,7 +606,15 @@ export class AgentChat extends Model {
                     if (msg.role === "user") {
                         entries.push({type: "user", content: msg.content});
                     } else if (msg.role === "assistant") {
-                        entries.push({type: "assistant", content: msg.content});
+                        entries.push({
+                            type: "assistant",
+                            content: msg.content,
+                            toolCalls: msg.toolCalls ? msg.toolCalls.map(tc => ({
+                                name: tc.name,
+                                arguments: tc.arguments || {},
+                                result: tc.result,
+                            })) : undefined,
+                        });
                     }
                 }
                 return entries;
@@ -714,16 +718,11 @@ export class AgentChat extends Model {
 
         this.requestStartTime = Date.now();
 
-        const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
-            role: e.type === "user" ? "user" as const : "assistant" as const,
-            content: (e as { content: string }).content
-        }));
-
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
 
         await fetchAgentSSE(
-            apiMessages,
+            text,
             window.siyuan.config.appearance.lang,
             refs,
             (event: ISSEResult) => {
@@ -1153,14 +1152,12 @@ export class AgentChat extends Model {
 
         // Re-submit
         this.setStreaming(true);
-        const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
-            role: e.type === "user" ? "user" as const : "assistant" as const,
-            content: (e as { content: string }).content
-        }));
+        const lastUserEntry = this.entries[this.entries.length - 1];
+        const lastUserText = lastUserEntry.type === "user" ? lastUserEntry.content : "";
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
         await fetchAgentSSE(
-            apiMessages,
+            lastUserText,
             window.siyuan.config.appearance.lang,
             [],
             (event: ISSEResult) => {
@@ -1178,6 +1175,7 @@ export class AgentChat extends Model {
             this.abortController.signal,
             this.sessionId,
             this.getSelectedModel(),
+            true,
         );
     }
 

@@ -167,11 +167,6 @@ type AgentEvent struct {
 	SnapshotID       string
 }
 
-type UserMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
 type AgentMessage struct {
 	Role      string          `json:"role"`
 	Content   string          `json:"content"`
@@ -179,6 +174,7 @@ type AgentMessage struct {
 }
 
 type AgentToolCall struct {
+	ID        string                 `json:"id,omitempty"`
 	Name      string                 `json:"name"`
 	Arguments map[string]interface{} `json:"arguments"`
 	Result    string                 `json:"result,omitempty"`
@@ -217,7 +213,7 @@ type agentCheckpoint struct {
 	Snapshots        []string                 `json:"snapshots,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, history []UserMessage, language string, references []Reference, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 100)
 
 	go func() {
@@ -234,7 +230,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		}
 
 		tools := convertMCPToolsToOpenAI()
-		messages := buildMessages(history, language, references)
+		var messages []openai.ChatCompletionMessage
+		var checkpointMsgs []AgentMessage
 		var totalPrompt, totalCompletion int
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
@@ -242,9 +239,30 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var compactCount int
 		var snapshotIDs []string
 
-		checkpointMsgs := make([]AgentMessage, 0, len(history))
-		for _, h := range history {
-			checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: h.Role, Content: h.Content})
+		if sessionID != "" {
+			if cp := loadCheckpoint(sessionID); cp != nil && len(cp.Messages) > 0 {
+				truncated := cp.Messages
+				if regenerate {
+					lastUserIdx := -1
+					for i := len(truncated) - 1; i >= 0; i-- {
+						if truncated[i].Role == "user" {
+							lastUserIdx = i
+							break
+						}
+					}
+					if lastUserIdx >= 0 && truncated[lastUserIdx].Content == userMessage {
+						truncated = truncated[:lastUserIdx]
+					}
+				}
+				checkpointMsgs = truncated
+				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
+				messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references)
+			}
+		}
+
+		if messages == nil {
+			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage}}
+			messages = buildInitialMessages(userMessage, language, references)
 		}
 
 		for round := 0; round < maxToolCallRounds; round++ {
@@ -359,6 +377,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				}
 				for _, tc := range aggregatedToolCalls {
 					checkpointMsg.ToolCalls = append(checkpointMsg.ToolCalls, AgentToolCall{
+						ID:        tc.ID,
 						Name:      tc.Function.Name,
 						Arguments: parseToolArgs(tc.Function.Arguments),
 					})
@@ -619,7 +638,7 @@ func handleQuestion(argsJSON string, ch chan<- AgentEvent, timeout time.Duration
 	return strings.Join(answer.Answers, ", ")
 }
 
-func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
+func buildSystemPrompt(language string, references []Reference) string {
 	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>"
 
 	skills := util.DiscoverSkills()
@@ -644,20 +663,97 @@ func buildMessages(history []UserMessage, language string, references []Referenc
 		}
 		prompt += "Use the block tools to fetch their actual content before responding."
 	}
-	messages := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: prompt},
+	return prompt
+}
+
+func buildInitialMessages(userMessage string, language string, references []Reference) []openai.ChatCompletionMessage {
+	return []openai.ChatCompletionMessage{
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+		{Role: openai.ChatMessageRoleUser, Content: userMessage},
 	}
-	for _, msg := range history {
-		content := msg.Content
-		if content == "" {
-			content = " "
+}
+
+func loadCheckpoint(sessionID string) *agentCheckpoint {
+	if sessionID == "" {
+		return nil
+	}
+	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID)
+	path := filepath.Join(dir, "session.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+	var cp agentCheckpoint
+	if gulu.JSON.UnmarshalJSON(data, &cp) != nil {
+		return nil
+	}
+	return &cp
+}
+
+func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference) []openai.ChatCompletionMessage {
+	msgs := []openai.ChatCompletionMessage{
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+	}
+
+	for cmi := range checkpointMsgs {
+		cm := &checkpointMsgs[cmi]
+		switch cm.Role {
+		case "user":
+			content := cm.Content
+			if content == "" {
+				content = " "
+			}
+			msgs = append(msgs, openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: content,
+			})
+		case "assistant":
+			if len(cm.ToolCalls) == 0 {
+				content := cm.Content
+				if content == "" {
+					content = " "
+				}
+				msgs = append(msgs, openai.ChatCompletionMessage{
+					Role:    openai.ChatMessageRoleAssistant,
+					Content: content,
+				})
+			} else {
+				for j := range cm.ToolCalls {
+					if cm.ToolCalls[j].ID == "" {
+						cm.ToolCalls[j].ID = fmt.Sprintf("call_cp_%d_%d", cmi, j)
+					}
+				}
+
+				toolCalls := make([]openai.ToolCall, 0, len(cm.ToolCalls))
+				for _, tc := range cm.ToolCalls {
+					argsJSON, _ := gulu.JSON.MarshalJSON(tc.Arguments)
+					toolCalls = append(toolCalls, openai.ToolCall{
+						ID:   tc.ID,
+						Type: openai.ToolTypeFunction,
+						Function: openai.FunctionCall{
+							Name:      tc.Name,
+							Arguments: string(argsJSON),
+						},
+					})
+				}
+				msgs = append(msgs, openai.ChatCompletionMessage{
+					Role:      openai.ChatMessageRoleAssistant,
+					Content:   cm.Content,
+					ToolCalls: toolCalls,
+				})
+				for _, tc := range cm.ToolCalls {
+					if tc.Result != "" {
+						msgs = append(msgs, openai.ChatCompletionMessage{
+							Role:       openai.ChatMessageRoleTool,
+							Content:    tc.Result,
+							ToolCallID: tc.ID,
+						})
+					}
+				}
+			}
 		}
-		messages = append(messages, openai.ChatCompletionMessage{
-			Role:    msg.Role,
-			Content: content,
-		})
 	}
-	return messages
+	return msgs
 }
 
 func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string) {

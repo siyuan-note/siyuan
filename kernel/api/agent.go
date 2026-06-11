@@ -33,11 +33,12 @@ import (
 )
 
 type agentChatReq struct {
-	SessionID  string              `json:"sessionID"`
-	Messages   []agent.UserMessage `json:"messages"`
-	Language   string              `json:"language"`
-	References []agent.Reference   `json:"references"`
-	Model      string              `json:"model,omitempty"`
+	SessionID  string            `json:"sessionID"`
+	Message    string            `json:"message"`
+	Language   string            `json:"language"`
+	References []agent.Reference `json:"references"`
+	Model      string            `json:"model,omitempty"`
+	Regenerate bool              `json:"regenerate"`
 }
 
 type runningSession struct {
@@ -86,7 +87,7 @@ func agentChat(c *gin.Context) {
 
 	var eventCh <-chan agent.AgentEvent
 
-	eventCh = agent.AgentChat(context.Background(), client, selectedProvider.APIModel, req.SessionID, req.Messages, req.Language, req.References, confirmTimeout, maxRetries)
+	eventCh = agent.AgentChat(context.Background(), client, selectedProvider.APIModel, req.SessionID, req.Message, req.Language, req.References, req.Regenerate, confirmTimeout, maxRetries)
 	sessionsMu.Lock()
 	runningSessions[req.SessionID] = &runningSession{eventCh: eventCh}
 	sessionsMu.Unlock()

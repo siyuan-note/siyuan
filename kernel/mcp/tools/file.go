@@ -29,7 +29,7 @@ import (
 
 var FileTool = &Tool{
 	Name:        "file",
-	Description: "Workspace file operations for SiYuan (paths are relative to workspace).\n- list: List directory contents. Requires: path.\n- read: Read file content. Requires: path.\n- write: Write file content. Requires: path, data.\n- delete: Delete file or directory. Requires: path.\n- rename: Rename or move file. Requires: old, new.\n- copy: Copy file or directory. Requires: src, dst.\n- grep: Search file contents using regex pattern. Requires: pattern, path. Optional: include, context.\n- find: Find files by glob pattern recursively. Requires: path. Optional: include (e.g. \"*.go\").\n- stat: Get file metadata (size, isDir, modTime). Requires: path.",
+	Description: "Workspace file operations for SiYuan (paths are relative to workspace).\n- list: List directory contents. Requires: path. Optional: limit (default 200, 0 or negative for unlimited).\n- read: Read file content. Requires: path. Optional: offset, limit (default 200 lines when neither is specified, use limit=-1 for full file).\n- write: Write file content. Requires: path, data.\n- delete: Delete file or directory. Requires: path.\n- rename: Rename or move file. Requires: old, new.\n- copy: Copy file or directory. Requires: src, dst.\n- grep: Search file contents using regex pattern. Requires: pattern, path. Optional: include, context, limit (default 200).\n- find: Find files by glob pattern recursively. Requires: path. Optional: include (e.g. \"*.go\"), limit (default 200, 0 or negative for unlimited).\n- stat: Get file metadata (size, isDir, modTime). Requires: path.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -37,7 +37,7 @@ var FileTool = &Tool{
 			"path":    {Type: "string", Description: "Relative path within workspace (for list, read, write, delete, grep, find, stat)"},
 			"data":    {Type: "string", Description: "File content (for write)"},
 			"offset":  {Type: "number", Description: "Line number to start reading from (for read, 1-based). Negative means N lines from the end. Default: 0 (read from beginning)."},
-			"limit":   {Type: "number", Description: "Maximum lines to read (for read). Default: all lines."},
+			"limit":   {Type: "number", Description: "Maximum lines/files/entries to return (for read, list, find, grep). Default: 200 lines when offset and limit are both 0 for read, 200 for list/find/grep. Use 0 or negative for unlimited."},
 			"old":     {Type: "string", Description: "Source path (for rename)"},
 			"new":     {Type: "string", Description: "Destination path (for rename)"},
 			"src":     {Type: "string", Description: "Source path (for copy)"},
@@ -105,8 +105,15 @@ func fileList(args map[string]interface{}) (CallToolResult, error) {
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "read dir failed: " + err.Error()}}, IsError: true}, nil
 	}
+
+	max := resolveLimit(args, 200)
+	total := len(entries)
+	if max > 0 && max < total {
+		entries = entries[:max]
+	}
+
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Directory: %s (%d entries)\n\n", p, len(entries)))
+	sb.WriteString(fmt.Sprintf("Directory: %s (%d entries)\n\n", p, total))
 	for _, e := range entries {
 		info, _ := e.Info()
 		size := ""
@@ -115,6 +122,11 @@ func fileList(args map[string]interface{}) (CallToolResult, error) {
 		}
 		sb.WriteString(fmt.Sprintf("- %s [%s] %s\n", e.Name(), typeLabel(e.IsDir()), size))
 	}
+
+	if max > 0 && max < total {
+		sb.WriteString(fmt.Sprintf("\n...output limited to %d of %d entries. Use limit parameter to adjust.", max, total))
+	}
+
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
@@ -125,6 +137,14 @@ func getFloat64Arg(args map[string]interface{}, key string) float64 {
 		}
 	}
 	return 0
+}
+
+func resolveLimit(args map[string]interface{}, defaultLimit int) int {
+	limit := int(getFloat64Arg(args, "limit"))
+	if limit <= 0 {
+		return defaultLimit
+	}
+	return limit
 }
 
 func fileRead(args map[string]interface{}) (CallToolResult, error) {
@@ -145,7 +165,7 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	limit := int(getFloat64Arg(args, "limit"))
 
 	if offset == 0 && limit == 0 {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(data)}}}, nil
+		limit = 200
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -335,8 +355,9 @@ func fileGrep(args map[string]interface{}) (CallToolResult, error) {
 
 	include, _ := args["include"].(string)
 	ctx := int(getFloat64Arg(args, "context"))
+	max := resolveLimit(args, 200)
 
-	results, err := gulu.File.Grep(abs, include, pattern, ctx, 0)
+	results, err := gulu.File.Grep(abs, include, pattern, ctx, max)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "grep failed: " + err.Error()}}, IsError: true}, nil
 	}
@@ -370,8 +391,10 @@ func fileFind(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	include, _ := args["include"].(string)
+	max := resolveLimit(args, 200)
 
 	var results []string
+	total := 0
 	err = filepath.WalkDir(abs, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return nil
@@ -390,11 +413,17 @@ func fileFind(args map[string]interface{}) (CallToolResult, error) {
 			return nil
 		}
 
-		rel, relErr := filepath.Rel(util.WorkspaceDir, path)
-		if relErr != nil {
-			rel = path
+		total++
+		if max <= 0 || len(results) < max {
+			rel, relErr := filepath.Rel(util.WorkspaceDir, path)
+			if relErr != nil {
+				rel = path
+			}
+			results = append(results, rel)
 		}
-		results = append(results, rel)
+		if max > 0 && total >= max {
+			return filepath.SkipAll
+		}
 		return nil
 	})
 
@@ -403,9 +432,16 @@ func fileFind(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Found %d files:\n\n", len(results)))
+	if max > 0 && max < total {
+		sb.WriteString(fmt.Sprintf("Found %d files (showing first %d):\n\n", total, max))
+	} else {
+		sb.WriteString(fmt.Sprintf("Found %d files:\n\n", len(results)))
+	}
 	for _, r := range results {
 		sb.WriteString(r + "\n")
+	}
+	if max > 0 && max < total {
+		sb.WriteString(fmt.Sprintf("\n...output limited to %d of %d files. Use limit parameter to adjust.", max, total))
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil

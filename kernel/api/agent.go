@@ -127,7 +127,7 @@ func agentChat(c *gin.Context) {
 			}
 			flusher.Flush()
 		case <-deadline:
-			writeSSEError(c, "request timeout")
+			writeSSEError(c, model.Conf.Language(24))
 			flusher.Flush()
 			return
 		}

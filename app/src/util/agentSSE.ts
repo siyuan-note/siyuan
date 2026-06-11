@@ -132,7 +132,12 @@ export async function fetchAgentSSE(
     } catch (err) {
         const e = err as Error;
         if (e.name !== "AbortError") {
-            onError(new Error(window.siyuan.languages._kernel[28]));
+            const msg = e.message.toLowerCase();
+            if (msg.indexOf("timeout") !== -1 || msg.indexOf("deadline") !== -1) {
+                onError(new Error(window.siyuan.languages._kernel[24]));
+            } else {
+                onError(new Error(window.siyuan.languages._kernel[28]));
+            }
         }
     }
 }

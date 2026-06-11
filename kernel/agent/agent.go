@@ -283,7 +283,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					continue
 				}
 		logging.LogErrorf("agent API request failed: %s", streamErr.Error())
-		sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+		sendEvent(ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
 			return
 			}
@@ -299,7 +299,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						break
 					}
 			logging.LogErrorf("agent stream error: %s", recvErr.Error())
-			sendEvent(ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			sendEvent(ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(recvErr)})
 			return
 				}
 
@@ -784,6 +784,14 @@ func classifyRetry(err error) string {
 		return "fatal"
 	}
 	return "network"
+}
+
+func getAgentErrorMessage(err error) string {
+	msg := strings.ToLower(err.Error())
+	if strings.Contains(msg, "context deadline exceeded") || strings.Contains(msg, "context canceled") || strings.Contains(msg, "timeout") || strings.Contains(msg, "exceeded while awaiting") {
+		return kernelModel.Conf.Language(24)
+	}
+	return kernelModel.Conf.Language(28)
 }
 
 func delayForCategory(category string, attempt int) time.Duration {

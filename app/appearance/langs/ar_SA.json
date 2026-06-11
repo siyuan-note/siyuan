@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "تم إنشاء لقطة تلقائيا",
   "agentThinkingDoneTime": "تم التفكير: %s",
   "agentThinking": "يفكر...",

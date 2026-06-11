@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Restauration terminée",
   "snapshotAutoCreated": "Instantané créé automatiquement",
   "agentThinkingDoneTime": "Réflexion terminée : %s",
   "agentThinking": "Réflexion...",

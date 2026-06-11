@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Otomatik anlık görüntü oluşturuldu",
   "agentThinkingDoneTime": "Düşünüldü: %s",
   "agentThinking": "Düşünüyor...",

@@ -44,7 +44,8 @@ type SessionEntry =
     timestamp?: number
 }
     | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string }
-    | { type: "snapshot"; snapshotID: string };
+    | { type: "snapshot"; snapshotID: string }
+    | { type: "rollback"; snapshotID: string };
 
 export class AgentChat extends Model {
     private messagesContainer: HTMLElement;
@@ -591,6 +592,9 @@ export class AgentChat extends Model {
                     break;
                 case "snapshot":
                     this.appendSnapshotInfo((entry as { snapshotID: string }).snapshotID);
+                    break;
+                case "rollback":
+                    this.appendRollbackInfo((entry as { snapshotID: string }).snapshotID);
                     break;
             }
         }
@@ -1331,12 +1335,25 @@ export class AgentChat extends Model {
         rollbackBtn.addEventListener("click", () => {
             const confirmText = (L.rollbackConfirm || "Rollback cannot be undone").replace("${name}", L.dataSnapshot || "Snapshot").replace("${time}", shortID);
             confirmDialog("⚠️ " + (L.rollback || "Rollback"), confirmText, () => {
-                fetchPost("/api/repo/checkoutRepo", {id: snapshotID}, () => {});
+                fetchPost("/api/repo/checkoutRepo", {id: snapshotID, sessionID: this.sessionId}, () => {});
             });
         });
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
+    }
+
+    private appendRollbackInfo(snapshotID: string) {
+        const L = window.siyuan.languages;
+        const shortID = snapshotID.length > 7 ? snapshotID.substring(0, 7) : snapshotID;
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--snapshot";
+        el.innerHTML = '<div class="agent-chat__snapshot-body">' +
+            '<svg class="agent-chat__snapshot-icon"><use xlink:href="#iconHistory"></use></svg>' +
+            '<span class="agent-chat__snapshot-text">' + escapeHtml((L.rollbackCompleted || "Rollback completed") + " " + shortID) + "</span>" +
+            "</div>";
+        this.messagesContainer.appendChild(el);
+        this.scrollToBottom(true);
     }
 
     private async stopGeneration() {

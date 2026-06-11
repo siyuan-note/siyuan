@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "ロールバック完了",
   "snapshotAutoCreated": "自動スナップショットが作成されました",
   "agentThinkingDoneTime": "考え済み：%s",
   "agentThinking": "考え中...",

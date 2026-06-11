@@ -1036,10 +1036,67 @@ func checkoutRepo(id string) {
 	}
 
 	FullReindexDirect()
+	appendAgentRollbackEntries()
 	time.Sleep(time.Second)
 	FlushTxQueue()
 	task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
 	return
+}
+
+func appendAgentRollbackEntries() {
+	pattern := filepath.Join(util.TempDir, "ai", "agent", "agentRollback_*.json")
+	markers, err := filepath.Glob(pattern)
+	if err != nil {
+		return
+	}
+	for _, markerPath := range markers {
+		data, err := os.ReadFile(markerPath)
+		if err != nil {
+			os.Remove(markerPath)
+			continue
+		}
+		var marker struct {
+			SessionID  string `json:"sessionID"`
+			SnapshotID string `json:"snapshotID"`
+		}
+		if nil != gulu.JSON.UnmarshalJSON(data, &marker) {
+			os.Remove(markerPath)
+			continue
+		}
+
+		sessionPath := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions",
+			marker.SessionID, "session.json")
+		sessionData, err := os.ReadFile(sessionPath)
+		if err != nil {
+			os.Remove(markerPath)
+			continue
+		}
+
+		var session map[string]interface{}
+		if nil != gulu.JSON.UnmarshalJSON(sessionData, &session) {
+			os.Remove(markerPath)
+			continue
+		}
+
+		entries, ok := session["entries"].([]interface{})
+		if !ok {
+			entries = make([]interface{}, 0)
+		}
+		entry := map[string]interface{}{
+			"type":       "rollback",
+			"snapshotID": marker.SnapshotID,
+		}
+		entries = append(entries, entry)
+		session["entries"] = entries
+
+		newData, err := gulu.JSON.MarshalIndentJSON(session, "", "\t")
+		if err != nil {
+			os.Remove(markerPath)
+			continue
+		}
+		filelock.WriteFile(sessionPath, newData)
+		os.Remove(markerPath)
+	}
 }
 
 func DownloadCloudSnapshot(tag, id string) (err error) {

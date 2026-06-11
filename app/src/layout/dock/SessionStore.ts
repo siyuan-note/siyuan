@@ -23,7 +23,7 @@ export interface AgentSession {
     model?: string;
     messages?: Array<{role: string; content: string}>;
     entries?: Array<{
-        type: "user" | "thinking" | "assistant" | "confirm" | "snapshot";
+        type: "user" | "thinking" | "assistant" | "confirm" | "snapshot" | "rollback";
         content?: string;
         steps?: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>;
         reasoningContent?: string;

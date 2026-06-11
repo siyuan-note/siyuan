@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "롤백 완료",
   "snapshotAutoCreated": "자동 스냅샷 생성됨",
   "agentThinkingDoneTime": "생각함：%s",
   "agentThinking": "생각 중...",

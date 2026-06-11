@@ -24,74 +24,92 @@ export const processSYLink = (app: App, url: string) => {
     } catch (error) {
         return false;
     }
-    if (urlObj && urlObj.hostname === "plugins") {
-        const pluginNameType = urlObj.pathname.split("/")[1];
-        if (!pluginNameType) {
-            return false;
-        }
-        app.plugins.find(plugin => {
-            if (pluginNameType.startsWith(plugin.name)) {
-                // siyuan://plugins/plugin-name/foo?bar=baz
-                plugin.eventBus.emit("open-siyuan-url-plugin", {url});
-
-                /// #if !MOBILE
-                // https://github.com/siyuan-note/siyuan/pull/9256
-                if (pluginNameType.split("/")[0] !== plugin.name) {
-                    // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-                    let data = urlObj.searchParams.get("data");
-                    try {
-                        data = JSON.parse(data || "{}");
-                    } catch (e) {
-                        console.log("Error open plugin tab with protocol:", e);
+    switch (urlObj.hostname) {
+        case "blocks": {
+            if (isSYProtocol(url)) {
+                const id = getIdFromSYProtocol(url);
+                const focus = urlObj.searchParams.get("focus") === "1";
+                window.siyuan.editorIsFullscreen = urlObj.searchParams.get("fullscreen") === "1";
+                fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
+                    if (existResponse.data) {
+                        checkFold(id, (zoomIn) => {
+                            /// #if !MOBILE
+                            openFileById({
+                                app,
+                                id,
+                                action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                                zoomIn: zoomIn || focus
+                            });
+                            /// #else
+                            openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                            /// #endif
+                        });
+                        /// #if !BROWSER
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "show");
+                        /// #endif
                     }
-                    openFile({
-                        app,
-                        custom: {
-                            title: urlObj.searchParams.get("title"),
-                            icon: urlObj.searchParams.get("icon"),
-                            data,
-                            id: pluginNameType
-                        },
+                    app.plugins.forEach(plugin => {
+                        plugin.eventBus.emit("open-siyuan-url-block", {
+                            url,
+                            id,
+                            focus,
+                            exist: existResponse.data,
+                        });
                     });
-                }
-                /// #endif
+                });
                 return true;
             }
-        });
-        return true;
-    }
-    if (urlObj && isSYProtocol(url)) {
-        const id = getIdFromSYProtocol(url);
-        const focus = urlObj.searchParams.get("focus") === "1";
-        window.siyuan.editorIsFullscreen = urlObj.searchParams.get("fullscreen") === "1";
-        fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
-            if (existResponse.data) {
-                checkFold(id, (zoomIn) => {
-                    /// #if !MOBILE
-                    openFileById({
-                        app,
-                        id,
-                        action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                        zoomIn: zoomIn || focus
-                    });
-                    /// #else
-                    openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
-                    /// #endif
+            break;
+        }
+        case "plugins": {
+            const pluginNameOrTabType: string | null = (() => {
+                const name = urlObj.pathname.split("/")[1];
+                if (!name) {
+                    return null;
+                }
+                try {
+                    return decodeURIComponent(name);
+                } catch (error) {
+                    return null;
+                }
+            })();
+
+            if (!pluginNameOrTabType) {
+                return false;
+            }
+
+            const plugin = app.plugins.find(plugin => pluginNameOrTabType === plugin.name);
+            if (plugin) {
+                // siyuan://plugins/plugin-name/foo?bar=baz
+                plugin.eventBus.emit("open-siyuan-url-plugin", { url });
+            } else {
+                // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
+                /// #if !MOBILE
+                // https://github.com/siyuan-note/siyuan/pull/9256
+                const data = (() => {
+                    try {
+                        return JSON.parse(urlObj.searchParams.get("data") || "{}");
+                    } catch (e) {
+                        console.log("Error open plugin tab with protocol:", e);
+                        return undefined;
+                    }
+                })();
+                // id 不存在时无副作用
+                openFile({
+                    app,
+                    custom: {
+                        title: urlObj.searchParams.get("title")!,
+                        icon: urlObj.searchParams.get("icon")!,
+                        data,
+                        id: pluginNameOrTabType
+                    },
                 });
-                /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                 /// #endif
             }
-            app.plugins.forEach(plugin => {
-                plugin.eventBus.emit("open-siyuan-url-block", {
-                    url,
-                    id,
-                    focus,
-                    exist: existResponse.data,
-                });
-            });
-        });
-        return true;
+            return true;
+        }
+        default:
+            break;
     }
     return false;
 };

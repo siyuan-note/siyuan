@@ -1715,9 +1715,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (taskItemElement.classList.contains("protyle-task--done")) {
                 taskItemElement.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                 taskItemElement.classList.remove("protyle-task--done");
+                taskItemElement.setAttribute("data-task", " ");
             } else {
                 taskItemElement.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                 taskItemElement.classList.add("protyle-task--done");
+                taskItemElement.setAttribute("data-task", "X");
             }
             taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             updateTransaction(protyle, taskItemElement, html);

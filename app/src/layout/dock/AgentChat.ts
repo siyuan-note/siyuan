@@ -536,9 +536,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm agent-chat__msg--confirmed";
         const argsStr = JSON.stringify(entry.args, null, 2);
-        const action = this.toolActionLabel((entry.args.action as string) || entry.name);
-        const objName = this.objectLabel(entry.args);
-        const desc = (L.agentConfirmDesc || "Agent will {action}: {name}").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(objName));
+        const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(entry.name)));
         let statusLabel = "";
         if (entry.status === "approved") {
             statusLabel = L.agentConfirmApprove || "Approved";
@@ -1409,13 +1407,13 @@ export class AgentChat extends Model {
     }
 
     private async appendConfirm(name: string, args: Record<string, unknown>, confirmID: string) {
+        this.finishActiveThinking();
+        this.flushThinkingStep();
         const L = window.siyuan.languages;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--confirm";
         const argsStr = JSON.stringify(args, null, 2);
-        const action = this.toolActionLabel((args.action as string) || name);
-        const objName = this.objectLabel(args);
-        const desc = (L.agentConfirmDesc || "Agent will {action}: {name}").replace("{action}", escapeHtml(action)).replace("{name}", escapeHtml(objName));
+        const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(name)));
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
             '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
@@ -1497,6 +1495,8 @@ export class AgentChat extends Model {
     }
 
     private appendQuestion(questionID: string, args: Record<string, unknown>) {
+        this.finishActiveThinking();
+        this.flushThinkingStep();
         const L = window.siyuan.languages;
         const rawQuestions = args.questions as Array<Record<string, unknown>>;
         if (!rawQuestions || rawQuestions.length === 0) {
@@ -1706,21 +1706,18 @@ export class AgentChat extends Model {
         });
     }
 
-    private objectLabel(args: Record<string, unknown>): string {
-        return (args.name || args.title || args.path || args.id || "") as string;
-    }
-
-    private toolActionLabel(action: string): string {
+    private toolCategory(name: string): string {
         const L = window.siyuan.languages;
-        const labels: Record<string, string> = {
-            "append": L.agentActionAppend || "add content",
-            "update": L.agentActionUpdate || "modify",
-            "delete": L.agentActionDelete || "delete",
-            "create": L.agentActionCreate || "create",
-            "move": L.agentActionMove || "move",
-            "rename": L.agentActionRename || "rename",
+        const m: Record<string, string | undefined> = {
+            "block": L.agentCatBlock, "document": L.agentCatDoc,
+            "notebook": L.agentCatNotebook, "tag": L.agentCatTag,
+            "bookmark": L.agentCatBookmark, "file": L.agentCatFile,
+            "asset": L.agentCatAsset, "attr": L.agentCatAttr,
+            "dailynote": L.agentCatDailynote, "import": L.agentCatImport,
+            "repo": L.agentCatRepo, "history": L.agentCatHistory,
+            "sync": L.agentCatSync, "database": L.agentCatDatabase,
         };
-        return labels[action] || action;
+        return m[name] || L.agentCatDefault;
     }
 
     private formatMessageTime(ts: number): string {

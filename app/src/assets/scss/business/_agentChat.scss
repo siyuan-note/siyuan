@@ -404,10 +404,15 @@
 
 .agent-chat__snapshot-rollback {
     flex-shrink: 0;
+    color: var(--b3-theme-on-surface-light);
 
     svg {
         width: 14px;
         height: 14px;
+    }
+
+    &:hover {
+        background: var(--b3-list-hover);
     }
 }
 
@@ -443,7 +448,7 @@
 .agent-chat__thinking-header {
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: 6px;
     padding: 4px 0;
     cursor: pointer;
     background: transparent;
@@ -458,7 +463,7 @@
     background: var(--b3-theme-primary-light);
     animation: agentThinkingPulse 1.4s ease-in-out infinite;
     flex-shrink: 0;
-    margin-right: 8px;
+    margin-right: 6px;
 }
 
 .agent-chat__thinking-text {
@@ -469,7 +474,7 @@
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    color: var(--b3-theme-primary);
+    color: var(--b3-theme-on-surface-light);
 
     svg {
         width: 14px;
@@ -555,14 +560,14 @@
 .agent-chat__confirm-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 8px 8px;
     color: var(--b3-theme-on-background);
     line-height: 1.5;
 
     .agent-chat__confirm-icon {
-        width: 18px;
-        height: 18px;
+        width: 14px;
+        height: 14px;
         flex-shrink: 0;
         display: flex;
         align-items: center;
@@ -767,7 +772,7 @@
 .agent-chat__todo-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 10px 12px;
     font-size: 13px;
     font-weight: 500;

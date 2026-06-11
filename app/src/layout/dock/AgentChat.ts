@@ -207,7 +207,16 @@ export class AgentChat extends Model {
         this.modelTrigger.addEventListener("keydown", (e: KeyboardEvent) => {
             if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
-                if (this.modelMenu) { this.closeModelMenu(); } else { this.openModelMenu(); }
+                if (this.modelMenu) {
+                    const option = this.modelOptions[this.modelMenuIndex];
+                    if (option) {
+                        this.selectedModel = option.id;
+                        this.updateModelLabel();
+                    }
+                    this.closeModelMenu();
+                } else {
+                    this.openModelMenu();
+                }
             } else if (e.key === "ArrowDown") {
                 e.preventDefault();
                 if (!this.modelMenu) { this.openModelMenu(); return; }
@@ -251,6 +260,7 @@ export class AgentChat extends Model {
         this.modelMenu = menu;
         this.updateModelMenuHighlight();
         menu.addEventListener("click", (e: MouseEvent) => {
+            e.stopPropagation();
             const item = (e.target as HTMLElement).closest(".agent-chat__model-item") as HTMLElement;
             if (item) {
                 this.selectedModel = item.getAttribute("data-id") || this.selectedModel;
@@ -280,7 +290,7 @@ export class AgentChat extends Model {
         if (!this.modelMenu) { return; }
         const items = this.modelMenu.querySelectorAll(".agent-chat__model-item");
         for (let i = 0; i < items.length; i++) {
-            items[i].classList.toggle("b3-menu__item--current", i === this.modelMenuIndex);
+            items[i].classList.toggle("b3-menu__item--highlight", i === this.modelMenuIndex);
         }
         const current = items[this.modelMenuIndex] as HTMLElement;
         if (current) { current.scrollIntoView({ block: "nearest" }); }
@@ -1309,7 +1319,7 @@ export class AgentChat extends Model {
         const rollbackBtn = el.querySelector(".agent-chat__snapshot-rollback") as HTMLButtonElement;
         rollbackBtn.addEventListener("click", () => {
             const confirmText = (L.rollbackConfirm || "Rollback cannot be undone").replace("${name}", L.dataSnapshot || "Snapshot").replace("${time}", shortID);
-            confirmDialog("⚠ " + (L.rollback || "Rollback"), confirmText, () => {
+            confirmDialog("⚠️ " + (L.rollback || "Rollback"), confirmText, () => {
                 fetchPost("/api/repo/checkoutRepo", {id: snapshotID}, () => {});
             });
         });

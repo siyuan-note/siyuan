@@ -666,6 +666,10 @@
     background: var(--b3-list-hover);
 }
 
+.agent-chat__model-menu .b3-menu__item--highlight {
+    background: var(--b3-list-hover);
+}
+
 .agent-chat__model-menu .b3-menu__item--current {
     background: transparent;
 }

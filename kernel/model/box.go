@@ -789,11 +789,6 @@ func VacuumDataIndex() {
 func FullReindex(needResetScroll bool) {
 	util.PushEndlessProgress(Conf.language(35))
 
-	cache.ClearTreeCache()
-	cache.ClearDocsIAL()
-	cache.ClearBlocksIAL()
-	cache.ClearAVCache()
-
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	go func() {
@@ -813,6 +808,11 @@ func FullReindexDirect() {
 }
 
 func fullReindex() {
+	cache.ClearTreeCache()
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
+	cache.ClearAVCache()
+
 	pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = true, true
 	defer func() {
 		sql.FlushQueue()

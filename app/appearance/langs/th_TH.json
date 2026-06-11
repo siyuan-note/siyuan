@@ -2,6 +2,7 @@
   "snapshotAutoCreated": "สร้างสแนปช็อตอัตโนมัติ",
   "agentThinkingDoneTime": "คิดแล้ว: %s",
   "agentThinking": "กำลังคิด...",
+  "manageSessions": "จัดการเซสชัน",
   "scrollToBottom": "เลื่อนไปด้านล่าง",
   "featurePreview": "💡 ฟีเจอร์นี้อยู่ในช่วงตัวอย่างเบื้องต้น ยังไม่เสถียร โปรดสำรองข้อมูลก่อนใช้งาน",
   "agentSessionSearch": "ค้นหาเซสชัน...",

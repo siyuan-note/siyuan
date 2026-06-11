@@ -2,6 +2,7 @@
   "snapshotAutoCreated": "已自動創建資料快照",
   "agentThinkingDoneTime": "已思考：%s",
   "agentThinking": "思考中...",
+  "manageSessions": "管理會話",
   "scrollToBottom": "滾動到底部",
   "featurePreview": "💡 該功能處於早期預覽階段，尚不穩定，建議備份數據後再使用",
   "agentSessionSearch": "搜尋會話...",

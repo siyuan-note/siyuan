@@ -2,6 +2,7 @@
   "snapshotAutoCreated": "Автоматический снимок создан",
   "agentThinkingDoneTime": "Обдумано: %s",
   "agentThinking": "Думает...",
+  "manageSessions": "Управление сессиями",
   "scrollToBottom": "Прокрутить вниз",
   "featurePreview": "💡 Эта функция на стадии раннего предпросмотра, пока нестабильна. Сделайте резервную копию данных перед использованием",
   "agentSessionSearch": "Поиск сессий...",

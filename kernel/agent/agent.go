@@ -549,10 +549,16 @@ func GenerateTitle(client *openai.Client, model string, userMsg string) string {
 
 var safeActions = map[string]bool{
 	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
-	"tree_stat": true,
-	"list":      true, "read": true, "search_docs": true, "fulltext": true, "backlinks": true,
-	"mentions": true, "labels": true, "status": true, "version": true,
-	"current_time": true, "workspace": true, "md": true, "query": true,
+	"tree_stat": true, "dom": true, "batch_get": true, "batch_kramdown": true,
+	"list": true, "read": true, "search_docs": true, "fulltext": true, "semantic": true, "search": true,
+	"backlinks": true, "mentions": true, "refresh": true,
+	"labels": true, "status": true, "version": true,
+	"current_time": true, "workspace": true, "info": true,
+	"grep": true, "find": true, "stat": true, "unused": true,
+	"keys": true, "render": true, "diff": true,
+	"file_get": true, "file_open": true, "file_export": true,
+	"open": true, "close": true, "batch-get": true, "question": true, "todo_write": true,
+	"md": true, "query": true,
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
@@ -567,6 +573,9 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 	}
 	if toolName == "sync" && action == "status" {
 		return false
+	}
+	if toolName == "import" && action == "md" {
+		return true
 	}
 	return true
 }

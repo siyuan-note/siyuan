@@ -375,6 +375,7 @@ export class AgentChat extends Model {
                 return;
             }
             if (t.closest('[data-type="min"]')) {
+                e.stopPropagation();
                 getDockByType("agentChat").toggleModel("agentChat", false, true);
                 return;
             }

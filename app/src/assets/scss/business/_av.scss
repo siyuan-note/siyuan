@@ -140,6 +140,7 @@
   }
 
   &__spacer {
+    grid-column: 1 / -1;
     pointer-events: none;
   }
 

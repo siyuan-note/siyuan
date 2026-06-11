@@ -31,12 +31,6 @@ interface IIds {
     colId?: string
 }
 
-interface IVirtualData {
-    renderedStart: number;
-    renderedEnd: number;
-    topSpacerHeight: number;
-}
-
 interface ITableOptions {
     protyle: IProtyle,
     blockElement: HTMLElement,
@@ -55,7 +49,7 @@ interface ITableOptions {
         activeIds: IIds[],
         query: string,
         pageSizes: { [key: string]: string },
-        virtualData: { [key: string]: IVirtualData },
+        virtualData: { [key: string]: IAVVirtualData },
     }
 }
 
@@ -130,7 +124,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     </div>`;
 };
 
-const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IVirtualData) => {
+const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData) => {
     let calcHTML = "";
     let contentHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     let pinIndex = -1;
@@ -199,7 +193,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
     }
     // body
     data.rows.find((row: IAVRow, rowIndex: number) => {
-        if (virtualData) {
+        if (virtualData && virtualData.renderedEnd) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
                 return;
@@ -208,7 +202,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
-        contentHTML += getRowHTML(data, row, rowIndex, pinIndex);
+        contentHTML += getRowHTML({data, row, rowIndex, pinIndex, type: "table"});
     });
     return `${contentHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
     <div class="av__colsticky">
@@ -508,19 +502,20 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         });
         const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
         const pageSizes: { [key: string]: string } = {};
+        const virtualData: { [key: string]: IAVVirtualData } = {};
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
             pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-        });
-        const headerTransformElement = e.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
-        const footerTransformElement = e.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
-        const virtualData: { [key: string]: IVirtualData } = {};
-        e.querySelectorAll(".av__body").forEach(item => {
+            if (!item.querySelector(".av__row")) {
+                return;
+            }
             virtualData[item.getAttribute("data-group-id") || "all"] = ({
                 renderedStart: parseInt(item.querySelectorAll(".av__row")[1].getAttribute("data-index")),
                 renderedEnd: parseInt(item.querySelector(".av__row--util").previousElementSibling.getAttribute("data-index")),
                 topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
             });
         });
+        const headerTransformElement = e.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
+        const footerTransformElement = e.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
         const resetData = {
             selectCellId,
             alignSelf: e.style.alignSelf,

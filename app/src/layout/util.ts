@@ -226,7 +226,7 @@ export const getAllLayout = () => {
 
 const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
     dockItem.forEach((existSubItem, index) => {
-        if (window.siyuan.isPublish && existSubItem.type === "inbox") {
+        if (window.siyuan.isPublish && (existSubItem.type === "inbox" || existSubItem.type === "agentChat")) {
             dockItem.splice(index, 1);
             return;
         }

@@ -376,7 +376,9 @@
 .agent-chat__error-icon {
     width: 16px; height: 16px;
     flex-shrink: 0;
-    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .agent-chat__snapshot-body {
@@ -391,6 +393,9 @@
     width: 14px;
     height: 14px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .agent-chat__snapshot-text {
@@ -602,6 +607,9 @@
     width: 14px;
     height: 14px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .agent-chat__tool-title {
@@ -804,6 +812,9 @@
     flex-shrink: 0;
     width: 14px;
     height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 // Question card styles

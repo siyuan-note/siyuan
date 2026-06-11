@@ -464,6 +464,7 @@
     animation: agentThinkingPulse 1.4s ease-in-out infinite;
     flex-shrink: 0;
     margin-right: 6px;
+    cursor: pointer;
 }
 
 .agent-chat__thinking-text {
@@ -855,14 +856,14 @@
 
 .agent-chat__question-option {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
     padding: 6px 8px;
     border-radius: var(--b3-border-radius);
     cursor: pointer;
     transition: var(--b3-transition);
     &:hover { background: var(--b3-theme-surface-light); }
-    input { flex-shrink: 0; margin-top: 2px; }
+    input { flex-shrink: 0; }
 }
 
 .agent-chat__question-option-label {

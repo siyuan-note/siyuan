@@ -1510,6 +1510,21 @@ export class AgentChat extends Model {
 
         el.innerHTML = renderQuestionCardHTML(rawQuestions, questionID);
 
+        el.querySelectorAll(".agent-chat__question-option").forEach((option) => {
+            const input = option.querySelector("input") as HTMLInputElement;
+            if (!input) return;
+            let wasChecked = false;
+            option.addEventListener("mousedown", () => {
+                wasChecked = input.checked;
+            });
+            option.addEventListener("click", (e) => {
+                if (input.type === "radio" && wasChecked) {
+                    e.preventDefault();
+                    input.checked = false;
+                }
+            });
+        });
+
         const submitBtn = el.querySelector(".agent-chat__question-submit-btn");
         if (submitBtn) {
             submitBtn.addEventListener("click", () => {

@@ -382,6 +382,32 @@ func checkBlockExist(c *gin.Context) {
 	ret.Data = nil != b
 }
 
+func checkBlocksExist(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	result := map[string]bool{}
+	for _, idArg := range idsArg {
+		id, idOk := idArg.(string)
+		if !idOk {
+			continue
+		}
+		b, err := model.GetBlock(id, nil)
+		if errors.Is(err, model.ErrIndexing) {
+			result[id] = false
+			continue
+		}
+		result[id] = nil != b
+	}
+	ret.Data = result
+}
+
 func getDocInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

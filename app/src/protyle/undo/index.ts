@@ -4,6 +4,7 @@ import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {scrollCenter} from "../../util/highlightById";
 import {matchHotKey} from "../util/hotKey";
+import {fetchSyncPost} from "../../util/fetch";
 import {ipcRenderer} from "electron";
 
 interface IOperations {
@@ -64,9 +65,64 @@ export class Undo {
         }
     }
 
-    private render(protyle: IProtyle, state: IOperations, redo: boolean) {
+    // 重放 insert 操作前检查块 ID 是否已被占用(例如剪切后粘贴到其他编辑器时保留了原 ID,
+    // 此时撤销剪切会插入重复 ID 的块),冲突时在两个栈中统一替换为新 ID
+    private async resolveDuplicateIds(operations: IOperation[]) {
+        const ids = new Set<string>();
+        operations.forEach(op => {
+            if (op.action === "insert" && typeof op.data === "string") {
+                if (op.id) {
+                    ids.add(op.id);
+                }
+                op.data.match(/data-node-id="[^"]+"/g)?.forEach((match: string) => {
+                    ids.add(match.substring(14, match.length - 1));
+                });
+            }
+        });
+        if (ids.size === 0) {
+            return;
+        }
+        const existResponse = await fetchSyncPost("/api/block/checkBlocksExist", {ids: Array.from(ids)});
+        const replacements: [string, string][] = [];
+        ids.forEach(id => {
+            if (existResponse.data[id] === true) {
+                replacements.push([id, Lute.NewNodeID()]);
+            }
+        });
+        if (replacements.length === 0) {
+            return;
+        }
+        [this.undoStack, this.redoStack].forEach(stack => {
+            stack.forEach(item => {
+                [item.doOperations, item.undoOperations].forEach(ops => {
+                    ops.forEach(op => {
+                        replacements.forEach(([oldId, newId]) => {
+                            if (op.id === oldId) {
+                                op.id = newId;
+                            }
+                            if (op.parentID === oldId) {
+                                op.parentID = newId;
+                            }
+                            if (op.previousID === oldId) {
+                                op.previousID = newId;
+                            }
+                            if (op.nextID === oldId) {
+                                op.nextID = newId;
+                            }
+                            if (typeof op.data === "string") {
+                                op.data = op.data.split(`data-node-id="${oldId}"`).join(`data-node-id="${newId}"`);
+                            }
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    private async render(protyle: IProtyle, state: IOperations, redo: boolean) {
         hideElements(["hint", "gutter"], protyle);
         protyle.wysiwyg.lastHTMLs = {};
+        await this.resolveDuplicateIds(redo ? state.doOperations : state.undoOperations);
         if (!redo) {
             for (let i = state.undoOperations.length - 1; i >= 0; i--) {
                 if (state.undoOperations[i].action === "insert") {

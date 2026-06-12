@@ -54,6 +54,7 @@ export class Toolbar {
     public subElementCloseCB: () => void;
     public range: Range;
     public toolbarHeight: number;
+    private readonly LINE_HEIGHT = 32;
 
     constructor(protyle: IProtyle) {
         const options = protyle.options;
@@ -90,7 +91,41 @@ export class Toolbar {
 
     public update(protyle: IProtyle) {
         this.element.innerHTML = "";
-        protyle.options.toolbar = toolbarKeyToMenu(Constants.PROTYLE_TOOLBAR);
+        debugger
+        protyle.options.toolbar = toolbarKeyToMenu(isMobile() ? [
+            "block-ref",
+            "a",
+            "|",
+            "text",
+            "strong",
+            "em",
+            "u",
+            "clear",
+            "|",
+            "code",
+            "tag",
+            "inline-math",
+            "inline-memo",
+        ] : [
+            "block-ref",
+            "a",
+            "|",
+            "text",
+            "strong",
+            "em",
+            "u",
+            "s",
+            "mark",
+            "sup",
+            "sub",
+            "clear",
+            "|",
+            "code",
+            "kbd",
+            "tag",
+            "inline-math",
+            "inline-memo",
+        ]);
         protyle.app.plugins.forEach(item => {
             const pluginToolbar = item.updateProtyleToolbar(protyle.options.toolbar);
             pluginToolbar.forEach(toolbarItem => {
@@ -1526,7 +1561,7 @@ export class Toolbar {
                     previewPath = response.data.templates[0]?.path;
                     /// #if !MOBILE
                     const rangePosition = getSelectionPosition(nodeElement, range);
-                    setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+                    setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, this.LINE_HEIGHT);
                     (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
                     /// #else
                     setPosition(this.subElement, 0, 0);
@@ -1661,7 +1696,7 @@ export class Toolbar {
                 if (init) {
                     /// #if !MOBILE
                     const rangePosition = getSelectionPosition(nodeElement, range);
-                    setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+                    setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, this.LINE_HEIGHT);
                     /// #else
                     setPosition(this.subElement, 0, 0);
                     /// #endif
@@ -1778,7 +1813,7 @@ export class Toolbar {
 <button class="keyboard__action${protyle.disabled ? " fn__none" : ""}" data-action="pasteEscaped"><span>${window.siyuan.languages.pasteEscaped}</span></button>
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
 <button class="keyboard__action" data-action="back"><svg><use xlink:href="#iconBack"></use></svg></button>`;
-                setPosition(this.subElement, rangePosition.left, rangePosition.top + 28, Constants.SIZE_TOOLBAR_HEIGHT);
+                setPosition(this.subElement, rangePosition.left, rangePosition.top + 28, this.LINE_HEIGHT);
             }
         });
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
@@ -1786,7 +1821,7 @@ export class Toolbar {
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");
         const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top - 48, Constants.SIZE_TOOLBAR_HEIGHT);
+        setPosition(this.subElement, rangePosition.left, rangePosition.top - 48, this.LINE_HEIGHT);
     }
 
     private genItem(protyle: IProtyle, menuItem: IMenuItem) {

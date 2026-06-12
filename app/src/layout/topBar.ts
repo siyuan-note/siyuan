@@ -25,6 +25,10 @@ import {exportLayout} from "./util";
 import {commandPanel} from "../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../plugin/openTopBarMenu";
 
+export const getTopBarHeight = () => {
+    return  document.getElementById("sidebar") ? 0 : (document.getElementById("toolbar").clientHeight || document.querySelector(".layout-tab-bar").clientHeight);
+};
+
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `

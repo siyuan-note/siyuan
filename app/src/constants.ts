@@ -77,7 +77,6 @@ export abstract class Constants {
     public static readonly SIZE_SCROLL_TB: number = 24;
     public static readonly SIZE_SCROLL_STEP: number = 256;
     public static readonly SIZE_LINK_TEXT_MAX: number = 64;
-    public static readonly SIZE_TOOLBAR_HEIGHT: number = isMobile() ? 0 : 32;
     public static readonly SIZE_GET_MAX = 102400;
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;
@@ -857,39 +856,5 @@ export abstract class Constants {
     ];
     public static readonly SIYUAN_RENDER_CODE_LANGUAGES: string[] = [
         "abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap", "graphviz", "math"
-    ];
-    public static readonly PROTYLE_TOOLBAR: string[] = isMobile() ? [
-        "block-ref",
-        "a",
-        "|",
-        "text",
-        "strong",
-        "em",
-        "u",
-        "clear",
-        "|",
-        "code",
-        "tag",
-        "inline-math",
-        "inline-memo",
-    ] : [
-        "block-ref",
-        "a",
-        "|",
-        "text",
-        "strong",
-        "em",
-        "u",
-        "s",
-        "mark",
-        "sup",
-        "sub",
-        "clear",
-        "|",
-        "code",
-        "kbd",
-        "tag",
-        "inline-math",
-        "inline-memo",
     ];
 }

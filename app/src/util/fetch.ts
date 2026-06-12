@@ -5,13 +5,13 @@ import {ipcRenderer} from "electron";
 import {processMessage} from "./processMessage";
 import {kernelError} from "../dialog/processSystem";
 
-export const fetchPost = (
+export function fetchPost(
     url: string,
     data?: any,
     cb?: (response: IWebSocketData) => void,
     headers?: IObject,
     failCallback?: (response: IWebSocketData) => void,
-    signal?: AbortSignal) => {
+    signal?: AbortSignal) {
     const init: RequestInit = {
         method: "POST",
     };
@@ -123,7 +123,7 @@ export const fetchPost = (
     });
 };
 
-export const fetchSyncPost = async (url: string, data?: any) => {
+export async function fetchSyncPost(url: string, data?: any) {
     const init: RequestInit = {
         method: "POST",
     };
@@ -140,7 +140,7 @@ export const fetchSyncPost = async (url: string, data?: any) => {
     return res2;
 };
 
-export const fetchGet = (url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
+export function fetchGet(url: string, cb: (response: IWebSocketData | IObject | string) => void) {
     fetch(url).then((response) => {
         if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
             return response.json();

@@ -3,8 +3,9 @@ import {Constants} from "../constants";
 import {Tab} from "./Tab";
 /// #endif
 import {processMessage} from "../util/processMessage";
-import {kernelError, reloadSync} from "../dialog/processSystem";
+import {reloadSync} from "../dialog/processSystem";
 import {App} from "../index";
+import {kernelError} from "../util/kernelFault";
 
 interface IConnectOptions {
     id: string,

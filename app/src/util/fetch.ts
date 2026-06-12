@@ -3,7 +3,7 @@ import {Constants} from "../constants";
 import {ipcRenderer} from "electron";
 /// #endif
 import {processMessage} from "./processMessage";
-import {kernelError} from "../dialog/processSystem";
+import {kernelError} from "./kernelFault";
 
 export function fetchPost(
     url: string,

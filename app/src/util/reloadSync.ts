@@ -8,8 +8,8 @@ import {Constants} from "../constants";
 import {getDocDisplayName, setNoteBook} from "./pathName";
 import {getAllModels} from "../layout/getAll";
 import {setStorageVal} from "../protyle/util/compatibility";
-import {setTitle} from "../dialog/processSystem";
 import type {Tab} from "../layout/Tab";
+import {setTitle} from "./processTitle";
 
 const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     fetchPost("/api/block/getDocInfo", {

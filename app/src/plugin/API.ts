@@ -337,41 +337,44 @@ const openEmoji = (options: {
     });
 };
 
-export const API = {
-    adaptHotkey: updateHotkeyTip,
-    confirm: confirmDialog,
-    Constants,
-    showMessage,
-    hideMessage,
-    fetchPost,
-    fetchSyncPost,
-    fetchGet,
-    getFrontend,
-    getBackend,
-    getModelByDockType,
-    openTab,
-    openWindow,
-    openMobileFileById,
-    lockScreen,
-    exitSiYuan,
-    Protyle,
-    ProtyleMethod,
-    Plugin,
-    Dialog,
-    Menu,
-    Setting,
-    getAllEditor,
-    /// #if !MOBILE
-    getActiveTab,
-    getAllModels,
-    getAllTabs,
-    /// #endif
-    getActiveEditor,
-    platformUtils,
-    openSetting,
-    openAttributePanel,
-    saveLayout,
-    globalCommand,
-    expandDocTree,
-    openEmoji
+export const API: Record<string, unknown> = {};
+const def = <T>(key: string, get: () => T) => {
+    Object.defineProperty(API, key, {get, enumerable: true, configurable: true});
 };
+
+def("adaptHotkey", () => updateHotkeyTip);
+def("confirm", () => confirmDialog);
+def("Constants", () => Constants);
+def("showMessage", () => showMessage);
+def("hideMessage", () => hideMessage);
+def("fetchPost", () => fetchPost);
+def("fetchSyncPost", () => fetchSyncPost);
+def("fetchGet", () => fetchGet);
+def("getFrontend", () => getFrontend);
+def("getBackend", () => getBackend);
+def("getModelByDockType", () => getModelByDockType);
+def("openTab", () => openTab);
+def("openWindow", () => openWindow);
+def("openMobileFileById", () => openMobileFileById);
+def("lockScreen", () => lockScreen);
+def("exitSiYuan", () => exitSiYuan);
+def("Protyle", () => Protyle);
+def("ProtyleMethod", () => ProtyleMethod);
+def("Plugin", () => Plugin);
+def("Dialog", () => Dialog);
+def("Menu", () => Menu);
+def("Setting", () => Setting);
+def("getAllEditor", () => getAllEditor);
+/// #if !MOBILE
+def("getActiveTab", () => getActiveTab);
+def("getAllModels", () => getAllModels);
+def("getAllTabs", () => getAllTabs);
+/// #endif
+def("getActiveEditor", () => getActiveEditor);
+def("platformUtils", () => platformUtils);
+def("openSetting", () => openSetting);
+def("openAttributePanel", () => openAttributePanel);
+def("saveLayout", () => saveLayout);
+def("globalCommand", () => globalCommand);
+def("expandDocTree", () => expandDocTree);
+def("openEmoji", () => openEmoji);

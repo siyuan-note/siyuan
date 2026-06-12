@@ -26,7 +26,6 @@ import {
     progressStatus,
     setDefRefCount,
     setRefDynamicText,
-    setTitle,
     transactionError
 } from "./dialog/processSystem";
 import {initMessage, showMessage} from "./dialog/message";
@@ -48,6 +47,7 @@ import {updateAppearance} from "./config/util/updateAppearance";
 import {renderSnippet} from "./config/util/snippets";
 import {setBodyHighlight} from "./util/assets";
 import {reloadSync} from "./util/reloadSync";
+import {setTitle} from "./util/processTitle";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];

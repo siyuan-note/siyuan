@@ -1,7 +1,7 @@
 import {Layout} from "./index";
 import {Wnd} from "./Wnd";
 import {Tab} from "./Tab";
-import {Model} from "./Model";
+import type {Model} from "./Model";
 import {Graph} from "./dock/Graph";
 import {Editor} from "../editor";
 import {Files} from "./dock/Files";
@@ -27,10 +27,10 @@ import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
-import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {adjustDockPadding} from "./dock/util";
+import {setTitle} from "../util/processTitle";
 
 export const setPanelFocus = (element: Element, isSaveLayout = true) => {
     if (element.getAttribute("data-type") === "wnd") {

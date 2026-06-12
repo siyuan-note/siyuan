@@ -1,4 +1,3 @@
-import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {
     isInMobileApp,
     setStorageVal,
@@ -24,6 +23,7 @@ import * as dayjs from "dayjs";
 import {exportLayout} from "./util";
 import {commandPanel} from "../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../plugin/openTopBarMenu";
+import {getWorkspaceName} from "../util/processTitle";
 
 export const getTopBarHeight = () => {
     return  document.getElementById("sidebar") ? 0 : (document.getElementById("toolbar").clientHeight || document.querySelector(".layout-tab-bar").clientHeight);

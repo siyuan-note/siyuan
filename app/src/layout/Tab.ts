@@ -13,7 +13,7 @@ import {openNewWindow} from "../window/openNewWindow";
 import {ipcRenderer} from "electron";
 /// #endif
 import {layoutToJSON, saveLayout} from "./util";
-import {setTitle} from "../dialog/processSystem";
+import {setTitle} from "../util/processTitle";
 
 export class Tab {
     public parent: Wnd;

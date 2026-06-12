@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 /// #endif
-import {getAllEditor, getAllModels} from "../layout/getAll";
+import {getAllEditor} from "../layout/getAll";
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 /// #if !BROWSER
@@ -14,7 +14,6 @@ import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
-import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
@@ -357,30 +356,6 @@ export const bootSync = () => {
             });
         }
     });
-};
-
-export const setTitle = (title: string, showVersionTitle = false) => {
-    if (window.siyuan.config.appearance.hideToolbar) {
-        return;
-    }
-    const dragElement = document.getElementById("drag");
-    const workspaceName = getWorkspaceName();
-    if (showVersionTitle) {
-        const versionTitle = `${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        document.title = versionTitle;
-        if (dragElement) {
-            dragElement.textContent = versionTitle;
-            dragElement.setAttribute("title", versionTitle);
-        }
-    } else {
-        title = title.trim() || window.siyuan.languages["_kernel"][16];
-        document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        if (!dragElement) {
-            return;
-        }
-        dragElement.setAttribute("title", title);
-        dragElement.innerHTML = escapeHtml(title);
-    }
 };
 
 export const downloadProgress = (data: { id: string, percent: number }) => {

@@ -91,7 +91,6 @@ export class Toolbar {
 
     public update(protyle: IProtyle) {
         this.element.innerHTML = "";
-        debugger
         protyle.options.toolbar = toolbarKeyToMenu(isMobile() ? [
             "block-ref",
             "a",

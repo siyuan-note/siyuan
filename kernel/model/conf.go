@@ -133,6 +133,10 @@ func InitConf() {
 				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
 			} else {
 				logging.LogInfof("loaded conf [%s]", confPath)
+				if nil != Conf.Search && Conf.Search.HanSensitive == nil {
+					// 旧版本配置无 hanSensitive 字段：保持既往行为（区分繁简）
+					Conf.Search.SetHanSensitive(true)
+				}
 			}
 		}
 	}
@@ -495,6 +499,7 @@ func InitConf() {
 	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
 		Conf.Search.BacklinkMentionKeywordsLimit = 512
 	}
+	sql.SetHanSensitive(Conf.Search.HanSensitiveVal())
 
 	if nil == Conf.Stat {
 		Conf.Stat = conf.NewStat()
@@ -760,6 +765,8 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	FlushTxQueue()
 
 	if !force {
+		cancelPurge()
+
 		// Stop kernel plugins early in shutdown
 		if OnKernelPluginsStop != nil {
 			OnKernelPluginsStop()

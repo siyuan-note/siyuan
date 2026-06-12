@@ -289,7 +289,8 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
             } else {
                 previousElement.setAttribute("disabled", "disabled");
             }
-            fetchPost("/api/search/fullTextSearchBlock", {
+            const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
+            fetchPost(endpoint, {
                 query: config.query,
                 method: config.method,
                 types: config.types,
@@ -298,6 +299,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 groupBy: config.group,
                 orderBy: config.sort,
                 page: config.page,
+                pageSize: 32,
             }, (response) => {
                 onRecentBlocks(response.data.blocks, config, response, focusId);
                 loadingElement.classList.add("fn__none");

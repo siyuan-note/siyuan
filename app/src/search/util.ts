@@ -1358,6 +1358,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 groupBy: config.group,
                 orderBy: config.sort,
                 page: config.page || 1,
+                pageSize: 32,
             }, (response) => {
                 const searchReqId = config.method === 4
                     ? window.siyuan.reqIds["/api/search/semanticSearchBlock"]

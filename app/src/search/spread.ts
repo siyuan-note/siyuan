@@ -47,6 +47,7 @@ export const openSearch = async (options: {
         group: localData.group,
         sort: localData.sort,
         types: Object.assign({}, localData.types),
+        subTypes: Object.assign({}, localData.subTypes),
         replaceTypes: Object.assign({}, localData.replaceTypes),
         page: options.key ? 1 : localData.page
     };

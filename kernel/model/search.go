@@ -1332,14 +1332,18 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	return
 }
 
-func buildBoxesFilter(boxes []string) string {
+func buildBoxesFilter(boxes []string, alias ...string) string {
 	if 0 == len(boxes) {
 		return ""
+	}
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
 	}
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, box := range boxes {
-		builder.WriteString(fmt.Sprintf("box = '%s'", box))
+		builder.WriteString(fmt.Sprintf("%sbox = '%s'", prefix, box))
 		if i < len(boxes)-1 {
 			builder.WriteString(" OR ")
 		}
@@ -1348,14 +1352,18 @@ func buildBoxesFilter(boxes []string) string {
 	return builder.String()
 }
 
-func buildPathsFilter(paths []string) string {
+func buildPathsFilter(paths []string, alias ...string) string {
 	if 0 == len(paths) {
 		return ""
+	}
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
 	}
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, path := range paths {
-		builder.WriteString(fmt.Sprintf("path LIKE '%s%%'", path))
+		builder.WriteString(fmt.Sprintf("%spath LIKE '%s%%'", prefix, path))
 		if i < len(paths)-1 {
 			builder.WriteString(" OR ")
 		}
@@ -1407,7 +1415,11 @@ func buildOrderBy(query string, method, orderBy int) string {
 // Example output:
 //
 //	(type IN ('p','c') OR (type = 'h' AND subtype IN ('h1','h2')))
-func buildTypeFilter(types, subTypes map[string]bool) string {
+func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
+	}
 	s := conf.NewSearch()
 	if err := copier.Copy(s, Conf.Search); err != nil {
 		logging.LogErrorf("copy search conf failed: %s", err)
@@ -1493,8 +1505,8 @@ func buildTypeFilter(types, subTypes map[string]bool) string {
 		if 0 == len(headingSubs) {
 			simpleTypes = append(simpleTypes, headingAbbr)
 		} else {
-			clauses = append(clauses, fmt.Sprintf("(type = '%s' AND subtype IN (%s))",
-				headingAbbr, sqlQuoteJoin(headingSubs)))
+			clauses = append(clauses, fmt.Sprintf("(%stype = '%s' AND %ssubtype IN (%s))",
+				prefix, headingAbbr, prefix, sqlQuoteJoin(headingSubs)))
 		}
 	}
 
@@ -1509,17 +1521,16 @@ func buildTypeFilter(types, subTypes map[string]bool) string {
 		if 0 == len(listSubs) {
 			simpleTypes = append(simpleTypes, listTypes...)
 		} else {
-			clauses = append(clauses, fmt.Sprintf("(type IN (%s) AND subtype IN (%s))",
-				sqlQuoteJoin(listTypes), sqlQuoteJoin(listSubs)))
+			clauses = append(clauses, fmt.Sprintf("(%stype IN (%s) AND %ssubtype IN (%s))",
+				prefix, sqlQuoteJoin(listTypes), prefix, sqlQuoteJoin(listSubs)))
 		}
 	}
 
 	if 0 < len(simpleTypes) {
-		clauses = append([]string{"type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
+		clauses = append([]string{prefix + "type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
 	}
 
 	if 0 == len(clauses) {
-		// Match nothing without producing invalid SQL when concatenated after AND.
 		return "(1 = 0)"
 	}
 	return "(" + strings.Join(clauses, " OR ") + ")"

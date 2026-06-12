@@ -10,6 +10,7 @@ import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {showMessage} from "../../dialog/message";
 import * as dayjs from "dayjs";
 import {sendNotification} from "../../plugin/platformUtils";
 import {
@@ -359,6 +360,19 @@ export class AgentChat extends Model {
 
         this.parent.panelElement.addEventListener("click", (e: MouseEvent) => {
             const t = e.target as HTMLElement;
+            let target = t;
+            while (target && !target.isEqualNode(this.parent.panelElement)) {
+                if (target.classList.contains("block__icon")) {
+                    const type = target.getAttribute("data-type");
+                    if (type === "min") {
+                        e.stopPropagation();
+                        getDockByType("agentChat").toggleModel("agentChat", false, true);
+                        return;
+                    }
+                    break;
+                }
+                target = target.parentElement;
+            }
             if (t.closest(".block__icons")) {
                 return;
             }
@@ -369,11 +383,6 @@ export class AgentChat extends Model {
                 return;
             }
             if (t.closest(".agent-session-popup")) {
-                return;
-            }
-            if (t.closest('[data-type="min"]')) {
-                e.stopPropagation();
-                getDockByType("agentChat").toggleModel("agentChat", false, true);
                 return;
             }
             if (t.closest(".agent-chat__model-trigger") || t.closest(".agent-chat__model-menu")) {
@@ -461,6 +470,7 @@ export class AgentChat extends Model {
         }
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
+        this.titleElement.textContent = session.title || this.defaultTitle;
         this.entries = this.buildEntriesFromSession(session);
         this.hasTitled = session.titled !== false;
         this.currentAIElement = null;
@@ -673,19 +683,21 @@ export class AgentChat extends Model {
     }
 
     private async deleteSession(id: string) {
-        await SessionStore.remove(id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
-            const result = await SessionStore.list({page: 1, pageSize: 1});
-            const list = result.sessions;
-            this.entries = [];
+            const result = await SessionStore.list({page: 1, pageSize: 2});
+            const list = result.sessions.filter(s => s.id !== id);
             if (list.length > 0) {
-                this.sessionId = list[0].id;
                 await this.switchSession(list[0].id);
+                await SessionStore.remove(id);
             } else {
+                this.entries = [];
                 this.sessionId = SessionStore.newSessionId();
                 await this.createSession();
+                await SessionStore.remove(id);
             }
+        } else {
+            await SessionStore.remove(id);
         }
     }
 
@@ -816,7 +828,11 @@ export class AgentChat extends Model {
         el.innerHTML = html;
         el.querySelector(".block__icon")?.addEventListener("click", (e) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(text).catch(() => {});
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            }).catch(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            });
         });
         this.messagesContainer.appendChild(el);
         this.scrollToBottom(true);
@@ -1103,7 +1119,10 @@ export class AgentChat extends Model {
         copyBtn.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
         copyBtn.addEventListener("click", (e: Event) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(content).catch(() => {
+            navigator.clipboard.writeText(content).then(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            }).catch(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
             });
         });
         actions.appendChild(copyBtn);

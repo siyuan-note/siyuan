@@ -501,11 +501,17 @@ func setSearch(c *gin.Context) {
 		return
 	}
 
+	if s.HanSensitive == nil {
+		// 兼容未携带该字段的旧版前端/第三方调用：保持当前值，避免被零值意外关闭并触发重建索引
+		s.HanSensitive = model.Conf.Search.HanSensitive
+	}
+
 	if 32 > s.Limit {
 		s.Limit = 32
 	}
 
 	oldCaseSensitive := model.Conf.Search.CaseSensitive
+	oldHanSensitive := model.Conf.Search.HanSensitiveVal()
 	oldIndexAssetPath := model.Conf.Search.IndexAssetPath
 
 	oldVirtualRefName := model.Conf.Search.VirtualRefName
@@ -517,9 +523,10 @@ func setSearch(c *gin.Context) {
 	model.Conf.Save()
 
 	sql.SetCaseSensitive(s.CaseSensitive)
+	sql.SetHanSensitive(s.HanSensitiveVal())
 	sql.SetIndexAssetPath(s.IndexAssetPath)
 
-	if needFullReindex := s.CaseSensitive != oldCaseSensitive || s.IndexAssetPath != oldIndexAssetPath; needFullReindex {
+	if needFullReindex := s.CaseSensitive != oldCaseSensitive || s.HanSensitiveVal() != oldHanSensitive || s.IndexAssetPath != oldIndexAssetPath; needFullReindex {
 		model.FullReindex(false)
 	}
 

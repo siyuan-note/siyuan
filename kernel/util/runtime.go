@@ -499,3 +499,6 @@ const (
 )
 
 var SearchCaseSensitive bool
+
+// SearchHanSensitive 是否区分繁简，由 sql.SetHanSensitive 维护；默认 true 与既往行为一致
+var SearchHanSensitive = true

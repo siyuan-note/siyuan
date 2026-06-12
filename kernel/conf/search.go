@@ -44,8 +44,8 @@ type Search struct {
 	WidgetBlock   bool `json:"widgetBlock"`
 	Callout       bool `json:"callout"`
 
-	Limit         int  `json:"limit"`
-	CaseSensitive bool `json:"caseSensitive"`
+	Limit         int   `json:"limit"`
+	CaseSensitive bool  `json:"caseSensitive"`
 	HanSensitive  *bool `json:"hanSensitive"` // 区分繁简：默认开启（与既往行为一致）；关闭后全文搜索不区分简体/繁体中文字形
 
 	Name  bool `json:"name"`

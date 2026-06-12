@@ -44,7 +44,7 @@
     border-radius: 50%;
     background: var(--b3-theme-background);
     border: 1px solid var(--b3-border-color);
-    box-shadow: var(--b3-dialog-shadow);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;

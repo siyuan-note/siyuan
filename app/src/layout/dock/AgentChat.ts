@@ -10,6 +10,7 @@ import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {showMessage} from "../../dialog/message";
 import * as dayjs from "dayjs";
 import {sendNotification} from "../../plugin/platformUtils";
 import {
@@ -827,7 +828,11 @@ export class AgentChat extends Model {
         el.innerHTML = html;
         el.querySelector(".block__icon")?.addEventListener("click", (e) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(text).catch(() => {});
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            }).catch(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            });
         });
         this.messagesContainer.appendChild(el);
         this.scrollToBottom(true);
@@ -1114,7 +1119,10 @@ export class AgentChat extends Model {
         copyBtn.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
         copyBtn.addEventListener("click", (e: Event) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(content).catch(() => {
+            navigator.clipboard.writeText(content).then(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            }).catch(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
             });
         });
         actions.appendChild(copyBtn);

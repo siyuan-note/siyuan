@@ -1348,7 +1348,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於傳回指定週幾的日期 "
+									"Data": "​：此函數用於傳回指定週幾的"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "日期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1357,7 +1365,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，例如傳回本週四的日期 "
+									"Data": "​，例如傳回本週四的"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "日期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1515,6 +1531,80 @@
 								{
 									"Type": "NodeText",
 									"Data": "​：對數計算，傳回浮點數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205426-dbc97z6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205426-dbc97z6",
+						"updated": "20260612205426"
+					},
+					"Children": [
+						{
+							"ID": "20260612205426-y2vkb8u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205426-y2vkb8u",
+								"updated": "20260612205426"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2text"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 將 Markdown 格式的欄位值轉為純文字（捨棄程式碼、公式等，不插入換行）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205426-hr03i3u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205426-hr03i3u",
+						"updated": "20260612205426"
+					},
+					"Children": [
+						{
+							"ID": "20260612205426-mqjochz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205426-mqjochz",
+								"updated": "20260612205426"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2content"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 將 Markdown 格式的欄位值轉為內容文字（保留程式碼、公式等，塊級節點間插入換行）"
 								}
 							]
 						}

@@ -249,7 +249,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Use this variable to insert the current document name. For example, if the template content is "
+									"Data": "​: Use this variable to insert the current document name. For example, if the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "template"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " content is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -443,7 +451,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the database, and the return value is a list of blocks"
+									"Data": "​: This function is used to query the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "database"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", and the return value is a list of blocks"
 								}
 							]
 						},
@@ -508,7 +524,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the database based on the block ID, and the return value is block"
+									"Data": "​: This function is used to query the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "database"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " based on the block ID, and the return value is block"
 								}
 							]
 						},
@@ -572,7 +596,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the database, and the return value is a list of spans"
+									"Data": "​: This function is used to query the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "database"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", and the return value is a list of spans"
 								}
 							]
 						},
@@ -637,7 +669,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the database and the return value is a result set"
+									"Data": "​: This function is used to query the "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "database"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and the return value is a result set"
 								}
 							]
 						},
@@ -1482,6 +1522,80 @@
 								{
 									"Type": "NodeText",
 									"Data": "​: Logarithmic calculation, return a floating point number"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205353-lyiyntd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205353-lyiyntd",
+						"updated": "20260612205353"
+					},
+					"Children": [
+						{
+							"ID": "20260612205353-314p2hv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205353-314p2hv",
+								"updated": "20260612205353"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2text"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ converts a Markdown-formatted field value into plain text (discards code, formulas, etc., no line breaks)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205353-4si1xks",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205353-4si1xks",
+						"updated": "20260612205353"
+					},
+					"Children": [
+						{
+							"ID": "20260612205353-kxb44qe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205353-kxb44qe",
+								"updated": "20260612205353"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2content"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ converts a Markdown-formatted field value into content text (preserves code, formulas, etc., inserts line breaks between blocks)"
 								}
 							]
 						}

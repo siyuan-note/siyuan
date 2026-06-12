@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20251224102323"
+		"updated": "20260612204505"
 	},
 	"Children": [
 		{
@@ -452,7 +452,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208120846-72y7j0d",
-				"updated": "20250101093504"
+				"updated": "20260612204505"
 			},
 			"Children": [
 				{
@@ -487,32 +487,32 @@
 			]
 		},
 		{
-			"ID": "20240208162800-hi8z1sj",
+			"ID": "20260612204505-8vpmfjp",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20240208162800-hi8z1sj",
-				"updated": "20240208162801"
+				"id": "20260612204505-8vpmfjp",
+				"updated": "20260612204505"
 			},
 			"Children": [
 				{
-					"ID": "20240208162801-4txax3h",
+					"ID": "20260612204505-qi2ao6d",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208162801-4txax3h",
-						"updated": "20240208162801"
+						"id": "20260612204505-qi2ao6d",
+						"updated": "20260612204505"
 					},
 					"Children": [
 						{
-							"ID": "20240208162801-3tr9m71",
+							"ID": "20260612204505-47bz3of",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208162801-3tr9m71",
-								"updated": "20240208164326"
+								"id": "20260612204505-47bz3of",
+								"updated": "20260612204505"
 							},
 							"Children": [
 								{
@@ -533,22 +533,23 @@
 					]
 				},
 				{
-					"ID": "20240208163449-al30pyy",
+					"ID": "20260612204505-2na9efc",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208163449-al30pyy"
+						"id": "20260612204505-2na9efc",
+						"updated": "20260612204505"
 					},
 					"Children": [
 						{
-							"ID": "20240208163449-byqawlo",
+							"ID": "20260612204505-fkbdhg8",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208163449-byqawlo",
-								"updated": "20240208163640"
+								"id": "20260612204505-fkbdhg8",
+								"updated": "20260612204505"
 							},
 							"Children": [
 								{
@@ -558,11 +559,306 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ index . \u0026quot;custom-xxx\u0026quot; }"
+									"TextMarkTextContent": ".action{ index . \"custom-xxx\" }"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 访问内容块自定义属性"
+									"Data": "​ 访问内容块自定义属性"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204505-t8tqrfk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204505-t8tqrfk",
+						"updated": "20260612204505"
+					},
+					"Children": [
+						{
+							"ID": "20260612204505-ugfo8q4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204505-ugfo8q4",
+								"updated": "20260612204505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .字段名_end }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 访问日期字段的结束日期，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_end"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 后缀仅对日期类型有效"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204505-fbr1lej",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204505-fbr1lej",
+						"updated": "20260612204505"
+					},
+					"Children": [
+						{
+							"ID": "20260612204505-99uaffd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204505-99uaffd",
+								"updated": "20260612204505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .字段名_str }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 访问多选字段的格式化字符串，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 后缀仅对多选类型有效"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204505-occ6pzq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204505-occ6pzq",
+						"updated": "20260612204505"
+					},
+					"Children": [
+						{
+							"ID": "20260612204505-ffcqvb2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204505-ffcqvb2",
+								"updated": "20260612204505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .字段名_created }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 访问块字段绑定块的创建时间，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_created"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 后缀仅对块类型有效"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204505-gu8594l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204505-gu8594l",
+						"updated": "20260612204505"
+					},
+					"Children": [
+						{
+							"ID": "20260612204505-28nt7ok",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204505-28nt7ok",
+								"updated": "20260612204505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ .字段名_raw }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 访问字段原始值对象，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_raw"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 后缀对所有字段类型有效"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204505-lqkx5o4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204505-lqkx5o4",
+						"updated": "20260612204505"
+					},
+					"Children": [
+						{
+							"ID": "20260612204505-fwno29s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204505-fwno29s",
+								"updated": "20260612204505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index .id_mod \"字段ID\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 按字段 ID 访问格式化值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204505-zde689i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204505-zde689i",
+						"updated": "20260612204505"
+					},
+					"Children": [
+						{
+							"ID": "20260612204505-ble2kwv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204505-ble2kwv",
+								"updated": "20260612204505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index . \"entryCreated\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 访问行绑定块的创建时间"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204505-ai1bphl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204505-ai1bphl",
+						"updated": "20260612204505"
+					},
+					"Children": [
+						{
+							"ID": "20260612204505-f9xsrye",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204505-f9xsrye",
+								"updated": "20260612204505"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ index . \"entryUpdated\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 访问行绑定块的更新时间"
 								}
 							]
 						}

@@ -194,7 +194,9 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
     // body
     data.rows.find((row: IAVRow, rowIndex: number) => {
         if (virtualData && virtualData.renderedEnd) {
-            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            if (rowIndex === 0) {
+                e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            }
             if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
                 return;
             }

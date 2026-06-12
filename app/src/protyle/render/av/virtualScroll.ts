@@ -213,6 +213,9 @@ export const initVirtualScroll = (options: {
     blockElement: HTMLElement,
     data: IAV,
 }): void => {
+    if (options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
+        return;
+    }
     dataStore.set(options.blockElement.getAttribute("data-av-id") +
         options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW), {
         protyle: options.protyle,

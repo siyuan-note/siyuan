@@ -37,7 +37,9 @@ const getKanbanHTML = (data: IAVKanban, e: HTMLElement, virtualData: IAVVirtualD
     // body
     data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
         if (virtualData && virtualData.renderedEnd) {
-            e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            if (rowIndex === 0) {
+                e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
+            }
             if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
                 return;
             }

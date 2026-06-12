@@ -58,7 +58,7 @@
     --b3-list-icon-hover: rgba(33, 34, 36, .1);
 
     /* 菜单 */
-    --b3-menu-background: var(--b3-theme-surface);
+    --b3-menu-background: #f9f9fa;
 
     /* 提示 */
     --b3-tooltips-background: #312f35;

@@ -336,38 +336,33 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
 };
 
 const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
+    const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     updateElements.forEach(item => {
-        // 图标撤销后无法渲染
-        if (item.getAttribute("data-subtype") === "echarts") {
-            item.outerHTML = protyle.lute.SpinBlockDOM(operation.data);
-        } else {
-            item.outerHTML = operation.data;
+        let isRangeBlock = false;
+        if (range && item.contains(range.startContainer)) {
+            isRangeBlock = true;
         }
-    });
-    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).find(item => {
-        if (!isInEmbedBlock(item)) {
-            if (item.getAttribute("data-type") === "NodeBlockQueryEmbed") {
-                item.removeAttribute("data-render");
+        item.insertAdjacentHTML("afterend",
+            // 图标撤销后无法渲染
+            item.getAttribute("data-subtype") === "echarts" ? protyle.lute.SpinBlockDOM(operation.data) : operation.data);
+        item = item.nextElementSibling;
+        item.previousElementSibling.remove();
+
+        const wbrElement = item.querySelector("wbr");
+        if (isRangeBlock && isUndo) {
+            if (wbrElement) {
+                focusByWbr(item, range);
+            } else {
+                focusBlock(item);
             }
-            updateElements[0] = item;
-            return true;
         }
+        wbrElement?.remove();
+
+        processRender(item);
+        highlightRender(item);
+        avRender(item, protyle);
+        blockRender(protyle, item);
     });
-    const wbrElement = updateElements[0].querySelector("wbr");
-    if (isUndo) {
-        const range = getEditorRange(updateElements[0]);
-        if (wbrElement) {
-            focusByWbr(updateElements[0], range);
-        } else {
-            focusBlock(updateElements[0]);
-        }
-    } else if (wbrElement) {
-        wbrElement.remove();
-    }
-    processRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
-    highlightRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
-    avRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element, protyle);
-    blockRender(protyle, updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
 };
 
 // 用于推送和撤销

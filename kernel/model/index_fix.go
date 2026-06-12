@@ -101,9 +101,6 @@ func removeDuplicateDatabaseIndex() {
 	duplicatedRootIDs := sql.GetDuplicatedRootIDs("blocks")
 	if 1 > len(duplicatedRootIDs) {
 		duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts")
-		if 1 > len(duplicatedRootIDs) && !Conf.Search.CaseSensitive {
-			duplicatedRootIDs = sql.GetDuplicatedRootIDs("blocks_fts_case_insensitive")
-		}
 	}
 
 	roots := sql.GetBlocks(duplicatedRootIDs)

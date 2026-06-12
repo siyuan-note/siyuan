@@ -1611,10 +1611,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	}
 
 	quotedKeyword := stringQuery(keyword)
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
+	table := "blocks_fts"
 
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS hpath, " +
@@ -1717,10 +1714,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreF
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
+	table := "blocks_fts"
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
 		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
@@ -1745,10 +1739,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 }
 
 func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
+	table := "blocks_fts"
 
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND " + typeFilter
@@ -1822,9 +1813,6 @@ func highlightByFTS(query, typeFilter, id string) (ret []string) {
 	query = strings.ReplaceAll(query, " ", " OR ")
 	const limit = 256
 	table := "blocks_fts"
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		"highlight(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS hpath, " +
 		"highlight(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS name, " +

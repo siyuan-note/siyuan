@@ -63,16 +63,9 @@ func updateRootContent(tx *sql.Tx, content, updated, ialContent, id string) (err
 	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
 		return
 	}
-	if caseSensitive {
-		stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
-			return
-		}
-	} else {
-		stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
-			return
-		}
+	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
+		return
 	}
 	removeBlockCache(id)
 	cache.RemoveBlockIAL(id)
@@ -85,18 +78,10 @@ func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
 		tx.Rollback()
 		return
 	}
-	if caseSensitive {
-		stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
-			tx.Rollback()
-			return
-		}
-	} else {
-		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
-			tx.Rollback()
-			return
-		}
+	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
+		tx.Rollback()
+		return
 	}
 
 	putBlockCache(block)
@@ -126,18 +111,10 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 		tx.Rollback()
 		return
 	}
-	if caseSensitive {
-		stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, content, id); err != nil {
-			tx.Rollback()
-			return
-		}
-	} else {
-		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, content, id); err != nil {
-			tx.Rollback()
-			return
-		}
+	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, id); err != nil {
+		tx.Rollback()
+		return
 	}
 	return
 }

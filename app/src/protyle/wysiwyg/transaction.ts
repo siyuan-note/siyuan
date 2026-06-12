@@ -1177,6 +1177,7 @@ export const turnsIntoTransaction = (options: {
                 } else {
                     previousId = undefined;
                 }
+                item.outerHTML = newHTML;
             } else {
                 let foldData;
                 if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
@@ -1187,7 +1188,6 @@ export const turnsIntoTransaction = (options: {
                 if (foldData && foldData.doOperations?.length > 0) {
                     doOperations.push(...foldData.doOperations);
                 }
-                item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 undoOperations.push({
                     action: "update",
                     id,
@@ -1201,8 +1201,11 @@ export const turnsIntoTransaction = (options: {
                 if (foldData && foldData.undoOperations?.length > 0) {
                     undoOperations.push(...foldData.undoOperations);
                 }
+                item.insertAdjacentHTML("afterend", newHTML);
+                item = item.nextElementSibling as HTMLElement;
+                item.previousElementSibling.remove();
+                item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             }
-            item.outerHTML = newHTML;
         } else {
             undoOperations.push({
                 action: "insert",

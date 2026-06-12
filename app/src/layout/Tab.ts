@@ -1,6 +1,6 @@
 import {Wnd} from "./Wnd";
 import {genUUID} from "../util/genID";
-import {Model} from "./Model";
+import type {Model} from "./Model";
 import {Editor} from "../editor";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";

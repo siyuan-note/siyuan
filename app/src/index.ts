@@ -24,7 +24,6 @@ import {
     progressBackgroundTask,
     progressLoading,
     progressStatus,
-    reloadSync,
     setDefRefCount,
     setRefDynamicText,
     setTitle,
@@ -48,6 +47,7 @@ import {Tag} from "./layout/dock/Tag";
 import {updateAppearance} from "./config/util/updateAppearance";
 import {renderSnippet} from "./config/util/snippets";
 import {setBodyHighlight} from "./util/assets";
+import {reloadSync} from "./util/reloadSync";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];

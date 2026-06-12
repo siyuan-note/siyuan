@@ -2,7 +2,6 @@ import {openMobileFileById} from "../editor";
 import {
     processSync,
     progressLoading,
-    reloadSync,
     setDefRefCount,
     setRefDynamicText,
     transactionError
@@ -12,6 +11,7 @@ import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
 import {renderSnippet} from "../../config/util/snippets";
 import {redirectToCheckAuth} from "../../util/pathName";
+import {reloadSync} from "../../util/reloadSync";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;

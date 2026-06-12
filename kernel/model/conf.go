@@ -764,10 +764,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
 
-	if !force {
-		cancelPurge()
+	cancelPurge()
 
-		// Stop kernel plugins early in shutdown
+	if !force {
 		if OnKernelPluginsStop != nil {
 			OnKernelPluginsStop()
 		}

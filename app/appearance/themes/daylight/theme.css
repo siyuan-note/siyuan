@@ -40,7 +40,7 @@
     --b3-layout-space-margin: -4px;
 
     /* 顶部工具栏 */
-    --b3-toolbar-color: var(--b3-theme-on-surface);
+    --b3-toolbar-color: var(--b3-theme-on-surface-light);
     --b3-toolbar-hover: rgba(255, 255, 255, .68);
     --b3-toolbar-left-mac: 74px;
 

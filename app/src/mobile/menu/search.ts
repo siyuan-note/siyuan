@@ -299,6 +299,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 groupBy: config.group,
                 orderBy: config.sort,
                 page: config.page,
+                pageSize: 32,
             }, (response) => {
                 onRecentBlocks(response.data.blocks, config, response, focusId);
                 loadingElement.classList.add("fn__none");

@@ -391,8 +391,8 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05Ut
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17 h1:cZbH1QcW/LWYtaKBv2i0O96qVm6HXKeEE3Z74VYdUHM=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17/go.mod h1:zE2SJ4t+2lFAeLgmhi27YtfzdyOWh3l9DXXUr9m/xU0=
-github.com/siyuan-note/dejavu v0.0.0-20260529092727-2b5e57a676af h1:UeK/zRYGFlBaBhAM0tCa84criQTB5Qx3PdUvGoBj97I=
-github.com/siyuan-note/dejavu v0.0.0-20260529092727-2b5e57a676af/go.mod h1:Wal8Y/RgYRINa0jyHdN3XqPUh0GGEcr3QfNVcK9Ci2w=
+github.com/siyuan-note/dejavu v0.0.0-20260612083615-9c45cefc9285 h1:1A9XHNx4JPeOBUoR0eGm7UBgXlRJwwheu1cYMGbrCfM=
+github.com/siyuan-note/dejavu v0.0.0-20260612083615-9c45cefc9285/go.mod h1:Wal8Y/RgYRINa0jyHdN3XqPUh0GGEcr3QfNVcK9Ci2w=
 github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f h1:HSgJKIAMgokJDAvBBfRj47SzRSm6mNGssY0Wv7rcEtg=
 github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f/go.mod h1:JE3S9VuJqTggyfhjesNDuqvqrRvwG3IctFjXXchLx1M=
 github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce h1:356bfC3pucxXuYpZIwaQ3viVCbq5RbRuvBhb4xtoBR0=

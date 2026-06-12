@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
@@ -72,6 +73,9 @@ func AutoPurgeRepoJob() {
 var (
 	autoPurgeRepoAfterFirstSync = false
 	lastAutoPurgeRepo           = time.Time{}
+
+	purgeCancelMu sync.Mutex
+	purgeCancel   context.CancelFunc
 )
 
 func autoPurgeRepo(cron bool) {
@@ -166,7 +170,30 @@ func autoPurgeRepo(cron bool) {
 		return
 	}
 
-	_, err = repo.Purge(retentionIndexIDs...)
+	purgeCancelMu.Lock()
+	var ctx context.Context
+	ctx, purgeCancel = context.WithCancel(context.Background())
+	cancelCtx := ctx
+	purgeCancelMu.Unlock()
+	defer func() {
+		purgeCancelMu.Lock()
+		if nil != purgeCancel {
+			purgeCancel()
+			purgeCancel = nil
+		}
+		purgeCancelMu.Unlock()
+	}()
+
+	_, err = repo.Purge(cancelCtx, retentionIndexIDs...)
+}
+
+func cancelPurge() {
+	purgeCancelMu.Lock()
+	defer purgeCancelMu.Unlock()
+	if nil != purgeCancel {
+		purgeCancel()
+		purgeCancel = nil
+	}
 }
 
 func GetRepoFile(fileID string) (ret []byte, p string, err error) {
@@ -876,7 +903,7 @@ func PurgeRepo() (err error) {
 		return
 	}
 
-	stat, err := repo.Purge()
+	stat, err := repo.Purge(context.Background())
 	if err != nil {
 		return
 	}

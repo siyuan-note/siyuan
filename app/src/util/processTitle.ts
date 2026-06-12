@@ -7,25 +7,21 @@ export const getWorkspaceName = () => {
 };
 
 export const setTitle = (title: string, showVersionTitle = false) => {
-    if (window.siyuan.config.appearance.hideToolbar) {
-        return;
-    }
     const dragElement = document.getElementById("drag");
     const workspaceName = getWorkspaceName();
     if (showVersionTitle) {
         const versionTitle = `${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         document.title = versionTitle;
-        if (dragElement) {
+        if (!window.siyuan.config.appearance.hideToolbar && dragElement) {
             dragElement.textContent = versionTitle;
             dragElement.setAttribute("title", versionTitle);
         }
     } else {
         title = title.trim() || window.siyuan.languages["_kernel"][16];
         document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        if (!dragElement) {
-            return;
+        if (!window.siyuan.config.appearance.hideToolbar && dragElement) {
+            dragElement.setAttribute("title", title);
+            dragElement.innerHTML = escapeHtml(title);
         }
-        dragElement.setAttribute("title", title);
-        dragElement.innerHTML = escapeHtml(title);
     }
 };

@@ -469,6 +469,7 @@ export class AgentChat extends Model {
         }
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
+        this.titleElement.textContent = session.title || this.defaultTitle;
         this.entries = this.buildEntriesFromSession(session);
         this.hasTitled = session.titled !== false;
         this.currentAIElement = null;
@@ -681,19 +682,21 @@ export class AgentChat extends Model {
     }
 
     private async deleteSession(id: string) {
-        await SessionStore.remove(id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
-            const result = await SessionStore.list({page: 1, pageSize: 1});
-            const list = result.sessions;
-            this.entries = [];
+            const result = await SessionStore.list({page: 1, pageSize: 2});
+            const list = result.sessions.filter(s => s.id !== id);
             if (list.length > 0) {
-                this.sessionId = list[0].id;
                 await this.switchSession(list[0].id);
+                await SessionStore.remove(id);
             } else {
+                this.entries = [];
                 this.sessionId = SessionStore.newSessionId();
                 await this.createSession();
+                await SessionStore.remove(id);
             }
+        } else {
+            await SessionStore.remove(id);
         }
     }
 

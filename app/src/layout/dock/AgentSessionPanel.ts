@@ -1,6 +1,7 @@
 import {SessionIndexItem, SessionStore} from "./SessionStore";
 import {escapeHtml} from "../../util/escape";
 import {setPosition} from "../../util/setPosition";
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;
@@ -142,31 +143,31 @@ export class AgentSessionPanel {
         container.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
 
-            const deleteBtn = target.closest(".agent-session-popup__delete");
+            const deleteBtn = hasClosestByClassName(target, "agent-session-popup__delete");
             if (deleteBtn) {
                 e.stopPropagation();
-                const id = deleteBtn.getAttribute("data-id") || "";
+                const id = (deleteBtn as HTMLElement).getAttribute("data-id") || "";
                 if (id) { this.callbacks.onDelete(id).then(() => { this.refresh(); }); }
                 return;
             }
 
-            const renameBtn = target.closest(".agent-session-popup__rename");
+            const renameBtn = hasClosestByClassName(target, "agent-session-popup__rename");
             if (renameBtn) {
                 e.stopPropagation();
-                const id = renameBtn.getAttribute("data-id") || "";
+                const id = (renameBtn as HTMLElement).getAttribute("data-id") || "";
                 if (id) {
-                    const parent = renameBtn.parentElement;
+                    const parent = (renameBtn as HTMLElement).parentElement;
                     const row = parent ? parent.parentElement as HTMLElement : null;
                     if (row) { this.startRename(id, row); }
                 }
                 return;
             }
 
-            if (target.closest(".agent-session-popup__rename-input")) {
+            if (hasClosestByClassName(target, "agent-session-popup__rename-input")) {
                 return;
             }
 
-            const item = target.closest(".b3-menu__item");
+            const item = hasClosestByClassName(target, "b3-menu__item");
             if (item) {
                 const id = (item as HTMLElement).getAttribute("data-id") || "";
                 if (id && id !== this.getCurrentSessionId()) {

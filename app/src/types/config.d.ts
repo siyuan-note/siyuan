@@ -1337,6 +1337,10 @@ declare namespace Config {
          */
         embedBlock: boolean;
         /**
+         * Whether to distinguish between Simplified and Traditional Chinese characters when searching
+         */
+        hanSensitive: boolean;
+        /**
          * Whether to search heading blocks
          */
         heading: boolean;

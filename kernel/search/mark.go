@@ -97,7 +97,12 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 		if splitWords {
 			wordBoundary = lex.IsASCIILetterNums(gulu.Str.ToBytes(k)) // Improve virtual reference split words https://github.com/siyuan-note/siyuan/issues/7833
 		}
-		k = regexp.QuoteMeta(util.EscapeHTML(k))
+		if !util.SearchHanSensitive {
+			// 不区分繁简：将关键字逐字符展开为繁简等价字符类，如 "诗经" -> "[诗詩][经經]"
+			k = hanInsensitiveRegexp(util.EscapeHTML(k))
+		} else {
+			k = regexp.QuoteMeta(util.EscapeHTML(k))
+		}
 		re.WriteString("(")
 		if wordBoundary {
 			re.WriteString("\\b")

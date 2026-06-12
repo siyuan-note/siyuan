@@ -249,7 +249,7 @@ func initFTSBlocks() (err error) {
 	if err != nil {
 		return
 	}
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"" + ftsTokenize(false) + "\")")
 	if err != nil {
 		return
 	}
@@ -258,7 +258,7 @@ func initFTSBlocks() (err error) {
 	if err != nil {
 		return
 	}
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"" + ftsTokenize(true) + "\")")
 	return
 }
 
@@ -436,6 +436,7 @@ func initAssetContentDBTables() {
 
 var (
 	caseSensitive  bool
+	hanSensitive   bool
 	indexAssetPath bool
 )
 
@@ -453,6 +454,25 @@ func SetCaseSensitive(b bool) {
 	}
 
 	util.SearchCaseSensitive = b
+}
+
+func SetHanSensitive(b bool) {
+	hanSensitive = b
+	util.SearchHanSensitive = b
+}
+
+// ftsTokenize 返回 blocks FTS 表的 tokenize 参数。
+// 分词器参数在 CREATE VIRTUAL TABLE 时固化，因此切换区分繁简选项后需要重建索引，
+// 与切换区分大小写选项的处理一致。
+func ftsTokenize(caseInsensitive bool) string {
+	ret := "siyuan"
+	if caseInsensitive {
+		ret += " case_insensitive"
+	}
+	if !hanSensitive {
+		ret += " han_insensitive"
+	}
+	return ret
 }
 
 func SetIndexAssetPath(b bool) {

@@ -550,9 +550,9 @@ func semanticSearchBlock(c *gin.Context) {
 		return
 	}
 
-	page, pageSize, query, _, boxes, types, subTypes, _, _, _ := parseSearchBlockArgs(arg)
+	page, pageSize, query, paths, boxes, types, subTypes, _, _, _ := parseSearchBlockArgs(arg)
 
-	blocks, matchedBlockCount, matchedRootCount, pageCount := model.SemanticSearchBlock(query, boxes, nil, types, subTypes, page, pageSize)
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.SemanticSearchBlock(query, boxes, paths, types, subTypes, page, pageSize)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)

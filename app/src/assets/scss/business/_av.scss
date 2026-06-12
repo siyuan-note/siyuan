@@ -835,6 +835,8 @@
     .b3-menu {
       min-width: 290px;
       max-width: 290px;
+      max-height: 80vh;
+      overflow: auto;
 
       &__item .b3-chip {
         max-width: 100%;

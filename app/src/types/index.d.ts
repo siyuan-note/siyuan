@@ -1257,8 +1257,6 @@ interface IKernelPluginRpcError {
     data?: any;
 }
 
-
-
 interface IKernelPluginRpc {
     /**
      * 通过 {@link Proxy} 实现的动态方法调用，插件开发者可以直接调用 `call.方法名(params)` 来调用内核插件暴露的方法，无需关心 JSON-RPC 的细节
@@ -1284,4 +1282,28 @@ interface IKernelPluginRpc {
      * 解绑事件处理函数，插件开发者可以通过 `unbind("方法名", handler)` 来停止监听内核插件通过 JSON-RPC 推送到客户端插件的通知
      */
     unbind: (method: TJsonRpcMethod, handler: TJsonRpcHandler<void>) => void;
+}
+
+/**
+ * SY 协议块信息接口，用于描述通过 SY 协议传递的块信息
+ */
+interface ISYProtocolBlocksInfo {
+    /**
+     * 块 ID
+     */
+    id: string;
+
+    /**
+     * 是否聚焦该块
+     * 
+     * @defaultValue false
+     */
+    focus: boolean;
+
+    /**
+     * 是否全屏显示该块
+     * 
+     * @defaultValue false
+     */
+    fullscreen: boolean;
 }

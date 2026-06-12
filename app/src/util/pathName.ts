@@ -26,30 +26,63 @@ export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string)
     /// #endif
 };
 
+/**
+ * parse siyuan://blocks/20221031001313-rk7sd0e?focus=1&fullscreen=1
+ * @param url - the siyuan block url to parse
+ * @return the block id and other info, or null if the url is not a valid siyuan block url
+ */
+export const parseSYProtocolBlockInfo = (url: URL | string | null | undefined): ISYProtocolBlocksInfo | null => {
+    try {
+        if (url == null) return null;
+
+        const urlObj = new URL(url);
+        if (urlObj.protocol !== "siyuan:" && urlObj.protocol !== "web+siyuan:") {
+            return null;
+        }
+        if (urlObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(urlObj.pathname)) {
+            return {
+                id: urlObj.pathname.substring(1, 1 + 22),
+                focus: urlObj.searchParams.get("focus") === "1",
+                fullscreen: urlObj.searchParams.get("fullscreen") === "1",
+            };
+        }
+        return null;
+    } catch (error) {
+        return null;
+    }
+};
+
 export const getIdZoomInByPath = () => {
     const searchParams = new URLSearchParams(window.location.search);
-    const PWAURL = searchParams.get("url");
     const data = {
         id: "",
         isZoomIn: false,
     };
-    if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
-        // PWA 捕获 web+siyuan://blocks/20221031001313-rk7sd0e?focus=1
-        data.id = PWAURL.substring(20, 20 + 22);
-        data.isZoomIn = getSearch("focus", PWAURL) === "1";
-        window.siyuan.editorIsFullscreen = getSearch("fullscreen", PWAURL) === "1";
-    } else if (window.JSAndroid) {
-        // PAD 通过思源协议打开
-        const SYURL = window.JSAndroid.getBlockURL();
-        data.id = getIdFromSYProtocol(SYURL);
-        data.isZoomIn = getSearch("focus", SYURL) === "1";
-        window.siyuan.editorIsFullscreen = getSearch("fullscreen", SYURL) === "1";
-    } else {
-        // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
-        data.id = searchParams.get("id");
-        data.isZoomIn = searchParams.get("focus") === "1";
-        window.siyuan.editorIsFullscreen = searchParams.get("fullscreen") === "1";
+
+    if (searchParams.has("url")) {
+        const dataInfo = parseSYProtocolBlockInfo(searchParams.get("url"));
+        if (dataInfo != null) {
+            data.id = dataInfo.id;
+            data.isZoomIn = dataInfo.focus;
+            window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
+            return data;
+        }
     }
+
+    if (window.JSAndroid) {
+        const dataInfo = parseSYProtocolBlockInfo(window.JSAndroid.getBlockURL());
+        if (dataInfo != null) {
+            data.id = dataInfo.id;
+            data.isZoomIn = dataInfo.focus;
+            window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
+            return data;
+        }
+    }
+
+    // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
+    data.id = searchParams.get("id") ?? "";
+    data.isZoomIn = searchParams.get("focus") === "1";
+    window.siyuan.editorIsFullscreen = searchParams.get("fullscreen") === "1";
     return data;
 };
 

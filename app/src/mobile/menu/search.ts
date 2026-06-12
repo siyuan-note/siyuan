@@ -289,7 +289,8 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
             } else {
                 previousElement.setAttribute("disabled", "disabled");
             }
-            fetchPost("/api/search/fullTextSearchBlock", {
+            const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
+            fetchPost(endpoint, {
                 query: config.query,
                 method: config.method,
                 types: config.types,

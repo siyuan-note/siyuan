@@ -552,47 +552,60 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
             replaceFilterMenu(config);
         }
     }).element);
+    const searchMethodSubmenu = [{
+        icon: "iconExact",
+        label: window.siyuan.languages.keyword,
+        current: config.method === 0,
+        click() {
+            config.method = 0;
+            config.page = 1;
+            updateSearchResult(config, element, true);
+        }
+    }, {
+        icon: "iconQuote",
+        label: window.siyuan.languages.querySyntax,
+        current: config.method === 1,
+        click() {
+            config.method = 1;
+            config.page = 1;
+            updateSearchResult(config, element, true);
+        }
+    }, {
+        icon: "iconDatabase",
+        label: "SQL",
+        current: config.method === 2,
+        click() {
+            config.method = 2;
+            config.page = 1;
+            updateSearchResult(config, element, true);
+        }
+    }, {
+        icon: "iconRegex",
+        label: window.siyuan.languages.regex,
+        current: config.method === 3,
+        click() {
+            config.method = 3;
+            config.page = 1;
+            updateSearchResult(config, element, true);
+        }
+    }];
+    if (window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey) {
+        searchMethodSubmenu.push({
+            icon: "iconSparkles",
+            label: window.siyuan.languages.semanticSearch,
+            current: config.method === 4,
+            click() {
+                config.method = 4;
+                config.page = 1;
+                updateSearchResult(config, element, true);
+            }
+        });
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
         label: window.siyuan.languages.searchMethod,
         type: "submenu",
-        submenu: [{
-            icon: "iconExact",
-            label: window.siyuan.languages.keyword,
-            current: config.method === 0,
-            click() {
-                config.method = 0;
-                config.page = 1;
-                updateSearchResult(config, element, true);
-            }
-        }, {
-            icon: "iconQuote",
-            label: window.siyuan.languages.querySyntax,
-            current: config.method === 1,
-            click() {
-                config.method = 1;
-                config.page = 1;
-                updateSearchResult(config, element, true);
-            }
-        }, {
-            icon: "iconDatabase",
-            label: "SQL",
-            current: config.method === 2,
-            click() {
-                config.method = 2;
-                config.page = 1;
-                updateSearchResult(config, element, true);
-            }
-        }, {
-            icon: "iconRegex",
-            label: window.siyuan.languages.regex,
-            current: config.method === 3,
-            click() {
-                config.method = 3;
-                config.page = 1;
-                updateSearchResult(config, element, true);
-            }
-        }]
+        submenu: searchMethodSubmenu
     }).element);
     /// #endif
     const sortMenu = [{

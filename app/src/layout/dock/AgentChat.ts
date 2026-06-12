@@ -359,6 +359,19 @@ export class AgentChat extends Model {
 
         this.parent.panelElement.addEventListener("click", (e: MouseEvent) => {
             const t = e.target as HTMLElement;
+            let target = t;
+            while (target && !target.isEqualNode(this.parent.panelElement)) {
+                if (target.classList.contains("block__icon")) {
+                    const type = target.getAttribute("data-type");
+                    if (type === "min") {
+                        e.stopPropagation();
+                        getDockByType("agentChat").toggleModel("agentChat", false, true);
+                        return;
+                    }
+                    break;
+                }
+                target = target.parentElement;
+            }
             if (t.closest(".block__icons")) {
                 return;
             }
@@ -369,11 +382,6 @@ export class AgentChat extends Model {
                 return;
             }
             if (t.closest(".agent-session-popup")) {
-                return;
-            }
-            if (t.closest('[data-type="min"]')) {
-                e.stopPropagation();
-                getDockByType("agentChat").toggleModel("agentChat", false, true);
                 return;
             }
             if (t.closest(".agent-chat__model-trigger") || t.closest(".agent-chat__model-menu")) {

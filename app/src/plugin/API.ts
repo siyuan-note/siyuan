@@ -34,17 +34,7 @@ import {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
 
-let openTab;
-let openWindow;
-/// #if MOBILE
-openTab = () => {
-    // TODO: Mobile
-};
-openWindow = () => {
-    // TODO: Mobile
-};
-/// #else
-openWindow = (options: {
+interface IOpenWindowOptions {
     position?: IPosition,
     height?: number,
     width?: number,
@@ -53,28 +43,9 @@ openWindow = (options: {
     doc?: {
         id: string,     // 块 id
     },
-}) => {
-    if (options.doc && options.doc.id) {
-        openNewWindowById(options.doc.id, {
-            alwaysOnTop: options.alwaysOnTop,
-            position: options.position,
-            width: options.width,
-            height: options.height
-        });
-        return;
-    }
-    if (options.tab) {
-        openNewWindow(options.tab, {
-            alwaysOnTop: options.alwaysOnTop,
-            position: options.position,
-            width: options.width,
-            height: options.height
-        });
-        return;
-    }
-};
+}
 
-openTab = (options: {
+interface IOpenTabOptions {
     app: App,
     doc?: {
         id: string,     // 块 id
@@ -106,7 +77,40 @@ openTab = (options: {
     keepCursor?: boolean // 是否跳转到新 tab 上
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
     afterOpen?: (model?: Model) => void // 打开后回调
-}) => {
+}
+
+let openTab: (options: IOpenTabOptions) => void;
+let openWindow: (options: IOpenWindowOptions) => void;
+/// #if MOBILE
+openTab = () => {
+    // TODO: Mobile
+};
+openWindow = () => {
+    // TODO: Mobile
+};
+/// #else
+openWindow = (options: IOpenWindowOptions) => {
+    if (options.doc && options.doc.id) {
+        openNewWindowById(options.doc.id, {
+            alwaysOnTop: options.alwaysOnTop,
+            position: options.position,
+            width: options.width,
+            height: options.height
+        });
+        return;
+    }
+    if (options.tab) {
+        openNewWindow(options.tab, {
+            alwaysOnTop: options.alwaysOnTop,
+            position: options.position,
+            width: options.width,
+            height: options.height
+        });
+        return;
+    }
+};
+
+openTab = (options: IOpenTabOptions) => {
     if (options.doc) {
         if (options.doc.zoomIn) {
             if (options.doc.action && !options.doc.action.includes(Constants.CB_GET_ALL)) {

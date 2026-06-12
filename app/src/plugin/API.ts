@@ -34,7 +34,17 @@ import {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
 
-interface IOpenWindowOptions {
+let openTab;
+let openWindow;
+/// #if MOBILE
+openTab = () => {
+    // TODO: Mobile
+};
+openWindow = () => {
+    // TODO: Mobile
+};
+/// #else
+openWindow = (options: {
     position?: IPosition,
     height?: number,
     width?: number,
@@ -43,9 +53,28 @@ interface IOpenWindowOptions {
     doc?: {
         id: string,     // 块 id
     },
-}
+}) => {
+    if (options.doc && options.doc.id) {
+        openNewWindowById(options.doc.id, {
+            alwaysOnTop: options.alwaysOnTop,
+            position: options.position,
+            width: options.width,
+            height: options.height
+        });
+        return;
+    }
+    if (options.tab) {
+        openNewWindow(options.tab, {
+            alwaysOnTop: options.alwaysOnTop,
+            position: options.position,
+            width: options.width,
+            height: options.height
+        });
+        return;
+    }
+};
 
-interface IOpenTabOptions {
+openTab = (options: {
     app: App,
     doc?: {
         id: string,     // 块 id
@@ -77,40 +106,7 @@ interface IOpenTabOptions {
     keepCursor?: boolean // 是否跳转到新 tab 上
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
     afterOpen?: (model?: Model) => void // 打开后回调
-}
-
-let openTab: (options: IOpenTabOptions) => void;
-let openWindow: (options: IOpenWindowOptions) => void;
-/// #if MOBILE
-openTab = () => {
-    // TODO: Mobile
-};
-openWindow = () => {
-    // TODO: Mobile
-};
-/// #else
-openWindow = (options: IOpenWindowOptions) => {
-    if (options.doc && options.doc.id) {
-        openNewWindowById(options.doc.id, {
-            alwaysOnTop: options.alwaysOnTop,
-            position: options.position,
-            width: options.width,
-            height: options.height
-        });
-        return;
-    }
-    if (options.tab) {
-        openNewWindow(options.tab, {
-            alwaysOnTop: options.alwaysOnTop,
-            position: options.position,
-            width: options.width,
-            height: options.height
-        });
-        return;
-    }
-};
-
-openTab = (options: IOpenTabOptions) => {
+}) => {
     if (options.doc) {
         if (options.doc.zoomIn) {
             if (options.doc.action && !options.doc.action.includes(Constants.CB_GET_ALL)) {
@@ -341,44 +337,41 @@ const openEmoji = (options: {
     });
 };
 
-export const API: Record<string, unknown> = {};
-const def = <T>(key: string, get: () => T) => {
-    Object.defineProperty(API, key, {get, enumerable: true, configurable: true});
+export const API = {
+    adaptHotkey: updateHotkeyTip,
+    confirm: confirmDialog,
+    Constants,
+    showMessage,
+    hideMessage,
+    fetchPost,
+    fetchSyncPost,
+    fetchGet,
+    getFrontend,
+    getBackend,
+    getModelByDockType,
+    openTab,
+    openWindow,
+    openMobileFileById,
+    lockScreen,
+    exitSiYuan,
+    Protyle,
+    ProtyleMethod,
+    Plugin,
+    Dialog,
+    Menu,
+    Setting,
+    getAllEditor,
+    /// #if !MOBILE
+    getActiveTab,
+    getAllModels,
+    getAllTabs,
+    /// #endif
+    getActiveEditor,
+    platformUtils,
+    openSetting,
+    openAttributePanel,
+    saveLayout,
+    globalCommand,
+    expandDocTree,
+    openEmoji
 };
-
-def("adaptHotkey", () => updateHotkeyTip);
-def("confirm", () => confirmDialog);
-def("Constants", () => Constants);
-def("showMessage", () => showMessage);
-def("hideMessage", () => hideMessage);
-def("fetchPost", () => fetchPost);
-def("fetchSyncPost", () => fetchSyncPost);
-def("fetchGet", () => fetchGet);
-def("getFrontend", () => getFrontend);
-def("getBackend", () => getBackend);
-def("getModelByDockType", () => getModelByDockType);
-def("openTab", () => openTab);
-def("openWindow", () => openWindow);
-def("openMobileFileById", () => openMobileFileById);
-def("lockScreen", () => lockScreen);
-def("exitSiYuan", () => exitSiYuan);
-def("Protyle", () => Protyle);
-def("ProtyleMethod", () => ProtyleMethod);
-def("Plugin", () => Plugin);
-def("Dialog", () => Dialog);
-def("Menu", () => Menu);
-def("Setting", () => Setting);
-def("getAllEditor", () => getAllEditor);
-/// #if !MOBILE
-def("getActiveTab", () => getActiveTab);
-def("getAllModels", () => getAllModels);
-def("getAllTabs", () => getAllTabs);
-/// #endif
-def("getActiveEditor", () => getActiveEditor);
-def("platformUtils", () => platformUtils);
-def("openSetting", () => openSetting);
-def("openAttributePanel", () => openAttributePanel);
-def("saveLayout", () => saveLayout);
-def("globalCommand", () => globalCommand);
-def("expandDocTree", () => expandDocTree);
-def("openEmoji", () => openEmoji);

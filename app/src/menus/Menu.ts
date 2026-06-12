@@ -3,7 +3,7 @@ import {setPosition} from "../util/setPosition";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
-import {getTopBarHeight} from "../layout/topBar";
+import {getTopBarHeight} from "../layout/getTopBarHeight";
 
 export class Menu {
     public element: HTMLElement;

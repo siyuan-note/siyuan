@@ -11,18 +11,6 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import type {Tab} from "../layout/Tab";
 import {setTitle} from "./processTitle";
 
-const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
-    fetchPost("/api/block/getDocInfo", {
-        id: rootID
-    }, (response) => {
-        const titleEmpty = response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true";
-        tab.updateTitle(getDocDisplayName(response.data.name, titleEmpty));
-        if (protyle && protyle.title) {
-            protyle.title.setTitle(response.data.name, titleEmpty);
-        }
-    });
-};
-
 export const reloadSync = (
     app: App,
     data: { upsertRootIDs: string[], removeRootIDs: string[] },
@@ -40,7 +28,7 @@ export const reloadSync = (
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);
         } else {
-            reloadProtyle(window.siyuan.mobile.popEditor.protyle, false, updateReadonly);
+            window.siyuan.mobile.popEditor.reload(false, updateReadonly);
         }
     }
     if (document.getElementById("empty").classList.contains("fn__none") &&
@@ -48,7 +36,7 @@ export const reloadSync = (
         if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
             setEmpty(app);
         } else {
-            reloadProtyle(window.siyuan.mobile.editor.protyle, false, updateReadonly);
+            window.siyuan.mobile.editor.reload(false, updateReadonly);
             fetchPost("/api/block/getDocInfo", {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
@@ -62,13 +50,24 @@ export const reloadSync = (
     });
     /// #else
     const allModels = getAllModels();
+    const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
+        fetchPost("/api/block/getDocInfo", {
+            id: rootID
+        }, (response) => {
+            const titleEmpty = response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true";
+            tab.updateTitle(getDocDisplayName(response.data.name, titleEmpty));
+            if (protyle && protyle.title) {
+                protyle.title.setTitle(response.data.name, titleEmpty);
+            }
+        });
+    };
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
             fetchPost("/api/block/getDocInfo", {
                 id: item.editor.protyle.block.rootID,
             }, (response) => {
                 item.editor.protyle.wysiwyg.renderCustom(response.data.ial);
-                reloadProtyle(item.editor.protyle, false, updateReadonly);
+                item.editor.reload(false, updateReadonly);
                 updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
             });
         } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {

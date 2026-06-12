@@ -1,4 +1,4 @@
-import {getTopBarHeight} from "../layout/topBar";
+import {getTopBarHeight} from "../layout/getTopBarHeight";
 
 export const setPosition = (element: HTMLElement, left: number, top: number, targetHeight = 0, targetLeft = 0) => {
     element.style.top = top + "px";

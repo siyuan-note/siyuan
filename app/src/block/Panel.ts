@@ -17,7 +17,7 @@ import {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {checkFold} from "../util/noRelyPCFunction";
 import {updateHotkeyAfterTip} from "../protyle/util/compatibility";
-import {getTopBarHeight} from "../layout/topBar";
+import {getTopBarHeight} from "../layout/getTopBarHeight";
 
 export class BlockPanel {
     public element: HTMLElement;

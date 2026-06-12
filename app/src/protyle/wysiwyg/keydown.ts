@@ -77,7 +77,7 @@ import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
 import {AIChat} from "../../ai/chat";
 import {updateCalloutType} from "./callout";
 import {tabCodeBlock} from "./codeBlock";
-import {getTopBarHeight} from "../../layout/topBar";
+import {getTopBarHeight} from "../../layout/getTopBarHeight";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";

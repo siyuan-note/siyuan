@@ -2,7 +2,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {setStorageVal} from "../protyle/util/compatibility";
-import {getTopBarHeight} from "../layout/topBar";
+import {getTopBarHeight} from "../layout/getTopBarHeight";
 
 export const moveResize = (element: HTMLElement, afterCB?: (type: string) => void) => {
     element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {

@@ -207,7 +207,7 @@ func databaseKeyAdd(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.AddAttributeViewKey(id, keyID, name, keyType, icon, prev); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "add key failed: " + err.Error()}}, IsError: true}, nil
 	}
-	model.AppendPushReloadAttrViewEntry(id)
+	model.ReloadAttrView(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("key added: %s (%s)", keyID, name)}}}, nil
 }
 
@@ -224,7 +224,7 @@ func databaseKeyRemove(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.RemoveAttributeViewKey(id, keyID, removeRelation); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "remove key failed: " + err.Error()}}, IsError: true}, nil
 	}
-	model.AppendPushReloadAttrViewEntry(id)
+	model.ReloadAttrView(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "key removed: " + keyID}}}, nil
 }
 
@@ -260,7 +260,7 @@ func databaseItemAdd(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.AddAttributeViewBlock(nil, srcs, id, blockID, viewID, groupID, previousID, ignoreFill); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "add item failed: " + err.Error()}}, IsError: true}, nil
 	}
-	model.AppendPushReloadAttrViewEntry(id)
+	model.ReloadAttrView(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "item added"}}}, nil
 }
 
@@ -277,7 +277,7 @@ func databaseItemRemove(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.RemoveAttributeViewBlock(itemIDs, id); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "remove items failed: " + err.Error()}}, IsError: true}, nil
 	}
-	model.AppendPushReloadAttrViewEntry(id)
+	model.ReloadAttrView(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("%d item(s) removed", len(itemIDs))}}}, nil
 }
 
@@ -296,7 +296,7 @@ func databaseItemUpdate(args map[string]interface{}) (CallToolResult, error) {
 	if _, err := model.UpdateAttributeViewCell(nil, id, keyID, itemID, valueData); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "update cell failed: " + err.Error()}}, IsError: true}, nil
 	}
-	model.AppendPushReloadAttrViewEntry(id)
+	model.ReloadAttrView(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "cell updated"}}}, nil
 }
 

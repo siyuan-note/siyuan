@@ -1325,7 +1325,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--snapshot";
         el.innerHTML = '<div class="agent-chat__snapshot-body">' +
-            '<div class="agent-chat__snapshot-icon"><svg><use xlink:href="#iconHistory"></use></svg></div>' +
+            '<span class="agent-chat__snapshot-icon"><svg><use xlink:href="#iconHistory"></use></svg></span>' +
             '<span class="agent-chat__snapshot-text">' + escapeHtml((L.snapshotAutoCreated || "Auto snapshot created") + " " + shortID) + "</span>" +
             '<button class="b3-button b3-button--text agent-chat__snapshot-rollback b3-tooltips b3-tooltips__n" aria-label="' + (L.rollback || "Rollback") + '"><svg><use xlink:href="#iconUndo"></use></svg></button>' +
             "</div>";
@@ -1347,7 +1347,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--snapshot";
         el.innerHTML = '<div class="agent-chat__snapshot-body">' +
-            '<div class="agent-chat__snapshot-icon"><svg><use xlink:href="#iconHistory"></use></svg></div>' +
+            '<span class="agent-chat__snapshot-icon"><svg><use xlink:href="#iconHistory"></use></svg></span>' +
             '<span class="agent-chat__snapshot-text">' + escapeHtml((L.rollbackCompleted || "Rollback completed") + " " + shortID) + "</span>" +
             "</div>";
         this.messagesContainer.appendChild(el);

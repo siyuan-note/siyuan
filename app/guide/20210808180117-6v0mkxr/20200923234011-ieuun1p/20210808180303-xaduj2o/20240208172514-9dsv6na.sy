@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20251224102024"
+		"updated": "20260612204637"
 	},
 	"Children": [
 		{
@@ -452,7 +452,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208173416-t51ome2",
-				"updated": "20250101093657"
+				"updated": "20260612204637"
 			},
 			"Children": [
 				{
@@ -487,32 +487,32 @@
 			]
 		},
 		{
-			"ID": "20240208173416-7jev6h7",
+			"ID": "20260612204637-zuxizmd",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20240208173416-7jev6h7",
-				"updated": "20240208173523"
+				"id": "20260612204637-zuxizmd",
+				"updated": "20260612204637"
 			},
 			"Children": [
 				{
-					"ID": "20240208173416-rv4pte3",
+					"ID": "20260612204637-ir2ljyp",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208173416-rv4pte3",
-						"updated": "20240208173517"
+						"id": "20260612204637-ir2ljyp",
+						"updated": "20260612204637"
 					},
 					"Children": [
 						{
-							"ID": "20240208173416-8oq1his",
+							"ID": "20260612204637-2nfxrpr",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208173416-8oq1his",
-								"updated": "20240208173517"
+								"id": "20260612204637-2nfxrpr",
+								"updated": "20260612204637"
 							},
 							"Children": [
 								{
@@ -522,34 +522,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ .field }"
+									"TextMarkTextContent": ".action{.FieldName}"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to access view properties"
+									"Data": "​ to access view fields"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240208173416-p9ol6f8",
+					"ID": "20260612204637-mw0wyhv",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208173416-p9ol6f8",
-						"updated": "20240208173523"
+						"id": "20260612204637-mw0wyhv",
+						"updated": "20260612204637"
 					},
 					"Children": [
 						{
-							"ID": "20240208173416-c79727p",
+							"ID": "20260612204637-3s9o22k",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208173416-c79727p",
-								"updated": "20240208173523"
+								"id": "20260612204637-3s9o22k",
+								"updated": "20260612204637"
 							},
 							"Children": [
 								{
@@ -559,11 +559,306 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ index . \u0026quot;custom-xxx\u0026quot; }"
+									"TextMarkTextContent": ".action{index . \"custom-xxx\"}"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to access content block custom attributes"
+									"Data": "​ to access block custom attributes"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-61131hy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-61131hy",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-22nlmu6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-22nlmu6",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_end}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the end date of a date field, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_end"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is only valid for date types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-v2aj5t4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-v2aj5t4",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-tt6duly",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-tt6duly",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_str}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the formatted string of a multi-select field, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is only valid for multi-select types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-0lcf589",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-0lcf589",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-wqpjeb3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-wqpjeb3",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_created}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the creation time of a block field's bound block, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_created"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is only valid for block types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-v93528j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-v93528j",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-be2i7wz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-be2i7wz",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_raw}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the raw value object of a field, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_raw"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is valid for all field types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-dpjmn80",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-dpjmn80",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-v3hacsg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-v3hacsg",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{index .id_mod \"FieldID\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the formatted value by field ID"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-exg7cb8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-exg7cb8",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-0tg3s54",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-0tg3s54",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{index . \"entryCreated\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the creation time of the row's bound block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-zbjwwjx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-zbjwwjx",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-6zx4x2v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-6zx4x2v",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{index . \"entryUpdated\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the update time of the row's bound block"
 								}
 							]
 						}

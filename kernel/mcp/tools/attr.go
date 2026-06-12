@@ -22,6 +22,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var AttrTool = &Tool{
@@ -99,7 +100,7 @@ func attrSet(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "set attrs failed: " + err.Error()}}, IsError: true}, nil
 	}
 
-	model.AppendPushReloadFiletreeEntry()
+	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attributes set for: " + id}}}, nil
 }
 

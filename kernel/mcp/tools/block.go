@@ -194,7 +194,7 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 	}
 	if reloadID != "" {
 		if bt := treenode.GetBlockTree(reloadID); bt != nil {
-			model.AppendPushReloadProtyleEntry(bt.RootID)
+			util.PushReloadProtyle(bt.RootID)
 		}
 	}
 
@@ -231,7 +231,7 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(parentID); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block appended"}}}, nil
 }
@@ -266,7 +266,7 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(parentID); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block prepended"}}}, nil
 }
@@ -301,7 +301,7 @@ func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(id); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block updated"}}}, nil
 }
@@ -325,7 +325,7 @@ func blockDelete(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block deleted: " + id}}}, nil
 }
@@ -373,7 +373,7 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(id); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block moved: " + id}}}, nil
 }

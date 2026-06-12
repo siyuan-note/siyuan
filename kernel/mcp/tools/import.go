@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var ImportTool = &Tool{
@@ -78,7 +79,7 @@ func importMd(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.ImportFromLocalPath(notebook, absPath, targetPath); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "import md failed: " + err.Error()}}, IsError: true}, nil
 	}
-	model.AppendPushReloadFiletreeEntry()
+	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "markdown imported to notebook " + notebook}}}, nil
 }
 
@@ -102,7 +103,7 @@ func importSy(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.ImportSY(absPath, notebook, targetPath); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "import sy failed: " + err.Error()}}, IsError: true}, nil
 	}
-	model.AppendPushReloadFiletreeEntry()
+	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sy archive imported to notebook " + notebook}}}, nil
 }
 

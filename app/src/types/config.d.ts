@@ -169,6 +169,24 @@ declare namespace Config {
     }
 
     /**
+     * MCP (Model Context Protocol) configuration
+     */
+    export interface IMCP {
+        servers?: IMCPServer[];
+    }
+
+    export interface IMCPServer {
+        name: string;
+        enabled: boolean;
+        type: string;
+        command: string;
+        args?: string[];
+        url: string;
+        headers?: Record<string, string>;
+        timeout: number;
+    }
+
+    /**
      * SiYuan API related configuration
      */
     export interface IAPI {

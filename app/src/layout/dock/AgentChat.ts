@@ -191,13 +191,19 @@ export class AgentChat extends Model {
 
     private initModelSelect() {
         const aiConfig = window.siyuan.config.ai;
-        const displayName = aiConfig.openAI.name || aiConfig.openAI.apiModel;
-        this.modelOptions = [{ id: aiConfig.openAI.id, name: displayName }];
-        for (const p of aiConfig.providers || []) {
-            if (p.enabled === false) { continue; }
-            this.modelOptions.push({ id: p.id, name: p.name || p.apiModel || p.id });
+        this.modelOptions = [];
+        for (const prov of aiConfig.providers || []) {
+            for (const m of prov.models || []) {
+                const displayName = m.displayName || m.name;
+                if (!displayName) {
+                    continue;
+                }
+                this.modelOptions.push({ id: m.id || m.name, name: displayName });
+            }
         }
-        this.selectedModel = aiConfig.openAI.id;
+        if (this.modelOptions.length > 0) {
+            this.selectedModel = this.modelOptions[0].id;
+        }
         this.updateModelLabel();
         this.modelTrigger.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();

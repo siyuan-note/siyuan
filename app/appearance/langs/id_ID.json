@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Jalankan checkout dari snapshot",
     "task.database.index.full": "Jalankan rebuild indeks",
+    "task.database.index.fts": "Bangun ulang indeks pencarian",
     "task.database.index": "Jalankan indeks database",
     "task.database.index.commit": "Jalankan komit indeks database",
     "task.database.index.ref": "Jalankan referensi indeks database",
@@ -1881,6 +1882,7 @@
     "292": "Tidak dapat membuat file",
     "293": "Tidak dapat menulis file",
     "294": "Kode aktivasi tidak boleh kosong",
-    "295": "Fitur ini memerlukan pembelian [Langganan Tahunan] (jika Anda sudah membeli, harap segarkan atau masuk lagi di Pengaturan - Akun)"
+    "295": "Fitur ini memerlukan pembelian [Langganan Tahunan] (jika Anda sudah membeli, harap segarkan atau masuk lagi di Pengaturan - Akun)",
+    "296": "Rebuilding search index..."
   }
 }

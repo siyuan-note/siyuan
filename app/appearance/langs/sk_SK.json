@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Vykonať obnovu zo snímky",
     "task.database.index.full": "Vykonať prestavbu indexu",
+    "task.database.index.fts": "Prebudovať vyhľadávací index",
     "task.database.index": "Vykonať indexáciu databázy",
     "task.database.index.commit": "Vykonať zápis indexu",
     "task.database.index.ref": "Vykonať indexáciu referencií",
@@ -1881,6 +1882,7 @@
     "292": "Súbor sa nedá vytvoriť",
     "293": "Do súboru sa nedá zapísať",
     "294": "Aktivačný kód nemôže byť prázdny",
-    "295": "Táto funkcia vyžaduje ročné predplatné"
+    "295": "Táto funkcia vyžaduje ročné predplatné",
+    "296": "Rebuilding search index..."
   }
 }

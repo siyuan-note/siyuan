@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Executar checkout do snapshot",
     "task.database.index.full": "Executar reconstrução do índice",
+    "task.database.index.fts": "Reconstruir índice de busca",
     "task.database.index": "Executar índice do banco de dados",
     "task.database.index.commit": "Executar commit do índice do banco de dados",
     "task.database.index.ref": "Executar índice de referência do banco de dados",
@@ -1881,6 +1882,7 @@
     "292": "Não foi possível criar o arquivo",
     "293": "Não foi possível gravar o arquivo",
     "294": "O código de ativação não pode estar vazio",
-    "295": "Este recurso requer a compra de [Assinatura Anual] (se já comprou, por favor atualize ou faça login novamente em Configurações - Conta)"
+    "295": "Este recurso requer a compra de [Assinatura Anual] (se já comprou, por favor atualize ou faça login novamente em Configurações - Conta)",
+    "296": "Rebuilding search index..."
   }
 }

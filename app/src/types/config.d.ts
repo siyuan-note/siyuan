@@ -127,6 +127,9 @@ declare namespace Config {
         sessionTimeout: number;
         confirmTimeout: number;
         maxRetries: number;
+        temperature: number;
+        maxCompletionTokens: number;
+        maxToolCallRounds: number;
     }
 
     /**

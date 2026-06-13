@@ -552,11 +552,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 	return ch
 }
 
-func GenerateTitle(client *openai.Client, model string, userMsg string) string {
+func GenerateTitle(client *openai.Client, model string, userMsg string, language string) string {
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
 		Model: model,
 		Messages: []openai.ChatCompletionMessage{
-			{Role: openai.ChatMessageRoleSystem, Content: "You are a title generator. Below is the first message of a conversation. Write a concise title (under 12 words) that summarizes the topic. Output ONLY the title, no other text. Reply in the same language as the user's message."},
+			{Role: openai.ChatMessageRoleSystem, Content: "You are a title generator. Below is the first message of a conversation. Write a concise title (under 12 words) that summarizes the topic. Output ONLY the title, no other text. Reply in the same language as the user's message. If you cannot determine the language, reply in " + util.I18nTerm(language, "_label") + "."},
 			{Role: openai.ChatMessageRoleUser, Content: "Conversation starts with: " + userMsg},
 		},
 		MaxCompletionTokens: 50,

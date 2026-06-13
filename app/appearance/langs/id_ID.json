@@ -1801,7 +1801,7 @@
     "212": "Ada beberapa cacat pada versi sinkronisasi data cloud saat ini, silakan tingkatkan ke versi terbaru. Maaf atas ketidaknyamanannya",
     "213": "Verifikasi cloud gagal, silakan coba tingkatkan ke versi terbaru dan masuk lagi sebelum sinkronisasi",
     "214": "Fitur ini memerlukan masuk ke akun dan membeli <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[Fitur PRO]</a> atau <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Langganan Tahunan]</a> untuk digunakan",
-    "215": "Silakan lihat panduan pengguna desktop",
+    "215": "",
     "216": "Membangun ulang indeks data konten aset, harap tunggu...",
     "217": "[%d/%d] Membuat indeks data konten aset",
     "218": "Terlalu banyak snapshot repositori data terdeteksi, yang memperlambat startup program dan sinkronisasi data. Harap pertimbangkan untuk menjalankan [Pengaturan - Tentang - Pembersihan repositori data]",

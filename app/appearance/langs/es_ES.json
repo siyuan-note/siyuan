@@ -1801,7 +1801,7 @@
     "212": "Hay algunos defectos en la versión actual de sincronización de datos en la nube, actualice a la versión más reciente. Disculpe las molestias",
     "213": "La verificación en la nube falló, intente actualizar a la versión más reciente e inicie sesión de nuevo antes de sincronizar",
     "214": "Esta función requiere iniciar sesión en la cuenta y comprar <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[funcionalidades]</a> o <a target='_blank' href='${accountServer}/subscribe/siyuan'>[suscripción anual]</a> para ser utilizada",
-    "215": "Consulte la guía del usuario de escritorio.",
+    "215": "",
     "216": "Reconstruyendo el índice de datos de contenido de recursos, espere...",
     "217": "[%d/%d] Índice de datos de contenido de recursos creado",
     "218": "Se han detectado demasiadas instantáneas del repositorio de datos, lo que ralentiza el inicio del programa y la sincronización de datos. Considere ejecutar [Configuración - Acerca de - Purga del repositorio de datos]",

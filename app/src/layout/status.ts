@@ -10,7 +10,7 @@ import {ipcRenderer} from "electron";
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
 import {toggleDockBar} from "./dock/util";
-import {isIPad, updateHotkeyTip} from "../protyle/util/compatibility";
+import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
@@ -67,7 +67,7 @@ export const initStatus = (isWindow = false) => {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.userGuide,
                     icon: "iconHelp",
-                    ignore: isIPad() || window.siyuan.config.readonly,
+                    ignore: window.siyuan.config.readonly,
                     click: () => {
                         mountHelp();
                     }

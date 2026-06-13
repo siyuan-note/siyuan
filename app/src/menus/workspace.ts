@@ -539,7 +539,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             id: "userGuide",
             label: window.siyuan.languages.userGuide,
             icon: "iconHelp",
-            ignore: isIPad() || window.siyuan.config.readonly,
+            ignore: window.siyuan.config.readonly,
             click: () => {
                 mountHelp();
             }

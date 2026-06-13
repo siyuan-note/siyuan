@@ -1801,7 +1801,7 @@
     "212": "W bieżącej wersji synchronizacji danych w chmurze występują pewne defekty, proszę zaktualizować do najnowszej wersji. Przepraszamy za niedogodności",
     "213": "Weryfikacja w chmurze nie powiodła się, proszę spróbować zaktualizować do najnowszej wersji i zalogować się ponownie przed synchronizacją",
     "214": "Ta funkcja wymaga zalogowania się na konto i zakupu <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[funkcji]</a> lub <a target='_blank' href='${accountServer}/subscribe/siyuan'>[rocznej subskrypcji]</a> przed użyciem",
-    "215": "Proszę odwołać się do podręcznika użytkownika na komputerze",
+    "215": "",
     "216": "Przebudowa indeksu danych zawartości zasobów, proszę czekać...",
     "217": "[%d/%d] Utworzono indeks danych zawartości zasobów",
     "218": "Wykryto zbyt wiele zrzutów repozytorium danych, co powoduje spowolnienie uruchamiania programu i synchronizacji danych. Zastanów się nad wykonaniem [Ustawienia - O - Opróżnienie repozytorium danych]",

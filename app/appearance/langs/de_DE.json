@@ -1801,7 +1801,7 @@
     "212": "Es gibt einige Mängel in der aktuellen Version der Cloud-Datensynchronisierung, bitte aktualisieren Sie auf die neueste Version. Wir entschuldigen uns für die Unannehmlichkeiten",
     "213": "Cloud-Überprüfung fehlgeschlagen, bitte versuchen Sie es erneut, indem Sie auf die neueste Version aktualisieren und sich erneut anmelden, bevor Sie synchronisieren",
     "214": "Diese Funktion erfordert das Einloggen in das Konto und den Kauf von <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[Funktionen]</a> oder <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Jahresabonnement]</a> zur Nutzung",
-    "215": "Bitte beziehen Sie sich auf das Benutzerhandbuch für Desktop",
+    "215": "",
     "216": "Indizierung des Asset-Inhaltsdatenindex wird durchgeführt, bitte warten...",
     "217": "[%d/%d] Asset-Inhaltsdatenindex erstellt",
     "218": "Es wurden zu viele Momentaufnahmen des Datenrepositories festgestellt, die das Programmstart und die Datensynchronisation verlangsamen. Bitte in Betracht ziehen, [Einstellungen - Über - Daten-Repository bereinigen] auszuführen",

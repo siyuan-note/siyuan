@@ -17,6 +17,7 @@
 package agent
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
@@ -29,7 +30,9 @@ func isContextOverflow(err error) bool {
 		strings.Contains(msg, "reduce the length") ||
 		strings.Contains(msg, "too many tokens") ||
 		strings.Contains(msg, "input is too long") ||
-		strings.Contains(msg, "exceeds the context window")
+		strings.Contains(msg, "exceeds the context window") ||
+		strings.Contains(msg, "超出上下文") ||
+		strings.Contains(msg, "上下文长度")
 }
 
 func compactMessages(msgs []openai.ChatCompletionMessage, keepLastUserMessages int) []openai.ChatCompletionMessage {
@@ -78,8 +81,9 @@ func extractSummary(msgs []openai.ChatCompletionMessage) string {
 		case openai.ChatMessageRoleUser:
 			text := strings.TrimSpace(m.Content)
 			if text != "" {
-				if len(text) > 300 {
-					text = text[:300] + "..."
+				runes := []rune(text)
+				if len(runes) > 300 {
+					text = string(runes[:300]) + "..."
 				}
 				userMsgs = append(userMsgs, "- User: "+text)
 			}
@@ -104,7 +108,7 @@ func extractSummary(msgs []openai.ChatCompletionMessage) string {
 		}
 		for name, count := range seen {
 			if count > 1 {
-				counts = append(counts, name+" ×"+itoa(count))
+				counts = append(counts, name+" ×"+strconv.Itoa(count))
 			} else {
 				counts = append(counts, name)
 			}
@@ -116,11 +120,4 @@ func extractSummary(msgs []openai.ChatCompletionMessage) string {
 		return "(no content to summarize)"
 	}
 	return sb.String()
-}
-
-func itoa(n int) string {
-	if n < 10 {
-		return string(rune('0' + n))
-	}
-	return itoa(n/10) + string(rune('0'+n%10))
 }

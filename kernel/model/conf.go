@@ -140,6 +140,9 @@ func InitConf() {
 				if nil != Conf.Search && Conf.Search.HanSensitive == nil {
 					Conf.Search.SetHanSensitive(true)
 				}
+				if nil != Conf.AI {
+					Conf.AI.DecryptAPIKeys()
+				}
 			}
 		}
 	}
@@ -557,9 +560,12 @@ func InitConf() {
 	}
 	if nil == Conf.AI.Agent {
 		Conf.AI.Agent = &conf.Agent{
-			SessionTimeout: 600,
-			ConfirmTimeout: 120,
-			MaxRetries:     3,
+			SessionTimeout:      600,
+			ConfirmTimeout:      120,
+			MaxRetries:          3,
+			Temperature:         1.0,
+			MaxCompletionTokens: 4096,
+			MaxToolCallRounds:   64,
 		}
 	}
 	for _, p := range Conf.AI.Providers {
@@ -592,7 +598,7 @@ func InitConf() {
 	}
 
 	for _, p := range Conf.AI.Providers {
-		if p == nil || len(string(p.APIKey)) == 0 {
+		if p == nil || len(p.APIKey) == 0 {
 			continue
 		}
 		for _, m := range p.Models {
@@ -615,7 +621,7 @@ func InitConf() {
 		}
 	}
 
-	if Conf.AI.Embedding != nil && len(string(Conf.AI.Embedding.APIKey)) > 0 {
+	if Conf.AI.Embedding != nil && len(Conf.AI.Embedding.APIKey) > 0 {
 		logging.LogInfof("embedding API enabled\n"+
 			"    baseURL=%s\n"+
 			"    model=%s",
@@ -624,6 +630,16 @@ func InitConf() {
 	}
 
 	Conf.AI.Normalize()
+
+	if len(Conf.AI.Scenarios) == 0 {
+		_, m := Conf.AI.GetModel("")
+		if m != nil && m.ID != "" {
+			Conf.AI.Scenarios = []*conf.Scenario{
+				{Name: conf.ScenarioChat, Model: m.ID},
+				{Name: conf.ScenarioAgent, Model: m.ID},
+			}
+		}
+	}
 
 	Conf.ReadOnly = util.ReadOnly
 
@@ -917,6 +933,11 @@ func (conf *AppConf) Save() {
 
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
+
+	if nil != Conf.AI {
+		Conf.AI.EncryptAPIKeys()
+		defer Conf.AI.DecryptAPIKeys()
+	}
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")

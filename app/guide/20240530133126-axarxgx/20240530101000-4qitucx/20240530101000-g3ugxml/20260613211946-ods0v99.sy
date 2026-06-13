@@ -1,0 +1,463 @@
+{
+	"ID": "20260613211946-ods0v99",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260613211946-ods0v99",
+		"title": "コンテンツ統計",
+		"type": "doc",
+		"updated": "20260613212017"
+	},
+	"Children": [
+		{
+			"ID": "20260613212017-hxtimtq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212017-hxtimtq",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-iyml10t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212017-iyml10t",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントを開くと、エディタ下部のステータスバーとドキュメント詳細メニューで統計情報を確認できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-4f7aqex",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212017-4f7aqex",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ステータスバー統計"
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-nvocn34",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212017-nvocn34",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタ下部のステータスバーには、デフォルトで現在のドキュメントの"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "文字"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "数と"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "単語"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "数が表示されます。ドキュメントに他の要素が含まれる場合、リンク数、画像数、参照数、ブロック数も表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-u7i9luj",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613212017-u7i9luj",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"ID": "20260613212017-c4rnfrg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613212017-c4rnfrg",
+						"updated": "20260613212017"
+					},
+					"Children": [
+						{
+							"ID": "20260613212017-pd9r289",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613212017-pd9r289",
+								"updated": "20260613212017"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "テキスト選択"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：エディタでテキストを選択すると、ステータスバーが自動的に選択テキストの統計表示に切り替わります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613212017-4bqq49j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613212017-4bqq49j",
+						"updated": "20260613212017"
+					},
+					"Children": [
+						{
+							"ID": "20260613212017-o7mk7y8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613212017-o7mk7y8",
+								"updated": "20260613212017"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "ブロック複数選択"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：複数ブロックを選択すると、選択ブロックの集計統計が表示されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613212017-2s6s4fk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613212017-2s6s4fk",
+						"updated": "20260613212017"
+					},
+					"Children": [
+						{
+							"ID": "20260613212017-9hm350a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613212017-9hm350a",
+								"updated": "20260613212017"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "全体に戻す"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：選択を解除すると、ステータスバーは現在のドキュメント全体の統計表示に戻ります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-6xc2pah",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212017-6xc2pah",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメント詳細統計"
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-hiyv7rq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212017-hiyv7rq",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントタイトル右側の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ボタンをクリックすると、ポップアップメニューで完全な統計情報を確認できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-1aa4lai",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212017-1aa4lai",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "統計項目の説明"
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-qjcmlo1",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260613212017-qjcmlo1",
+				"updated": "20260613212017"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "項目"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "説明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文字"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメント内の Unicode 文字の総数。漢字、英字、数字、句読点、スペースなどを含む"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "単語"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "中国語：各漢字が1単語としてカウント。英語：連続する英字が1単語としてカウント"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リンク"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメント内のハイパーリンクの総数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "画像"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメント内の画像の総数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "参照"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメント内のブロック参照の総数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロック"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメント内のコンテンツブロックの総数"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613212017-op0fjq4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212017-op0fjq4",
+				"updated": "20260613212017"
+			}
+		}
+	]
+}

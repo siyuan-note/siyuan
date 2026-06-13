@@ -118,6 +118,12 @@ declare namespace Config {
         embedding?: IEmbedding;
         agent?: IAgent;
         providers?: IProvider[];
+        scenarios?: IScenario[];
+    }
+
+    export interface IScenario {
+        name: string;
+        model?: string;
     }
 
     /**
@@ -127,6 +133,9 @@ declare namespace Config {
         sessionTimeout: number;
         confirmTimeout: number;
         maxRetries: number;
+        temperature: number;
+        maxCompletionTokens: number;
+        maxToolCallRounds: number;
     }
 
     /**

@@ -6,7 +6,7 @@
 		"id": "20240517031132-jmr5ihm",
 		"title": "Publish service",
 		"type": "doc",
-		"updated": "20260426175821"
+		"updated": "20260613195415"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160303-vbqukj8",
-				"updated": "20260426175821"
+				"updated": "20260613195415"
 			},
 			"Children": [
 				{
@@ -273,143 +273,405 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160303-o4t761o",
-								"updated": "20260315160355"
+								"updated": "20260613195413"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If you require access control for the publishing service"
+									"Data": "Toggle on the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Service Basic Authentication"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ switch and add "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Authentication Accounts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This utilizes the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#basic_authentication_scheme",
+									"TextMarkTextContent": "Basic authentication scheme"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to authenticate visitors. Visitors must correctly enter the username and password configured in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Authentication Accounts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ section before they can view the published content"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613195415-pbh6hjr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613195415-pbh6hjr",
+				"updated": "20260613195415"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Access Control"
+				}
+			]
+		},
+		{
+			"ID": "20260613195415-80h81pg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613195415-80h81pg",
+				"updated": "20260613195415"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Set access levels for notebooks and documents when publishing, enabling granular permission management. Access control and Basic auth are two independent mechanisms: Basic auth is a global lock — when enabled, all visitors must enter a unified password; access control is set per notebook/document and can be used alone or combined."
+				}
+			]
+		},
+		{
+			"ID": "20260613195415-996cb6x",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613195415-996cb6x",
+				"updated": "20260613195415"
+			},
+			"Children": [
+				{
+					"ID": "20260613195415-p3v5ud8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195415-p3v5ud8",
+						"updated": "20260613195415"
+					},
+					"Children": [
+						{
+							"ID": "20260613195415-w7v2huz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195415-w7v2huz",
+								"updated": "20260613195415"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Entry"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": In the doc tree, click the \"More\" menu and select \"Publish Access Control\" to open the publish access control interface"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195415-05gwvxu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195415-05gwvxu",
+						"updated": "20260613195415"
+					},
+					"Children": [
+						{
+							"ID": "20260613195415-qi80y8c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195415-qi80y8c",
+								"updated": "20260613195415"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Scope"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports setting access levels per notebook or per document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195415-24ltn76",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195415-24ltn76",
+						"updated": "20260613195415"
+					},
+					"Children": [
+						{
+							"ID": "20260613195415-rs1gj90",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195415-rs1gj90",
+								"updated": "20260613195415"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Access Levels"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
 								}
 							]
 						},
 						{
-							"ID": "20260315160357-dm9iiml",
+							"ID": "20260613195415-hhd0fgl",
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20260315160357-dm9iiml",
-								"updated": "20260426175821"
+								"id": "20260613195415-hhd0fgl",
+								"updated": "20260613195415"
 							},
 							"Children": [
 								{
-									"ID": "20260315160303-aa4kh8e",
+									"ID": "20260613195415-p2c99ql",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20260315160303-aa4kh8e",
-										"updated": "20260317200403"
+										"id": "20260613195415-p2c99ql",
+										"updated": "20260613195415"
 									},
 									"Children": [
 										{
-											"ID": "20260315160303-8kzcy9p",
+											"ID": "20260613195415-3m1b9b8",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20260315160303-8kzcy9p",
-												"updated": "20260317200403"
+												"id": "20260613195415-3m1b9b8",
+												"updated": "20260613195415"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Toggle on the "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Service Basic Authentication"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ switch and add "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Authentication Accounts"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​: This utilizes the "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#basic_authentication_scheme",
-													"TextMarkTextContent": "Basic authentication scheme"
-												},
-												{
-													"Type": "NodeText",
-													"Data": " to authenticate visitors. Visitors must correctly enter the username and password configured in the "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Authentication Accounts"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ section before they can view the published content"
+													"Data": "🌐 Public: Published openly, accessible without a password"
 												}
 											]
 										}
 									]
 								},
 								{
-									"ID": "20260315160303-x5ogidw",
+									"ID": "20260613195415-lq5e4xa",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20260315160303-x5ogidw",
-										"updated": "20260426175821"
+										"id": "20260613195415-lq5e4xa",
+										"updated": "20260613195415"
 									},
 									"Children": [
 										{
-											"ID": "20260315160303-zd8bh09",
+											"ID": "20260613195415-3mkteud",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20260315160303-zd8bh09",
-												"updated": "20260426175821"
+												"id": "20260613195415-3mkteud",
+												"updated": "20260613195415"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Open the "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Document Panel"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ \u003e "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "More"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ \u003e "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "Publish Access Control"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​, then click the icon located next to a notebook or document to configure access controls at the notebook or document level"
+													"Data": "🔒 Protected: Published openly, but requires a password to access"
 												}
 											]
 										}
 									]
+								},
+								{
+									"ID": "20260613195415-52l6mpd",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195415-52l6mpd",
+										"updated": "20260613195415"
+									},
+									"Children": [
+										{
+											"ID": "20260613195415-52pyp21",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195415-52pyp21",
+												"updated": "20260613195415"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "👻 Hidden: Not shown in the directory listing, but accessible with the link"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613195415-vtq214e",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195415-vtq214e",
+										"updated": "20260613195415"
+									},
+									"Children": [
+										{
+											"ID": "20260613195415-ggwavup",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195415-ggwavup",
+												"updated": "20260613195415"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🤫 Private: Hidden and requires a password, accessible only to users with both the link and password"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613195415-fqhy7iv",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195415-fqhy7iv",
+										"updated": "20260613195415"
+									},
+									"Children": [
+										{
+											"ID": "20260613195415-0n9df0x",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195415-0n9df0x",
+												"updated": "20260613195415"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🚫 Forbidden: Completely blocked from access; the notebook or document will not be published"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195415-5yx1ff3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195415-5yx1ff3",
+						"updated": "20260613195415"
+					},
+					"Children": [
+						{
+							"ID": "20260613195415-grp1vwh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195415-grp1vwh",
+								"updated": "20260613195415"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Password"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When selecting an access level that requires a password, set the password in the popup dialog"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195415-7uieb9g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195415-7uieb9g",
+						"updated": "20260613195415"
+					},
+					"Children": [
+						{
+							"ID": "20260613195415-k9sglmf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195415-k9sglmf",
+								"updated": "20260613195415"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Default"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Notebooks or documents without access control settings are published at the public level by default"
 								}
 							]
 						}

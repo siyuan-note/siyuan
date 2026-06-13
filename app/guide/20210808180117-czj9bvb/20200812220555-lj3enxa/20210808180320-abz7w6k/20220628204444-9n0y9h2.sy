@@ -6,7 +6,7 @@
 		"id": "20220628204444-9n0y9h2",
 		"title": "优化排版",
 		"type": "doc",
-		"updated": "20250115151317"
+		"updated": "20260613191839"
 	},
 	"Children": [
 		{
@@ -68,7 +68,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220628205558-6krkd89",
-				"updated": "20250115151317"
+				"updated": "20260613191839"
 			},
 			"Children": [
 				{
@@ -319,7 +319,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220630211054-5om39qm"
+						"id": "20220630211054-5om39qm",
+						"updated": "20220630211054"
 					},
 					"Children": [
 						{
@@ -395,6 +396,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260613191839-szs8gqt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613191839-szs8gqt",
+				"updated": "20260613191839"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "优化排版仅处理当前打开的文档，不支持批量处理多个文档。"
 				}
 			]
 		},

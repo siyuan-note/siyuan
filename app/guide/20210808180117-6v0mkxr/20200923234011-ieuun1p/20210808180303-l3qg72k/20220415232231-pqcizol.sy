@@ -6,7 +6,7 @@
 		"id": "20220415232231-pqcizol",
 		"title": "Query syntax",
 		"type": "doc",
-		"updated": "20260612224424"
+		"updated": "20260613193430"
 	},
 	"Children": [
 		{
@@ -958,7 +958,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415233433-mnuypxn",
-				"updated": "20260612224418"
+				"updated": "20260613193430"
 			},
 			"Children": [
 				{
@@ -1124,144 +1124,12 @@
 			]
 		},
 		{
-			"ID": "20260612224413-g34xy27",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260612224413-g34xy27",
-				"updated": "20260612224418"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Case sensitive"
-				}
-			]
-		},
-		{
-			"ID": "20260612224413-9j8w5iq",
+			"ID": "20260613193430-9q9g9da",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612224413-9j8w5iq",
-				"updated": "20260612224418"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "When "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Search"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Case sensitive"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ is enabled, searching for \"Hello\" will not match \"hello\". This option is off by default, meaning search is case insensitive."
-				}
-			]
-		},
-		{
-			"ID": "20260612224413-2k8gcxg",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612224413-2k8gcxg",
-				"updated": "20260612224413"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After toggling this option, please wait for the index rebuild to complete."
-				}
-			]
-		},
-		{
-			"ID": "20260612224413-wbh1j9t",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260612224413-wbh1j9t",
-				"updated": "20260612224424"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Simplified/traditional Chinese sensitive"
-				}
-			]
-		},
-		{
-			"ID": "20260612224413-nr3lu2k",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612224413-nr3lu2k",
-				"updated": "20260612224424"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Search"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Han sensitive"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ is enabled by default, so searching for \"经济\" will not match \"經濟\". When disabled, searching for \"经济\" will match both \"经济\" and \"經濟\"."
-				}
-			]
-		},
-		{
-			"ID": "20260612224413-nyx9e6e",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612224413-nyx9e6e",
-				"updated": "20260612224413"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "After toggling this option, please wait for the index rebuild to complete."
-				}
-			]
+				"id": "20260613193430-9q9g9da",
+				"updated": "20260613193430"
+			}
 		}
 	]
 }

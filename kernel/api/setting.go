@@ -202,12 +202,18 @@ func setAI(c *gin.Context) {
 		if nil == p {
 			continue
 		}
+		if p.APIKey != "" {
+			p.Enabled = true
+		}
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 30
 		}
 		for _, m := range p.Models {
 			if nil == m {
 				continue
+			}
+			if m.Name != "" {
+				m.Enabled = true
 			}
 			if 0 > m.MaxTokens {
 				m.MaxTokens = 0
@@ -233,8 +239,8 @@ func setAI(c *gin.Context) {
 	if nil == ai.Agent {
 		ai.Agent = model.Conf.AI.Agent
 	}
-	if nil == ai.Embedding && nil != model.Conf.AI.Embedding {
-		ai.Embedding = model.Conf.AI.Embedding
+	if len(ai.Scenarios) == 0 {
+		ai.Scenarios = model.Conf.AI.Scenarios
 	}
 
 	for i, p := range ai.Providers {

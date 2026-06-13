@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20260317195743"
+		"updated": "20260613181402"
 	},
 	"Children": [
 		{
@@ -560,7 +560,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260317195658-ar294xg",
-				"updated": "20260317195743"
+				"updated": "20260613174243"
 			},
 			"Children": [
 				{
@@ -763,6 +763,578 @@
 					"Data": "Once the above steps are completed, SiYuan will send a notification every 45 seconds to help ensure it remains active in the background."
 				}
 			]
+		},
+		{
+			"ID": "20260613174243-53h143k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613174243-53h143k",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Shorthand"
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-6npuum2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174243-6npuum2",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Shorthand is a quick capture feature on mobile. When inspiration strikes or you need to jot down temporary information, you can quickly save text via system share or a shortcut entry without opening SiYuan and entering a document editor. Shorthand content is temporarily stored locally and then automatically moved into the doc tree for organization."
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-r1hbexb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174243-r1hbexb",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Usage"
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-hwdpey5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613174243-hwdpey5",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"ID": "20260613174243-7hmhfd6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174243-7hmhfd6",
+						"updated": "20260613174243"
+					},
+					"Children": [
+						{
+							"ID": "20260613174243-9os4im2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174243-9os4im2",
+								"updated": "20260613174243"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Creating a Shorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": On mobile, share text/links to SiYuan via the system share menu, or add a SiYuan shortcut entry on your home screen for one-tap recording"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613174243-tk2xinl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174243-tk2xinl",
+						"updated": "20260613174243"
+					},
+					"Children": [
+						{
+							"ID": "20260613174243-fnm4km4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174243-fnm4km4",
+								"updated": "20260613174243"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Auto-import"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": After a shorthand is created, the system checks the local shorthand directory every 7 seconds and automatically moves new shorthands to the configured target location in the doc tree"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-tm05xft",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174243-tm05xft",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Storage Configuration"
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-2fim9a2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174243-2fim9a2",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configure the shorthand save location in Settings - Doc:"
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-nae40wa",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613174243-nae40wa",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"ID": "20260613174243-s2uh22m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174243-s2uh22m",
+						"updated": "20260613174243"
+					},
+					"Children": [
+						{
+							"ID": "20260613174243-hgvtrpg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174243-hgvtrpg",
+								"updated": "20260613174243"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Target Notebook"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Select the notebook to which shorthands will be imported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613174243-xiuy0dr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174243-xiuy0dr",
+						"updated": "20260613174243"
+					},
+					"Children": [
+						{
+							"ID": "20260613174243-l4q7jer",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174243-l4q7jer",
+								"updated": "20260613174243"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Save Path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Set the path template for shorthand content:"
+								}
+							]
+						},
+						{
+							"ID": "20260613174243-4s30lk4",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613174243-4s30lk4",
+								"updated": "20260613174243"
+							},
+							"Children": [
+								{
+									"ID": "20260613174243-wuod08q",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613174243-wuod08q",
+										"updated": "20260613174243"
+									},
+									"Children": [
+										{
+											"ID": "20260613174243-itrmnzb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613174243-itrmnzb",
+												"updated": "20260613174243"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "No path template: Each shorthand creates a separate document with a timestamp as the title"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613174243-t3c99ru",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613174243-t3c99ru",
+										"updated": "20260613174243"
+									},
+									"Children": [
+										{
+											"ID": "20260613174243-rd2otp0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613174243-rd2otp0",
+												"updated": "20260613174243"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "With a path template: All shorthands are appended to the end of the specified document. The path template supports Go template syntax, e.g. "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/shorthand/{{now | date \"20060102150405\"}}"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ generates independent documents by time"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-jz36fsj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174243-jz36fsj",
+				"updated": "20260613181402"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Difference from Inbox"
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-bgncfkl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174243-bgncfkl",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Shorthand and cloud inbox are two separate quick capture methods:"
+				}
+			]
+		},
+		{
+			"ID": "20260613174243-em1vwmu",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260613174243-em1vwmu",
+				"updated": "20260613174243"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th"
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Shorthand"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Cloud Inbox"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Storage"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Local"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Cloud"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Input Method"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "System share / shortcut"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "WeChat / API"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Import Method"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Auto-import to doc tree"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Manual processing from inbox panel"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Subscription Required"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "No"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Yes"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Available On"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mobile only"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "All platforms"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613181402-55wa9vo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613181402-55wa9vo",
+				"updated": "20260613181402"
+			}
 		}
 	]
 }

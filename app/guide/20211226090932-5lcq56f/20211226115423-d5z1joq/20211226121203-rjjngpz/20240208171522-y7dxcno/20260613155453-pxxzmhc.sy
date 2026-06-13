@@ -1,0 +1,5958 @@
+{
+	"ID": "20260613155453-pxxzmhc",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260613155453-pxxzmhc",
+		"title": "字段類型",
+		"type": "doc",
+		"updated": "20260613194159"
+	},
+	"Children": [
+		{
+			"ID": "20260613155453-5mfqt52",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-5mfqt52",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-jr9lf7s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-jr9lf7s",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "下表列出了全部字段類型及其核心特性："
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-19iw9k8",
+			"Type": "NodeTable",
+			"Data": "| 字段類型 | 適用場景 | 可排序 | 可過濾 | 可彙總 | 特殊範本後綴 |\n|---------|---------|--------|--------|--------|------------|\n| 文本 | 標題、描述、任意文字 | √ | √ | × | — |\n| 數字 | 金額、數量、評分 | √ | √ | √ | — |\n| 日期 | 截止日、生日、創建日 | √ | √ | × | `_end` |\n| 單選 | 狀態、分類、優先級 | √ | √ | × | — |\n| 多選 | 標籤、多分類 | √ | √ | × | `_str` |\n| 網址 | 外部連結、參考來源 | × | √ | × | — |\n| 郵箱 | 聯繫人郵箱 | × | √ | × | — |\n| 電話 | 聯繫人電話 | × | √ | × | — |\n| 覈取方塊 | 是否完成、是否啟用 | √ | √ | × | — |\n| 主鍵（繫結塊） | 記錄的唯一標識，可繫結內容塊 | √ | √ | × | `_created` |\n| 資源 | 附件、圖片、檔案 | × | × | × | — |\n| 關聯 | 跨資料庫關聯記錄 | × | √ | × | — |\n| 彙總 | 基於關聯字段的統計計算 | √ | √ | √ | — |\n| 範本 | 自動填充預設值 | × | × | × | — |\n| 創建時間 | 記錄創建時間（自動） | √ | √ | × | — |\n| 更新時間 | 記錄更新時間（自動） | √ | √ | × | — |\n| 行號 | 自動遞增序號 | √ | √ | × | — |",
+			"TableAligns": [
+				0,
+				0,
+				0,
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20260613155453-19iw9k8",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "字段類型"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "適用場景"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "可排序"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "可過濾"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "可彙總"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "特殊範本後綴"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文本"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "標題、描述、任意文字"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "數字"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "金額、數量、評分"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日期"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "截止日、生日、創建日"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_end"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "單選"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "狀態、分類、優先級"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "多選"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "標籤、多分類"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "網址"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "外部連結、參考來源"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "郵箱"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "聯繫人郵箱"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "電話"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "聯繫人電話"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "覈取方塊"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "是否完成、是否啟用"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主鍵（繫結塊）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "記錄的唯一標識，可繫結內容塊"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_created"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資源"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "附件、圖片、檔案"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "關聯"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "跨資料庫關聯記錄"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "彙總"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "基於關聯字段的統計計算"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "範本"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自動填充預設值"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "創建時間"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "記錄創建時間（自動）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "更新時間"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "記錄更新時間（自動）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "行號"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自動遞增序號"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-tge2c1v",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260613155453-tge2c1v",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e "
+				},
+				{
+					"ID": "20260613155453-zi43aq8",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260613155453-zi43aq8",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "strong",
+							"TextMarkTextContent": "範本語法說明"
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-lni2zam",
+					"Type": "NodeList",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-lni2zam",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-lbscvmz",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-lbscvmz",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-zw7d59f",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-zw7d59f",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.字段名}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 獲取字段格式化值，適用於所有字段類型"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-zr1fxqc",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-zr1fxqc",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-h4oyqgf",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-h4oyqgf",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.字段名_str}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 將多選字段的值轉爲逗號分隔的字串，"
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "僅對多選有效"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-sbv5ixc",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-sbv5ixc",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-q8b9ud4",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-q8b9ud4",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.字段名_end}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 獲取日期字段的結束日期，"
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "僅對日期有效"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-hwwondx",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-hwwondx",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-a9t7bbf",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-a9t7bbf",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.字段名_created}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 獲取主鍵字段所繫結塊的創建時間，"
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "僅對主鍵有效"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-3nzsd17",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-3nzsd17",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-5p70g3b",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-5p70g3b",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.字段名_raw}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 獲取字段原始值物件，對所有字段類型有效"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-uzi5weo",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-uzi5weo",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-u1ndxbx",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-u1ndxbx",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{index . \"entryCreated\"}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 和 "
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{index . \"entryUpdated\"}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 訪問行繫結塊的創建/更新時間"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-3vxlycl",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-3vxlycl",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-cbmuiqj",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-cbmuiqj",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{index .id_mod \"字段ID\"}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " 按字段 ID 訪問格式化值"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-vtftazl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-vtftazl",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "文本"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-rrftueu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-rrftueu",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於儲存標題、描述等任意文本內容。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-hq9a0up",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-hq9a0up",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-x483xja",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-x483xja",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-5pzvpxu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-5pzvpxu",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建時可勾選「多行」切換爲多行文本框"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-9c1296c",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-9c1296c",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-zgs0m2q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-zgs0m2q",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中直接輸入；多行模式下 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Shift+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 換行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-egyyjmm",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-egyyjmm",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-tshb4g9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-tshb4g9",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援模糊搜尋匹配"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-5eo3qs8",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-5eo3qs8",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-5c1ocej",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-5c1ocej",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按拼音或 Unicode 碼點排序"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-g18hoxk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-g18hoxk",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "數字"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-xbxq3wm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-xbxq3wm",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於儲存金額、數量、評分等數值資訊。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-r57ai6w",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-r57ai6w",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-6mcyvep",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-6mcyvep",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-zqqgp8k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-zqqgp8k",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建時可選擇數字格式——整數、小數、百分比、貨幣"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-f7hp496",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-f7hp496",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ri92a3c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ri92a3c",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中直接輸入數字；格式切換在設定面板中調整"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-sfz1t8r",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-sfz1t8r",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-x5aioq5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-x5aioq5",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援大於/小於/等於/區間等條件篩選"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-n8qtzlx",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-n8qtzlx",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ru4o2mt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ru4o2mt",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按數值大小排序"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-tku93ey",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-tku93ey",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-uvqrrvm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-uvqrrvm",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "彙總支援"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：彙總字段可對此列求和、求平均值、最大值、最小值、計數等"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-veckkdg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-veckkdg",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "日期"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-2pbevhk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-2pbevhk",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於儲存日期或日期時間。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-7bmnuie",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-7bmnuie",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-808oy4f",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-808oy4f",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3rctexl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3rctexl",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建時可勾選「包含時間」；可配置日期範圍（起止日期）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-12oa7qu",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-12oa7qu",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-crkeby3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-crkeby3",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中點擊彈出日期選擇器"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-3oka4h2",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-3oka4h2",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-brt36xm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-brt36xm",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援某天、某天之前/之後、兩個日期之間、有值/無值等條件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-b2t34gu",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-b2t34gu",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ishqcpc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ishqcpc",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按時間先後排序"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-0dgy9a8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-0dgy9a8",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "單選"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-dmz77uc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-dmz77uc",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "從預設選項列表中選擇一個值。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-m541ci6",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-m541ci6",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-x2tndoh",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-x2tndoh",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-8vzgr6o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-8vzgr6o",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建後可添加、編輯、刪除選項，可爲每個選項設定顏色標籤"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-skv8v2y",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-skv8v2y",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ybqu66q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ybqu66q",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中點擊彈出選項列表，選中一個"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-blezyua",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-blezyua",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-co9dstf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-co9dstf",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援等於/不等於某選項、有值/無值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-o5tk6tz",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-o5tk6tz",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-twxx472",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-twxx472",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按選項列表中的排列順序排序"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-fs8ip4b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-fs8ip4b",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "多選"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-fk6fz8d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-fk6fz8d",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "從預設選項列表中選擇零個、一個或多個值。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-9r9bobl",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-9r9bobl",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-vdie3du",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-vdie3du",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-bjx7c1z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-bjx7c1z",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建後可添加、編輯、刪除選項，可拖拽排序選項、設定顏色標籤"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-ferfa0o",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ferfa0o",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-zr573ol",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-zr573ol",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中點擊彈出選項列表，可勾選多個"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-56vuzr1",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-56vuzr1",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-qberbjy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-qberbjy",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援包含/不包含某個選項。選擇「包含」時，只要記錄中包含指定選項之一即匹配"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-37hlq74",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-37hlq74",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-4g6uja0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-4g6uja0",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按選項列表中的排列順序排序"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-0uu3dbs",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-0uu3dbs",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-kpdb1ir",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-kpdb1ir",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "範本引用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.字段名}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 獲取多選值；"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 後綴轉爲逗號分隔字串"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-h07wfvn",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-h07wfvn",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-7bs5a2e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-7bs5a2e",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "與單選的區別"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：可以爲一個字段賦予多個標籤值，適用於多維度分類的場景"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-7fv4zp9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-7fv4zp9",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "網址"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-56k2cl6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-56k2cl6",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於儲存 URL 連結。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-evvjkiv",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-evvjkiv",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-9g1vbc9",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-9g1vbc9",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ez9ypy8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ez9ypy8",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中輸入或粘貼 URL"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-fyi7pzh",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-fyi7pzh",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-sgdzq86",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-sgdzq86",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "展示形式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：點擊在瀏覽器中打開"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-lupk1wg",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-lupk1wg",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-fw3fvx5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-fw3fvx5",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援模糊搜尋"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-wi0d6s1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-wi0d6s1",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "郵箱"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-hhzs1p3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-hhzs1p3",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於儲存電子郵件地址。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-nqno7xt",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-nqno7xt",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-9g4h9ah",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-9g4h9ah",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-7djme30",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-7djme30",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中直接輸入郵箱地址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-fyg308z",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-fyg308z",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-5szmqw2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-5szmqw2",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "展示形式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：點擊可喚起預設郵件客戶端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-15h413i",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-15h413i",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-js2qo2i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-js2qo2i",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援模糊搜尋"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-y2gh6du",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-y2gh6du",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "電話"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-k33kx8o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-k33kx8o",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於儲存電話號碼。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-lbr8p3g",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-lbr8p3g",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-c3kswtr",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-c3kswtr",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-n5rxowb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-n5rxowb",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中直接輸入電話號碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-afzab35",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-afzab35",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-qb6wqsp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-qb6wqsp",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "展示形式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在行動端點擊可喚起撥號介面"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-wo7a2aj",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-wo7a2aj",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-jcvh42d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-jcvh42d",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援模糊搜尋"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-0yodjpr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-0yodjpr",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "覈取方塊"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-c16p9i1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-c16p9i1",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於表示是/否、開/關等布爾狀態。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-v41aaux",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-v41aaux",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-xrm0g89",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-xrm0g89",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ty5td1k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ty5td1k",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中點擊勾選或取消勾選"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-cipct2n",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-cipct2n",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-pscz6av",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-pscz6av",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援已勾選/未勾選兩種條件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-85isbya",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-85isbya",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-yinhjxd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-yinhjxd",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：勾選的排在前面或後面"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-hihxn09",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-hihxn09",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "主鍵（繫結塊）"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-llv32f4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-llv32f4",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資料庫每條記錄的唯一標識。在內容塊類型的記錄中，主鍵繫結到對應的內容塊，從而實現結構化資料與非結構化內容的連接。每張表必須且僅有一個主鍵字段。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-aww9utd",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-aww9utd",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-3gqs71f",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-3gqs71f",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-xir0v42",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-xir0v42",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "創建方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：資料庫創建時自動生成，無需手動添加"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-z9mjw7z",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-z9mjw7z",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-isaf5gp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-isaf5gp",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "繫結方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-xty8ydi",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-xty8ydi",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-ocy81do",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-ocy81do",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-ot1b613",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-ot1b613",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "內容塊記錄：通過拖拽塊到資料庫視圖、或塊標選單「添加到資料庫」繫結"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-pqm3evu",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-pqm3evu",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-81nxm5r",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-81nxm5r",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "非內容塊記錄：直接在視圖中添加條目，主鍵由系統自動生成"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-7xtumxj",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-7xtumxj",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-2kiwn2u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-2kiwn2u",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "展示形式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：內容塊記錄的儲存格中展示所繫結塊的內容摘要，懸停可預覽，點擊可跳轉"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-w5hwnlb",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-w5hwnlb",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-k56boov",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-k56boov",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：不支援通過儲存格直接修改繫結關係；若內容塊被刪除，對應記錄也隨之刪除"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-wtgyc8j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-wtgyc8j",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "資源"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ngmyavo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-ngmyavo",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "用於儲存附件、圖片、檔案等資源檔案。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-o83tnav",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-o83tnav",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-n8utw8h",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-n8utw8h",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-r4m040e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-r4m040e",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-w3w2qwu",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-w3w2qwu",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-z7lm62g",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-z7lm62g",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-n81kaim",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-n81kaim",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "從檔案管理器拖放檔案到儲存格中"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-5xdoi5n",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-5xdoi5n",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-j6b1od2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-j6b1od2",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "在儲存格中點擊上傳按鈕選擇本機檔案"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-xbtzswn",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-xbtzswn",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-avwhawb",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-avwhawb",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "從收集箱拖拽圖片到儲存格中"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-s1wxroc",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-s1wxroc",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-qdyyze5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-qdyyze5",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "支援的檔案類型"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：圖片、PDF、Office 文件、壓縮檔等任意檔案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-u8a3k6k",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-u8a3k6k",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-zz2icc5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-zz2icc5",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "展示形式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：圖片以縮圖預覽，其他檔案顯示類型圖示和檔案名；點擊可打開或下載"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-ssn2mau",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ssn2mau",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ta6r6x6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ta6r6x6",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：多資產字段支援儲存多個檔案，不支援過濾和排序"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-8j0t0hl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-8j0t0hl",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "關聯"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-1zw46yy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-1zw46yy",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建立跨資料庫的記錄關聯關係，是資料庫之間協同的核心機制。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-wtmlshi",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-wtmlshi",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-odeekpq",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-odeekpq",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-xu5w5c7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-xu5w5c7",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建時必須選擇「關聯的目標資料庫」"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-x928ex4",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-x928ex4",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ezqhgvj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ezqhgvj",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在儲存格中點擊，從目標資料庫的記錄列表中搜尋和選擇一條或多條記錄"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-1okh9jn",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-1okh9jn",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-2wjbzl3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-2wjbzl3",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "關聯方向"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-sg6bgr8",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-sg6bgr8",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-b8eaqc0",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-b8eaqc0",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-c13pi9c",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-c13pi9c",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "創建關聯字段時，可選擇是否在目標資料庫中自動創建反向關聯字段（雙向關聯）"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-dlqkrbw",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-dlqkrbw",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-75h794n",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-75h794n",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "單向關聯僅在當前資料庫能看到關聯關係"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-k8kf2lq",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-k8kf2lq",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-fudy9li",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-fudy9li",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援有值/無值篩選"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-k6n01x8",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-k6n01x8",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-yz8dcu8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-yz8dcu8",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：關聯字段儲存目標資料庫條目的引用，目標條目刪除後關聯自動清空"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-8vd1h13",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-8vd1h13",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "彙總"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-93h3tzy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-93h3tzy",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "基於關聯字段，對目標資料庫的某個字段進行統計計算。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-1mphsqr",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-1mphsqr",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-mdsa4k9",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-mdsa4k9",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-fjnaiq4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-fjnaiq4",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "前置條件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：必須已存在一個關聯字段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-62torht",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-62torht",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-a1qlv6w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-a1qlv6w",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建時需指定「基於哪個關聯字段」、「目標字段」和「彙總函數」"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-206pqhe",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-206pqhe",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-bze9a2b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-bze9a2b",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "彙總函數"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-bffspms",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-bffspms",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-9icupha",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-9icupha",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-rzubpik",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-rzubpik",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "求和（SUM）、平均值（AVG）、最大值（MAX）、最小值（MIN）"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-rhf52uc",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-rhf52uc",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-g3axa2q",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-g3axa2q",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "計數（COUNT）、去重計數（COUNT DISTINCT）"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-7yqw143",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-7yqw143",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-8rkz1rw",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-8rkz1rw",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "最早（EARLIEST）、最晚（LATEST）（日期字段）"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-8o633cg",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-8o633cg",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-2qgjhh2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-2qgjhh2",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "範圍（RANGE）、中位數（MEDIAN）（數值字段）"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-dy9oc5c",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-dy9oc5c",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-vvfxxfh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-vvfxxfh",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：彙總值自動計算，不可手動編輯"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-4qrxh5y",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-4qrxh5y",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-y06k7mh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-y06k7mh",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：可按計算結果排序"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-h90m2yn",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-h90m2yn",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-nxfbkq8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-nxfbkq8",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：關聯字段刪除後，對應的彙總字段也會一併刪除"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-shwhovg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-shwhovg",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "範本"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ij01whb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-ij01whb",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "創建新條目時自動填充預設值。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-aw35j3j",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-aw35j3j",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-vpduyyh",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-vpduyyh",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-21gd67q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-21gd67q",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "配置項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：創建時可編寫預設值文本，支援範本變數語法"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-ac3xalr",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ac3xalr",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-123v49t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-123v49t",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "自動填充規則"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：新建條目時，範本字段的值自動填入預設內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-vn6xf16",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-vn6xf16",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3vowtgq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3vowtgq",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "範本變數"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：可使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.字段名}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 等語法引用同資料庫中同一行其他字段的值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-s098jmc",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-s098jmc",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-gpfnad8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-gpfnad8",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：與「範本片段」不同，此範本僅作用於資料庫條目預設值填充"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ru5nzha",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-ru5nzha",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "創建時間"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-08fob5j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-08fob5j",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動記錄條目的創建時間。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ewnfems",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-ewnfems",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-ux4xf5n",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ux4xf5n",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-hrmqd1p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-hrmqd1p",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：自動填充，不可手動修改"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-6k5cbg7",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-6k5cbg7",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-tk2pn6x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-tk2pn6x",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：與日期字段相同，支援時間範圍篩選"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-yl27eqx",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-yl27eqx",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-f5thetf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-f5thetf",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按時間先後排序"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-8w7crss",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-8w7crss",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-uccrpec",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-uccrpec",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：每條記錄創建後此值固定不變"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-jrr3c4t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-jrr3c4t",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "更新時間"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-aht8vi0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-aht8vi0",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動記錄條目最後一次修改的時間。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-qiqbiui",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-qiqbiui",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-06aqbye",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-06aqbye",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-nnibmh7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-nnibmh7",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：自動填充，對該條目的任意字段修改後自動刷新"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-m6qgl0x",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-m6qgl0x",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-a5fgp9h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-a5fgp9h",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：與日期字段相同"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-qnzuf4m",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-qnzuf4m",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-x0pjlzx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-x0pjlzx",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按時間先後排序"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-lhfqgs7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-lhfqgs7",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "行號"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-4ijv7rc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-4ijv7rc",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動遞增的序號。"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-yx191vp",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-yx191vp",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-1c87q9s",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-1c87q9s",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-abhjgd5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-abhjgd5",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：自動生成，不可手動修改"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-axaertz",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-axaertz",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-x0tphpg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-x0tphpg",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "展示形式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：從 1 開始自動遞增編號"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-cndaa0s",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-cndaa0s",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-5ocx5ln",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-5ocx5ln",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "排序行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：按數值大小排序"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-vkf1tac",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-vkf1tac",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-a4hod9x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-a4hod9x",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "過濾行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援大於/小於/等於等數值比較"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-u1j4soj",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-u1j4soj",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ydwz9ku",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ydwz9ku",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：行號在條目創建時分配，刪除中間條目不會導致後續條目重新編號"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-d9zaouk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-d9zaouk",
+				"updated": "20260613194159"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "建議"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-g7yj2mn",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-g7yj2mn",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-c1amqjp",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-c1amqjp",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-tdxfv5t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-tdxfv5t",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要繫結內容塊作爲記錄主體 → 系統自動生成"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "主鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "字段，拖拽塊到資料庫或通過塊標選單繫結"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-f97fgbb",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-f97fgbb",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-lkul0mf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-lkul0mf",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "記錄金額/庫存/評分並做統計 → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "數字"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，配合彙總字段做求和/平均值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-5cpcwje",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-5cpcwje",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-trv63fb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-trv63fb",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "記錄狀態流程（待辦/進行中/已完成）→ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "單選"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-5mq0q9g",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-5mq0q9g",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-b4i2sre",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-b4i2sre",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "多標籤分類（一篇文章同時屬於多個分類）→ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "多選"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-1ovhrai",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-1ovhrai",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-d0tzgho",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-d0tzgho",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要關聯其他資料庫中的資料 → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "關聯"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，配合"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "彙總"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "做跨表統計"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-xpcoyhw",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-xpcoyhw",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3i4g9he",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3i4g9he",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自動記錄條目的時間資訊 → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "創建時間"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " + "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "更新時間"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-9nr2x1o",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-9nr2x1o",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ckdtmj9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ckdtmj9",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要有序序號 → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "行號"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-5rqk850",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-5rqk850",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-4ocz2ad",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-4ocz2ad",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要上傳截圖/附件 → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "資源"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-jpf8xl1",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-jpf8xl1",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-wcj0qi1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-wcj0qi1",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "新建條目需要預填預設值 → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "範本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-kkmdi5m",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-kkmdi5m",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-wc0jmjw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-wc0jmjw",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要點擊跳轉到網頁/發郵件/撥號 → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "網址"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "郵箱"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "電話"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613194159-ekrcmo8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613194159-ekrcmo8",
+				"updated": "20260613194159"
+			}
+		}
+	]
+}

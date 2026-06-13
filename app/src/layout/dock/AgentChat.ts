@@ -1303,7 +1303,7 @@ export class AgentChat extends Model {
         fetch("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: userMsg, model: this.getSelectedModel()}),
+            body: JSON.stringify({message: userMsg, model: this.getSelectedModel(), language: window.siyuan.config.appearance.lang}),
         }).then((resp) => resp.json()).then((data) => {
             if (data.code === 0 && data.data && data.data !== this.sessionTitle) {
                 this.sessionTitle = data.data;

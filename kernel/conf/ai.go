@@ -17,54 +17,37 @@
 package conf
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"strconv"
 
 	"github.com/88250/lute/ast"
-	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
-
-type EncryptedString string
-
-func (s EncryptedString) MarshalJSON() ([]byte, error) {
-	return json.Marshal(util.AESEncrypt(string(s)))
-}
-
-func (s *EncryptedString) UnmarshalJSON(data []byte) error {
-	var str string
-	json.Unmarshal(data, &str)
-	if dec := util.AESDecrypt(str); len(dec) > 0 {
-		*s = EncryptedString(dec)
-	} else {
-		*s = EncryptedString(str)
-	}
-	return nil
-}
-
-func (s EncryptedString) String() string {
-	return string(s)
-}
 
 type AI struct {
 	MCP       *MCP       `json:"mcp"`
 	Embedding *Embedding `json:"embedding"`
 	Agent     *Agent     `json:"agent"`
 	Providers []*Provider `json:"providers"`
+	Scenarios []*Scenario `json:"scenarios"`
 }
 
 type Agent struct {
-	SessionTimeout int `json:"sessionTimeout"`
-	ConfirmTimeout int `json:"confirmTimeout"`
-	MaxRetries     int `json:"maxRetries"`
+	SessionTimeout      int     `json:"sessionTimeout"`
+	ConfirmTimeout      int     `json:"confirmTimeout"`
+	MaxRetries          int     `json:"maxRetries"`
+	Temperature         float64 `json:"temperature"`
+	MaxCompletionTokens int     `json:"maxCompletionTokens"`
+	MaxToolCallRounds   int     `json:"maxToolCallRounds"`
 }
 
 type Embedding struct {
 	ID          string          `json:"id,omitempty"`
 	DisplayName string          `json:"displayName,omitempty"`
 	Enabled     bool            `json:"enabled,omitempty"`
-	APIKey      EncryptedString `json:"apiKey"`
+	APIKey      string          `json:"apiKey"`
 	BaseURL     string          `json:"baseURL"`
 	Name        string          `json:"name"`
 	Timeout     int             `json:"timeout"`
@@ -74,7 +57,7 @@ type Provider struct {
 	ID             string          `json:"id,omitempty"`
 	DisplayName    string          `json:"displayName,omitempty"`
 	Enabled        bool            `json:"enabled,omitempty"`
-	APIKey         EncryptedString `json:"apiKey"`
+	APIKey         string          `json:"apiKey"`
 	BaseURL        string          `json:"baseURL"`
 	RequestTimeout int             `json:"requestTimeout"`
 	Models         []*Model        `json:"models"`
@@ -88,6 +71,16 @@ type Model struct {
 	MaxTokens   int     `json:"maxTokens"`
 	Temperature float64 `json:"temperature"`
 	MaxContexts int     `json:"maxContexts"`
+}
+
+const (
+	ScenarioChat  = "chat"
+	ScenarioAgent = "agent"
+)
+
+type Scenario struct {
+	Name  string `json:"name"`
+	Model string `json:"model"`
 }
 
 type MCP struct {
@@ -108,50 +101,57 @@ type MCPServer struct {
 func NewAI() *AI {
 	ai := &AI{
 		Agent: &Agent{
-			SessionTimeout: 600,
-			ConfirmTimeout: 120,
-			MaxRetries:     3,
+			SessionTimeout:      600,
+			ConfirmTimeout:      120,
+			MaxRetries:          3,
+			Temperature:         1.0,
+			MaxCompletionTokens: 4096,
+			MaxToolCallRounds:   64,
 		},
 	}
 
-	provider := &Provider{
-		BaseURL:        "https://api.openai.com/v1",
-		RequestTimeout: 30,
-	}
-	provider.APIKey = EncryptedString(os.Getenv("SIYUAN_OPENAI_API_KEY"))
+	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
+	apiModel := os.Getenv("SIYUAN_OPENAI_API_MODEL")
+	apiBaseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
 
-	if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
-		if v, err := strconv.Atoi(timeout); err == nil {
-			provider.RequestTimeout = v
+	if apiKey != "" && apiModel != "" && apiBaseURL != "" {
+		provider := &Provider{
+			BaseURL:        apiBaseURL,
+			RequestTimeout: 30,
+			Enabled:        true,
+			APIKey:         apiKey,
 		}
-	}
-	if baseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL"); "" != baseURL {
-		provider.BaseURL = baseURL
-	}
+		if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
+			if v, err := strconv.Atoi(timeout); err == nil {
+				provider.RequestTimeout = v
+			}
+		}
 
-	model := &Model{
-		Name:        openai.GPT3Dot5Turbo,
-		Temperature: 1.0,
-		MaxContexts: 7,
-	}
-	if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
-		if v, err := strconv.Atoi(maxTokens); err == nil {
-			model.MaxTokens = v
+		model := &Model{
+			Name:        apiModel,
+			Temperature: 1.0,
+			MaxContexts: 7,
+			Enabled:     true,
 		}
-	}
-	if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
-		if v, err := strconv.ParseFloat(temperature, 64); err == nil {
-			model.Temperature = v
+		if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
+			if v, err := strconv.Atoi(maxTokens); err == nil {
+				model.MaxTokens = v
+			}
 		}
-	}
-	if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
-		if v, err := strconv.Atoi(maxContexts); err == nil {
-			model.MaxContexts = v
+		if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
+			if v, err := strconv.ParseFloat(temperature, 64); err == nil {
+				model.Temperature = v
+			}
 		}
-	}
+		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
+			if v, err := strconv.Atoi(maxContexts); err == nil {
+				model.MaxContexts = v
+			}
+		}
 
-	provider.Models = append(provider.Models, model)
-	ai.Providers = append(ai.Providers, provider)
+		provider.Models = append(provider.Models, model)
+		ai.Providers = append(ai.Providers, provider)
+	}
 
 	if agentTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_TIMEOUT"); "" != agentTimeout {
 		if v, err := strconv.Atoi(agentTimeout); err == nil {
@@ -168,13 +168,28 @@ func NewAI() *AI {
 			ai.Agent.MaxRetries = v
 		}
 	}
+	if agentTemperature := os.Getenv("SIYUAN_OPENAI_AGENT_TEMPERATURE"); "" != agentTemperature {
+		if v, err := strconv.ParseFloat(agentTemperature, 64); err == nil {
+			ai.Agent.Temperature = v
+		}
+	}
+	if agentMaxCompletionTokens := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_COMPLETION_TOKENS"); "" != agentMaxCompletionTokens {
+		if v, err := strconv.Atoi(agentMaxCompletionTokens); err == nil {
+			ai.Agent.MaxCompletionTokens = v
+		}
+	}
+	if agentMaxToolCallRounds := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_TOOL_CALL_ROUNDS"); "" != agentMaxToolCallRounds {
+		if v, err := strconv.Atoi(agentMaxToolCallRounds); err == nil {
+			ai.Agent.MaxToolCallRounds = v
+		}
+	}
 
 	embeddingKey := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY")
 	embeddingBaseURL := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL")
 	embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL")
 	if "" != embeddingKey && "" != embeddingBaseURL && "" != embeddingModel {
 		ai.Embedding = &Embedding{
-			APIKey:  EncryptedString(embeddingKey),
+			APIKey:  embeddingKey,
 			BaseURL: embeddingBaseURL,
 			Name:    embeddingModel,
 			Timeout: 30,
@@ -186,9 +201,9 @@ func NewAI() *AI {
 
 func (ai *AI) HasAnyProvider() bool {
 	for _, p := range ai.Providers {
-		if p != nil && len(string(p.APIKey)) > 0 {
+		if p != nil && len(p.APIKey) > 0 && p.Enabled {
 			for _, m := range p.Models {
-				if m.Name != "" {
+				if m.Name != "" && m.Enabled {
 					return true
 				}
 			}
@@ -200,11 +215,11 @@ func (ai *AI) HasAnyProvider() bool {
 func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	if id == "" {
 		for _, p := range ai.Providers {
-			if p == nil || len(string(p.APIKey)) == 0 {
+			if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 				continue
 			}
 			for _, m := range p.Models {
-				if m.Name != "" {
+				if m.Name != "" && m.Enabled {
 					return p, m
 				}
 			}
@@ -216,33 +231,33 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.ID == id && len(string(p.APIKey)) > 0 {
+			if m.ID == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.DisplayName == id && len(string(p.APIKey)) > 0 {
+			if m.DisplayName == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.Name == id && len(string(p.APIKey)) > 0 {
+			if m.Name == id && m.Enabled {
 				return p, m
 			}
 		}
@@ -252,6 +267,19 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 		return ai.Providers[0], ai.Providers[0].Models[0]
 	}
 	return nil, nil
+}
+
+func (ai *AI) GetScenarioModel(name string) (*Provider, *Model) {
+	if ai.Scenarios != nil {
+		for _, s := range ai.Scenarios {
+			if s.Name == name && s.Model != "" {
+				if p, m := ai.GetModel(s.Model); p != nil {
+					return p, m
+				}
+			}
+		}
+	}
+	return ai.GetModel("")
 }
 
 func (ai *AI) Normalize() {
@@ -281,6 +309,38 @@ func (ai *AI) Normalize() {
 		if ai.Embedding.DisplayName == "" {
 			ai.Embedding.DisplayName = ai.Embedding.Name
 		}
+	}
+}
+
+func (ai *AI) DecryptAPIKeys() {
+	for _, p := range ai.Providers {
+		if p == nil || p.APIKey == "" {
+			continue
+		}
+		if dec := util.AESDecrypt(p.APIKey); len(dec) > 0 {
+			if plain, err := hex.DecodeString(string(dec)); err == nil {
+				p.APIKey = string(plain)
+			}
+		}
+	}
+	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
+		if dec := util.AESDecrypt(ai.Embedding.APIKey); len(dec) > 0 {
+			if plain, err := hex.DecodeString(string(dec)); err == nil {
+				ai.Embedding.APIKey = string(plain)
+			}
+		}
+	}
+}
+
+func (ai *AI) EncryptAPIKeys() {
+	for _, p := range ai.Providers {
+		if p == nil {
+			continue
+		}
+		p.APIKey = util.AESEncrypt(p.APIKey)
+	}
+	if ai.Embedding != nil {
+		ai.Embedding.APIKey = util.AESEncrypt(ai.Embedding.APIKey)
 	}
 }
 
@@ -397,7 +457,7 @@ func migrateProvider(raw map[string]any) *Provider {
 	return &Provider{
 		ID:             getString(raw, "id"),
 		Enabled:        true,
-		APIKey:         EncryptedString(getString(raw, "apiKey")),
+		APIKey:         getString(raw, "apiKey"),
 		BaseURL:        getString(raw, "apiBaseURL"),
 		RequestTimeout: getInt(raw, "apiTimeout"),
 	}
@@ -426,7 +486,7 @@ func migrateEmbedding(raw map[string]any) *Embedding {
 		ID:          getString(raw, "id"),
 		DisplayName: getString(raw, "name"),
 		Enabled:     getBool(raw, "enabled"),
-		APIKey:      EncryptedString(getString(raw, "apiKey")),
+		APIKey:       getString(raw, "apiKey"),
 		BaseURL:     getString(raw, "apiBaseURL"),
 		Name:        getString(raw, "apiModel"),
 		Timeout:     getInt(raw, "apiTimeout"),

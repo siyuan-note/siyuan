@@ -241,6 +241,12 @@ export const postRender = (container: HTMLElement): void => {
             }
         }
     });
+    container.querySelectorAll("pre > code[class*='language-']").forEach((code) => {
+        const match = code.className.match(/language-(\S+)/);
+        if (match) {
+            code.parentElement?.setAttribute("data-language", match[1]);
+        }
+    });
     highlightCodeBlocks(container);
     mathRender(container);
     addCopyButtons(container);

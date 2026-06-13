@@ -28,6 +28,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/agent"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -66,7 +67,13 @@ func agentChat(c *gin.Context) {
 		return
 	}
 
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(req.Model)
+	modelID := req.Model
+	if modelID == "" {
+		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
+			modelID = m.ID
+		}
+	}
+	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1
@@ -74,7 +81,7 @@ func agentChat(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClient(string(selectedProvider.APIKey), selectedProvider.BaseURL)
+	client := util.NewOpenAIClient(selectedProvider.APIKey, selectedProvider.BaseURL)
 
 	confirmTimeout := time.Duration(model.Conf.AI.Agent.ConfirmTimeout) * time.Second
 	if confirmTimeout <= 0 {
@@ -87,10 +94,17 @@ func agentChat(c *gin.Context) {
 
 	var eventCh <-chan agent.AgentEvent
 
-	eventCh = agent.AgentChat(context.Background(), client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.Regenerate, confirmTimeout, maxRetries)
+	ctx, cancel := context.WithCancel(c.Request.Context())
+	defer cancel()
+	eventCh = agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.Regenerate, confirmTimeout, maxRetries)
 	sessionsMu.Lock()
 	runningSessions[req.SessionID] = &runningSession{eventCh: eventCh}
 	sessionsMu.Unlock()
+	defer func() {
+		sessionsMu.Lock()
+		delete(runningSessions, req.SessionID)
+		sessionsMu.Unlock()
+	}()
 
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -175,8 +189,9 @@ func agentChatQuestion(c *gin.Context) {
 }
 
 type agentTitleReq struct {
-	Message string `json:"message"`
-	Model   string `json:"model"`
+	Message  string `json:"message"`
+	Model    string `json:"model"`
+	Language string `json:"language"`
 }
 
 func agentChatTitle(c *gin.Context) {
@@ -189,7 +204,13 @@ func agentChatTitle(c *gin.Context) {
 		return
 	}
 
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(req.Model)
+	modelID := req.Model
+	if modelID == "" {
+		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
+			modelID = m.ID
+		}
+	}
+	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1
@@ -197,9 +218,9 @@ func agentChatTitle(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClient(string(selectedProvider.APIKey), selectedProvider.BaseURL)
+	client := util.NewOpenAIClient(selectedProvider.APIKey, selectedProvider.BaseURL)
 
-	title := agent.GenerateTitle(client, selectedModel.Name, req.Message)
+	title := agent.GenerateTitle(client, selectedModel.Name, req.Message, req.Language)
 	ret := gulu.Ret.NewResult()
 	ret.Data = title
 	c.JSON(http.StatusOK, ret)

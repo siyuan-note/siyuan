@@ -1,0 +1,463 @@
+{
+	"ID": "20260613211829-rjgkboa",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260613211829-rjgkboa",
+		"title": "內容統計",
+		"type": "doc",
+		"updated": "20260613211902"
+	},
+	"Children": [
+		{
+			"ID": "20260613211901-dyms1hk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211901-dyms1hk",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-8axxt6f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211901-8axxt6f",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打開文件後，可以在編輯器底部狀態列和文件詳情選單中查看當前文件的統計資訊。"
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-8a7oa2s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211901-8a7oa2s",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "狀態列統計"
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-ef6ut4j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211901-ef6ut4j",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "狀態列位於編輯器底部，預設顯示當前文件的"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "字元"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "數和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "字"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "數。當文件中包含其他元素時，連結數、圖片數、引用數和塊數也會一併顯示。"
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-o4pf67o",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613211901-o4pf67o",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"ID": "20260613211901-djhir4t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613211901-djhir4t",
+						"updated": "20260613211901"
+					},
+					"Children": [
+						{
+							"ID": "20260613211901-58vlfxd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613211901-58vlfxd",
+								"updated": "20260613211901"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "選取文字"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在編輯器中選取一段文字後，狀態列自動切換為顯示所選文字的統計"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613211901-towxu4t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613211901-towxu4t",
+						"updated": "20260613211901"
+					},
+					"Children": [
+						{
+							"ID": "20260613211901-5f2ihpl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613211901-5f2ihpl",
+								"updated": "20260613211901"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "多選塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：多選塊後，狀態列顯示所選塊的彙總統計"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613211901-qpxakub",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613211901-qpxakub",
+						"updated": "20260613211901"
+					},
+					"Children": [
+						{
+							"ID": "20260613211901-1yt5q9l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613211901-1yt5q9l",
+								"updated": "20260613211901"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "恢復全域"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：取消選取後，狀態列恢復顯示當前文件的整體統計"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-0d3goo1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211901-0d3goo1",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文件詳情統計"
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-h26l8at",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211901-h26l8at",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊文件標題右側的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 按鈕，彈出選單中可查看文件的完整統計資訊。"
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-0c24oh4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211901-0c24oh4",
+				"updated": "20260613211902"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "統計項說明"
+				}
+			]
+		},
+		{
+			"ID": "20260613211901-ehsm39v",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260613211901-ehsm39v",
+				"updated": "20260613211901"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "統計項"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "說明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "字元"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文件中 Unicode 字元的總數，漢字、字母、數字、標點、空格等均計入"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "字"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "中文：每個漢字計 1 個字；英文：連續英文字母整體計 1 個字"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "連結數"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "當前文件中包含的超連結總數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "圖片數"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "當前文件中包含的圖片總數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用數"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "當前文件中包含的塊引用總數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "塊數"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "當前文件中包含的內容塊總數"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613211902-9585qpo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211902-9585qpo",
+				"updated": "20260613211902"
+			}
+		}
+	]
+}

@@ -6,7 +6,7 @@
 		"id": "20240517031052-mgoxs16",
 		"title": "發布服務",
 		"type": "doc",
-		"updated": "20260426231912"
+		"updated": "20260613195451"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160433-v2hgbex",
-				"updated": "20260426231912"
+				"updated": "20260613195451"
 			},
 			"Children": [
 				{
@@ -273,143 +273,405 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160433-w89wf5m",
-								"updated": "20260315160433"
+								"updated": "20260613195449"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "若需要對發布服務進行存取控制"
+									"Data": "開啟 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "服務 Basic 認證"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 開關並新增 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "認證帳戶"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：將使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#basic_authentication_scheme",
+									"TextMarkTextContent": "Basic 驗證方案"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "對訪客進行認證。訪客在瀏覽發佈內容前必須正確輸入 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "認證帳戶"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中設定的使用者名稱與密碼"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613195451-38ecvdn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613195451-38ecvdn",
+				"updated": "20260613195451"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "訪問控制"
+				}
+			]
+		},
+		{
+			"ID": "20260613195451-7vs8ufl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613195451-7vs8ufl",
+				"updated": "20260613195451"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可對筆記本和文件設定發佈時的訪問級別，實現細粒度的權限管理。訪問控制與 Basic 認證是兩套獨立機制：Basic 認證是全域鎖，開啟後所有訪問者都需輸入統一密碼；訪問控制按筆記本/文件粒度分別設定，可單獨或疊加使用。"
+				}
+			]
+		},
+		{
+			"ID": "20260613195451-nteoeqe",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613195451-nteoeqe",
+				"updated": "20260613195451"
+			},
+			"Children": [
+				{
+					"ID": "20260613195451-0xjhhv3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195451-0xjhhv3",
+						"updated": "20260613195451"
+					},
+					"Children": [
+						{
+							"ID": "20260613195451-gwxfcbd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195451-gwxfcbd",
+								"updated": "20260613195451"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "入口"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在文件面板中點擊「更多」選單，選擇「發佈訪問控制」，進入發佈訪問控制界面"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195451-d48oybd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195451-d48oybd",
+						"updated": "20260613195451"
+					},
+					"Children": [
+						{
+							"ID": "20260613195451-nt641n8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195451-nt641n8",
+								"updated": "20260613195451"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "設定範圍"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援對筆記本或單個文件分別設定訪問級別"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195451-wf1q2da",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195451-wf1q2da",
+						"updated": "20260613195451"
+					},
+					"Children": [
+						{
+							"ID": "20260613195451-ko8ihke",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195451-ko8ihke",
+								"updated": "20260613195451"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "訪問級別"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
 								}
 							]
 						},
 						{
-							"ID": "20260315160438-p4ogqy6",
+							"ID": "20260613195451-musees0",
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20260315160438-p4ogqy6",
-								"updated": "20260426231912"
+								"id": "20260613195451-musees0",
+								"updated": "20260613195451"
 							},
 							"Children": [
 								{
-									"ID": "20260315160433-0mttibg",
+									"ID": "20260613195451-laryw59",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20260315160433-0mttibg",
-										"updated": "20260317200702"
+										"id": "20260613195451-laryw59",
+										"updated": "20260613195451"
 									},
 									"Children": [
 										{
-											"ID": "20260315160433-oezruev",
+											"ID": "20260613195451-lh7vs9u",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20260315160433-oezruev",
-												"updated": "20260317200702"
+												"id": "20260613195451-lh7vs9u",
+												"updated": "20260613195451"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "開啟 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "服務 Basic 認證"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ 開關並新增 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "認證帳戶"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​：將使用 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#basic_authentication_scheme",
-													"TextMarkTextContent": "Basic 驗證方案"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "對訪客進行認證。訪客在瀏覽發佈內容前必須正確輸入 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "認證帳戶"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ 中設定的使用者名稱與密碼"
+													"Data": "🌐 公開：公開發佈，無需密碼即可訪問"
 												}
 											]
 										}
 									]
 								},
 								{
-									"ID": "20260315160433-on7vsqb",
+									"ID": "20260613195451-cih5dkb",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20260315160433-on7vsqb",
-										"updated": "20260426231912"
+										"id": "20260613195451-cih5dkb",
+										"updated": "20260613195451"
 									},
 									"Children": [
 										{
-											"ID": "20260315160433-1ljedcx",
+											"ID": "20260613195451-qy2j3za",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20260315160433-1ljedcx",
-												"updated": "20260426231912"
+												"id": "20260613195451-qy2j3za",
+												"updated": "20260613195451"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "開啟 "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "文件面板"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ - "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "更多"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ - "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "發布存取控制"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​，點擊筆記本或文件前的圖示配置筆記本或文件層級的存取控制"
+													"Data": "🔒 受保護：公開發佈，但訪問前需輸入密碼"
 												}
 											]
 										}
 									]
+								},
+								{
+									"ID": "20260613195451-3g4zpxa",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195451-3g4zpxa",
+										"updated": "20260613195451"
+									},
+									"Children": [
+										{
+											"ID": "20260613195451-14ycw2o",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195451-14ycw2o",
+												"updated": "20260613195451"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "👻 隱藏：不在目錄列表中顯示，但擁有連結仍可訪問"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613195451-e7yga4j",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195451-e7yga4j",
+										"updated": "20260613195451"
+									},
+									"Children": [
+										{
+											"ID": "20260613195451-t4m7bh6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195451-t4m7bh6",
+												"updated": "20260613195451"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🤫 私有：隱藏且需密碼，僅持有連結和密碼的用戶可訪問"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613195451-ss4zqu6",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195451-ss4zqu6",
+										"updated": "20260613195451"
+									},
+									"Children": [
+										{
+											"ID": "20260613195451-vdawda6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195451-vdawda6",
+												"updated": "20260613195451"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🚫 禁止：完全禁止訪問，該筆記本或文件不會被發佈"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195451-wqc5xy8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195451-wqc5xy8",
+						"updated": "20260613195451"
+					},
+					"Children": [
+						{
+							"ID": "20260613195451-tmn3yea",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195451-tmn3yea",
+								"updated": "20260613195451"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "密碼設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：選擇需要密碼的訪問級別後，在彈出的對話框中設定密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195451-tc27956",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195451-tc27956",
+						"updated": "20260613195451"
+					},
+					"Children": [
+						{
+							"ID": "20260613195451-7dqqb9c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195451-7dqqb9c",
+								"updated": "20260613195451"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "預設行爲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：未設定訪問控制的筆記本或文件，預設以公開級別發佈"
 								}
 							]
 						}

@@ -7,7 +7,7 @@
 		"id": "20240530101000-vejnh1k",
 		"title": "クエリ構文",
 		"type": "doc",
-		"updated": "20260612224354"
+		"updated": "20260613193647"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-tyyk26i",
 				"id": "20240530101000-omyfbt2",
-				"updated": "20250115150339"
+				"updated": "20260613193647"
 			},
 			"Children": [
 				{
@@ -31,7 +31,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-cdbpnhl",
-				"updated": "20250115150339"
+				"updated": "20260613193647"
 			},
 			"Children": [
 				{
@@ -1224,146 +1224,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "さらに API を通じて全文検索も可能です。"
-				}
-			]
-		},
-		{
-			"ID": "20260612224344-9fboow6",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260612224344-9fboow6",
-				"updated": "20260612224348"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "大文字小文字の区別"
-				}
-			]
-		},
-		{
-			"ID": "20260612224344-i7x5b2s",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612224344-i7x5b2s",
-				"updated": "20260612224348"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "検索"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "大文字小文字を区別"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ をオンにすると、検索時に「Hello」と「hello」が区別されます。デフォルトはオフで、大文字小文字を区別しません。"
-				}
-			]
-		},
-		{
-			"ID": "20260612224344-bp1i2j3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612224344-bp1i2j3",
-				"updated": "20260612224344"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "切り替え後はインデックスの再構築が完了するまでお待ちください。"
-				}
-			]
-		},
-		{
-			"ID": "20260612224344-1fxm4hk",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260612224344-1fxm4hk",
-				"updated": "20260612224354"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "繁体字・簡体字の区別"
-				}
-			]
-		},
-		{
-			"ID": "20260612224344-escr8sn",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612224344-escr8sn",
-				"updated": "20260612224354"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "検索"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "繁体簡体を区別"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ はデフォルトでオンです。「経済」で検索しても「經濟」には一致しません。オフにすると、「経済」で検索した際に「経済」と「經濟」の両方に一致するようになります。"
-				}
-			]
-		},
-		{
-			"ID": "20260612224344-mi08nn5",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612224344-mi08nn5",
-				"updated": "20260612224344"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "切り替え後はインデックスの再構築が完了するまでお待ちください。"
 				}
 			]
 		},

@@ -134,8 +134,9 @@ func firstLine(text string) string {
 	if idx > 0 {
 		text = text[:idx]
 	}
-	if len(text) > 200 {
-		text = text[:200] + "..."
+	runes := []rune(text)
+	if len(runes) > 200 {
+		text = string(runes[:200]) + "..."
 	}
 	return text
 }

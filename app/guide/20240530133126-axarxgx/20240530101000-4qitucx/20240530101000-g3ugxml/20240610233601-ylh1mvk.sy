@@ -6,7 +6,7 @@
 		"id": "20240610233601-ylh1mvk",
 		"title": "サービスを公開",
 		"type": "doc",
-		"updated": "20260427075628"
+		"updated": "20260613195435"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160203-l0m0q2g",
-				"updated": "20260427075628"
+				"updated": "20260613195435"
 			},
 			"Children": [
 				{
@@ -273,143 +273,405 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160203-scvg9m1",
-								"updated": "20260315160405"
+								"updated": "20260613195433"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "公開サービスへのアクセス制御が必要な場合"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "サービス基本認証"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ のスイッチをオンにし、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "認証アカウント"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を追加します。これにより、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://developer.mozilla.org/ja/docs/Web/HTTP/Guides/Authentication#basic_%E8%AA%8D%E8%A8%BC%E6%96%B9%E5%BC%8F",
+									"TextMarkTextContent": "Basic 認証方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を使用して訪問者の認証を行います。訪問者は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "認証アカウント"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ セクションで設定されたユーザー名とパスワードを正しく入力して初めて、公開されたコンテンツを閲覧できるようになります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613195435-0hujlqb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613195435-0hujlqb",
+				"updated": "20260613195435"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アクセス制御"
+				}
+			]
+		},
+		{
+			"ID": "20260613195435-ve7jqxc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613195435-ve7jqxc",
+				"updated": "20260613195435"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノートブックやドキュメントに対して公開時のアクセスレベルを設定し、きめ細かな権限管理を実現します。アクセス制御とBasic認証は独立した二つの仕組みです：Basic認証はグローバルロックであり、有効にするとすべての訪問者が統一パスワードの入力を求められます。アクセス制御はノートブック/ドキュメント単位で設定され、単独でも組み合わせても使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260613195435-kau66hv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613195435-kau66hv",
+				"updated": "20260613195435"
+			},
+			"Children": [
+				{
+					"ID": "20260613195435-392n2ak",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195435-392n2ak",
+						"updated": "20260613195435"
+					},
+					"Children": [
+						{
+							"ID": "20260613195435-febaxik",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195435-febaxik",
+								"updated": "20260613195435"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "入り口"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：ドキュメントパネルで「その他」メニューをクリックし、「公開アクセス制御」を選択して公開アクセス制御画面に入ります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195435-res0e6z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195435-res0e6z",
+						"updated": "20260613195435"
+					},
+					"Children": [
+						{
+							"ID": "20260613195435-vat590v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195435-vat590v",
+								"updated": "20260613195435"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "設定範囲"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：ノートブック単位またはドキュメント単位でアクセスレベルを設定可能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195435-tnmrxr8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195435-tnmrxr8",
+						"updated": "20260613195435"
+					},
+					"Children": [
+						{
+							"ID": "20260613195435-lehnw7e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195435-lehnw7e",
+								"updated": "20260613195435"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "アクセスレベル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
 								}
 							]
 						},
 						{
-							"ID": "20260315160406-950zvew",
+							"ID": "20260613195435-deum7gm",
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20260315160406-950zvew",
-								"updated": "20260427075628"
+								"id": "20260613195435-deum7gm",
+								"updated": "20260613195435"
 							},
 							"Children": [
 								{
-									"ID": "20260315160203-d5za8yr",
+									"ID": "20260613195435-m656vly",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20260315160203-d5za8yr",
-										"updated": "20260317200509"
+										"id": "20260613195435-m656vly",
+										"updated": "20260613195435"
 									},
 									"Children": [
 										{
-											"ID": "20260315160203-p5z33e4",
+											"ID": "20260613195435-2fdt3qi",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20260315160203-p5z33e4",
-												"updated": "20260317200509"
+												"id": "20260613195435-2fdt3qi",
+												"updated": "20260613195435"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "サービス基本認証"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ のスイッチをオンにし、"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "認証アカウント"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ を追加します。これにより、"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://developer.mozilla.org/ja/docs/Web/HTTP/Guides/Authentication#basic_%E8%AA%8D%E8%A8%BC%E6%96%B9%E5%BC%8F",
-													"TextMarkTextContent": "Basic 認証方式"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "を使用して訪問者の認証を行います。訪問者は、"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "認証アカウント"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ セクションで設定されたユーザー名とパスワードを正しく入力して初めて、公開されたコンテンツを閲覧できるようになります"
+													"Data": "🌐 公開：公開され、パスワードなしでアクセス可能"
 												}
 											]
 										}
 									]
 								},
 								{
-									"ID": "20260315160203-ctlex3g",
+									"ID": "20260613195435-py5s929",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20260315160203-ctlex3g",
-										"updated": "20260427075628"
+										"id": "20260613195435-py5s929",
+										"updated": "20260613195435"
 									},
 									"Children": [
 										{
-											"ID": "20260315160203-obefee6",
+											"ID": "20260613195435-xtvcqek",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20260315160203-obefee6",
-												"updated": "20260427075628"
+												"id": "20260613195435-xtvcqek",
+												"updated": "20260613195435"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "​"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "ドキュメントパネル"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ \u003e "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "その他"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ \u003e "
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
-													"TextMarkTextContent": "公開アクセス制御"
-												},
-												{
-													"Type": "NodeText",
-													"Data": "​ を開き、ノートブックまたはドキュメントの横にあるアイコンをクリックして、ノートブック単位またはドキュメント単位でのアクセス制御を設定します"
+													"Data": "🔒 保護：公開されるが、アクセスにパスワードが必要"
 												}
 											]
 										}
 									]
+								},
+								{
+									"ID": "20260613195435-0yg3ax6",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195435-0yg3ax6",
+										"updated": "20260613195435"
+									},
+									"Children": [
+										{
+											"ID": "20260613195435-brn4j4x",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195435-brn4j4x",
+												"updated": "20260613195435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "👻 非表示：ディレクトリ一覧に表示されないが、リンクがあればアクセス可能"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613195435-yh2ibga",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195435-yh2ibga",
+										"updated": "20260613195435"
+									},
+									"Children": [
+										{
+											"ID": "20260613195435-ufsc7c3",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195435-ufsc7c3",
+												"updated": "20260613195435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🤫 プライベート：非表示かつパスワード必須。リンクとパスワードの両方を持つユーザーのみアクセス可能"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613195435-x8y7izf",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613195435-x8y7izf",
+										"updated": "20260613195435"
+									},
+									"Children": [
+										{
+											"ID": "20260613195435-tim7euq",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613195435-tim7euq",
+												"updated": "20260613195435"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "🚫 禁止：アクセス完全禁止。そのノートブックまたはドキュメントは公開されない"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195435-67o7gxg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195435-67o7gxg",
+						"updated": "20260613195435"
+					},
+					"Children": [
+						{
+							"ID": "20260613195435-3rl2m4g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195435-3rl2m4g",
+								"updated": "20260613195435"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "パスワード設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：パスワードが必要なアクセスレベルを選択した場合、ダイアログでパスワードを設定"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613195435-1e5w8i4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613195435-1e5w8i4",
+						"updated": "20260613195435"
+					},
+					"Children": [
+						{
+							"ID": "20260613195435-g768weo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613195435-g768weo",
+								"updated": "20260613195435"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "デフォルト"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：アクセス制御が設定されていないノートブックやドキュメントは、デフォルトで公開レベルとして公開される"
 								}
 							]
 						}

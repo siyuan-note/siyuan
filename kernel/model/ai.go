@@ -86,7 +86,7 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 	util.PushEndlessProgress("Requesting...")
 	defer util.ClearPushProgress(100)
 
-	prov, m := Conf.AI.GetModel("")
+	prov, m := Conf.AI.GetScenarioModel(conf.ScenarioChat)
 	if nil == prov || nil == m {
 		err = errors.New("no AI provider configured")
 		return
@@ -101,7 +101,7 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 		gpt = &CloudGPT{}
 	} else {
 		gpt = &OpenAIGPT{
-			c:       util.NewOpenAIClient(string(prov.APIKey), prov.BaseURL),
+			c:       util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
 			m:       m,
 			timeout: prov.RequestTimeout,
 		}

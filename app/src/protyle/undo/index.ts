@@ -82,7 +82,15 @@ export class Undo {
         if (ids.size === 0) {
             return;
         }
-        const existResponse = await fetchSyncPost("/api/block/checkBlocksExist", {ids: Array.from(ids)});
+        let existResponse: IWebSocketData;
+        try {
+            existResponse = await fetchSyncPost("/api/block/checkBlocksExist", {ids: Array.from(ids)});
+        } catch (e) {
+            return;
+        }
+        if (!existResponse?.data) {
+            return;
+        }
         const replacements: [string, string][] = [];
         ids.forEach(id => {
             if (existResponse.data[id] === true) {

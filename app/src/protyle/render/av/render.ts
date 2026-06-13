@@ -507,7 +507,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const virtualData: { [key: string]: IAVVirtualData } = {};
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
             pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-            if (!item.querySelector(".av__row")) {
+            if (!item.querySelector(".av__row") || e.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
                 return;
             }
             virtualData[item.getAttribute("data-group-id") || "all"] = ({

@@ -250,7 +250,7 @@ export const renderGallery = async (options: {
     const virtualData: { [key: string]: IAVVirtualData } = {};
     options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-        if (!item.querySelector(".av__gallery-item")) {
+        if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
             return;
         }
         virtualData[item.getAttribute("data-group-id") || "all"] = ({

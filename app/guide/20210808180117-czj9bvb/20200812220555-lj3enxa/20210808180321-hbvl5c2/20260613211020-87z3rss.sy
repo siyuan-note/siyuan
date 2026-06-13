@@ -1,0 +1,463 @@
+{
+	"ID": "20260613211020-87z3rss",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260613211020-87z3rss",
+		"title": "内容统计",
+		"type": "doc",
+		"updated": "20260613211912"
+	},
+	"Children": [
+		{
+			"ID": "20260613211910-dnwtgp6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211910-dnwtgp6",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-hlp90d0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211910-hlp90d0",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开文档后，可以在编辑器底部状态栏和文档详情菜单中查看当前文档的统计信息。"
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-vwfhr05",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211910-vwfhr05",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "状态栏统计"
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-fas3aje",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211910-fas3aje",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "状态栏位于编辑器底部，默认显示当前文档的"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "字符"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "数和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "字"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "数。当文档中包含其他元素时，链接数、图片数、引用数和块数也会一并显示。"
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-x4y4udp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613211910-x4y4udp",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"ID": "20260613211910-5op03ka",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613211910-5op03ka",
+						"updated": "20260613211910"
+					},
+					"Children": [
+						{
+							"ID": "20260613211910-v2vp3pm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613211910-v2vp3pm",
+								"updated": "20260613211910"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "选中文本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在编辑器中选中一段文本后，状态栏自动切换为显示所选文本的统计"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613211910-surszi0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613211910-surszi0",
+						"updated": "20260613211910"
+					},
+					"Children": [
+						{
+							"ID": "20260613211910-aytd5aq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613211910-aytd5aq",
+								"updated": "20260613211910"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "多选块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：多选块后，状态栏显示所选块的汇总统计"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613211910-ez0tofa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613211910-ez0tofa",
+						"updated": "20260613211910"
+					},
+					"Children": [
+						{
+							"ID": "20260613211910-ecc8yz9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613211910-ecc8yz9",
+								"updated": "20260613211910"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "恢复全局"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：取消选中后，状态栏恢复显示当前文档的整体统计"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-4ymndg5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211910-4ymndg5",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档详情统计"
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-oilvssw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211910-oilvssw",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击文档标题右侧的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 按钮，弹出菜单中可查看文档的完整统计信息。"
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-hehof5u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613211910-hehof5u",
+				"updated": "20260613211912"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "统计项说明"
+				}
+			]
+		},
+		{
+			"ID": "20260613211910-saj0fin",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260613211910-saj0fin",
+				"updated": "20260613211910"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "统计项"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "说明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "字符"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文档中 Unicode 字符的总数，汉字、字母、数字、标点、空格等均计入"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "字"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "中文字数：每个汉字计 1 个字，连续英文字母整体计 1 个字"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "链接数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "当前文档中包含的超链接总数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "图片数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "当前文档中包含的图片总数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "引用数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "当前文档中包含的块引用总数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "块数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "当前文档中包含的内容块总数"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613211912-hxxvpat",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613211912-hxxvpat",
+				"updated": "20260613211912"
+			}
+		}
+	]
+}

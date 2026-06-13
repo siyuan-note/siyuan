@@ -1,0 +1,463 @@
+{
+	"ID": "20260613212028-gozdm4e",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260613212028-gozdm4e",
+		"title": "Content Statistics",
+		"type": "doc",
+		"updated": "20260613212056"
+	},
+	"Children": [
+		{
+			"ID": "20260613212037-3unkz3i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212037-3unkz3i",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-s0f023a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212037-s0f023a",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a document is open, you can view its statistics in the status bar at the bottom of the editor and in the document details menu."
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-yliukdo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212037-yliukdo",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Status Bar Statistics"
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-te5yfoo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212037-te5yfoo",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The status bar, located at the bottom of the editor, displays the current document's "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "character"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " count and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "word"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " count by default. When the document contains other elements, the link count, image count, reference count, and block count are also displayed."
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-4v8vhxq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613212037-4v8vhxq",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"ID": "20260613212037-esr4puw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613212037-esr4puw",
+						"updated": "20260613212037"
+					},
+					"Children": [
+						{
+							"ID": "20260613212037-qutdi95",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613212037-qutdi95",
+								"updated": "20260613212037"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Text Selection"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": After selecting text in the editor, the status bar automatically switches to showing statistics for the selected text"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613212037-b4u2v5n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613212037-b4u2v5n",
+						"updated": "20260613212037"
+					},
+					"Children": [
+						{
+							"ID": "20260613212037-87sbjke",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613212037-87sbjke",
+								"updated": "20260613212037"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Block Multi-Selection"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": After selecting multiple blocks, the status bar shows aggregated statistics for the selected blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613212037-fvdzgab",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613212037-fvdzgab",
+						"updated": "20260613212037"
+					},
+					"Children": [
+						{
+							"ID": "20260613212037-k0cb23o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613212037-k0cb23o",
+								"updated": "20260613212037"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Restore Global"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When the selection is cleared, the status bar returns to showing overall statistics for the current document"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-w3f5b5t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212037-w3f5b5t",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Document Details Statistics"
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-gnhm9wu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212037-gnhm9wu",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ button to the right of the document title to view complete statistics in the popup menu."
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-l0gd4ec",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613212037-l0gd4ec",
+				"updated": "20260613212056"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Stat Item Descriptions"
+				}
+			]
+		},
+		{
+			"ID": "20260613212037-u0vyr2d",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260613212037-u0vyr2d",
+				"updated": "20260613212037"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Item"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Description"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Characters"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Total number of Unicode characters in the document, including Chinese characters, letters, digits, punctuation, spaces, etc."
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Words"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Each Chinese character counts as 1; each consecutive sequence of English letters counts as 1"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Links"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Total number of hyperlinks in the document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Images"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Total number of images in the document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Refs"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Total number of block references in the document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Blocks"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Total number of content blocks in the document"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613212056-6k2vokq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613212056-6k2vokq",
+				"updated": "20260613212056"
+			}
+		}
+	]
+}

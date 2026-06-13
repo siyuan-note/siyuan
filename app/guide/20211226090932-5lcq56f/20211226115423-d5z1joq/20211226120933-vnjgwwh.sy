@@ -7,9 +7,371 @@
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
 		"type": "doc",
-		"updated": "20240508002838"
+		"updated": "20260613193945"
 	},
 	"Children": [
+		{
+			"ID": "20260613193945-kyzslnl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193945-kyzslnl",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-ihvrl5l",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193945-ihvrl5l",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全域搜尋支援查詢語法進行進階搜尋，包括 AND/OR/NOT 邏輯組合、類型過濾、字段篩選等。同時提供資料庫表直查、忽略索引和忽略搜尋等進階功能，滿足從簡單關鍵字到複雜條件的各類搜尋需求。以下子文檔將逐一介紹這些功能的詳細用法。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-7pjioog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193945-7pjioog",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "大小寫敏感"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-f8wb78d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193945-f8wb78d",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 設定 - 搜尋 - 區分大小寫 中設定。預設關閉，即搜尋 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 結果相同。開啟後搜尋將嚴格區分大小寫。切換該選項後需等待索引重建完成方可生效。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-pk2v0po",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193945-pk2v0po",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "繁簡體敏感"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-sftcfdo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193945-sftcfdo",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 設定 - 搜尋 - 區分繁簡 中設定。預設開啟，即搜尋\"經濟\"不會匹配\"經濟\"。關閉後搜尋\"經濟\"將同時匹配\"經濟\"和\"經濟\"。切換該選項後需等待索引重建完成方可生效。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-4wxkgoj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193945-4wxkgoj",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "替換"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-fkxigni",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193945-fkxigni",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "搜尋對話框整合了文字替換功能，可對搜尋結果進行批量替換。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193945-4hfyr20",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613193945-4hfyr20",
+				"updated": "20260613193945"
+			},
+			"Children": [
+				{
+					"ID": "20260613193945-0ha8zyc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193945-0ha8zyc",
+						"updated": "20260613193945"
+					},
+					"Children": [
+						{
+							"ID": "20260613193945-o4p9q8d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193945-o4p9q8d",
+								"updated": "20260613193945"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "入口"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在搜尋對話框（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​）中點擊替換圖示按鈕，展開替換輸入行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193945-hf84no5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193945-hf84no5",
+						"updated": "20260613193945"
+					},
+					"Children": [
+						{
+							"ID": "20260613193945-o6gybx0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193945-o6gybx0",
+								"updated": "20260613193945"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "替換操作"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20260613193945-sru4bx1",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613193945-sru4bx1",
+								"updated": "20260613193945"
+							},
+							"Children": [
+								{
+									"ID": "20260613193945-gs7bi13",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613193945-gs7bi13",
+										"updated": "20260613193945"
+									},
+									"Children": [
+										{
+											"ID": "20260613193945-1t3u0c8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613193945-1t3u0c8",
+												"updated": "20260613193945"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "在搜尋結果列表中選中一條記錄，點擊「↵ 替換」替換該條"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613193945-671t1ed",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613193945-671t1ed",
+										"updated": "20260613193945"
+									},
+									"Children": [
+										{
+											"ID": "20260613193945-exv52e6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613193945-exv52e6",
+												"updated": "20260613193945"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "點擊「全部替換」一次性替換當前搜尋結果中的所有匹配項"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193945-3m1fcdq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193945-3m1fcdq",
+						"updated": "20260613193945"
+					},
+					"Children": [
+						{
+							"ID": "20260613193945-wf0i28v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193945-wf0i28v",
+								"updated": "20260613193945"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "替換類型"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：點擊替換過濾器可選擇替換範圍（內容塊文字、命名、別名、備註等）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193945-iabr67h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193945-iabr67h",
+						"updated": "20260613193945"
+					},
+					"Children": [
+						{
+							"ID": "20260613193945-a1m8biq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193945-a1m8biq",
+								"updated": "20260613193945"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：替換後不支援 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+Z"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 撤銷，執行前系統會自動生成資料歷史，如需恢復請通過資料歷史回滾"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20240508002838-b2inby3",
 			"Type": "NodeParagraph",

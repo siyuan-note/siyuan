@@ -431,6 +431,26 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							confirmChannelsMu.Lock()
 							delete(confirmChannels, confirmID)
 							confirmChannelsMu.Unlock()
+
+							cancelMsg := "Operation cancelled"
+							checkpointMsgs[assistantIdx].ToolCalls[i].Result = cancelMsg
+							messages = append(messages, openai.ChatCompletionMessage{
+								Role:       openai.ChatMessageRoleTool,
+								Content:    cancelMsg,
+								ToolCallID: tc.ID,
+							})
+							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: cancelMsg})
+
+							for j := i + 1; j < len(aggregatedToolCalls); j++ {
+								checkpointMsgs[assistantIdx].ToolCalls[j].Result = cancelMsg
+								messages = append(messages, openai.ChatCompletionMessage{
+									Role:       openai.ChatMessageRoleTool,
+									Content:    cancelMsg,
+									ToolCallID: aggregatedToolCalls[j].ID,
+								})
+								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: cancelMsg})
+							}
+							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 							return
 						case <-time.After(confirmTimeout):
 							confirmChannelsMu.Lock()
@@ -452,13 +472,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								ToolCallID: tc.ID,
 							})
 							checkpointMsgs[assistantIdx].ToolCalls[i].Result = rejectionMsg
-							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 							continue
 						}
 
 						if result.always {
 							alwaysAllow["*"] = true
-							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 						}
 					}
 
@@ -470,6 +488,25 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							Type:  "error",
 							Error: "auto snapshot failed, operation aborted: " + err.Error(),
 						})
+
+						abortMsg := "Operation aborted due to snapshot failure"
+						checkpointMsgs[assistantIdx].ToolCalls[i].Result = abortMsg
+						messages = append(messages, openai.ChatCompletionMessage{
+							Role:       openai.ChatMessageRoleTool,
+							Content:    abortMsg,
+							ToolCallID: tc.ID,
+						})
+						sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: abortMsg})
+
+						for j := i + 1; j < len(aggregatedToolCalls); j++ {
+							checkpointMsgs[assistantIdx].ToolCalls[j].Result = abortMsg
+							messages = append(messages, openai.ChatCompletionMessage{
+								Role:       openai.ChatMessageRoleTool,
+								Content:    abortMsg,
+								ToolCallID: aggregatedToolCalls[j].ID,
+							})
+							sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: abortMsg})
+						}
 						saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 						return
 					}
@@ -758,13 +795,11 @@ func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, 
 					ToolCalls: toolCalls,
 				})
 				for _, tc := range cm.ToolCalls {
-					if tc.Result != "" {
-						msgs = append(msgs, openai.ChatCompletionMessage{
-							Role:       openai.ChatMessageRoleTool,
-							Content:    tc.Result,
-							ToolCallID: tc.ID,
-						})
-					}
+					msgs = append(msgs, openai.ChatCompletionMessage{
+						Role:       openai.ChatMessageRoleTool,
+						Content:    tc.Result,
+						ToolCallID: tc.ID,
+					})
 				}
 			}
 		}

@@ -811,6 +811,8 @@ func ReindexFTS() {
 	defer logging.Recover()
 
 	util.PushEndlessProgress(Conf.language(296))
+	defer util.PushClearProgress()
+
 	sql.FlushQueue()
 	FlushTxQueue()
 	if err := sql.RebuildFTSIndex(); err != nil {

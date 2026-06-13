@@ -27,9 +27,9 @@ import (
 )
 
 type AI struct {
-	MCP       *MCP       `json:"mcp"`
-	Embedding *Embedding `json:"embedding"`
-	Agent     *Agent     `json:"agent"`
+	MCP       *MCP        `json:"mcp"`
+	Embedding *Embedding  `json:"embedding"`
+	Agent     *Agent      `json:"agent"`
 	Providers []*Provider `json:"providers"`
 	Scenarios []*Scenario `json:"scenarios"`
 }
@@ -44,23 +44,23 @@ type Agent struct {
 }
 
 type Embedding struct {
-	ID          string          `json:"id,omitempty"`
-	DisplayName string          `json:"displayName,omitempty"`
-	Enabled     bool            `json:"enabled,omitempty"`
-	APIKey      string          `json:"apiKey"`
-	BaseURL     string          `json:"baseURL"`
-	Name        string          `json:"name"`
-	Timeout     int             `json:"timeout"`
+	ID          string `json:"id,omitempty"`
+	DisplayName string `json:"displayName,omitempty"`
+	Enabled     bool   `json:"enabled,omitempty"`
+	APIKey      string `json:"apiKey"`
+	BaseURL     string `json:"baseURL"`
+	Name        string `json:"name"`
+	Timeout     int    `json:"timeout"`
 }
 
 type Provider struct {
-	ID             string          `json:"id,omitempty"`
-	DisplayName    string          `json:"displayName,omitempty"`
-	Enabled        bool            `json:"enabled,omitempty"`
-	APIKey         string          `json:"apiKey"`
-	BaseURL        string          `json:"baseURL"`
-	RequestTimeout int             `json:"requestTimeout"`
-	Models         []*Model        `json:"models"`
+	ID             string   `json:"id,omitempty"`
+	DisplayName    string   `json:"displayName,omitempty"`
+	Enabled        bool     `json:"enabled,omitempty"`
+	APIKey         string   `json:"apiKey"`
+	BaseURL        string   `json:"baseURL"`
+	RequestTimeout int      `json:"requestTimeout"`
+	Models         []*Model `json:"models"`
 }
 
 type Model struct {
@@ -486,7 +486,7 @@ func migrateEmbedding(raw map[string]any) *Embedding {
 		ID:          getString(raw, "id"),
 		DisplayName: getString(raw, "name"),
 		Enabled:     getBool(raw, "enabled"),
-		APIKey:       getString(raw, "apiKey"),
+		APIKey:      getString(raw, "apiKey"),
 		BaseURL:     getString(raw, "apiBaseURL"),
 		Name:        getString(raw, "apiModel"),
 		Timeout:     getInt(raw, "apiTimeout"),

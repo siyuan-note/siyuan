@@ -266,22 +266,22 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					alwaysAllow["*"] = true
 				}
 				if len(cp.Messages) > 0 {
-				truncated := cp.Messages
-				if regenerate {
-					lastUserIdx := -1
-					for i := len(truncated) - 1; i >= 0; i-- {
-						if truncated[i].Role == "user" {
-							lastUserIdx = i
-							break
+					truncated := cp.Messages
+					if regenerate {
+						lastUserIdx := -1
+						for i := len(truncated) - 1; i >= 0; i-- {
+							if truncated[i].Role == "user" {
+								lastUserIdx = i
+								break
+							}
+						}
+						if lastUserIdx >= 0 && truncated[lastUserIdx].Content == userMessage {
+							truncated = truncated[:lastUserIdx]
 						}
 					}
-					if lastUserIdx >= 0 && truncated[lastUserIdx].Content == userMessage {
-						truncated = truncated[:lastUserIdx]
-					}
-				}
-				checkpointMsgs = truncated
-				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
-				messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references)
+					checkpointMsgs = truncated
+					checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
+					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references)
 				}
 			}
 		}
@@ -335,21 +335,20 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						keepTurns = 1
 					}
 					messages = compactMessages(messages, keepTurns)
+					checkpointMsgs = compactCheckpointMsgs(checkpointMsgs, keepTurns)
 					compactCount++
 					sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)})
 					continue
 				}
-		logging.LogErrorf("agent API request failed: %s", streamErr.Error())
-		sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
-		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
-			return
+				logging.LogErrorf("agent API request failed: %s", streamErr.Error())
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
+				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+				return
 			}
 
-		defer stream.Close()
-
-		var contentBuilder strings.Builder
-		var reasoningBuilder strings.Builder
-		var aggregatedToolCalls []openai.ToolCall
+			var contentBuilder strings.Builder
+			var reasoningBuilder strings.Builder
+			var aggregatedToolCalls []openai.ToolCall
 
 			for {
 				resp, recvErr := stream.Recv()
@@ -357,18 +356,20 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					if recvErr == io.EOF {
 						break
 					}
-			logging.LogErrorf("agent stream error: %s", recvErr.Error())
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(recvErr)})
-			content := contentBuilder.String()
-			if content != "" || reasoningBuilder.String() != "" {
-				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
-			}
-			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
-			return
+					logging.LogErrorf("agent stream error: %s", recvErr.Error())
+					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(recvErr)})
+					content := contentBuilder.String()
+					if content != "" || reasoningBuilder.String() != "" {
+						checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+					}
+					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+					stream.Close()
+					return
 				}
 
 				select {
 				case <-ctx.Done():
+					stream.Close()
 					return
 				default:
 				}
@@ -408,6 +409,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					totalCompletion += resp.Usage.CompletionTokens
 				}
 			}
+
+			stream.Close()
 
 			if len(aggregatedToolCalls) > 0 {
 				filtered := make([]openai.ToolCall, 0, len(aggregatedToolCalls))
@@ -525,40 +528,40 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						}
 					}
 
-				if !snapshotCreated && action != "" && !safeActions[action] && !(tc.Function.Name == "repo" && action == "create") {
-					id, err := kernelModel.IndexRepo("AI agent auto snapshot")
-					if err != nil {
-						logging.LogErrorf("agent auto snapshot failed: %s", err)
-						sendCriticalEvent(ctx, ch, AgentEvent{
-							Type:  "error",
-							Error: "auto snapshot failed, operation aborted: " + err.Error(),
-						})
+					if !snapshotCreated && action != "" && !safeActions[action] && !(tc.Function.Name == "repo" && action == "create") {
+						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
+						if err != nil {
+							logging.LogErrorf("agent auto snapshot failed: %s", err)
+							sendCriticalEvent(ctx, ch, AgentEvent{
+								Type:  "error",
+								Error: "auto snapshot failed, operation aborted: " + err.Error(),
+							})
 
-						abortMsg := "Operation aborted due to snapshot failure"
-						checkpointMsgs[assistantIdx].ToolCalls[i].Result = abortMsg
-						messages = append(messages, openai.ChatCompletionMessage{
-							Role:       openai.ChatMessageRoleTool,
-							Content:    wrapToolOutput(abortMsg),
-							ToolCallID: tc.ID,
-						})
-						sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: abortMsg})
-
-						for j := i + 1; j < len(aggregatedToolCalls); j++ {
-							checkpointMsgs[assistantIdx].ToolCalls[j].Result = abortMsg
+							abortMsg := "Operation aborted due to snapshot failure"
+							checkpointMsgs[assistantIdx].ToolCalls[i].Result = abortMsg
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:       openai.ChatMessageRoleTool,
 								Content:    wrapToolOutput(abortMsg),
-								ToolCallID: aggregatedToolCalls[j].ID,
+								ToolCallID: tc.ID,
 							})
-							sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: abortMsg})
+							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: abortMsg})
+
+							for j := i + 1; j < len(aggregatedToolCalls); j++ {
+								checkpointMsgs[assistantIdx].ToolCalls[j].Result = abortMsg
+								messages = append(messages, openai.ChatCompletionMessage{
+									Role:       openai.ChatMessageRoleTool,
+									Content:    wrapToolOutput(abortMsg),
+									ToolCallID: aggregatedToolCalls[j].ID,
+								})
+								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: abortMsg})
+							}
+							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+							return
 						}
-						saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
-						return
+						snapshotIDs = append(snapshotIDs, id)
+						snapshotCreated = true
+						sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", SnapshotID: id})
 					}
-					snapshotIDs = append(snapshotIDs, id)
-					snapshotCreated = true
-					sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", SnapshotID: id})
-				}
 
 					var resultStr string
 					if tc.Function.Name == "question" {
@@ -585,7 +588,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					checkpointMsgs[assistantIdx].ToolCalls[i].Result = resultStr
 
 					if tc.Function.Name != "question" {
-						sig := tc.Function.Name + "::" + tc.Function.Arguments
+						sig := tc.Function.Name + "::action=" + action
 						if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
 							doomLoop.count++
 						} else {
@@ -596,8 +599,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 				}
 
-				if doomLoop.count >= 3 {
-					errMsg := "Repetitive tool calls detected: '" + doomLoop.prevName + "' called " + fmt.Sprintf("%d", doomLoop.count) + " times with the same arguments. Operation terminated."
+				if doomLoop.count == 3 {
+					messages = append(messages, openai.ChatCompletionMessage{
+						Role:    openai.ChatMessageRoleSystem,
+						Content: "You have called '" + doomLoop.prevName + "' " + fmt.Sprintf("%d", doomLoop.count) + " times with the same action. Please try a different approach.",
+					})
+				}
+				if doomLoop.count >= 5 {
+					errMsg := "Repetitive tool calls detected: '" + doomLoop.prevName + "' called " + fmt.Sprintf("%d", doomLoop.count) + " times with the same action. Operation terminated."
 					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
 					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 					return
@@ -608,7 +617,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 					roundsSinceCheckpoint = 0
 				}
-				stream.Close()
 				continue
 			}
 
@@ -668,6 +676,9 @@ func GenerateTitle(client *openai.Client, model string, userMsg string, language
 	return title
 }
 
+// safeActions 按 action 字符串全局匹配，命中即免 UI 确认。
+// 契约：此处列出的 action 名必须代表纯只读操作。
+// 新增工具时，写操作的 action 切勿与此表冲突，否则将静默豁免确认。
 var safeActions = map[string]bool{
 	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
 	"tree_stat": true, "dom": true, "batch_get": true, "batch_kramdown": true,
@@ -725,6 +736,11 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	var answer QuestionAnswer
 	select {
 	case answer = <-ch2:
+	case <-ctx.Done():
+		questionChannelsMu.Lock()
+		delete(questionChannels, questionID)
+		questionChannelsMu.Unlock()
+		return "Question cancelled."
 	case <-time.After(timeout):
 		questionChannelsMu.Lock()
 		delete(questionChannels, questionID)
@@ -869,9 +885,13 @@ func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, 
 					ToolCalls: toolCalls,
 				})
 				for _, tc := range cm.ToolCalls {
+					result := tc.Result
+					if result == "" {
+						result = "(result unavailable)"
+					}
 					msgs = append(msgs, openai.ChatCompletionMessage{
 						Role:       openai.ChatMessageRoleTool,
-						Content:    tc.Result,
+						Content:    result,
 						ToolCallID: tc.ID,
 					})
 				}
@@ -895,8 +915,8 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		TotalDuration:    time.Now().UnixMilli() - startTime,
 		CreatedAt:        startTime,
 		UpdatedAt:        time.Now().UnixMilli(),
-		Snapshots:         snapshotIDs,
-		AlwaysAllow:       alwaysAllow["*"],
+		Snapshots:        snapshotIDs,
+		AlwaysAllow:      alwaysAllow["*"],
 	}
 
 	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID)

@@ -345,7 +345,7 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 		return writeSSEEvent(c, "done", map[string]interface{}{})
 	case "retry":
 		return writeSSEEvent(c, "retry", map[string]interface{}{
-			"attempt":   event.RetryAttempt,
+			"attempt":    event.RetryAttempt,
 			"maxRetries": event.RetryMax,
 		})
 	case "question":

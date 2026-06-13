@@ -6,7 +6,7 @@
 		"id": "20220415190432-r3xqn3r",
 		"title": "查询语法",
 		"type": "doc",
-		"updated": "20260612223915"
+		"updated": "20260613193347"
 	},
 	"Children": [
 		{
@@ -956,7 +956,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415195733-gb4mj1a",
-				"updated": "20260612223915"
+				"updated": "20260613193347"
 			},
 			"Children": [
 				{
@@ -1122,144 +1122,12 @@
 			]
 		},
 		{
-			"ID": "20220415230035-u0oui0b",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220415230035-u0oui0b",
-				"updated": "20260612223915"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "大小写敏感"
-				}
-			]
-		},
-		{
-			"ID": "20220415230042-zzlr04p",
+			"ID": "20260613193347-pfqank8",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220415230042-zzlr04p",
-				"updated": "20260612223915"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果开启了 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "搜索"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "区分大小写"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 选项，则搜索会区分大小写，默认该选项是关闭的，即不区分大小写。"
-				}
-			]
-		},
-		{
-			"ID": "20260612222345-zcidksj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612222345-zcidksj",
-				"updated": "20260612222346"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "切换该选项后需等待索引重建完成方可生效。"
-				}
-			]
-		},
-		{
-			"ID": "20260612223426-cjeshda",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20260612223426-cjeshda",
-				"updated": "20260612223436"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "繁简体敏感"
-				}
-			]
-		},
-		{
-			"ID": "20260612223426-4v74zo9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612223426-4v74zo9",
-				"updated": "20260612223433"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "默认开启了 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "搜索"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "区分繁简"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 选项，搜索\"经济\"不会匹配\"經濟\"。关闭该选项后，搜索\"经济\"将同时匹配\"经济\"和\"經濟\"。"
-				}
-			]
-		},
-		{
-			"ID": "20260612223436-zns6pg8",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260612223436-zns6pg8",
-				"updated": "20260612223436"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "切换该选项后需等待索引重建完成方可生效。"
-				}
-			]
+				"id": "20260613193347-pfqank8",
+				"updated": "20260613193347"
+			}
 		}
 	]
 }

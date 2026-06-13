@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Checkout uit momentopname uitvoeren",
     "task.database.index.full": "Index herbouwen uitvoeren",
+    "task.database.index.fts": "Zoekindex opnieuw opbouwen",
     "task.database.index": "Database-index uitvoeren",
     "task.database.index.commit": "Database-index commit uitvoeren",
     "task.database.index.ref": "Database-index verwijzing uitvoeren",
@@ -1881,6 +1882,7 @@
     "292": "Kan bestand niet aanmaken",
     "293": "Kan niet naar bestand schrijven",
     "294": "Activeringscode mag niet leeg zijn",
-    "295": "Vereist aankoop Jaarabonnement"
+    "295": "Vereist aankoop Jaarabonnement",
+    "296": "Rebuilding search index..."
   }
 }

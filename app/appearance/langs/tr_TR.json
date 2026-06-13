@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Anlık görüntüden geri yükleme işlemini gerçekleştir",
     "task.database.index.full": "Dizini yeniden oluştur",
+    "task.database.index.fts": "Arama dizinini yeniden oluştur",
     "task.database.index": "Veritabanı indekslemesini çalıştır",
     "task.database.index.commit": "Veritabanı indeksleme kaydını çalıştır",
     "task.database.index.ref": "Veritabanı indeks referansını çalıştır",
@@ -1881,6 +1882,7 @@
     "292": "Dosya oluşturulamadı",
     "293": "Dosyaya yazılamadı",
     "294": "Etkinleştirme kodu boş olamaz",
-    "295": "Bu özellik için [Yıllık Abonelik] gereklidir (zaten satın aldıysan Ayarlar - Hesap kısmından yenile veya tekrar giriş yap)"
+    "295": "Bu özellik için [Yıllık Abonelik] gereklidir (zaten satın aldıysan Ayarlar - Hesap kısmından yenile veya tekrar giriş yap)",
+    "296": "Rebuilding search index..."
   }
 }

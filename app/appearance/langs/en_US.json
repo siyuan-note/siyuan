@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Execute checkout from snapshot",
     "task.database.index.full": "Execute rebuild index",
+    "task.database.index.fts": "Rebuild search index",
     "task.database.index": "Execute database index",
     "task.database.index.commit": "Execute database index commit",
     "task.database.index.ref": "Execute database index reference",
@@ -1881,6 +1882,7 @@
     "292": "Cannot create file",
     "293": "Cannot write file",
     "294": "Activation code cannot be empty",
-    "295": "This feature requires the purchase of [Annual Subscription] (if you have already purchased, please refresh or re-login in Settings - Account)"
+    "295": "This feature requires the purchase of [Annual Subscription] (if you have already purchased, please refresh or re-login in Settings - Account)",
+    "296": "Rebuilding search index..."
   }
 }

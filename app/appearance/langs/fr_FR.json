@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Effectuer le checkout à partir d'un instantané",
     "task.database.index.full": "Exécuter l'index de reconstruction",
+    "task.database.index.fts": "Reconstruire l'index de recherche",
     "task.database.index": "Effectuer l'indexation de la base de données",
     "task.database.index.commit": "Effectuer la validation de l'index de la base de données",
     "task.database.index.ref": "Exécuter la référence d'index de la base de données",
@@ -1881,6 +1882,7 @@
     "292": "Impossible de créer le fichier",
     "293": "Impossible d'écrire le fichier",
     "294": "Le code d'activation ne peut pas être vide",
-    "295": "Cette fonctionnalité nécessite l'achat d'un [abonnement annuel] (si vous avez déjà acheté, actualisez ou reconnectez-vous dans Paramètres - Compte)"
+    "295": "Cette fonctionnalité nécessite l'achat d'un [abonnement annuel] (si vous avez déjà acheté, actualisez ou reconnectez-vous dans Paramètres - Compte)",
+    "296": "Rebuilding search index..."
   }
 }

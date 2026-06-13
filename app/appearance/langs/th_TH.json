@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "checkout สแนปช็อต",
     "task.database.index.full": "สร้างดัชนีใหม่",
+    "task.database.index.fts": "สร้างดัชนีการค้นหาใหม่",
     "task.database.index": "ดัชนีฐานข้อมูล",
     "task.database.index.commit": "commit ดัชนี",
     "task.database.index.ref": "อ้างอิงดัชนี",
@@ -1881,6 +1882,7 @@
     "292": "ไม่สามารถสร้างไฟล์ได้",
     "293": "ไม่สามารถเขียนไฟล์ได้",
     "294": "รหัสเปิดใช้ไม่สามารถว่างได้",
-    "295": "ต้องซื้อสมัครรายปี"
+    "295": "ต้องซื้อสมัครรายปี",
+    "296": "Rebuilding search index..."
   }
 }

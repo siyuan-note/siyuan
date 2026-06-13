@@ -114,98 +114,59 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
-        openAI: IOpenAI;
-        providers?: IOpenAI[];
+        mcp?: IMCP;
+        embedding?: IEmbedding;
+        agent?: IAgent;
+        providers?: IProvider[];
     }
 
     /**
-     * Open AI related configuration
+     * AI agent global settings
      */
-    export interface IOpenAI {
-        /**
-         * Immutable unique identifier
-         */
+    export interface IAgent {
+        sessionTimeout: number;
+        confirmTimeout: number;
+        maxRetries: number;
+    }
+
+    /**
+     * Embedding model configuration
+     */
+    export interface IEmbedding {
         id?: string;
-        /**
-         * Display name, defaults to apiModel
-         */
-        name?: string;
-        /**
-         * API base URL
-         */
-        apiBaseURL: string;
-        /**
-         * API key
-         */
-        apiKey: string;
-        /**
-         * The maximum number of contexts passed when requesting the API
-         */
-        apiMaxContexts: number;
-        /**
-         * Maximum number of tokens (0 means no limit)
-         */
-        apiMaxTokens: number;
-        /**
-         * The model name called by the API
-         */
-        apiModel: TOpenAIAPIModel;
-        /**
-         * API Provider
-         * OpenAI, Azure
-         */
-        apiProvider: TOpenAAPIProvider;
-        /**
-         * API request proxy address
-         */
-        apiProxy: string;
-        /**
-         * Parameter `temperature` that controls the randomness of the generated text
-         */
-        apiTemperature: number;
-        /**
-         * API request timeout (unit: seconds)
-         */
-        apiTimeout: number;
-        /**
-         * Agent total session timeout (unit: seconds, 0 = no limit)
-         */
-        agentTimeout?: number;
-        /**
-         * Agent confirmation timeout (unit: seconds), auto-rejects on timeout
-         */
-        agentConfirmTimeout?: number;
-        /**
-         * Agent API maximum retry attempts on failure
-         */
-        agentMaxRetries?: number;
-        /**
-         * API request additional user agent field
-         */
-        apiUserAgent: string;
-        /**
-         * API version number
-         */
-        apiVersion: string;
-        /**
-         * Provider type: empty or "chat" = chat model, "embedding" = embedding model
-         */
-        type?: string;
-        /**
-         * Whether this provider is enabled
-         */
+        displayName?: string;
         enabled?: boolean;
+        apiKey: string;
+        baseURL: string;
+        name: string;
+        timeout: number;
     }
 
     /**
-     * The model name called by the API
+     * AI provider configuration
      */
-    export type TOpenAIAPIModel = "gpt-4" | "gpt-4-32k" | "gpt-3.5-turbo" | "gpt-3.5-turbo-16k";
+    export interface IProvider {
+        id?: string;
+        displayName?: string;
+        enabled?: boolean;
+        apiKey: string;
+        baseURL: string;
+        requestTimeout: number;
+        models?: IModel[];
+    }
 
     /**
-     * API Provider
+     * AI model configuration
      */
-    export type TOpenAAPIProvider = "OpenAI" | "Azure";
+    export interface IModel {
+        id?: string;
+        displayName?: string;
+        enabled?: boolean;
+        name: string;
+        maxTokens: number;
+        temperature: number;
+        maxContexts: number;
+    }
 
     /**
      * SiYuan API related configuration

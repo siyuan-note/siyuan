@@ -253,6 +253,16 @@ func initFTSBlocks() (err error) {
 	return
 }
 
+func RebuildFTSIndex() (err error) {
+	if err = initFTSBlocks(); err != nil {
+		return
+	}
+
+	stmt := "INSERT INTO blocks_fts (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) SELECT id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated FROM blocks"
+	_, err = db.Exec(stmt)
+	return
+}
+
 func initDBConnection() {
 	closeDatabase()
 

@@ -375,7 +375,7 @@ export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => voi
             cb();
         }
     }).element);
-    if (window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey) {
+    if (window.siyuan.config.ai.embedding?.apiKey) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconSparkles",
             label: window.siyuan.languages.semanticSearch,
@@ -589,7 +589,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
             updateSearchResult(config, element, true);
         }
     }];
-    if (window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey) {
+    if (window.siyuan.config.ai.embedding?.apiKey) {
         searchMethodSubmenu.push({
             icon: "iconSparkles",
             label: window.siyuan.languages.semanticSearch,

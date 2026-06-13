@@ -1555,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Esegui checkout dall'istantanea",
     "task.database.index.full": "Esegui ricostruzione indice",
+    "task.database.index.fts": "Ricostruisci indice di ricerca",
     "task.database.index": "Esegui indice database",
     "task.database.index.commit": "Esegui commit indice database",
     "task.database.index.ref": "Esegui indice riferimento database",
@@ -1881,6 +1882,7 @@
     "292": "Impossibile creare il file",
     "293": "Impossibile scrivere il file",
     "294": "Il codice di attivazione non può essere vuoto",
-    "295": "Questa funzione è disponibile solo con l'acquisto di [abbonamento annuale] (se hai già acquistato, aggiorna o accedi nuovamente in Impostazioni - Account)"
+    "295": "Questa funzione è disponibile solo con l'acquisto di [abbonamento annuale] (se hai già acquistato, aggiorna o accedi nuovamente in Impostazioni - Account)",
+    "296": "Rebuilding search index..."
   }
 }

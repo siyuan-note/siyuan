@@ -87,10 +87,17 @@ func agentChat(c *gin.Context) {
 
 	var eventCh <-chan agent.AgentEvent
 
-	eventCh = agent.AgentChat(context.Background(), client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.Regenerate, confirmTimeout, maxRetries)
+	ctx, cancel := context.WithCancel(c.Request.Context())
+	defer cancel()
+	eventCh = agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.Regenerate, confirmTimeout, maxRetries)
 	sessionsMu.Lock()
 	runningSessions[req.SessionID] = &runningSession{eventCh: eventCh}
 	sessionsMu.Unlock()
+	defer func() {
+		sessionsMu.Lock()
+		delete(runningSessions, req.SessionID)
+		sessionsMu.Unlock()
+	}()
 
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")

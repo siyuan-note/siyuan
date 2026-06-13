@@ -35,9 +35,12 @@ type AI struct {
 }
 
 type Agent struct {
-	SessionTimeout int `json:"sessionTimeout"`
-	ConfirmTimeout int `json:"confirmTimeout"`
-	MaxRetries     int `json:"maxRetries"`
+	SessionTimeout      int     `json:"sessionTimeout"`
+	ConfirmTimeout      int     `json:"confirmTimeout"`
+	MaxRetries          int     `json:"maxRetries"`
+	Temperature         float64 `json:"temperature"`
+	MaxCompletionTokens int     `json:"maxCompletionTokens"`
+	MaxToolCallRounds   int     `json:"maxToolCallRounds"`
 }
 
 type Embedding struct {
@@ -88,9 +91,12 @@ type MCPServer struct {
 func NewAI() *AI {
 	ai := &AI{
 		Agent: &Agent{
-			SessionTimeout: 600,
-			ConfirmTimeout: 120,
-			MaxRetries:     3,
+			SessionTimeout:      600,
+			ConfirmTimeout:      120,
+			MaxRetries:          3,
+			Temperature:         1.0,
+			MaxCompletionTokens: 4096,
+			MaxToolCallRounds:   64,
 		},
 	}
 
@@ -146,6 +152,21 @@ func NewAI() *AI {
 	if agentMaxRetries := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_RETRIES"); "" != agentMaxRetries {
 		if v, err := strconv.Atoi(agentMaxRetries); err == nil {
 			ai.Agent.MaxRetries = v
+		}
+	}
+	if agentTemperature := os.Getenv("SIYUAN_OPENAI_AGENT_TEMPERATURE"); "" != agentTemperature {
+		if v, err := strconv.ParseFloat(agentTemperature, 64); err == nil {
+			ai.Agent.Temperature = v
+		}
+	}
+	if agentMaxCompletionTokens := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_COMPLETION_TOKENS"); "" != agentMaxCompletionTokens {
+		if v, err := strconv.Atoi(agentMaxCompletionTokens); err == nil {
+			ai.Agent.MaxCompletionTokens = v
+		}
+	}
+	if agentMaxToolCallRounds := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_TOOL_CALL_ROUNDS"); "" != agentMaxToolCallRounds {
+		if v, err := strconv.Atoi(agentMaxToolCallRounds); err == nil {
+			ai.Agent.MaxToolCallRounds = v
 		}
 	}
 

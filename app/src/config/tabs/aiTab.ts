@@ -1,111 +1,150 @@
 import type {SettingTabBuilder} from "../setting/builder";
+import {
+    genProvidersBlockHtml,
+    getProvidersBlockKeywords,
+    mountProvidersBlock,
+    genModelPickerHtml,
+    getModelPickerKeywords,
+    mountModelPickerBlock,
+    genMcpServersBlockHtml,
+    getMcpServersBlockKeywords,
+    mountMcpServersBlock,
+} from "./aiUi";
 
-const registerAiServiceGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("service", window.siyuan.languages.configGroupServiceConnection);
+const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("providers", window.siyuan.languages.apiProvider);
 
-    group.select("ai.openAI.apiProvider", {
-        title: window.siyuan.languages.apiProvider,
-        desc: window.siyuan.languages.apiProviderTip,
-        options: [
-            {value: "OpenAI"},
-            {value: "Azure"},
-        ],
-        afterMount: bindApiProviderToggle,
-    });
-    group.textBlock("ai.openAI.apiBaseURL", {
-        title: window.siyuan.languages.apiBaseURL,
-        desc: window.siyuan.languages.apiBaseURLTip,
-        mode: "input-text",
-    });
-    group.textBlock("ai.openAI.apiKey", {
-        title: window.siyuan.languages.apiKey,
-        desc: window.siyuan.languages.apiKeyTip,
-        mode: "input-password",
-    });
-    group.textBlock("ai.openAI.apiVersion", {
-        title: window.siyuan.languages.apiVersion,
-        desc: window.siyuan.languages.apiVersionTip,
-        mode: "input-text",
-    });
-    group.textBlock("ai.openAI.apiProxy", {
-        title: window.siyuan.languages.apiProxy,
-        desc: window.siyuan.languages.apiProxyTip,
-        mode: "input-text",
-    });
-    group.textBlock("ai.openAI.apiUserAgent", {
-        title: "User-Agent",
-        desc: window.siyuan.languages.apiUserAgentTip,
-        mode: "input-text",
+    group.slot({
+        key: "providers",
+        keywords: getProvidersBlockKeywords(),
+        html: genProvidersBlockHtml,
+        afterMount: mountProvidersBlock,
     });
 };
 
-const bindApiProviderToggle = (root: HTMLElement) => {
-    const providerSelect = root.querySelector<HTMLSelectElement>(`#${CSS.escape("ai.openAI.apiProvider")}`);
-    if (!providerSelect) {
-        return;
-    }
-    const toggleVersionWrap = () => {
-        root.querySelector(`#${CSS.escape("ai.openAI.apiVersion")}`)?.closest(".config-item")?.classList.toggle("fn__none", providerSelect.value !== "Azure");
-    };
-    providerSelect.addEventListener("change", toggleVersionWrap);
-    toggleVersionWrap();
-};
+const registerAiEditingGroup = (tab: SettingTabBuilder) => {
+    const groupId = "editing";
+    const group = tab.group(groupId, window.siyuan.languages.editor);
 
-const registerAiModelGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("model", window.siyuan.languages.configGroupModelParameters);
-
-    group.textBlock("ai.openAI.apiModel", {
-        title: window.siyuan.languages.apiModel,
-        desc: window.siyuan.languages.apiModelTip,
-        mode: "input-text",
+    group.slot({
+        key: "editingModelPicker",
+        keywords: getModelPickerKeywords(groupId),
+        html: () => genModelPickerHtml(groupId),
+        afterMount: (root) => mountModelPickerBlock(root, groupId),
     });
-    group.number("ai.openAI.apiTimeout", {
-        title: window.siyuan.languages.apiTimeout,
-        desc: window.siyuan.languages.apiTimeoutTip,
-        min: 5,
-        max: 600,
-        unit: "s",
-    });
-    group.number("ai.openAI.apiMaxTokens", {
+    group.number("ai.editing.maxCompletionTokens", {
         title: window.siyuan.languages.apiMaxTokens,
         desc: window.siyuan.languages.apiMaxTokensTip,
         min: 0,
     });
-    group.number("ai.openAI.apiMaxContexts", {
+    group.number("ai.editing.maxHistoryMessages", {
         title: window.siyuan.languages.apiMaxContexts,
         desc: window.siyuan.languages.apiMaxContextsTip,
         min: 1,
         max: 64,
     });
-    group.number("ai.openAI.apiTemperature", {
+    group.number("ai.editing.temperature", {
         title: window.siyuan.languages.apiTemperature,
         desc: window.siyuan.languages.apiTemperatureTip,
         min: 0,
         max: 2,
         step: "0.1",
     });
-    group.number("ai.openAI.agentTimeout", {
+};
+
+const registerAiAgentGroup = (tab: SettingTabBuilder) => {
+    const groupId = "agent";
+    const group = tab.group(groupId, window.siyuan.languages.agentChat);
+
+    group.slot({
+        key: "agentModelPicker",
+        keywords: getModelPickerKeywords(groupId),
+        html: () => genModelPickerHtml(groupId),
+        afterMount: (root) => mountModelPickerBlock(root, groupId),
+    });
+    group.number("ai.agent.maxCompletionTokens", {
+        title: window.siyuan.languages.apiMaxTokens,
+        desc: window.siyuan.languages.apiMaxTokensTip,
+        min: 0,
+    });
+    group.number("ai.agent.maxToolCallRounds", {
+        title: window.siyuan.languages.agentMaxToolCallRounds,
+        desc: window.siyuan.languages.agentMaxToolCallRoundsTip,
+        min: 0,
+    });
+    group.number("ai.agent.temperature", {
+        title: window.siyuan.languages.apiTemperature,
+        desc: window.siyuan.languages.apiTemperatureTip,
+        min: 0,
+        max: 2,
+        step: "0.1",
+    });
+    group.number("ai.agent.sessionTimeout", {
         title: window.siyuan.languages.agentTimeout,
         desc: window.siyuan.languages.agentTimeoutTip,
         min: 0,
+        max: 3600,
         unit: "s",
     });
-    group.number("ai.openAI.agentConfirmTimeout", {
+    group.number("ai.agent.confirmTimeout", {
         title: window.siyuan.languages.agentConfirmTimeout,
         desc: window.siyuan.languages.agentConfirmTimeoutTip,
-        min: 10,
-        max: 600,
+        min: 0,
         unit: "s",
     });
-    group.number("ai.openAI.agentMaxRetries", {
+    group.number("ai.agent.maxRetries", {
         title: window.siyuan.languages.agentMaxRetries,
         desc: window.siyuan.languages.agentMaxRetriesTip,
         min: 0,
-        max: 10,
+    });
+};
+
+const registerAiMcpGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("mcp", "智能体 MCP 服务");
+
+    group.slot({
+        key: "mcpServers",
+        keywords: getMcpServersBlockKeywords(),
+        html: genMcpServersBlockHtml,
+        afterMount: mountMcpServersBlock,
+    });
+};
+
+const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("embedding", "嵌入模型");
+
+    group.switch("ai.embedding.enabled", {
+        title: window.siyuan.languages.semanticSearch,
+        desc: window.siyuan.languages.semanticSearchTip,
+    });
+    group.textBlock("ai.embedding.baseURL", {
+        title: window.siyuan.languages.apiBaseURL,
+        desc: window.siyuan.languages.apiBaseURLTip,
+        mode: "input-text",
+    });
+    group.textBlock("ai.embedding.apiKey", {
+        title: window.siyuan.languages.apiKey,
+        desc: window.siyuan.languages.apiKeyTip,
+        mode: "input-password",
+    });
+    group.textBlock("ai.embedding.name", {
+        title: window.siyuan.languages.apiModel,
+        desc: window.siyuan.languages.apiModelTip,
+        mode: "input-text",
+    });
+    group.number("ai.embedding.timeout", {
+        title: window.siyuan.languages.apiTimeout,
+        desc: window.siyuan.languages.apiTimeoutTip,
+        min: 1,
+        unit: "s",
     });
 };
 
 export const registerAiTab = (tab: SettingTabBuilder) => {
-    registerAiServiceGroup(tab);
-    registerAiModelGroup(tab);
+    registerAiProvidersGroup(tab);
+    registerAiEditingGroup(tab);
+    registerAiAgentGroup(tab);
+    registerAiMcpGroup(tab);
+    // TODO: add skills group?
+    registerAiEmbeddingGroup(tab);
 };

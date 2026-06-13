@@ -43,6 +43,8 @@ type ControlSpecBase = {
     desc?: string;
     save?: SaveFn;
     afterMount?: (root: HTMLElement) => void | Promise<void>;
+    /** 省略时按控件 id 从 config 读取；嵌套 / 派生项需显式传入 */
+    readConfig?: () => unknown;
 };
 type SwitchSpec = ControlSpecBase;
 type NumberSpec = ControlSpecBase & {
@@ -250,7 +252,9 @@ class SettingGroupBuilder<TId extends string> {
     }
 
     switch(id: string, spec: SwitchSpec) {
-        return this.registerFullItem(id, spec, controlBoolean(id));
+        return this.registerFullItem(id, spec, controlBoolean(id, {
+            readConfig: spec.readConfig as (() => boolean) | undefined,
+        }));
     }
 
     number(id: string, spec: NumberSpec) {
@@ -259,6 +263,7 @@ class SettingGroupBuilder<TId extends string> {
             max: spec.max,
             step: spec.step,
             unit: spec.unit,
+            readConfig: spec.readConfig as (() => number) | undefined,
         }));
     }
 
@@ -267,6 +272,7 @@ class SettingGroupBuilder<TId extends string> {
             min: spec.min,
             max: spec.max,
             step: spec.step,
+            readConfig: spec.readConfig as (() => number) | undefined,
         }));
     }
 
@@ -278,11 +284,16 @@ class SettingGroupBuilder<TId extends string> {
     }
 
     text(id: string, spec: TextSpec) {
-        return this.registerFullItem(id, spec, controlString(id));
+        return this.registerFullItem(id, spec, controlString(id, {
+            readConfig: spec.readConfig as (() => string) | undefined,
+        }));
     }
 
     textBlock(id: string, spec: TextBlockSpec) {
-        return this.registerFullItem(id, spec, controlTextBlock(id, {mode: spec.mode}));
+        return this.registerFullItem(id, spec, controlTextBlock(id, {
+            mode: spec.mode,
+            readConfig: spec.readConfig as (() => string) | undefined,
+        }));
     }
 
     textPair(spec: TextPairSpec) {

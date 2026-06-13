@@ -70,7 +70,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             /// #if !MOBILE
             // 临时：启动后直接打开设置
             window.setTimeout(() => {
-                openSetting(app);
+                openSetting(app, "ai");
             }, 0);
             /// #endif
         } catch (e) {

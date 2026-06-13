@@ -189,6 +189,9 @@ export abstract class Constants {
     public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 锁屏密码
     public static readonly DIALOG_AICUSTOMACTION = "dialog-aicustomaction"; // AI 自定义操作
     public static readonly DIALOG_AIUPDATECUSTOMACTION = "dialog-aiupdatecustomaction"; // 更新 AI 自定义操作
+    public static readonly DIALOG_AIPROVIDER = "dialog-aiprovider"; // AI 提供商设置
+    public static readonly DIALOG_AIMODEL = "dialog-aimodel"; // AI 模型设置
+    public static readonly DIALOG_AIMCPSERVER = "dialog-aimcpserver"; // AI MCP 服务设置
     public static readonly DIALOG_BACKGROUNDLINK = "dialog-backgroundlink"; // 题头图-随机
     public static readonly DIALOG_BACKGROUNDRANDOM = "dialog-backgroundrandom"; // 题头图-链接
     public static readonly DIALOG_CHANGELOG = "dialog-changelog"; // 更新日志
@@ -803,7 +806,7 @@ export abstract class Constants {
 <path fill="#fff" opacity="0.8" d="M15.38 1.591c0.047 0.016 0.101 0.026 0.158 0.026 0.276 0 0.499-0.224 0.499-0.499 0-0.219-0.141-0.406-0.338-0.473l-0.004-0.001c-0.047-0.016-0.101-0.026-0.158-0.026-0.276 0-0.499 0.224-0.499 0.499 0 0.219 0.141 0.406 0.338 0.473l0.004 0.001z"></path>
 <path fill="#ffdeeb" d="M25.732 8.268c-2.393-2.371-6.249-2.371-8.642 0l-1.089 1.085-1.079-1.089c-2.38-2.39-6.249-2.393-8.639-0.013s-2.393 6.249-0.013 8.639l2.158 2.158 6.474 6.464c0.596 0.593 1.562 0.593 2.158 0l6.474-6.464 2.193-2.158c2.384-2.383 2.384-6.242 0.003-8.622z"></path>
 <path fill="#fff" d="M17.081 8.268l-1.079 1.085-1.079-1.089c-2.38-2.39-6.249-2.393-8.639-0.013s-2.393 6.249-0.013 8.639l2.158 2.158 2.548 2.487c4.097-1.044 7.627-3.646 9.837-7.254 1.424-2.271 2.284-4.848 2.503-7.518-2.193-0.715-4.606-0.132-6.236 1.504z"></path>
-</svg>`
+</svg>`;
 
     // assets
     public static readonly SIYUAN_ASSETS_IMAGE: string[] = [".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif", ".tiff", ".tif"];

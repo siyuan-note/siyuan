@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Zatwierdź",
   "agentConfirmReject": "Odrzuć",
   "agentConfirmAlways": "Zezwól sesję",
-  "agentConfirmAlwaysDesc": "Nie pytaj ponownie w tej sesji",
+  "agentConfirmAlwaysDesc": "Nie pytaj ponownie o żadną operację w tej sesji",
   "agentTimeout": "Limit czasu agenta",
   "agentTimeoutTip": "Całkowity limit czasu sesji agenta, 0 = bez limitu",
   "agentConfirmTimeout": "Limit czasu potwierdzenia",

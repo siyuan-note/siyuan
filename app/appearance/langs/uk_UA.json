@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Підтвердити",
   "agentConfirmReject": "Відхилити",
   "agentConfirmAlways": "Дозволити сесію",
-  "agentConfirmAlwaysDesc": "Більше не питати в цій сесії",
+  "agentConfirmAlwaysDesc": "Більше не питати про жодні операції в цій сесії",
   "agentTimeout": "Таймаут агента",
   "agentTimeoutTip": "Загальний таймаут сесії агента, 0 = без обмежень",
   "agentConfirmTimeout": "Таймаут підтвердження",

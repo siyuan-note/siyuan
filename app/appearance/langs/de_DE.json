@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Genehmigen",
   "agentConfirmReject": "Ablehnen",
   "agentConfirmAlways": "Sitzung erlauben",
-  "agentConfirmAlwaysDesc": "In dieser Sitzung nicht erneut fragen",
+  "agentConfirmAlwaysDesc": "In dieser Sitzung für keine Operation erneut fragen",
   "agentTimeout": "Agent-Timeout",
   "agentTimeoutTip": "Gesamt-Timeout der Agent-Sitzung, 0 = kein Limit",
   "agentConfirmTimeout": "Bestätigungs-Timeout",

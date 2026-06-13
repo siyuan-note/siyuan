@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Setujui",
   "agentConfirmReject": "Tolak",
   "agentConfirmAlways": "Izinkan sesi",
-  "agentConfirmAlwaysDesc": "Jangan tanya lagi di sesi ini",
+  "agentConfirmAlwaysDesc": "Jangan tanya lagi untuk operasi apa pun di sesi ini",
   "agentTimeout": "Batas waktu agen",
   "agentTimeoutTip": "Batas waktu total sesi agen, 0 = tanpa batas",
   "agentConfirmTimeout": "Batas waktu konfirmasi",

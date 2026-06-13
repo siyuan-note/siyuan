@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Onayla",
   "agentConfirmReject": "Reddet",
   "agentConfirmAlways": "Oturuma izin ver",
-  "agentConfirmAlwaysDesc": "Bu oturumda tekrar sorma",
+  "agentConfirmAlwaysDesc": "Bu oturumda hiçbir işlem için tekrar sorma",
   "agentTimeout": "Agent zaman aşımı",
   "agentTimeoutTip": "Agent oturumu toplam zaman aşımı, 0 = sınırsız",
   "agentConfirmTimeout": "Onay zaman aşımı",

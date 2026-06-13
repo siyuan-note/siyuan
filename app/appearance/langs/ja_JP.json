@@ -32,7 +32,7 @@
   "agentConfirmApprove": "承認",
   "agentConfirmReject": "拒否",
   "agentConfirmAlways": "セッション許可",
-  "agentConfirmAlwaysDesc": "このセッションでは再度確認しない",
+  "agentConfirmAlwaysDesc": "このセッションではいかなる操作も確認しない",
   "agentTimeout": "エージェント タイムアウト",
   "agentTimeoutTip": "エージェント セッション全体のタイムアウト、0 は制限なし",
   "agentConfirmTimeout": "確認タイムアウト",

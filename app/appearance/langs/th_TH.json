@@ -32,7 +32,7 @@
   "agentConfirmApprove": "อนุมัติ",
   "agentConfirmReject": "ปฏิเสธ",
   "agentConfirmAlways": "อนุญาตเซสชัน",
-  "agentConfirmAlwaysDesc": "ไม่ต้องถามอีกในเซสชันนี้",
+  "agentConfirmAlwaysDesc": "ไม่ต้องถามอีกสำหรับการดำเนินการใดๆ ในเซสชันนี้",
   "agentTimeout": "หมดเวลาเอเจนต์",
   "agentTimeoutTip": "หมดเวลารวมของเซสชันเอเจนต์, 0 = ไม่จำกัด",
   "agentConfirmTimeout": "หมดเวลายืนยัน",

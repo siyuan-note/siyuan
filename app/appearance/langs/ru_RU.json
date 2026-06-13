@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Одобрить",
   "agentConfirmReject": "Отклонить",
   "agentConfirmAlways": "Разрешить сессию",
-  "agentConfirmAlwaysDesc": "Больше не спрашивать в этой сессии",
+  "agentConfirmAlwaysDesc": "Больше не спрашивать ни о каких операциях в этой сессии",
   "agentTimeout": "Тайм-аут агента",
   "agentTimeoutTip": "Общий тайм-аут сессии агента, 0 = без ограничения",
   "agentConfirmTimeout": "Тайм-аут подтверждения",

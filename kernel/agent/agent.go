@@ -217,6 +217,7 @@ type agentCheckpoint struct {
 	MessageHistory   []string                 `json:"messageHistory,omitempty"`
 	ThinkingSteps    []checkpointThinkingStep `json:"thinkingSteps,omitempty"`
 	Snapshots        []string                 `json:"snapshots,omitempty"`
+	AlwaysAllow      bool                     `json:"alwaysAllow,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
@@ -246,7 +247,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var snapshotIDs []string
 
 		if sessionID != "" {
-			if cp := loadCheckpoint(sessionID); cp != nil && len(cp.Messages) > 0 {
+			if cp := loadCheckpoint(sessionID); cp != nil {
+				if cp.AlwaysAllow {
+					alwaysAllow["*"] = true
+				}
+				if len(cp.Messages) > 0 {
 				truncated := cp.Messages
 				if regenerate {
 					lastUserIdx := -1
@@ -263,6 +268,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				checkpointMsgs = truncated
 				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
 				messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references)
+				}
 			}
 		}
 
@@ -308,7 +314,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				}
 		logging.LogErrorf("agent API request failed: %s", streamErr.Error())
 		sendEvent(ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
-		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
+		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 			return
 			}
 
@@ -446,12 +452,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								ToolCallID: tc.ID,
 							})
 							checkpointMsgs[assistantIdx].ToolCalls[i].Result = rejectionMsg
-							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
+							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 							continue
 						}
 
 						if result.always {
-							alwaysAllow[tc.Function.Name+"::"+action] = true
+							alwaysAllow["*"] = true
+							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 						}
 					}
 
@@ -463,7 +470,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							Type:  "error",
 							Error: "auto snapshot failed, operation aborted: " + err.Error(),
 						})
-						saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
+						saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 						return
 					}
 					snapshotIDs = append(snapshotIDs, id)
@@ -514,7 +521,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					doomLoop = doomLoopTracker{}
 				}
 
-				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
+				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 				continue
 			}
 
@@ -522,7 +529,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			if content != "" {
 				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
 			}
-			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
+			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 			if content == "" {
 				content = " "
 			}
@@ -538,7 +545,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		}
 
 		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion})
-		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs)
+		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 		sendEvent(ch, AgentEvent{Type: "done"})
 	}()
 
@@ -587,6 +594,9 @@ var safeActions = map[string]bool{
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
+	if alwaysAllow["*"] {
+		return false
+	}
 	if action == "" {
 		return false
 	}
@@ -762,7 +772,7 @@ func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, 
 	return msgs
 }
 
-func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string) {
+func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
 	if sessionID == "" {
 		return
 	}
@@ -777,6 +787,7 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		CreatedAt:        startTime,
 		UpdatedAt:        time.Now().UnixMilli(),
 		Snapshots:         snapshotIDs,
+		AlwaysAllow:       alwaysAllow["*"],
 	}
 
 	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID)

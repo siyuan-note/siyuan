@@ -32,7 +32,7 @@
   "agentConfirmApprove": "確認執行",
   "agentConfirmReject": "拒絕",
   "agentConfirmAlways": "會話允許",
-  "agentConfirmAlwaysDesc": "本次會話中後續不再詢問此操作",
+  "agentConfirmAlwaysDesc": "本次會話中不再詢問任何確認",
   "agentTimeout": "智能體超時時間",
   "agentTimeoutTip": "智能體會話總超時時間，0 表示不限制",
   "agentConfirmTimeout": "確認超時時間",

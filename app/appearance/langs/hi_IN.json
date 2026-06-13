@@ -32,7 +32,7 @@
   "agentConfirmApprove": "स्वीकृत करें",
   "agentConfirmReject": "अस्वीकृत करें",
   "agentConfirmAlways": "सत्र अनुमति दें",
-  "agentConfirmAlwaysDesc": "इस सत्र में दोबारा न पूछें",
+  "agentConfirmAlwaysDesc": "इस सत्र में किसी भी कार्रवाई के लिए दोबारा न पूछें",
   "agentTimeout": "एजेंट समय समाप्ति",
   "agentTimeoutTip": "एजेंट सत्र की कुल समय सीमा, 0 = कोई सीमा नहीं",
   "agentConfirmTimeout": "पुष्टि समय समाप्ति",

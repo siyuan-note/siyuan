@@ -32,7 +32,7 @@
   "agentConfirmApprove": "موافقة",
   "agentConfirmReject": "رفض",
   "agentConfirmAlways": "السماح بالجلسة",
-  "agentConfirmAlwaysDesc": "لا تسأل مرة أخرى في هذه الجلسة",
+  "agentConfirmAlwaysDesc": "لا تسأل عن أي عملية في هذه الجلسة",
   "agentTimeout": "مهلة الوكيل",
   "agentTimeoutTip": "إجمالي مهلة جلسة الوكيل، 0 = بلا حد",
   "agentConfirmTimeout": "مهلة التأكيد",

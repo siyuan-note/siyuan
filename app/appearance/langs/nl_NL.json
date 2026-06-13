@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Goedkeuren",
   "agentConfirmReject": "Afwijzen",
   "agentConfirmAlways": "Sessie toestaan",
-  "agentConfirmAlwaysDesc": "Niet opnieuw vragen deze sessie",
+  "agentConfirmAlwaysDesc": "Niet meer vragen voor enige operatie deze sessie",
   "agentTimeout": "Time-out agent",
   "agentTimeoutTip": "Totale time-out van de agentsessie, 0 = geen limiet",
   "agentConfirmTimeout": "Bevestigingstime-out",

@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Approva",
   "agentConfirmReject": "Rifiuta",
   "agentConfirmAlways": "Consenti sessione",
-  "agentConfirmAlwaysDesc": "Non chiedere più in questa sessione",
+  "agentConfirmAlwaysDesc": "Non chiedere più per nessuna operazione in questa sessione",
   "agentTimeout": "Timeout agente",
   "agentTimeoutTip": "Timeout totale della sessione agente, 0 = nessun limite",
   "agentConfirmTimeout": "Timeout conferma",

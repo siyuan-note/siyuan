@@ -32,7 +32,7 @@
   "agentConfirmApprove": "אשר",
   "agentConfirmReject": "דחה",
   "agentConfirmAlways": "אפשר הפעלה",
-  "agentConfirmAlwaysDesc": "אל תשאל שוב בהפעלה זו",
+  "agentConfirmAlwaysDesc": "אל תשאל שוב על שום פעולה בהפעלה זו",
   "agentTimeout": "פג זמן סוכן",
   "agentTimeoutTip": "זמן קצוב כולל להפעלת הסוכן, 0 = ללא הגבלה",
   "agentConfirmTimeout": "פג זמן אישור",

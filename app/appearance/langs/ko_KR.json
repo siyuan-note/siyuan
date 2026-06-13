@@ -32,7 +32,7 @@
   "agentConfirmApprove": "승인",
   "agentConfirmReject": "거부",
   "agentConfirmAlways": "세션 허용",
-  "agentConfirmAlwaysDesc": "이 세션에서 다시 묻지 않음",
+  "agentConfirmAlwaysDesc": "이 세션에서 모든 작업에 대해 다시 묻지 않음",
   "agentTimeout": "에이전트 시간 초과",
   "agentTimeoutTip": "에이전트 세션 전체 시간 초과, 0 은 제한 없음",
   "agentConfirmTimeout": "확인 시간 초과",

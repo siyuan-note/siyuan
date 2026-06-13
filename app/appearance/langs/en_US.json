@@ -32,7 +32,7 @@
   "agentConfirmApprove": "Approve",
   "agentConfirmReject": "Reject",
   "agentConfirmAlways": "Session Allow",
-  "agentConfirmAlwaysDesc": "Don't ask again in this session",
+  "agentConfirmAlwaysDesc": "Don't ask again for any operations in this session",
   "agentTimeout": "Agent Timeout",
   "agentTimeoutTip": "0 = no limit",
   "agentConfirmTimeout": "Confirm Timeout",

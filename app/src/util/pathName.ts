@@ -27,9 +27,9 @@ export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string)
 };
 
 /**
- * parse siyuan://blocks/20221031001313-rk7sd0e?focus=1&fullscreen=1
+ * Parse siyuan://blocks/20221031001313-rk7sd0e?focus=1&fullscreen=1
  * @param url - the siyuan block url to parse
- * @return the block id and other info, or null if the url is not a valid siyuan block url
+ * @returns the block id and other info, or null if the url is not a valid siyuan block url
  */
 export const parseSYProtocolBlockInfo = (url: URL | string | null | undefined): ISYProtocolBlocksInfo | null => {
     try {

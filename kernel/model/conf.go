@@ -560,9 +560,12 @@ func InitConf() {
 	}
 	if nil == Conf.AI.Agent {
 		Conf.AI.Agent = &conf.Agent{
-			SessionTimeout: 600,
-			ConfirmTimeout: 120,
-			MaxRetries:     3,
+			SessionTimeout:      600,
+			ConfirmTimeout:      120,
+			MaxRetries:          3,
+			Temperature:         1.0,
+			MaxCompletionTokens: 4096,
+			MaxToolCallRounds:   64,
 		}
 	}
 	for _, p := range Conf.AI.Providers {
@@ -627,6 +630,16 @@ func InitConf() {
 	}
 
 	Conf.AI.Normalize()
+
+	if len(Conf.AI.Scenarios) == 0 {
+		_, m := Conf.AI.GetModel("")
+		if m != nil && m.ID != "" {
+			Conf.AI.Scenarios = []*conf.Scenario{
+				{Name: conf.ScenarioChat, Model: m.ID},
+				{Name: conf.ScenarioAgent, Model: m.ID},
+			}
+		}
+	}
 
 	Conf.ReadOnly = util.ReadOnly
 

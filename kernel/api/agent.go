@@ -28,6 +28,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/agent"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -66,7 +67,13 @@ func agentChat(c *gin.Context) {
 		return
 	}
 
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(req.Model)
+	modelID := req.Model
+	if modelID == "" {
+		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
+			modelID = m.ID
+		}
+	}
+	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1
@@ -197,7 +204,13 @@ func agentChatTitle(c *gin.Context) {
 		return
 	}
 
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(req.Model)
+	modelID := req.Model
+	if modelID == "" {
+		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
+			modelID = m.ID
+		}
+	}
+	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1

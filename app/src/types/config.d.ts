@@ -118,6 +118,12 @@ declare namespace Config {
         embedding?: IEmbedding;
         agent?: IAgent;
         providers?: IProvider[];
+        scenarios?: IScenario[];
+    }
+
+    export interface IScenario {
+        name: string;
+        model?: string;
     }
 
     /**

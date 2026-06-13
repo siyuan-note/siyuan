@@ -23,7 +23,6 @@ import (
 	"strconv"
 
 	"github.com/88250/lute/ast"
-	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -32,6 +31,7 @@ type AI struct {
 	Embedding *Embedding `json:"embedding"`
 	Agent     *Agent     `json:"agent"`
 	Providers []*Provider `json:"providers"`
+	Scenarios []*Scenario `json:"scenarios"`
 }
 
 type Agent struct {
@@ -73,6 +73,16 @@ type Model struct {
 	MaxContexts int     `json:"maxContexts"`
 }
 
+const (
+	ScenarioChat  = "chat"
+	ScenarioAgent = "agent"
+)
+
+type Scenario struct {
+	Name  string `json:"name"`
+	Model string `json:"model"`
+}
+
 type MCP struct {
 	Servers []MCPServer `json:"servers"`
 }
@@ -100,44 +110,48 @@ func NewAI() *AI {
 		},
 	}
 
-	provider := &Provider{
-		BaseURL:        "https://api.openai.com/v1",
-		RequestTimeout: 30,
-	}
-	provider.APIKey = os.Getenv("SIYUAN_OPENAI_API_KEY")
+	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
+	apiModel := os.Getenv("SIYUAN_OPENAI_API_MODEL")
+	apiBaseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
 
-	if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
-		if v, err := strconv.Atoi(timeout); err == nil {
-			provider.RequestTimeout = v
+	if apiKey != "" && apiModel != "" && apiBaseURL != "" {
+		provider := &Provider{
+			BaseURL:        apiBaseURL,
+			RequestTimeout: 30,
+			Enabled:        true,
+			APIKey:         apiKey,
 		}
-	}
-	if baseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL"); "" != baseURL {
-		provider.BaseURL = baseURL
-	}
+		if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
+			if v, err := strconv.Atoi(timeout); err == nil {
+				provider.RequestTimeout = v
+			}
+		}
 
-	model := &Model{
-		Name:        openai.GPT3Dot5Turbo,
-		Temperature: 1.0,
-		MaxContexts: 7,
-	}
-	if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
-		if v, err := strconv.Atoi(maxTokens); err == nil {
-			model.MaxTokens = v
+		model := &Model{
+			Name:        apiModel,
+			Temperature: 1.0,
+			MaxContexts: 7,
+			Enabled:     true,
 		}
-	}
-	if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
-		if v, err := strconv.ParseFloat(temperature, 64); err == nil {
-			model.Temperature = v
+		if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
+			if v, err := strconv.Atoi(maxTokens); err == nil {
+				model.MaxTokens = v
+			}
 		}
-	}
-	if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
-		if v, err := strconv.Atoi(maxContexts); err == nil {
-			model.MaxContexts = v
+		if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
+			if v, err := strconv.ParseFloat(temperature, 64); err == nil {
+				model.Temperature = v
+			}
 		}
-	}
+		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
+			if v, err := strconv.Atoi(maxContexts); err == nil {
+				model.MaxContexts = v
+			}
+		}
 
-	provider.Models = append(provider.Models, model)
-	ai.Providers = append(ai.Providers, provider)
+		provider.Models = append(provider.Models, model)
+		ai.Providers = append(ai.Providers, provider)
+	}
 
 	if agentTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_TIMEOUT"); "" != agentTimeout {
 		if v, err := strconv.Atoi(agentTimeout); err == nil {
@@ -253,6 +267,19 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 		return ai.Providers[0], ai.Providers[0].Models[0]
 	}
 	return nil, nil
+}
+
+func (ai *AI) GetScenarioModel(name string) (*Provider, *Model) {
+	if ai.Scenarios != nil {
+		for _, s := range ai.Scenarios {
+			if s.Name == name && s.Model != "" {
+				if p, m := ai.GetModel(s.Model); p != nil {
+					return p, m
+				}
+			}
+		}
+	}
+	return ai.GetModel("")
 }
 
 func (ai *AI) Normalize() {

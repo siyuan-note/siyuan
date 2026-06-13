@@ -11,9 +11,10 @@ import {fetchPost} from "./fetch";
 import {checkFold} from "./noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
 import {isSiYuanUriProtocol} from "./uri";
+import {openBazaarReadme} from "../config";
 
 export const initAppEventBus = (app: import("../index").App) => {
-    app.eventBus.addEventListener(Constants.SIYUAN_APP_EVENT_OPEN_URI, (event: Event) => {
+    app.eventBus.addEventListener(Constants.SIYUAN_APP_EVENT_OPEN_SIYUAN_URI, (event: Event) => {
         const {uri} = (event as CustomEvent<IOpenSiYuanUriDetails>).detail;
         if (!isSiYuanUriProtocol(uri)) {
             return;
@@ -21,10 +22,13 @@ export const initAppEventBus = (app: import("../index").App) => {
 
         switch (uri.hostname) {
             case "blocks":
-                processSiyuanUriBlocks(app, uri);
+                processSiYuanUriBlocks(app, uri);
                 break;
             case "plugins":
-                processSiyuanUriPlugins(app, uri);
+                processSiYuanUriPlugins(app, uri);
+                break;
+            case "bazaar":
+                processSiYuanUriBazaar(app, uri);
                 break;
             default:
                 break;
@@ -32,16 +36,16 @@ export const initAppEventBus = (app: import("../index").App) => {
     });
 };
 
-export const processSiyuanUriBlocks = (app: App, uriObj: URL): boolean => {
+export const processSiYuanUriBlocks = async (app: App, uriObj: URL): Promise<void> => {
     const blockInfo = parseSYProtocolBlockInfo(uriObj);
     if (blockInfo != null) {
         const {id, focus} = blockInfo;
         window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
         fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
             if (existResponse.data) {
-                checkFold(id, (zoomIn) => {
+                checkFold(id, async (zoomIn) => {
                     /// #if !MOBILE
-                    openFileById({
+                    await openFileById({
                         app,
                         id,
                         action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
@@ -64,12 +68,10 @@ export const processSiyuanUriBlocks = (app: App, uriObj: URL): boolean => {
                 });
             });
         });
-        return true;
     }
-    return false;
 };
 
-export const processSiyuanUriPlugins = (app: App, uriObj: URL): boolean => {
+export const processSiYuanUriPlugins = async (app: App, uriObj: URL): Promise<void> => {
     const pluginNameOrTabType: string | null = (() => {
         const name = uriObj.pathname.split("/")[1];
         if (!name) {
@@ -83,7 +85,7 @@ export const processSiyuanUriPlugins = (app: App, uriObj: URL): boolean => {
     })();
 
     if (!pluginNameOrTabType) {
-        return false;
+        return;
     }
 
     const plugin = app.plugins.find(plugin => pluginNameOrTabType === plugin.name);
@@ -114,5 +116,26 @@ export const processSiyuanUriPlugins = (app: App, uriObj: URL): boolean => {
         });
         /// #endif
     }
-    return true;
+    return;
+};
+
+export const processSiYuanUriBazaar = async (app: App, uri: URL): Promise<void> => {
+    /// #if !MOBILE
+    try {
+        const [, _type, _name, target] = uri.pathname.split("/");
+        if (!_type || !_name) return;
+        const resourceType = _type as TBazaarType;
+        const resourceName = decodeURIComponent(_name);
+        switch (target) {
+            case "readme":
+                // siyuan://bazaar/plugins/plugin-sample/readme
+                await openBazaarReadme(app, resourceType, resourceName);
+                break;
+            default:
+                break;
+        }
+    } catch (error) {
+        return;
+    }
+    /// #endif
 };

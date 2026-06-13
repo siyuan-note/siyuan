@@ -21,7 +21,7 @@ import {App} from "../index";
 import {isHuawei, isInHarmony} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {focusByRange} from "../protyle/util/selection";
-import {fetchPost} from "../util/fetch";
+import {fetchSyncPost} from "../util/fetch";
 /// #endif
 
 export const genItemPanel = (type: string, containerElement: Element, app: App) => {
@@ -190,7 +190,7 @@ export const openSetting = (app: App) => {
     /// #endif
 };
 
-export const openBazaarReadme = (app: App, bazaarType: TBazaarType, itemName: string) => {
+export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemName: string) => {
     let getResourcesUrl: string;
     switch (bazaarType) {
         case "templates":
@@ -209,16 +209,19 @@ export const openBazaarReadme = (app: App, bazaarType: TBazaarType, itemName: st
             getResourcesUrl = "/api/bazaar/getBazaarPlugin";
             break;
         default:
-            return false;
+            return;
     }
 
-    fetchPost(getResourcesUrl, {keyword: itemName}, response => {
-        if (response.code !== 0) return;
-        const resource = (response.data.packages as IBazaarItem[]).find((item: IBazaarItem) => item.name === itemName);
-        if (!resource) return;
-        const dialog = openSetting(app);
-        dialog.element.querySelector<HTMLLIElement>(".config__side .b3-list-item[data-type='bazaar']")?.click();
+    const response = await fetchSyncPost(getResourcesUrl, {frontend: "all", keyword: itemName});
+    if (response.code !== 0) return;
+
+    const resource = (response.data.packages as IBazaarItem[]).find((item: IBazaarItem) => item.name === itemName);
+    if (!resource) return;
+
+    const dialog = openSetting(app);
+    dialog.element.querySelector<HTMLLIElement>(".config__side .b3-list-item[data-name='bazaar']")?.click();
+
+    setTimeout(() => {
         bazaar._renderReadme(bazaarType, resource, resource.installed, resource.outdated);
     });
-    return true;
 };

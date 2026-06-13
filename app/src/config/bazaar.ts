@@ -530,7 +530,8 @@ type="checkbox">
         }
     },
     _renderReadme(bazaarType: TBazaarType, data: IBazaarItem, downloaded: boolean, isUpdateItem = false) {
-        const readmeElement = bazaar.element.querySelector("#configBazaarReadme") as HTMLElement;
+        const readmeElement = bazaar.element?.querySelector<HTMLElement>("#configBazaarReadme");
+        if (readmeElement == null) return;
         const urls = data.repoURL.split("/");
         urls.pop();
         let navTitle = window.siyuan.languages.icon;

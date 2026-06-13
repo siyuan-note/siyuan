@@ -29,6 +29,7 @@ import {reloadEmoji} from "../emoji";
 import {updateAppearance} from "../config/util/updateAppearance";
 import {renderSnippet} from "../config/util/snippets";
 import {setBodyHighlight} from "../util/assets";
+import {initAppEventBus} from "../util/eventBus";
 
 class App {
     public readonly appId: string = Constants.SIYUAN_APPID;
@@ -37,6 +38,7 @@ class App {
 
     constructor() {
         addBaseURL();
+        initAppEventBus(this);
 
         const mainWs = new Model({app: this});
         mainWs.connect({

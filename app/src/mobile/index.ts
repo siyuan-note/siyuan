@@ -39,6 +39,7 @@ import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
+import {initAppEventBus} from "../util/eventBus";
 
 class App {
     public readonly appId: string = Constants.SIYUAN_APPID;
@@ -51,6 +52,7 @@ class App {
         }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
+        initAppEventBus(this);
 
         const mainWs = new Model({app: this});
         mainWs.connect({

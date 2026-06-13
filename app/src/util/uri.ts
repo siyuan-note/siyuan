@@ -6,10 +6,10 @@ export const isSiYuanUriProtocol = (uri: URL | string | null | undefined): boole
         if (uri == null) return false;
 
         const uriObj = new URL(uri);
-        if (uriObj.protocol !== "siyuan:" && uriObj.protocol !== "web+siyuan:") {
-            return false;
+        if (uriObj.protocol === "siyuan:" || uriObj.protocol === "web+siyuan:") {
+            return true;
         }
-        return true;
+        return false;
     } catch (error) {
         return false;
     }
@@ -21,7 +21,7 @@ export const processSiYuanUri = (app: App, uri: string) => {
         if (!isSiYuanUriProtocol(uriObj)) {
             return false;
         }
-        app.eventBus.dispatchEvent(new CustomEvent<IOpenSiYuanUriDetails>(Constants.SIYUAN_APP_EVENT_OPEN_URI, {detail: {uri: uriObj}}));
+        app.eventBus.dispatchEvent(new CustomEvent<IOpenSiYuanUriDetails>(Constants.SIYUAN_APP_EVENT_OPEN_SIYUAN_URI, {detail: {uri: uriObj}}));
         return true;
     } catch (error) {
         return false;

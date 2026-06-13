@@ -32,7 +32,7 @@ export abstract class Constants {
     public static readonly SIYUAN_DROP_EDITOR: string = "application/siyuan-editor";
 
     // App 内部全局事件
-    public static readonly SIYUAN_APP_EVENT_OPEN_URI: string = "open-uri";
+    public static readonly SIYUAN_APP_EVENT_OPEN_SIYUAN_URI: string = "open-siyuan-uri";
 
     // 渲染进程调主进程
     public static readonly SIYUAN_CMD: string = "siyuan-cmd";

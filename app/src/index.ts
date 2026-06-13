@@ -41,10 +41,12 @@ import {Tag} from "./layout/dock/Tag";
 import {updateAppearance} from "./config/util/updateAppearance";
 import {renderSnippet} from "./config/util/snippets";
 import {setBodyHighlight} from "./util/assets";
+import {initAppEventBus} from "./util/eventBus";
 
 export class App {
-    public plugins: import("./plugin").Plugin[] = [];
-    public appId: string;
+    public readonly appId: string = Constants.SIYUAN_APPID;
+    public readonly plugins: import("./plugin").Plugin[] = [];
+    public readonly eventBus = new EventTarget();
 
     constructor() {
         if (checkPublishServiceClosed()) {
@@ -52,8 +54,7 @@ export class App {
         }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
-
-        this.appId = Constants.SIYUAN_APPID;
+        initAppEventBus(this);
 
         const mainWs = new Model({app: this});
         mainWs.connect({

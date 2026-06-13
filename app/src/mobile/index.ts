@@ -41,8 +41,9 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
 
 class App {
-    public plugins: import("../plugin").Plugin[] = [];
-    public appId: string;
+    public readonly appId: string = Constants.SIYUAN_APPID;
+    public readonly plugins: import("../plugin").Plugin[] = [];
+    public readonly eventBus = new EventTarget();
 
     constructor() {
         if (checkPublishServiceClosed()) {
@@ -50,7 +51,6 @@ class App {
         }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
-        this.appId = Constants.SIYUAN_APPID;
 
         const mainWs = new Model({app: this});
         mainWs.connect({

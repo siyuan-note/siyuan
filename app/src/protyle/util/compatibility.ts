@@ -5,7 +5,7 @@ import {Constants} from "../../constants";
 import {ipcRenderer} from "electron";
 /// #endif
 /// #if MOBILE
-import {processSiyuanUri} from "../../util/uri";
+import {processSiYuanUri} from "../../util/uri";
 /// #endif
 import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
 import {hideMessage, showMessage} from "../../dialog/message";
@@ -71,7 +71,7 @@ export const openByMobile = (uri: string) => {
         return;
     }
     /// #if MOBILE
-    if (processSiyuanUri(window.siyuan.ws.app, uri)) {
+    if (processSiYuanUri(window.siyuan.ws.app, uri)) {
         return;
     }
     /// #endif

@@ -31,12 +31,12 @@ import {renderSnippet} from "../config/util/snippets";
 import {setBodyHighlight} from "../util/assets";
 
 class App {
-    public plugins: import("../plugin").Plugin[] = [];
-    public appId: string;
+    public readonly appId: string = Constants.SIYUAN_APPID;
+    public readonly plugins: import("../plugin").Plugin[] = [];
+    public readonly eventBus = new EventTarget();
 
     constructor() {
         addBaseURL();
-        this.appId = Constants.SIYUAN_APPID;
 
         const mainWs = new Model({app: this});
         mainWs.connect({

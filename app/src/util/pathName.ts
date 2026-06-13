@@ -16,6 +16,7 @@ import {isOnlyMeta, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/
 import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {isSiYuanUriProtocol} from "./uri";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     /// #if !BROWSER
@@ -36,7 +37,7 @@ export const parseSYProtocolBlockInfo = (url: URL | string | null | undefined): 
         if (url == null) return null;
 
         const urlObj = new URL(url);
-        if (urlObj.protocol !== "siyuan:" && urlObj.protocol !== "web+siyuan:") {
+        if (!isSiYuanUriProtocol(urlObj)) {
             return null;
         }
         if (urlObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(urlObj.pathname)) {

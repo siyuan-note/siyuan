@@ -1,118 +1,29 @@
-import {parseSYProtocolBlockInfo} from "./pathName";
-/// #if !BROWSER
-import {ipcRenderer} from "electron";
-/// #endif
-import {Constants} from "../constants";
-/// #if !MOBILE
-import {openFile, openFileById} from "../editor/util";
-/// #endif
 import {App} from "../index";
-import {fetchPost} from "./fetch";
-import {checkFold} from "./noRelyPCFunction";
-import {openMobileFileById} from "../mobile/editor";
+import {Constants} from "../constants";
 
-export const processSiyuanUriBlocks = (app: App, uriObj: URL): boolean => {
-    const blockInfo = parseSYProtocolBlockInfo(uriObj);
-    if (blockInfo != null) {
-        const {id, focus} = blockInfo;
-        window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
-        fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
-            if (existResponse.data) {
-                checkFold(id, (zoomIn) => {
-                    /// #if !MOBILE
-                    openFileById({
-                        app,
-                        id,
-                        action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                        zoomIn: zoomIn || focus
-                    });
-                    /// #else
-                    openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
-                    /// #endif
-                });
-                /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_CMD, "show");
-                /// #endif
-            }
-            app.plugins.forEach(plugin => {
-                plugin.eventBus.emit("open-siyuan-url-block", {
-                    url: uriObj.href,
-                    id,
-                    focus,
-                    exist: existResponse.data,
-                });
-            });
-        });
-        return true;
-    }
-    return false;
-};
-
-export const processSiyuanUriPlugins = (app: App, uriObj: URL): boolean => {
-    const pluginNameOrTabType: string | null = (() => {
-        const name = uriObj.pathname.split("/")[1];
-        if (!name) {
-            return null;
-        }
-        try {
-            return decodeURIComponent(name);
-        } catch (error) {
-            return null;
-        }
-    })();
-
-    if (!pluginNameOrTabType) {
-        return false;
-    }
-
-    const plugin = app.plugins.find(plugin => pluginNameOrTabType === plugin.name);
-    if (plugin) {
-        // siyuan://plugins/plugin-name/foo?bar=baz
-        plugin.eventBus.emit("open-siyuan-url-plugin", {url: uriObj.href});
-    } else {
-        // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-        /// #if !MOBILE
-        // https://github.com/siyuan-note/siyuan/pull/9256
-        const data = (() => {
-            try {
-                return JSON.parse(uriObj.searchParams.get("data") || "{}");
-            } catch (e) {
-                console.log("Error open plugin tab with protocol:", e);
-                return undefined;
-            }
-        })();
-        // id 不存在时无副作用
-        openFile({
-            app,
-            custom: {
-                title: uriObj.searchParams.get("title") ?? pluginNameOrTabType,
-                icon: uriObj.searchParams.get("icon") ?? "iconPlugin",
-                data,
-                id: pluginNameOrTabType
-            },
-        });
-        /// #endif
-    }
-    return true;
-};
-
-export const processSiyuanUri = (app: App, uri: string) => {
-    let uriObj: URL;
+export const isSiYuanUriProtocol = (uri: URL | string | null | undefined): boolean => {
     try {
-        uriObj = new URL(uri);
+        if (uri == null) return false;
+
+        const uriObj = new URL(uri);
         if (uriObj.protocol !== "siyuan:" && uriObj.protocol !== "web+siyuan:") {
             return false;
         }
+        return true;
     } catch (error) {
         return false;
     }
-    switch (uriObj.hostname) {
-        case "blocks":
-            return processSiyuanUriBlocks(app, uriObj);
-        case "plugins":
-            return processSiyuanUriPlugins(app, uriObj);
-        default:
-            break;
+};
+
+export const processSiYuanUri = (app: App, uri: string) => {
+    try {
+        const uriObj = new URL(uri);
+        if (!isSiYuanUriProtocol(uriObj)) {
+            return false;
+        }
+        app.eventBus.dispatchEvent(new CustomEvent<IOpenSiYuanUriDetails>(Constants.SIYUAN_APP_EVENT_OPEN_URI, {detail: {uri: uriObj}}));
+        return true;
+    } catch (error) {
+        return false;
     }
-    return false;
 };

@@ -1307,3 +1307,7 @@ interface ISYProtocolBlocksInfo {
      */
     fullscreen: boolean;
 }
+
+interface IOpenSiYuanUriDetails {
+    uri: URL;
+}

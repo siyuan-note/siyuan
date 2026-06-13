@@ -193,7 +193,7 @@ func decodeVector(b []byte) []float32 {
 }
 
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
-	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), Conf.AI.OpenAI.APITimeout)
+	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
 	if err != nil {
 		if util.IsNetworkError(err) {
 			embeddingStop.Store(true)
@@ -298,12 +298,18 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		return
 	}
 
-	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), Conf.AI.OpenAI.APITimeout)
+	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
 	if err != nil || 1 > len(vectors) {
 		logging.LogErrorf("get query embedding failed")
 		return
 	}
 	queryVec := vectors[0]
+
+	boxFilter := buildBoxesFilter(boxes, "be.")
+	pathFilter := buildPathsFilter(paths, "be.")
+	typeFilter := buildTypeFilter(types, subTypes, "b.")
+	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types)
+	hasTypeFilter := 0 < len(types)
 
 	numWorkers := runtime.GOMAXPROCS(0)
 	if numWorkers < 1 {
@@ -318,7 +324,17 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	cursor := int64(0)
 
 	for {
-		q := fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
+		var q string
+		if hasFilter {
+			q = fmt.Sprintf("SELECT be.rowid, be.id, be.embedding FROM block_embeddings be JOIN blocks b ON be.id = b.id WHERE be.embedding IS NOT NULL AND length(be.embedding) > 0 AND be.rowid > %d", cursor)
+			if hasTypeFilter {
+				q += " AND " + typeFilter
+			}
+			q += boxFilter + pathFilter
+			q += fmt.Sprintf(" ORDER BY be.rowid LIMIT %d", scanSize)
+		} else {
+			q = fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
+		}
 		rows, qErr := sql.QueryNoLimit(q)
 		if qErr != nil {
 			logging.LogErrorf("query embeddings for search failed: %s", qErr)
@@ -422,12 +438,12 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 }
 
 func isEmbeddingEnabled() bool {
-	return "" != embeddingKey()
+	return nil != Conf.AI.Embedding && len(Conf.AI.Embedding.APIKey) > 0
 }
 
 func embeddingKey() string {
-	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIKey {
-		return p.APIKey
+	if nil != Conf.AI.Embedding && "" != Conf.AI.Embedding.APIKey {
+		return Conf.AI.Embedding.APIKey
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != v {
 		return v
@@ -436,8 +452,8 @@ func embeddingKey() string {
 }
 
 func embeddingBaseURL() string {
-	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIBaseURL {
-		return p.APIBaseURL
+	if nil != Conf.AI.Embedding && "" != Conf.AI.Embedding.BaseURL {
+		return Conf.AI.Embedding.BaseURL
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != v {
 		return v
@@ -445,9 +461,16 @@ func embeddingBaseURL() string {
 	return ""
 }
 
+func embeddingTimeout() int {
+	if nil != Conf.AI.Embedding && 0 < Conf.AI.Embedding.Timeout {
+		return Conf.AI.Embedding.Timeout
+	}
+	return 30
+}
+
 func embeddingModel() string {
-	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIModel {
-		return p.APIModel
+	if nil != Conf.AI.Embedding && "" != Conf.AI.Embedding.Name {
+		return Conf.AI.Embedding.Name
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != v {
 		return v

@@ -129,10 +129,20 @@ func InitConf() {
 		if data, err := os.ReadFile(confPath); err != nil {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		} else {
-			if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
+			if conf.NeedsAIMigration(data) {
+				Conf.AI = conf.MigrateAI(data)
+				Conf.Save()
+				logging.LogInfof("migrated AI config [%s]", confPath)
+			} else if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
 				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
 			} else {
 				logging.LogInfof("loaded conf [%s]", confPath)
+				if nil != Conf.Search && Conf.Search.HanSensitive == nil {
+					Conf.Search.SetHanSensitive(true)
+				}
+				if nil != Conf.AI {
+					Conf.AI.DecryptAPIKeys()
+				}
 			}
 		}
 	}
@@ -340,9 +350,7 @@ func InitConf() {
 
 	if nil == Conf.System {
 		Conf.System = conf.NewSystem()
-		if util.ContainerIOS != util.Container {
-			Conf.OpenHelp = true
-		}
+		Conf.OpenHelp = true
 	} else {
 		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
 		if 0 < cmp {
@@ -495,6 +503,7 @@ func InitConf() {
 	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
 		Conf.Search.BacklinkMentionKeywordsLimit = 512
 	}
+	sql.SetHanSensitive(Conf.Search.HanSensitiveVal())
 
 	if nil == Conf.Stat {
 		Conf.Stat = conf.NewStat()
@@ -549,58 +558,72 @@ func InitConf() {
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
 	}
-	if "" == Conf.AI.OpenAI.APIModel {
-		Conf.AI.OpenAI.APIModel = openai.GPT3Dot5Turbo
+	if nil == Conf.AI.Agent {
+		Conf.AI.Agent = &conf.Agent{
+			SessionTimeout: 600,
+			ConfirmTimeout: 120,
+			MaxRetries:     3,
+		}
 	}
-	if "" == Conf.AI.OpenAI.APIUserAgent {
-		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
-	}
-	if strings.HasPrefix(Conf.AI.OpenAI.APIUserAgent, "SiYuan/") {
-		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
-	}
-	if "" == Conf.AI.OpenAI.APIProvider {
-		Conf.AI.OpenAI.APIProvider = "OpenAI"
-	}
-	if 0 > Conf.AI.OpenAI.APIMaxTokens {
-		Conf.AI.OpenAI.APIMaxTokens = 0
-	}
-	if 0 >= Conf.AI.OpenAI.APITemperature || 2 < Conf.AI.OpenAI.APITemperature {
-		Conf.AI.OpenAI.APITemperature = 1.0
-	}
-	if 1 > Conf.AI.OpenAI.APIMaxContexts || 64 < Conf.AI.OpenAI.APIMaxContexts {
-		Conf.AI.OpenAI.APIMaxContexts = 7
-	}
-	if nil == Conf.AI.OpenAI.Enabled && Conf.AI.OpenAI.APIBaseURL != "" && Conf.AI.OpenAI.APIKey != "" {
-		t := true
-		Conf.AI.OpenAI.Enabled = &t
-	}
-
-	if "" != Conf.AI.OpenAI.APIKey {
-		logging.LogInfof("OpenAI API enabled\n"+
-			"    userAgent=%s\n"+
-			"    baseURL=%s\n"+
-			"    timeout=%ds\n"+
-			"    proxy=%s\n"+
-			"    model=%s\n"+
-			"    maxTokens=%d\n"+
-			"    temperature=%.1f\n"+
-			"    maxContexts=%d",
-			Conf.AI.OpenAI.APIUserAgent,
-			Conf.AI.OpenAI.APIBaseURL,
-			Conf.AI.OpenAI.APITimeout,
-			Conf.AI.OpenAI.APIProxy,
-			Conf.AI.OpenAI.APIModel,
-			Conf.AI.OpenAI.APIMaxTokens,
-			Conf.AI.OpenAI.APITemperature,
-			Conf.AI.OpenAI.APIMaxContexts)
+	for _, p := range Conf.AI.Providers {
+		if nil == p {
+			continue
+		}
+		if "" == p.BaseURL {
+			p.BaseURL = "https://api.openai.com/v1"
+		}
+		if 1 > p.RequestTimeout {
+			p.RequestTimeout = 30
+		}
+		for _, m := range p.Models {
+			if nil == m {
+				continue
+			}
+			if "" == m.Name {
+				m.Name = openai.GPT3Dot5Turbo
+			}
+			if 0 > m.MaxTokens {
+				m.MaxTokens = 0
+			}
+			if 0 >= m.Temperature || 2 < m.Temperature {
+				m.Temperature = 1.0
+			}
+			if 1 > m.MaxContexts || 64 < m.MaxContexts {
+				m.MaxContexts = 7
+			}
+		}
 	}
 
-	if embeddingProvider := Conf.AI.GetEmbeddingProvider(); embeddingProvider != nil {
+	for _, p := range Conf.AI.Providers {
+		if p == nil || len(p.APIKey) == 0 {
+			continue
+		}
+		for _, m := range p.Models {
+			if m.Name == "" {
+				continue
+			}
+			logging.LogInfof("AI provider enabled\n"+
+				"    baseURL=%s\n"+
+				"    timeout=%ds\n"+
+				"    model=%s\n"+
+				"    maxTokens=%d\n"+
+				"    temperature=%.1f\n"+
+				"    maxContexts=%d",
+				p.BaseURL,
+				p.RequestTimeout,
+				m.Name,
+				m.MaxTokens,
+				m.Temperature,
+				m.MaxContexts)
+		}
+	}
+
+	if Conf.AI.Embedding != nil && len(Conf.AI.Embedding.APIKey) > 0 {
 		logging.LogInfof("embedding API enabled\n"+
 			"    baseURL=%s\n"+
 			"    model=%s",
-			embeddingProvider.APIBaseURL,
-			embeddingProvider.APIModel)
+			Conf.AI.Embedding.BaseURL,
+			Conf.AI.Embedding.Name)
 	}
 
 	Conf.AI.Normalize()
@@ -759,8 +782,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
 
+	cancelPurge()
+
 	if !force {
-		// Stop kernel plugins early in shutdown
 		if OnKernelPluginsStop != nil {
 			OnKernelPluginsStop()
 		}
@@ -896,6 +920,11 @@ func (conf *AppConf) Save() {
 
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
+
+	if nil != Conf.AI {
+		Conf.AI.EncryptAPIKeys()
+		defer Conf.AI.DecryptAPIKeys()
+	}
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")

@@ -6,7 +6,7 @@
 		"id": "20220628204454-hhxohv5",
 		"title": "Optimize typography",
 		"type": "doc",
-		"updated": "20250115151312"
+		"updated": "20260613191858"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220628215200-efn43ah",
-				"updated": "20250115151312"
+				"updated": "20260613191858"
 			},
 			"Children": [
 				{
@@ -380,6 +380,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260613191857-ml16wi0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613191857-ml16wi0",
+				"updated": "20260613191858"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Optimize typography only processes the currently open document and does not support batch processing of multiple documents."
 				}
 			]
 		},

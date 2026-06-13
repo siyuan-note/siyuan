@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Snapshot otomatis dibuat",
   "agentThinkingDoneTime": "Selesai berpikir: %s",
   "agentThinking": "Berpikir...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Setujui",
   "agentConfirmReject": "Tolak",
   "agentConfirmAlways": "Izinkan sesi",
-  "agentConfirmAlwaysDesc": "Jangan tanya lagi di sesi ini",
+  "agentConfirmAlwaysDesc": "Jangan tanya lagi untuk operasi apa pun di sesi ini",
   "agentTimeout": "Batas waktu agen",
   "agentTimeoutTip": "Batas waktu total sesi agen, 0 = tanpa batas",
   "agentConfirmTimeout": "Batas waktu konfirmasi",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Jalankan checkout dari snapshot",
     "task.database.index.full": "Jalankan rebuild indeks",
+    "task.database.index.fts": "Bangun ulang indeks pencarian",
     "task.database.index": "Jalankan indeks database",
     "task.database.index.commit": "Jalankan komit indeks database",
     "task.database.index.ref": "Jalankan referensi indeks database",
@@ -1800,7 +1802,7 @@
     "212": "Ada beberapa cacat pada versi sinkronisasi data cloud saat ini, silakan tingkatkan ke versi terbaru. Maaf atas ketidaknyamanannya",
     "213": "Verifikasi cloud gagal, silakan coba tingkatkan ke versi terbaru dan masuk lagi sebelum sinkronisasi",
     "214": "Fitur ini memerlukan masuk ke akun dan membeli <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[Fitur PRO]</a> atau <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Langganan Tahunan]</a> untuk digunakan",
-    "215": "Silakan lihat panduan pengguna desktop",
+    "215": "",
     "216": "Membangun ulang indeks data konten aset, harap tunggu...",
     "217": "[%d/%d] Membuat indeks data konten aset",
     "218": "Terlalu banyak snapshot repositori data terdeteksi, yang memperlambat startup program dan sinkronisasi data. Harap pertimbangkan untuk menjalankan [Pengaturan - Tentang - Pembersihan repositori data]",
@@ -1880,6 +1882,7 @@
     "292": "Tidak dapat membuat file",
     "293": "Tidak dapat menulis file",
     "294": "Kode aktivasi tidak boleh kosong",
-    "295": "Fitur ini memerlukan pembelian [Langganan Tahunan] (jika Anda sudah membeli, harap segarkan atau masuk lagi di Pengaturan - Akun)"
+    "295": "Fitur ini memerlukan pembelian [Langganan Tahunan] (jika Anda sudah membeli, harap segarkan atau masuk lagi di Pengaturan - Akun)",
+    "296": "Rebuilding search index..."
   }
 }

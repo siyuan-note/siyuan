@@ -1,6 +1,6 @@
 import {Wnd} from "./Wnd";
 import {genUUID} from "../util/genID";
-import {Model} from "./Model";
+import type {Model} from "./Model";
 import {Editor} from "../editor";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
@@ -13,7 +13,7 @@ import {openNewWindow} from "../window/openNewWindow";
 import {ipcRenderer} from "electron";
 /// #endif
 import {layoutToJSON, saveLayout} from "./util";
-import {setTitle} from "../dialog/processSystem";
+import {setTitle} from "../util/processTitle";
 
 export class Tab {
     public parent: Wnd;

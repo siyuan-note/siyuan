@@ -2,7 +2,6 @@ import {Dialog} from "../dialog";
 import {fetchPost} from "./fetch";
 import {isMobile} from "./functions";
 import {Constants} from "../constants";
-import {pathPosix} from "./pathName";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
 import {Tag} from "../layout/dock/Tag";
@@ -116,10 +115,6 @@ export const renameTag = (labelName: string) => {
         inputElement.value = listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim();
         listElement.classList.add("fn__none");
     });
-};
-
-export const getWorkspaceName = () => {
-    return pathPosix().basename(window.siyuan.config.system.workspaceDir.replace(/\\/g, "/"));
 };
 
 export const checkFold = (id: string, cb: (zoomIn: boolean, action: TProtyleAction[], isRoot: boolean) => void) => {

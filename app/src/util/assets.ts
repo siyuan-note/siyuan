@@ -18,7 +18,7 @@ import {
 } from "../protyle/util/compatibility";
 import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
-import {getWorkspaceName} from "./noRelyPCFunction";
+import {getWorkspaceName} from "./processTitle";
 
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];

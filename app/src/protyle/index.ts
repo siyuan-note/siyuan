@@ -465,8 +465,8 @@ export class Protyle {
         resize(this.protyle);
     }
 
-    public reload(focus: boolean) {
-        reloadProtyle(this.protyle, focus);
+    public reload(focus: boolean, updateReadonly?: boolean) {
+        reloadProtyle(this.protyle, focus, updateReadonly);
     }
 
     public insert(html: string, isBlock = false, useProtyleRange = false) {

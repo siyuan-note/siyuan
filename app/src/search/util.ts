@@ -66,7 +66,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
             k: text,
             r: "",
             hasReplace: false,
-            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey ? 0 : localData.method),
+            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.embedding?.apiKey ? 0 : localData.method),
             hPath: "",
             idPath: [],
             group: localData.group,
@@ -1358,6 +1358,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 groupBy: config.group,
                 orderBy: config.sort,
                 page: config.page || 1,
+                pageSize: 32,
             }, (response) => {
                 const searchReqId = config.method === 4
                     ? window.siyuan.reqIds["/api/search/semanticSearchBlock"]

@@ -10,12 +10,12 @@ github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48 h1:qiE88Pw/9GG8hvMfpfB4
 github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48/go.mod h1:UgVSq5iO9pOvqs3hIGNVk6WXDiAB0v3Dlg4nssQJ7W4=
 github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7 h1:MafIFwSS0x6A4hqNtl0ObDG2cx8kcafqWu2xxkwZ3rI=
 github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7/go.mod h1:HrKCCTin3YNDSLBD02K0AOljjV6eNwc3/zyEI+xyV1I=
-github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950 h1:Pa5hMiBceTVVqrYaDlLio2QSKbXMUmAZPbzCwT5eNCw=
-github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
+github.com/88250/go-sqlite3 v1.14.13-0.20260612032504-d7314231d840 h1:j1Ln3/ZUMzbs2NoCr3STzZmh+uAknATebXOhlo1SJ8M=
+github.com/88250/go-sqlite3 v1.14.13-0.20260612032504-d7314231d840/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20260609090754-168309361d92 h1:/DtFVbsSdZLqbADVnFUz2vsNl8d1NPm98yxKdYnpB8I=
 github.com/88250/gulu v1.2.3-0.20260609090754-168309361d92/go.mod h1:D+Db16m0N7r9MLZCMcj1a0ZsEGQAxDZkadOn79Gh0vI=
-github.com/88250/lute v1.7.7-0.20260609015101-c1d6e480ca97 h1:IqPqrGrv9D8a2ES79Z1sZoKCFwwZXhkHc9qmTWTB1M8=
-github.com/88250/lute v1.7.7-0.20260609015101-c1d6e480ca97/go.mod h1:WYyUw//5yVw9BJnoVjx7rI/3szsISxNZCYGOqTIrV0o=
+github.com/88250/lute v1.7.7-0.20260613090726-3166cbf8440a h1:ifBEC9o+7TqK9dxxwm8li8jWAJMtlvDxNl2O72JC2lk=
+github.com/88250/lute v1.7.7-0.20260613090726-3166cbf8440a/go.mod h1:WYyUw//5yVw9BJnoVjx7rI/3szsISxNZCYGOqTIrV0o=
 github.com/88250/pdfcpu v0.3.14-0.20250424122812-f10e8d9d8d46 h1:Bq1JsDfVbHKUxNL/B2JXd8cC/1h6aFjrlXpGycnh0Hk=
 github.com/88250/pdfcpu v0.3.14-0.20250424122812-f10e8d9d8d46/go.mod h1:fVfOloBzs2+W2VJCCbq60XIxc3yJHAZ0Gahv1oO0gyI=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -391,8 +391,8 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05Ut
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17 h1:cZbH1QcW/LWYtaKBv2i0O96qVm6HXKeEE3Z74VYdUHM=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17/go.mod h1:zE2SJ4t+2lFAeLgmhi27YtfzdyOWh3l9DXXUr9m/xU0=
-github.com/siyuan-note/dejavu v0.0.0-20260529092727-2b5e57a676af h1:UeK/zRYGFlBaBhAM0tCa84criQTB5Qx3PdUvGoBj97I=
-github.com/siyuan-note/dejavu v0.0.0-20260529092727-2b5e57a676af/go.mod h1:Wal8Y/RgYRINa0jyHdN3XqPUh0GGEcr3QfNVcK9Ci2w=
+github.com/siyuan-note/dejavu v0.0.0-20260612083615-9c45cefc9285 h1:1A9XHNx4JPeOBUoR0eGm7UBgXlRJwwheu1cYMGbrCfM=
+github.com/siyuan-note/dejavu v0.0.0-20260612083615-9c45cefc9285/go.mod h1:Wal8Y/RgYRINa0jyHdN3XqPUh0GGEcr3QfNVcK9Ci2w=
 github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f h1:HSgJKIAMgokJDAvBBfRj47SzRSm6mNGssY0Wv7rcEtg=
 github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f/go.mod h1:JE3S9VuJqTggyfhjesNDuqvqrRvwG3IctFjXXchLx1M=
 github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce h1:356bfC3pucxXuYpZIwaQ3viVCbq5RbRuvBhb4xtoBR0=

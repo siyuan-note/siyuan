@@ -33,11 +33,12 @@ import (
 )
 
 type agentChatReq struct {
-	SessionID  string              `json:"sessionID"`
-	Messages   []agent.UserMessage `json:"messages"`
-	Language   string              `json:"language"`
-	References []agent.Reference   `json:"references"`
-	Model      string              `json:"model,omitempty"`
+	SessionID  string            `json:"sessionID"`
+	Message    string            `json:"message"`
+	Language   string            `json:"language"`
+	References []agent.Reference `json:"references"`
+	Model      string            `json:"model,omitempty"`
+	Regenerate bool              `json:"regenerate"`
 }
 
 type runningSession struct {
@@ -65,31 +66,38 @@ func agentChat(c *gin.Context) {
 		return
 	}
 
-	selectedProvider := model.Conf.AI.GetProvider(req.Model)
-	client := util.NewOpenAIClient(
-		selectedProvider.APIKey,
-		selectedProvider.APIProxy,
-		selectedProvider.APIBaseURL,
-		selectedProvider.APIUserAgent,
-		selectedProvider.APIVersion,
-		selectedProvider.APIProvider,
-	)
+	selectedProvider, selectedModel := model.Conf.AI.GetModel(req.Model)
+	if nil == selectedProvider || nil == selectedModel {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(193)
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	client := util.NewOpenAIClient(selectedProvider.APIKey, selectedProvider.BaseURL)
 
-	confirmTimeout := time.Duration(selectedProvider.AgentConfirmTimeout) * time.Second
+	confirmTimeout := time.Duration(model.Conf.AI.Agent.ConfirmTimeout) * time.Second
 	if confirmTimeout <= 0 {
 		confirmTimeout = 120 * time.Second
 	}
-	maxRetries := selectedProvider.AgentMaxRetries
+	maxRetries := model.Conf.AI.Agent.MaxRetries
 	if maxRetries <= 0 {
 		maxRetries = 3
 	}
 
 	var eventCh <-chan agent.AgentEvent
 
-	eventCh = agent.AgentChat(context.Background(), client, selectedProvider.APIModel, req.SessionID, req.Messages, req.Language, req.References, confirmTimeout, maxRetries)
+	ctx, cancel := context.WithCancel(c.Request.Context())
+	defer cancel()
+	eventCh = agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.Regenerate, confirmTimeout, maxRetries)
 	sessionsMu.Lock()
 	runningSessions[req.SessionID] = &runningSession{eventCh: eventCh}
 	sessionsMu.Unlock()
+	defer func() {
+		sessionsMu.Lock()
+		delete(runningSessions, req.SessionID)
+		sessionsMu.Unlock()
+	}()
 
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -100,11 +108,11 @@ func agentChat(c *gin.Context) {
 		return
 	}
 
-	timeout := selectedProvider.APITimeout
+	timeout := selectedProvider.RequestTimeout
 	if timeout <= 0 {
 		timeout = 30
 	}
-	totalTimeout := time.Duration(selectedProvider.AgentTimeout) * time.Second
+	totalTimeout := time.Duration(model.Conf.AI.Agent.SessionTimeout) * time.Second
 	if totalTimeout <= 0 {
 		totalTimeout = time.Duration(timeout) * time.Second * 10
 	}
@@ -127,7 +135,7 @@ func agentChat(c *gin.Context) {
 			}
 			flusher.Flush()
 		case <-deadline:
-			writeSSEError(c, "request timeout")
+			writeSSEError(c, model.Conf.Language(24))
 			flusher.Flush()
 			return
 		}
@@ -174,8 +182,9 @@ func agentChatQuestion(c *gin.Context) {
 }
 
 type agentTitleReq struct {
-	Message string `json:"message"`
-	Model   string `json:"model"`
+	Message  string `json:"message"`
+	Model    string `json:"model"`
+	Language string `json:"language"`
 }
 
 func agentChatTitle(c *gin.Context) {
@@ -188,17 +197,17 @@ func agentChatTitle(c *gin.Context) {
 		return
 	}
 
-	selectedProvider := model.Conf.AI.GetProvider(req.Model)
-	client := util.NewOpenAIClient(
-		selectedProvider.APIKey,
-		selectedProvider.APIProxy,
-		selectedProvider.APIBaseURL,
-		selectedProvider.APIUserAgent,
-		selectedProvider.APIVersion,
-		selectedProvider.APIProvider,
-	)
+	selectedProvider, selectedModel := model.Conf.AI.GetModel(req.Model)
+	if nil == selectedProvider || nil == selectedModel {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "no AI provider configured"
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	client := util.NewOpenAIClient(selectedProvider.APIKey, selectedProvider.BaseURL)
 
-	title := agent.GenerateTitle(client, selectedProvider.APIModel, req.Message)
+	title := agent.GenerateTitle(client, selectedModel.Name, req.Message, req.Language)
 	ret := gulu.Ret.NewResult()
 	ret.Data = title
 	c.JSON(http.StatusOK, ret)

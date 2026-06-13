@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Restauration terminée",
   "snapshotAutoCreated": "Instantané créé automatiquement",
   "agentThinkingDoneTime": "Réflexion terminée : %s",
   "agentThinking": "Réflexion...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Approuver",
   "agentConfirmReject": "Rejeter",
   "agentConfirmAlways": "Autoriser session",
-  "agentConfirmAlwaysDesc": "Ne plus demander durant cette session",
+  "agentConfirmAlwaysDesc": "Ne plus demander pour aucune opération durant cette session",
   "agentTimeout": "Délai d'expiration de l'agent",
   "agentTimeoutTip": "Délai d'expiration total de la session de l'agent, 0 = sans limite",
   "agentConfirmTimeout": "Délai de confirmation",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Effectuer le checkout à partir d'un instantané",
     "task.database.index.full": "Exécuter l'index de reconstruction",
+    "task.database.index.fts": "Reconstruire l'index de recherche",
     "task.database.index": "Effectuer l'indexation de la base de données",
     "task.database.index.commit": "Effectuer la validation de l'index de la base de données",
     "task.database.index.ref": "Exécuter la référence d'index de la base de données",
@@ -1800,7 +1802,7 @@
     "212": "Il y a quelques défauts dans la version actuelle de la synchronisation des données cloud, veuillez mettre à niveau vers la dernière version. Désolé pour le désagrément",
     "213": "Échec de la vérification cloud, veuillez essayer de mettre à niveau vers la dernière version et de vous reconnecter avant de synchroniser",
     "214": "Cette fonctionnalité nécessite de se connecter au compte et d'acheter <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[fonctionnalités]</a> ou <a target='_blank' href='${accountServer}/subscribe/siyuan'>[abonnement annuel]</a> pour être utilisée",
-    "215": "Veuillez vous référer au guide de l'utilisateur du bureau",
+    "215": "",
     "216": "Reconstruction de l'index des données du contenu des ressources, veuillez patienter...",
     "217": "[%d/%d] Création d'un index de données de contenu d'actif",
     "218": "Trop d'instantanés du référentiel de données ont été détectés, ce qui ralentit le démarrage du programme et la synchronisation des données. Veuillez envisager d'exécuter [Paramètres - À propos - Purge du référentiel de données]",
@@ -1880,6 +1882,7 @@
     "292": "Impossible de créer le fichier",
     "293": "Impossible d'écrire le fichier",
     "294": "Le code d'activation ne peut pas être vide",
-    "295": "Cette fonctionnalité nécessite l'achat d'un [abonnement annuel] (si vous avez déjà acheté, actualisez ou reconnectez-vous dans Paramètres - Compte)"
+    "295": "Cette fonctionnalité nécessite l'achat d'un [abonnement annuel] (si vous avez déjà acheté, actualisez ou reconnectez-vous dans Paramètres - Compte)",
+    "296": "Rebuilding search index..."
   }
 }

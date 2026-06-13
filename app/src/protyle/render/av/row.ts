@@ -2,24 +2,187 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {genCellValue, genCellValueByElement, getTypeByCellElement, renderCell, renderCellAttr} from "./cell";
+import {
+    cellValueIsEmpty,
+    genCellValue,
+    genCellValueByElement,
+    getTypeByCellElement,
+    renderCell,
+    renderCellAttr
+} from "./cell";
 import {fetchPost} from "../../../util/fetch";
 import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
 import {clearSelect} from "../../util/clear";
 import {isCustomAttr} from "./blockAttr";
+import {getColIconByType, getColNameByType} from "./col";
+import {unicode2Emoji} from "../../../emoji";
+import {escapeAttr} from "../../../util/escape";
+import {getCompressURL} from "../../../util/image";
 
-export const getRowHTML = (data: IAVView, row: IAVRow, rowIndex: number, pinIndex: number) => {
-    let html = `<div class="av__row" data-index="${rowIndex}" data-id="${row.id}">`;
-    if (pinIndex > -1) {
+export const getRowHTML = (options: {
+    data: IAVView
+    row: IAVRow | IAVGalleryItem
+    rowIndex: number
+    type: TAVView
+    pinIndex?: number
+}) => {
+    let html = "";
+    if (options.type === "gallery") {
+        const galleryRow = options.row as IAVGalleryItem;
+        const kanbanData = options.data as IAVGallery;
+        html += `<div data-id="${galleryRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item">`;
+        if (kanbanData.coverFrom !== 0) {
+            const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
+            if (galleryRow.coverURL) {
+                if (galleryRow.coverURL.startsWith("background")) {
+                    html += `<div class="${coverClass}"><img class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${galleryRow.coverURL}"></div>`;
+                } else {
+                    html += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${kanbanData.fitImage ? " av__gallery-img--fit" : ""}" src="${getCompressURL(galleryRow.coverURL)}"></div>`;
+                }
+            } else if (galleryRow.coverContent) {
+                html += `<div class="${coverClass}"><div class="av__gallery-content">${galleryRow.coverContent}</div><div></div></div>`;
+            } else {
+                html += `<div class="${coverClass}"></div>`;
+            }
+        }
+        html += '<div class="av__gallery-fields">';
+        galleryRow.values.forEach((cell, fieldsIndex) => {
+            if (kanbanData.fields[fieldsIndex].hidden) {
+                return;
+            }
+            let checkClass = "";
+            if (cell.valueType === "checkbox") {
+                checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
+            }
+            const isEmpty = cellValueIsEmpty(cell.value);
+            // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
+            let ariaLabel = escapeAttr(kanbanData.fields[fieldsIndex].name) || getColNameByType(kanbanData.fields[fieldsIndex].type);
+            if (kanbanData.fields[fieldsIndex].desc) {
+                ariaLabel += escapeAttr(`<div class="ft__on-surface">${kanbanData.fields[fieldsIndex].desc}</div>`);
+            }
+
+            if (cell.valueType === "checkbox" && !kanbanData.displayFieldName) {
+                cell.value.checkbox.content = kanbanData.fields[fieldsIndex].name || getColNameByType(kanbanData.fields[fieldsIndex].type);
+            }
+            const cellHTML = `<div class="av__cell${checkClass}${kanbanData.displayFieldName ? "" : " ariaLabel"}" 
+data-wrap="${kanbanData.fields[fieldsIndex].wrap}" 
+aria-label="${ariaLabel}" 
+data-position="5west"
+data-id="${cell.id}" 
+data-field-id="${kanbanData.fields[fieldsIndex].id}" 
+data-dtype="${cell.valueType}" 
+${cell.value?.isDetached ? ' data-detached="true"' : ""} 
+style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, kanbanData.showIcon, "gallery")}</div>`;
+            if (kanbanData.displayFieldName) {
+                html += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
+    <div class="av__gallery-name">
+        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
+        ${kanbanData.fields[fieldsIndex].desc ? `<svg aria-label="${kanbanData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
+    </div>
+    ${cellHTML}
+</div>`;
+            } else {
+                html += `<div class="av__gallery-field" data-empty="${isEmpty}">
+    <div class="av__gallery-tip">
+        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
+    </div>
+    ${cellHTML}
+</div>`;
+            }
+        });
+        html += `</div>
+    <div class="av__gallery-actions">
+        <span class="protyle-icon protyle-icon--first ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+    </div>
+</div>`;
+        return html;
+    }
+    if (options.type === "kanban") {
+        const kanbanRow = options.row as IAVGalleryItem;
+        const kanbanData = options.data as IAVKanban;
+        html += `<div data-id="${kanbanRow.id}" data-index="${options.rowIndex}" draggable="true" class="av__gallery-item">`;
+        if (kanbanData.coverFrom !== 0) {
+            const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
+            if (kanbanRow.coverURL) {
+                if (kanbanRow.coverURL.startsWith("background")) {
+                    html += `<div class="${coverClass}"><img class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${kanbanRow.coverURL}"></div>`;
+                } else {
+                    html += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${kanbanData.fitImage ? " av__gallery-img--fit" : ""}" src="${getCompressURL(kanbanRow.coverURL)}"></div>`;
+                }
+            } else if (kanbanRow.coverContent.trim()) {
+                html += `<div class="${coverClass}"><div class="av__gallery-content">${kanbanRow.coverContent}</div><div></div></div>`;
+            }
+        }
+        html += '<div class="av__gallery-fields">';
+        kanbanRow.values.forEach((cell, fieldsIndex) => {
+            if (kanbanData.fields[fieldsIndex].hidden) {
+                return;
+            }
+            let checkClass = "";
+            if (cell.valueType === "checkbox") {
+                checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
+            }
+            const isEmpty = cellValueIsEmpty(cell.value);
+            // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
+            let ariaLabel = escapeAttr(kanbanData.fields[fieldsIndex].name) || getColNameByType(kanbanData.fields[fieldsIndex].type);
+            if (kanbanData.fields[fieldsIndex].desc) {
+                ariaLabel += escapeAttr(`<div class="ft__on-surface">${kanbanData.fields[fieldsIndex].desc}</div>`);
+            }
+
+            if (cell.valueType === "checkbox" && !kanbanData.displayFieldName) {
+                cell.value.checkbox.content = kanbanData.fields[fieldsIndex].name || getColNameByType(kanbanData.fields[fieldsIndex].type);
+            }
+            const cellHTML = `<div class="av__cell${checkClass}${kanbanData.displayFieldName ? "" : " ariaLabel"}" 
+data-wrap="${kanbanData.fields[fieldsIndex].wrap}" 
+aria-label="${ariaLabel}" 
+data-position="5west"
+data-id="${cell.id}" 
+data-field-id="${kanbanData.fields[fieldsIndex].id}" 
+data-dtype="${cell.valueType}" 
+${cell.value?.isDetached ? ' data-detached="true"' : ""} 
+style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, kanbanData.showIcon, "kanban")}</div>`;
+            if (kanbanData.displayFieldName) {
+                html += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
+    <div class="av__gallery-name">
+        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
+        ${kanbanData.fields[fieldsIndex].desc ? `<svg aria-label="${kanbanData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
+    </div>
+    ${cellHTML}
+</div>`;
+            } else {
+                html += `<div class="av__gallery-field" data-empty="${isEmpty}">
+    <div class="av__gallery-tip">
+        ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
+    </div>
+    ${cellHTML}
+</div>`;
+            }
+        });
+        html += `</div>
+    <div class="av__gallery-actions">
+        <span class="protyle-icon protyle-icon--first ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+    </div>
+</div>`;
+        return html;
+    }
+    const tableRow = options.row as IAVRow;
+    const tableData = options.data as IAVTable;
+
+    html = `<div class="av__row" data-index="${options.rowIndex}" data-id="${tableRow.id}">`;
+    if (options.pinIndex > -1) {
         html += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     } else {
         html += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     }
 
-    row.cells.forEach((cell, index) => {
-        const column = (data as IAVTable).columns[index];
+   tableRow.cells.forEach((cell, index) => {
+        const column = tableData.columns[index];
         if (column.hidden) {
             return;
         }
@@ -35,9 +198,9 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="width: ${column.width || "200px"};
 ${cell.valueType === "number" ? "text-align: right;" : ""}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.rowIndex, tableData.showIcon)}</div>`;
 
-        if (pinIndex === index) {
+        if (options.pinIndex === index) {
             html += "</div>";
         }
     });

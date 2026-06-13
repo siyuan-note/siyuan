@@ -810,10 +810,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 		return
 	}
 
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
+	table := "blocks_fts"
 
 	buf := bytes.Buffer{}
 	buf.WriteString("SELECT * FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(")

@@ -19,11 +19,11 @@ import {activeBlur, initKeyboardToolbar} from "./keyboardToolbar";
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";
-import {setTitle} from "../../dialog/processSystem";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {MobileCustom} from "../dock/MobileCustom";
 import {Menu} from "../../plugin/Menu";
 import {showMessage} from "../../dialog/message";
+import {setTitle} from "../../util/processTitle";
 
 let custom: MobileCustom;
 const openDockMenu = (app: App) => {

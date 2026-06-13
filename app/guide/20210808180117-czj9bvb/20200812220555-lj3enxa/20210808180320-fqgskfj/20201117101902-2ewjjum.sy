@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20240731204712"
+		"updated": "20260612202926"
 	},
 	"Children": [
 		{
@@ -15,13 +15,9 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210111224435-y1fesd1",
-				"updated": "20210512154656"
+				"updated": "20260612202926"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "概述"
@@ -33,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120447-1ros46z",
-				"updated": "20210512154659"
+				"updated": "20260612202926"
 			},
 			"Children": [
 				{
@@ -47,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 和 "
+					"Data": "​ 和 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -56,7 +52,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 将 SQL 脚本包裹起来并独占一行："
+					"Data": "​ 将 SQL 脚本包裹起来并独占一行："
 				},
 				{
 					"Type": "NodeTextMark",
@@ -65,7 +61,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，数据库表请参考"
+					"Data": "​，数据库表请参考"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -82,6 +78,10 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "内容块/嵌入"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -90,13 +90,10 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201224120447-e6zyfti"
+				"id": "20201224120447-e6zyfti",
+				"updated": "20201224120447"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "示例"
@@ -106,12 +103,7 @@
 		{
 			"ID": "20201224120447-znjkoy5",
 			"Type": "NodeList",
-			"ListData": {
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
+			"ListData": {},
 			"Properties": {
 				"id": "20201224120447-znjkoy5",
 				"updated": "20210503152123"
@@ -120,22 +112,21 @@
 				{
 					"ID": "20201224120447-n30ybcs",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201224120447-n30ybcs"
+						"id": "20201224120447-n30ybcs",
+						"updated": "20201224120447"
 					},
 					"Children": [
 						{
 							"ID": "20201224120447-qmgtpok",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20201224120447-qmgtpok"
+								"id": "20201224120447-qmgtpok",
+								"updated": "20201224120447"
 							},
 							"Children": [
 								{
@@ -149,7 +140,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 的列表项："
+									"Data": "​ 的"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表项"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
 								}
 							]
 						},
@@ -157,36 +156,26 @@
 							"ID": "20201224120447-7zxu4l5",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
-							"CodeBlockFenceChar": 96,
-							"CodeBlockFenceLen": 3,
-							"CodeBlockOpenFence": "YGBg",
-							"CodeBlockInfo": "c3Fs",
-							"CodeBlockCloseFence": "YGBg",
 							"Properties": {
-								"id": "20201224120447-7zxu4l5"
+								"id": "20201224120447-7zxu4l5",
+								"updated": "20201224120447"
 							},
 							"Children": [
 								{
 									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
+									"Data": "```"
 								},
 								{
 									"Type": "NodeCodeBlockFenceInfoMarker",
 									"CodeBlockInfo": "c3Fs"
 								},
 								{
-									"ID": "20220307091943-nnvt195",
 									"Type": "NodeCodeBlockCode",
-									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND type = 'i' }}\n",
-									"Properties": {
-										"id": "20220307091943-nnvt195"
-									}
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND type = 'i' }}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
+									"Data": "```"
 								}
 							]
 						}
@@ -195,23 +184,21 @@
 				{
 					"ID": "20201224120447-s8m8new",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201224120447-s8m8new"
+						"id": "20201224120447-s8m8new",
+						"updated": "20201224120447"
 					},
 					"Children": [
 						{
 							"ID": "20201224120447-5c10xrv",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20201224120447-5c10xrv"
+								"id": "20201224120447-5c10xrv",
+								"updated": "20201224120447"
 							},
 							"Children": [
 								{
@@ -225,7 +212,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 和 "
+									"Data": "​ 和 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -234,7 +221,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 段落块："
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "段落块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
 								}
 							]
 						},
@@ -242,36 +237,26 @@
 							"ID": "20201224120447-0y91i5d",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
-							"CodeBlockFenceChar": 96,
-							"CodeBlockFenceLen": 3,
-							"CodeBlockOpenFence": "YGBg",
-							"CodeBlockInfo": "c3Fs",
-							"CodeBlockCloseFence": "YGBg",
 							"Properties": {
-								"id": "20201224120447-0y91i5d"
+								"id": "20201224120447-0y91i5d",
+								"updated": "20201224120447"
 							},
 							"Children": [
 								{
 									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
+									"Data": "```"
 								},
 								{
 									"Type": "NodeCodeBlockFenceInfoMarker",
 									"CodeBlockInfo": "c3Fs"
 								},
 								{
-									"ID": "20220307091943-yr7wm1v",
 									"Type": "NodeCodeBlockCode",
-									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%引用%' AND type = 'p') }}\n",
-									"Properties": {
-										"id": "20220307091943-yr7wm1v"
-									}
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%引用%' AND type = 'p') }}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
+									"Data": "```"
 								}
 							]
 						}
@@ -280,16 +265,13 @@
 				{
 					"ID": "20201224120447-7lzhgko",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201224120447-7lzhgko"
+						"id": "20201224120447-7lzhgko",
+						"updated": "20201224120447"
 					},
 					"Children": [
 						{
@@ -311,7 +293,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 和 "
+									"Data": "​ 和 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -320,7 +302,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 的标题块并按更新时间降序结果取前 2 条："
+									"Data": "​ 的标题块并按更新时间降序结果取前 "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 条："
 								}
 							]
 						},
@@ -328,36 +318,26 @@
 							"ID": "20201224120447-zgg5lvx",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
-							"CodeBlockFenceChar": 96,
-							"CodeBlockFenceLen": 3,
-							"CodeBlockOpenFence": "YGBg",
-							"CodeBlockInfo": "c3Fs",
-							"CodeBlockCloseFence": "YGBg",
 							"Properties": {
-								"id": "20201224120447-zgg5lvx"
+								"id": "20201224120447-zgg5lvx",
+								"updated": "20201224120447"
 							},
 							"Children": [
 								{
 									"Type": "NodeCodeBlockFenceOpenMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
+									"Data": "```"
 								},
 								{
 									"Type": "NodeCodeBlockFenceInfoMarker",
 									"CodeBlockInfo": "c3Fs"
 								},
 								{
-									"ID": "20220307091943-wjxtfog",
 									"Type": "NodeCodeBlockCode",
-									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%嵌入%' AND type = 'h' ORDER BY updated DESC LIMIT 2 }}\n",
-									"Properties": {
-										"id": "20220307091943-wjxtfog"
-									}
+									"Data": "{{ SELECT * FROM blocks WHERE content LIKE '%内容块%' AND content LIKE '%嵌入%' AND type = 'h' ORDER BY updated DESC LIMIT 2 }}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
-									"Data": "```",
-									"CodeBlockFenceLen": 3
+									"Data": "```"
 								}
 							]
 						}
@@ -370,13 +350,10 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201224120447-fnapz6h"
+				"id": "20201224120447-fnapz6h",
+				"updated": "20201224120447"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "案例一"
@@ -387,7 +364,8 @@
 			"ID": "20201224120447-acd7hwp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20201224120447-acd7hwp"
+				"id": "20201224120447-acd7hwp",
+				"updated": "20201224120447"
 			},
 			"Children": [
 				{
@@ -401,7 +379,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 和 "
+					"Data": "​ 和 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -410,7 +388,23 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文本的段落块，并排除当前文档（否则当段落块也会包含到结果集中，因为当前段落同样包含了这两个文本，下面的案例类似）："
+					"Data": "​ 文本的"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "段落块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，并排除当前文档（否则当"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "段落块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "也会包含到结果集中，因为当前段落同样包含了这两个文本，下面的案例类似）："
 				}
 			]
 		},
@@ -450,10 +444,6 @@
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
 					"Type": "NodeText",
 					"Data": "案例二"
 				}
@@ -487,7 +477,15 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 的段落块："
+					"Data": "​ 的"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "段落块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "："
 				}
 			]
 		},
@@ -496,7 +494,6 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20201224120447-veyqmvr",
-				"style": "height: 100px;",
 				"updated": "20240731204356"
 			},
 			"Children": [
@@ -523,13 +520,10 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201224120447-v7yfh5v"
+				"id": "20201224120447-v7yfh5v",
+				"updated": "20201224120447"
 			},
 			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
 				{
 					"Type": "NodeText",
 					"Data": "案例三"
@@ -540,21 +534,30 @@
 			"ID": "20201224120447-s5zmpsa",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20201224120447-s5zmpsa"
+				"id": "20201224120447-s5zmpsa",
+				"updated": "20201224120447"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "有时候我们可能需要随机漫游显示内容块，以方便回顾。"
+					"Data": "有时候我们可能需要随机漫游显示"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "内容块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，以方便回顾。"
 				}
 			]
 		},
 		{
 			"ID": "20201224120447-kewa9nr",
 			"Type": "NodeBlockQueryEmbed",
-			"Data": "{{SELECT * FROM blocks ORDER BY random() LIMIT 3}}\n",
 			"Properties": {
-				"id": "20201224120447-kewa9nr"
+				"id": "20201224120447-kewa9nr",
+				"updated": "20201224120447"
 			},
 			"Children": [
 				{
@@ -581,7 +584,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210630172050-m3pgmkt",
-				"updated": "20210630172057"
+				"updated": "20260612202058"
 			},
 			"Children": [
 				{
@@ -600,7 +603,23 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "查询未完成的任务列表项，这里需要使用 "
+					"Data": "查询未完成的任务"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "列表项"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "这里"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "需要使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -609,7 +628,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 字段而不是 "
+					"Data": "​ 字段而不是 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -618,7 +637,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 字段："
+					"Data": "​ 字段："
 				}
 			]
 		},
@@ -645,6 +664,881 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-4nvpz56",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260612202058-4nvpz56",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入块执行 JavaScript"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-q54zwf8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-q54zwf8",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入块支持通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "//!js"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 前缀执行 JavaScript 代码，动态决定要嵌入哪些块，适合 SQL 查询无法满足的复杂场景"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-1tfila8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202058-1tfila8",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "编辑方式"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-paqopye",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-paqopye",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在嵌入块编辑框中输入以 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "//!js"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 开头的代码即可进入 JS 模式"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-u31815k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202058-u31815k",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可用的上下文变量"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-ef6nmf4",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260612202058-ef6nmf4",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "参数"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "类型"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "说明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "fetchSyncPost"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "(url, data, callback?) =\u0026gt; void"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "发起同步 POST 请求"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "item"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTMLElement"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "当前嵌入块 DOM 元素"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "protyle"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "IProtyle"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "当前文档的 Protyle 编辑器实例"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "top"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "number \u0026#124; undefined"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "滚动位置（前进/后退定位用）"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-8ljs229",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202058-8ljs229",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "返回值"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-7u53ctj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-7u53ctj",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "需要"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "返回一个块 ID 数组"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "string[]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，格式为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS-[a-z0-9]{7}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​），支持同步和异步："
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-2dobv32",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202058-2dobv32",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "// 同步返回\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// 异步返回（Promise 会被自动 await）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" })\n    .then(r =\u003e r.data.blocks.map(b =\u003e b.id));\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-81vbloa",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-81vbloa",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "返回数组中 ID 的顺序即为最终显示顺序"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-dt9gwb2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202058-dt9gwb2",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "实用示例"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-8quyqb9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-8quyqb9",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "嵌入固定的几个块："
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-tv6co88",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202058-tv6co88",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-nzro8zw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-nzro8zw",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "通过全文搜索动态获取："
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-wp4nan2",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202058-wp4nan2",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-2v9xnq8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-2v9xnq8",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "获取当前文档下所有子块："
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-wvrepjj",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202058-wvrepjj",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-kb0mobj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202058-kb0mobj",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "按自定义属性过滤："
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-6kivtwm",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202058-6kivtwm",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) =\u003e attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) =\u003e id);\nreturn filtered;\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-7o8g0fu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202058-7o8g0fu",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "特性与限制"
+				}
+			]
+		},
+		{
+			"ID": "20260612202058-ih0e8zv",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260612202058-ih0e8zv",
+				"updated": "20260612202058"
+			},
+			"Children": [
+				{
+					"ID": "20260612202058-x78zwd5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260612202058-x78zwd5",
+						"updated": "20260612202058"
+					},
+					"Children": [
+						{
+							"ID": "20260612202058-eixyatk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202058-eixyatk",
+								"updated": "20260612202058"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "不做自动索引"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：JS 模式嵌入块需要浏览器运行时环境，后端不会自动索引更新内容，由前端主动渲染"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202058-zjwzokw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260612202058-zjwzokw",
+						"updated": "20260612202058"
+					},
+					"Children": [
+						{
+							"ID": "20260612202058-57rsop5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202058-57rsop5",
+								"updated": "20260612202058"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "最大嵌套 4 层"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：嵌入块内的嵌入块最多递归渲染 4 层，超出部分不再展开"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202058-niuyc9c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260612202058-niuyc9c",
+						"updated": "20260612202058"
+					},
+					"Children": [
+						{
+							"ID": "20260612202058-0x1tkd6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202058-0x1tkd6",
+								"updated": "20260612202058"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "不嵌套自身类型"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：嵌入块内部不会再次嵌入其他 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "query_embed"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202058-vuy2gbe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260612202058-vuy2gbe",
+						"updated": "20260612202058"
+					},
+					"Children": [
+						{
+							"ID": "20260612202058-c32za6h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202058-c32za6h",
+								"updated": "20260612202058"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "错误提示"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：JS 执行异常或返回非数组时，显示\"引用已过期\""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202058-8zhr6r3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20260612202058-8zhr6r3",
+						"updated": "20260612202058"
+					},
+					"Children": [
+						{
+							"ID": "20260612202058-qh54hmx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202058-qh54hmx",
+								"updated": "20260612202058"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "安全性"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：后端渲染/导出时会移除 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;script\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 标签和 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "javascript:"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 协议等危险内容"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

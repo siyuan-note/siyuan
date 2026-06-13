@@ -1332,14 +1332,18 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	return
 }
 
-func buildBoxesFilter(boxes []string) string {
+func buildBoxesFilter(boxes []string, alias ...string) string {
 	if 0 == len(boxes) {
 		return ""
+	}
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
 	}
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, box := range boxes {
-		builder.WriteString(fmt.Sprintf("box = '%s'", box))
+		builder.WriteString(fmt.Sprintf("%sbox = '%s'", prefix, box))
 		if i < len(boxes)-1 {
 			builder.WriteString(" OR ")
 		}
@@ -1348,14 +1352,18 @@ func buildBoxesFilter(boxes []string) string {
 	return builder.String()
 }
 
-func buildPathsFilter(paths []string) string {
+func buildPathsFilter(paths []string, alias ...string) string {
 	if 0 == len(paths) {
 		return ""
+	}
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
 	}
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, path := range paths {
-		builder.WriteString(fmt.Sprintf("path LIKE '%s%%'", path))
+		builder.WriteString(fmt.Sprintf("%spath LIKE '%s%%'", prefix, path))
 		if i < len(paths)-1 {
 			builder.WriteString(" OR ")
 		}
@@ -1407,7 +1415,11 @@ func buildOrderBy(query string, method, orderBy int) string {
 // Example output:
 //
 //	(type IN ('p','c') OR (type = 'h' AND subtype IN ('h1','h2')))
-func buildTypeFilter(types, subTypes map[string]bool) string {
+func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
+	}
 	s := conf.NewSearch()
 	if err := copier.Copy(s, Conf.Search); err != nil {
 		logging.LogErrorf("copy search conf failed: %s", err)
@@ -1493,8 +1505,8 @@ func buildTypeFilter(types, subTypes map[string]bool) string {
 		if 0 == len(headingSubs) {
 			simpleTypes = append(simpleTypes, headingAbbr)
 		} else {
-			clauses = append(clauses, fmt.Sprintf("(type = '%s' AND subtype IN (%s))",
-				headingAbbr, sqlQuoteJoin(headingSubs)))
+			clauses = append(clauses, fmt.Sprintf("(%stype = '%s' AND %ssubtype IN (%s))",
+				prefix, headingAbbr, prefix, sqlQuoteJoin(headingSubs)))
 		}
 	}
 
@@ -1509,17 +1521,16 @@ func buildTypeFilter(types, subTypes map[string]bool) string {
 		if 0 == len(listSubs) {
 			simpleTypes = append(simpleTypes, listTypes...)
 		} else {
-			clauses = append(clauses, fmt.Sprintf("(type IN (%s) AND subtype IN (%s))",
-				sqlQuoteJoin(listTypes), sqlQuoteJoin(listSubs)))
+			clauses = append(clauses, fmt.Sprintf("(%stype IN (%s) AND %ssubtype IN (%s))",
+				prefix, sqlQuoteJoin(listTypes), prefix, sqlQuoteJoin(listSubs)))
 		}
 	}
 
 	if 0 < len(simpleTypes) {
-		clauses = append([]string{"type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
+		clauses = append([]string{prefix + "type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
 	}
 
 	if 0 == len(clauses) {
-		// Match nothing without producing invalid SQL when concatenated after AND.
 		return "(1 = 0)"
 	}
 	return "(" + strings.Join(clauses, " OR ") + ")"
@@ -1600,10 +1611,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 	}
 
 	quotedKeyword := stringQuery(keyword)
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
+	table := "blocks_fts"
 
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS hpath, " +
@@ -1706,10 +1714,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreF
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
+	table := "blocks_fts"
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
 		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
@@ -1734,10 +1739,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 }
 
 func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
+	table := "blocks_fts"
 
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND " + typeFilter
@@ -1811,9 +1813,6 @@ func highlightByFTS(query, typeFilter, id string) (ret []string) {
 	query = strings.ReplaceAll(query, " ", " OR ")
 	const limit = 256
 	table := "blocks_fts"
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		"highlight(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS hpath, " +
 		"highlight(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS name, " +

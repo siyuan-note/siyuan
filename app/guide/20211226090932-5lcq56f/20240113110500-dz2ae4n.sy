@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20260317202510"
+		"updated": "20260613181357"
 	},
 	"Children": [
 		{
@@ -560,7 +560,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260317195622-4bssmue",
-				"updated": "20260317202510"
+				"updated": "20260613174315"
 			},
 			"Children": [
 				{
@@ -767,6 +767,578 @@
 					"Data": "完成以上步驟後思源每隔 45 秒會發送通知來盡量保活後台運作。"
 				}
 			]
+		},
+		{
+			"ID": "20260613174315-dz9gat0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613174315-dz9gat0",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "速記"
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-qusjg15",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174315-qusjg15",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "速記是行動端的快速記錄功能。當靈感閃現或有臨時資訊需要記錄時，無需打開思源進入文件編輯，即可透過系統分享或快捷入口將文字快速保存。速記內容先暫存在本機，之後自動轉入文件面板進行整理。"
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-symmh66",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174315-symmh66",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-jrdwpsv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613174315-jrdwpsv",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"ID": "20260613174315-likzl1k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174315-likzl1k",
+						"updated": "20260613174315"
+					},
+					"Children": [
+						{
+							"ID": "20260613174315-cm4y9k9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174315-cm4y9k9",
+								"updated": "20260613174315"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "創建速記"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在行動端透過系統分享選單將文字/連結發送到思源，或在桌面添加思源的快捷入口一鍵記錄"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613174315-vu6cm45",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174315-vu6cm45",
+						"updated": "20260613174315"
+					},
+					"Children": [
+						{
+							"ID": "20260613174315-9lhuhx6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174315-9lhuhx6",
+								"updated": "20260613174315"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "自動轉入"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：速記創建後，系統每 7 秒自動檢查本機速記目錄，將新速記轉入文件面板中設定的目標位置"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-uerjb05",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174315-uerjb05",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "存放設定"
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-nlwy3go",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174315-nlwy3go",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 設定 - 文件 中設定速記的存放位置："
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-uyvpqtm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613174315-uyvpqtm",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"ID": "20260613174315-wwan3ip",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174315-wwan3ip",
+						"updated": "20260613174315"
+					},
+					"Children": [
+						{
+							"ID": "20260613174315-efssah6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174315-efssah6",
+								"updated": "20260613174315"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "存放筆記本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：選擇速記轉入的目標筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613174315-0vkza17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174315-0vkza17",
+						"updated": "20260613174315"
+					},
+					"Children": [
+						{
+							"ID": "20260613174315-8n45e3c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174315-8n45e3c",
+								"updated": "20260613174315"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "存放路徑"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：設定速記內容的保存路徑範本："
+								}
+							]
+						},
+						{
+							"ID": "20260613174315-dqqh5s8",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613174315-dqqh5s8",
+								"updated": "20260613174315"
+							},
+							"Children": [
+								{
+									"ID": "20260613174315-ynkgv5w",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613174315-ynkgv5w",
+										"updated": "20260613174315"
+									},
+									"Children": [
+										{
+											"ID": "20260613174315-r7af61h",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613174315-r7af61h",
+												"updated": "20260613174315"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "不設定路徑範本：每條速記單獨創建一個文件，標題為時間戳"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613174315-049sszt",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613174315-049sszt",
+										"updated": "20260613174315"
+									},
+									"Children": [
+										{
+											"ID": "20260613174315-487udar",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613174315-487udar",
+												"updated": "20260613174315"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "設定路徑範本：所有速記追加到指定文件的末尾。路徑範本支援 Go template 語法，例如 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/速記/{{now | date \"20060102150405\"}}"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 會按時間生成獨立文件"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-hik0k7e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174315-hik0k7e",
+				"updated": "20260613181357"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "與收集箱的區別"
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-0tyz93k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174315-0tyz93k",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "速記與雲端收集箱是兩種獨立的快速記錄方式："
+				}
+			]
+		},
+		{
+			"ID": "20260613174315-yjuh3nc",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260613174315-yjuh3nc",
+				"updated": "20260613174315"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th"
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "速記"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "雲端收集箱"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "存儲位置"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本機"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "雲端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用方式"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "系統分享/快捷入口"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "WeChat 發送/API 調用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "轉入方式"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自動轉入文件面板"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需手動從收集箱面板處理"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要訂閱"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "否"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "是"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可用平臺"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "僅行動端"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "全平臺"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613181357-b7601vm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613181357-b7601vm",
+				"updated": "20260613181357"
+			}
 		}
 	]
 }

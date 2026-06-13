@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Automatische snapshot gemaakt",
   "agentThinkingDoneTime": "Nagedacht: %s",
   "agentThinking": "Denkt na...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Goedkeuren",
   "agentConfirmReject": "Afwijzen",
   "agentConfirmAlways": "Sessie toestaan",
-  "agentConfirmAlwaysDesc": "Niet opnieuw vragen deze sessie",
+  "agentConfirmAlwaysDesc": "Niet meer vragen voor enige operatie deze sessie",
   "agentTimeout": "Time-out agent",
   "agentTimeoutTip": "Totale time-out van de agentsessie, 0 = geen limiet",
   "agentConfirmTimeout": "Bevestigingstime-out",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Checkout uit momentopname uitvoeren",
     "task.database.index.full": "Index herbouwen uitvoeren",
+    "task.database.index.fts": "Zoekindex opnieuw opbouwen",
     "task.database.index": "Database-index uitvoeren",
     "task.database.index.commit": "Database-index commit uitvoeren",
     "task.database.index.ref": "Database-index verwijzing uitvoeren",
@@ -1800,7 +1802,7 @@
     "212": "Defecten in huidige cloud sync-versie; upgrade",
     "213": "Cloudverificatie mislukt; upgrade en log opnieuw in",
     "214": "Vereist PRO-functies of Jaarabonnement",
-    "215": "Zie bureaublad gebruikersgids",
+    "215": "",
     "216": "Asset-inhoudsindex herbouwen...",
     "217": "[%d/%d] Asset-inhoudsindex aangemaakt",
     "218": "Te veel momentopnamen; voer data-repo opschonen uit",
@@ -1880,6 +1882,7 @@
     "292": "Kan bestand niet aanmaken",
     "293": "Kan niet naar bestand schrijven",
     "294": "Activeringscode mag niet leeg zijn",
-    "295": "Vereist aankoop Jaarabonnement"
+    "295": "Vereist aankoop Jaarabonnement",
+    "296": "Rebuilding search index..."
   }
 }

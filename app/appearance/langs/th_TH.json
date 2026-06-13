@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "สร้างสแนปช็อตอัตโนมัติ",
   "agentThinkingDoneTime": "คิดแล้ว: %s",
   "agentThinking": "กำลังคิด...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "อนุมัติ",
   "agentConfirmReject": "ปฏิเสธ",
   "agentConfirmAlways": "อนุญาตเซสชัน",
-  "agentConfirmAlwaysDesc": "ไม่ต้องถามอีกในเซสชันนี้",
+  "agentConfirmAlwaysDesc": "ไม่ต้องถามอีกสำหรับการดำเนินการใดๆ ในเซสชันนี้",
   "agentTimeout": "หมดเวลาเอเจนต์",
   "agentTimeoutTip": "หมดเวลารวมของเซสชันเอเจนต์, 0 = ไม่จำกัด",
   "agentConfirmTimeout": "หมดเวลายืนยัน",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "checkout สแนปช็อต",
     "task.database.index.full": "สร้างดัชนีใหม่",
+    "task.database.index.fts": "สร้างดัชนีการค้นหาใหม่",
     "task.database.index": "ดัชนีฐานข้อมูล",
     "task.database.index.commit": "commit ดัชนี",
     "task.database.index.ref": "อ้างอิงดัชนี",
@@ -1800,7 +1802,7 @@
     "212": "ข้อบกพร่องในเวอร์ชันนี้",
     "213": "ตรวจสอบล้มเหลว อัปเกรด",
     "214": "ต้อง PRO หรือสมัคร",
-    "215": "ดูคู่มือเดสก์ท็อป",
+    "215": "",
     "216": "สร้างดัชนีทรัพยากร...",
     "217": "[%d/%d] ดัชนีทรัพยากร",
     "218": "สแนปช็อตมากเกิน",
@@ -1880,6 +1882,7 @@
     "292": "ไม่สามารถสร้างไฟล์ได้",
     "293": "ไม่สามารถเขียนไฟล์ได้",
     "294": "รหัสเปิดใช้ไม่สามารถว่างได้",
-    "295": "ต้องซื้อสมัครรายปี"
+    "295": "ต้องซื้อสมัครรายปี",
+    "296": "Rebuilding search index..."
   }
 }

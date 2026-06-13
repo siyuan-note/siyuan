@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Automatyczna migawka utworzona",
   "agentThinkingDoneTime": "Przemyślane: %s",
   "agentThinking": "Myśli...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Zatwierdź",
   "agentConfirmReject": "Odrzuć",
   "agentConfirmAlways": "Zezwól sesję",
-  "agentConfirmAlwaysDesc": "Nie pytaj ponownie w tej sesji",
+  "agentConfirmAlwaysDesc": "Nie pytaj ponownie o żadną operację w tej sesji",
   "agentTimeout": "Limit czasu agenta",
   "agentTimeoutTip": "Całkowity limit czasu sesji agenta, 0 = bez limitu",
   "agentConfirmTimeout": "Limit czasu potwierdzenia",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Wykonaj checkout ze zrzutu",
     "task.database.index.full": "Wykonaj przebudowę indeksu",
+    "task.database.index.fts": "Przebuduj indeks wyszukiwania",
     "task.database.index": "Wykonaj indeks bazy danych",
     "task.database.index.commit": "Wykonaj zatwierdzenie indeksu bazy danych",
     "task.database.index.ref": "Wykonaj odniesienie indeksu bazy danych",
@@ -1800,7 +1802,7 @@
     "212": "W bieżącej wersji synchronizacji danych w chmurze występują pewne defekty, proszę zaktualizować do najnowszej wersji. Przepraszamy za niedogodności",
     "213": "Weryfikacja w chmurze nie powiodła się, proszę spróbować zaktualizować do najnowszej wersji i zalogować się ponownie przed synchronizacją",
     "214": "Ta funkcja wymaga zalogowania się na konto i zakupu <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[funkcji]</a> lub <a target='_blank' href='${accountServer}/subscribe/siyuan'>[rocznej subskrypcji]</a> przed użyciem",
-    "215": "Proszę odwołać się do podręcznika użytkownika na komputerze",
+    "215": "",
     "216": "Przebudowa indeksu danych zawartości zasobów, proszę czekać...",
     "217": "[%d/%d] Utworzono indeks danych zawartości zasobów",
     "218": "Wykryto zbyt wiele zrzutów repozytorium danych, co powoduje spowolnienie uruchamiania programu i synchronizacji danych. Zastanów się nad wykonaniem [Ustawienia - O - Opróżnienie repozytorium danych]",
@@ -1880,6 +1882,7 @@
     "292": "Nie można utworzyć pliku",
     "293": "Nie można zapisać pliku",
     "294": "Kod aktywacyjny nie może być pusty",
-    "295": "Ta funkcja jest dostępna tylko po zakupie [rocznej subskrypcji] (jeśli już kupiłeś, odśwież lub zaloguj się ponownie w Ustawienia - Konto)"
+    "295": "Ta funkcja jest dostępna tylko po zakupie [rocznej subskrypcji] (jeśli już kupiłeś, odśwież lub zaloguj się ponownie w Ustawienia - Konto)",
+    "296": "Rebuilding search index..."
   }
 }

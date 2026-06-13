@@ -249,16 +249,17 @@ func initFTSBlocks() (err error) {
 	if err != nil {
 		return
 	}
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan\")")
-	if err != nil {
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"" + ftsTokenize() + "\")")
+	return
+}
+
+func RebuildFTSIndex() (err error) {
+	if err = initFTSBlocks(); err != nil {
 		return
 	}
 
-	_, err = db.Exec("DROP TABLE IF EXISTS blocks_fts_case_insensitive")
-	if err != nil {
-		return
-	}
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts_case_insensitive USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"siyuan case_insensitive\")")
+	stmt := "INSERT INTO blocks_fts (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) SELECT id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated FROM blocks"
+	_, err = db.Exec(stmt)
 	return
 }
 
@@ -436,6 +437,7 @@ func initAssetContentDBTables() {
 
 var (
 	caseSensitive  bool
+	hanSensitive   bool
 	indexAssetPath bool
 )
 
@@ -453,6 +455,24 @@ func SetCaseSensitive(b bool) {
 	}
 
 	util.SearchCaseSensitive = b
+}
+
+func SetHanSensitive(b bool) {
+	hanSensitive = b
+	util.SearchHanSensitive = b
+}
+
+// ftsTokenize 返回 blocks FTS 表的 tokenize 参数。
+// 分词器参数在 CREATE VIRTUAL TABLE 时固化，切换区分大小写或区分繁简后需要重建索引。
+func ftsTokenize() string {
+	ret := "siyuan"
+	if !caseSensitive {
+		ret += " case_insensitive"
+	}
+	if !hanSensitive {
+		ret += " han_insensitive"
+	}
+	return ret
 }
 
 func SetIndexAssetPath(b bool) {
@@ -1072,16 +1092,9 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		return
 	}
 
-	if caseSensitive {
-		stmt = "DELETE FROM blocks_fts WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
-		if err = execStmtTx(tx, stmt); err != nil {
-			return
-		}
-	} else {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
-		if err = execStmtTx(tx, stmt); err != nil {
-			return
-		}
+	stmt = "DELETE FROM blocks_fts WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
+	if err = execStmtTx(tx, stmt); err != nil {
+		return
 	}
 
 	stmt = "DELETE FROM block_embeddings WHERE id IN (" + strings.Join(ftsIDs, ",") + ")"
@@ -1096,16 +1109,9 @@ func deleteBlocksByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = execStmtTx(tx, stmt, box); err != nil {
 		return
 	}
-	if caseSensitive {
-		stmt = "DELETE FROM blocks_fts WHERE box = ?"
-		if err = execStmtTx(tx, stmt, box); err != nil {
-			return
-		}
-	} else {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ?"
-		if err = execStmtTx(tx, stmt, box); err != nil {
-			return
-		}
+	stmt = "DELETE FROM blocks_fts WHERE box = ?"
+	if err = execStmtTx(tx, stmt, box); err != nil {
+		return
 	}
 	ClearCache()
 	return
@@ -1196,16 +1202,9 @@ func deleteByRootID(tx *sql.Tx, rootID string, context map[string]any) (err erro
 	if err = execStmtTx(tx, stmt, rootID); err != nil {
 		return
 	}
-	if caseSensitive {
-		stmt = "DELETE FROM blocks_fts WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, rootID); err != nil {
-			return
-		}
-	} else {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, rootID); err != nil {
-			return
-		}
+	stmt = "DELETE FROM blocks_fts WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, rootID); err != nil {
+		return
 	}
 	stmt = "DELETE FROM spans WHERE root_id = ?"
 	if err = execStmtTx(tx, stmt, rootID); err != nil {
@@ -1243,16 +1242,9 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]any) 
 	if err = execStmtTx(tx, stmt); err != nil {
 		return
 	}
-	if caseSensitive {
-		stmt = "DELETE FROM blocks_fts WHERE root_id IN " + ids
-		if err = execStmtTx(tx, stmt); err != nil {
-			return
-		}
-	} else {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id IN " + ids
-		if err = execStmtTx(tx, stmt); err != nil {
-			return
-		}
+	stmt = "DELETE FROM blocks_fts WHERE root_id IN " + ids
+	if err = execStmtTx(tx, stmt); err != nil {
+		return
 	}
 	stmt = "DELETE FROM spans WHERE root_id IN " + ids
 	if err = execStmtTx(tx, stmt); err != nil {
@@ -1284,16 +1276,9 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
 		return
 	}
-	if caseSensitive {
-		stmt = "DELETE FROM blocks_fts WHERE box = ? AND path LIKE ?"
-		if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
-			return
-		}
-	} else {
-		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ? AND path LIKE ?"
-		if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
-			return
-		}
+	stmt = "DELETE FROM blocks_fts WHERE box = ? AND path LIKE ?"
+	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+		return
 	}
 	stmt = "DELETE FROM spans WHERE box = ? AND path LIKE ?"
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
@@ -1324,16 +1309,9 @@ func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err 
 	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	if caseSensitive {
-		stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
-			return
-		}
-	} else {
-		stmt = "UPDATE blocks_fts_case_insensitive SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
-			return
-		}
+	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
+		return
 	}
 
 	stmt = "UPDATE spans SET box = ?, path = ? WHERE root_id = ?"
@@ -1373,16 +1351,9 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 		return
 	}
 
-	if caseSensitive {
-		stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
-			return
-		}
-	} else {
-		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
-			return
-		}
+	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
+		return
 	}
 
 	ClearCache()

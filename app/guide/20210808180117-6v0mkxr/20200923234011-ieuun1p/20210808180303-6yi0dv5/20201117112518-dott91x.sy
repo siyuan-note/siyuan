@@ -6,7 +6,7 @@
 		"id": "20201117112518-dott91x",
 		"title": "Embed Content Block",
 		"type": "doc",
-		"updated": "20240731204825"
+		"updated": "20260612202529"
 	},
 	"Children": [
 		{
@@ -581,7 +581,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210630172523-9xe9jj2",
-				"updated": "20210630172530"
+				"updated": "20260612202529"
 			},
 			"Children": [
 				{
@@ -645,6 +645,881 @@
 				},
 				{
 					"Type": "NodeCloseBrace"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-iytdii0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260612202529-iytdii0",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Embed Block JavaScript Execution"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-yw2m7sw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-yw2m7sw",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Embed blocks support executing JavaScript code via the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "//!js"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ prefix, allowing dynamic determination of which blocks to embed. This is suitable for complex scenarios where SQL queries are insufficient"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-36g9e2h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202529-36g9e2h",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to Edit"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-gki8m5i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-gki8m5i",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enter code starting with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "//!js"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in the embed block editor to enter JS mode"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-9d8y4l1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202529-9d8y4l1",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Available Context Variables"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-qhxlt57",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260612202529-qhxlt57",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Parameter"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Type"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Description"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "fetchSyncPost"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "(url, data, callback?) =\u0026gt; void"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Send synchronous POST request"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "item"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTMLElement"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The current embed block DOM element"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "protyle"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "IProtyle"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The current document's Protyle editor instance"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "top"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "number \u0026#124; undefined"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Scroll position (for forward/back navigation)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-n0b2kco",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202529-n0b2kco",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Return Value"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-n7a8u46",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-n7a8u46",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You must "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "return an array of block IDs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "string[]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, format: "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "YYYYMMDDHHMMSS-[a-z0-9]{7}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​). Both synchronous and asynchronous returns are supported:"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-mimar76",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202529-mimar76",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "// Synchronous return\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// Asynchronous return (Promise will be automatically await'd)\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"todo\" })\n    .then(r =\u003e r.data.blocks.map(b =\u003e b.id));\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-fkmdwuz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-fkmdwuz",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The order of IDs in the returned array determines the final display order"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-tm04p7m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202529-tm04p7m",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Practical Examples"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-n6xesmj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-n6xesmj",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "Embed a fixed set of blocks:"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-prxsrxp",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202529-prxsrxp",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-mqqlrsl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-mqqlrsl",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "Dynamically fetch via full-text search:"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-jid9olh",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202529-jid9olh",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"todo\" });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-7oe7nua",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-7oe7nua",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "Get all child blocks of the current document:"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-hnj4v12",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202529-hnj4v12",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-ovpa5wl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260612202529-ovpa5wl",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "Filter by custom attributes:"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-8as8rn5",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260612202529-8as8rn5",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anM="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) =\u003e attrs[\"custom-tag\"] === \"important\")\n    .map(([id]) =\u003e id);\nreturn filtered;\n}}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-f1btjt3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260612202529-f1btjt3",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Features and Limitations"
+				}
+			]
+		},
+		{
+			"ID": "20260612202529-xxa1lw6",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260612202529-xxa1lw6",
+				"updated": "20260612202529"
+			},
+			"Children": [
+				{
+					"ID": "20260612202529-0wxcq3g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260612202529-0wxcq3g",
+						"updated": "20260612202529"
+					},
+					"Children": [
+						{
+							"ID": "20260612202529-d7yq1k9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202529-d7yq1k9",
+								"updated": "20260612202529"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "No automatic indexing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": JS-mode embed blocks require a browser runtime environment, so the backend does not auto-index their content. The frontend handles rendering proactively"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202529-qs5d5rg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260612202529-qs5d5rg",
+						"updated": "20260612202529"
+					},
+					"Children": [
+						{
+							"ID": "20260612202529-ywzi343",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202529-ywzi343",
+								"updated": "20260612202529"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Maximum 4 levels of nesting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Embed blocks nested inside embed blocks are recursively rendered up to 4 levels deep; deeper levels are not expanded"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202529-ra1leyg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260612202529-ra1leyg",
+						"updated": "20260612202529"
+					},
+					"Children": [
+						{
+							"ID": "20260612202529-4k96j6t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202529-4k96j6t",
+								"updated": "20260612202529"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "No self-type nesting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Embed blocks will not embed other "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "query_embed"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ blocks inside them"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202529-2ju81sc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260612202529-2ju81sc",
+						"updated": "20260612202529"
+					},
+					"Children": [
+						{
+							"ID": "20260612202529-itlebo8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202529-itlebo8",
+								"updated": "20260612202529"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Error display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When JS execution fails or returns a non-array value, \"Reference expired\" is displayed"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612202529-vtu370m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"id": "20260612202529-vtu370m",
+						"updated": "20260612202529"
+					},
+					"Children": [
+						{
+							"ID": "20260612202529-pyx0zis",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612202529-pyx0zis",
+								"updated": "20260612202529"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Security"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": The backend removes "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;script\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ tags and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "javascript:"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ protocols and other dangerous content during rendering/export"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

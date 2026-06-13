@@ -1,20 +1,21 @@
-import {Constants} from "../constants";
+import {getTopBarHeight} from "../layout/getTopBarHeight";
 
 export const setPosition = (element: HTMLElement, left: number, top: number, targetHeight = 0, targetLeft = 0) => {
     element.style.top = top + "px";
     element.style.left = left + "px";
     const rect = element.getBoundingClientRect();
-    if (rect.top < Constants.SIZE_TOOLBAR_HEIGHT) {
+    const topBarHeight = getTopBarHeight();
+    if (rect.top < topBarHeight) {
         // 如果元素接触顶栏，向下移
-        element.style.top = Constants.SIZE_TOOLBAR_HEIGHT + "px";
+        element.style.top = topBarHeight + "px";
     } else if (rect.bottom > window.innerHeight) {
         const y = top - rect.height - targetHeight;
-        if (y > Constants.SIZE_TOOLBAR_HEIGHT && (y + rect.height) < window.innerHeight) {
+        if (y > topBarHeight && (y + rect.height) < window.innerHeight) {
             // 如果元素底部超出窗口（下方空间不够），向上移
             element.style.top = y + "px";
         } else {
             // 如果上下空间都不够，向上移，但尽量靠底部
-            element.style.top = Math.max(Constants.SIZE_TOOLBAR_HEIGHT, window.innerHeight - rect.height) + "px";
+            element.style.top = Math.max(topBarHeight, window.innerHeight - rect.height) + "px";
         }
     }
     if (rect.right > window.innerWidth) {

@@ -12,7 +12,7 @@ import {closePanel} from "./closePanel";
 import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
-import {setTitle} from "../../dialog/processSystem";
+import {setTitle} from "../../util/processTitle";
 
 const forwardStack: IBackStack[] = [];
 

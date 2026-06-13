@@ -7,7 +7,14 @@ import {account} from "./config/account";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
-import {addBaseURL, getDocDisplayName, getIdFromSYProtocol, isSYProtocol, redirectToCheckAuth, setNoteBook} from "./util/pathName";
+import {
+    addBaseURL,
+    getDocDisplayName,
+    getIdFromSYProtocol,
+    isSYProtocol,
+    redirectToCheckAuth,
+    setNoteBook
+} from "./util/pathName";
 import {registerServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
 import {
@@ -17,10 +24,8 @@ import {
     progressBackgroundTask,
     progressLoading,
     progressStatus,
-    reloadSync,
     setDefRefCount,
     setRefDynamicText,
-    setTitle,
     transactionError
 } from "./dialog/processSystem";
 import {initMessage, showMessage} from "./dialog/message";
@@ -42,6 +47,8 @@ import {updateAppearance} from "./config/util/updateAppearance";
 import {renderSnippet} from "./config/util/snippets";
 import {setBodyHighlight} from "./util/assets";
 import {initAppEventBus} from "./util/eventBus";
+import {reloadSync} from "./util/reloadSync";
+import {setTitle} from "./util/processTitle";
 
 export class App {
     public readonly appId: string = Constants.SIYUAN_APPID;
@@ -210,7 +217,7 @@ export class App {
                             }
                             break;
                         case "updateKernelPluginState": {
-                            const {name, state} = data.data as {name: string, state: TKernelPluginState};
+                            const {name, state} = data.data as { name: string, state: TKernelPluginState };
                             const plugin = this.plugins.find(p => p.name === name);
                             if (plugin) {
                                 plugin.kernel.state.code = state;

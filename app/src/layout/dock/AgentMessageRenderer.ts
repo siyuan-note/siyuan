@@ -3,6 +3,7 @@ import {setCodeTheme} from "../../protyle/render/util";
 import {addScript} from "../../protyle/util/addScript";
 import {Constants} from "../../constants";
 import {mathRender} from "../../protyle/render/mathRender";
+import {showMessage} from "../../dialog/message";
 
 export const renderTodoList = (result: string): string => {
     const L = window.siyuan.languages;
@@ -194,6 +195,32 @@ export const highlightCodeBlocks = (container: HTMLElement): void => {
     }
 };
 
+export const addCopyButtons = (container: HTMLElement): void => {
+    container.querySelectorAll("pre").forEach((pre) => {
+        if (pre.querySelector(".agent-chat__copy-btn")) {
+            return;
+        }
+        const wrap = document.createElement("div");
+        wrap.className = "agent-chat__copy-wrap";
+        const btn = document.createElement("span");
+        btn.className = "agent-chat__copy-btn";
+        btn.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
+        btn.setAttribute("aria-label", window.siyuan.languages.copy);
+        btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const code = pre.querySelector("code");
+            const text = (code?.textContent || "").trimEnd().replace(/\n$/, "");
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            }).catch(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            });
+        });
+        wrap.appendChild(btn);
+        pre.appendChild(wrap);
+    });
+};
+
 export const postRender = (container: HTMLElement): void => {
     container.querySelectorAll(".language-math").forEach((el) => {
         if (el.hasAttribute("data-subtype")) { return; }
@@ -214,6 +241,13 @@ export const postRender = (container: HTMLElement): void => {
             }
         }
     });
+    container.querySelectorAll("pre > code[class*='language-']").forEach((code) => {
+        const match = code.className.match(/language-(\S+)/);
+        if (match) {
+            code.parentElement?.setAttribute("data-language", match[1]);
+        }
+    });
     highlightCodeBlocks(container);
     mathRender(container);
+    addCopyButtons(container);
 };

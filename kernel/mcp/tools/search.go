@@ -70,7 +70,7 @@ func fulltextSearch(args map[string]interface{}) (CallToolResult, error) {
 	if v, ok := args["page"].(float64); ok {
 		page = int(v)
 	}
-	pageSize := 20
+	pageSize := 32
 	if v, ok := args["pageSize"].(float64); ok {
 		pageSize = int(v)
 	}
@@ -78,7 +78,7 @@ func fulltextSearch(args map[string]interface{}) (CallToolResult, error) {
 		page = 1
 	}
 	if pageSize < 1 {
-		pageSize = 20
+		pageSize = 32
 	}
 
 	notebooks := parseStringSlice(args["notebook"])
@@ -132,7 +132,7 @@ func semanticSearch(args map[string]interface{}) (CallToolResult, error) {
 	if v, ok := args["page"].(float64); ok {
 		page = int(v)
 	}
-	pageSize := 20
+	pageSize := 32
 	if v, ok := args["pageSize"].(float64); ok {
 		pageSize = int(v)
 	}
@@ -140,7 +140,7 @@ func semanticSearch(args map[string]interface{}) (CallToolResult, error) {
 		page = 1
 	}
 	if pageSize < 1 {
-		pageSize = 20
+		pageSize = 32
 	}
 
 	notebooks := parseStringSlice(args["notebook"])

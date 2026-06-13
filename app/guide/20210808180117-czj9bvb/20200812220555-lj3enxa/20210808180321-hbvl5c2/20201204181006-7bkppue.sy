@@ -399,11 +399,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该变量用于插入当前"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "文档别名"
+									"Data": "​：该变量用于插入当前文档别名"
 								}
 							]
 						}
@@ -1389,7 +1385,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于返回指定周几的日期 "
+									"Data": "​：该函数用于返回指定周几的"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "日期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1398,7 +1402,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，例如返回本周四的日期 "
+									"Data": "​，例如返回本周四的"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "日期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1556,6 +1568,80 @@
 								{
 									"Type": "NodeText",
 									"Data": "​：对数计算，返回浮点数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205326-c6mlj47",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205326-c6mlj47",
+						"updated": "20260612205326"
+					},
+					"Children": [
+						{
+							"ID": "20260612205326-v8hf504",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205326-v8hf504",
+								"updated": "20260612205326"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2text"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将 Markdown 格式的字段值转为纯文本（丢弃代码、公式等，不插换行）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205326-xd1vrfv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205326-xd1vrfv",
+						"updated": "20260612205326"
+					},
+					"Children": [
+						{
+							"ID": "20260612205326-15gkmfh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205326-15gkmfh",
+								"updated": "20260612205326"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2content"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将 Markdown 格式的字段值转为内容文本（保留代码、公式等，块级节点间插入换行）"
 								}
 							]
 						}

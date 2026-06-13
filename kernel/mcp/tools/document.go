@@ -23,6 +23,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var DocumentTool = &Tool{
@@ -252,7 +253,7 @@ func documentDuplicate(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	model.DuplicateDoc(tree)
-	model.AppendPushReloadFiletreeEntry()
+	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document duplicated: " + id}}}, nil
 }
 

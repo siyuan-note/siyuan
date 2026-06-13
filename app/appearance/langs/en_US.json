@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Auto snapshot created",
   "agentThinkingDoneTime": "Thought: %s",
   "agentThinking": "Thinking...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Approve",
   "agentConfirmReject": "Reject",
   "agentConfirmAlways": "Session Allow",
-  "agentConfirmAlwaysDesc": "Don't ask again in this session",
+  "agentConfirmAlwaysDesc": "Don't ask again for any operations in this session",
   "agentTimeout": "Agent Timeout",
   "agentTimeoutTip": "0 = no limit",
   "agentConfirmTimeout": "Confirm Timeout",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Execute checkout from snapshot",
     "task.database.index.full": "Execute rebuild index",
+    "task.database.index.fts": "Rebuild search index",
     "task.database.index": "Execute database index",
     "task.database.index.commit": "Execute database index commit",
     "task.database.index.ref": "Execute database index reference",
@@ -1800,7 +1802,7 @@
     "212": "There are some defects in the current version of cloud data sync, please upgrade to the latest version. Sorry for the inconvenience",
     "213": "Cloud verification failed, please try to upgrade to the latest version and log in again before syncing",
     "214": "This feature requires logging into the account and purchasing <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[PRO Features]</a> or <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Annual Subscription]</a> to use",
-    "215": "Please refer to the desktop user guide",
+    "215": "",
     "216": "Rebuilding asset content data index, please wait...",
     "217": "[%d/%d] Created asset content data index",
     "218": "Too many snapshots of the data repo have been detected, which slows down program startup and data sync. Please consider executing [Settings - About - Data repo purge]",
@@ -1880,6 +1882,7 @@
     "292": "Cannot create file",
     "293": "Cannot write file",
     "294": "Activation code cannot be empty",
-    "295": "This feature requires the purchase of [Annual Subscription] (if you have already purchased, please refresh or re-login in Settings - Account)"
+    "295": "This feature requires the purchase of [Annual Subscription] (if you have already purchased, please refresh or re-login in Settings - Account)",
+    "296": "Rebuilding search index..."
   }
 }

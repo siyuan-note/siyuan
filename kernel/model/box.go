@@ -807,6 +807,20 @@ func FullReindexDirect() {
 	fullReindex()
 }
 
+func ReindexFTS() {
+	defer logging.Recover()
+
+	util.PushEndlessProgress(Conf.language(296))
+	defer util.PushClearProgress()
+
+	sql.FlushQueue()
+	FlushTxQueue()
+	if err := sql.RebuildFTSIndex(); err != nil {
+		logging.LogErrorf("rebuild fts index failed, falling back to full reindex: %s", err)
+		FullReindex(false)
+	}
+}
+
 func fullReindex() {
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()

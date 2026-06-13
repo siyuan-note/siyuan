@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 /// #endif
-import {getAllEditor, getAllModels} from "../layout/getAll";
+import {getAllEditor} from "../layout/getAll";
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 /// #if !BROWSER
@@ -14,143 +14,12 @@ import {Dialog} from "./index";
 import {isMobile} from "../util/functions";
 import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
-import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
-import {getDocDisplayName, setNoteBook} from "../util/pathName";
-import {reloadProtyle} from "../protyle/util/reload";
-import {Tab} from "../layout/Tab";
-import {setEmpty} from "../mobile/util/setEmpty";
-import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
+import {hideAllElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
-
-const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
-    fetchPost("/api/block/getDocInfo", {
-        id: rootID
-    }, (response) => {
-        const titleEmpty = response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true";
-        tab.updateTitle(getDocDisplayName(response.data.name, titleEmpty));
-        if (protyle && protyle.title) {
-            protyle.title.setTitle(response.data.name, titleEmpty);
-        }
-    });
-};
-
-export const reloadSync = (
-    app: App,
-    data: { upsertRootIDs: string[], removeRootIDs: string[] },
-    hideMsg = true,
-    // 同步的时候需要更新只读状态 https://github.com/siyuan-note/siyuan/issues/11517
-    // 调整大纲的时候需要使用现有状态 https://github.com/siyuan-note/siyuan/issues/11808
-    updateReadonly = true,
-    onlyUpdateDoc = false
-) => {
-    if (hideMsg) {
-        hideMessage();
-    }
-    /// #if MOBILE
-    if (window.siyuan.mobile.popEditor && window.siyuan.mobile.popEditor.protyle) {
-        if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
-            hideElements(["dialog"]);
-        } else {
-            reloadProtyle(window.siyuan.mobile.popEditor.protyle, false, updateReadonly);
-        }
-    }
-    if (document.getElementById("empty").classList.contains("fn__none") &&
-        window.siyuan.mobile.editor && window.siyuan.mobile.editor.protyle) {
-        if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
-            setEmpty(app);
-        } else {
-            reloadProtyle(window.siyuan.mobile.editor.protyle, false, updateReadonly);
-            fetchPost("/api/block/getDocInfo", {
-                id: window.siyuan.mobile.editor.protyle.block.rootID
-            }, (response) => {
-                setTitle(response.data.name);
-                window.siyuan.mobile.editor.protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
-            });
-        }
-    }
-    setNoteBook(() => {
-        window.siyuan.mobile.docks.file.init(false);
-    });
-    /// #else
-    const allModels = getAllModels();
-    allModels.editor.forEach(item => {
-        if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
-            fetchPost("/api/block/getDocInfo", {
-                id: item.editor.protyle.block.rootID,
-            }, (response) => {
-                item.editor.protyle.wysiwyg.renderCustom(response.data.ial);
-                reloadProtyle(item.editor.protyle, false, updateReadonly);
-                updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
-            });
-        } else if (data.removeRootIDs.includes(item.editor.protyle.block.rootID)) {
-            item.parent.parent.removeTab(item.parent.id, false, false);
-            delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][item.editor.protyle.block.rootID];
-            setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
-        }
-    });
-    allModels.graph.forEach(item => {
-        if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false);
-        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.rootId)) {
-            item.searchGraph(false);
-            if (item.type === "local") {
-                updateTitle(item.rootId, item.parent);
-            }
-        }
-    });
-    allModels.outline.forEach(item => {
-        if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false);
-        } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
-            fetchPost("/api/outline/getDocOutline", {
-                id: item.blockId,
-                preview: item.isPreview
-            }, response => {
-                item.update(response);
-            });
-            if (item.type === "local") {
-                updateTitle(item.blockId, item.parent);
-            }
-        }
-    });
-    allModels.backlink.forEach(item => {
-        if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
-            item.parent.parent.removeTab(item.parent.id, false, false);
-        } else {
-            item.refresh();
-            if (item.type === "local") {
-                updateTitle(item.rootId, item.parent);
-            }
-        }
-    });
-    if (!onlyUpdateDoc) {
-        allModels.files.forEach(item => {
-            setNoteBook(() => {
-                item.init(false);
-            });
-        });
-    }
-    allModels.bookmark.forEach(item => {
-        item.update();
-    });
-    allModels.tag.forEach(item => {
-        item.update();
-    });
-    // NOTE asset 无法获取推送地址，先不处理
-    allModels.search.forEach(item => {
-        item.parent.panelElement.querySelector("#searchInput").dispatchEvent(new CustomEvent("input"));
-    });
-    allModels.custom.forEach(item => {
-        if (item.update) {
-            item.update();
-        }
-    });
-    /// #endif
-};
 
 export const setRefDynamicText = (data: {
     "blockID": string,
@@ -256,37 +125,6 @@ export const lockScreen = async (app: App) => {
     }
     /// #endif
 
-};
-
-export const kernelError = () => {
-    if (document.querySelector("#errorLog")) {
-        return;
-    }
-    let title = `💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small>`;
-    let body = `<div>${window.siyuan.languages.kernelFault1}</div><div class="fn__hr"></div><div>${window.siyuan.languages.kernelFault2}</div>`;
-    if (isInIOS()) {
-        title = `🍵 ${window.siyuan.languages.pleaseWait} <small>v${Constants.SIYUAN_VERSION}</small>`;
-        body = `<div>${window.siyuan.languages.reconnectPrompt}</div><div class="fn__hr"></div><div class="fn__flex"><div class="fn__flex-1"></div><button class="b3-button">${window.siyuan.languages.retry}</button></div>`;
-    }
-    const dialog = new Dialog({
-        disableClose: true,
-        title: title,
-        width: isMobile() ? "92vw" : "520px",
-        content: `<div class="b3-dialog__content">
-<div class="ft__breakword">
-    ${body}
-</div>
-</div>`
-    });
-    dialog.element.id = "errorLog";
-    dialog.element.setAttribute("data-key", Constants.DIALOG_KERNELFAULT);
-    const restartElement = dialog.element.querySelector(".b3-button");
-    if (restartElement) {
-        restartElement.addEventListener("click", () => {
-            dialog.destroy();
-            window.webkit.messageHandlers.startKernelFast.postMessage("startKernelFast");
-        });
-    }
 };
 
 export const exitSiYuan = async (setCurrentWorkspace = true) => {
@@ -518,30 +356,6 @@ export const bootSync = () => {
             });
         }
     });
-};
-
-export const setTitle = (title: string, showVersionTitle = false) => {
-    if (window.siyuan.config.appearance.hideToolbar) {
-        return;
-    }
-    const dragElement = document.getElementById("drag");
-    const workspaceName = getWorkspaceName();
-    if (showVersionTitle) {
-        const versionTitle = `${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        document.title = versionTitle;
-        if (dragElement) {
-            dragElement.textContent = versionTitle;
-            dragElement.setAttribute("title", versionTitle);
-        }
-    } else {
-        title = title.trim() || window.siyuan.languages["_kernel"][16];
-        document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
-        if (!dragElement) {
-            return;
-        }
-        dragElement.setAttribute("title", title);
-        dragElement.innerHTML = escapeHtml(title);
-    }
 };
 
 export const downloadProgress = (data: { id: string, percent: number }) => {

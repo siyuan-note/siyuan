@@ -28,7 +28,7 @@ const MaxToolOutputChars = 40000
 
 func TruncateToolOutput(text, sessionID string) string {
 	runes := []rune(text)
-	if len(runes) <= MaxToolOutputChars {
+	if len(runes) <= MaxToolOutputChars || sessionID == "" {
 		return text
 	}
 

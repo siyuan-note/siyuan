@@ -32,8 +32,8 @@ import (
 )
 
 var serveCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "Start kernel HTTP server",
+	Use:                "serve",
+	Short:              "Start kernel HTTP server",
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return nil // bypass root's init — Boot() handles it

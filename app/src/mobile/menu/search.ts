@@ -289,7 +289,8 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
             } else {
                 previousElement.setAttribute("disabled", "disabled");
             }
-            fetchPost("/api/search/fullTextSearchBlock", {
+            const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
+            fetchPost(endpoint, {
                 query: config.query,
                 method: config.method,
                 types: config.types,
@@ -298,6 +299,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 groupBy: config.group,
                 orderBy: config.sort,
                 page: config.page,
+                pageSize: 32,
             }, (response) => {
                 onRecentBlocks(response.data.blocks, config, response, focusId);
                 loadingElement.classList.add("fn__none");
@@ -703,7 +705,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 
 export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
-    if (config.method === 4 && !window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey) {
+    if (config.method === 4 && !window.siyuan.config.ai.embedding?.apiKey) {
         config.method = 0;
     }
     const rangeText = (getCurrentEditor()?.protyle.toolbar.range || (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange())).toString();

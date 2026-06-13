@@ -27,6 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -197,23 +198,27 @@ func setAI(c *gin.Context) {
 		return
 	}
 
-	if 5 > ai.OpenAI.APITimeout {
-		ai.OpenAI.APITimeout = 5
-	}
-	if 600 < ai.OpenAI.APITimeout {
-		ai.OpenAI.APITimeout = 600
-	}
-
-	if 0 > ai.OpenAI.APIMaxTokens {
-		ai.OpenAI.APIMaxTokens = 0
-	}
-
-	if 0 >= ai.OpenAI.APITemperature || 2 < ai.OpenAI.APITemperature {
-		ai.OpenAI.APITemperature = 1.0
-	}
-
-	if 1 > ai.OpenAI.APIMaxContexts || 64 < ai.OpenAI.APIMaxContexts {
-		ai.OpenAI.APIMaxContexts = 7
+	for _, p := range ai.Providers {
+		if nil == p {
+			continue
+		}
+		if 1 > p.RequestTimeout {
+			p.RequestTimeout = 30
+		}
+		for _, m := range p.Models {
+			if nil == m {
+				continue
+			}
+			if 0 > m.MaxTokens {
+				m.MaxTokens = 0
+			}
+			if 0 >= m.Temperature || 2 < m.Temperature {
+				m.Temperature = 1.0
+			}
+			if 1 > m.MaxContexts || 64 < m.MaxContexts {
+				m.MaxContexts = 7
+			}
+		}
 	}
 
 	if len(ai.Providers) == 0 {
@@ -222,11 +227,20 @@ func setAI(c *gin.Context) {
 	if nil == ai.MCP {
 		ai.MCP = model.Conf.AI.MCP
 	}
-	if "" == ai.OpenAI.ID {
-		ai.OpenAI.ID = model.Conf.AI.OpenAI.ID
+	if nil == ai.Embedding {
+		ai.Embedding = model.Conf.AI.Embedding
 	}
-	if "" == ai.OpenAI.Name {
-		ai.OpenAI.Name = model.Conf.AI.OpenAI.Name
+	if nil == ai.Agent {
+		ai.Agent = model.Conf.AI.Agent
+	}
+
+	for i, p := range ai.Providers {
+		if nil == p {
+			continue
+		}
+		if "" == p.ID && i < len(model.Conf.AI.Providers) && nil != model.Conf.AI.Providers[i] {
+			p.ID = model.Conf.AI.Providers[i].ID
+		}
 	}
 	model.Conf.AI = ai
 	model.Conf.AI.Normalize()
@@ -501,11 +515,17 @@ func setSearch(c *gin.Context) {
 		return
 	}
 
+	if s.HanSensitive == nil {
+		// 兼容未携带该字段的旧版前端/第三方调用：保持当前值，避免被零值意外关闭并触发重建索引
+		s.HanSensitive = model.Conf.Search.HanSensitive
+	}
+
 	if 32 > s.Limit {
 		s.Limit = 32
 	}
 
 	oldCaseSensitive := model.Conf.Search.CaseSensitive
+	oldHanSensitive := model.Conf.Search.HanSensitiveVal()
 	oldIndexAssetPath := model.Conf.Search.IndexAssetPath
 
 	oldVirtualRefName := model.Conf.Search.VirtualRefName
@@ -517,9 +537,13 @@ func setSearch(c *gin.Context) {
 	model.Conf.Save()
 
 	sql.SetCaseSensitive(s.CaseSensitive)
+	sql.SetHanSensitive(s.HanSensitiveVal())
 	sql.SetIndexAssetPath(s.IndexAssetPath)
 
-	if needFullReindex := s.CaseSensitive != oldCaseSensitive || s.IndexAssetPath != oldIndexAssetPath; needFullReindex {
+	ftsChanged := s.CaseSensitive != oldCaseSensitive || s.HanSensitiveVal() != oldHanSensitive
+	if ftsChanged && s.IndexAssetPath == oldIndexAssetPath {
+		task.AppendTask(task.DatabaseIndexFTS, model.ReindexFTS)
+	} else if ftsChanged || s.IndexAssetPath != oldIndexAssetPath {
 		model.FullReindex(false)
 	}
 

@@ -158,9 +158,9 @@ func historyRollback(args map[string]interface{}) (CallToolResult, error) {
 	}
 	docID := util.GetTreeID(path)
 	if bt := treenode.GetBlockTree(docID); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
-	model.AppendPushReloadFiletreeEntry()
+	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "history rolled back: " + path}}}, nil
 }
 

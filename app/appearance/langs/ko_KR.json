@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "롤백 완료",
   "snapshotAutoCreated": "자동 스냅샷 생성됨",
   "agentThinkingDoneTime": "생각함：%s",
   "agentThinking": "생각 중...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "승인",
   "agentConfirmReject": "거부",
   "agentConfirmAlways": "세션 허용",
-  "agentConfirmAlwaysDesc": "이 세션에서 다시 묻지 않음",
+  "agentConfirmAlwaysDesc": "이 세션에서 모든 작업에 대해 다시 묻지 않음",
   "agentTimeout": "에이전트 시간 초과",
   "agentTimeoutTip": "에이전트 세션 전체 시간 초과, 0 은 제한 없음",
   "agentConfirmTimeout": "확인 시간 초과",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "스냅샷에서 체크아웃 실행",
     "task.database.index.full": "인덱스 재생성 실행",
+    "task.database.index.fts": "검색 인덱스 재구축",
     "task.database.index": "데이터베이스 인덱스 실행",
     "task.database.index.commit": "데이터베이스 인덱스 커밋 실행",
     "task.database.index.ref": "데이터베이스 인덱스 참조 실행",
@@ -1800,7 +1802,7 @@
     "212": "현재 버전의 클라우드 데이터 동기화에 일부 결함이 있습니다. 최신 버전으로 업그레이드하세요. 불편을 드려 죄송합니다",
     "213": "클라우드 확인 실패. 동기화하기 전에 최신 버전으로 업그레이드하고 다시 로그인하세요",
     "214": "이 기능을 사용하려면 계정에 로그인하고 <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[PRO 기능]</a> 또는 <a target='_blank' href='${accountServer}/subscribe/siyuan'>[연간 구독]</a>을 구매해야 합니다",
-    "215": "데스크톱 사용자 가이드를 참조하세요",
+    "215": "",
     "216": "에셋 콘텐츠 데이터 인덱스 재생성 중, 잠시만 기다려 주세요...",
     "217": "[%d/%d] 에셋 콘텐츠 데이터 인덱스 생성됨",
     "218": "데이터 저장소 스냅샷이 너무 많아 프로그램 시작 및 데이터 동기화가 느려지는 것이 감지되었습니다. [설정 - 정보 - 데이터 저장소 정리] 실행을 고려하세요",
@@ -1880,6 +1882,7 @@
     "292": "파일을 만들 수 없습니다",
     "293": "파일에 쓸 수 없습니다",
     "294": "활성화 코드는 비워 둘 수 없습니다",
-    "295": "이 기능을 사용하려면 [연간 구독]을 구매해야 합니다(이미 구매한 경우 설정 - 계정에서 새로 고침하거나 다시 로그인하세요)"
+    "295": "이 기능을 사용하려면 [연간 구독]을 구매해야 합니다(이미 구매한 경우 설정 - 계정에서 새로 고침하거나 다시 로그인하세요)",
+    "296": "Rebuilding search index..."
   }
 }

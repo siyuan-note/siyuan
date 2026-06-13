@@ -13,10 +13,8 @@ import {
     progressBackgroundTask,
     progressLoading,
     progressStatus,
-    reloadSync,
     setDefRefCount,
     setRefDynamicText,
-    setTitle,
     transactionError
 } from "../dialog/processSystem";
 import {initMessage} from "../dialog/message";
@@ -30,6 +28,8 @@ import {updateAppearance} from "../config/util/updateAppearance";
 import {renderSnippet} from "../config/util/snippets";
 import {setBodyHighlight} from "../util/assets";
 import {initAppEventBus} from "../util/eventBus";
+import {reloadSync} from "../util/reloadSync";
+import {setTitle} from "../util/processTitle";
 
 class App {
     public readonly appId: string = Constants.SIYUAN_APPID;

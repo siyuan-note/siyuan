@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20251224102024"
+		"updated": "20260613194213"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20251224102024"
+				"updated": "20260613162855"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20251224101749-2wip2q0",
-				"updated": "20251224102024"
+				"updated": "20260613160453"
 			},
 			"Children": [
 				{
@@ -109,7 +109,7 @@
 					},
 					"Properties": {
 						"id": "20251224101749-8kvjim8",
-						"updated": "20251224101749"
+						"updated": "20260613160453"
 					},
 					"Children": [
 						{
@@ -117,12 +117,19 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20251224101749-9lhbaoa",
-								"updated": "20251224101749"
+								"updated": "20260613160453"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Add fields"
+									"Data": "Add "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260613155453-sgecaav",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "fields"
 								}
 							]
 						}
@@ -283,6 +290,1974 @@
 								{
 									"Type": "NodeText",
 									"Data": "Multiple views can be added to the same database; all views share the same data, but filtering and sorting settings are independent of each other"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-gkemixn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613162855-gkemixn",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Table View"
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-6ui96ya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613162855-6ui96ya",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The default database view, displaying data in a tabular row-and-column format."
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-kpg6f6m",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613162855-kpg6f6m",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"ID": "20260613162855-bu5ed35",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-bu5ed35",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-p0z95qc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-p0z95qc",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Switching"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": The database defaults to table view upon creation; switch from other views via the dropdown menu by selecting \"Table View\""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-0qrf9g2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-0qrf9g2",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-dtea0lo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-dtea0lo",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Column Management"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Each column represents a field. Drag to resize columns and reorder them. Right-click the column header to edit, delete, or hide the field"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-h17gbv5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-h17gbv5",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-02kyd5u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-02kyd5u",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Row Operations"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the row start to expand row details. Drag rows to reorder. Right-click a row to delete, duplicate, or move to another database"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-wcvwgrj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-wcvwgrj",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-p0nxcqy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-p0nxcqy",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Adding Rows"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the blank row at the bottom of the table or use the plus button to add a new entry"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-1pnd8m2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-1pnd8m2",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-gaqn4m8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-gaqn4m8",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Best For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Data entry, batch editing, scenarios with diverse field types, general data management similar to spreadsheets"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-cdeorum",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613162855-cdeorum",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Kanban View"
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-3g52lzy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613162855-3g52lzy",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Displays data as cards in columns, where each column corresponds to a value of the grouping field."
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-y67hk0x",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613162855-y67hk0x",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"ID": "20260613162855-yvqo49r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-yvqo49r",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-5zeo7ua",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-5zeo7ua",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Switching"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Select \"Kanban View\" from the view layout dropdown menu"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-p5m98a8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-p5m98a8",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-0ztjqmf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-0ztjqmf",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Grouping Field"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Choose a select or multi-select field as the grouping basis. The system automatically organizes data into columns by the field's option values"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-i1ifv63",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-i1ifv63",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-q8b0pyo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-q8b0pyo",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Card Content"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Each card displays a summary of the content block bound to the primary key, along with the values of fields selected in that view"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-q3krvr0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-q3krvr0",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-mx33glu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-mx33glu",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Drag and Drop"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Dragging a card from one column to another automatically updates that entry's grouping field value to match the target column's option. This is the core interaction of kanban——status transitions are completed via drag and drop"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-mzor8if",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-mzor8if",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-4hcaclz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-4hcaclz",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Adding Entries"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the plus button at the bottom of a column to directly add a new card to that column. The new card's field value is automatically set to the option corresponding to that column"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-sinfoou",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-sinfoou",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-3ko7245",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-3ko7245",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "View Independence"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Shares data with other views of the same database, but filter, sort, and grouping settings are independent per view"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-fjl8lr1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-fjl8lr1",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-366owq2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-366owq2",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Best For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Project management boards (To-do → In Progress → Done), status flow management, category browsing"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-sxaxx5x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613162855-sxaxx5x",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Gallery View"
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-kj9ia0w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613162855-kj9ia0w",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Displays data as an independent card grid, ideal for content-preview-oriented scenarios."
+				}
+			]
+		},
+		{
+			"ID": "20260613162855-9yfcx0f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613162855-9yfcx0f",
+				"updated": "20260613162855"
+			},
+			"Children": [
+				{
+					"ID": "20260613162855-yn36128",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-yn36128",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-liaroo3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-liaroo3",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Switching"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Select \"Gallery View\" from the view layout dropdown menu"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-39vgry3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-39vgry3",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-0c304fq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-0c304fq",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Each entry is rendered as a card showing a summary of the primary key block's content and the selected field values, making it ideal for quick browsing and content-first viewing"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-bfitjv2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-bfitjv2",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-u6e5usf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-u6e5usf",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Card Operations"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click a card to expand details or open the bound content block. Right-click menu supports delete, duplicate, and other operations"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-j8yk3ra",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-j8yk3ra",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-07uuaa5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-07uuaa5",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering and Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports the same filtering and sorting settings as other views"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613162855-04l56cu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613162855-04l56cu",
+						"updated": "20260613162855"
+					},
+					"Children": [
+						{
+							"ID": "20260613162855-pz4cy4b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613162855-pz4cy4b",
+								"updated": "20260613162855"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Best For"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Image/media libraries, reading note cards, content management focused on visual preview"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-edm1pru",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613171129-edm1pru",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Filter and Sort"
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-n8nqdp1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613171129-n8nqdp1",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each view can independently configure filter conditions and sort rules; filters and sorts do not affect each other across views."
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-5zjv62o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20260613171129-5zjv62o",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Filter"
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-odxe19h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613171129-odxe19h",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to filter entries displayed in the view, showing only data that meets the conditions."
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-438l9c3",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613171129-438l9c3",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"ID": "20260613171129-8i8xjqh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-8i8xjqh",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-o03i9eu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-o03i9eu",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Entry"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the menu button in the view toolbar, go to \"Filter\", click \"Add Filter\" in the filter submenu, and select the field to filter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-vx8jgo5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-vx8jgo5",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-3xqjlvb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-3xqjlvb",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Condition Types"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Different field types support different filter conditions:"
+								}
+							]
+						},
+						{
+							"ID": "20260613171129-qfkf7fo",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613171129-qfkf7fo",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"ID": "20260613171129-lpul6o4",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-lpul6o4",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-4rxayxm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-4rxayxm",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Text/URL/Email/Phone: =, ≠, Contains, Does not contain, Starts with, Ends with, Is empty, Is not empty"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-6nopxt2",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-6nopxt2",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-p744is2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-p744is2",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Number: =, ≠, \u003e, ≥, \u003c, ≤, Is empty, Is not empty"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-2uvd04w",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-2uvd04w",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-pg2yhw0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-pg2yhw0",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Date/Created Time/Updated Time: =, Is after, Is on or after, Is before, Is on or before, Is between, Is empty, Is not empty"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-87rcjl2",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-87rcjl2",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-31aekkf",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-31aekkf",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Select: =, ≠, Is empty, Is not empty"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-mcs5d60",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-mcs5d60",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-qlm3qyv",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-qlm3qyv",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Multi-Select: Contains, Does not contain, Is empty, Is not empty"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-zejk6wn",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-zejk6wn",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-1dx172r",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-1dx172r",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Checkbox: Is true, Is false"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-cec2cnj",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-cec2cnj",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-qha5qwg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-qha5qwg",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Relation: Contains, Does not contain, Is empty, Is not empty"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-4a6yi6q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-4a6yi6q",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-5e9n0cc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-5e9n0cc",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Multiple Conditions"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Filter conditions can be set on multiple fields simultaneously. Multiple conditions use AND logic (all must be satisfied)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-3i7tz32",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-3i7tz32",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-e7q5y43",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-e7q5y43",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Removing Filters"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the delete button on the right of a filter condition to remove it individually; use the filter menu to clear all at once"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-mddd4p3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-mddd4p3",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-uzsqjre",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-uzsqjre",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Note"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Line number fields do not support filtering"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-vqc74gs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20260613171129-vqc74gs",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Sort"
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-rv2bk0b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613171129-rv2bk0b",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to sort entries in the view by a specified field."
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-kv1oshm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613171129-kv1oshm",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"ID": "20260613171129-pk1i8aq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-pk1i8aq",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-ni6a51l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-ni6a51l",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Entry"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the view toolbar menu, go to \"Sort\", add sort conditions, select the sort field and direction"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-fm4oe28",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-fm4oe28",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-e0pgqts",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-e0pgqts",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sort Direction"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Ascending or descending; click to toggle"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-eiia4g2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-eiia4g2",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-jfe3fnv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-jfe3fnv",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Multiple Sorts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Multiple sort conditions can be added. The system applies them in the order they were added. For example, sort by \"Date\" descending first, then by \"Title\" ascending"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-lcbzv8u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-lcbzv8u",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-1xbifzm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-1xbifzm",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Removing Sorts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the delete button on the right of a sort condition to remove it individually; use the sort menu to clear all"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-ow0duo1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-ow0duo1",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-duodkkv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-duodkkv",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Field Type Differences"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613171129-ev59rmw",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613171129-ev59rmw",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"ID": "20260613171129-cimltyd",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-cimltyd",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-05qycd6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-05qycd6",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Text: Sorted by pinyin or Unicode code points"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-a2vpswv",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-a2vpswv",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-vfjl05y",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-vfjl05y",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Number: Sorted by numeric value"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-dwzguu0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-dwzguu0",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-bide2v2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-bide2v2",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Date/Created Time/Updated Time: Sorted chronologically"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-yb9vqon",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-yb9vqon",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-sk2ir8l",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-sk2ir8l",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Select/Multi-Select: Sorted by option order in the list"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-zd4rtkw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-zd4rtkw",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-off6rp9",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-off6rp9",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Checkbox: Sorted by checked/unchecked state"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-ly3kjo0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-ly3kjo0",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-rgfnfxy",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-rgfnfxy",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Rollup: Sorted by calculated result"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-jxnni38",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-jxnni38",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-4x3ktft",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-4x3ktft",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Note"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613171129-42i5mjn",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613171129-42i5mjn",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"ID": "20260613171129-3pxl42s",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-3pxl42s",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-k09kddz",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-k09kddz",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Line number fields do not support sorting"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-bkk8gir",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-bkk8gir",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-wfww2an",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-wfww2an",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Unmodified rows are placed last, sorted by creation time in ascending order"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-y8inb0t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 4,
+			"Properties": {
+				"id": "20260613171129-y8inb0t",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Group"
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-su3q9ar",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613171129-su3q9ar",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use a field as the grouping basis to categorize and display entries by their group values."
+				}
+			]
+		},
+		{
+			"ID": "20260613171129-y221wzt",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613171129-y221wzt",
+				"updated": "20260613171129"
+			},
+			"Children": [
+				{
+					"ID": "20260613171129-p25yb2l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-p25yb2l",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-685xb50",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-685xb50",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Entry"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the view toolbar menu, go to \"Group\", select the group field and grouping method"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-ifu1208",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-ifu1208",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-hjdzw4d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-hjdzw4d",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Supported Fields"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Except for rollup, asset, and line number, almost all field types support grouping. Different field types correspond to different grouping methods:"
+								}
+							]
+						},
+						{
+							"ID": "20260613171129-y35s1no",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613171129-y35s1no",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"ID": "20260613171129-lgdc1gn",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-lgdc1gn",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-j32himq",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-j32himq",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Text/Select/Multi-Select/URL/Email/Phone/Checkbox/Relation/Template: Group by value, each distinct value forms its own group"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-haw3elk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-haw3elk",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-kyvkeoi",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-kyvkeoi",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Number: Group by number range"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-8d175xx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-8d175xx",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-moxjh46",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-moxjh46",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Date/Created Time/Updated Time: Group by relative date"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-ravjist",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-ravjist",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-iazsgfg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-iazsgfg",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "View Differences"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613171129-qfcbary",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613171129-qfcbary",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"ID": "20260613171129-e2s3vqd",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-e2s3vqd",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-wrv369s",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-wrv369s",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Table View: Rows are categorized by group, each group can be collapsed/expanded"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-62qg6gl",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-62qg6gl",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-6g5d5of",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-6g5d5of",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Gallery View: Cards are categorized by group"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613171129-fq2jz7u",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613171129-fq2jz7u",
+										"updated": "20260613171129"
+									},
+									"Children": [
+										{
+											"ID": "20260613171129-3c7sfh9",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613171129-3c7sfh9",
+												"updated": "20260613171129"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Kanban View: Grouping is required; each group value generates a column. Grouping cannot be removed. When the group field is select or multi-select, dragging a card to another column automatically updates the field value (except for template, created time, and updated time fields)"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613171129-ksd0v5v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613171129-ksd0v5v",
+						"updated": "20260613171129"
+					},
+					"Children": [
+						{
+							"ID": "20260613171129-l092i7g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613171129-l092i7g",
+								"updated": "20260613171129"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Removing Groups"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": In table and gallery views, select \"None\" to remove grouping; kanban view cannot remove grouping"
 								}
 							]
 						}
@@ -452,7 +2427,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208173416-t51ome2",
-				"updated": "20250101093657"
+				"updated": "20260612204637"
 			},
 			"Children": [
 				{
@@ -487,32 +2462,32 @@
 			]
 		},
 		{
-			"ID": "20240208173416-7jev6h7",
+			"ID": "20260612204637-zuxizmd",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20240208173416-7jev6h7",
-				"updated": "20240208173523"
+				"id": "20260612204637-zuxizmd",
+				"updated": "20260612204637"
 			},
 			"Children": [
 				{
-					"ID": "20240208173416-rv4pte3",
+					"ID": "20260612204637-ir2ljyp",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208173416-rv4pte3",
-						"updated": "20240208173517"
+						"id": "20260612204637-ir2ljyp",
+						"updated": "20260612204637"
 					},
 					"Children": [
 						{
-							"ID": "20240208173416-8oq1his",
+							"ID": "20260612204637-2nfxrpr",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208173416-8oq1his",
-								"updated": "20240208173517"
+								"id": "20260612204637-2nfxrpr",
+								"updated": "20260612204637"
 							},
 							"Children": [
 								{
@@ -522,34 +2497,34 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ .field }"
+									"TextMarkTextContent": ".action{.FieldName}"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to access view properties"
+									"Data": "​ to access view fields"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240208173416-p9ol6f8",
+					"ID": "20260612204637-mw0wyhv",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208173416-p9ol6f8",
-						"updated": "20240208173523"
+						"id": "20260612204637-mw0wyhv",
+						"updated": "20260612204637"
 					},
 					"Children": [
 						{
-							"ID": "20240208173416-c79727p",
+							"ID": "20260612204637-3s9o22k",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208173416-c79727p",
-								"updated": "20240208173523"
+								"id": "20260612204637-3s9o22k",
+								"updated": "20260612204637"
 							},
 							"Children": [
 								{
@@ -559,11 +2534,306 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ index . \u0026quot;custom-xxx\u0026quot; }"
+									"TextMarkTextContent": ".action{index . \"custom-xxx\"}"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to access content block custom attributes"
+									"Data": "​ to access block custom attributes"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-61131hy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-61131hy",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-22nlmu6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-22nlmu6",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_end}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the end date of a date field, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_end"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is only valid for date types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-v2aj5t4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-v2aj5t4",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-tt6duly",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-tt6duly",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_str}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the formatted string of a multi-select field, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is only valid for multi-select types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-0lcf589",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-0lcf589",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-wqpjeb3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-wqpjeb3",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_created}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the creation time of a block field's bound block, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_created"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is only valid for block types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-v93528j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-v93528j",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-be2i7wz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-be2i7wz",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.FieldName_raw}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the raw value object of a field, the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_raw"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ suffix is valid for all field types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-dpjmn80",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-dpjmn80",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-v3hacsg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-v3hacsg",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{index .id_mod \"FieldID\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the formatted value by field ID"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-exg7cb8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-exg7cb8",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-0tg3s54",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-0tg3s54",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{index . \"entryCreated\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the creation time of the row's bound block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612204637-zbjwwjx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612204637-zbjwwjx",
+						"updated": "20260612204637"
+					},
+					"Children": [
+						{
+							"ID": "20260612204637-6zx4x2v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612204637-6zx4x2v",
+								"updated": "20260612204637"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{index . \"entryUpdated\"}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to access the update time of the row's bound block"
 								}
 							]
 						}
@@ -637,7 +2907,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240818174922-r0eubvc",
-				"updated": "20250115145238"
+				"updated": "20260613194213"
 			},
 			"Children": [
 				{
@@ -682,6 +2952,14 @@
 					"Data": "​ ."
 				}
 			]
+		},
+		{
+			"ID": "20260613194213-n2rytff",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613194213-n2rytff",
+				"updated": "20260613194213"
+			}
 		}
 	]
 }

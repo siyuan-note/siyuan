@@ -10,6 +10,7 @@ import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {showMessage} from "../../dialog/message";
 import * as dayjs from "dayjs";
 import {sendNotification} from "../../plugin/platformUtils";
 import {
@@ -44,7 +45,8 @@ type SessionEntry =
     timestamp?: number
 }
     | { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string }
-    | { type: "snapshot"; snapshotID: string };
+    | { type: "snapshot"; snapshotID: string }
+    | { type: "rollback"; snapshotID: string };
 
 export class AgentChat extends Model {
     private messagesContainer: HTMLElement;
@@ -189,13 +191,19 @@ export class AgentChat extends Model {
 
     private initModelSelect() {
         const aiConfig = window.siyuan.config.ai;
-        const displayName = aiConfig.openAI.name || aiConfig.openAI.apiModel;
-        this.modelOptions = [{ id: aiConfig.openAI.id, name: displayName }];
-        for (const p of aiConfig.providers || []) {
-            if (p.enabled === false) { continue; }
-            this.modelOptions.push({ id: p.id, name: p.name || p.apiModel || p.id });
+        this.modelOptions = [];
+        for (const prov of aiConfig.providers || []) {
+            for (const m of prov.models || []) {
+                const displayName = m.displayName || m.name;
+                if (!displayName) {
+                    continue;
+                }
+                this.modelOptions.push({ id: m.id || m.name, name: displayName });
+            }
         }
-        this.selectedModel = aiConfig.openAI.id;
+        if (this.modelOptions.length > 0) {
+            this.selectedModel = this.modelOptions[0].id;
+        }
         this.updateModelLabel();
         this.modelTrigger.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
@@ -314,14 +322,10 @@ export class AgentChat extends Model {
                     this.appendUserMessage(text, Date.now());
                     this.tryGenerateTitle();
                     this.setStreaming(true);
-                    const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
-                        role: e.type === "user" ? "user" as const : "assistant" as const,
-                        content: (e as { content: string }).content
-                    }));
                     this.abortController = new AbortController();
                     const requestSessionId = this.sessionId;
                     this.requestStartTime = Date.now();
-                    fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
+                    fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
                         (event: ISSEResult) => {
                             if (this.sessionId !== requestSessionId) {
                                 return;
@@ -362,6 +366,19 @@ export class AgentChat extends Model {
 
         this.parent.panelElement.addEventListener("click", (e: MouseEvent) => {
             const t = e.target as HTMLElement;
+            let target = t;
+            while (target && !target.isEqualNode(this.parent.panelElement)) {
+                if (target.classList.contains("block__icon")) {
+                    const type = target.getAttribute("data-type");
+                    if (type === "min") {
+                        e.stopPropagation();
+                        getDockByType("agentChat").toggleModel("agentChat", false, true);
+                        return;
+                    }
+                    break;
+                }
+                target = target.parentElement;
+            }
             if (t.closest(".block__icons")) {
                 return;
             }
@@ -372,10 +389,6 @@ export class AgentChat extends Model {
                 return;
             }
             if (t.closest(".agent-session-popup")) {
-                return;
-            }
-            if (t.closest('[data-type="min"]')) {
-                getDockByType("agentChat").toggleModel("agentChat", false, true);
                 return;
             }
             if (t.closest(".agent-chat__model-trigger") || t.closest(".agent-chat__model-menu")) {
@@ -463,6 +476,7 @@ export class AgentChat extends Model {
         }
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
+        this.titleElement.textContent = session.title || this.defaultTitle;
         this.entries = this.buildEntriesFromSession(session);
         this.hasTitled = session.titled !== false;
         this.currentAIElement = null;
@@ -591,6 +605,9 @@ export class AgentChat extends Model {
                 case "snapshot":
                     this.appendSnapshotInfo((entry as { snapshotID: string }).snapshotID);
                     break;
+                case "rollback":
+                    this.appendRollbackInfo((entry as { snapshotID: string }).snapshotID);
+                    break;
             }
         }
     }
@@ -605,7 +622,15 @@ export class AgentChat extends Model {
                     if (msg.role === "user") {
                         entries.push({type: "user", content: msg.content});
                     } else if (msg.role === "assistant") {
-                        entries.push({type: "assistant", content: msg.content});
+                        entries.push({
+                            type: "assistant",
+                            content: msg.content,
+                            toolCalls: msg.toolCalls ? msg.toolCalls.map(tc => ({
+                                name: tc.name,
+                                arguments: tc.arguments || {},
+                                result: tc.result,
+                            })) : undefined,
+                        });
                     }
                 }
                 return entries;
@@ -664,19 +689,21 @@ export class AgentChat extends Model {
     }
 
     private async deleteSession(id: string) {
-        await SessionStore.remove(id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
-            const result = await SessionStore.list({page: 1, pageSize: 1});
-            const list = result.sessions;
-            this.entries = [];
+            const result = await SessionStore.list({page: 1, pageSize: 2});
+            const list = result.sessions.filter(s => s.id !== id);
             if (list.length > 0) {
-                this.sessionId = list[0].id;
                 await this.switchSession(list[0].id);
+                await SessionStore.remove(id);
             } else {
+                this.entries = [];
                 this.sessionId = SessionStore.newSessionId();
                 await this.createSession();
+                await SessionStore.remove(id);
             }
+        } else {
+            await SessionStore.remove(id);
         }
     }
 
@@ -709,16 +736,11 @@ export class AgentChat extends Model {
 
         this.requestStartTime = Date.now();
 
-        const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
-            role: e.type === "user" ? "user" as const : "assistant" as const,
-            content: (e as { content: string }).content
-        }));
-
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
 
         await fetchAgentSSE(
-            apiMessages,
+            text,
             window.siyuan.config.appearance.lang,
             refs,
             (event: ISSEResult) => {
@@ -812,7 +834,11 @@ export class AgentChat extends Model {
         el.innerHTML = html;
         el.querySelector(".block__icon")?.addEventListener("click", (e) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(text).catch(() => {});
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            }).catch(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            });
         });
         this.messagesContainer.appendChild(el);
         this.scrollToBottom(true);
@@ -1099,7 +1125,10 @@ export class AgentChat extends Model {
         copyBtn.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
         copyBtn.addEventListener("click", (e: Event) => {
             e.stopPropagation();
-            navigator.clipboard.writeText(content).catch(() => {
+            navigator.clipboard.writeText(content).then(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
+            }).catch(() => {
+                showMessage(window.siyuan.languages.copied, 2000);
             });
         });
         actions.appendChild(copyBtn);
@@ -1148,14 +1177,12 @@ export class AgentChat extends Model {
 
         // Re-submit
         this.setStreaming(true);
-        const apiMessages = this.entries.filter((e) => e.type === "user" || e.type === "assistant").map((e) => ({
-            role: e.type === "user" ? "user" as const : "assistant" as const,
-            content: (e as { content: string }).content
-        }));
+        const lastUserEntry = this.entries[this.entries.length - 1];
+        const lastUserText = lastUserEntry.type === "user" ? lastUserEntry.content : "";
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
         await fetchAgentSSE(
-            apiMessages,
+            lastUserText,
             window.siyuan.config.appearance.lang,
             [],
             (event: ISSEResult) => {
@@ -1173,6 +1200,7 @@ export class AgentChat extends Model {
             this.abortController.signal,
             this.sessionId,
             this.getSelectedModel(),
+            true,
         );
     }
 
@@ -1275,7 +1303,7 @@ export class AgentChat extends Model {
         fetch("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: userMsg, model: this.getSelectedModel()}),
+            body: JSON.stringify({message: userMsg, model: this.getSelectedModel(), language: window.siyuan.config.appearance.lang}),
         }).then((resp) => resp.json()).then((data) => {
             if (data.code === 0 && data.data && data.data !== this.sessionTitle) {
                 this.sessionTitle = data.data;
@@ -1322,7 +1350,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--snapshot";
         el.innerHTML = '<div class="agent-chat__snapshot-body">' +
-            '<svg class="agent-chat__snapshot-icon"><use xlink:href="#iconHistory"></use></svg>' +
+            '<span class="agent-chat__snapshot-icon"><svg><use xlink:href="#iconHistory"></use></svg></span>' +
             '<span class="agent-chat__snapshot-text">' + escapeHtml((L.snapshotAutoCreated || "Auto snapshot created") + " " + shortID) + "</span>" +
             '<button class="b3-button b3-button--text agent-chat__snapshot-rollback b3-tooltips b3-tooltips__n" aria-label="' + (L.rollback || "Rollback") + '"><svg><use xlink:href="#iconUndo"></use></svg></button>' +
             "</div>";
@@ -1330,12 +1358,25 @@ export class AgentChat extends Model {
         rollbackBtn.addEventListener("click", () => {
             const confirmText = (L.rollbackConfirm || "Rollback cannot be undone").replace("${name}", L.dataSnapshot || "Snapshot").replace("${time}", shortID);
             confirmDialog("⚠️ " + (L.rollback || "Rollback"), confirmText, () => {
-                fetchPost("/api/repo/checkoutRepo", {id: snapshotID}, () => {});
+                fetchPost("/api/repo/checkoutRepo", {id: snapshotID, sessionID: this.sessionId}, () => {});
             });
         });
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
+    }
+
+    private appendRollbackInfo(snapshotID: string) {
+        const L = window.siyuan.languages;
+        const shortID = snapshotID.length > 7 ? snapshotID.substring(0, 7) : snapshotID;
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--snapshot";
+        el.innerHTML = '<div class="agent-chat__snapshot-body">' +
+            '<span class="agent-chat__snapshot-icon"><svg><use xlink:href="#iconHistory"></use></svg></span>' +
+            '<span class="agent-chat__snapshot-text">' + escapeHtml((L.rollbackCompleted || "Rollback completed") + " " + shortID) + "</span>" +
+            "</div>";
+        this.messagesContainer.appendChild(el);
+        this.scrollToBottom(true);
     }
 
     private async stopGeneration() {
@@ -1508,6 +1549,21 @@ export class AgentChat extends Model {
         el.setAttribute("data-question-id", questionID);
 
         el.innerHTML = renderQuestionCardHTML(rawQuestions, questionID);
+
+        el.querySelectorAll(".agent-chat__question-option").forEach((option) => {
+            const input = option.querySelector("input") as HTMLInputElement;
+            if (!input) return;
+            let wasChecked = false;
+            option.addEventListener("mousedown", () => {
+                wasChecked = input.checked;
+            });
+            option.addEventListener("click", (e) => {
+                if (input.type === "radio" && wasChecked) {
+                    e.preventDefault();
+                    input.checked = false;
+                }
+            });
+        });
 
         const submitBtn = el.querySelector(".agent-chat__question-submit-btn");
         if (submitBtn) {

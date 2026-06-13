@@ -41,12 +41,13 @@ export const openSearch = async (options: {
         k: options.key || localData.k,
         r: localData.r,
         hasReplace: options.hotkey === Constants.DIALOG_REPLACE,
-        method: localData.method === 4 && !window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey ? 0 : localData.method,
+        method: localData.method === 4 && !window.siyuan.config.ai.embedding?.apiKey ? 0 : localData.method,
         hPath,
         idPath,
         group: localData.group,
         sort: localData.sort,
         types: Object.assign({}, localData.types),
+        subTypes: Object.assign({}, localData.subTypes),
         replaceTypes: Object.assign({}, localData.replaceTypes),
         page: options.key ? 1 : localData.page
     };

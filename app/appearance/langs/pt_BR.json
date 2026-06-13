@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Restauração concluída",
   "snapshotAutoCreated": "Instantâneo criado automaticamente",
   "agentThinkingDoneTime": "Pensado: %s",
   "agentThinking": "Pensando...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Aprovar",
   "agentConfirmReject": "Rejeitar",
   "agentConfirmAlways": "Permitir sessão",
-  "agentConfirmAlwaysDesc": "Não perguntar novamente nesta sessão",
+  "agentConfirmAlwaysDesc": "Não perguntar novamente para nenhuma operação nesta sessão",
   "agentTimeout": "Tempo limite do agente",
   "agentTimeoutTip": "Tempo limite total da sessão do agente, 0 = sem limite",
   "agentConfirmTimeout": "Tempo limite de confirmação",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Executar checkout do snapshot",
     "task.database.index.full": "Executar reconstrução do índice",
+    "task.database.index.fts": "Reconstruir índice de busca",
     "task.database.index": "Executar índice do banco de dados",
     "task.database.index.commit": "Executar commit do índice do banco de dados",
     "task.database.index.ref": "Executar índice de referência do banco de dados",
@@ -1800,7 +1802,7 @@
     "212": "Há alguns defeitos na versão atual da sincronização de dados na nuvem, por favor atualize para a versão mais recente. Pedimos desculpas pelo inconveniente",
     "213": "Falha na verificação na nuvem, por favor tente atualizar para a versão mais recente e faça login novamente antes de sincronizar",
     "214": "Este recurso requer login na conta e compra de <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[Recursos PRO]</a> ou <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Assinatura Anual]</a> para usar",
-    "215": "Por favor, consulte o guia do usuário da área de trabalho",
+    "215": "",
     "216": "Reconstruindo índice de dados de conteúdo de ativos, por favor aguarde...",
     "217": "[%d/%d] Criado índice de dados de conteúdo de ativos",
     "218": "Muitos snapshots do repositório de dados foram detectados, o que retarda a inicialização do programa e a sincronização de dados. Por favor, considere executar [Configurações - Sobre - Purga do repositório de dados]",
@@ -1880,6 +1882,7 @@
     "292": "Não foi possível criar o arquivo",
     "293": "Não foi possível gravar o arquivo",
     "294": "O código de ativação não pode estar vazio",
-    "295": "Este recurso requer a compra de [Assinatura Anual] (se já comprou, por favor atualize ou faça login novamente em Configurações - Conta)"
+    "295": "Este recurso requer a compra de [Assinatura Anual] (se já comprou, por favor atualize ou faça login novamente em Configurações - Conta)",
+    "296": "Rebuilding search index..."
   }
 }

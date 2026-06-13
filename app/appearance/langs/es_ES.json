@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Restauración completada",
   "snapshotAutoCreated": "Instantánea creada automáticamente",
   "agentThinkingDoneTime": "Pensado: %s",
   "agentThinking": "Pensando...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Aprobar",
   "agentConfirmReject": "Rechazar",
   "agentConfirmAlways": "Permitir sesión",
-  "agentConfirmAlwaysDesc": "No preguntar de nuevo en esta sesión",
+  "agentConfirmAlwaysDesc": "No preguntar de nuevo para ninguna operación en esta sesión",
   "agentTimeout": "Tiempo de espera del agente",
   "agentTimeoutTip": "Tiempo de espera total de la sesión del agente, 0 = sin límite",
   "agentConfirmTimeout": "Tiempo de espera de confirmación",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Ejecutar el pago desde la instantánea",
     "task.database.index.full": "Ejecutar índice de reconstrucción",
+    "task.database.index.fts": "Reconstruir índice de búsqueda",
     "task.database.index": "Ejecutar el índice de la base de datos",
     "task.database.index.commit": "Ejecutar la confirmación del índice de la base de datos",
     "task.database.index.ref": "Ejecutar referencia de índice de base de datos",
@@ -1800,7 +1802,7 @@
     "212": "Hay algunos defectos en la versión actual de sincronización de datos en la nube, actualice a la versión más reciente. Disculpe las molestias",
     "213": "La verificación en la nube falló, intente actualizar a la versión más reciente e inicie sesión de nuevo antes de sincronizar",
     "214": "Esta función requiere iniciar sesión en la cuenta y comprar <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[funcionalidades]</a> o <a target='_blank' href='${accountServer}/subscribe/siyuan'>[suscripción anual]</a> para ser utilizada",
-    "215": "Consulte la guía del usuario de escritorio.",
+    "215": "",
     "216": "Reconstruyendo el índice de datos de contenido de recursos, espere...",
     "217": "[%d/%d] Índice de datos de contenido de recursos creado",
     "218": "Se han detectado demasiadas instantáneas del repositorio de datos, lo que ralentiza el inicio del programa y la sincronización de datos. Considere ejecutar [Configuración - Acerca de - Purga del repositorio de datos]",
@@ -1880,6 +1882,7 @@
     "292": "No se puede crear el archivo",
     "293": "No se puede escribir el archivo",
     "294": "El código de activación no puede estar vacío",
-    "295": "Esta función requiere la compra de [suscripción anual] (si ya has comprado, actualiza o vuelve a iniciar sesión en Configuración - Cuenta)"
+    "295": "Esta función requiere la compra de [suscripción anual] (si ya has comprado, actualiza o vuelve a iniciar sesión en Configuración - Cuenta)",
+    "296": "Rebuilding search index..."
   }
 }

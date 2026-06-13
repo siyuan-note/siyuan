@@ -209,7 +209,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.classList.contains("table")) {
             scrollLeft = blockElement.firstElementChild.scrollLeft;
         }
-        blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         if (!/<span data-type="backslash">.{1,8}<\/span><wbr>/.test(html)) {
             // 使用 md 闭合后继续输入应为普通文本, 转义不需要添加 zwsp
             html = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
@@ -217,6 +216,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         blockElement.insertAdjacentHTML("afterend", html);
         blockElement = blockElement.nextElementSibling as HTMLElement;
         blockElement.previousElementSibling.remove();
+        blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         // https://github.com/siyuan-note/siyuan/issues/8972
         if (html.split('<span data-type="inline-math" data-subtype="math"').length > 1) {
             Array.from(blockElement.querySelectorAll('[data-type="inline-math"]')).find((item: HTMLElement) => {

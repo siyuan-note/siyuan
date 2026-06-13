@@ -22,6 +22,7 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var RepoTool = &Tool{
@@ -165,8 +166,8 @@ func repoCheckout(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 	model.CheckoutRepoDirect(id)
-	model.AppendPushReloadFiletreeEntry()
-	model.AppendPushReloadUIEntry()
+	util.PushReloadFiletree()
+	util.ReloadUI()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "checkout to snapshot: " + id}}}, nil
 }
 
@@ -261,7 +262,7 @@ func repoFileRollback(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "rollback repo file failed: " + err.Error()}}, IsError: true}, nil
 	}
 	if bt := treenode.GetBlockTree(id); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "file rolled back: " + id}}}, nil
 }

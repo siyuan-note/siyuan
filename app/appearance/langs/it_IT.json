@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completato",
   "snapshotAutoCreated": "Snapshot creato automaticamente",
   "agentThinkingDoneTime": "Pensato: %s",
   "agentThinking": "Pensando...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Approva",
   "agentConfirmReject": "Rifiuta",
   "agentConfirmAlways": "Consenti sessione",
-  "agentConfirmAlwaysDesc": "Non chiedere più in questa sessione",
+  "agentConfirmAlwaysDesc": "Non chiedere più per nessuna operazione in questa sessione",
   "agentTimeout": "Timeout agente",
   "agentTimeoutTip": "Timeout totale della sessione agente, 0 = nessun limite",
   "agentConfirmTimeout": "Timeout conferma",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Esegui checkout dall'istantanea",
     "task.database.index.full": "Esegui ricostruzione indice",
+    "task.database.index.fts": "Ricostruisci indice di ricerca",
     "task.database.index": "Esegui indice database",
     "task.database.index.commit": "Esegui commit indice database",
     "task.database.index.ref": "Esegui indice riferimento database",
@@ -1800,7 +1802,7 @@
     "212": "Ci sono alcuni difetti nella versione attuale della sincronizzazione dei dati cloud, si prega di aggiornare all'ultima versione. Ci scusiamo per l'inconveniente",
     "213": "Verifica cloud fallita, si prega di provare ad aggiornare all'ultima versione e accedere nuovamente prima di sincronizzare",
     "214": "Questa funzione richiede l'accesso all'account e l'acquisto di <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[funzionalità]</a> o <a target='_blank' href='${accountServer}/subscribe/siyuan'>[abbonamento annuale]</a> per essere utilizzata",
-    "215": "Si prega di fare riferimento alla guida utente per desktop",
+    "215": "",
     "216": "Ripristino dell'indice dei dati di contenuto degli asset, attendere...",
     "217": "[%d/%d] Creato indice dei dati di contenuto degli asset",
     "218": "Sono stati rilevati troppi snapshot del repository dati, il che rallenta l'avvio del programma e la sincronizzazione dei dati. Si prega di considerare l'esecuzione di [Impostazioni - Informazioni - Purgare repository dati]",
@@ -1880,6 +1882,7 @@
     "292": "Impossibile creare il file",
     "293": "Impossibile scrivere il file",
     "294": "Il codice di attivazione non può essere vuoto",
-    "295": "Questa funzione è disponibile solo con l'acquisto di [abbonamento annuale] (se hai già acquistato, aggiorna o accedi nuovamente in Impostazioni - Account)"
+    "295": "Questa funzione è disponibile solo con l'acquisto di [abbonamento annuale] (se hai già acquistato, aggiorna o accedi nuovamente in Impostazioni - Account)",
+    "296": "Rebuilding search index..."
   }
 }

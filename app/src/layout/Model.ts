@@ -1,10 +1,11 @@
 import {Constants} from "../constants";
 /// #if !MOBILE
-import {Tab} from "./Tab";
+import type {Tab} from "./Tab";
 /// #endif
+import type {App} from "../index";
+import {kernelError} from "../util/kernelFault";
 import {processMessage} from "../util/processMessage";
-import {kernelError, reloadSync} from "../dialog/processSystem";
-import {App} from "../index";
+import {reloadSync} from "../util/reloadSync";
 
 interface IConnectOptions {
     id: string,

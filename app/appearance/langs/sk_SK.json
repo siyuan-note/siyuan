@@ -1,4 +1,5 @@
 {
+  "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Automatická snímka vytvorená",
   "agentThinkingDoneTime": "Premyslené: %s",
   "agentThinking": "Premýšľa...",
@@ -31,7 +32,7 @@
   "agentConfirmApprove": "Schváliť",
   "agentConfirmReject": "Odmietnuť",
   "agentConfirmAlways": "Povoliť reláciu",
-  "agentConfirmAlwaysDesc": "V tejto relácii sa už nepýtať",
+  "agentConfirmAlwaysDesc": "V tejto relácii sa už nepýtať na žiadnu operáciu",
   "agentTimeout": "Časový limit agenta",
   "agentTimeoutTip": "Celkový časový limit relácie agenta, 0 = bez limitu",
   "agentConfirmTimeout": "Časový limit potvrdenia",
@@ -1554,6 +1555,7 @@
   "_taskAction": {
     "task.repo.checkout": "Vykonať obnovu zo snímky",
     "task.database.index.full": "Vykonať prestavbu indexu",
+    "task.database.index.fts": "Prebudovať vyhľadávací index",
     "task.database.index": "Vykonať indexáciu databázy",
     "task.database.index.commit": "Vykonať zápis indexu",
     "task.database.index.ref": "Vykonať indexáciu referencií",
@@ -1800,7 +1802,7 @@
     "212": "Chyba v synchronizácii aktuálnej verzie, prosím aktualizujte",
     "213": "Cloudové overenie zlyhalo, aktualizujte a znova sa prihláste",
     "214": "Funkcia vyžaduje prihlásenie a PRO verziu",
-    "215": "Pozrite si desktopovú príručku",
+    "215": "",
     "216": "Prestavujem index obsahu príloh...",
     "217": "Vytvorený index obsahu príloh",
     "218": "Príliš veľa snímok v sklade spomaľuje program, vykonajte vyčistenie",
@@ -1880,6 +1882,7 @@
     "292": "Súbor sa nedá vytvoriť",
     "293": "Do súboru sa nedá zapísať",
     "294": "Aktivačný kód nemôže byť prázdny",
-    "295": "Táto funkcia vyžaduje ročné predplatné"
+    "295": "Táto funkcia vyžaduje ročné predplatné",
+    "296": "Rebuilding search index..."
   }
 }

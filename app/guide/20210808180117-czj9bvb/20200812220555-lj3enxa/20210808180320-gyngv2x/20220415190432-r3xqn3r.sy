@@ -6,7 +6,7 @@
 		"id": "20220415190432-r3xqn3r",
 		"title": "查询语法",
 		"type": "doc",
-		"updated": "20250115150504"
+		"updated": "20260613193347"
 	},
 	"Children": [
 		{
@@ -956,7 +956,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415195733-gb4mj1a",
-				"updated": "20250115150504"
+				"updated": "20260613193347"
 			},
 			"Children": [
 				{
@@ -1122,179 +1122,12 @@
 			]
 		},
 		{
-			"ID": "20220415230035-u0oui0b",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220415230035-u0oui0b",
-				"updated": "20220415230221"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "大小写敏感"
-				}
-			]
-		},
-		{
-			"ID": "20220415230042-zzlr04p",
+			"ID": "20260613193347-pfqank8",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220415230042-zzlr04p",
-				"updated": "20220415230236"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果开启了 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "搜索"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "区分大小写"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 选项，则搜索会区分大小写，默认该选项是关闭的，即不区分大小写。"
-				}
-			]
-		},
-		{
-			"ID": "20220415230602-jrrha1j",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415230602-jrrha1j",
-				"updated": "20220415230942"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "由于分词器是区分大小写的，所以我们构建了两张虚拟表来分别索引："
-				}
-			]
-		},
-		{
-			"ID": "20220415230020-e6368ni",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220415230020-e6368ni",
-				"updated": "20220415231331"
-			},
-			"Children": [
-				{
-					"ID": "20220415230947-ckedfb7",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220415230947-ckedfb7",
-						"updated": "20220415230947"
-					},
-					"Children": [
-						{
-							"ID": "20220415230947-wz2s44w",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220415230947-wz2s44w",
-								"updated": "20220415231012"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：按字符原样分词"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220415230955-u91qki7",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220415230955-u91qki7",
-						"updated": "20220415231331"
-					},
-					"Children": [
-						{
-							"ID": "20220415230955-x5pw61i",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220415230955-x5pw61i",
-								"updated": "20220415231331"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts_case_insensitive"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：将英文字母转换为小写分词"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220415231036-fa3a3bu",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415231036-fa3a3bu",
-				"updated": "20230802221513"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "这样做的缺点是增加了磁盘空间占用和降低了索引性能，但是目前暂时没有更好的方案，所以只能先这样了。另外，不支持变音符号，仅支持忽略大小写。"
-				}
-			]
-		},
-		{
-			"ID": "20220415232054-zr76p9s",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415232054-zr76p9s",
-				"updated": "20220415232120"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果你有更好的实现方案，欢迎告诉我们，非常感谢。"
-				}
-			]
+				"id": "20260613193347-pfqank8",
+				"updated": "20260613193347"
+			}
 		}
 	]
 }

@@ -2,6 +2,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {getTopBarHeight} from "../layout/getTopBarHeight";
 
 export const moveResize = (element: HTMLElement, afterCB?: (type: string) => void) => {
     element.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
@@ -47,6 +48,7 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
         documentSelf.ondragstart = () => false;
 
         let hasMove = false;
+        const topBarHeight = getTopBarHeight();
         documentSelf.onmousemove = (moveEvent: MouseEvent) => {
             hasMove = true;
             if (!element) {
@@ -62,18 +64,18 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
                     positionY = window.innerHeight - height;
                 }
                 element.style.left = Math.max(positionX, 0) + "px";
-                element.style.top = Math.max(positionY, Constants.SIZE_TOOLBAR_HEIGHT) + "px";
+                element.style.top = Math.max(positionY, topBarHeight) + "px";
             } else {
                 if (type === "r" &&
                     moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth) {
                     element.style.width = moveEvent.clientX - x + width + "px";
                     element.style.maxWidth = "none";
                 } else if (type === "d" &&
-                    moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
+                    moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - topBarHeight) {
                     element.style.height = moveEvent.clientY - y + height + "px";
                     element.style.maxHeight = "";
                 } else if (type === "t" &&
-                    moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
+                    moveEvent.clientY > topBarHeight && y - moveEvent.clientY + height > 160) {
                     element.style.top = moveEvent.clientY + "px";
                     element.style.maxHeight = "";
                     element.style.height = (y - moveEvent.clientY + height) + "px";
@@ -84,14 +86,14 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
                     element.style.maxWidth = "none";
                 } else if (type === "rd" &&
                     moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth &&
-                    moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
+                    moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - topBarHeight) {
                     element.style.height = moveEvent.clientY - y + height + "px";
                     element.style.maxHeight = "";
                     element.style.maxWidth = "none";
                     element.style.width = moveEvent.clientX - x + width + "px";
                 } else if (type === "rt" &&
                     moveEvent.clientX - x + width > 200 && moveEvent.clientX - x + width < window.innerWidth &&
-                    moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
+                    moveEvent.clientY > topBarHeight && y - moveEvent.clientY + height > 160) {
                     element.style.width = moveEvent.clientX - x + width + "px";
                     element.style.top = moveEvent.clientY + "px";
                     element.style.maxHeight = "";
@@ -99,7 +101,7 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
                     element.style.height = (y - moveEvent.clientY + height) + "px";
                 } else if (type === "lt" &&
                     moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200 &&
-                    moveEvent.clientY > Constants.SIZE_TOOLBAR_HEIGHT && y - moveEvent.clientY + height > 160) {
+                    moveEvent.clientY > topBarHeight && y - moveEvent.clientY + height > 160) {
                     element.style.left = moveEvent.clientX + "px";
                     element.style.width = (x - moveEvent.clientX + width) + "px";
                     element.style.top = moveEvent.clientY + "px";
@@ -108,7 +110,7 @@ export const moveResize = (element: HTMLElement, afterCB?: (type: string) => voi
                     element.style.height = (y - moveEvent.clientY + height) + "px";
                 } else if (type === "ld" &&
                     moveEvent.clientX > 0 && x - moveEvent.clientX + width > 200 &&
-                    moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - Constants.SIZE_TOOLBAR_HEIGHT) {
+                    moveEvent.clientY - y + height > 160 && moveEvent.clientY - y + height < window.innerHeight - topBarHeight) {
                     element.style.left = moveEvent.clientX + "px";
                     element.style.width = (x - moveEvent.clientX + width) + "px";
                     element.style.height = moveEvent.clientY - y + height + "px";

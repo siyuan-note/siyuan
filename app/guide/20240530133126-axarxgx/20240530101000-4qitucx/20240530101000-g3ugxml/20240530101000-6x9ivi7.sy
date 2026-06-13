@@ -277,7 +277,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ の場合、呼び出し後にレベル 1 の見出しとしてドキュメント名が挿入されます"
+									"Data": "​ の場合、呼び出し後にレベル "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "1"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " の見出しとしてドキュメント名が挿入されます"
 								}
 							]
 						}
@@ -1533,6 +1541,80 @@
 								{
 									"Type": "NodeText",
 									"Data": "​: 対数計算を行い浮動小数点数を返します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205412-5pg8060",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205412-5pg8060",
+						"updated": "20260612205412"
+					},
+					"Children": [
+						{
+							"ID": "20260612205412-wmfxvg4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205412-wmfxvg4",
+								"updated": "20260612205412"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2text"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ は Markdown 形式のフィールド値をプレーンテキストに変換します（コードや数式などは破棄され、改行も挿入されません）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260612205412-j9w8ku4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260612205412-j9w8ku4",
+						"updated": "20260612205412"
+					},
+					"Children": [
+						{
+							"ID": "20260612205412-7x0k0dz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260612205412-7x0k0dz",
+								"updated": "20260612205412"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "markdown2content"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ は Markdown 形式のフィールド値をコンテンツテキストに変換します（コードや数式などは保持され、ブロック間には改行が挿入されます）"
 								}
 							]
 						}

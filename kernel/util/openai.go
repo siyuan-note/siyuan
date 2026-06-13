@@ -19,7 +19,6 @@ package util
 import (
 	"context"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -88,39 +87,10 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, m
 	return
 }
 
-func NewOpenAIClient(apiKey, apiProxy, apiBaseURL, apiUserAgent, apiVersion, apiProvider string) *openai.Client {
+func NewOpenAIClient(apiKey, apiBaseURL string) *openai.Client {
 	config := openai.DefaultConfig(apiKey)
-	if "Azure" == apiProvider {
-		config = openai.DefaultAzureConfig(apiKey, apiBaseURL)
-		config.APIVersion = apiVersion
-	}
-
-	transport := &http.Transport{}
-	if "" != apiProxy {
-		proxyUrl, err := url.Parse(apiProxy)
-		if err != nil {
-			logging.LogErrorf("OpenAI API proxy failed: %v", err)
-		} else {
-			transport.Proxy = http.ProxyURL(proxyUrl)
-		}
-	}
-	config.HTTPClient = &http.Client{Transport: newAddHeaderTransport(transport, apiUserAgent)}
 	config.BaseURL = apiBaseURL
 	return openai.NewClientWithConfig(config)
-}
-
-type AddHeaderTransport struct {
-	RoundTripper http.RoundTripper
-	UserAgent    string
-}
-
-func (adt *AddHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Add("User-Agent", adt.UserAgent)
-	return adt.RoundTripper.RoundTrip(req)
-}
-
-func newAddHeaderTransport(transport *http.Transport, userAgent string) *AddHeaderTransport {
-	return &AddHeaderTransport{RoundTripper: transport, UserAgent: userAgent}
 }
 
 func IsNetworkError(err error) bool {
@@ -151,11 +121,8 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout i
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = baseURL
 	config.HTTPClient = &http.Client{
-		Timeout: time.Duration(timeout) * time.Second,
-		Transport: &AddHeaderTransport{
-			RoundTripper: &http.Transport{},
-			UserAgent:    UserAgent,
-		},
+		Timeout:   time.Duration(timeout) * time.Second,
+		Transport: &http.Transport{},
 	}
 	client := openai.NewClientWithConfig(config)
 

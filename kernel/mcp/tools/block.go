@@ -28,7 +28,7 @@ import (
 
 var BlockTool = &Tool{
 	Name:        "block",
-	Description: "Block operations for SiYuan.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- tree_stat: Get tree statistics (word count, character count, block count, etc.) by document ID. Requires: id.\n- dom: Get block DOM by ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a child block. Requires: data, dataType, parentID.\n- prepend: Prepend a child block. Requires: data, dataType, parentID.\n- update: Update a block. Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.\n- move: Move a block. Requires: id, parentID. Optional: previousID.\n- breadcrumb: Get block breadcrumb path. Requires: id.\n- batch_get: Batch get block info by IDs. Requires: ids (comma-separated block IDs).\n- batch_kramdown: Batch get block kramdown by IDs. Requires: ids (comma-separated block IDs).",
+	Description: "Block operations for SiYuan.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- tree_stat: Get tree statistics (word count, character count, block count, etc.) by document ID. Requires: id.\n- dom: Get block DOM by ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a NEW child block. Requires: data, dataType, parentID. Use this AFTER block.update if you need to both modify and add new content.\n- prepend: Prepend a NEW child block. Requires: data, dataType, parentID. Use this AFTER block.update if you need to both modify and add new content.\n- update: Update an existing block's content (single block only, does NOT create or append new blocks). Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.\n- move: Move a block. Requires: id, parentID. Optional: previousID.\n- breadcrumb: Get block breadcrumb path. Requires: id.\n- batch_get: Batch get block info by IDs. Requires: ids (comma-separated block IDs).\n- batch_kramdown: Batch get block kramdown by IDs. Requires: ids (comma-separated block IDs).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -194,7 +194,7 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 	}
 	if reloadID != "" {
 		if bt := treenode.GetBlockTree(reloadID); bt != nil {
-			model.AppendPushReloadProtyleEntry(bt.RootID)
+			util.PushReloadProtyle(bt.RootID)
 		}
 	}
 
@@ -231,7 +231,7 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(parentID); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block appended"}}}, nil
 }
@@ -266,7 +266,7 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(parentID); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block prepended"}}}, nil
 }
@@ -301,7 +301,7 @@ func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(id); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block updated"}}}, nil
 }
@@ -325,7 +325,7 @@ func blockDelete(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block deleted: " + id}}}, nil
 }
@@ -373,7 +373,7 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 	model.FlushTxQueue()
 
 	if bt := treenode.GetBlockTree(id); bt != nil {
-		model.AppendPushReloadProtyleEntry(bt.RootID)
+		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block moved: " + id}}}, nil
 }

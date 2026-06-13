@@ -1,125 +1,14 @@
-import {isLocalPath, parseSYProtocolBlockInfo, pathPosix} from "../util/pathName";
+import {isLocalPath, pathPosix} from "../util/pathName";
 /// #if !BROWSER
-import {shell, ipcRenderer} from "electron";
+import {shell} from "electron";
 /// #endif
 import {getSearch} from "../util/functions";
 import {Constants} from "../constants";
 /// #if !MOBILE
-import {openAsset, openBy, openFile, openFileById} from "./util";
+import {openAsset, openBy} from "./util";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {openByMobile} from "../protyle/util/compatibility";
-import {App} from "../index";
-import {fetchPost} from "../util/fetch";
-import {checkFold} from "../util/noRelyPCFunction";
-import {openMobileFileById} from "../mobile/editor";
-
-export const processSYLinkBlocks = (app: App, urlObj: URL): boolean => {
-    const blockInfo = parseSYProtocolBlockInfo(urlObj);
-    if (blockInfo != null) {
-        const {id, focus} = blockInfo;
-        window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
-        fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
-            if (existResponse.data) {
-                checkFold(id, (zoomIn) => {
-                    /// #if !MOBILE
-                    openFileById({
-                        app,
-                        id,
-                        action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                        zoomIn: zoomIn || focus
-                    });
-                    /// #else
-                    openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
-                    /// #endif
-                });
-                /// #if !BROWSER
-                ipcRenderer.send(Constants.SIYUAN_CMD, "show");
-                /// #endif
-            }
-            app.plugins.forEach(plugin => {
-                plugin.eventBus.emit("open-siyuan-url-block", {
-                    url: urlObj.href,
-                    id,
-                    focus,
-                    exist: existResponse.data,
-                });
-            });
-        });
-        return true;
-    }
-    return false;
-};
-
-export const processSYLinkPlugins = (app: App, urlObj: URL): boolean => {
-    const pluginNameOrTabType: string | null = (() => {
-        const name = urlObj.pathname.split("/")[1];
-        if (!name) {
-            return null;
-        }
-        try {
-            return decodeURIComponent(name);
-        } catch (error) {
-            return null;
-        }
-    })();
-
-    if (!pluginNameOrTabType) {
-        return false;
-    }
-
-    const plugin = app.plugins.find(plugin => pluginNameOrTabType === plugin.name);
-    if (plugin) {
-        // siyuan://plugins/plugin-name/foo?bar=baz
-        plugin.eventBus.emit("open-siyuan-url-plugin", {url: urlObj.href});
-    } else {
-        // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-        /// #if !MOBILE
-        // https://github.com/siyuan-note/siyuan/pull/9256
-        const data = (() => {
-            try {
-                return JSON.parse(urlObj.searchParams.get("data") || "{}");
-            } catch (e) {
-                console.log("Error open plugin tab with protocol:", e);
-                return undefined;
-            }
-        })();
-        // id 不存在时无副作用
-        openFile({
-            app,
-            custom: {
-                title: urlObj.searchParams.get("title") ?? pluginNameOrTabType,
-                icon: urlObj.searchParams.get("icon") ?? "iconPlugin",
-                data,
-                id: pluginNameOrTabType
-            },
-        });
-        /// #endif
-    }
-    return true;
-};
-
-export const processSYLink = (app: App, url: string) => {
-    let urlObj: URL;
-    try {
-        urlObj = new URL(url);
-        if (urlObj.protocol !== "siyuan:" && urlObj.protocol !== "web+siyuan:") {
-            return false;
-        }
-    } catch (error) {
-        return false;
-    }
-    switch (urlObj.hostname) {
-        case "blocks":
-            return processSYLinkBlocks(app, urlObj);
-        case "plugins":
-            return processSYLinkPlugins(app, urlObj);
-        default:
-            break;
-    }
-    return false;
-};
-
 
 export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let linkAddress = Lute.UnEscapeHTMLStr(aLink);

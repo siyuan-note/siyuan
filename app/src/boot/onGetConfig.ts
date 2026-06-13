@@ -27,7 +27,7 @@ import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";
 import {correctHotkey} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
-import {processSYLink} from "../editor/openLink";
+import {processSiyuanUri} from "../util/uri";
 import {getAllEditor} from "../layout/getAll";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
@@ -172,7 +172,7 @@ export const initWindow = async (app: App) => {
     });
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPEN_URL, (event, url) => {
-            processSYLink(app, url);
+            processSiyuanUri(app, url);
         });
     }
     ipcRenderer.on(Constants.SIYUAN_OPEN_FILE, (event, data) => {

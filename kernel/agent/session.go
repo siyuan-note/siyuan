@@ -19,21 +19,19 @@ package agent
 import (
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var sessionIDRegexp = regexp.MustCompile(`^[a-zA-Z0-9]{14,26}$`)
-
 func isValidSessionID(id string) bool {
-	return sessionIDRegexp.MatchString(id)
+	return ast.IsNodeIDPattern(id)
 }
 
 var indexMu sync.Mutex

@@ -101,7 +101,7 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 		gpt = &CloudGPT{}
 	} else {
 		gpt = &OpenAIGPT{
-			c:       util.NewOpenAIClient(string(prov.APIKey), prov.BaseURL),
+			c:       util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
 			m:       m,
 			timeout: prov.RequestTimeout,
 		}

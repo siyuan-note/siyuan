@@ -17,6 +17,7 @@
 package conf
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"strconv"
@@ -25,27 +26,6 @@ import (
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
-
-type EncryptedString string
-
-func (s EncryptedString) MarshalJSON() ([]byte, error) {
-	return json.Marshal(util.AESEncrypt(string(s)))
-}
-
-func (s *EncryptedString) UnmarshalJSON(data []byte) error {
-	var str string
-	json.Unmarshal(data, &str)
-	if dec := util.AESDecrypt(str); len(dec) > 0 {
-		*s = EncryptedString(dec)
-	} else {
-		*s = EncryptedString(str)
-	}
-	return nil
-}
-
-func (s EncryptedString) String() string {
-	return string(s)
-}
 
 type AI struct {
 	MCP       *MCP       `json:"mcp"`
@@ -64,7 +44,7 @@ type Embedding struct {
 	ID          string          `json:"id,omitempty"`
 	DisplayName string          `json:"displayName,omitempty"`
 	Enabled     bool            `json:"enabled,omitempty"`
-	APIKey      EncryptedString `json:"apiKey"`
+	APIKey      string          `json:"apiKey"`
 	BaseURL     string          `json:"baseURL"`
 	Name        string          `json:"name"`
 	Timeout     int             `json:"timeout"`
@@ -74,7 +54,7 @@ type Provider struct {
 	ID             string          `json:"id,omitempty"`
 	DisplayName    string          `json:"displayName,omitempty"`
 	Enabled        bool            `json:"enabled,omitempty"`
-	APIKey         EncryptedString `json:"apiKey"`
+	APIKey         string          `json:"apiKey"`
 	BaseURL        string          `json:"baseURL"`
 	RequestTimeout int             `json:"requestTimeout"`
 	Models         []*Model        `json:"models"`
@@ -118,7 +98,7 @@ func NewAI() *AI {
 		BaseURL:        "https://api.openai.com/v1",
 		RequestTimeout: 30,
 	}
-	provider.APIKey = EncryptedString(os.Getenv("SIYUAN_OPENAI_API_KEY"))
+	provider.APIKey = os.Getenv("SIYUAN_OPENAI_API_KEY")
 
 	if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
 		if v, err := strconv.Atoi(timeout); err == nil {
@@ -174,7 +154,7 @@ func NewAI() *AI {
 	embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL")
 	if "" != embeddingKey && "" != embeddingBaseURL && "" != embeddingModel {
 		ai.Embedding = &Embedding{
-			APIKey:  EncryptedString(embeddingKey),
+			APIKey:  embeddingKey,
 			BaseURL: embeddingBaseURL,
 			Name:    embeddingModel,
 			Timeout: 30,
@@ -186,7 +166,7 @@ func NewAI() *AI {
 
 func (ai *AI) HasAnyProvider() bool {
 	for _, p := range ai.Providers {
-		if p != nil && len(string(p.APIKey)) > 0 {
+		if p != nil && len(p.APIKey) > 0 {
 			for _, m := range p.Models {
 				if m.Name != "" {
 					return true
@@ -200,7 +180,7 @@ func (ai *AI) HasAnyProvider() bool {
 func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	if id == "" {
 		for _, p := range ai.Providers {
-			if p == nil || len(string(p.APIKey)) == 0 {
+			if p == nil || len(p.APIKey) == 0 {
 				continue
 			}
 			for _, m := range p.Models {
@@ -220,7 +200,7 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.ID == id && len(string(p.APIKey)) > 0 {
+			if m.ID == id && len(p.APIKey) > 0 {
 				return p, m
 			}
 		}
@@ -231,7 +211,7 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.DisplayName == id && len(string(p.APIKey)) > 0 {
+			if m.DisplayName == id && len(p.APIKey) > 0 {
 				return p, m
 			}
 		}
@@ -242,7 +222,7 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.Name == id && len(string(p.APIKey)) > 0 {
+			if m.Name == id && len(p.APIKey) > 0 {
 				return p, m
 			}
 		}
@@ -281,6 +261,38 @@ func (ai *AI) Normalize() {
 		if ai.Embedding.DisplayName == "" {
 			ai.Embedding.DisplayName = ai.Embedding.Name
 		}
+	}
+}
+
+func (ai *AI) DecryptAPIKeys() {
+	for _, p := range ai.Providers {
+		if p == nil || p.APIKey == "" {
+			continue
+		}
+		if dec := util.AESDecrypt(p.APIKey); len(dec) > 0 {
+			if plain, err := hex.DecodeString(string(dec)); err == nil {
+				p.APIKey = string(plain)
+			}
+		}
+	}
+	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
+		if dec := util.AESDecrypt(ai.Embedding.APIKey); len(dec) > 0 {
+			if plain, err := hex.DecodeString(string(dec)); err == nil {
+				ai.Embedding.APIKey = string(plain)
+			}
+		}
+	}
+}
+
+func (ai *AI) EncryptAPIKeys() {
+	for _, p := range ai.Providers {
+		if p == nil {
+			continue
+		}
+		p.APIKey = util.AESEncrypt(p.APIKey)
+	}
+	if ai.Embedding != nil {
+		ai.Embedding.APIKey = util.AESEncrypt(ai.Embedding.APIKey)
 	}
 }
 
@@ -397,7 +409,7 @@ func migrateProvider(raw map[string]any) *Provider {
 	return &Provider{
 		ID:             getString(raw, "id"),
 		Enabled:        true,
-		APIKey:         EncryptedString(getString(raw, "apiKey")),
+		APIKey:         getString(raw, "apiKey"),
 		BaseURL:        getString(raw, "apiBaseURL"),
 		RequestTimeout: getInt(raw, "apiTimeout"),
 	}
@@ -426,7 +438,7 @@ func migrateEmbedding(raw map[string]any) *Embedding {
 		ID:          getString(raw, "id"),
 		DisplayName: getString(raw, "name"),
 		Enabled:     getBool(raw, "enabled"),
-		APIKey:      EncryptedString(getString(raw, "apiKey")),
+		APIKey:       getString(raw, "apiKey"),
 		BaseURL:     getString(raw, "apiBaseURL"),
 		Name:        getString(raw, "apiModel"),
 		Timeout:     getInt(raw, "apiTimeout"),

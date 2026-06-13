@@ -233,9 +233,6 @@ func setAI(c *gin.Context) {
 	if nil == ai.Agent {
 		ai.Agent = model.Conf.AI.Agent
 	}
-	if nil == ai.Embedding && nil != model.Conf.AI.Embedding {
-		ai.Embedding = model.Conf.AI.Embedding
-	}
 
 	for i, p := range ai.Providers {
 		if nil == p {

@@ -438,12 +438,12 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 }
 
 func isEmbeddingEnabled() bool {
-	return nil != Conf.AI.Embedding && len(string(Conf.AI.Embedding.APIKey)) > 0
+	return nil != Conf.AI.Embedding && len(Conf.AI.Embedding.APIKey) > 0
 }
 
 func embeddingKey() string {
 	if nil != Conf.AI.Embedding && "" != Conf.AI.Embedding.APIKey {
-		return string(Conf.AI.Embedding.APIKey)
+		return Conf.AI.Embedding.APIKey
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != v {
 		return v

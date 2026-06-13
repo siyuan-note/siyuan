@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20260317202452"
+		"updated": "20260613181406"
 	},
 	"Children": [
 		{
@@ -559,7 +559,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20250114214413-n2v7z20",
-				"updated": "20260317202452"
+				"updated": "20260613174109"
 			},
 			"Children": [
 				{
@@ -768,11 +768,575 @@
 			]
 		},
 		{
-			"ID": "20250114215221-sl97cs4",
+			"ID": "20260613174109-kf9rdvq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613174109-kf9rdvq",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "闪念速记"
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-55ofcrn",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20250114215221-sl97cs4",
-				"updated": "20260317183704"
+				"id": "20260613174109-55ofcrn",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "闪念速记是移动端的快速记录功能。当灵感闪现或有临时信息需要记录时，无需打开思源进入文档编辑，即可通过系统分享或快捷入口将文本快速保存。速记内容先暂存在本地，之后自动转入文档面板进行整理。"
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-bccohoq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174109-bccohoq",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-6e5twqf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613174109-6e5twqf",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"ID": "20260613174109-igar9kc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174109-igar9kc",
+						"updated": "20260613174109"
+					},
+					"Children": [
+						{
+							"ID": "20260613174109-0xg5mem",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174109-0xg5mem",
+								"updated": "20260613174109"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "创建速记"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在移动端通过系统分享菜单将文本/链接发送到思源，或在桌面添加思源的快捷入口一键记录"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613174109-wuyfmvn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174109-wuyfmvn",
+						"updated": "20260613174109"
+					},
+					"Children": [
+						{
+							"ID": "20260613174109-0vtxbwq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174109-0vtxbwq",
+								"updated": "20260613174109"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "自动转入"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：速记创建后，系统每 7 秒自动检查本地速记目录，将新速记转入文档面板中配置的目标位置"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-f6x4sin",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174109-f6x4sin",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "存放配置"
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-mq2h4ye",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174109-mq2h4ye",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 设置 - 文档 中配置闪念速记的存放位置："
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-k0fcrzv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613174109-k0fcrzv",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"ID": "20260613174109-m6mai1x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174109-m6mai1x",
+						"updated": "20260613174109"
+					},
+					"Children": [
+						{
+							"ID": "20260613174109-12l7x26",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174109-12l7x26",
+								"updated": "20260613174109"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "存放笔记本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：选择速记转入的目标笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613174109-shjipox",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613174109-shjipox",
+						"updated": "20260613174109"
+					},
+					"Children": [
+						{
+							"ID": "20260613174109-eevgxvm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613174109-eevgxvm",
+								"updated": "20260613174109"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "存放路径"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：设置速记内容的保存路径模板："
+								}
+							]
+						},
+						{
+							"ID": "20260613174109-h2extb5",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613174109-h2extb5",
+								"updated": "20260613174109"
+							},
+							"Children": [
+								{
+									"ID": "20260613174109-zusf704",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613174109-zusf704",
+										"updated": "20260613174109"
+									},
+									"Children": [
+										{
+											"ID": "20260613174109-npg5j7i",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613174109-npg5j7i",
+												"updated": "20260613174109"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "不设置路径模板：每条速记单独创建一个文档，标题为时间戳"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613174109-w6cmh7f",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613174109-w6cmh7f",
+										"updated": "20260613174109"
+									},
+									"Children": [
+										{
+											"ID": "20260613174109-gc3shhc",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613174109-gc3shhc",
+												"updated": "20260613174109"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "设置路径模板：所有速记追加到指定文档的末尾。路径模板支持 Go template 语法，例如 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "/闪念速记/{{now | date \"20060102150405\"}}"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 会按时间生成独立文档"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-gt6j3mh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613174109-gt6j3mh",
+				"updated": "20260613181406"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "与收集箱的区别"
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-30nokl3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613174109-30nokl3",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "闪念速记与云端收集箱是两种独立的快速记录方式："
+				}
+			]
+		},
+		{
+			"ID": "20260613174109-aw0019y",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260613174109-aw0019y",
+				"updated": "20260613174109"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th"
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "闪念速记"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "云端收集箱"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "存储位置"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本地"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用方式"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "系统分享/快捷入口"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "微信发送/API 调用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "转入方式"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "自动转入文档面板"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需手动从收集箱面板处理"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要订阅"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "否"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "是"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可用平台"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅移动端"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "全平台"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613181406-4uql2vg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613181406-4uql2vg",
+				"updated": "20260613181406"
 			}
 		}
 	]

@@ -187,9 +187,9 @@ func NewAI() *AI {
 
 func (ai *AI) HasAnyProvider() bool {
 	for _, p := range ai.Providers {
-		if p != nil && len(p.APIKey) > 0 {
+		if p != nil && len(p.APIKey) > 0 && p.Enabled {
 			for _, m := range p.Models {
-				if m.Name != "" {
+				if m.Name != "" && m.Enabled {
 					return true
 				}
 			}
@@ -201,11 +201,11 @@ func (ai *AI) HasAnyProvider() bool {
 func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	if id == "" {
 		for _, p := range ai.Providers {
-			if p == nil || len(p.APIKey) == 0 {
+			if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 				continue
 			}
 			for _, m := range p.Models {
-				if m.Name != "" {
+				if m.Name != "" && m.Enabled {
 					return p, m
 				}
 			}
@@ -217,33 +217,33 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.ID == id && len(p.APIKey) > 0 {
+			if m.ID == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.DisplayName == id && len(p.APIKey) > 0 {
+			if m.DisplayName == id && m.Enabled {
 				return p, m
 			}
 		}
 	}
 
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.Name == id && len(p.APIKey) > 0 {
+			if m.Name == id && m.Enabled {
 				return p, m
 			}
 		}

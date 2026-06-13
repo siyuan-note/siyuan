@@ -546,7 +546,6 @@ func setSearch(c *gin.Context) {
 	ftsChanged := s.CaseSensitive != oldCaseSensitive || s.HanSensitiveVal() != oldHanSensitive
 	if ftsChanged && s.IndexAssetPath == oldIndexAssetPath {
 		task.AppendTask(task.DatabaseIndexFTS, model.ReindexFTS)
-		task.AppendTask(task.ReloadUI, util.ReloadUI)
 	} else if ftsChanged || s.IndexAssetPath != oldIndexAssetPath {
 		model.FullReindex(false)
 	}

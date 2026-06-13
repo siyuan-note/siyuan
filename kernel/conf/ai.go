@@ -285,17 +285,33 @@ func (ai *AI) Normalize() {
 }
 
 func NeedsAIMigration(data []byte) bool {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
+	var topRaw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &topRaw); err != nil {
 		return false
 	}
-	_, ok := raw["openAI"]
+	aiRaw, ok := topRaw["ai"]
+	if !ok {
+		return false
+	}
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(aiRaw, &raw); err != nil {
+		return false
+	}
+	_, ok = raw["openAI"]
 	return ok
 }
 
 func MigrateAI(data []byte) *AI {
+	var topRaw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &topRaw); err != nil {
+		return NewAI()
+	}
+	aiRaw, ok := topRaw["ai"]
+	if !ok {
+		return NewAI()
+	}
 	var raw map[string]any
-	if err := json.Unmarshal(data, &raw); err != nil {
+	if err := json.Unmarshal(aiRaw, &raw); err != nil {
 		return NewAI()
 	}
 
@@ -306,10 +322,8 @@ func MigrateAI(data []byte) *AI {
 	}
 
 	if oai, ok := raw["openAI"].(map[string]any); ok {
-		prov, m := migrateProviderAndModel(oai)
-		if prov.Models == nil {
-			prov.Models = make([]*Model, 0)
-		}
+		prov := migrateProvider(oai)
+		m := migrateModel(oai)
 		prov.Models = append(prov.Models, m)
 		ai.Providers = append(ai.Providers, prov)
 
@@ -329,17 +343,29 @@ func MigrateAI(data []byte) *AI {
 			if getString(p, "type") == "embedding" {
 				ai.Embedding = migrateEmbedding(p)
 			} else {
-				prov, m2 := migrateProviderAndModel(p)
-				if prov.Models == nil {
-					prov.Models = make([]*Model, 0)
+				m := migrateModel(p)
+				oldBaseURL := getString(p, "apiBaseURL")
+				if existing := findProviderByBaseURL(ai.Providers, oldBaseURL); existing != nil {
+					existing.Models = append(existing.Models, m)
+				} else {
+					prov := migrateProvider(p)
+					prov.Models = append(prov.Models, m)
+					ai.Providers = append(ai.Providers, prov)
 				}
-				prov.Models = append(prov.Models, m2)
-				ai.Providers = append(ai.Providers, prov)
 			}
 		}
 	}
 
 	return ai
+}
+
+func findProviderByBaseURL(providers []*Provider, baseURL string) *Provider {
+	for _, p := range providers {
+		if p != nil && p.BaseURL == baseURL && baseURL != "" {
+			return p
+		}
+	}
+	return nil
 }
 
 func migrateMCP(raw map[string]any) *MCP {
@@ -367,24 +393,32 @@ func migrateMCP(raw map[string]any) *MCP {
 	return mcp
 }
 
-func migrateProviderAndModel(raw map[string]any) (*Provider, *Model) {
-	prov := &Provider{
+func migrateProvider(raw map[string]any) *Provider {
+	return &Provider{
 		ID:             getString(raw, "id"),
 		Enabled:        true,
 		APIKey:         EncryptedString(getString(raw, "apiKey")),
 		BaseURL:        getString(raw, "apiBaseURL"),
 		RequestTimeout: getInt(raw, "apiTimeout"),
 	}
-	model := &Model{
+}
+
+func migrateModel(raw map[string]any) *Model {
+	enabled := true
+	if v, ok := raw["enabled"]; ok {
+		if b, ok2 := v.(bool); ok2 && !b {
+			enabled = false
+		}
+	}
+	return &Model{
 		ID:          getString(raw, "id"),
 		DisplayName: getString(raw, "name"),
-		Enabled:     getBool(raw, "enabled"),
+		Enabled:     enabled,
 		Name:        getString(raw, "apiModel"),
 		MaxTokens:   getInt(raw, "apiMaxTokens"),
 		Temperature: getFloat(raw, "apiTemperature"),
 		MaxContexts: getInt(raw, "apiMaxContexts"),
 	}
-	return prov, model
 }
 
 func migrateEmbedding(raw map[string]any) *Embedding {

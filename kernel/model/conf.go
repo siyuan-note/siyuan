@@ -131,12 +131,8 @@ func InitConf() {
 		} else {
 			if conf.NeedsAIMigration(data) {
 				Conf.AI = conf.MigrateAI(data)
-				if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
-					logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
-				} else {
-					Conf.Save()
-					logging.LogInfof("migrated AI config [%s]", confPath)
-				}
+				Conf.Save()
+				logging.LogInfof("migrated AI config [%s]", confPath)
 			} else if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
 				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
 			} else {

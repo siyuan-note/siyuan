@@ -491,6 +491,9 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
                 let firstChild = cellElement.firstChild;
                 while (firstChild) {
                     if (firstChild.textContent === "" && firstChild.nodeType === 3) {
+                        if (!firstChild.nextSibling) {
+                            break;
+                        }
                         firstChild = firstChild.nextSibling;
                     } else {
                         break;
@@ -525,6 +528,9 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
                 let lastChild = cellElement.lastChild;
                 while (lastChild) {
                     if (lastChild.textContent === "" && lastChild.nodeType === 3) {
+                        if (!lastChild.previousSibling) {
+                            break;
+                        }
                         lastChild = lastChild.previousSibling;
                     } else {
                         break;

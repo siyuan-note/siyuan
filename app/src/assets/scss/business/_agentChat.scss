@@ -261,7 +261,7 @@
         }
     }
 
-    code:not(.hljs) {
+    :not(pre) > code:not(.hljs) {
         padding: .2em .4em;
         font-size: 85%;
         border-radius: var(--b3-border-radius);
@@ -280,11 +280,19 @@
         background-color: var(--b3-protyle-code-background);
     }
 
+    pre[data-language] {
+        padding-top: 24px;
+    }
+
+    pre code.hljs {
+        padding: 0;
+    }
+
     pre[data-language]::before {
         content: attr(data-language);
         position: absolute;
         top: 4px;
-        right: 8px;
+        left: 8px;
         font-size: 12px;
         color: var(--b3-theme-on-surface-light);
         opacity: 0;

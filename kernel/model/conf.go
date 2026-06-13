@@ -344,9 +344,7 @@ func InitConf() {
 
 	if nil == Conf.System {
 		Conf.System = conf.NewSystem()
-		if util.ContainerIOS != util.Container {
-			Conf.OpenHelp = true
-		}
+		Conf.OpenHelp = true
 	} else {
 		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
 		if 0 < cmp {

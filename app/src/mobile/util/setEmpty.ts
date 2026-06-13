@@ -5,7 +5,6 @@ import {popSearch} from "../menu/search";
 import {getRecentDocs} from "../menu/getRecentDocs";
 import {openHistory} from "../../history/history";
 import {App} from "../../index";
-import {isIPhone} from "../../protyle/util/compatibility";
 import {setTitle} from "../../util/processTitle";
 
 export const setEmpty = (app: App) => {
@@ -32,7 +31,7 @@ export const setEmpty = (app: App) => {
 <div class="b3-list-item" id="emptyNewNotebook${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconNewNoteBook"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
 </div>
-<div class="b3-list-item${(isIPhone() || window.siyuan.config.readonly) ? " fn__none" : ""}" id="emptyHelp">
+<div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="emptyHelp">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconHelp"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.userGuide}</span>
 </div>`;
     emptyElement.addEventListener("click", (event) => {

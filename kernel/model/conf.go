@@ -130,9 +130,19 @@ func InitConf() {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		} else {
 			if conf.NeedsAIMigration(data) {
-				Conf.AI = conf.MigrateAI(data)
-				Conf.Save()
-				logging.LogInfof("migrated AI config [%s]", confPath)
+				if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
+					logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+				} else {
+					Conf.AI = conf.MigrateAI(data)
+					if nil != Conf.Search && Conf.Search.HanSensitive == nil {
+						Conf.Search.SetHanSensitive(true)
+					}
+					if nil != Conf.AI {
+						Conf.AI.DecryptAPIKeys()
+					}
+					Conf.Save()
+					logging.LogInfof("migrated AI config [%s]", confPath)
+				}
 			} else if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
 				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
 			} else {

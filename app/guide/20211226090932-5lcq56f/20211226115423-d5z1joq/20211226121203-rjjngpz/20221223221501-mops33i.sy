@@ -7,16 +7,16 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20260426180222"
+		"updated": "20260614194452"
 	},
 	"Children": [
 		{
-			"ID": "20221223221502-s7obktn",
+			"ID": "20260614194439-k7n1m8a",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20221223221502-s7obktn",
-				"updated": "20221223221502"
+				"id": "20260614194439-k7n1m8a",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
@@ -26,26 +26,26 @@
 			]
 		},
 		{
-			"ID": "20221223221502-wolnn20",
+			"ID": "20260614194439-ffn21hi",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20221223221502-wolnn20",
-				"updated": "20230820185212"
+				"id": "20260614194439-ffn21hi",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "將內容塊設置為閃卡後會自動通過間隔重複算法 FSRS (github repo: open-spaced-repetition/free-spaced-repetition-scheduler) 安排複習。"
+					"Data": "將內容塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（github repo: open-spaced-repetition/free-spaced-repetition-scheduler）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
 				}
 			]
 		},
 		{
-			"ID": "20221223221502-ezm96rt",
+			"ID": "20260614194439-91xd3o2",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20221223221502-ezm96rt",
-				"updated": "20221223221502"
+				"id": "20260614194439-91xd3o2",
+				"updated": "20260614194452"
 			},
 			"Children": [
 				{
@@ -55,61 +55,61 @@
 			]
 		},
 		{
-			"ID": "20230219092911-xk65zqb",
+			"ID": "20260614194439-33ewrfo",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20230219092911-xk65zqb",
-				"updated": "20230219092911"
+				"id": "20260614194439-33ewrfo",
+				"updated": "20260614194452"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "內容塊"
+					"Data": "製卡"
 				}
 			]
 		},
 		{
-			"ID": "20230219092911-yxwh91v",
+			"ID": "20260614194439-srj2lby",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230219092911-yxwh91v",
-				"updated": "20230219092911"
+				"id": "20260614194439-srj2lby",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在開始正式製卡之前，我們先介紹一些制卡的基本規則："
+					"Data": "在開始正式製卡之前，我們先介紹一些製卡的基本規則："
 				}
 			]
 		},
 		{
-			"ID": "20230219092911-8074ovh",
+			"ID": "20260614194439-s5vvtpl",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20230219092911-8074ovh",
-				"updated": "20240326165451"
+				"id": "20260614194439-s5vvtpl",
+				"updated": "20260614194452"
 			},
 			"Children": [
 				{
-					"ID": "20230219092911-r97cxkq",
+					"ID": "20260614194439-yrmz62g",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230219092911-r97cxkq",
-						"updated": "20230219092911"
+						"id": "20260614194439-yrmz62g",
+						"updated": "20260614194452"
 					},
 					"Children": [
 						{
-							"ID": "20230219092911-ne0d1fm",
+							"ID": "20260614194439-xja26ei",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230219092911-ne0d1fm",
-								"updated": "20230219092911"
+								"id": "20260614194439-xja26ei",
+								"updated": "20260614194452"
 							},
 							"Children": [
 								{
@@ -130,84 +130,84 @@
 					]
 				},
 				{
-					"ID": "20230219092911-k399zf9",
+					"ID": "20260614194439-8wgizhg",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230219092911-k399zf9",
-						"updated": "20230219092911"
+						"id": "20260614194439-8wgizhg",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20230219092911-5enl43r",
+							"ID": "20260614194439-g95rwrc",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230219092911-5enl43r",
-								"updated": "20230219092911"
+								"id": "20260614194439-g95rwrc",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將超級塊設置為閃卡，則該超級塊的第一個子塊會被視作問題，其餘子塊會被視作答案"
+									"Data": "如果將超級塊設定為閃卡，則該超級塊的第一個子區塊會被視作問題，其餘子區塊會被視作答案"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230219092911-ez3j9t1",
+					"ID": "20260614194439-v1a766t",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230219092911-ez3j9t1",
-						"updated": "20230219092911"
+						"id": "20260614194439-v1a766t",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20230219092911-x89zk5a",
+							"ID": "20260614194439-gs2lipc",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230219092911-x89zk5a",
-								"updated": "20230219092911"
+								"id": "20260614194439-gs2lipc",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將列表或者列表項設置為閃卡，則非子列表會被視問題，子列表會被視作答案"
+									"Data": "如果將列表或者列表項設定為閃卡，則非子列表會被視問題，子列表會被視作答案"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20231013104042-7impulf",
+					"ID": "20260614194439-sfrgwut",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20231013104042-7impulf",
-						"updated": "20240326165451"
+						"id": "20260614194439-sfrgwut",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20231013104042-wzwhxmr",
+							"ID": "20260614194439-01nxgir",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20231013104042-wzwhxmr",
-								"updated": "20240326165451"
+								"id": "20260614194439-01nxgir",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將標題塊設為閃卡，則該標題塊會被視為問題，其下方塊會被視為答案"
+									"Data": "如果將標題塊設定為閃卡，則該標題塊會被視作問題，其下方塊會被視作答案"
 								}
 							]
 						}
@@ -216,144 +216,178 @@
 			]
 		},
 		{
-			"ID": "20230324110806-8rbbppa",
+			"ID": "20260614194439-xknxlzy",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230324110806-8rbbppa",
-				"updated": "20230328100340"
+				"id": "20260614194439-xknxlzy",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以上規則可以在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "閃卡"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中調整。"
+					"Data": "以上規則可以在 設定 - 閃卡 中調整。"
 				}
 			]
 		},
 		{
-			"ID": "20230219092911-kawl9n2",
+			"ID": "20260614194439-zih3624",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614194439-zih3624",
+				"updated": "20260614194439"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "完成製卡：在塊標選單中選擇「快速製卡」。"
+				}
+			]
+		},
+		{
+			"ID": "20260614194439-dpit548",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20230219092911-kawl9n2",
-				"updated": "20260426180222"
+				"id": "20260614194439-dpit548",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "基於文檔"
+					"Data": "複習"
 				}
 			]
 		},
 		{
-			"ID": "20230219092911-vfi7z5z",
+			"ID": "20260614194439-27yl506",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230219092911-vfi7z5z",
-				"updated": "20230324110737"
+				"id": "20260614194439-27yl506",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "基於文檔的使用方式可以不必關注卡包，並且支持父子文檔複習。"
+					"Data": "有以下入口可以進入複習，各自的複習範圍不同："
 				}
 			]
 		},
 		{
-			"ID": "20230219092911-jluw0db",
+			"ID": "20260614194439-x7bnua6",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20230219092911-jluw0db",
-				"updated": "20260426180222"
+				"id": "20260614194439-x7bnua6",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
-					"ID": "20230219092911-4j7zdh5",
+					"ID": "20260614194439-cr63ps9",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230219092911-4j7zdh5",
-						"updated": "20230219092934"
+						"id": "20260614194439-cr63ps9",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20230219092911-5swg3v3",
+							"ID": "20260614194439-v8bptst",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230219092911-5swg3v3",
-								"updated": "20230219092934"
+								"id": "20260614194439-v8bptst",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在塊標菜單中選擇 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "快速制卡"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 完成製卡"
+									"Data": "在文件面板中右擊文件選擇「閃卡 - 間隔重複」，複習範圍為該文件及其子文件中的卡片"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230219092911-i1eqodd",
+					"ID": "20260614194439-jlntwy0",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230219092911-i1eqodd",
-						"updated": "20260426180222"
+						"id": "20260614194439-jlntwy0",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20230219092911-5sewtmn",
+							"ID": "20260614194439-brh7nwo",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230219092911-5sewtmn",
-								"updated": "20260426180222"
+								"id": "20260614194439-brh7nwo",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在文檔面板中右擊文檔或者在編輯器中點擊文檔塊標 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "閃卡"
-								},
+									"Data": "在編輯器中點擊文件塊標上的「閃卡 - 間隔重複」，複習範圍為當前文件及其子文件中的卡片"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614194439-4u7hw7h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614194439-4u7hw7h",
+						"updated": "20260614194439"
+					},
+					"Children": [
+						{
+							"ID": "20260614194439-nhr33d3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614194439-nhr33d3",
+								"updated": "20260614194439"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​ 進入複習"
+									"Data": "右擊筆記本選擇「閃卡 - 間隔重複」，複習範圍為該筆記本中所有文件的卡片"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614194439-isqh5m6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614194439-isqh5m6",
+						"updated": "20260614194439"
+					},
+					"Children": [
+						{
+							"ID": "20260614194439-jreqv6v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614194439-jreqv6v",
+								"updated": "20260614194439"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "點擊頂部主選單中的「閃卡」，複習範圍涵蓋所有筆記本中到期的卡片"
 								}
 							]
 						}
@@ -362,112 +396,322 @@
 			]
 		},
 		{
-			"ID": "20230219092911-wh5sgd8",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20230219092911-wh5sgd8",
-				"updated": "20230219092911"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "基於卡包"
-				}
-			]
-		},
-		{
-			"ID": "20230219092911-ol65uqs",
+			"ID": "20260614194439-vi1i5u5",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230219092911-ol65uqs",
-				"updated": "20230219092911"
+				"id": "20260614194439-vi1i5u5",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "基於卡包的使用方式可以將不同文檔中的內容塊制卡後放到統一的卡包中復習。"
+					"Data": "進入複習後，介面會逐張展示待複習的卡片。每張卡片先展示問題面，點擊「顯示答案」或按空格/Enter 展示答案面，然後根據自己的掌握程度選擇評級："
 				}
 			]
 		},
 		{
-			"ID": "20230219092911-u7jucj7",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260614194439-8fnim9f",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
 			"Properties": {
-				"id": "20230219092911-u7jucj7",
-				"updated": "20230219092928"
+				"colgroup": "||",
+				"id": "20260614194439-8fnim9f",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
-					"ID": "20230219092911-s4dh6g1",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230219092911-s4dh6g1",
-						"updated": "20230219092922"
-					},
+					"Type": "NodeTableHead",
+					"Data": "thead",
 					"Children": [
 						{
-							"ID": "20230219092911-9cn6n81",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230219092911-9cn6n81",
-								"updated": "20230219092922"
-							},
+							"Type": "NodeTableRow",
+							"Data": "tr",
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "在塊標菜單中選擇 "
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "評級"
+										}
+									]
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "添加到卡包..."
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "快捷鍵"
+										}
+									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": "​​，然後將該內容塊添加到一個卡包中完成製卡"
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "說明"
+										}
+									]
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230219092911-lxrxhy6",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230219092911-lxrxhy6",
-						"updated": "20230219092928"
-					},
+					"Type": "NodeTableRow",
+					"Data": "tr",
 					"Children": [
 						{
-							"ID": "20230219092911-05ghbty",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230219092911-05ghbty",
-								"updated": "20230219092928"
-							},
+							"Type": "NodeTableCell",
+							"Data": "td",
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通過點擊頂欄菜單中的 "
+									"Data": "重來"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "閃卡"
+									"TextMarkType": "code",
+									"TextMarkTextContent": "1"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ 進入複習"
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "j"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "完全忘記，需要重新學習"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "困難"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "k"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "回憶起來了但很吃力"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "良好"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "3"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "l"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "d"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "能夠正確回憶"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "簡單"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "4"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ";"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "f"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "非常輕鬆就能回憶"
 								}
 							]
 						}
@@ -476,138 +720,93 @@
 			]
 		},
 		{
-			"ID": "20230324110844-nhwgtq3",
+			"ID": "20260614194439-mun0m8m",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230324110844-nhwgtq3",
-				"updated": "20230324110901"
+				"id": "20260614194439-mun0m8m",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "該使用方式預設關閉，如果需要可以在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "閃卡"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "卡包"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中開啟。但建議不要基於卡包使用閃卡，因為卡包是固定的，沒有基於文檔使用閃卡靈活。"
+					"Data": "展示答案後，空格和 Enter 也可直接觸發「良好」評級。評級直接影響卡片的複習間隔——高評級延長下次複習時間，低評級縮短下次複習時間。系統使用 FSRS 演算法根據歷史評級資料自動最佳化每個人的複習安排。"
 				}
 			]
 		},
 		{
-			"ID": "20240128111751-bb41541",
+			"ID": "20260614194439-dfoesdf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20240128111751-bb41541",
-				"updated": "20241018105514"
+				"id": "20260614194439-dfoesdf",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "設置"
+					"Data": "設定"
 				}
 			]
 		},
 		{
-			"ID": "20240128111910-2n2j702",
+			"ID": "20260614194439-02gn3hw",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20240128111910-2n2j702",
-				"updated": "20241018105514"
+				"id": "20260614194439-02gn3hw",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 "
+					"Data": "在 設定 - 閃卡 中可以調整閃卡相關的全域設定，其中"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "閃卡"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中可以調整閃卡相關的全域配置，其中 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "strong",
 					"TextMarkTextContent": "新卡上限"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 和 "
+					"Data": "和"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
+					"TextMarkType": "strong",
 					"TextMarkTextContent": "舊卡上限"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 可以使用文檔塊自訂屬性進行覆寫："
+					"Data": "可以使用文件區塊自訂屬性進行覆寫："
 				}
 			]
 		},
 		{
-			"ID": "20240128111910-utitmr7",
+			"ID": "20260614194439-q14tylo",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20240128111910-utitmr7",
-				"updated": "20240128111910"
+				"id": "20260614194439-q14tylo",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
-					"ID": "20240128111910-fm03lqa",
+					"ID": "20260614194439-zostlc4",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240128111910-fm03lqa",
-						"updated": "20240128111910"
+						"id": "20260614194439-zostlc4",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20240128111910-l3gn3xk",
+							"ID": "20260614194439-x3nwwag",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240128111910-l3gn3xk",
-								"updated": "20240128111910"
+								"id": "20260614194439-x3nwwag",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
@@ -628,23 +827,23 @@
 					]
 				},
 				{
-					"ID": "20240128111910-jm5o4fb",
+					"ID": "20260614194439-fznx46b",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240128111910-jm5o4fb",
-						"updated": "20240128111910"
+						"id": "20260614194439-fznx46b",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20240128111910-b9hb5w9",
+							"ID": "20260614194439-leh5azf",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240128111910-b9hb5w9",
-								"updated": "20240128111910"
+								"id": "20260614194439-leh5azf",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
@@ -667,79 +866,28 @@
 			]
 		},
 		{
-			"ID": "20240128111824-6gfrt8e",
+			"ID": "20260614194439-2ltr340",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20240128111824-6gfrt8e",
-				"updated": "20240128113519"
+				"id": "20260614194439-2ltr340",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "image"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/image-20240128113232-ny2q076.png"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "不同文件上單獨設定，相互獨立不影響，比如父文件上設定為 5，子文件為 10，那麼從父文件複習的時候就是 5，不會疊加子文件的設定。"
 				}
 			]
 		},
 		{
-			"ID": "20240128111957-wa0cjkq",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240128111957-wa0cjkq",
-				"updated": "20240128111957"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "不同文檔上單獨配置，相互獨立不影響，例如父文檔上配置為 5，子文檔為 10，那麼從父文檔複習的時候就是 5，不會疊加子文檔的配置。"
-				}
-			]
-		},
-		{
-			"ID": "20221223221502-cqcjal6",
+			"ID": "20260614194439-b734a7s",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20221223221502-cqcjal6",
-				"updated": "20230304000916"
+				"id": "20260614194439-b734a7s",
+				"updated": "20260614194439"
 			},
 			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -752,32 +900,32 @@
 			]
 		},
 		{
-			"ID": "20221223221502-n4qqurn",
+			"ID": "20260614194439-tkd6sob",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20221223221502-n4qqurn",
-				"updated": "20240128112842"
+				"id": "20260614194439-tkd6sob",
+				"updated": "20260614194439"
 			},
 			"Children": [
 				{
-					"ID": "20221223221502-punrhny",
+					"ID": "20260614194439-w41829f",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20221223221502-punrhny",
-						"updated": "20221223221502"
+						"id": "20260614194439-w41829f",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20221223221502-u6e20cj",
+							"ID": "20260614194439-j1e4fk4",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20221223221502-u6e20cj",
-								"updated": "20221223221502"
+								"id": "20260614194439-j1e4fk4",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
@@ -789,119 +937,28 @@
 					]
 				},
 				{
-					"ID": "20240128112426-7avqfo1",
+					"ID": "20260614194439-wopary7",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240128112426-7avqfo1",
-						"updated": "20240128112842"
+						"id": "20260614194439-wopary7",
+						"updated": "20260614194439"
 					},
 					"Children": [
 						{
-							"ID": "20240128112426-gzlcn7u",
+							"ID": "20260614194439-u4qz477",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240128112426-gzlcn7u",
-								"updated": "20240128112842"
+								"id": "20260614194439-u4qz477",
+								"updated": "20260614194439"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
 									"Data": "不建議啟用卡包，該方式已經棄用，繼續使用可能會遇到無法解決的問題"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20221223221502-gtk5evt",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20221223221502-gtk5evt",
-				"updated": "20221223221502"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "技術實現"
-				}
-			]
-		},
-		{
-			"ID": "20221223221502-2rwr82o",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20221223221502-2rwr82o",
-				"updated": "20230630132735"
-			},
-			"Children": [
-				{
-					"ID": "20221223221502-nrh9pu3",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221223221502-nrh9pu3",
-						"updated": "20221223221852"
-					},
-					"Children": [
-						{
-							"ID": "20221223221502-iku6lwx",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221223221502-iku6lwx",
-								"updated": "20221223221852"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "卡包資料通過 MessagePack 序列化協議存儲在 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "工作空間/data/storage/riff/"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 文件夾下"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20221223221502-vrom8jb",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20221223221502-vrom8jb",
-						"updated": "20230630132735"
-					},
-					"Children": [
-						{
-							"ID": "20221223221502-yfedqlh",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20221223221502-yfedqlh",
-								"updated": "20230630132735"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "啟動時加載所有卡包資料到記憶體，資料同步下載後重新加載一次"
 								}
 							]
 						}

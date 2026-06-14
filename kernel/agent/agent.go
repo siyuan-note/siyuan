@@ -123,6 +123,43 @@ type doomLoopTracker struct {
 	count    int
 }
 
+const (
+	// doomLoopWarnThreshold 是相同签名连续命中时向 LLM 发出警告的阈值。
+	doomLoopWarnThreshold = 3
+	// doomLoopStopThreshold 是相同签名连续命中时终止 agent 的阈值。
+	doomLoopStopThreshold = 5
+)
+
+// toolSignatureKeys 列出各工具里真正"区分一次调用"的关键参数。
+// 这些参数会并入死循环签名，避免 agent 对不同 url/query/sql 的合法连续调用被误判；
+// 同时对同一参数反复调用（真死循环）仍能正确触发终止。
+var toolSignatureKeys = map[string][]string{
+	"web_fetch":  {"url", "format"},
+	"web_search": {"query"},
+	"sql":        {"sql", "stmt"},
+	"search":     {"query", "keyword"},
+	"outline":    {"id", "doc_id"},
+	"system":     {"action"},
+	"workspace":  {"action"},
+	"sync":       {"action"},
+	"todo_write": {"todos"},
+}
+
+// buildDoomSignature 用 toolName + action + 关键参数构造死循环签名。
+func buildDoomSignature(name, action string, args map[string]interface{}) string {
+	sig := name + "::action=" + action
+	for _, k := range toolSignatureKeys[name] {
+		if v, ok := args[k]; ok {
+			s := fmt.Sprint(v)
+			if len(s) > 64 {
+				s = s[:64] + "..."
+			}
+			sig += "::" + k + "=" + s
+		}
+	}
+	return sig
+}
+
 var confirmChannelsMu sync.Mutex
 var confirmChannels = make(map[string]chan confirmResult)
 
@@ -604,15 +641,16 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 
 					var resultStr string
+					isErr := false
 					if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
-						doomLoop = doomLoopTracker{}
 					} else if tc.Function.Name == "frontend" {
 						resultStr = handleFrontendTool(ctx, tc, ch, confirmTimeout)
-						doomLoop = doomLoopTracker{}
 					} else {
-						resultStr = executeTool(tc, sessionID)
+						resultStr, isErr = executeTool(tc, sessionID)
 					}
+					// rawResult 保留 wrap/truncate 之前的原始文本，用于判断是否为空。
+					rawResult := resultStr
 
 					resultStr = util.TruncateToolOutput(resultStr, sessionID)
 					resultStr = wrapToolOutput(resultStr)
@@ -630,25 +668,35 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					})
 					checkpointMsgs[assistantIdx].ToolCalls[i].Result = resultStr
 
+					// 死循环检测：只有 question/frontend 之外的普通工具参与，
+					// 且仅当本次调用失败或无返回（即"卡住反复重试"的真死循环特征）时才累加计数。
+					// 成功的工具调用一定产生了有用的副作用，不应计入。
 					if tc.Function.Name != "question" && tc.Function.Name != "frontend" {
-						sig := tc.Function.Name + "::action=" + action
-						if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
-							doomLoop.count++
+						if isErr || strings.TrimSpace(rawResult) == "" {
+							sig := buildDoomSignature(tc.Function.Name, action, args)
+							if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
+								doomLoop.count++
+							} else {
+								doomLoop.prevSig = sig
+								doomLoop.prevName = tc.Function.Name
+								doomLoop.count = 1
+							}
 						} else {
-							doomLoop.prevSig = sig
-							doomLoop.prevName = tc.Function.Name
-							doomLoop.count = 1
+							// 成功调用：重置基准，避免误把后续合理调用连成"重复"。
+							doomLoop.prevSig = ""
+							doomLoop.prevName = ""
+							doomLoop.count = 0
 						}
 					}
 				}
 
-				if doomLoop.count == 3 {
+				if doomLoop.count == doomLoopWarnThreshold {
 					messages = append(messages, openai.ChatCompletionMessage{
 						Role:    openai.ChatMessageRoleSystem,
 						Content: "You have called '" + doomLoop.prevName + "' " + fmt.Sprintf("%d", doomLoop.count) + " times with the same action. Please try a different approach.",
 					})
 				}
-				if doomLoop.count >= 5 {
+				if doomLoop.count >= doomLoopStopThreshold {
 					errMsg := "Repetitive tool calls detected: '" + doomLoop.prevName + "' called " + fmt.Sprintf("%d", doomLoop.count) + " times with the same action. Operation terminated."
 					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
 					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)

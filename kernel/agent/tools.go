@@ -40,20 +40,22 @@ func convertMCPToolsToOpenAI() []openai.Tool {
 	return result
 }
 
-func executeTool(tc openai.ToolCall, sessionID string) string {
+// executeTool 执行单次工具调用。
+// 返回值：结果文本（已展平为字符串），isErr 表示工具是否返回错误结果。
+func executeTool(tc openai.ToolCall, sessionID string) (string, bool) {
 	t := tools.GetTool(tc.Function.Name)
 	if t == nil {
-		return "unknown tool: " + tc.Function.Name
+		return "unknown tool: " + tc.Function.Name, true
 	}
 
 	args := parseToolArgs(tc.Function.Arguments)
 	args["_sessionID"] = sessionID
 	result, err := t.Handler(args)
 	if err != nil {
-		return "tool execution error: " + err.Error()
+		return "tool execution error: " + err.Error(), true
 	}
 
-	return resultToString(result)
+	return resultToString(result), result.IsError
 }
 
 func convertSchema(schema tools.ToolSchema) any {

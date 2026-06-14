@@ -627,26 +627,7 @@ func InitConf() {
 			if "" == m.Name {
 				m.Name = openai.GPT3Dot5Turbo
 			}
-			if 0 > m.MaxTokens {
-				m.MaxTokens = 0
-			}
-			if 0 >= m.Temperature || 2 < m.Temperature {
-				m.Temperature = 1.0
-			}
-			if 1 > m.MaxContexts || 64 < m.MaxContexts {
-				m.MaxContexts = 7
-			}
 		}
-	}
-	// Chat is the runtime view of the chat-scenario model's behavior params.
-	// The settings page still persists them on Model; mirror them onto Chat so
-	// the chat runtime reads from a single, Agent-symmetric place.
-	// https://github.com/siyuan-note/siyuan/issues/17797
-	if prov, m := Conf.AI.GetScenarioModel(conf.ScenarioChat); nil != prov && nil != m {
-		Conf.AI.Chat.MaxCompletionTokens = m.MaxTokens
-		Conf.AI.Chat.Temperature = m.Temperature
-		Conf.AI.Chat.MaxHistoryMessages = m.MaxContexts
-		Conf.AI.Chat.MaxContinueRounds = m.MaxContexts
 	}
 	if 0 > Conf.AI.Chat.MaxCompletionTokens {
 		Conf.AI.Chat.MaxCompletionTokens = 0

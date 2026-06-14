@@ -6,7 +6,7 @@
 		"id": "20210110175347-2xrwoiq",
 		"title": "日记",
 		"type": "doc",
-		"updated": "20260613180727"
+		"updated": "20260614205004"
 	},
 	"Children": [
 		{
@@ -187,7 +187,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180438-konhms4",
-				"updated": "20260613180459"
+				"updated": "20260614205004"
 			},
 			"Children": [
 				{
@@ -216,7 +216,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180438-24jbb0i",
-				"updated": "20260613180459"
+				"updated": "20260614205004"
 			},
 			"Children": [
 				{
@@ -228,7 +228,7 @@
 					},
 					"Properties": {
 						"id": "20260613180438-rtu02yf",
-						"updated": "20260613180459"
+						"updated": "20260614205004"
 					},
 					"Children": [
 						{
@@ -267,7 +267,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613180438-s3tximc",
-								"updated": "20260613180438"
+								"updated": "20260614205004"
 							},
 							"Children": [
 								{
@@ -279,7 +279,7 @@
 									},
 									"Properties": {
 										"id": "20260613180438-bxgni3r",
-										"updated": "20260613180438"
+										"updated": "20260614205004"
 									},
 									"Children": [
 										{
@@ -302,7 +302,7 @@
 											"ListData": {},
 											"Properties": {
 												"id": "20260613180438-ulzp490",
-												"updated": "20260613180438"
+												"updated": "20260614205004"
 											},
 											"Children": [
 												{
@@ -314,7 +314,7 @@
 													},
 													"Properties": {
 														"id": "20260613180438-zyhhaeb",
-														"updated": "20260613180438"
+														"updated": "20260614205004"
 													},
 													"Children": [
 														{
@@ -322,7 +322,7 @@
 															"Type": "NodeParagraph",
 															"Properties": {
 																"id": "20260613180438-acg49un",
-																"updated": "20260613180438"
+																"updated": "20260614205004"
 															},
 															"Children": [
 																{
@@ -332,7 +332,7 @@
 																{
 																	"Type": "NodeTextMark",
 																	"TextMarkType": "code",
-																	"TextMarkTextContent": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}"
+																	"TextMarkTextContent": "/日记/{{now | date \"2006/01/2006-01-02\"}}"
 																},
 																{
 																	"Type": "NodeText",

@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20250218121000"
+		"updated": "20260614203414"
 	},
 	"Children": [
 		{
@@ -1124,7 +1124,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-b62c3ph",
-				"updated": "20210901163529"
+				"updated": "20260614203414"
 			},
 			"Children": [
 				{
@@ -1140,7 +1140,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210721112403-th2r6zf",
-				"updated": "20231120213154"
+				"updated": "20260614203414"
 			},
 			"Children": [
 				{
@@ -1165,23 +1165,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Synchronization will not be triggered in the case "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "of"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " sudden disconnection such "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "as"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " sleep or shutdown, please manually click the synchronization button to synchronize"
+									"Data": "Synchronization will not be triggered in the case of sudden disconnection such as sleep or shutdown, please manually click the synchronization button to synchronize"
 								}
 							]
 						}
@@ -1209,27 +1193,35 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Do"
-								},
+									"Data": "Do not use a third-party sync disk and SiYuan sync at the same time, it may cause data damage"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614203414-pbzjiyc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614203414-pbzjiyc",
+						"updated": "20260614203414"
+					},
+					"Children": [
+						{
+							"ID": "20260614203414-jn0eoni",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614203414-jn0eoni",
+								"updated": "20260614203414"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": " not use a third-party sync disk and "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "SiYuan"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " sync "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "at"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " the same time, it may cause data damage"
+									"Data": "SiYuan will automatically detect if the workspace is located in a third-party sync directory. If detected, it will force exit to prevent data corruption"
 								}
 							]
 						}
@@ -1271,7 +1263,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20231120213145-qvushc7"
+						"id": "20231120213145-qvushc7",
+						"updated": "20231120213145"
 					},
 					"Children": [
 						{

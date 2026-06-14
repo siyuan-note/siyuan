@@ -81,9 +81,6 @@ type Model struct {
 	DisplayName string  `json:"displayName,omitempty"`
 	Enabled     bool    `json:"enabled"`
 	Name        string  `json:"name"`
-	MaxTokens   int     `json:"maxTokens"`
-	Temperature float64 `json:"temperature"`
-	MaxContexts int     `json:"maxContexts"`
 }
 
 const (
@@ -147,28 +144,21 @@ func NewAI() *AI {
 		}
 
 		model := &Model{
-			Name:        apiModel,
-			Temperature: 1.0,
-			MaxContexts: 7,
-			Enabled:     true,
+			Name:    apiModel,
+			Enabled: true,
 		}
-		// Behavior params persist on Model (UI-facing) and are mirrored onto Chat
-		// (runtime view). Env var names kept for backward compat.
 		if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
 			if v, err := strconv.Atoi(maxTokens); err == nil {
-				model.MaxTokens = v
 				ai.Chat.MaxCompletionTokens = v
 			}
 		}
 		if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
 			if v, err := strconv.ParseFloat(temperature, 64); err == nil {
-				model.Temperature = v
 				ai.Chat.Temperature = v
 			}
 		}
 		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
 			if v, err := strconv.Atoi(maxContexts); err == nil {
-				model.MaxContexts = v
 				ai.Chat.MaxHistoryMessages = v
 				ai.Chat.MaxContinueRounds = v
 			}
@@ -394,9 +384,18 @@ func MigrateAI(data []byte) *AI {
 		ai.Providers = append(ai.Providers, prov)
 
 		ai.Agent = &Agent{
-			SessionTimeout: getInt(oai, "agentTimeout"),
-			ConfirmTimeout: getInt(oai, "agentConfirmTimeout"),
-			MaxRetries:     getInt(oai, "agentMaxRetries"),
+			SessionTimeout:    getInt(oai, "agentTimeout"),
+			ConfirmTimeout:    getInt(oai, "agentConfirmTimeout"),
+			MaxRetries:        getInt(oai, "agentMaxRetries"),
+			MaxToolCallRounds: 64,
+		}
+
+		maxContexts := getInt(oai, "apiMaxContexts")
+		ai.Chat = &Chat{
+			MaxHistoryMessages:  maxContexts,
+			MaxContinueRounds:   maxContexts,
+			Temperature:         getFloat(oai, "apiTemperature"),
+			MaxCompletionTokens: getInt(oai, "apiMaxTokens"),
 		}
 	}
 
@@ -509,9 +508,6 @@ func migrateModel(raw map[string]any) *Model {
 		DisplayName: getString(raw, "name"),
 		Enabled:     enabled,
 		Name:        getString(raw, "apiModel"),
-		MaxTokens:   getInt(raw, "apiMaxTokens"),
-		Temperature: getFloat(raw, "apiTemperature"),
-		MaxContexts: getInt(raw, "apiMaxContexts"),
 	}
 }
 

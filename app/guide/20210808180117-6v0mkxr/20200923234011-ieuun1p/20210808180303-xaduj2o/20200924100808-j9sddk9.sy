@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20260426175834"
+		"updated": "20220317224017"
 	},
 	"Children": [
 		{
@@ -197,7 +197,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185726-nlnhhsh",
-				"updated": "20220511185726"
+				"updated": "20260614201131"
 			},
 			"Children": [
 				{
@@ -392,13 +392,46 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "Note"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ": Please pay attention before use, to avoid existing data being overwritten and unrecoverable."
+					"Data": "​: Please pay attention before use, to avoid existing data being overwritten and unrecoverable."
+				}
+			]
+		},
+		{
+			"ID": "20260614201131-zgav44f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614201131-zgav44f",
+				"updated": "20260614201131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip"
+				}
+			]
+		},
+		{
+			"ID": "20260614201131-kkxt385",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614201131-kkxt385",
+				"updated": "20260614201131"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip is SiYuan's native document format for importing individual documents exported from other SiYuan workspaces. You can directly drag and drop .sy.zip files into the doc tree to complete the import. The imported document includes complete content, child documents, asset files, and block properties."
 				}
 			]
 		},
@@ -511,7 +544,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223639-8217o1r",
-				"updated": "20260426175834"
+				"updated": "20220317224017"
 			},
 			"Children": [
 				{
@@ -578,7 +611,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220317223639-du4a7d2"
+						"id": "20220317223639-du4a7d2",
+						"updated": "20220317223639"
 					},
 					"Children": [
 						{
@@ -605,14 +639,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220317224009-wqfhw3y"
+						"id": "20220317224009-wqfhw3y",
+						"updated": "20220317224009"
 					},
 					"Children": [
 						{
 							"ID": "20220317224009-khgfqoe",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220317224009-khgfqoe"
+								"id": "20220317224009-khgfqoe",
+								"updated": "20220317224009"
 							},
 							"Children": [
 								{
@@ -631,7 +667,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220317223639-kqjyqge"
+						"id": "20220317223639-kqjyqge",
+						"updated": "20220317223639"
 					},
 					"Children": [
 						{
@@ -677,6 +714,48 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260614201147-eesmuaj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614201147-eesmuaj",
+						"updated": "20260614201147"
+					},
+					"Children": [
+						{
+							"ID": "20260614201147-378bp5u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614201147-378bp5u",
+								"updated": "20260614201147"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".sy.zip"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614201156-jt25t7h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614201156-jt25t7h",
+				"updated": "20260614201157"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip is SiYuan's native format. The exported file contains the complete content, child documents, asset files, and block properties of the document, suitable for migrating documents between workspaces or sharing with other SiYuan users."
 				}
 			]
 		},

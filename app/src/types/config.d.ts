@@ -117,6 +117,7 @@ declare namespace Config {
         mcp?: IMCP;
         embedding?: IEmbedding;
         agent?: IAgent;
+        chat?: IChat;
         providers?: IProvider[];
         scenarios?: IScenario[];
     }
@@ -139,11 +140,20 @@ declare namespace Config {
     }
 
     /**
+     * AI chat scenario behavior settings (mirrors IAgent)
+     */
+    export interface IChat {
+        maxHistoryMessages: number;
+        maxContinueRounds: number;
+        temperature: number;
+        maxCompletionTokens: number;
+    }
+
+    /**
      * Embedding model configuration
      */
     export interface IEmbedding {
         id?: string;
-        displayName?: string;
         enabled?: boolean;
         apiKey: string;
         baseURL: string;
@@ -165,16 +175,14 @@ declare namespace Config {
     }
 
     /**
-     * AI model configuration
+     * AI model configuration. Behavior params (maxTokens/temperature/maxContexts)
+     * live on IChat; Model holds only identity fields.
      */
     export interface IModel {
         id?: string;
         displayName?: string;
         enabled?: boolean;
         name: string;
-        maxTokens: number;
-        temperature: number;
-        maxContexts: number;
     }
 
     /**

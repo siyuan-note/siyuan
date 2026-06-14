@@ -55,6 +55,7 @@ type SessionEntry =
     timestamp?: number
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string })
+    | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string })
     | (EntryBase & { type: "snapshot"; snapshotID: string })
     | (EntryBase & { type: "rollback"; snapshotID: string });
 
@@ -680,12 +681,45 @@ export class AgentChat extends Model {
             statusLabel = L.agentConfirmReject || "Rejected";
         } else if (entry.status === "always") {
             statusLabel = L.agentConfirmAlways || "Session Allow";
+        } else {
+            // pending（用户未操作就切换/出错而落盘）：重载后无法再交互，
+            // 至少显示一个状态提示，避免变成无按钮无文本的死卡片。
+            statusLabel = L.agentConfirmPending || "Pending";
         }
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
             '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
             (statusLabel ? '<div class="agent-chat__confirm-actions"><span class="agent-chat__confirm-done">' + statusLabel + "</span></div>" : "") +
             "</div>";
+        this.messagesContainer.appendChild(el);
+    }
+
+    private appendPersistedQuestion(entry: {
+        id?: string;
+        questionID: string;
+        questions: Array<Record<string, unknown>>;
+        status?: string
+    }) {
+        const L = window.siyuan.languages;
+        const el = document.createElement("div");
+        // 重载后 question 不可再交互（后端已超时或会话已切换），统一显示为已确认态。
+        el.className = "agent-chat__msg agent-chat__msg--question agent-chat__msg--confirmed";
+        if (entry.id) {
+            el.setAttribute("data-message-id", entry.id);
+        }
+        el.innerHTML = renderQuestionCardHTML(entry.questions, entry.questionID);
+        // 用状态文本替换提交按钮区域，对齐实时提交后的呈现。
+        const submit = el.querySelector(".agent-chat__question-submit") as HTMLElement;
+        if (submit) {
+            const submitted = entry.status === "submitted";
+            submit.innerHTML = '<span class="agent-chat__confirm-done">' +
+                (submitted ? (L.agentQuestionSubmitted || "Submitted") : (L.agentQuestionPending || "Awaiting answer")) +
+                "</span>";
+        }
+        // 禁用所有输入，避免用户误以为还能提交。
+        el.querySelectorAll("input").forEach((inp) => {
+            (inp as HTMLInputElement).disabled = true;
+        });
         this.messagesContainer.appendChild(el);
     }
 
@@ -746,6 +780,14 @@ export class AgentChat extends Model {
                         name: string;
                         args: Record<string, unknown>;
                         confirmID: string;
+                        status?: string
+                    });
+                    break;
+                case "question":
+                    this.appendPersistedQuestion(entry as unknown as {
+                        id?: string;
+                        questionID: string;
+                        questions: Array<Record<string, unknown>>;
                         status?: string
                     });
                     break;
@@ -1982,6 +2024,15 @@ export class AgentChat extends Model {
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
+        const questionEntryId = SessionStore.newSessionId();
+        el.setAttribute("data-message-id", questionEntryId);
+        this.entries.push({
+            id: questionEntryId,
+            type: "question",
+            questionID: questionID,
+            questions: rawQuestions,
+            status: "pending",
+        });
     }
 
     private async postQuestionAnswer(questionID: string, answers: string[]) {
@@ -1997,6 +2048,13 @@ export class AgentChat extends Model {
         } catch (e) {
             console.error("agent question request error:", e);
         }
+        const entry = this.entries.find(e => e.type === "question" && e.questionID === questionID) as {
+            status?: string
+        } | undefined;
+        if (entry) {
+            entry.status = "submitted";
+        }
+        await this.saveSession();
     }
 
     private renderSingleThinkingCard(step: {

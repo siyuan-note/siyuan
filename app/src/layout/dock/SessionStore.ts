@@ -24,7 +24,7 @@ export interface AgentSession {
     messages?: Array<{role: string; content: string; toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>}>;
     entries?: Array<{
         id?: string;
-        type: "user" | "thinking" | "assistant" | "confirm" | "snapshot" | "rollback";
+        type: "user" | "thinking" | "assistant" | "confirm" | "question" | "snapshot" | "rollback";
         content?: string;
         // thinking step：新格式只含 reasoning/reasoningContent/toolNames/content；
         // text/toolCalls 仅为读取老数据而保留为可选（渲染时归一化）。
@@ -43,6 +43,9 @@ export interface AgentSession {
         confirmArgs?: Record<string, unknown>;
         confirmID?: string;
         confirmStatus?: string;
+        questionID?: string;
+        questions?: Array<Record<string, unknown>>;
+        questionStatus?: string;
         snapshotID?: string;
     }>;
     snapshots?: string[];

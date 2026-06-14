@@ -144,7 +144,6 @@ declare namespace Config {
      */
     export interface IChat {
         maxHistoryMessages: number;
-        maxContinueRounds: number;
         temperature: number;
         maxCompletionTokens: number;
     }

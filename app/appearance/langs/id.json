@@ -1883,6 +1883,7 @@
     "293": "Tidak dapat menulis file",
     "294": "Kode aktivasi tidak boleh kosong",
     "295": "Fitur ini memerlukan pembelian [Langganan Tahunan] (jika Anda sudah membeli, harap segarkan atau masuk lagi di Pengaturan - Akun)",
-    "296": "Rebuilding search index..."
+    "296": "Membangun ulang indeks pencarian...",
+    "297": "Output telah mencapai batas token penyelesaian maksimum"
   }
 }

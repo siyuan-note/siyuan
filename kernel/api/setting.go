@@ -217,9 +217,6 @@ func setAI(c *gin.Context) {
 		if 1 > ai.Chat.MaxHistoryMessages || 64 < ai.Chat.MaxHistoryMessages {
 			ai.Chat.MaxHistoryMessages = 7
 		}
-		if 1 > ai.Chat.MaxContinueRounds || 64 < ai.Chat.MaxContinueRounds {
-			ai.Chat.MaxContinueRounds = 7
-		}
 	}
 
 	if len(ai.Providers) == 0 {

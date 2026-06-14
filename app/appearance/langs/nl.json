@@ -1883,6 +1883,7 @@
     "293": "Kan niet naar bestand schrijven",
     "294": "Activeringscode mag niet leeg zijn",
     "295": "Vereist aankoop Jaarabonnement",
-    "296": "Rebuilding search index..."
+    "296": "Zoekindex opnieuw opbouwen...",
+    "297": "De uitvoer heeft de limiet voor max. tokens bereikt"
   }
 }

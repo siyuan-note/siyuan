@@ -231,7 +231,7 @@
         list-style-type: disc;
     }
 
-    pre, table {
+    table {
         max-width: 100%;
         overflow-x: auto;
     }
@@ -285,6 +285,11 @@
 
     pre code.hljs {
         padding: 0;
+    }
+
+    pre code {
+        overflow-x: auto;
+        display: block;
     }
 
     pre[data-language]::before {

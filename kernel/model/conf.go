@@ -665,16 +665,6 @@ func InitConf() {
 
 	Conf.AI.Normalize()
 
-	if len(Conf.AI.Scenarios) == 0 {
-		_, m := Conf.AI.GetModel("")
-		if m != nil && m.ID != "" {
-			Conf.AI.Scenarios = []*conf.Scenario{
-				{Name: conf.ScenarioChat, Model: m.ID},
-				{Name: conf.ScenarioAgent, Model: m.ID},
-			}
-		}
-	}
-
 	Conf.ReadOnly = util.ReadOnly
 
 	if "" != util.AccessAuthCode {

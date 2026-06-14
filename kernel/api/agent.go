@@ -69,12 +69,13 @@ func agentChat(c *gin.Context) {
 	}
 
 	modelID := req.Model
-	if modelID == "" {
-		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
-			modelID = m.ID
-		}
+	var selectedProvider *conf.Provider
+	var selectedModel *conf.Model
+	if modelID != "" {
+		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
+	} else {
+		selectedProvider, selectedModel = model.Conf.AI.GetScenarioModel(conf.ScenarioAgent)
 	}
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1
@@ -226,12 +227,13 @@ func agentChatTitle(c *gin.Context) {
 	}
 
 	modelID := req.Model
-	if modelID == "" {
-		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
-			modelID = m.ID
-		}
+	var selectedProvider *conf.Provider
+	var selectedModel *conf.Model
+	if modelID != "" {
+		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
+	} else {
+		selectedProvider, selectedModel = model.Conf.AI.GetScenarioModel(conf.ScenarioAgent)
 	}
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1

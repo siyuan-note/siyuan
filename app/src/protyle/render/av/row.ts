@@ -457,13 +457,13 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
     if (blockElement.dataset.avType !== "table") {
         return;
     }
-    const elementRect = scrollElement.getBoundingClientRect();
-    const scrollTop = scrollElement.scrollTop;
     const scrollEl = blockElement.querySelector(".av__scroll") as HTMLElement;
     if (scrollEl) {
         bindHeaderScrollSync(blockElement, scrollEl);
     }
 
+    const elementRect = scrollElement.getBoundingClientRect();
+    const scrollTop = scrollElement.scrollTop;
     if (status === "top" || status === "all") {
         blockElement.querySelectorAll(".av__row--header").forEach((item: HTMLElement) => {
             const body = item.parentElement as HTMLElement;

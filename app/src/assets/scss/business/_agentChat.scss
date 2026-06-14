@@ -1164,10 +1164,11 @@ pre:hover .agent-chat__copy-wrap {
 }
 
 .agent-chat__nav-rail--expanded {
-    background: var(--b3-theme-background);
-    box-shadow: var(--b3-tooltips-shadow);
-    border: 1px solid var(--b3-border-color);
+    background: var(--b3-menu-background);
+    box-shadow: var(--b3-dialog-shadow);
+    border: 1px solid var(--b3-theme-surface-lighter);
     gap: 0;
+    padding: 8px 0;
     overflow: hidden;
 
     .agent-chat__nav-rail-marker {
@@ -1176,18 +1177,20 @@ pre:hover .agent-chat__copy-wrap {
         line-height: 28px;
         opacity: 1;
         padding: 0 8px;
+        margin: 1px 0;
         background: transparent;
         background-clip: padding-box;
-        color: var(--b3-theme-on-surface);
-        border-radius: 0;
+        color: var(--b3-theme-on-background);
+        border-radius: var(--b3-border-radius);
 
         &:hover {
-            background: var(--b3-theme-primary-lightest);
-            color: var(--b3-theme-primary);
+            background: var(--b3-list-hover);
+            color: var(--b3-theme-on-background);
         }
     }
 
     .agent-chat__nav-rail-marker--active {
+        background: var(--b3-list-hover);
         color: var(--b3-theme-primary);
     }
 }

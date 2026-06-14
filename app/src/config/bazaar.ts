@@ -253,7 +253,7 @@ export const bazaar = {
     },
     _genCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
         const showSwitch = item.installed && !item.current && ["icons", "themes"].includes(bazaarType);
-        return `<div data-repourl="${item.repoURL}" class="b3-card${item.current ? " b3-card--current" : ""}">
+        return `<div data-repourl="${escapeAttr(item.repoURL)}" class="b3-card${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img">
         <img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/>
     </div>
@@ -327,7 +327,7 @@ export const bazaar = {
 </div>`;
     },
     _genUpdateItemHTML(item: IBazaarItem) {
-        return `<div class="b3-card" data-repourl="${item.repoURL}">
+        return `<div class="b3-card" data-repourl="${escapeAttr(item.repoURL)}">
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
@@ -412,7 +412,7 @@ export const bazaar = {
                             hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
                         }
                     }
-                    return `<div data-repourl="${bazaarItem.repoURL}" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}${(window.siyuan.config.bazaar.petalDisabled && bazaarType === "plugins") ? " b3-card--disabled" : ""}">
+                    return `<div data-repourl="${escapeAttr(bazaarItem.repoURL)}" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}${(window.siyuan.config.bazaar.petalDisabled && bazaarType === "plugins") ? " b3-card--disabled" : ""}">
     <div class="b3-card__img"><img src="${bazaarItem.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
@@ -488,7 +488,7 @@ type="checkbox">
         if (!(bazaarType in navTitles)) {
             return;
         }
-        readmeElement.innerHTML = ` <div class="item__side" data-download="${isDownload.toString()}" data-repourl="${data.repoURL}">
+        readmeElement.innerHTML = ` <div class="item__side" data-download="${isDownload.toString()}" data-repourl="${escapeAttr(data.repoURL)}">
     <div class="fn__flex">
         <div style="padding-right: 8px" class="block__icon block__icon--show ariaLabel" data-position="north" data-type="goBack" aria-label="${window.siyuan.languages.back}">
             <svg><use xlink:href="#iconLeft"></use></svg>
@@ -704,6 +704,9 @@ type="checkbox">
                             mode: pkgItem.modes?.toString() === "dark" ? 1 : 0,
                             frontend: getFrontend()
                         }, response => {
+                            if (response.code !== 0) {
+                                return;
+                            }
                             bazaar._onBazaar(response, pkgType);
                             if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
                                 bazaar._data[pkgType].find((i) => {
@@ -712,9 +715,6 @@ type="checkbox">
                                         return true;
                                     }
                                 });
-                            }
-                            if (response.code !== 0) {
-                                return;
                             }
                             bazaar._genMyHTML(pkgType, app, false);
                             if (pkgType === "plugins") {

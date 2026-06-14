@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20250218121017"
+		"updated": "20260614203626"
 	},
 	"Children": [
 		{
@@ -1128,7 +1128,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-0nlneiq",
-				"updated": "20211226010158"
+				"updated": "20260614203626"
 			},
 			"Children": [
 				{
@@ -1144,7 +1144,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121454-kv5itch",
-				"updated": "20231120213316"
+				"updated": "20260614203626"
 			},
 			"Children": [
 				{
@@ -1197,15 +1197,35 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "請勿同時使用第三方同步碟和"
-								},
+									"Data": "請勿同時使用第三方同步碟和思源同步，可能會導致資料損壞"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614203626-5d8grrv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614203626-5d8grrv",
+						"updated": "20260614203626"
+					},
+					"Children": [
+						{
+							"ID": "20260614203626-1xm9wts",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614203626-1xm9wts",
+								"updated": "20260614203626"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "思源"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "同步，可能會導致資料損壞"
+									"Data": "思源會自動檢測工作空間是否位於第三方同步目錄下，如果檢測到會強制退出以防止資料損壞"
 								}
 							]
 						}

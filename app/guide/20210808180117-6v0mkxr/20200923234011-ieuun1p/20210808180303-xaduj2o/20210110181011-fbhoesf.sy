@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20260613180724"
+		"updated": "20260614204928"
 	},
 	"Children": [
 		{
@@ -187,7 +187,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-9fh070b",
-				"updated": "20260613180631"
+				"updated": "20260614204928"
 			},
 			"Children": [
 				{
@@ -216,7 +216,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180619-q2wvciq",
-				"updated": "20260613180631"
+				"updated": "20260614204928"
 			},
 			"Children": [
 				{
@@ -228,7 +228,7 @@
 					},
 					"Properties": {
 						"id": "20260613180619-pbo5rls",
-						"updated": "20260613180631"
+						"updated": "20260614204928"
 					},
 					"Children": [
 						{
@@ -267,7 +267,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260613180619-r69colp",
-								"updated": "20260613180619"
+								"updated": "20260614204928"
 							},
 							"Children": [
 								{
@@ -279,7 +279,7 @@
 									},
 									"Properties": {
 										"id": "20260613180619-7bt2ars",
-										"updated": "20260613180619"
+										"updated": "20260614204928"
 									},
 									"Children": [
 										{
@@ -302,7 +302,7 @@
 											"ListData": {},
 											"Properties": {
 												"id": "20260613180619-1u6x9uf",
-												"updated": "20260613180619"
+												"updated": "20260614204928"
 											},
 											"Children": [
 												{
@@ -314,7 +314,7 @@
 													},
 													"Properties": {
 														"id": "20260613180619-1wpqu11",
-														"updated": "20260613180619"
+														"updated": "20260614204928"
 													},
 													"Children": [
 														{
@@ -322,7 +322,7 @@
 															"Type": "NodeParagraph",
 															"Properties": {
 																"id": "20260613180619-2wsn8nc",
-																"updated": "20260613180619"
+																"updated": "20260614204928"
 															},
 															"Children": [
 																{
@@ -332,7 +332,7 @@
 																{
 																	"Type": "NodeTextMark",
 																	"TextMarkType": "code",
-																	"TextMarkTextContent": "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}"
+																	"TextMarkTextContent": "/daily note/{{now | date \"2006/01/2006-01-02\"}}"
 																},
 																{
 																	"Type": "NodeText",

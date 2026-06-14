@@ -22,7 +22,7 @@ export const speechRender = (element: HTMLElement, lang: string) => {
             let currentVoice;
             let defaultVoice;
             voices.forEach((item) => {
-                if (item.lang === lang.replace("_", "-")) {
+                if (item.lang === lang) {
                     currentVoice = item;
                 }
                 if (item.default) {

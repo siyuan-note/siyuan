@@ -34,12 +34,13 @@ import (
 )
 
 type agentChatReq struct {
-	SessionID  string            `json:"sessionID"`
-	Message    string            `json:"message"`
-	Language   string            `json:"language"`
-	References []agent.Reference `json:"references"`
-	Model      string            `json:"model,omitempty"`
-	Regenerate bool              `json:"regenerate"`
+	SessionID     string              `json:"sessionID"`
+	Message       string              `json:"message"`
+	Language      string              `json:"language"`
+	References    []agent.Reference   `json:"references"`
+	EditorContext agent.EditorContext `json:"editorContext"`
+	Model         string              `json:"model,omitempty"`
+	Regenerate    bool                `json:"regenerate"`
 }
 
 type runningSession struct {
@@ -68,12 +69,13 @@ func agentChat(c *gin.Context) {
 	}
 
 	modelID := req.Model
-	if modelID == "" {
-		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
-			modelID = m.ID
-		}
+	var selectedProvider *conf.Provider
+	var selectedModel *conf.Model
+	if modelID != "" {
+		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
+	} else {
+		selectedProvider, selectedModel = model.Conf.AI.GetScenarioModel(conf.ScenarioAgent)
 	}
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1
@@ -96,7 +98,7 @@ func agentChat(c *gin.Context) {
 
 	ctx, cancel := context.WithCancel(c.Request.Context())
 	defer cancel()
-	eventCh = agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.Regenerate, confirmTimeout, maxRetries)
+	eventCh = agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.EditorContext, req.Regenerate, confirmTimeout, maxRetries)
 	sessionsMu.Lock()
 	runningSessions[req.SessionID] = &runningSession{eventCh: eventCh}
 	sessionsMu.Unlock()
@@ -188,6 +190,26 @@ func agentChatQuestion(c *gin.Context) {
 	c.JSON(http.StatusOK, ret)
 }
 
+type agentFrontendResultReq struct {
+	CallID  string `json:"callID"`
+	Result  string `json:"result"`
+	IsError bool   `json:"isError"`
+}
+
+func agentChatFrontendResult(c *gin.Context) {
+	req := &agentFrontendResultReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	agent.FrontendToolResult(req.CallID, req.Result, req.IsError)
+	ret := gulu.Ret.NewResult()
+	c.JSON(http.StatusOK, ret)
+}
+
 type agentTitleReq struct {
 	Message  string `json:"message"`
 	Model    string `json:"model"`
@@ -205,12 +227,13 @@ func agentChatTitle(c *gin.Context) {
 	}
 
 	modelID := req.Model
-	if modelID == "" {
-		if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioAgent); m != nil {
-			modelID = m.ID
-		}
+	var selectedProvider *conf.Provider
+	var selectedModel *conf.Model
+	if modelID != "" {
+		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
+	} else {
+		selectedProvider, selectedModel = model.Conf.AI.GetScenarioModel(conf.ScenarioAgent)
 	}
-	selectedProvider, selectedModel := model.Conf.AI.GetModel(modelID)
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1
@@ -353,6 +376,12 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			"questionID": event.QuestionID,
 			"arguments":  event.Arguments,
 		})
+	case "frontend_tool_call":
+		return writeSSEEvent(c, "frontend_tool_call", map[string]interface{}{
+			"callID":    event.CallID,
+			"name":      event.Name,
+			"arguments": event.Arguments,
+		})
 	case "snapshot":
 		return writeSSEEvent(c, "snapshot", map[string]string{"snapshotID": event.SnapshotID})
 	}
@@ -377,4 +406,100 @@ func lsSkills(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 	skills := util.DiscoverSkills()
 	ret.Data = skills
+}
+
+type skillGetReq struct {
+	Name string `json:"name"`
+}
+
+func getSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillGetReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	content, err := util.ReadSkill(req.Name)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]string{
+		"name":    req.Name,
+		"content": content,
+	}
+}
+
+type skillSaveReq struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+func saveSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillSaveReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	if err := util.SaveSkill(req.Name, req.Content); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+type skillRemoveReq struct {
+	Name string `json:"name"`
+}
+
+func removeSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillRemoveReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	if err := util.RemoveSkill(req.Name); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+type skillRenameReq struct {
+	OldName string `json:"oldName"`
+	NewName string `json:"newName"`
+}
+
+func renameSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillRenameReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	if err := util.RenameSkill(req.OldName, req.NewName); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 }

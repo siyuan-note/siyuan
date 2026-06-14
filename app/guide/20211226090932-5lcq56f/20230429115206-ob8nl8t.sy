@@ -7,7 +7,7 @@
 		"id": "20230429115206-ob8nl8t",
 		"title": "術語表",
 		"type": "doc",
-		"updated": "20260426180217"
+		"updated": "20260614111516"
 	},
 	"Children": [
 		{
@@ -208,7 +208,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115509-rfzye0g",
-				"updated": "20250115163209"
+				"updated": "20260614111457"
 			},
 			"Children": [
 				{
@@ -371,6 +371,243 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 菜單中；所見即所得編輯和只讀模式切換位於頂欄右上角。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-7uftgv5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111457-7uftgv5",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "區塊參照"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-blivagz",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111457-blivagz",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111457-8a6a678",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111457-8a6a678",
+						"updated": "20260614111457"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "參照是指向另一處內容的連結，使讀者可以跳轉到被參照的位置。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-el5qnm3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111457-el5qnm3",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，區塊參照是透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 觸發的指向另一個內容塊的連結，支援靜態錨文字和動態錨文字兩種方式。點擊區塊參照可跳轉到被參照的塊，懸浮可預覽。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-nf8wq3v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111457-nf8wq3v",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "反鏈"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-6dfbm0o",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111457-6dfbm0o",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111457-1ad7mbw",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111457-1ad7mbw",
+						"updated": "20260614111457"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "反向連結（Backlink）是指其他頁面中指向當前頁面的連結，是雙向連結體系的重要組成部分。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-rizqw9m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111457-rizqw9m",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，反鏈面板展示了所有參照了當前塊的塊。反鏈分為兩部分：連結（透過區塊參照直接關聯）和提及（透過文字匹配的潛在關聯）。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-wh2unuw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111457-wh2unuw",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提及"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-s49hyaw",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111457-s49hyaw",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111457-sjjoek5",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111457-sjjoek5",
+						"updated": "20260614111457"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "提及（Mention）是指在文字中發現的關鍵詞匹配，用於發現潛在的關聯關係。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-6pg0dna",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111457-6pg0dna",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，提及類似反鏈中的連結部分，但不是透過區塊參照建立的，而是透過搜尋內容塊名稱、別名和參照錨文字來自動匹配的文字內容。提及可一鍵轉換為區塊參照。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-xqubcvr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111457-xqubcvr",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "虛擬參照"
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-8yf6tx8",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111457-8yf6tx8",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111457-javkesq",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111457-javkesq",
+						"updated": "20260614111457"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "虛擬參照是一種自動發現潛在參照關係的技術，無需使用者手動建立即可在文字中標識可能存在關聯的內容塊。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111457-xntm6ad",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111457-xntm6ad",
+				"updated": "20260614111457"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，虛擬參照基於內容塊的命名、別名和錨文字進行自動探測，在編輯器中以虛線底線標識。滑鼠懸浮可預覽對應的內容塊，點擊可轉換為正式的區塊參照。可在 設定 - 編輯器 中開啟或關閉。"
 				}
 			]
 		},
@@ -841,7 +1078,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115527-jjq4vik",
-				"updated": "20250115163227"
+				"updated": "20260614111508"
 			},
 			"Children": [
 				{
@@ -897,12 +1134,249 @@
 			]
 		},
 		{
+			"ID": "20260614111508-hyrjbqs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111508-hyrjbqs",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "集市"
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-fegr1zs",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111508-fegr1zs",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111508-qr2z8cv",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111508-qr2z8cv",
+						"updated": "20260614111508"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "集市（Bazaar）源自波斯語，指集中進行商品交易的場所。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-asmiekc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111508-asmiekc",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，集市是瀏覽和安裝社群擴充的入口，包括主題、圖示、外掛、小工具和範本五種類型。使用者可直接在應用內搜尋、安裝和更新。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-h3us19q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111508-h3us19q",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "收集箱"
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-5zfdv6g",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111508-5zfdv6g",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111508-2euyh9e",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111508-2euyh9e",
+						"updated": "20260614111508"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "收集箱（Inbox）是臨時存放待處理資訊的容器。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-ygdjeul",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111508-ygdjeul",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，收集箱是雲端快速記錄功能，透過 WeChat 發送或 API 呼叫將文字暫存到雲端，之後可在收集箱面板中將其移動到文件中進行整理。該功能需要訂閱會員。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-7otqkx3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111508-7otqkx3",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "閃卡"
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-zw53p6s",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111508-zw53p6s",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111508-q89u31h",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111508-q89u31h",
+						"updated": "20260614111508"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "閃卡（Flashcard）是一種用於記憶訓練的卡片，正面寫問題，背面寫答案，透過間隔重複演算法安排複習時間。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-sef3t3q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111508-sef3t3q",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，閃卡是基於內容塊的間隔重複複習功能。可將內容塊製作為閃卡，系統根據複習表現自動安排下次複習時間。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-gqxf0f5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111508-gqxf0f5",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "命令面板"
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-u5rg5cf",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111508-u5rg5cf",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111508-4nzluhc",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111508-4nzluhc",
+						"updated": "20260614111508"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "命令面板（Command Palette）是一種透過鍵盤快速存取應用功能的入口，使用者輸入關鍵詞即可搜尋和執行命令。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111508-3gu2eju",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111508-3gu2eju",
+				"updated": "20260614111508"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Ctrl+Shift+P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 呼叫命令面板，可快速執行開啟面板、切換功能、導航文件等操作，無需透過選單逐級尋找。"
+				}
+			]
+		},
+		{
 			"ID": "20230429115527-roo52g3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115527-roo52g3",
-				"updated": "20230429115527"
+				"updated": "20260614111516"
 			},
 			"Children": [
 				{
@@ -917,7 +1391,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115527-zoaurau",
-				"updated": "20230429115527"
+				"updated": "20260614111516"
 			},
 			"Children": [
 				{
@@ -948,6 +1422,120 @@
 				{
 					"Type": "NodeText",
 					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111516-8op2j24",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111516-8op2j24",
+				"updated": "20260614111516"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內核"
+				}
+			]
+		},
+		{
+			"ID": "20260614111516-ms7zh4q",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111516-ms7zh4q",
+				"updated": "20260614111516"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111516-guzmn5l",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111516-guzmn5l",
+						"updated": "20260614111516"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "內核是作業系統的核心元件，負責管理系統的進程、記憶體、裝置驅動程式、檔案和網路系統等，決定著系統的效能和穩定性。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111516-jaeybfl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111516-jaeybfl",
+				"updated": "20260614111516"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，內核指的是啟動後執行的後端服務進程，負責資料讀寫、索引搜尋、同步備份等核心功能。前端介面透過 HTTP/WebSocket 與內核通訊。桌面端和行動端內建內核，Docker 部署時單獨執行內核。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111516-xaresom",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111516-xaresom",
+				"updated": "20260614111516"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "工作空間"
+				}
+			]
+		},
+		{
+			"ID": "20260614111516-264i0vw",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111516-264i0vw",
+				"updated": "20260614111516"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111516-8ttqwlt",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111516-8ttqwlt",
+						"updated": "20260614111516"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "工作空間是使用者進行工作時的資料環境，類似於作業系統中的使用者目錄。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111516-bb2sqqp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111516-bb2sqqp",
+				"updated": "20260614111516"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，工作空間是一個資料夾，用於儲存所有資料，包括筆記本、文件、資源檔案、設定和歷史記錄等。不同工作空間透過檔案系統資料夾相互隔離，一個工作空間只能被一個內核進程伺服。"
 				}
 			]
 		}

@@ -7,7 +7,7 @@
 		"id": "20210808180303-xaduj2o",
 		"title": "General Operations",
 		"type": "doc",
-		"updated": "20240612234729"
+		"updated": "20260614115148"
 	},
 	"Children": [
 		{
@@ -75,6 +75,23 @@
 					"TextMarkBlockRefID": "20200924100906-0u4zfq3",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Window and Tab"
+				}
+			]
+		},
+		{
+			"ID": "20260614115137-e4l62jg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115137-e4l62jg",
+				"updated": "20260614115137"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260613212028-gozdm4e",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Content Statistics"
 				}
 			]
 		},
@@ -415,6 +432,40 @@
 					"TextMarkBlockRefID": "20240517031132-jmr5ihm",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Publish service"
+				}
+			]
+		},
+		{
+			"ID": "20260614115143-k9n53ur",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115143-k9n53ur",
+				"updated": "20260614115144"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260612192252-sgw2paw",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Command Line Interface"
+				}
+			]
+		},
+		{
+			"ID": "20260614115147-5yguoku",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115147-5yguoku",
+				"updated": "20260614115148"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260614104204-staofnm",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Network Proxy"
 				}
 			]
 		}

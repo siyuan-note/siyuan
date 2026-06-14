@@ -6,7 +6,7 @@
 		"id": "20220708103401-mgydrfg",
 		"title": "Data backup",
 		"type": "doc",
-		"updated": "20220708104612"
+		"updated": "20260614145014"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220708103921-t25la2x",
-				"updated": "20220708103921"
+				"updated": "20260614145014"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220708103921-2vmuuiv",
-				"updated": "20220708104201"
+				"updated": "20260614145014"
 			},
 			"Children": [
 				{
@@ -41,11 +41,11 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20220615120602-drz9hwc",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "Data snapshot"
+					"TextMarkTextContent": "data snapshots"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to the cloud."
+					"Data": " to the cloud for disaster recovery. Unlike data sync: the purpose of sync is to keep data consistent across multiple devices, while backup is manually uploading snapshots for safekeeping."
 				}
 			]
 		},

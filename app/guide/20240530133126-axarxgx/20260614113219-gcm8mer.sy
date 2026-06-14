@@ -1,0 +1,102 @@
+{
+	"ID": "20260614113219-gcm8mer",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"icon": "1f6e3-fe0f",
+		"id": "20260614113219-gcm8mer",
+		"title": "最新情報",
+		"type": "doc",
+		"updated": "20260614113230"
+	},
+	"Children": [
+		{
+			"ID": "20260614113219-446hand",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614113219-446hand",
+				"updated": "20260614113146"
+			},
+			"Children": [
+				{
+					"ID": "20260614113219-4b2lnhe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614113219-4b2lnhe",
+						"updated": "20260614113142"
+					},
+					"Children": [
+						{
+							"ID": "20260614113219-wip0zuv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614113219-wip0zuv",
+								"updated": "20260614113142"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "X "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "B3log Open Source"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://x.com/b3logos",
+									"TextMarkTextContent": "https://x.com/b3logos"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614113219-fxhvsr5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614113219-fxhvsr5",
+						"updated": "20260614113146"
+					},
+					"Children": [
+						{
+							"ID": "20260614113219-dz41die",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614113219-dz41die",
+								"updated": "20260614113146"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "GitHub Releases "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/siyuan/releases",
+									"TextMarkTextContent": "https://github.com/siyuan-note/siyuan/releases"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -26,9 +26,9 @@
 
 <p align="center">
 <b>English</b>
-| <a href="README_zh_CN.md">中文</a>
-| <a href="README_ja_JP.md">日本語</a>
-| <a href="README_tr_TR.md">Türkçe</a>
+| <a href="README_zh-CN.md">中文</a>
+| <a href="README_ja.md">日本語</a>
+| <a href="README_tr.md">Türkçe</a>
 </p>
 
 ---
@@ -227,7 +227,7 @@ docker run -d \
 - `accessAuthCode`: Lock screen password (please **be sure to modify**, otherwise anyone can access your data)
   - Alternatively, it's possible to set the lock screen password via the `SIYUAN_ACCESS_AUTH_CODE` env variable. The commandline will always have the priority, if both are set
   - To disable the lock screen password set the env variable `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`
-- `SIYUAN_LANG`: Interface language (optional, defaults to `en_US` if unset in Docker). Omit it if you want the language chosen in **Settings** to persist across restarts; if set, it is applied on every startup and overrides the saved setting
+- `SIYUAN_LANG`: Interface language (optional, defaults to `en` if unset in Docker). Accepts BCP 47 tags like `zh-CN`/`zh-TW`/`en`/`ja`/`pt-BR`; legacy underscore values like `zh_CN`/`en_US` are also accepted for backward compatibility. Omit it if you want the language chosen in **Settings** to persist across restarts; if set, it is applied on every startup and overrides the saved setting
   - Alternatively, use the `--lang` command-line parameter. If both are set, the command-line takes priority
 
 To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:

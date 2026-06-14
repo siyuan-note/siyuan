@@ -111,6 +111,9 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 var maxToolCallRounds = 64
 
+// maxVisibleBlockIDs 限制注入到 system prompt 的"视口可见块"数量，控制 token 开销。
+var maxVisibleBlockIDs = 50
+
 type confirmResult struct {
 	approved bool
 	always   bool
@@ -150,6 +153,26 @@ func AnswerQuestion(id string, answers []string) {
 	}
 }
 
+// frontendCallResult carries the result of a frontend tool action back from the browser.
+type frontendCallResult struct {
+	result  string
+	isError bool
+}
+
+var frontendCallChannelsMu sync.Mutex
+var frontendCallChannels = make(map[string]chan frontendCallResult)
+
+// FrontendToolResult is called by the API handler when the browser POSTs the outcome of a
+// frontend tool action. It unblocks the agent goroutine waiting in handleFrontendTool.
+func FrontendToolResult(callID string, result string, isError bool) {
+	frontendCallChannelsMu.Lock()
+	ch, ok := frontendCallChannels[callID]
+	frontendCallChannelsMu.Unlock()
+	if ok {
+		ch <- frontendCallResult{result: result, isError: isError}
+	}
+}
+
 func sendEvent(ch chan<- AgentEvent, ev AgentEvent) {
 	select {
 	case ch <- ev:
@@ -178,6 +201,7 @@ type AgentEvent struct {
 	Reasoning        string
 	ConfirmID        string
 	QuestionID       string
+	CallID           string
 	Error            string
 	PromptTokens     int
 	CompletionTokens int
@@ -202,6 +226,18 @@ type AgentToolCall struct {
 type Reference struct {
 	ID    string `json:"id"`
 	Title string `json:"title"`
+}
+
+// EditorContext 是发送消息时前端编辑器的只读状态快照。
+// 字段有意只传 ID 而不传正文 —— system prompt 会指示 LLM 用 block 工具按需拉取内容，
+// 与 Reference 的处理方式保持一致。
+type EditorContext struct {
+	ActiveDocID      string   `json:"activeDocID,omitempty"`      // 当前激活文档的 root block ID
+	ActiveDocTitle   string   `json:"activeDocTitle,omitempty"`   // 当前文档标题
+	NotebookID       string   `json:"notebookID,omitempty"`       // 当前文档所属笔记本 ID
+	FocusedBlockID   string   `json:"focusedBlockID,omitempty"`   // 光标/聚焦所在块 ID（editor.protyle.block.id）
+	SelectedBlockIDs []string `json:"selectedBlockIDs,omitempty"` // 用户选中的块 ID 列表
+	VisibleBlockIDs  []string `json:"visibleBlockIDs,omitempty"`  // 视口内可见块 ID 列表（已截断至上限）
 }
 
 type checkpointThinkingStep struct {
@@ -233,7 +269,7 @@ type agentCheckpoint struct {
 	AlwaysAllow      bool                     `json:"alwaysAllow,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 100)
 
 	go func() {
@@ -281,14 +317,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 					checkpointMsgs = truncated
 					checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
-					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references)
+					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references, editorCtx)
 				}
 			}
 		}
 
 		if messages == nil {
 			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage}}
-			messages = buildInitialMessages(userMessage, language, references)
+			messages = buildInitialMessages(userMessage, language, references, editorCtx)
 		}
 
 		temperature := kernelModel.Conf.AI.Agent.Temperature
@@ -528,7 +564,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						}
 					}
 
-					if !snapshotCreated && action != "" && !safeActions[action] && !(tc.Function.Name == "repo" && action == "create") {
+					if !snapshotCreated && action != "" && !safeActions[action] && tc.Function.Name != "frontend" && !(tc.Function.Name == "repo" && action == "create") {
 						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
 						if err != nil {
 							logging.LogErrorf("agent auto snapshot failed: %s", err)
@@ -567,6 +603,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
 						doomLoop = doomLoopTracker{}
+					} else if tc.Function.Name == "frontend" {
+						resultStr = handleFrontendTool(ctx, tc, ch, confirmTimeout)
+						doomLoop = doomLoopTracker{}
 					} else {
 						resultStr = executeTool(tc, sessionID)
 					}
@@ -587,7 +626,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					})
 					checkpointMsgs[assistantIdx].ToolCalls[i].Result = resultStr
 
-					if tc.Function.Name != "question" {
+					if tc.Function.Name != "question" && tc.Function.Name != "frontend" {
 						sig := tc.Function.Name + "::action=" + action
 						if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
 							doomLoop.count++
@@ -759,7 +798,55 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	return strings.Join(answer.Answers, ", ")
 }
 
-func buildSystemPrompt(language string, references []Reference) string {
+// handleFrontendTool dispatches a frontend tool action to the browser via SSE and blocks until
+// the browser POSTs the result (or the context is cancelled / timeout fires). It mirrors
+// handleQuestion's structure exactly — the only difference is the channel registry and the
+// event type ("frontend_tool_call").
+func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- AgentEvent, timeout time.Duration) string {
+	args := parseToolArgs(tc.Function.Arguments)
+	callID := fmt.Sprintf("%d", time.Now().UnixNano())
+	if len(callID) > 12 {
+		callID = callID[:12]
+	}
+
+	sendCriticalEvent(ctx, ch, AgentEvent{
+		Type:      "frontend_tool_call",
+		CallID:    callID,
+		Name:      tc.Function.Name,
+		Arguments: args,
+	})
+
+	ch2 := make(chan frontendCallResult, 1)
+	frontendCallChannelsMu.Lock()
+	frontendCallChannels[callID] = ch2
+	frontendCallChannelsMu.Unlock()
+
+	var fr frontendCallResult
+	select {
+	case fr = <-ch2:
+	case <-ctx.Done():
+		frontendCallChannelsMu.Lock()
+		delete(frontendCallChannels, callID)
+		frontendCallChannelsMu.Unlock()
+		return "Frontend action cancelled."
+	case <-time.After(timeout):
+		frontendCallChannelsMu.Lock()
+		delete(frontendCallChannels, callID)
+		frontendCallChannelsMu.Unlock()
+		return "Frontend action timed out (no response from the editor)."
+	}
+
+	frontendCallChannelsMu.Lock()
+	delete(frontendCallChannels, callID)
+	frontendCallChannelsMu.Unlock()
+
+	if fr.isError {
+		return "Frontend action failed: " + fr.result
+	}
+	return fr.result
+}
+
+func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext) string {
 	var sb strings.Builder
 	sb.WriteString(systemPrompt)
 	sb.WriteString("\n\n<env>\nWorkspace: ")
@@ -789,6 +876,16 @@ func buildSystemPrompt(language string, references []Reference) string {
 		sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
 	}
 
+	sb.WriteString("\n\n")
+	sb.WriteString("## Skill Management\n")
+	sb.WriteString("You can create, update, and delete skills using the skill tool:\n")
+	sb.WriteString("- skill with action \"save\": create or update a skill. Provide name (safe directory name) and content (SKILL.md full text).\n")
+	sb.WriteString("- skill with action \"remove\": delete a skill by name.\n")
+	sb.WriteString("- skill with action \"rename\": rename a skill. Provide name (old directory name) and new_name (new directory name).\n")
+	sb.WriteString("- skill with action \"list\": list all available skills.\n")
+	sb.WriteString("A SKILL.md file uses YAML frontmatter (---\\nname: skill name\\ndescription: skill description\\n---) followed by markdown body with instructions.\n")
+	sb.WriteString("When the user asks to save a process or workflow as a reusable skill, use skill with action \"save\" to create it.")
+
 	sb.WriteString("\n\nReply in ")
 	sb.WriteString(util.I18nTerm(language, "_label"))
 	sb.WriteString(".")
@@ -806,12 +903,79 @@ func buildSystemPrompt(language string, references []Reference) string {
 		}
 		sb.WriteString("Use the block tools to fetch their actual content before responding.")
 	}
+	if editorCtx.ActiveDocID != "" || editorCtx.ActiveDocTitle != "" || editorCtx.NotebookID != "" ||
+		len(editorCtx.SelectedBlockIDs) > 0 || editorCtx.FocusedBlockID != "" || len(editorCtx.VisibleBlockIDs) > 0 {
+		sb.WriteString("\n\n<editor_context>\n")
+		sb.WriteString("This is the user's editor state at the moment they sent the message. It may be stale by now.\n")
+		if editorCtx.ActiveDocID != "" || editorCtx.ActiveDocTitle != "" {
+			sb.WriteString("Active document: ")
+			if editorCtx.ActiveDocTitle != "" {
+				sb.WriteString(editorCtx.ActiveDocTitle)
+			} else {
+				sb.WriteString("(untitled)")
+			}
+			if editorCtx.ActiveDocID != "" {
+				sb.WriteString(" (root block id: ")
+				sb.WriteString(editorCtx.ActiveDocID)
+				if editorCtx.NotebookID != "" {
+					sb.WriteString(", notebook: ")
+					sb.WriteString(editorCtx.NotebookID)
+				}
+				sb.WriteString(")")
+			} else if editorCtx.NotebookID != "" {
+				sb.WriteString(" (notebook: ")
+				sb.WriteString(editorCtx.NotebookID)
+				sb.WriteString(")")
+			}
+			sb.WriteString("\n")
+		} else if editorCtx.NotebookID != "" {
+			sb.WriteString("Notebook: ")
+			sb.WriteString(editorCtx.NotebookID)
+			sb.WriteString("\n")
+		}
+		if editorCtx.FocusedBlockID != "" && editorCtx.FocusedBlockID != editorCtx.ActiveDocID {
+			sb.WriteString("Cursor/focused block id: ")
+			sb.WriteString(editorCtx.FocusedBlockID)
+			sb.WriteString("\n")
+		}
+		if len(editorCtx.SelectedBlockIDs) > 0 {
+			sb.WriteString("Selected block ids:\n")
+			for _, id := range editorCtx.SelectedBlockIDs {
+				sb.WriteString("- ")
+				sb.WriteString(id)
+				sb.WriteString("\n")
+			}
+		}
+		if len(editorCtx.VisibleBlockIDs) > 0 {
+			totalVisible := len(editorCtx.VisibleBlockIDs)
+			if totalVisible > maxVisibleBlockIDs {
+				sb.WriteString("Visible block ids (showing first ")
+				sb.WriteString(fmt.Sprintf("%d", maxVisibleBlockIDs))
+				sb.WriteString(" of ")
+				sb.WriteString(fmt.Sprintf("%d", totalVisible))
+				sb.WriteString("):\n")
+			} else {
+				sb.WriteString("Visible block ids:\n")
+			}
+			limit := totalVisible
+			if limit > maxVisibleBlockIDs {
+				limit = maxVisibleBlockIDs
+			}
+			for i := 0; i < limit; i++ {
+				sb.WriteString("- ")
+				sb.WriteString(editorCtx.VisibleBlockIDs[i])
+				sb.WriteString("\n")
+			}
+		}
+		sb.WriteString("Use the block tools (e.g. block with action \"get\") to fetch actual content before responding.")
+		sb.WriteString("\n</editor_context>")
+	}
 	return sb.String()
 }
 
-func buildInitialMessages(userMessage string, language string, references []Reference) []openai.ChatCompletionMessage {
+func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext) []openai.ChatCompletionMessage {
 	return []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx)},
 		{Role: openai.ChatMessageRoleUser, Content: userMessage},
 	}
 }
@@ -833,9 +997,9 @@ func loadCheckpoint(sessionID string) *agentCheckpoint {
 	return &cp
 }
 
-func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference) []openai.ChatCompletionMessage {
+func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference, editorCtx EditorContext) []openai.ChatCompletionMessage {
 	msgs := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx)},
 	}
 
 	for cmi := range checkpointMsgs {

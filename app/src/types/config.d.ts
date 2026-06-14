@@ -298,27 +298,27 @@ declare namespace Config {
      * Same as {@link IAppearance.lang}
      */
     export type TLang =
-        "en_US"
-        | "ar_SA"
-        | "de_DE"
-        | "es_ES"
-        | "fr_FR"
-        | "he_IL"
-        | "hi_IN"
-        | "id_ID"
-        | "it_IT"
-        | "ja_JP"
-        | "ko_KR"
-        | "pl_PL"
-        | "pt_BR"
-        | "ru_RU"
-        | "sk_SK"
-        | "tr_TR"
-        | "uk_UA"
-        | "th_TH"
-        | "nl_NL"
-        | "zh_CN"
-        | "zh_CHT";
+        "en"
+        | "ar"
+        | "de"
+        | "es"
+        | "fr"
+        | "he"
+        | "hi"
+        | "id"
+        | "it"
+        | "ja"
+        | "ko"
+        | "pl"
+        | "pt-BR"
+        | "ru"
+        | "sk"
+        | "tr"
+        | "uk"
+        | "th"
+        | "nl"
+        | "zh-CN"
+        | "zh-TW";
 
     /**
      * SiYuan bazaar related configuration

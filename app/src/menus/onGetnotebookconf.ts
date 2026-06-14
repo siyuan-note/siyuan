@@ -26,7 +26,7 @@ export const genNotebookOption = (id: string, notebookId?: string, noCurrent?: b
         html = `<option value="">${window.siyuan.languages.currentNotebook}</option>`;
     }
     const helpIds: string[] = [];
-    Object.keys(Constants.HELP_PATH).forEach((key: "zh_CN") => {
+    Object.keys(Constants.HELP_PATH).forEach((key: "zh-CN") => {
         helpIds.push(Constants.HELP_PATH[key]);
     });
     let firstNotebookId = "";

@@ -214,19 +214,6 @@ func (ai *AI) HasAnyProvider() bool {
 
 func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	if id == "" {
-		for _, p := range ai.Providers {
-			if p == nil || len(p.APIKey) == 0 || !p.Enabled {
-				continue
-			}
-			for _, m := range p.Models {
-				if m.Name != "" && m.Enabled {
-					return p, m
-				}
-			}
-		}
-		if len(ai.Providers) > 0 && ai.Providers[0] != nil && len(ai.Providers[0].Models) > 0 {
-			return ai.Providers[0], ai.Providers[0].Models[0]
-		}
 		return nil, nil
 	}
 
@@ -263,23 +250,19 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 		}
 	}
 
-	if len(ai.Providers) > 0 && ai.Providers[0] != nil && len(ai.Providers[0].Models) > 0 {
-		return ai.Providers[0], ai.Providers[0].Models[0]
-	}
 	return nil, nil
 }
 
 func (ai *AI) GetScenarioModel(name string) (*Provider, *Model) {
-	if ai.Scenarios != nil {
-		for _, s := range ai.Scenarios {
-			if s.Name == name && s.Model != "" {
-				if p, m := ai.GetModel(s.Model); p != nil {
-					return p, m
-				}
-			}
+	if ai.Scenarios == nil {
+		return nil, nil
+	}
+	for _, s := range ai.Scenarios {
+		if s != nil && s.Name == name && s.Model != "" {
+			return ai.GetModel(s.Model)
 		}
 	}
-	return ai.GetModel("")
+	return nil, nil
 }
 
 func (ai *AI) Normalize() {
@@ -287,27 +270,21 @@ func (ai *AI) Normalize() {
 		if p == nil {
 			continue
 		}
-		if p.ID == "" {
+		if !ast.IsNodeIDPattern(p.ID) {
 			p.ID = ast.NewNodeID()
 		}
 		for _, m := range p.Models {
 			if m == nil {
 				continue
 			}
-			if m.ID == "" {
+			if !ast.IsNodeIDPattern(m.ID) {
 				m.ID = ast.NewNodeID()
-			}
-			if m.DisplayName == "" {
-				m.DisplayName = m.Name
 			}
 		}
 	}
 	if ai.Embedding != nil {
-		if ai.Embedding.ID == "" {
+		if !ast.IsNodeIDPattern(ai.Embedding.ID) {
 			ai.Embedding.ID = ast.NewNodeID()
-		}
-		if ai.Embedding.DisplayName == "" {
-			ai.Embedding.DisplayName = ai.Embedding.Name
 		}
 	}
 }
@@ -317,29 +294,33 @@ func (ai *AI) DecryptAPIKeys() {
 		if p == nil || p.APIKey == "" {
 			continue
 		}
-		if dec := util.AESDecrypt(p.APIKey); len(dec) > 0 {
-			if plain, err := hex.DecodeString(string(dec)); err == nil {
-				p.APIKey = string(plain)
-			}
+		dec := util.AESDecrypt(p.APIKey)
+		if dec == nil {
+			continue
+		}
+		if plain, err := hex.DecodeString(string(dec)); err == nil {
+			p.APIKey = string(plain)
 		}
 	}
 	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
-		if dec := util.AESDecrypt(ai.Embedding.APIKey); len(dec) > 0 {
-			if plain, err := hex.DecodeString(string(dec)); err == nil {
-				ai.Embedding.APIKey = string(plain)
-			}
+		dec := util.AESDecrypt(ai.Embedding.APIKey)
+		if dec == nil {
+			return
+		}
+		if plain, err := hex.DecodeString(string(dec)); err == nil {
+			ai.Embedding.APIKey = string(plain)
 		}
 	}
 }
 
 func (ai *AI) EncryptAPIKeys() {
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || p.APIKey == "" {
 			continue
 		}
 		p.APIKey = util.AESEncrypt(p.APIKey)
 	}
-	if ai.Embedding != nil {
+	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
 		ai.Embedding.APIKey = util.AESEncrypt(ai.Embedding.APIKey)
 	}
 }
@@ -416,6 +397,34 @@ func MigrateAI(data []byte) *AI {
 		}
 	}
 
+	ai.Normalize()
+
+	if len(ai.Scenarios) == 0 {
+		var m *Model
+		for _, p := range ai.Providers {
+			if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+				continue
+			}
+			for _, model := range p.Models {
+				if model != nil && model.Name != "" && model.Enabled {
+					m = model
+					break
+				}
+			}
+			if m != nil {
+				break
+			}
+		}
+		if m == nil && len(ai.Providers) > 0 && ai.Providers[0] != nil && len(ai.Providers[0].Models) > 0 {
+			m = ai.Providers[0].Models[0]
+		}
+		if m != nil && m.ID != "" {
+			ai.Scenarios = []*Scenario{
+				{Name: ScenarioChat, Model: m.ID},
+				{Name: ScenarioAgent, Model: m.ID},
+			}
+		}
+	}
 	return ai
 }
 

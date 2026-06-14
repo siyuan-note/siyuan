@@ -265,31 +265,23 @@ func loadCode(petal *Petal) {
 		if nil != readErr {
 			logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, readErr)
 		} else if 0 < len(langJSONs) {
+			// 优先：BCP 47 新名（zh-CN.json），次选：历史下划线旧名（zh_CN.json），再回退 en/en_US/zh-CN/zh_CN/首个
 			preferredLang := Conf.Lang + ".json"
-			foundPreferredLang := false
-			foundEnUS := false
-			foundZhCN := false
+			legacyLang := util.LangToFile(Conf.Lang) + ".json"
+			candidates := []string{preferredLang, legacyLang, "en.json", "en_US.json", "zh-CN.json", "zh_CN.json"}
+			found := make(map[string]bool)
 			for _, langJSON := range langJSONs {
-				if langJSON.Name() == preferredLang {
-					foundPreferredLang = true
+				found[langJSON.Name()] = true
+			}
+			preferredLang = ""
+			for _, c := range candidates {
+				if found[c] {
+					preferredLang = c
 					break
 				}
-				if langJSON.Name() == "en_US.json" {
-					foundEnUS = true
-				}
-				if langJSON.Name() == "zh_CN.json" {
-					foundZhCN = true
-				}
 			}
-
-			if !foundPreferredLang {
-				if foundEnUS {
-					preferredLang = "en_US.json"
-				} else if foundZhCN {
-					preferredLang = "zh_CN.json"
-				} else {
-					preferredLang = langJSONs[0].Name()
-				}
+			if "" == preferredLang {
+				preferredLang = langJSONs[0].Name()
 			}
 
 			if langFilePath := filepath.Join(i18nDir, preferredLang); gulu.File.IsExist(langFilePath) {

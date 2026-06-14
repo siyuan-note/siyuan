@@ -119,7 +119,7 @@ func Boot() {
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "", "ar_SA/de_DE/en_US/es_ES/fr_FR/he_IL/hi_IN/id_ID/it_IT/ja_JP/ko_KR/nl_NL/pl_PL/pt_BR/ru_RU/sk_SK/th_TH/tr_TR/uk_UA/zh_CHT/zh_CN")
+	lang := flag.String("lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/th/tr/uk/zh-CN/zh-TW")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
@@ -131,7 +131,7 @@ func Boot() {
 	lang = coalesceToEnvVar(lang, "SIYUAN_LANG")
 
 	if "" != *lang {
-		Lang = *lang
+		Lang = MigrateLang(*lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	}
 	Mode = *mode
 	ServerPort = *port

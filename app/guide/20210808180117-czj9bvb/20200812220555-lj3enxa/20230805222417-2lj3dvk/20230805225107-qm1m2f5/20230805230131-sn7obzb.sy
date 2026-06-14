@@ -6,82 +6,393 @@
 		"id": "20230805230131-sn7obzb",
 		"title": "对接第三方云端存储",
 		"type": "doc",
-		"updated": "20241231014122"
+		"updated": "20260614133043"
 	},
 	"Children": [
 		{
-			"ID": "20230805230131-14bfide",
-			"Type": "NodeParagraph",
+			"ID": "20260614133043-jmtky3h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230805230131-14bfide",
-				"updated": "20230805230825"
+				"id": "20260614133043-jmtky3h",
+				"updated": "20260614133043"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "请在 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "设置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "云端"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "云端存储服务提供商"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中进行选择和配置，目前已经支持："
+					"Data": "概述"
 				}
 			]
 		},
 		{
-			"ID": "20230805230746-4q9cmrb",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260614133043-upn65ne",
+			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230805230746-4q9cmrb",
-				"updated": "20241231014122"
+				"id": "20260614133043-upn65ne",
+				"updated": "20260614133043"
 			},
 			"Children": [
 				{
-					"ID": "20230805230746-7xcfbue",
+					"Type": "NodeText",
+					"Data": "除了思源官方提供的云端同步外，还可以对接第三方云端存储服务来实现数据同步。这种方式适合以下场景："
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-5i5q9kv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614133043-5i5q9kv",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"ID": "20260614133043-f6xr9xs",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230805230746-7xcfbue",
-						"updated": "20230805230746"
+						"id": "20260614133043-f6xr9xs",
+						"updated": "20260614133043"
 					},
 					"Children": [
 						{
-							"ID": "20230805230746-fejfd76",
+							"ID": "20260614133043-ibidxud",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230805230746-fejfd76",
-								"updated": "20230805230746"
+								"id": "20260614133043-ibidxud",
+								"updated": "20260614133043"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "S3 兼容的对象存储服务，比如"
+									"Data": "希望使用自己已有的云存储服务"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614133043-nr42wzl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614133043-nr42wzl",
+						"updated": "20260614133043"
+					},
+					"Children": [
+						{
+							"ID": "20260614133043-qy98ynk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614133043-qy98ynk",
+								"updated": "20260614133043"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "对数据存储位置有特定要求"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614133043-wu4v6nq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614133043-wu4v6nq",
+						"updated": "20260614133043"
+					},
+					"Children": [
+						{
+							"ID": "20260614133043-735mgtp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614133043-735mgtp",
+								"updated": "20260614133043"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "官方云端存储空间不足以满足需求"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-az6i1az",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614133043-az6i1az",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "目前支持三种第三方存储方式："
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-sv7q6cn",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260614133043-sv7q6cn",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "方式"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "特点"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "推荐场景"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "S3 兼容对象存储"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "性能好，支持大容量"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数据量较大，追求同步速度"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "WebDAV"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "配置简单，兼容性广"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数据量较小，已有 WebDAV 服务"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本地文件系统"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "无需网络，直接同步到本地目录"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "配合本地 NAS 或可移动存储设备使用"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-3s78b05",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614133043-3s78b05",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "由于 WebDAV 协议本身的限制，数据量较大后会出现启动慢、同步慢、资源占用高等问题，建议优先选择 S3 对象存储。"
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-h36hnh5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260614133043-h36hnh5",
+				"updated": "20260614133130"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-i39bra1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614133043-i39bra1",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 设置 - 云端 - 云端存储服务提供商 中进行选择和配置，目前已经支持："
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-tmp13yk",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614133043-tmp13yk",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"ID": "20260614133043-4v1mj5g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614133043-4v1mj5g",
+						"updated": "20260614133043"
+					},
+					"Children": [
+						{
+							"ID": "20260614133043-82id27o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614133043-82id27o",
+								"updated": "20260614133043"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "S3 兼容的对象存储服务"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：比如 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -106,36 +417,45 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://www.cloudflare.com/",
+									"TextMarkAHref": "https://www.cloudflare.com/developer-platform/r2/",
 									"TextMarkTextContent": "Cloudflare R2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 等"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230805230746-zb33erf",
+					"ID": "20260614133043-q3rtwnz",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230805230746-zb33erf",
-						"updated": "20241216171525"
+						"id": "20260614133043-q3rtwnz",
+						"updated": "20260614133043"
 					},
 					"Children": [
 						{
-							"ID": "20230805230746-i9fzmzi",
+							"ID": "20260614133043-oi0hv66",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230805230746-i9fzmzi",
-								"updated": "20241216171521"
+								"id": "20260614133043-oi0hv66",
+								"updated": "20260614133043"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "WebDAV 协议"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "WebDAV 协议，比如 "
+									"Data": "：比如 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -144,105 +464,37 @@
 									"TextMarkTextContent": "InfiniCLOUD"
 								}
 							]
-						},
-						{
-							"ID": "20241216171521-40xtiyf",
-							"Type": "NodeList",
-							"ListData": {},
-							"Properties": {
-								"id": "20241216171521-40xtiyf",
-								"updated": "20241216171525"
-							},
-							"Children": [
-								{
-									"ID": "20241216171530-dhfkay6",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20241216171530-dhfkay6",
-										"updated": "20241216171530"
-									},
-									"Children": [
-										{
-											"ID": "20241216171530-kxdtu73",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20241216171530-kxdtu73",
-												"updated": "20241216171531"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "由于 WebDAV 协议本身的问题，数据量较大后会出现启动慢、同步慢、资源占用高等问题，所以建议选择使用 S3 对象存储"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20241216171521-ccruwd8",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"id": "20241216171521-ccruwd8",
-										"updated": "20241216171525"
-									},
-									"Children": [
-										{
-											"ID": "20241216171521-z0p3t71",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"id": "20241216171521-z0p3t71",
-												"updated": "20241216171525"
-											},
-											"Children": [
-												{
-													"Type": "NodeText",
-													"Data": "不支持坚果云 WebDAV，因为其"
-												},
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "a",
-													"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
-													"TextMarkTextContent": "接口存在限制"
-												}
-											]
-										}
-									]
-								}
-							]
 						}
 					]
 				},
 				{
-					"ID": "20241231014119-rkud23t",
+					"ID": "20260614133043-1dkpzgl",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20241231014119-rkud23t",
-						"updated": "20241231014122"
+						"id": "20260614133043-1dkpzgl",
+						"updated": "20260614133043"
 					},
 					"Children": [
 						{
-							"ID": "20241231014119-fdfwv7d",
+							"ID": "20260614133043-ujo9nfd",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20241231014119-fdfwv7d",
-								"updated": "20241231014122"
+								"id": "20260614133043-ujo9nfd",
+								"updated": "20260614133043"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "本地文件系统"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "本地文件系统"
+									"Data": "：同步到本地指定目录"
 								}
 							]
 						}
@@ -251,11 +503,35 @@
 			]
 		},
 		{
-			"ID": "20230805230746-pq0po1p",
+			"ID": "20260614133043-unbgfol",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230805230746-pq0po1p",
-				"updated": "20241216171020"
+				"id": "20260614133043-unbgfol",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不支持坚果云 WebDAV，因为其"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
+					"TextMarkTextContent": "接口存在限制"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-jfps05k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614133043-jfps05k",
+				"updated": "20260614133130"
 			},
 			"Children": [
 				{
@@ -271,22 +547,19 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "的，第三方云端存储服务提供商无法获得我们的明文数据。"
+					"Data": "的，第三方云端存储服务提供商无法获得明文数据。"
 				}
 			]
 		},
 		{
-			"ID": "20230805233629-s9vc1t4",
-			"Type": "NodeParagraph",
+			"ID": "20260614133043-5uv9pw2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230805233629-s9vc1t4",
-				"updated": "20230805233629"
+				"id": "20260614133043-5uv9pw2",
+				"updated": "20260614133043"
 			},
 			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
@@ -294,37 +567,51 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​：为了保障数据同步的可用性，请确保："
+					"Data": "​"
 				}
 			]
 		},
 		{
-			"ID": "20230805233629-cefelxe",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260614133043-adwzd3w",
+			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230805233629-cefelxe",
-				"updated": "20231217111041"
+				"id": "20260614133043-adwzd3w",
+				"updated": "20260614133043"
 			},
 			"Children": [
 				{
-					"ID": "20230805233629-74eufrs",
+					"Type": "NodeText",
+					"Data": "为了保障数据同步的可用性，请确保："
+				}
+			]
+		},
+		{
+			"ID": "20260614133043-ld64eeg",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614133043-ld64eeg",
+				"updated": "20260614133043"
+			},
+			"Children": [
+				{
+					"ID": "20260614133043-qhyk5xs",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230805233629-74eufrs",
-						"updated": "20230805233629"
+						"id": "20260614133043-qhyk5xs",
+						"updated": "20260614133043"
 					},
 					"Children": [
 						{
-							"ID": "20230805233629-sednxlz",
+							"ID": "20260614133043-kivw43i",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230805233629-sednxlz",
-								"updated": "20230805233629"
+								"id": "20260614133043-kivw43i",
+								"updated": "20260614133043"
 							},
 							"Children": [
 								{
@@ -336,51 +623,51 @@
 					]
 				},
 				{
-					"ID": "20230805233629-ojkqvj5",
+					"ID": "20260614133043-o6j2its",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230805233629-ojkqvj5",
-						"updated": "20230805233629"
+						"id": "20260614133043-o6j2its",
+						"updated": "20260614133043"
 					},
 					"Children": [
 						{
-							"ID": "20230805233629-av1keyv",
+							"ID": "20260614133043-ktx4s3h",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230805233629-av1keyv",
-								"updated": "20230805233629"
+								"id": "20260614133043-ktx4s3h",
+								"updated": "20260614133043"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "网络稳定（比如中国大陆地区请勿使用非中大陆地区的服务）"
+									"Data": "网络稳定（比如中国大陆地区请勿使用非中国大陆地区的服务）"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20231217110937-uwz2itr",
+					"ID": "20260614133043-b27vgrn",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20231217110937-uwz2itr",
-						"updated": "20231217111041"
+						"id": "20260614133043-b27vgrn",
+						"updated": "20260614133043"
 					},
 					"Children": [
 						{
-							"ID": "20231217110937-wnrtb66",
+							"ID": "20260614133043-ishj7ox",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20231217110937-wnrtb66",
-								"updated": "20231217111041"
+								"id": "20260614133043-ishj7ox",
+								"updated": "20260614133043"
 							},
 							"Children": [
 								{
@@ -392,6 +679,14 @@
 					]
 				}
 			]
+		},
+		{
+			"ID": "20260614133143-do7vdkz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614133143-do7vdkz",
+				"updated": "20260614133143"
+			}
 		}
 	]
 }

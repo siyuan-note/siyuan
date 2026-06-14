@@ -7,7 +7,7 @@
 		"id": "20230429115711-ejbts4s",
 		"title": "Glossary",
 		"type": "doc",
-		"updated": "20260426180041"
+		"updated": "20260614111257"
 	},
 	"Children": [
 		{
@@ -208,7 +208,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115912-b97gvan",
-				"updated": "20250115163213"
+				"updated": "20260614111229"
 			},
 			"Children": [
 				{
@@ -371,6 +371,243 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ menu in the upper right corner of the editor; WYSIWYG editing and read-only mode switches are located in the upper right corner of the top bar."
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-to99h4r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111229-to99h4r",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Block Reference"
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-2ogahww",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111229-2ogahww",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111229-vob22z9",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111229-vob22z9",
+						"updated": "20260614111229"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A reference is a link pointing to another piece of content, allowing the reader to jump to the referenced location."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-pgtjgxi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111229-pgtjgxi",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, a block reference is a link triggered by "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ that points to another content block. It supports both static anchor text and dynamic anchor text. Clicking a block reference navigates to the referenced block; hovering shows a preview."
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-mp4whcc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111229-mp4whcc",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Backlink"
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-9spl9ve",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111229-9spl9ve",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111229-98p3e3u",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111229-98p3e3u",
+						"updated": "20260614111229"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A backlink is a link from another page pointing to the current page, an essential component of a bidirectional linking system."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-7mco34k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111229-7mco34k",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, the backlink panel displays all blocks that reference the current block. Backlinks are divided into two parts: links (directly connected via block references) and mentions (potential connections matched by text)."
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-to1iuj1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111229-to1iuj1",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mention"
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-sfctxyi",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111229-sfctxyi",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111229-qsw7m2s",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111229-qsw7m2s",
+						"updated": "20260614111229"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A mention is a keyword match found in text, used to discover potential connections."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-71ipyls",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111229-71ipyls",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, mentions are similar to the links part of backlinks, but instead of being established through block references, they are automatically matched text content found by searching content block names, aliases, and reference anchor text. Mentions can be converted to block references with one click."
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-xhhdmql",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111229-xhhdmql",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Virtual Reference"
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-4gfb4hy",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111229-4gfb4hy",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111229-pg7ejry",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111229-pg7ejry",
+						"updated": "20260614111229"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A virtual reference is a technique for automatically discovering potential reference relationships, identifying content blocks that may be related without manual creation."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111229-2a1poix",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111229-2a1poix",
+				"updated": "20260614111229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, virtual references automatically detect potential connections based on content block names, aliases, and anchor text, displayed with dashed underlines in the editor. Hovering shows a preview of the corresponding content block; clicking converts it to a formal block reference. Can be toggled in Settings - Editor."
 				}
 			]
 		},
@@ -841,7 +1078,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429120050-i338ss7",
-				"updated": "20250115151002"
+				"updated": "20260614111245"
 			},
 			"Children": [
 				{
@@ -897,12 +1134,249 @@
 			]
 		},
 		{
+			"ID": "20260614111245-do79b2w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111245-do79b2w",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Bazaar"
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-ne03z3w",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111245-ne03z3w",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111245-4exrwcd",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111245-4exrwcd",
+						"updated": "20260614111245"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A bazaar is a marketplace where goods are traded, originating from Persian."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-ts4nqpv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111245-ts4nqpv",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, the Bazaar is the entry point for browsing and installing community extensions, including five types: themes, icons, plugins, widgets, and templates. Users can search, install, and update directly within the app."
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-dorazkv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111245-dorazkv",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Inbox"
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-mn05zjr",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111245-mn05zjr",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111245-c72qm7a",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111245-c72qm7a",
+						"updated": "20260614111245"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "An inbox is a container for temporarily storing information to be processed."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-qeay9ky",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111245-qeay9ky",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, the Inbox is a cloud-based quick capture feature. Text is temporarily stored in the cloud via WeChat or API calls, and can later be moved into documents from the Inbox panel. This feature requires a subscription."
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-qxb6qzw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111245-qxb6qzw",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Flashcard"
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-2h7wety",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111245-2h7wety",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111245-rq2epc7",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111245-rq2epc7",
+						"updated": "20260614111245"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A flashcard is a card used for memory training, with a question on the front and an answer on the back, scheduled for review using spaced repetition algorithms."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-z9ld0j1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111245-z9ld0j1",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, flashcards are a spaced repetition review feature based on content blocks. Content blocks can be made into flashcards, and the system automatically schedules the next review based on performance."
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-ejrp4c3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111245-ejrp4c3",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Command Palette"
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-fe0kgoy",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111245-fe0kgoy",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111245-8z5dsoc",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111245-8z5dsoc",
+						"updated": "20260614111245"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A command palette is a keyboard-driven entry point for quickly accessing application features, where users type keywords to search and execute commands."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111245-8viirmm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111245-8viirmm",
+				"updated": "20260614111245"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, the command palette is invoked with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Ctrl+Shift+P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, allowing quick execution of operations like opening panels, toggling features, and navigating documents without navigating through menus."
+				}
+			]
+		},
+		{
 			"ID": "20230429120050-b0r6bh0",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429120050-b0r6bh0",
-				"updated": "20230429120142"
+				"updated": "20260614111257"
 			},
 			"Children": [
 				{
@@ -917,7 +1391,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429120050-s4dqqa7",
-				"updated": "20230429120146"
+				"updated": "20260614111257"
 			},
 			"Children": [
 				{
@@ -948,6 +1422,120 @@
 				{
 					"Type": "NodeText",
 					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260614111257-gh2a33v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111257-gh2a33v",
+				"updated": "20260614111257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Kernel"
+				}
+			]
+		},
+		{
+			"ID": "20260614111257-erncw1g",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111257-erncw1g",
+				"updated": "20260614111257"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111257-uo9f96w",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111257-uo9f96w",
+						"updated": "20260614111257"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A kernel is the core component of an operating system, responsible for managing processes, memory, device drivers, file systems, and networking, determining system performance and stability."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111257-fuv5t0k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111257-fuv5t0k",
+				"updated": "20260614111257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, the kernel refers to the backend service process that runs after startup, responsible for core functions such as data read/write, index search, and sync backup. The frontend communicates with the kernel via HTTP/WebSocket. The desktop and mobile apps have built-in kernels; Docker deployments run the kernel separately."
+				}
+			]
+		},
+		{
+			"ID": "20260614111257-dk8jq1u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111257-dk8jq1u",
+				"updated": "20260614111257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Workspace"
+				}
+			]
+		},
+		{
+			"ID": "20260614111257-eik5zme",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111257-eik5zme",
+				"updated": "20260614111257"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111257-rt41e11",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111257-rt41e11",
+						"updated": "20260614111257"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A workspace is the data environment for users to work in, similar to a user directory in an operating system."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111257-xrvsdv3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111257-xrvsdv3",
+				"updated": "20260614111257"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In SiYuan, a workspace is a folder that stores all data, including notebooks, documents, asset files, configurations, and history. Different workspaces are isolated through file system folders, and one workspace can only be served by one kernel process."
 				}
 			]
 		}

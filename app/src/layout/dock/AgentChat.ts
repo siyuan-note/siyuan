@@ -121,6 +121,9 @@ export class AgentChat extends Model {
     private navExpandTimer = 0;
     // 思考计时器：流式进行时每 100ms 刷新未完成思考卡片的标题为「思考中... X.Xs」。
     private thinkingTimerId = 0;
+    // 上一个 thinking step 快照时 currentToolCalls 的长度基准，
+    // 用于计算本轮新增的工具（避免 step.toolNames 累积重复历史工具）。
+    private lastStepToolCount = 0;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -630,7 +633,8 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         postRender(el);
-        this.addCopyButton(el, content, promptTokens, completionTokens, duration, timestamp);
+        // entry.duration 存的是秒，addCopyButton 期望毫秒。
+        this.addCopyButton(el, content, promptTokens, completionTokens, duration ? duration * 1000 : undefined, timestamp);
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{
@@ -859,6 +863,7 @@ export class AgentChat extends Model {
         this.responsePromptTokens = 0;
         this.responseCompletionTokens = 0;
         this.currentToolCalls = [];
+        this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         this.hasInterveningCard = false;
         if (this.tokenDisplayEl) {
@@ -1278,9 +1283,10 @@ export class AgentChat extends Model {
     private appendThinking(reasoning: string) {
         const L = window.siyuan.languages;
         if (this.currentThinkingText) {
-            // step 不再保存 text（渲染时由 duration 经 i18n 生成），
-            // 工具调用只留名字（arguments/result 在 assistant entry 存一份）。
-            const toolNames = this.currentToolCalls.map(function (t) {
+            // step 不保存 text（渲染时由 duration 经 i18n 生成）。
+            // toolNames 只取本轮新增的工具（lastStepToolCount 之后的），
+            // 避免累积重复历史工具——完整的 arguments/result 在 assistant entry 存一份。
+            const toolNames = this.currentToolCalls.slice(this.lastStepToolCount).map(function (t) {
                 return t.name;
             });
             this.currentThinkingSteps.push({
@@ -1288,6 +1294,7 @@ export class AgentChat extends Model {
                 reasoningContent: this.currentThinkingReasoningContent,
                 toolNames: toolNames.length > 0 ? toolNames : undefined,
             });
+            this.lastStepToolCount = this.currentToolCalls.length;
         }
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
@@ -1366,6 +1373,7 @@ export class AgentChat extends Model {
             if (this.currentToolCalls.length > 0) {
                 this.entries.push({id: SessionStore.newSessionId(), type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
                 this.currentToolCalls = [];
+        this.lastStepToolCount = 0;
             }
             // Flush pending confirms
             if (this.pendingConfirms.length > 0) {
@@ -1532,6 +1540,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         this.hasInterveningCard = false;
         this.currentThinkingSteps = [];
@@ -1614,7 +1623,8 @@ export class AgentChat extends Model {
                 toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined,
                 promptTokens: rPromptTokens || undefined,
                 completionTokens: rCompletionTokens || undefined,
-                duration: dur || undefined,
+                // duration 统一用秒（与 thinking entry 一致）；addCopyButton 仍传毫秒 dur。
+                duration: dur ? dur / 1000 : undefined,
                 timestamp: ts,
             });
         } else if (this.currentToolCalls.length > 0) {
@@ -1626,6 +1636,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
@@ -1655,7 +1666,7 @@ export class AgentChat extends Model {
 
     private flushThinkingStep() {
         if (this.currentThinkingText) {
-            const toolNames = this.currentToolCalls.map(function (t) {
+            const toolNames = this.currentToolCalls.slice(this.lastStepToolCount).map(function (t) {
                 return t.name;
             });
             this.currentThinkingSteps.push({
@@ -1664,6 +1675,7 @@ export class AgentChat extends Model {
                 toolNames: toolNames.length > 0 ? toolNames : undefined,
                 content: this.currentThinkingStepContent,
             });
+            this.lastStepToolCount = this.currentToolCalls.length;
             this.currentThinkingText = "";
             this.currentThinkingStepContent = "";
         }
@@ -1821,7 +1833,8 @@ export class AgentChat extends Model {
                 toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined,
                 promptTokens: rPromptTokens || undefined,
                 completionTokens: rCompletionTokens || undefined,
-                duration: dur || undefined,
+                // duration 统一用秒（与 thinking entry 一致）；addCopyButton 仍传毫秒 dur。
+                duration: dur ? dur / 1000 : undefined,
                 timestamp: ts,
             });
         }
@@ -1831,6 +1844,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
+        this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;

@@ -6,7 +6,7 @@
 		"id": "20200813125307-pxsjela",
 		"title": "导入和导出",
 		"type": "doc",
-		"updated": "20260426175436"
+		"updated": "20260614200822"
 	},
 	"Children": [
 		{
@@ -197,7 +197,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511184340-6w8o7kg",
-				"updated": "20250115150830"
+				"updated": "20260614200806"
 			},
 			"Children": [
 				{
@@ -388,13 +388,46 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用前请务必留意，避免已有数据被覆盖无法恢复。"
+					"Data": "​：使用前请务必留意，避免已有数据被覆盖无法恢复。"
+				}
+			]
+		},
+		{
+			"ID": "20260614200806-k4r9npq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614200806-k4r9npq",
+				"updated": "20260614200806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip"
+				}
+			]
+		},
+		{
+			"ID": "20260614200806-6qg8yqx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614200806-6qg8yqx",
+				"updated": "20260614200806"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip 是思源原生文档格式，用于导入从其他思源工作空间导出的单个文档。支持直接拖拽 .sy.zip 文件到文档面板中完成导入，导入后的文档包含完整的内容、子文档、资源文件以及块属性。"
 				}
 			]
 		},
@@ -515,7 +548,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210120154948-gl0hxz6",
-				"updated": "20260426175436"
+				"updated": "20260614200822"
 			},
 			"Children": [
 				{
@@ -575,7 +608,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201229120428-sokahme",
-				"updated": "20220317223356"
+				"updated": "20260614200822"
 			},
 			"Children": [
 				{
@@ -586,7 +619,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201229120428-3zal4fw"
+						"id": "20201229120428-3zal4fw",
+						"updated": "20201229120428"
 					},
 					"Children": [
 						{
@@ -613,14 +647,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201229120428-rbzugkm"
+						"id": "20201229120428-rbzugkm",
+						"updated": "20201229120428"
 					},
 					"Children": [
 						{
 							"ID": "20210302223614-6mzkgcu",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223614-6mzkgcu"
+								"id": "20210302223614-6mzkgcu",
+								"updated": "20210302223614"
 							},
 							"Children": [
 								{
@@ -639,14 +675,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210120155702-mhp0c0s"
+						"id": "20210120155702-mhp0c0s",
+						"updated": "20210120155702"
 					},
 					"Children": [
 						{
 							"ID": "20210302223614-zc7v8ds",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223614-zc7v8ds"
+								"id": "20210302223614-zc7v8ds",
+								"updated": "20210302223614"
 							},
 							"Children": [
 								{
@@ -684,6 +722,48 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260614200822-ltvmpym",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614200822-ltvmpym",
+						"updated": "20260614200822"
+					},
+					"Children": [
+						{
+							"ID": "20260614200822-0hldom5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614200822-0hldom5",
+								"updated": "20260614200822"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".sy.zip"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614200829-qq1g8hc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614200829-qq1g8hc",
+				"updated": "20260614200833"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其中 .sy.zip 是思源原生格式，导出后包含文档及其子文档的完整内容、资源文件和块属性，适合在不同工作空间之间迁移文档或分享给其他思源用户。"
 				}
 			]
 		},

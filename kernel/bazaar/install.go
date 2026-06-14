@@ -37,16 +37,17 @@ import (
 var downloadPackageFlight singleflight.Group
 
 // downloadBazaarFile 下载集市文件
-func downloadBazaarFile(repoURLHash string, pushProgress bool, packageName string) (data []byte, err error) {
+func downloadBazaarFile(repoURLHash string, pushProgress bool) (data []byte, err error) {
 	repoURLHashTrimmed := strings.TrimPrefix(repoURLHash, "https://github.com/")
 	v, err, _ := downloadPackageFlight.Do(repoURLHash, func() (any, error) {
 		// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc 或带路径 /README.md
+		repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
 		u := util.BazaarOSSServer + "/package/" + repoURLHashTrimmed
 		buf := &bytes.Buffer{}
 		resp, err := httpclient.NewCloudFileRequest2m().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
-			if pushProgress && packageName != "" {
+			if pushProgress {
 				progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
-				util.PushDownloadProgress(packageName, progress)
+				util.PushDownloadProgress(repoURL, progress)
 			}
 		}).Get(u)
 		if err != nil {
@@ -83,7 +84,7 @@ func incPackageDownloads(repoURL, systemID string) {
 // InstallPackage 安装集市包
 func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageName string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadBazaarFile(repoURLHash, true, packageName)
+	data, err := downloadBazaarFile(repoURLHash, true)
 	if err != nil {
 		return err
 	}

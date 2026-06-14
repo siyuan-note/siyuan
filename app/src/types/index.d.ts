@@ -76,7 +76,6 @@ type TOperation =
     | "setAttrViewUpdatedIncludeTime"
     | "setAttrViewCreatedIncludeTime"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
-type TBazaarPackageSource = "bazaar" | "downloaded" | "update"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" | "click-flashcard-action" |

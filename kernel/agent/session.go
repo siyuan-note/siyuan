@@ -301,7 +301,7 @@ func SaveSession(data []byte) error {
 			for k, v := range existingData {
 				if _, ok := newData[k]; !ok {
 					switch k {
-					case "createdAt", "titled", "messageHistory", "thinkingSteps", "entries", "snapshots", "id":
+					case "createdAt", "titled", "messageHistory", "thinkingSteps", "entries", "snapshots", "id", "messages", "alwaysAllow":
 						newData[k] = v
 					}
 				}

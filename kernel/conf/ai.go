@@ -30,6 +30,7 @@ type AI struct {
 	MCP       *MCP        `json:"mcp"`
 	Embedding *Embedding  `json:"embedding"`
 	Agent     *Agent      `json:"agent"`
+	Chat      *Chat       `json:"chat"`
 	Providers []*Provider `json:"providers"`
 	Scenarios []*Scenario `json:"scenarios"`
 }
@@ -43,14 +44,23 @@ type Agent struct {
 	MaxToolCallRounds   int     `json:"maxToolCallRounds"`
 }
 
+// Chat holds behavior parameters used by the chat scenario. They are kept
+// here (instead of on Model) to mirror Agent and to decouple scenario behavior
+// from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
+type Chat struct {
+	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
+	MaxContinueRounds   int     `json:"maxContinueRounds"`   // Max continuation rounds when finish_reason=length
+	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
+	MaxCompletionTokens int     `json:"maxCompletionTokens"` // Alignment with Agent.MaxCompletionTokens
+}
+
 type Embedding struct {
-	ID          string `json:"id"`
-	DisplayName string `json:"displayName,omitempty"`
-	Enabled     bool   `json:"enabled"`
-	APIKey      string `json:"apiKey"`
-	BaseURL     string `json:"baseURL"`
-	Name        string `json:"name"`
-	Timeout     int    `json:"timeout"`
+	ID      string `json:"id"`
+	Enabled bool   `json:"enabled"`
+	APIKey  string `json:"apiKey"`
+	BaseURL string `json:"baseURL"`
+	Name    string `json:"name"`
+	Timeout int    `json:"timeout"`
 }
 
 type Provider struct {
@@ -63,6 +73,9 @@ type Provider struct {
 	Models         []*Model `json:"models"`
 }
 
+// Model is the provider-scoped model registry entry. MaxTokens/Temperature/
+// MaxContexts remain the persisted UI-facing config (the settings page still
+// reads/writes them). Chat holds the runtime view derived from them.
 type Model struct {
 	ID          string  `json:"id"`
 	DisplayName string  `json:"displayName,omitempty"`
@@ -108,6 +121,12 @@ func NewAI() *AI {
 			MaxCompletionTokens: 4096,
 			MaxToolCallRounds:   64,
 		},
+		Chat: &Chat{
+			MaxHistoryMessages:  7,
+			MaxContinueRounds:   7,
+			Temperature:         1.0,
+			MaxCompletionTokens: 0,
+		},
 	}
 
 	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
@@ -133,19 +152,25 @@ func NewAI() *AI {
 			MaxContexts: 7,
 			Enabled:     true,
 		}
+		// Behavior params persist on Model (UI-facing) and are mirrored onto Chat
+		// (runtime view). Env var names kept for backward compat.
 		if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
 			if v, err := strconv.Atoi(maxTokens); err == nil {
 				model.MaxTokens = v
+				ai.Chat.MaxCompletionTokens = v
 			}
 		}
 		if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
 			if v, err := strconv.ParseFloat(temperature, 64); err == nil {
 				model.Temperature = v
+				ai.Chat.Temperature = v
 			}
 		}
 		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
 			if v, err := strconv.Atoi(maxContexts); err == nil {
 				model.MaxContexts = v
+				ai.Chat.MaxHistoryMessages = v
+				ai.Chat.MaxContinueRounds = v
 			}
 		}
 
@@ -492,13 +517,12 @@ func migrateModel(raw map[string]any) *Model {
 
 func migrateEmbedding(raw map[string]any) *Embedding {
 	return &Embedding{
-		ID:          getString(raw, "id"),
-		DisplayName: getString(raw, "name"),
-		Enabled:     getBool(raw, "enabled"),
-		APIKey:      getString(raw, "apiKey"),
-		BaseURL:     getString(raw, "apiBaseURL"),
-		Name:        getString(raw, "apiModel"),
-		Timeout:     getInt(raw, "apiTimeout"),
+		ID:      getString(raw, "id"),
+		Enabled: getBool(raw, "enabled"),
+		APIKey:  getString(raw, "apiKey"),
+		BaseURL: getString(raw, "apiBaseURL"),
+		Name:    getString(raw, "apiModel"),
+		Timeout: getInt(raw, "apiTimeout"),
 	}
 }
 

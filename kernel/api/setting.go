@@ -233,6 +233,9 @@ func setAI(c *gin.Context) {
 	if nil == ai.Agent {
 		ai.Agent = model.Conf.AI.Agent
 	}
+	if nil == ai.Chat {
+		ai.Chat = model.Conf.AI.Chat
+	}
 	if len(ai.Scenarios) == 0 {
 		ai.Scenarios = model.Conf.AI.Scenarios
 	}
@@ -246,6 +249,20 @@ func setAI(c *gin.Context) {
 		}
 	}
 	model.Conf.AI = ai
+
+	// Chat is the runtime view of the chat-scenario model's behavior params; the
+	// settings page persists them on Model, so mirror them onto Chat after assign.
+	// https://github.com/siyuan-note/siyuan/issues/17797
+	if _, m := model.Conf.AI.GetScenarioModel(conf.ScenarioChat); nil != m {
+		if nil == model.Conf.AI.Chat {
+			model.Conf.AI.Chat = &conf.Chat{}
+		}
+		model.Conf.AI.Chat.MaxCompletionTokens = m.MaxTokens
+		model.Conf.AI.Chat.Temperature = m.Temperature
+		model.Conf.AI.Chat.MaxHistoryMessages = m.MaxContexts
+		model.Conf.AI.Chat.MaxContinueRounds = m.MaxContexts
+	}
+
 	model.Conf.AI.Normalize()
 	model.Conf.Save()
 

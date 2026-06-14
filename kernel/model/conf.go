@@ -602,6 +602,14 @@ func InitConf() {
 			MaxToolCallRounds:   64,
 		}
 	}
+	if nil == Conf.AI.Chat {
+		Conf.AI.Chat = &conf.Chat{
+			MaxHistoryMessages:  7,
+			MaxContinueRounds:   7,
+			Temperature:         1.0,
+			MaxCompletionTokens: 0,
+		}
+	}
 	for _, p := range Conf.AI.Providers {
 		if nil == p {
 			continue
@@ -630,6 +638,28 @@ func InitConf() {
 			}
 		}
 	}
+	// Chat is the runtime view of the chat-scenario model's behavior params.
+	// The settings page still persists them on Model; mirror them onto Chat so
+	// the chat runtime reads from a single, Agent-symmetric place.
+	// https://github.com/siyuan-note/siyuan/issues/17797
+	if prov, m := Conf.AI.GetScenarioModel(conf.ScenarioChat); nil != prov && nil != m {
+		Conf.AI.Chat.MaxCompletionTokens = m.MaxTokens
+		Conf.AI.Chat.Temperature = m.Temperature
+		Conf.AI.Chat.MaxHistoryMessages = m.MaxContexts
+		Conf.AI.Chat.MaxContinueRounds = m.MaxContexts
+	}
+	if 0 > Conf.AI.Chat.MaxCompletionTokens {
+		Conf.AI.Chat.MaxCompletionTokens = 0
+	}
+	if 0 >= Conf.AI.Chat.Temperature || 2 < Conf.AI.Chat.Temperature {
+		Conf.AI.Chat.Temperature = 1.0
+	}
+	if 1 > Conf.AI.Chat.MaxHistoryMessages || 64 < Conf.AI.Chat.MaxHistoryMessages {
+		Conf.AI.Chat.MaxHistoryMessages = 7
+	}
+	if 1 > Conf.AI.Chat.MaxContinueRounds || 64 < Conf.AI.Chat.MaxContinueRounds {
+		Conf.AI.Chat.MaxContinueRounds = 7
+	}
 
 	for _, p := range Conf.AI.Providers {
 		if p == nil || len(p.APIKey) == 0 {
@@ -643,15 +673,17 @@ func InitConf() {
 				"    baseURL=%s\n"+
 				"    timeout=%ds\n"+
 				"    model=%s\n"+
-				"    maxTokens=%d\n"+
+				"    maxCompletionTokens=%d\n"+
 				"    temperature=%.1f\n"+
-				"    maxContexts=%d",
+				"    maxHistoryMessages=%d\n"+
+				"    maxContinueRounds=%d",
 				p.BaseURL,
 				p.RequestTimeout,
 				m.Name,
-				m.MaxTokens,
-				m.Temperature,
-				m.MaxContexts)
+				Conf.AI.Chat.MaxCompletionTokens,
+				Conf.AI.Chat.Temperature,
+				Conf.AI.Chat.MaxHistoryMessages,
+				Conf.AI.Chat.MaxContinueRounds)
 		}
 	}
 

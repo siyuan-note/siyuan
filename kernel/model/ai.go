@@ -92,8 +92,14 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 		return
 	}
 
-	if m.MaxContexts < len(contextMsgs) {
-		contextMsgs = contextMsgs[len(contextMsgs)-m.MaxContexts:]
+	chat := Conf.AI.Chat
+	if nil == chat {
+		err = errors.New("no AI chat config")
+		return
+	}
+
+	if chat.MaxHistoryMessages < len(contextMsgs) {
+		contextMsgs = contextMsgs[len(contextMsgs)-chat.MaxHistoryMessages:]
 	}
 
 	var gpt GPT
@@ -101,14 +107,16 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 		gpt = &CloudGPT{}
 	} else {
 		gpt = &OpenAIGPT{
-			c:       util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
-			m:       m,
-			timeout: prov.RequestTimeout,
+			c:                   util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
+			m:                   m,
+			timeout:             prov.RequestTimeout,
+			maxCompletionTokens: chat.MaxCompletionTokens,
+			temperature:         chat.Temperature,
 		}
 	}
 
 	buf := &bytes.Buffer{}
-	for i := 0; i < m.MaxContexts; i++ {
+	for i := 0; i < chat.MaxContinueRounds; i++ {
 		part, stop, chatErr := gpt.chat(msg, contextMsgs)
 		buf.WriteString(part)
 
@@ -180,13 +188,15 @@ type GPT interface {
 }
 
 type OpenAIGPT struct {
-	c       *openai.Client
-	m       *conf.Model
-	timeout int
+	c                   *openai.Client
+	m                   *conf.Model
+	timeout             int
+	maxCompletionTokens int
+	temperature         float64
 }
 
 func (gpt *OpenAIGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
-	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.m.Name, gpt.m.MaxTokens, gpt.m.Temperature, gpt.timeout)
+	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.m.Name, gpt.maxCompletionTokens, gpt.temperature, gpt.timeout)
 }
 
 type CloudGPT struct {

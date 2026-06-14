@@ -93,13 +93,16 @@ export class AgentChat extends Model {
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
     private currentThinkingReasoningContent = "";
+    // thinking step 只保留工具名列表（去重：arguments/result 仅在 assistant entry 存一份），
+    // 不再保存 text（"已思考：Xs" 由 i18n 在渲染时从 duration 生成）。
     private currentThinkingSteps: Array<{
         reasoning: string;
-        text: string;
-        toolCalls: Array<{ name: string; result?: string }>;
         reasoningContent: string;
+        toolNames?: string[];
         content?: string
     }> = [];
+    // 当前请求的思考耗时（秒）。持久化为 entry.duration，"已思考"文本不落盘。
+    private currentThinkingDuration = 0;
     private currentThinkingStepContent = "";
     private pendingConfirms: SessionEntry[] = [];
     private renderedToolNames: Record<string, boolean> = {};
@@ -357,6 +360,7 @@ export class AgentChat extends Model {
                     this.abortController = new AbortController();
                     const requestSessionId = this.sessionId;
                     this.requestStartTime = Date.now();
+                    this.currentThinkingDuration = 0;
                     fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
                         (event: ISSEResult) => {
                             if (this.sessionId !== requestSessionId) {
@@ -695,14 +699,37 @@ export class AgentChat extends Model {
                     break;
                 case "thinking":
                     if (entry.steps && entry.steps.length > 0) {
-                        this.renderMergedThinkingCard((entry as {
+                        // 老数据兼容：旧 step 可能含 text（"已思考：Xs"）和 toolCalls（{name,result}），
+                        // 这里归一化为新格式（toolNames + entry.duration）。
+                        const rawEntry = entry as {
                             steps: Array<{
                                 reasoning: string;
-                                text: string;
-                                toolCalls: Array<{ name: string; result?: string }>;
-                                reasoningContent: string
-                            }>
-                        }).steps, entryId);
+                                reasoningContent?: string;
+                                toolNames?: string[];
+                                toolCalls?: Array<{ name: string; result?: string }>;
+                                text?: string;
+                                content?: string
+                            }>;
+                            duration?: number
+                        };
+                        const normSteps = rawEntry.steps.map(s => ({
+                            reasoning: s.reasoning || "",
+                            reasoningContent: s.reasoningContent || "",
+                            toolNames: (s.toolNames && s.toolNames.length > 0)
+                                ? s.toolNames
+                                : (s.toolCalls ? s.toolCalls.map(t => t.name) : undefined),
+                            content: s.content,
+                        }));
+                        // entry.duration 优先；否则尝试从最后一个 step.text 提取（老格式）。
+                        let dur: number | undefined = rawEntry.duration;
+                        if (dur === undefined) {
+                            const lastText = rawEntry.steps[rawEntry.steps.length - 1]?.text;
+                            if (lastText) {
+                                const m = lastText.match(/([\d.]+)\s*s/i);
+                                if (m) { dur = parseFloat(m[1]); }
+                            }
+                        }
+                        this.renderMergedThinkingCard(normSteps, entryId, dur);
                     }
                     break;
                 case "assistant":
@@ -863,6 +890,7 @@ export class AgentChat extends Model {
         await this.saveSession();
 
         this.requestStartTime = Date.now();
+        this.currentThinkingDuration = 0;
 
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
@@ -1206,16 +1234,15 @@ export class AgentChat extends Model {
     private appendThinking(reasoning: string) {
         const L = window.siyuan.languages;
         if (this.currentThinkingText) {
-            let doneText = this.currentThinkingText;
-            this.currentThinkingText = doneText;
-            const tc = this.currentToolCalls.map(function (t) {
-                return {name: t.name, result: t.result};
+            // step 不再保存 text（渲染时由 duration 经 i18n 生成），
+            // 工具调用只留名字（arguments/result 在 assistant entry 存一份）。
+            const toolNames = this.currentToolCalls.map(function (t) {
+                return t.name;
             });
             this.currentThinkingSteps.push({
                 reasoning: this.currentThinkingReasoning,
-                text: this.currentThinkingText,
-                toolCalls: tc,
                 reasoningContent: this.currentThinkingReasoningContent,
+                toolNames: toolNames.length > 0 ? toolNames : undefined,
             });
         }
         this.currentThinkingText = "";
@@ -1227,12 +1254,12 @@ export class AgentChat extends Model {
 
         let detailLines = "";
         if (reasoning === "processing" && this.currentToolCalls.length > 0) {
-            const newTools: Array<{ name: string; result?: string }> = [];
+            const newTools: Array<{ name: string }> = [];
             for (let i = 0; i < this.currentToolCalls.length; i++) {
                 const tc = this.currentToolCalls[i];
                 if (!this.renderedToolNames[tc.name]) {
                     this.renderedToolNames[tc.name] = true;
-                    newTools.push(tc);
+                    newTools.push({name: tc.name});
                 }
             }
             if (newTools.length > 0) {
@@ -1246,7 +1273,7 @@ export class AgentChat extends Model {
                 if (bodyEl) {
                     bodyEl.classList.remove("agent-chat__body--streaming");
                 }
-                this.currentThinkingStepContent = this.currentContent;
+                this.attachStepContent(this.currentContent);
                 this.currentAIElement.remove();
             } else {
                 this.currentAIElement.remove();
@@ -1256,7 +1283,7 @@ export class AgentChat extends Model {
         this.currentThinkingEntryId = "";
         this.currentContent = "";
         } else if (reasoning === "processing" && this.currentContent) {
-            this.currentThinkingStepContent = this.currentContent;
+            this.attachStepContent(this.currentContent);
             this.currentContent = "";
             const streamingEl = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-chat--streaming") as HTMLElement;
             if (streamingEl) {
@@ -1281,13 +1308,16 @@ export class AgentChat extends Model {
             }
             if (this.currentThinkingStepContent && this.currentThinkingSteps.length > 0) {
                 this.currentThinkingSteps[this.currentThinkingSteps.length - 1].content = this.currentThinkingStepContent;
+                this.currentThinkingStepContent = "";
             }
             if (this.currentThinkingSteps.length > 0) {
-                this.entries.push({id: this.currentThinkingEntryId || undefined, type: "thinking", steps: this.currentThinkingSteps.slice()});
+                this.entries.push({id: this.currentThinkingEntryId || undefined, type: "thinking", steps: this.currentThinkingSteps.slice(), duration: this.currentThinkingDuration || undefined});
                 this.currentThinkingSteps = [];
                 this.currentThinkingEntryId = "";
             }
-            this.currentThinkingStepContent = "";
+            // 卡片边界：一张思考卡片已落盘，重置工具名去重表，使下一张卡片独立显示本轮工具
+            // （与重载路径 renderMergedThinkingCard 的单卡片局部去重 seenTools 对齐）。
+            this.renderedToolNames = {};
             // Flush tool calls as assistant entry
             if (this.currentToolCalls.length > 0) {
                 this.entries.push({id: SessionStore.newSessionId(), type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
@@ -1567,16 +1597,25 @@ export class AgentChat extends Model {
         }
     }
 
+    // 把上一轮在思考卡片内显示过的 content 归属到刚 push 的最后一个 step，
+    // 并清空 currentThinkingStepContent。这样每个 step 的 content 都能正确归属到自己的轮次，
+    // 而不会被 flushThinkingStep 错挂到下一轮的 step（导致重载后 content 位置错位）。
+    private attachStepContent(content: string) {
+        if (content && this.currentThinkingSteps.length > 0) {
+            this.currentThinkingSteps[this.currentThinkingSteps.length - 1].content = content;
+        }
+        this.currentThinkingStepContent = "";
+    }
+
     private flushThinkingStep() {
         if (this.currentThinkingText) {
-            const tc = this.currentToolCalls.map(function (t) {
-                return {name: t.name, result: t.result};
+            const toolNames = this.currentToolCalls.map(function (t) {
+                return t.name;
             });
             this.currentThinkingSteps.push({
                 reasoning: this.currentThinkingReasoning,
-                text: this.currentThinkingText,
-                toolCalls: tc,
                 reasoningContent: this.currentThinkingReasoningContent,
+                toolNames: toolNames.length > 0 ? toolNames : undefined,
                 content: this.currentThinkingStepContent,
             });
             this.currentThinkingText = "";
@@ -1587,9 +1626,12 @@ export class AgentChat extends Model {
                 id: this.currentThinkingEntryId || undefined,
                 type: "thinking",
                 steps: this.currentThinkingSteps.slice(),
+                duration: this.currentThinkingDuration || undefined,
             });
             this.currentThinkingSteps = [];
             this.currentThinkingEntryId = "";
+            // 卡片边界：与 appendThinking 的 hasInterveningCard 分支一致，重置工具名去重表。
+            this.renderedToolNames = {};
         }
     }
 
@@ -1633,6 +1675,7 @@ export class AgentChat extends Model {
         this.finishActiveThinking();
         this.currentThinkingSteps = [];
         this.currentThinkingStepContent = "";
+        this.renderedToolNames = {};
         this.clearThinking();
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--thinking";
@@ -1959,7 +2002,7 @@ export class AgentChat extends Model {
     private renderSingleThinkingCard(step: {
         reasoning: string;
         text: string;
-        toolCalls: Array<{ name: string; result?: string }>;
+        toolNames?: string[];
         reasoningContent: string
     }) {
         const el = createThinkingCardElement(step);
@@ -1969,11 +2012,10 @@ export class AgentChat extends Model {
 
     private renderMergedThinkingCard(steps: Array<{
         reasoning: string;
-        text: string;
-        toolCalls: Array<{ name: string; result?: string }>;
         reasoningContent: string;
+        toolNames?: string[];
         content?: string
-    }>, entryId?: string) {
+    }>, entryId?: string, duration?: number) {
         if (!steps || steps.length === 0) { return; }
         let detail = "";
         const seenTools: Record<string, boolean> = {};
@@ -1982,24 +2024,28 @@ export class AgentChat extends Model {
             if (step.content) {
                 detail += '<div class="agent-chat__thinking-chat">' + (this.lute.MarkdownStr("", step.content) || escapeHtml(step.content)) + "</div>";
             }
-            if (step.toolCalls.length > 0) {
-                const newTools = step.toolCalls.filter(tc => !seenTools[tc.name]);
+            if (step.reasoningContent) {
+                detail += '<div class="agent-chat__thinking-reasoning-text">' + escapeHtml(step.reasoningContent) + "</div>";
+            }
+            // 工具行放在该步 reasoning 之后，对齐实时流式渲染中
+            // 「reasoning/content 先到、工具行在下一轮 thinking 时补到末尾」的实际呈现。
+            const names = step.toolNames && step.toolNames.length > 0
+                ? step.toolNames
+                : undefined;
+            if (names && names.length > 0) {
+                const newTools = names.filter(n => !seenTools[n]);
                 if (newTools.length > 0) {
                     detail += "<div class=\"agent-chat__thinking-tools-line\"><span class=\"agent-chat__thinking-summary\">Tool calls:</span>";
                     for (let j = 0; j < newTools.length; j++) {
-                        const tc = newTools[j];
-                        seenTools[tc.name] = true;
-                        detail += '<span class="agent-chat__thinking-tool">' + escapeHtml(tc.name) + "</span>";
+                        seenTools[newTools[j]] = true;
+                        detail += '<span class="agent-chat__thinking-tool">' + escapeHtml(newTools[j]) + "</span>";
                     }
                     detail += "</div>";
                 }
             }
-            if (step.reasoningContent) {
-                detail += '<div class="agent-chat__thinking-reasoning-text">' + escapeHtml(step.reasoningContent) + "</div>";
-            }
         }
 
-        const headerText = steps[steps.length - 1].text;
+        const headerText = this.formatThinkingHeader(duration);
 
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--thinking agent-chat__msg--thinking-done";
@@ -2023,6 +2069,15 @@ export class AgentChat extends Model {
         bindThinkingCardToggle(el);
         this.messagesContainer.appendChild(el);
         postRender(el);
+    }
+
+    // 由 duration 经 i18n 生成"已思考：Xs"标题文本；无 duration 时回退到"思考中..."。
+    private formatThinkingHeader(duration?: number): string {
+        const L = window.siyuan.languages;
+        if (duration && duration > 0) {
+            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", duration.toFixed(1) + "s") : (L.agentThinking || "Thinking...");
+        }
+        return L.agentThinking || "Thinking...";
     }
 
     private updateTokenDisplay() {
@@ -2063,9 +2118,12 @@ export class AgentChat extends Model {
 
     private finishActiveThinking() {
         const L = window.siyuan.languages;
-        const dur = this.requestStartTime ? ((Date.now() - this.requestStartTime) / 1000).toFixed(1) + "s" : "";
-        let doneText = L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", dur) : (L.agentThinking || "Thinking...");
-        this.currentThinkingText = doneText || this.currentThinkingText;
+        // 耗时存为数值（用于持久化 entry.duration），"已思考：Xs" 文本只在 DOM 显示、不落盘。
+        const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
+        this.currentThinkingDuration = durSec;
+        const doneText = durSec > 0
+            ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", durSec.toFixed(1) + "s") : (L.agentThinking || "Thinking..."))
+            : (L.agentThinking || "Thinking...");
 
         const items = this.messagesContainer.querySelectorAll(
             ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"

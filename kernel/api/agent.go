@@ -451,3 +451,26 @@ func removeSkill(c *gin.Context) {
 		return
 	}
 }
+
+type skillRenameReq struct {
+	OldName string `json:"oldName"`
+	NewName string `json:"newName"`
+}
+
+func renameSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillRenameReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	if err := util.RenameSkill(req.OldName, req.NewName); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

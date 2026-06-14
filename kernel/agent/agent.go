@@ -789,6 +789,16 @@ func buildSystemPrompt(language string, references []Reference) string {
 		sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
 	}
 
+	sb.WriteString("\n\n")
+	sb.WriteString("## Skill Management\n")
+	sb.WriteString("You can create, update, and delete skills using the skill tool:\n")
+	sb.WriteString("- skill with action \"save\": create or update a skill. Provide name (safe directory name) and content (SKILL.md full text).\n")
+	sb.WriteString("- skill with action \"remove\": delete a skill by name.\n")
+	sb.WriteString("- skill with action \"rename\": rename a skill. Provide name (old directory name) and new_name (new directory name).\n")
+	sb.WriteString("- skill with action \"list\": list all available skills.\n")
+	sb.WriteString("A SKILL.md file uses YAML frontmatter (---\\nname: skill name\\ndescription: skill description\\n---) followed by markdown body with instructions.\n")
+	sb.WriteString("When the user asks to save a process or workflow as a reusable skill, use skill with action \"save\" to create it.")
+
 	sb.WriteString("\n\nReply in ")
 	sb.WriteString(util.I18nTerm(language, "_label"))
 	sb.WriteString(".")

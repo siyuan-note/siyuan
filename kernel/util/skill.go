@@ -151,6 +151,25 @@ func RemoveSkill(name string) error {
 	return os.RemoveAll(skillDir)
 }
 
+func RenameSkill(oldName, newName string) error {
+	if err := validateSkillName(oldName); err != nil {
+		return err
+	}
+	if err := validateSkillName(newName); err != nil {
+		return err
+	}
+	dir := SkillsDir()
+	oldDir := filepath.Join(dir, oldName)
+	newDir := filepath.Join(dir, newName)
+	if _, err := os.Stat(oldDir); os.IsNotExist(err) {
+		return fmt.Errorf("skill not found: %s", oldName)
+	}
+	if _, err := os.Stat(newDir); err == nil {
+		return fmt.Errorf("skill already exists: %s", newName)
+	}
+	return os.Rename(oldDir, newDir)
+}
+
 func parseSkillFrontmatter(text string) (fm map[string]string, body string) {
 	fm = map[string]string{}
 	text = strings.TrimSpace(text)

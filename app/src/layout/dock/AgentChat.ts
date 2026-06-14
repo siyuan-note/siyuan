@@ -119,6 +119,8 @@ export class AgentChat extends Model {
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
     private navExpandTimer = 0;
+    // 思考计时器：流式进行时每 100ms 刷新未完成思考卡片的标题为「思考中... X.Xs」。
+    private thinkingTimerId = 0;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -642,9 +644,8 @@ export class AgentChat extends Model {
             if (tc.result && tc.name === "todo_write") {
                 const rel = document.createElement("div");
                 rel.className = "agent-chat__msg agent-chat__msg--tool";
-                if (entryId) {
-                    rel.setAttribute("data-message-id", entryId);
-                }
+                // todo 卡片是 assistant entry 的附属展示，不单独持有 entryId
+                // （entryId 属于后续的 AI 消息元素），避免多个 todo 共享同一 id。
                 rel.innerHTML = renderTodoList(tc.result);
                 this.messagesContainer.appendChild(rel);
                 hasRendered = true;
@@ -1267,6 +1268,7 @@ export class AgentChat extends Model {
 
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--tool";
+        el.setAttribute("data-message-id", SessionStore.newSessionId());
         el.innerHTML = renderTodoList(result);
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
@@ -1386,6 +1388,7 @@ export class AgentChat extends Model {
                 existingBody.innerHTML += detailLines;
             }
             this.scrollToBottom();
+            this.startThinkingTimer();
             return;
         }
         if (existingCard) {
@@ -1418,6 +1421,7 @@ export class AgentChat extends Model {
         this.insertBeforeAI(el);
         this.scrollToBottom();
         this.observeStickTarget(el);
+        this.startThinkingTimer();
     }
 
     private appendReasoning(token: string) {
@@ -1744,7 +1748,13 @@ export class AgentChat extends Model {
         rollbackBtn.addEventListener("click", () => {
             const confirmText = (L.rollbackConfirm || "Rollback cannot be undone").replace("${name}", L.dataSnapshot || "Snapshot").replace("${time}", shortID);
             confirmDialog("⚠️ " + (L.rollback || "Rollback"), confirmText, () => {
-                fetchPost("/api/repo/checkoutRepo", {id: snapshotID, sessionID: this.sessionId}, () => {});
+                fetchPost("/api/repo/checkoutRepo", {id: snapshotID, sessionID: this.sessionId}, () => {
+                    // 记录回滚操作，使重载会话后仍可见「已回滚」提示（激活 appendRollbackInfo 渲染分支）。
+                    const rollbackEntryId = SessionStore.newSessionId();
+                    this.entries.push({id: rollbackEntryId, type: "rollback", snapshotID: snapshotID});
+                    this.appendRollbackInfo(snapshotID, rollbackEntryId);
+                    void this.saveSession();
+                });
             });
         });
         this.insertBeforeAI(el);
@@ -2133,7 +2143,7 @@ export class AgentChat extends Model {
     private formatThinkingHeader(duration?: number): string {
         const L = window.siyuan.languages;
         if (duration && duration > 0) {
-            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", duration.toFixed(1) + "s") : (L.agentThinking || "Thinking...");
+            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(duration) + "s") : (L.agentThinking || "Thinking...");
         }
         return L.agentThinking || "Thinking...";
     }
@@ -2174,13 +2184,43 @@ export class AgentChat extends Model {
         }
     }
 
+    // 启动思考计时器，每 100ms 刷新所有未完成思考卡片的标题文本为「思考中... X.Xs」。
+    private startThinkingTimer() {
+        this.stopThinkingTimer();
+        if (!this.requestStartTime) {
+            return;
+        }
+        const tick = () => {
+            const sec = Math.floor((Date.now() - this.requestStartTime) / 1000);
+            const L = window.siyuan.languages;
+            const live = (L.agentThinking || "Thinking...") + " " + sec + "s";
+            const cards = this.messagesContainer.querySelectorAll(
+                ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-text"
+            );
+            for (let i = 0; i < cards.length; i++) {
+                (cards[i] as HTMLElement).textContent = live;
+            }
+        };
+        tick();
+        this.thinkingTimerId = window.setInterval(tick, 100);
+    }
+
+    // 停止思考计时器（思考结束/切换会话/停止生成时调用，避免泄漏）。
+    private stopThinkingTimer() {
+        if (this.thinkingTimerId) {
+            clearInterval(this.thinkingTimerId);
+            this.thinkingTimerId = 0;
+        }
+    }
+
     private finishActiveThinking() {
+        this.stopThinkingTimer();
         const L = window.siyuan.languages;
         // 耗时存为数值（用于持久化 entry.duration），"已思考：Xs" 文本只在 DOM 显示、不落盘。
         const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
         this.currentThinkingDuration = durSec;
         const doneText = durSec > 0
-            ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", durSec.toFixed(1) + "s") : (L.agentThinking || "Thinking..."))
+            ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(durSec) + "s") : (L.agentThinking || "Thinking..."))
             : (L.agentThinking || "Thinking...");
 
         const items = this.messagesContainer.querySelectorAll(

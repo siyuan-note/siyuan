@@ -49,7 +49,6 @@ type Agent struct {
 // from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
 type Chat struct {
 	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
-	MaxContinueRounds   int     `json:"maxContinueRounds"`   // Max continuation rounds when finish_reason=length
 	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
 	MaxCompletionTokens int     `json:"maxCompletionTokens"` // Alignment with Agent.MaxCompletionTokens
 }
@@ -120,7 +119,6 @@ func NewAI() *AI {
 		},
 		Chat: &Chat{
 			MaxHistoryMessages:  7,
-			MaxContinueRounds:   7,
 			Temperature:         1.0,
 			MaxCompletionTokens: 0,
 		},
@@ -160,7 +158,6 @@ func NewAI() *AI {
 		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
 			if v, err := strconv.Atoi(maxContexts); err == nil {
 				ai.Chat.MaxHistoryMessages = v
-				ai.Chat.MaxContinueRounds = v
 			}
 		}
 
@@ -393,7 +390,6 @@ func MigrateAI(data []byte) *AI {
 		maxContexts := getInt(oai, "apiMaxContexts")
 		ai.Chat = &Chat{
 			MaxHistoryMessages:  maxContexts,
-			MaxContinueRounds:   maxContexts,
 			Temperature:         getFloat(oai, "apiTemperature"),
 			MaxCompletionTokens: getInt(oai, "apiMaxTokens"),
 		}

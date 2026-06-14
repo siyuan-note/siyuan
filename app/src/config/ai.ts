@@ -23,7 +23,6 @@ function getDefaultProvider() {
 function getDefaultChat() {
     return window.siyuan.config.ai.chat || {
         maxHistoryMessages: 7,
-        maxContinueRounds: 7,
         temperature: 1.0,
         maxCompletionTokens: 0,
     };
@@ -226,7 +225,7 @@ export const ai = {
                 const providers = window.siyuan.config.ai.providers || [];
                 const firstProvider = providers[0] || {apiKey: "", baseURL: "https://api.openai.com/v1", requestTimeout: 30, models: []};
                 const firstModel = firstProvider.models?.[0] || {name: ""};
-                const chat = window.siyuan.config.ai.chat || {maxHistoryMessages: 7, maxContinueRounds: 7, temperature: 1.0, maxCompletionTokens: 0};
+                const chat = window.siyuan.config.ai.chat || {maxHistoryMessages: 7, temperature: 1.0, maxCompletionTokens: 0};
                 fetchPost("/api/setting/setAI", {
                     providers: [{
                         apiKey: (ai.element.querySelector("#apiKey") as HTMLInputElement)?.value || firstProvider.apiKey || "",
@@ -240,7 +239,6 @@ export const ai = {
                         maxCompletionTokens: parseInt((ai.element.querySelector("#chatMaxCompletionTokens") as HTMLInputElement)?.value) || 0,
                         temperature: parseFloat((ai.element.querySelector("#chatTemperature") as HTMLInputElement)?.value) || chat.temperature || 1.0,
                         maxHistoryMessages: parseInt((ai.element.querySelector("#chatMaxHistoryMessages") as HTMLInputElement)?.value) || chat.maxHistoryMessages || 7,
-                        maxContinueRounds: chat.maxContinueRounds || 7,
                     },
                     agent: {
                         sessionTimeout: parseInt((ai.element.querySelector("#agentTimeout") as HTMLInputElement)?.value) || 600,

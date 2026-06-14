@@ -605,7 +605,6 @@ func InitConf() {
 	if nil == Conf.AI.Chat {
 		Conf.AI.Chat = &conf.Chat{
 			MaxHistoryMessages:  7,
-			MaxContinueRounds:   7,
 			Temperature:         1.0,
 			MaxCompletionTokens: 0,
 		}
@@ -638,9 +637,6 @@ func InitConf() {
 	if 1 > Conf.AI.Chat.MaxHistoryMessages || 64 < Conf.AI.Chat.MaxHistoryMessages {
 		Conf.AI.Chat.MaxHistoryMessages = 7
 	}
-	if 1 > Conf.AI.Chat.MaxContinueRounds || 64 < Conf.AI.Chat.MaxContinueRounds {
-		Conf.AI.Chat.MaxContinueRounds = 7
-	}
 
 	for _, p := range Conf.AI.Providers {
 		if p == nil || len(p.APIKey) == 0 {
@@ -656,15 +652,13 @@ func InitConf() {
 				"    model=%s\n"+
 				"    maxCompletionTokens=%d\n"+
 				"    temperature=%.1f\n"+
-				"    maxHistoryMessages=%d\n"+
-				"    maxContinueRounds=%d",
+				"    maxHistoryMessages=%d",
 				p.BaseURL,
 				p.RequestTimeout,
 				m.Name,
 				Conf.AI.Chat.MaxCompletionTokens,
 				Conf.AI.Chat.Temperature,
-				Conf.AI.Chat.MaxHistoryMessages,
-				Conf.AI.Chat.MaxContinueRounds)
+				Conf.AI.Chat.MaxHistoryMessages)
 		}
 	}
 

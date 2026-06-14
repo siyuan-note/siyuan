@@ -1883,6 +1883,7 @@
     "293": "Impossible d'écrire le fichier",
     "294": "Le code d'activation ne peut pas être vide",
     "295": "Cette fonctionnalité nécessite l'achat d'un [abonnement annuel] (si vous avez déjà acheté, actualisez ou reconnectez-vous dans Paramètres - Compte)",
-    "296": "Rebuilding search index..."
+    "296": "Reconstruction de l'index de recherche...",
+    "297": "La sortie a atteint la limite maximale de jetons"
   }
 }

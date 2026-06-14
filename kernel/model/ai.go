@@ -62,7 +62,7 @@ func chatGPT(msg string, cloud bool) (ret string) {
 		return
 	}
 
-	ret, retCtxMsgs, err := chatGPTContinueWrite(msg, cachedContextMsg, cloud)
+	ret, retCtxMsgs, err := chatGPTComplete(msg, cachedContextMsg, cloud)
 	if err != nil {
 		return
 	}
@@ -75,14 +75,14 @@ func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
 	if "" != action {
 		msg = action + ":\n\n" + msg
 	}
-	ret, _, err := chatGPTContinueWrite(msg, nil, cloud)
+	ret, _, err := chatGPTComplete(msg, nil, cloud)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string, err error) {
+func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string, err error) {
 	util.PushEndlessProgress("Requesting...")
 	defer util.ClearPushProgress(100)
 
@@ -115,20 +115,21 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 		}
 	}
 
-	buf := &bytes.Buffer{}
-	for i := 0; i < chat.MaxContinueRounds; i++ {
-		part, stop, chatErr := gpt.chat(msg, contextMsgs)
-		buf.WriteString(part)
-
-		if stop || nil != chatErr {
-			break
-		}
-
-		util.PushEndlessProgress("Continue requesting...")
+	part, stop, chatErr := gpt.chat(msg, contextMsgs)
+	if nil != chatErr {
+		err = chatErr
+		return
 	}
 
-	ret = buf.String()
-	ret = strings.TrimSpace(ret)
+	// stop==false means finish_reason=length: the output was truncated at
+	// MaxCompletionTokens. Retrying the same prompt would almost certainly hit
+	// the same limit again, so we return whatever was produced and notify the
+	// user instead of silently looping. See https://github.com/siyuan-note/siyuan/issues/17797
+	if !stop {
+		util.PushMsg(Conf.Language(297), 5000)
+	}
+
+	ret = strings.TrimSpace(part)
 	if "" != ret {
 		retContextMsgs = append(retContextMsgs, msg, ret)
 	}

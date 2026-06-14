@@ -1883,6 +1883,7 @@
     "293": "Do súboru sa nedá zapísať",
     "294": "Aktivačný kód nemôže byť prázdny",
     "295": "Táto funkcia vyžaduje ročné predplatné",
-    "296": "Rebuilding search index..."
+    "296": "Obnovuje sa index vyhľadávania...",
+    "297": "Výstup dosiahol limit maximálneho počtu tokenov"
   }
 }

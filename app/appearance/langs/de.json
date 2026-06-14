@@ -1883,6 +1883,7 @@
     "293": "Datei kann nicht geschrieben werden",
     "294": "Aktivierungscode darf nicht leer sein",
     "295": "Diese Funktion erfordert den Kauf eines [Jahresabonnements] (wenn Sie bereits gekauft haben, aktualisieren oder erneut anmelden in Einstellungen - Konto)",
-    "296": "Rebuilding search index..."
+    "296": "Suchindex wird neu aufgebaut...",
+    "297": "Die Ausgabe hat das Limit für die maximale Token-Anzahl erreicht"
   }
 }

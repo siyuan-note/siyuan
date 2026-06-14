@@ -1883,6 +1883,7 @@
     "293": "Dosyaya yazılamadı",
     "294": "Etkinleştirme kodu boş olamaz",
     "295": "Bu özellik için [Yıllık Abonelik] gereklidir (zaten satın aldıysan Ayarlar - Hesap kısmından yenile veya tekrar giriş yap)",
-    "296": "Rebuilding search index..."
+    "296": "Arama dizini yeniden oluşturuluyor...",
+    "297": "Çıktı, maksimum tamamlama token sınırına ulaştı"
   }
 }

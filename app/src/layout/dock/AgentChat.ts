@@ -103,6 +103,9 @@ export class AgentChat extends Model {
     private modelOptions: Array<{ id: string; name: string }> = [];
     private userScrolledUp = false;
     private scrollBottomBtn: HTMLElement;
+    private navRail: HTMLElement;
+    private navPreview: HTMLElement;
+    private navPreviewTimer = 0;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -167,6 +170,9 @@ export class AgentChat extends Model {
             this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 20;
             this.scrollBottomBtn.classList.toggle("agent-chat__scroll-bottom--visible", this.userScrolledUp);
         });
+
+        const messagesWrap = panel.querySelector(".agent-chat__messages-wrap") as HTMLElement;
+        this.initNavRail(messagesWrap);
 
         this.initModelSelect();
 
@@ -325,6 +331,7 @@ export class AgentChat extends Model {
                     const userEntryId = SessionStore.newSessionId();
                     this.entries.push({id: userEntryId, type: "user", content: text, timestamp: Date.now()});
                     this.appendUserMessage(text, Date.now(), userEntryId);
+                    this.rebuildNavMarkers();
                     this.tryGenerateTitle();
                     this.setStreaming(true);
                     this.abortController = new AbortController();
@@ -349,6 +356,93 @@ export class AgentChat extends Model {
                 }
             });
         });
+    }
+
+    private initNavRail(wrap: HTMLElement) {
+        this.navRail = document.createElement("div");
+        this.navRail.className = "agent-chat__nav-rail";
+        this.navPreview = document.createElement("div");
+        this.navPreview.className = "agent-chat__nav-preview fn__none";
+
+        this.navRail.addEventListener("mouseover", (e: MouseEvent) => {
+            const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
+            if (!marker) { return; }
+            this.showNavPreview(marker);
+        });
+        this.navRail.addEventListener("mouseleave", () => {
+            this.hideNavPreview();
+        });
+        this.navRail.addEventListener("click", (e: MouseEvent) => {
+            const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
+            if (!marker) { return; }
+            this.jumpToMessage(marker.dataset.messageId || "");
+        });
+
+        wrap.appendChild(this.navRail);
+        wrap.appendChild(this.navPreview);
+    }
+
+    private rebuildNavMarkers() {
+        this.navRail.innerHTML = "";
+        const userEntries = this.entries.filter((e): e is { id?: string; type: "user"; content: string; timestamp?: number } => e.type === "user");
+        if (userEntries.length === 0) { return; }
+
+        const gap = Math.max(0.5, Math.min(3, 40 / userEntries.length));
+
+        for (const entry of userEntries) {
+            const marker = document.createElement("div");
+            marker.className = "agent-chat__nav-rail-marker";
+            marker.style.marginBottom = gap + "px";
+            marker.dataset.messageId = entry.id || "";
+            marker.dataset.preview = entry.content.slice(0, 120);
+            if (entry.timestamp) {
+                marker.dataset.time = this.formatMessageTime(entry.timestamp);
+            }
+            this.navRail.appendChild(marker);
+        }
+    }
+
+    private showNavPreview(marker: HTMLElement) {
+        clearTimeout(this.navPreviewTimer);
+        const text = marker.dataset.preview || "";
+        const time = marker.dataset.time || "";
+        let html = "";
+        if (time) {
+            html += '<div class="agent-chat__nav-preview-time">' + escapeHtml(time) + "</div>";
+        }
+        html += '<div class="agent-chat__nav-preview-body">' + escapeHtml(text) + "</div>";
+        this.navPreview.innerHTML = html;
+        this.navPreview.classList.remove("fn__none");
+
+        const wrap = this.navRail.parentElement;
+        if (!wrap) { return; }
+        const markerRect = marker.getBoundingClientRect();
+        const wrapRect = wrap.getBoundingClientRect();
+        const previewWidth = 200;
+        const rightOffset = wrapRect.right - markerRect.left + 4;
+        let topOffset = markerRect.top - wrapRect.top - 4;
+        const maxTop = wrapRect.height - this.navPreview.offsetHeight - 4;
+        topOffset = Math.max(0, Math.min(topOffset, maxTop));
+        this.navPreview.style.right = rightOffset + "px";
+        this.navPreview.style.top = topOffset + "px";
+        this.navPreview.style.width = previewWidth + "px";
+    }
+
+    private hideNavPreview() {
+        this.navPreviewTimer = window.setTimeout(() => {
+            this.navPreview.classList.add("fn__none");
+        }, 100);
+    }
+
+    private jumpToMessage(messageId: string) {
+        if (!messageId) { return; }
+        const el = this.messagesContainer.querySelector('[data-message-id="' + messageId + '"]') as HTMLElement;
+        if (!el) { return; }
+        el.scrollIntoView({behavior: "smooth", block: "center"});
+        el.classList.add("agent-chat__msg--jumped");
+        setTimeout(() => {
+            el.classList.remove("agent-chat__msg--jumped");
+        }, 1500);
     }
 
     private bindEvents() {
@@ -433,6 +527,7 @@ export class AgentChat extends Model {
                 this.titleElement.textContent = session.title;
                 this.updateTokenDisplay();
                 this.renderLoadedSession(session);
+                this.rebuildNavMarkers();
                 this.scrollToBottom(true);
                 return;
             }
@@ -502,6 +597,7 @@ export class AgentChat extends Model {
             this.messagesContainer.innerHTML = "";
             this.titleElement.textContent = session.title;
             this.renderLoadedSession(session);
+            this.rebuildNavMarkers();
             this.scrollToBottom(true);
             this.messagesContainer.classList.remove("agent-chat__messages--switching");
         }, {once: true});
@@ -694,6 +790,7 @@ export class AgentChat extends Model {
         this.currentThinkingSteps = [];
         this.currentThinkingStepContent = "";
         this.pendingConfirms = [];
+        this.rebuildNavMarkers();
         this.titleElement.textContent = this.defaultTitle;
         if (this.composer) {
             this.composer.clear();
@@ -746,6 +843,7 @@ export class AgentChat extends Model {
             this.messagesContainer.innerHTML = "";
         }
         this.appendUserMessage(text, Date.now(), userEntryId);
+        this.rebuildNavMarkers();
         this.tryGenerateTitle();
         if (this.composer) {
             this.composer.pushHistory(text);
@@ -1207,6 +1305,7 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = "";
         this.currentThinkingReasoningContent = "";
+        this.rebuildNavMarkers();
 
         // Re-submit
         this.setStreaming(true);
@@ -1302,6 +1401,7 @@ export class AgentChat extends Model {
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
+        this.rebuildNavMarkers();
         if (savedContent && (!document.hasFocus() || document.hidden)) {
             const L = window.siyuan.languages;
             sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
@@ -1486,6 +1586,7 @@ export class AgentChat extends Model {
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
+        this.rebuildNavMarkers();
     }
 
     private insertBeforeAI(el: HTMLElement) {

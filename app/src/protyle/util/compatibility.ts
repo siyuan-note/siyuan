@@ -455,7 +455,12 @@ export function isChromeBrowser(): boolean {
         }
     };
     if (nav.userAgentData && Array.isArray(nav.userAgentData.brands)) {
-        return nav.userAgentData.brands.some((b: any) => /Chrome|Chromium/i.test(b.brand));
+        const brands = nav.userAgentData.brands.map((b) => b.brand);
+        // Edge、Opera 等 Chromium 内核浏览器 brands 中同样包含 Chromium，需与 userAgent 回退逻辑一致排除
+        if (brands.some((brand) => /Edge|Opera|OPR/i.test(brand))) {
+            return false;
+        }
+        return brands.some((brand) => /Chrome|Chromium/i.test(brand));
     }
     // 回退到 userAgent
     const ua = nav.userAgent || "";

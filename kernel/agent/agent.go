@@ -204,6 +204,15 @@ type Reference struct {
 	Title string `json:"title"`
 }
 
+// EditorContext 是发送消息时前端编辑器的只读状态快照。
+// 字段有意只传 ID 而不传正文 —— system prompt 会指示 LLM 用 block 工具按需拉取内容，
+// 与 Reference 的处理方式保持一致。
+type EditorContext struct {
+	ActiveDocID      string   `json:"activeDocID,omitempty"`      // 当前激活文档的 root block ID
+	FocusedBlockID   string   `json:"focusedBlockID,omitempty"`   // 光标/聚焦所在块 ID（editor.protyle.block.id）
+	SelectedBlockIDs []string `json:"selectedBlockIDs,omitempty"` // 用户选中的块 ID 列表
+}
+
 type checkpointThinkingStep struct {
 	Reasoning        string              `json:"reasoning"`
 	Text             string              `json:"text"`
@@ -233,7 +242,7 @@ type agentCheckpoint struct {
 	AlwaysAllow      bool                     `json:"alwaysAllow,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 100)
 
 	go func() {
@@ -281,14 +290,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 					checkpointMsgs = truncated
 					checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
-					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references)
+					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references, editorCtx)
 				}
 			}
 		}
 
 		if messages == nil {
 			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage}}
-			messages = buildInitialMessages(userMessage, language, references)
+			messages = buildInitialMessages(userMessage, language, references, editorCtx)
 		}
 
 		temperature := kernelModel.Conf.AI.Agent.Temperature
@@ -759,7 +768,7 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	return strings.Join(answer.Answers, ", ")
 }
 
-func buildSystemPrompt(language string, references []Reference) string {
+func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext) string {
 	var sb strings.Builder
 	sb.WriteString(systemPrompt)
 	sb.WriteString("\n\n<env>\nWorkspace: ")
@@ -816,12 +825,36 @@ func buildSystemPrompt(language string, references []Reference) string {
 		}
 		sb.WriteString("Use the block tools to fetch their actual content before responding.")
 	}
+	if editorCtx.ActiveDocID != "" || len(editorCtx.SelectedBlockIDs) > 0 || editorCtx.FocusedBlockID != "" {
+		sb.WriteString("\n\n<editor_context>\n")
+		sb.WriteString("This is the user's editor state at the moment they sent the message. It may be stale by now.\n")
+		if editorCtx.ActiveDocID != "" {
+			sb.WriteString("Active document root block id: ")
+			sb.WriteString(editorCtx.ActiveDocID)
+			sb.WriteString("\n")
+		}
+		if editorCtx.FocusedBlockID != "" && editorCtx.FocusedBlockID != editorCtx.ActiveDocID {
+			sb.WriteString("Cursor/focused block id: ")
+			sb.WriteString(editorCtx.FocusedBlockID)
+			sb.WriteString("\n")
+		}
+		if len(editorCtx.SelectedBlockIDs) > 0 {
+			sb.WriteString("Selected block ids:\n")
+			for _, id := range editorCtx.SelectedBlockIDs {
+				sb.WriteString("- ")
+				sb.WriteString(id)
+				sb.WriteString("\n")
+			}
+		}
+		sb.WriteString("Use the block tools (e.g. block with action \"get\") to fetch actual content before responding.")
+		sb.WriteString("\n</editor_context>")
+	}
 	return sb.String()
 }
 
-func buildInitialMessages(userMessage string, language string, references []Reference) []openai.ChatCompletionMessage {
+func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext) []openai.ChatCompletionMessage {
 	return []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx)},
 		{Role: openai.ChatMessageRoleUser, Content: userMessage},
 	}
 }
@@ -843,9 +876,9 @@ func loadCheckpoint(sessionID string) *agentCheckpoint {
 	return &cp
 }
 
-func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference) []openai.ChatCompletionMessage {
+func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference, editorCtx EditorContext) []openai.ChatCompletionMessage {
 	msgs := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx)},
 	}
 
 	for cmi := range checkpointMsgs {

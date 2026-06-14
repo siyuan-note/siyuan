@@ -42,6 +42,12 @@ export type ISSEResult = {
     snapshotID: string;
 };
 
+export type IEditorContext = {
+    activeDocID?: string;
+    focusedBlockID?: string;
+    selectedBlockIDs?: string[];
+};
+
 export async function fetchAgentSSE(
     message: string,
     language: string,
@@ -52,12 +58,14 @@ export async function fetchAgentSSE(
     sessionID?: string,
     model?: string,
     regenerate?: boolean,
+    editorContext?: IEditorContext,
 ): Promise<void> {
     try {
         const body: Record<string, unknown> = {message: message, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
         if (model) { body.model = model; }
         if (regenerate) { body.regenerate = regenerate; }
+        if (editorContext) { body.editorContext = editorContext; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",

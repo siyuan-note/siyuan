@@ -1,8 +1,9 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {App} from "../../index";
-import {fetchAgentSSE, ISSEResult} from "../../util/agentSSE";
+import {fetchAgentSSE, IEditorContext, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
+import {getAllEditor} from "../getAll";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
@@ -102,6 +103,8 @@ export class AgentChat extends Model {
     private modelMenuIndex = 0;
     private modelOptions: Array<{ id: string; name: string }> = [];
     private userScrolledUp = false;
+    private programmaticScroll = false;
+    private stickResizeObserver: ResizeObserver | null = null;
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
     private navExpandTimer = 0;
@@ -165,11 +168,21 @@ export class AgentChat extends Model {
         this.modelTrigger = panel.querySelector(".agent-chat__model-trigger") as HTMLElement;
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
+            if (this.programmaticScroll) { return; }
             const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
-            this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 20;
+            const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+            // Hysteresis: only mark as scrolled-up when clearly above bottom (>=60),
+            // and only return to sticky when really at the bottom (<=10).
+            // This prevents the follow state from rapidly toggling while streaming
+            // causes scrollHeight to grow asynchronously.
+            if (!this.userScrolledUp) {
+                this.userScrolledUp = distanceFromBottom >= 60;
+            } else if (distanceFromBottom <= 10) {
+                this.userScrolledUp = false;
+            }
             this.scrollBottomBtn.classList.toggle("agent-chat__scroll-bottom--visible", this.userScrolledUp);
             this.updateActiveMarker();
-        });
+        }, {passive: true});
 
         const messagesWrap = panel.querySelector(".agent-chat__messages-wrap") as HTMLElement;
         this.initNavRail(messagesWrap);
@@ -816,6 +829,7 @@ export class AgentChat extends Model {
         const sendData = this.composer.getSendData();
         const text = sendData.text;
         const refs = sendData.references;
+        const editorContext = this.captureEditorContext();
         if (!text || this.isStreaming) {
             return;
         }
@@ -862,7 +876,113 @@ export class AgentChat extends Model {
             this.abortController.signal,
             this.sessionId,
             this.getSelectedModel(),
+            undefined,
+            editorContext,
         );
+    }
+
+    // Capture a read-only snapshot of the user's editor to inject into the system prompt.
+    // Strategy: scan ALL editors. Prefer one that (a) is visible and (b) has selected blocks; 
+    // this directly targets "user selected blocks here" regardless of which window has focus.
+    // Falls back to the editor hosting the DOM selection, then the most-recently-activated tab.
+    private captureEditorContext(): IEditorContext | undefined {
+        /// #if MOBILE
+        const mobEditor = window.siyuan.mobile.editor || window.siyuan.mobile.popEditor;
+        if (mobEditor?.protyle && !mobEditor.protyle.element.classList.contains("fn__none")) {
+            return this.readEditorContext(mobEditor);
+        }
+        return undefined;
+        /// #else
+        const allEditor = getAllEditor();
+        if (!allEditor || allEditor.length === 0) {
+            return undefined;
+        }
+        const isEditable = (e: { protyle: { element: HTMLElement } }) =>
+            !e.protyle.element.classList.contains("fn__none") &&
+            e.protyle.element.closest(".layout__center") !== null;
+
+        // Aggregate selected block IDs across ALL editors (user may have selected blocks
+        // in one editor while a different one is "active").
+        let allSelected: string[] = [];
+        allEditor.forEach(e => {
+            e.protyle?.wysiwyg?.element?.querySelectorAll("[data-node-id].protyle-wysiwyg--select")
+                ?.forEach(el => {
+                    const id = (el as HTMLElement).getAttribute("data-node-id");
+                    if (id) { allSelected.push(id); }
+                });
+        });
+        allSelected = Array.from(new Set(allSelected));
+
+        // Candidate selection, in priority order:
+        let candidate: { protyle: { block?: { id?: string; rootID?: string }; wysiwyg?: { element?: HTMLElement }; element: HTMLElement; model?: { parent?: { headElement?: HTMLElement } } } } | undefined;
+
+        // 1) An editable editor that has its own selected blocks.
+        candidate = allEditor.find(e => isEditable(e) &&
+            !!e.protyle?.wysiwyg?.element?.querySelector(".protyle-wysiwyg--select"));
+        // 2) The editor hosting the current DOM selection.
+        if (!candidate) {
+            const domSel = window.getSelection();
+            const range = domSel && domSel.rangeCount > 0 ? domSel.getRangeAt(0) : null;
+            if (range) {
+                candidate = allEditor.find(e => e.protyle.element.contains(range.startContainer));
+            }
+        }
+        // 3) The most-recently-activated focused document tab (data-activetime).
+        if (!candidate) {
+            let activeTime = 0;
+            allEditor.forEach(e => {
+                let head = e.protyle.model?.parent?.headElement;
+                if (!head && e.protyle.element.getBoundingClientRect().height > 0) {
+                    const tabBody = e.protyle.element.closest(".fn__flex-1[data-id]");
+                    if (tabBody) {
+                        head = document.querySelector(
+                            `.layout-tab-bar .item[data-id="${tabBody.getAttribute("data-id")}"]`);
+                    }
+                }
+                if (head && head.classList.contains("item--focus") &&
+                    parseInt(head.dataset.activetime || "0") > activeTime) {
+                    activeTime = parseInt(head.dataset.activetime || "0");
+                    candidate = e;
+                }
+            });
+        }
+        // 4) Any visible (non-fn__none) editor.
+        if (!candidate) {
+            candidate = allEditor.find(e => !e.protyle.element.classList.contains("fn__none"));
+        }
+
+        const ctx = candidate ? this.readEditorContext(candidate) : undefined;
+        // Even if no candidate editor was located, surface the globally-collected selections.
+        if ((!ctx || !ctx.selectedBlockIDs || ctx.selectedBlockIDs.length === 0) && allSelected.length > 0) {
+            const merged: IEditorContext = ctx ? {...ctx} : {};
+            merged.selectedBlockIDs = allSelected;
+            return merged;
+        }
+        return ctx;
+        /// #endif
+    }
+
+    private readEditorContext(editor: { protyle: { block?: { id?: string; rootID?: string }; wysiwyg?: { element?: HTMLElement } } }): IEditorContext | undefined {
+        const p = editor.protyle;
+        if (!p) {
+            return undefined;
+        }
+        const activeDocID = p.block?.rootID;
+        const focusedBlockID = p.block?.id;
+        const selectedBlockIDs: string[] = [];
+        p.wysiwyg?.element?.querySelectorAll("[data-node-id].protyle-wysiwyg--select")
+            ?.forEach(el => {
+                const id = (el as HTMLElement).getAttribute("data-node-id");
+                if (id) { selectedBlockIDs.push(id); }
+            });
+        if (!activeDocID && !focusedBlockID && selectedBlockIDs.length === 0) {
+            return undefined;
+        }
+        const ctx: IEditorContext = {};
+        if (activeDocID) { ctx.activeDocID = activeDocID; }
+        if (focusedBlockID && focusedBlockID !== activeDocID) { ctx.focusedBlockID = focusedBlockID; }
+        if (selectedBlockIDs.length > 0) { ctx.selectedBlockIDs = selectedBlockIDs; }
+        return ctx;
     }
 
     private async handleSSEEvent(event: ISSEResult) {
@@ -963,6 +1083,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--streaming"></div>';
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
+        this.observeStickTarget(el);
         return el;
     }
 
@@ -983,9 +1104,7 @@ export class AgentChat extends Model {
             }
             chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
             postRender(chatEl);
-            if (!this.userScrolledUp) {
-                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-            }
+            this.scrollToBottom();
             return;
         }
 
@@ -1002,9 +1121,7 @@ export class AgentChat extends Model {
                     bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
                     postRender(bodyEl);
                     void bodyEl.offsetHeight; // force reflow
-                    if (!this.userScrolledUp) {
-                        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-                    }
+                    this.scrollToBottom();
                 }
             });
         }
@@ -1177,6 +1294,7 @@ export class AgentChat extends Model {
         bindThinkingCardToggle(el);
         this.insertBeforeAI(el);
         this.scrollToBottom();
+        this.observeStickTarget(el);
     }
 
     private appendReasoning(token: string) {
@@ -1283,6 +1401,7 @@ export class AgentChat extends Model {
             all[i].remove();
         }
         this.currentAIElement = null;
+        this.observeStickTarget(null);
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
@@ -1375,6 +1494,7 @@ export class AgentChat extends Model {
             this.entries.push({id: SessionStore.newSessionId(), type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
         }
         this.currentAIElement = null;
+        this.observeStickTarget(null);
         this.currentAssistantEntryId = "";
         this.currentContent = "";
         this.fullContent = "";
@@ -1560,6 +1680,7 @@ export class AgentChat extends Model {
             });
         }
         this.currentAIElement = null;
+        this.observeStickTarget(null);
         this.currentAssistantEntryId = "";
         this.currentContent = "";
         this.fullContent = "";
@@ -1900,9 +2021,38 @@ export class AgentChat extends Model {
 
     private scrollToBottom(force = false) {
         if (!force && this.userScrolledUp) { return; }
+        // Guard with a flag so the resulting scroll event can be told apart from
+        // a user-driven scroll. Without this, the programmatic stick-to-bottom
+        // write itself trips the scroll handler and, while streaming, flips
+        // userScrolledUp on transiently (scrollHeight keeps growing) which
+        // immediately breaks follow-scroll.
+        this.programmaticScroll = true;
         requestAnimationFrame(() => {
             this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            // Reset the flag only after the scroll event caused by this write has
+            // been dispatched (a second RAF runs after layout/event delivery).
+            requestAnimationFrame(() => {
+                this.programmaticScroll = false;
+            });
         });
+    }
+
+    // Observe a streaming message card so that asynchronous content growth
+    // (code highlighting, images, mermaid, fonts) keeps the view pinned to the
+    // bottom while the user has not scrolled up. token frames only fire when a
+    // chunk arrives; this closes the gap between chunks.
+    private observeStickTarget(el: HTMLElement | null) {
+        if (this.stickResizeObserver) {
+            this.stickResizeObserver.disconnect();
+            this.stickResizeObserver = null;
+        }
+        if (!el) { return; }
+        this.stickResizeObserver = new ResizeObserver(() => {
+            if (!this.userScrolledUp) {
+                this.scrollToBottom();
+            }
+        });
+        this.stickResizeObserver.observe(el);
     }
 
     private toolCategory(name: string): string {

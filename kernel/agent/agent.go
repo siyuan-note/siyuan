@@ -153,6 +153,26 @@ func AnswerQuestion(id string, answers []string) {
 	}
 }
 
+// frontendCallResult carries the result of a frontend tool action back from the browser.
+type frontendCallResult struct {
+	result  string
+	isError bool
+}
+
+var frontendCallChannelsMu sync.Mutex
+var frontendCallChannels = make(map[string]chan frontendCallResult)
+
+// FrontendToolResult is called by the API handler when the browser POSTs the outcome of a
+// frontend tool action. It unblocks the agent goroutine waiting in handleFrontendTool.
+func FrontendToolResult(callID string, result string, isError bool) {
+	frontendCallChannelsMu.Lock()
+	ch, ok := frontendCallChannels[callID]
+	frontendCallChannelsMu.Unlock()
+	if ok {
+		ch <- frontendCallResult{result: result, isError: isError}
+	}
+}
+
 func sendEvent(ch chan<- AgentEvent, ev AgentEvent) {
 	select {
 	case ch <- ev:
@@ -181,6 +201,7 @@ type AgentEvent struct {
 	Reasoning        string
 	ConfirmID        string
 	QuestionID       string
+	CallID           string
 	Error            string
 	PromptTokens     int
 	CompletionTokens int
@@ -543,7 +564,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						}
 					}
 
-					if !snapshotCreated && action != "" && !safeActions[action] && !(tc.Function.Name == "repo" && action == "create") {
+					if !snapshotCreated && action != "" && !safeActions[action] && tc.Function.Name != "frontend" && !(tc.Function.Name == "repo" && action == "create") {
 						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
 						if err != nil {
 							logging.LogErrorf("agent auto snapshot failed: %s", err)
@@ -582,6 +603,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
 						doomLoop = doomLoopTracker{}
+					} else if tc.Function.Name == "frontend" {
+						resultStr = handleFrontendTool(ctx, tc, ch, confirmTimeout)
+						doomLoop = doomLoopTracker{}
 					} else {
 						resultStr = executeTool(tc, sessionID)
 					}
@@ -602,7 +626,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					})
 					checkpointMsgs[assistantIdx].ToolCalls[i].Result = resultStr
 
-					if tc.Function.Name != "question" {
+					if tc.Function.Name != "question" && tc.Function.Name != "frontend" {
 						sig := tc.Function.Name + "::action=" + action
 						if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
 							doomLoop.count++
@@ -772,6 +796,54 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	}
 
 	return strings.Join(answer.Answers, ", ")
+}
+
+// handleFrontendTool dispatches a frontend tool action to the browser via SSE and blocks until
+// the browser POSTs the result (or the context is cancelled / timeout fires). It mirrors
+// handleQuestion's structure exactly — the only difference is the channel registry and the
+// event type ("frontend_tool_call").
+func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- AgentEvent, timeout time.Duration) string {
+	args := parseToolArgs(tc.Function.Arguments)
+	callID := fmt.Sprintf("%d", time.Now().UnixNano())
+	if len(callID) > 12 {
+		callID = callID[:12]
+	}
+
+	sendCriticalEvent(ctx, ch, AgentEvent{
+		Type:      "frontend_tool_call",
+		CallID:    callID,
+		Name:      tc.Function.Name,
+		Arguments: args,
+	})
+
+	ch2 := make(chan frontendCallResult, 1)
+	frontendCallChannelsMu.Lock()
+	frontendCallChannels[callID] = ch2
+	frontendCallChannelsMu.Unlock()
+
+	var fr frontendCallResult
+	select {
+	case fr = <-ch2:
+	case <-ctx.Done():
+		frontendCallChannelsMu.Lock()
+		delete(frontendCallChannels, callID)
+		frontendCallChannelsMu.Unlock()
+		return "Frontend action cancelled."
+	case <-time.After(timeout):
+		frontendCallChannelsMu.Lock()
+		delete(frontendCallChannels, callID)
+		frontendCallChannelsMu.Unlock()
+		return "Frontend action timed out (no response from the editor)."
+	}
+
+	frontendCallChannelsMu.Lock()
+	delete(frontendCallChannels, callID)
+	frontendCallChannelsMu.Unlock()
+
+	if fr.isError {
+		return "Frontend action failed: " + fr.result
+	}
+	return fr.result
 }
 
 func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext) string {

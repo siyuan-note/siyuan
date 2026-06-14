@@ -4,6 +4,8 @@ import {App} from "../../index";
 import {fetchAgentSSE, IEditorContext, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
 import {getAllEditor} from "../getAll";
+import "./frontendActions";
+import {lookupAction} from "./frontendActions";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
@@ -1075,6 +1077,9 @@ export class AgentChat extends Model {
                         this.appendSnapshotInfo(event.snapshotID, snapshotEntryId);
                     }
                     break;
+                case "frontend_tool_call":
+                    this.handleFrontendToolCall(event.callID, event.arguments);
+                    break;
             }
         } catch (e) {
             console.error("agent SSE event handler error:", e, event);
@@ -1835,6 +1840,39 @@ export class AgentChat extends Model {
             entry.status = always ? "always" : (approved ? "approved" : "rejected");
         }
         await this.saveSession();
+    }
+
+    private async handleFrontendToolCall(callID: string, args: Record<string, unknown>) {
+        // Resolve the action name ("frontend" tool calls carry the action in args.action).
+        const action = (args.action as string | undefined) || "";
+        const handler = lookupAction(action);
+        if (!handler) {
+            await this.postFrontendResult(callID, `Unknown frontend action: ${action}`, true);
+            return;
+        }
+        try {
+            const outcome = await handler.handler(args, this.app);
+            const result = outcome.result || "";
+            const error = outcome.error || "";
+            await this.postFrontendResult(callID, error ? error : result, !!error);
+        } catch (e) {
+            await this.postFrontendResult(callID, `Frontend action threw: ${(e as Error).message}`, true);
+        }
+    }
+
+    private async postFrontendResult(callID: string, result: string, isError: boolean) {
+        try {
+            const resp = await fetch("/api/ai/agent/frontendToolResult", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({callID, result, isError}),
+            });
+            if (!resp.ok) {
+                console.error("agent frontend result request failed:", resp.status);
+            }
+        } catch (e) {
+            console.error("agent frontend result request error:", e);
+        }
     }
 
     private appendQuestion(questionID: string, args: Record<string, unknown>) {

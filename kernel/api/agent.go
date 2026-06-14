@@ -189,6 +189,26 @@ func agentChatQuestion(c *gin.Context) {
 	c.JSON(http.StatusOK, ret)
 }
 
+type agentFrontendResultReq struct {
+	CallID  string `json:"callID"`
+	Result  string `json:"result"`
+	IsError bool   `json:"isError"`
+}
+
+func agentChatFrontendResult(c *gin.Context) {
+	req := &agentFrontendResultReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	agent.FrontendToolResult(req.CallID, req.Result, req.IsError)
+	ret := gulu.Ret.NewResult()
+	c.JSON(http.StatusOK, ret)
+}
+
 type agentTitleReq struct {
 	Message  string `json:"message"`
 	Model    string `json:"model"`
@@ -353,6 +373,12 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 		return writeSSEEvent(c, "question", map[string]interface{}{
 			"questionID": event.QuestionID,
 			"arguments":  event.Arguments,
+		})
+	case "frontend_tool_call":
+		return writeSSEEvent(c, "frontend_tool_call", map[string]interface{}{
+			"callID":    event.CallID,
+			"name":      event.Name,
+			"arguments": event.Arguments,
 		})
 	case "snapshot":
 		return writeSSEEvent(c, "snapshot", map[string]string{"snapshotID": event.SnapshotID})

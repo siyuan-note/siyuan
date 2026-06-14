@@ -528,6 +528,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/agent/chat", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChat)
 	ginServer.Handle("POST", "/api/ai/agent/confirm", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatConfirm)
 	ginServer.Handle("POST", "/api/ai/agent/question", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatQuestion)
+	ginServer.Handle("POST", "/api/ai/agent/frontendToolResult", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatFrontendResult)
 	ginServer.Handle("POST", "/api/ai/agent/title", model.CheckAuth, model.CheckAdminRole, agentChatTitle)
 	ginServer.Handle("POST", "/api/ai/agent/lsSessions", model.CheckAuth, model.CheckAdminRole, lsSessions)
 	ginServer.Handle("POST", "/api/ai/agent/getSession", model.CheckAuth, model.CheckAdminRole, getSession)

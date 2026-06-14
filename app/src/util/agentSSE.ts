@@ -40,6 +40,11 @@ export type ISSEResult = {
 } | {
     type: "snapshot";
     snapshotID: string;
+} | {
+    type: "frontend_tool_call";
+    callID: string;
+    name: string;
+    arguments: Record<string, unknown>;
 };
 
 export type IEditorContext = {
@@ -206,6 +211,13 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
             return {type: "reasoning", token: data.token as string};
         case "snapshot":
             return {type: "snapshot", snapshotID: data.snapshotID as string};
+        case "frontend_tool_call":
+            return {
+                type: "frontend_tool_call",
+                callID: data.callID as string,
+                name: data.name as string,
+                arguments: (data.arguments || {}) as Record<string, unknown>,
+            };
         default:
             return null;
     }

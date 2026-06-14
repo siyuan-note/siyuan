@@ -27,11 +27,11 @@ var FrontendTool = &Tool{
 		"- open_setting: Open the settings panel. Optional: query (search keyword to filter config items and locate a specific setting).\n" +
 		"- focus_block: Scroll the active editor to focus a specific block. Requires: id (block ID).\n" +
 		"- open_document: Open a document by its root block ID in a new tab. Requires: id.\n" +
-		"- open_search: Open the global search dialog. Optional: query (pre-filled search keyword).",
+		"- open_search: Open the global search dialog. Optional: query (pre-filled search keyword).\nPlugins may register additional actions; see the <plugin_actions> section in the context for available plugin actions and use their full name (e.g. plugin__myplugin__myaction)",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"open_setting", "focus_block", "open_document", "open_search"}},
+			"action": {Type: "string", Description: "Operation"},
 			"id":     {Type: "string", Description: "Block or document ID (for focus_block and open_document)"},
 			"query":  {Type: "string", Description: "Search keyword (for open_setting to locate a config item, for open_search to pre-fill the search box)"},
 		},

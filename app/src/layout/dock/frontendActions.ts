@@ -18,6 +18,7 @@ import type {App} from "../../index";
 
 export interface IAction {
     name: string;
+    description?: string;
     handler: (args: Record<string, unknown>, app: App) => Promise<{result?: string; error?: string}>;
 }
 
@@ -37,6 +38,12 @@ export const registerAction = (a: IAction) => {
 };
 
 export const lookupAction = (name: string): IAction | undefined => actionRegistry.get(name);
+
+export const listActions = (): IAction[] => Array.from(actionRegistry.values());
+
+export const unregisterAction = (name: string) => {
+    actionRegistry.delete(name);
+};
 
 /// #if !MOBILE
 registerAction({

@@ -240,6 +240,15 @@ type EditorContext struct {
 	VisibleBlockIDs  []string `json:"visibleBlockIDs,omitempty"`  // 视口内可见块 ID 列表（已截断至上限）
 }
 
+// PluginAction describes a frontend action registered by a plugin (via Plugin.addAction()).
+// The frontend serializes the list of currently-registered plugin actions into each chat
+// request, and the backend injects them into the system prompt so the LLM can discover and
+// invoke them. Structurally identical to EditorContext: browser-owned state, refreshed per message.
+type PluginAction struct {
+	Name        string `json:"name"`        // full name: plugin__<pluginName>__<actionName>
+	Description string `json:"description"` // purpose description for the LLM
+}
+
 type checkpointThinkingStep struct {
 	Reasoning        string              `json:"reasoning"`
 	Text             string              `json:"text"`
@@ -269,7 +278,7 @@ type agentCheckpoint struct {
 	AlwaysAllow      bool                     `json:"alwaysAllow,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 100)
 
 	go func() {
@@ -317,14 +326,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 					checkpointMsgs = truncated
 					checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
-					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references, editorCtx)
+					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references, editorCtx, pluginActions)
 				}
 			}
 		}
 
 		if messages == nil {
 			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage}}
-			messages = buildInitialMessages(userMessage, language, references, editorCtx)
+			messages = buildInitialMessages(userMessage, language, references, editorCtx, pluginActions)
 		}
 
 		temperature := kernelModel.Conf.AI.Agent.Temperature
@@ -846,7 +855,7 @@ func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- Agent
 	return fr.result
 }
 
-func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext) string {
+func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) string {
 	var sb strings.Builder
 	sb.WriteString(systemPrompt)
 	sb.WriteString("\n\n<env>\nWorkspace: ")
@@ -874,6 +883,19 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 		}
 		sb.WriteString("</available_skills>\n\n")
 		sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
+	}
+
+	if len(pluginActions) > 0 {
+		sb.WriteString("\n\n<plugin_actions>\n")
+		sb.WriteString("The following frontend actions were registered by plugins. Invoke them via the \"frontend\" tool with action set to the full name shown below.\n")
+		for _, a := range pluginActions {
+			sb.WriteString("- ")
+			sb.WriteString(a.Name)
+			sb.WriteString(": ")
+			sb.WriteString(a.Description)
+			sb.WriteString("\n")
+		}
+		sb.WriteString("</plugin_actions>")
 	}
 
 	sb.WriteString("\n\n")
@@ -973,9 +995,9 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 	return sb.String()
 }
 
-func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext) []openai.ChatCompletionMessage {
+func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) []openai.ChatCompletionMessage {
 	return []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx, pluginActions)},
 		{Role: openai.ChatMessageRoleUser, Content: userMessage},
 	}
 }
@@ -997,9 +1019,9 @@ func loadCheckpoint(sessionID string) *agentCheckpoint {
 	return &cp
 }
 
-func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference, editorCtx EditorContext) []openai.ChatCompletionMessage {
+func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) []openai.ChatCompletionMessage {
 	msgs := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx, pluginActions)},
 	}
 
 	for cmi := range checkpointMsgs {

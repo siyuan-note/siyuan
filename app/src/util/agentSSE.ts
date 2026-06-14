@@ -67,6 +67,7 @@ export async function fetchAgentSSE(
     model?: string,
     regenerate?: boolean,
     editorContext?: IEditorContext,
+    pluginActions?: Array<{name: string; description: string}>,
 ): Promise<void> {
     try {
         const body: Record<string, unknown> = {message: message, language: language, references: references};
@@ -74,6 +75,7 @@ export async function fetchAgentSSE(
         if (model) { body.model = model; }
         if (regenerate) { body.regenerate = regenerate; }
         if (editorContext) { body.editorContext = editorContext; }
+        if (pluginActions && pluginActions.length > 0) { body.pluginActions = pluginActions; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",

@@ -5,7 +5,7 @@ import {fetchAgentSSE, IEditorContext, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
 import {getAllEditor} from "../getAll";
 import "./frontendActions";
-import {lookupAction} from "./frontendActions";
+import {listActions, lookupAction} from "./frontendActions";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
@@ -836,6 +836,9 @@ export class AgentChat extends Model {
         const text = sendData.text;
         const refs = sendData.references;
         const editorContext = this.captureEditorContext();
+        const pluginActions = listActions()
+            .filter(a => a.name.startsWith("plugin__") && a.description)
+            .map(a => ({name: a.name, description: a.description as string}));
         if (!text || this.isStreaming) {
             return;
         }
@@ -884,6 +887,7 @@ export class AgentChat extends Model {
             this.getSelectedModel(),
             undefined,
             editorContext,
+            pluginActions,
         );
     }
 

@@ -2191,7 +2191,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                         const theadElement = nodeElement.querySelector("thead");
                         while (prueTrElement !== theadElement.lastElementChild) {
                             theadElement.lastElementChild.querySelectorAll("th").forEach(item => {
-                                const td = document.createElement('td');
+                                const td = document.createElement("td");
                                 Array.from(item.attributes).forEach(attr => {
                                     td.setAttribute(attr.name, attr.value);
                                 });

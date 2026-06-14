@@ -1,16 +1,11 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
-import {escapeAttr} from "../../../../util/escape";
-import {unicode2Emoji} from "../../../../emoji";
-import {cellValueIsEmpty, renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
 import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
 import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
 import {processRender} from "../../../util/processCode";
-import {getColIconByType, getColNameByType} from "../col";
-import {getCompressURL} from "../../../../util/image";
 import {getPageSize} from "../groups";
 /// #if MOBILE
 import {activeBlur} from "../../../../mobile/util/keyboardToolbar";

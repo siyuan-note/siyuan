@@ -1205,7 +1205,7 @@ export class AgentChat extends Model {
     private appendThinking(reasoning: string) {
         const L = window.siyuan.languages;
         if (this.currentThinkingText) {
-            let doneText = this.currentThinkingText;
+            const doneText = this.currentThinkingText;
             this.currentThinkingText = doneText;
             const tc = this.currentToolCalls.map(function (t) {
                 return {name: t.name, result: t.result};
@@ -1220,7 +1220,7 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
-        let text = L.agentThinking || "Thinking...";
+        const text = L.agentThinking || "Thinking...";
 
         this.currentThinkingText = text;
 
@@ -2063,7 +2063,7 @@ export class AgentChat extends Model {
     private finishActiveThinking() {
         const L = window.siyuan.languages;
         const dur = this.requestStartTime ? ((Date.now() - this.requestStartTime) / 1000).toFixed(1) + "s" : "";
-        let doneText = L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", dur) : (L.agentThinking || "Thinking...");
+        const doneText = L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", dur) : (L.agentThinking || "Thinking...");
         this.currentThinkingText = doneText || this.currentThinkingText;
 
         const items = this.messagesContainer.querySelectorAll(

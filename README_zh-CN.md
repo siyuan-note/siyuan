@@ -27,8 +27,8 @@
 <p align="center">
 <a href="README.md">English</a>
 | <b>中文</b>
-| <a href="README_ja_JP.md">日本�?/a>
-| <a href="README_tr_TR.md">Türkçe</a>
+| <a href="README_ja.md">日本�?/a>
+| <a href="README_tr.md">Türkçe</a>
 </p>
 
 ---
@@ -113,7 +113,7 @@
 - JavaScript/CSS 代码片段
 - Android/iOS/鸿蒙 App
 - Docker 部署
-- [API](API_zh_CN.md)
+- [API](API_zh-CN.md)
 - 社区集市
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)�?
@@ -234,7 +234,7 @@ docker run -d \
 - `accessAuthCode`：锁屏密码，�?*务必修改**，否则任何人都可以读写你的数�?
   - 另外，也可以通过 `SIYUAN_ACCESS_AUTH_CODE` 环境变量设置锁屏密码。如果两者都设置了，命令行的值将优先
   - 可通过设置环境变量 `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` 禁用锁屏密码
-- `SIYUAN_LANG`：界面语言（可选，Docker 下未设置时默认为 `en`）。以下示例使�?`zh_CN`，与本文档语言一致。若希望**设置**中选择的语言在重启后仍生效，部署时请去掉该变量；若设置了，每次启动都会应用该值并覆盖已保存的语言设置
+- `SIYUAN_LANG`：界面语言（可选，Docker 下未设置时默认为 `en`）。接受 BCP 47 标签如 `zh-CN`/`zh-TW`/`en`/`ja`/`pt-BR`；旧下划线值如 `zh_CN`/`en_US` 也兼容。以下示例使用 `zh-CN`，与本文档语言一致。若希望**设置**中选择的语言在重启后仍生效，部署时请去掉该变量；若设置了，每次启动都会应用该值并覆盖已保存的语言设置
   - 也可通过 `--lang` 命令行参数设置。如果两者都设置了，命令行的值将优先
 
 为了简化，建议�?workspace 文件夹路径在宿主机和容器上配置为一致的，比如将 `workspace_dir_host` �?`workspace_dir_container` 都配置为 `/siyuan/workspace`，对应的启动命令示例�?
@@ -518,7 +518,7 @@ ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 
 ## 🛠�?开发指�?
 
-见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)�?
+见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh-CN.md)�?
 
 ## �?常见问题和解�?
 
@@ -557,7 +557,7 @@ ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 - [鸿蒙端](https://github.com/siyuan-note/siyuan-harmony)
 - [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
 
-更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)�?
+更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh-CN.md)�?
 
 ### 如何升级到新版本�?
 

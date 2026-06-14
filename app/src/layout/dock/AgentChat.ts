@@ -7,7 +7,7 @@ import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
-import {escapeHtml} from "../../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
@@ -104,8 +104,7 @@ export class AgentChat extends Model {
     private userScrolledUp = false;
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
-    private navPreview: HTMLElement;
-    private navPreviewTimer = 0;
+    private navExpandTimer = 0;
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -361,16 +360,15 @@ export class AgentChat extends Model {
     private initNavRail(wrap: HTMLElement) {
         this.navRail = document.createElement("div");
         this.navRail.className = "agent-chat__nav-rail";
-        this.navPreview = document.createElement("div");
-        this.navPreview.className = "agent-chat__nav-preview fn__none";
 
-        this.navRail.addEventListener("mouseover", (e: MouseEvent) => {
-            const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
-            if (!marker) { return; }
-            this.showNavPreview(marker);
+        this.navRail.addEventListener("mouseenter", () => {
+            this.navExpandTimer = window.setTimeout(() => {
+                this.navRail.classList.add("agent-chat__nav-rail--expanded");
+            }, 200);
         });
         this.navRail.addEventListener("mouseleave", () => {
-            this.hideNavPreview();
+            clearTimeout(this.navExpandTimer);
+            this.navRail.classList.remove("agent-chat__nav-rail--expanded");
         });
         this.navRail.addEventListener("click", (e: MouseEvent) => {
             const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
@@ -379,7 +377,6 @@ export class AgentChat extends Model {
         });
 
         wrap.appendChild(this.navRail);
-        wrap.appendChild(this.navPreview);
     }
 
     private rebuildNavMarkers() {
@@ -388,50 +385,17 @@ export class AgentChat extends Model {
         if (userEntries.length === 0) { return; }
 
         const gap = Math.max(0.5, Math.min(3, 40 / userEntries.length));
+        this.navRail.style.setProperty("--nav-gap", gap + "px");
 
         for (const entry of userEntries) {
             const marker = document.createElement("div");
-            marker.className = "agent-chat__nav-rail-marker";
-            marker.style.marginBottom = gap + "px";
+            marker.className = "agent-chat__nav-rail-marker ariaLabel";
             marker.dataset.messageId = entry.id || "";
-            marker.dataset.preview = entry.content.slice(0, 120);
-            if (entry.timestamp) {
-                marker.dataset.time = this.formatMessageTime(entry.timestamp);
-            }
+            marker.setAttribute("data-position", "west");
+            marker.setAttribute("aria-label", escapeAriaLabel(escapeHtml(entry.content)));
+            marker.textContent = entry.content.slice(0, 120);
             this.navRail.appendChild(marker);
         }
-    }
-
-    private showNavPreview(marker: HTMLElement) {
-        clearTimeout(this.navPreviewTimer);
-        const text = marker.dataset.preview || "";
-        const time = marker.dataset.time || "";
-        let html = "";
-        if (time) {
-            html += '<div class="agent-chat__nav-preview-time">' + escapeHtml(time) + "</div>";
-        }
-        html += '<div class="agent-chat__nav-preview-body">' + escapeHtml(text) + "</div>";
-        this.navPreview.innerHTML = html;
-        this.navPreview.classList.remove("fn__none");
-
-        const wrap = this.navRail.parentElement;
-        if (!wrap) { return; }
-        const markerRect = marker.getBoundingClientRect();
-        const wrapRect = wrap.getBoundingClientRect();
-        const previewWidth = 200;
-        const rightOffset = wrapRect.right - markerRect.left + 4;
-        let topOffset = markerRect.top - wrapRect.top - 4;
-        const maxTop = wrapRect.height - this.navPreview.offsetHeight - 4;
-        topOffset = Math.max(0, Math.min(topOffset, maxTop));
-        this.navPreview.style.right = rightOffset + "px";
-        this.navPreview.style.top = topOffset + "px";
-        this.navPreview.style.width = previewWidth + "px";
-    }
-
-    private hideNavPreview() {
-        this.navPreviewTimer = window.setTimeout(() => {
-            this.navPreview.classList.add("fn__none");
-        }, 100);
     }
 
     private jumpToMessage(messageId: string) {

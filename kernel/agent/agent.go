@@ -18,7 +18,6 @@ package agent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -284,33 +283,47 @@ type PluginAction struct {
 	Description string `json:"description"` // purpose description for the LLM
 }
 
-type checkpointThinkingStep struct {
-	Reasoning        string              `json:"reasoning"`
-	Text             string              `json:"text"`
-	ToolCalls        []checkpointBriefTC `json:"toolCalls"`
-	ReasoningContent string              `json:"reasoningContent"`
+// SessionEntry 与前端 SessionStore.ts 中 entries 元素一一对应，
+// 是会话持久化的唯一数据源（不再单独持久化 messages）。
+type SessionEntry struct {
+	ID             string             `json:"id,omitempty"`
+	Type           string             `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
+	Content        string             `json:"content,omitempty"`
+	Steps          []SessionEntryStep `json:"steps,omitempty"`          // 仅 thinking
+	ToolCalls      []AgentToolCall    `json:"toolCalls,omitempty"`      // 仅 assistant
+	Duration       float64            `json:"duration,omitempty"`       // 秒（thinking/assistant 均可能带）
+	PromptTokens   int                `json:"promptTokens,omitempty"`   // 仅 assistant
+	CompletionTok  int                `json:"completionTokens,omitempty"`
+	Timestamp      int64              `json:"timestamp,omitempty"`
+	ReasoningCont  string             `json:"reasoningContent,omitempty"`
+	ConfirmName    string             `json:"confirmName,omitempty"`
+	ConfirmArgs    map[string]interface{} `json:"confirmArgs,omitempty"`
+	ConfirmID      string             `json:"confirmID,omitempty"`
+	ConfirmStatus  string             `json:"confirmStatus,omitempty"`
+	SnapshotID     string             `json:"snapshotID,omitempty"`
 }
 
-type checkpointBriefTC struct {
-	Name   string `json:"name"`
-	Result string `json:"result,omitempty"`
+// SessionEntryStep 描述一次思考步骤。工具调用只保留名字列表，
+// arguments/result 仅在所属 assistant entry 的 ToolCalls 中存储，避免重复。
+type SessionEntryStep struct {
+	Reasoning        string   `json:"reasoning"`
+	ReasoningContent string   `json:"reasoningContent,omitempty"`
+	ToolNames        []string `json:"toolNames,omitempty"`
 }
 
 type agentCheckpoint struct {
-	ID               string                   `json:"id"`
-	Title            string                   `json:"title"`
-	Titled           bool                     `json:"titled"`
-	Messages         []AgentMessage           `json:"messages"`
-	Entries          []json.RawMessage        `json:"entries,omitempty"`
-	PromptTokens     int                      `json:"promptTokens"`
-	CompletionTokens int                      `json:"completionTokens"`
-	TotalDuration    int64                    `json:"totalDuration"`
-	CreatedAt        int64                    `json:"createdAt"`
-	UpdatedAt        int64                    `json:"updatedAt"`
-	MessageHistory   []string                 `json:"messageHistory,omitempty"`
-	ThinkingSteps    []checkpointThinkingStep `json:"thinkingSteps,omitempty"`
-	Snapshots        []string                 `json:"snapshots,omitempty"`
-	AlwaysAllow      bool                     `json:"alwaysAllow,omitempty"`
+	ID               string           `json:"id"`
+	Title            string           `json:"title"`
+	Titled           bool             `json:"titled"`
+	Entries          []SessionEntry   `json:"entries"`
+	PromptTokens     int              `json:"promptTokens"`
+	CompletionTokens int              `json:"completionTokens"`
+	TotalDuration    int64            `json:"totalDuration"`
+	CreatedAt        int64            `json:"createdAt"`
+	UpdatedAt        int64            `json:"updatedAt"`
+	MessageHistory   []string         `json:"messageHistory,omitempty"`
+	Snapshots        []string         `json:"snapshots,omitempty"`
+	AlwaysAllow      bool             `json:"alwaysAllow,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
@@ -345,8 +358,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				if cp.AlwaysAllow {
 					alwaysAllow["*"] = true
 				}
-				if len(cp.Messages) > 0 {
-					truncated := cp.Messages
+				if len(cp.Entries) > 0 {
+					// entries 是唯一持久化数据源。先转回 AgentMessage 视图用于
+					// 截断/重建逻辑（thinking/confirm/snapshot 不参与 LLM 上下文）。
+					loadedMsgs := entriesToAgentMessages(cp.Entries)
+					truncated := loadedMsgs
 					if regenerate {
 						lastUserIdx := -1
 						for i := len(truncated) - 1; i >= 0; i-- {
@@ -1062,6 +1078,33 @@ func loadCheckpoint(sessionID string) *agentCheckpoint {
 	return &cp
 }
 
+// entriesToAgentMessages 把持久化的 entries 还原为 AgentMessage 视图。
+// 仅 user/assistant（含 toolCalls）参与；thinking/confirm/snapshot 等仅供 UI 展示，
+// 因此不进入 LLM 上下文。配合 checkpointMessagesToOpenAI 即可重建 OpenAI 消息。
+func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
+	var msgs []AgentMessage
+	for i := range entries {
+		e := &entries[i]
+		switch e.Type {
+		case "user":
+			msgs = append(msgs, AgentMessage{Role: "user", Content: e.Content})
+		case "assistant":
+			m := AgentMessage{Role: "assistant", Content: e.Content}
+			if len(e.ToolCalls) > 0 {
+				m.ToolCalls = make([]AgentToolCall, len(e.ToolCalls))
+				for j := range e.ToolCalls {
+					m.ToolCalls[j] = e.ToolCalls[j]
+					if m.ToolCalls[j].ID == "" {
+						m.ToolCalls[j].ID = fmt.Sprintf("call_cp_%d_%d", i, j)
+					}
+				}
+			}
+			msgs = append(msgs, m)
+		}
+	}
+	return msgs
+}
+
 func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) []openai.ChatCompletionMessage {
 	msgs := []openai.ChatCompletionMessage{
 		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, references, editorCtx, pluginActions)},
@@ -1130,6 +1173,36 @@ func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, 
 	return msgs
 }
 
+// agentMessagesToEntries 把后端运行期累积的 AgentMessage 派生为最小 entries，
+// 用于中途崩溃恢复的 checkpoint 兜底（仅 user/assistant + toolCalls，
+// 不含 thinking/confirm/snapshot —— 前端完成后会用完整 entries 覆盖）。
+func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
+	if len(msgs) == 0 {
+		return nil
+	}
+	entries := make([]SessionEntry, 0, len(msgs))
+	for i := range msgs {
+		m := &msgs[i]
+		switch m.Role {
+		case "user":
+			entries = append(entries, SessionEntry{
+				ID:      fmt.Sprintf("cp_%d", i),
+				Type:    "user",
+				Content: m.Content,
+			})
+		case "assistant":
+			e := SessionEntry{
+				ID:        fmt.Sprintf("cp_%d", i),
+				Type:      "assistant",
+				Content:   m.Content,
+				ToolCalls: m.ToolCalls,
+			}
+			entries = append(entries, e)
+		}
+	}
+	return entries
+}
+
 func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
 	if sessionID == "" || !isValidSessionID(sessionID) {
 		return
@@ -1138,7 +1211,7 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 	cp := agentCheckpoint{
 		ID:               sessionID,
 		Title:            "AI Agent",
-		Messages:         messages,
+		Entries:          agentMessagesToEntries(messages),
 		PromptTokens:     promptTokens,
 		CompletionTokens: completionTokens,
 		TotalDuration:    time.Now().UnixMilli() - startTime,
@@ -1170,9 +1243,9 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		if len(old.MessageHistory) > 0 {
 			cp.MessageHistory = old.MessageHistory
 		}
-		if len(old.ThinkingSteps) > 0 {
-			cp.ThinkingSteps = old.ThinkingSteps
-		}
+		// 后端中途 checkpoint 只能派生最小 entries（user/assistant/toolCalls）。
+		// 若磁盘上已有前端写入的完整 entries（含 thinking/confirm/snapshot），
+		// 优先保留它，避免后端兜底数据覆盖前端的富信息。
 		if len(old.Entries) > 0 {
 			cp.Entries = old.Entries
 		}

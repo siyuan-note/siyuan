@@ -96,7 +96,7 @@ export const renderRetryCardHTML = (attempt: number, maxRetries: number): string
 "</div>";
 };
 
-export const renderToolsLineHTML = (newTools: Array<{name: string; result?: string}>): string => {
+export const renderToolsLineHTML = (newTools: Array<{name: string}>): string => {
     let detailLines = "<div class=\"agent-chat__thinking-tools-line\"><span class=\"agent-chat__thinking-summary\">Tool calls:</span>";
     for (let i = 0; i < newTools.length; i++) {
         detailLines += '<span class="agent-chat__thinking-tool">' + escapeHtml(newTools[i].name) + "</span>";
@@ -105,13 +105,15 @@ export const renderToolsLineHTML = (newTools: Array<{name: string; result?: stri
     return detailLines;
 };
 
-export const createThinkingCardElement = (step: {reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}): HTMLElement => {
+// createThinkingCardElement 用于流式过程中的单个思考卡片。
+// 工具调用只接收名字列表（arguments/result 在 assistant entry 存一份）；
+// 标题文本由调用方传入（已通过 i18n 从 duration 生成）。
+export const createThinkingCardElement = (step: {reasoning: string; text: string; toolNames?: string[]; reasoningContent: string}): HTMLElement => {
     let detail = "";
-    if (step.toolCalls.length > 0) {
+    if (step.toolNames && step.toolNames.length > 0) {
         detail += '<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>';
-        for (let j = 0; j < step.toolCalls.length; j++) {
-            const tc = step.toolCalls[j];
-            detail += '<span class="agent-chat__thinking-tool">' + escapeHtml(tc.name) + "</span>";
+        for (let j = 0; j < step.toolNames.length; j++) {
+            detail += '<span class="agent-chat__thinking-tool">' + escapeHtml(step.toolNames[j]) + "</span>";
         }
         detail += "</div>";
     }

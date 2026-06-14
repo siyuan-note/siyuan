@@ -39,10 +39,11 @@ type SessionEntry =
     type: "thinking";
     steps: Array<{
         reasoning: string;
-        text: string;
-        toolCalls: Array<{ name: string; result?: string }>;
-        reasoningContent: string
-    }>
+        reasoningContent: string;
+        toolNames?: string[];
+        content?: string
+    }>;
+    duration?: number
 })
     | (EntryBase & {
     type: "assistant";
@@ -1205,7 +1206,7 @@ export class AgentChat extends Model {
     private appendThinking(reasoning: string) {
         const L = window.siyuan.languages;
         if (this.currentThinkingText) {
-            const doneText = this.currentThinkingText;
+            let doneText = this.currentThinkingText;
             this.currentThinkingText = doneText;
             const tc = this.currentToolCalls.map(function (t) {
                 return {name: t.name, result: t.result};
@@ -1220,7 +1221,7 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
-        const text = L.agentThinking || "Thinking...";
+        let text = L.agentThinking || "Thinking...";
 
         this.currentThinkingText = text;
 
@@ -2063,7 +2064,7 @@ export class AgentChat extends Model {
     private finishActiveThinking() {
         const L = window.siyuan.languages;
         const dur = this.requestStartTime ? ((Date.now() - this.requestStartTime) / 1000).toFixed(1) + "s" : "";
-        const doneText = L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", dur) : (L.agentThinking || "Thinking...");
+        let doneText = L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", dur) : (L.agentThinking || "Thinking...");
         this.currentThinkingText = doneText || this.currentThinkingText;
 
         const items = this.messagesContainer.querySelectorAll(

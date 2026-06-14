@@ -301,7 +301,9 @@ func SaveSession(data []byte) error {
 			for k, v := range existingData {
 				if _, ok := newData[k]; !ok {
 					switch k {
-					case "createdAt", "titled", "messageHistory", "thinkingSteps", "entries", "snapshots", "id", "messages", "alwaysAllow":
+					// messages 不再保留：以 entries 为唯一持久化数据源，
+					// 前端下次保存时会用 entries 覆盖，老 messages 字段自然清除。
+					case "createdAt", "titled", "messageHistory", "entries", "snapshots", "id", "alwaysAllow":
 						newData[k] = v
 					}
 				}

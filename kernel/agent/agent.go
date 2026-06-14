@@ -111,6 +111,9 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 var maxToolCallRounds = 64
 
+// maxVisibleBlockIDs 限制注入到 system prompt 的"视口可见块"数量，控制 token 开销。
+var maxVisibleBlockIDs = 50
+
 type confirmResult struct {
 	approved bool
 	always   bool
@@ -209,8 +212,11 @@ type Reference struct {
 // 与 Reference 的处理方式保持一致。
 type EditorContext struct {
 	ActiveDocID      string   `json:"activeDocID,omitempty"`      // 当前激活文档的 root block ID
+	ActiveDocTitle   string   `json:"activeDocTitle,omitempty"`   // 当前文档标题
+	NotebookID       string   `json:"notebookID,omitempty"`       // 当前文档所属笔记本 ID
 	FocusedBlockID   string   `json:"focusedBlockID,omitempty"`   // 光标/聚焦所在块 ID（editor.protyle.block.id）
 	SelectedBlockIDs []string `json:"selectedBlockIDs,omitempty"` // 用户选中的块 ID 列表
+	VisibleBlockIDs  []string `json:"visibleBlockIDs,omitempty"`  // 视口内可见块 ID 列表（已截断至上限）
 }
 
 type checkpointThinkingStep struct {
@@ -825,12 +831,34 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 		}
 		sb.WriteString("Use the block tools to fetch their actual content before responding.")
 	}
-	if editorCtx.ActiveDocID != "" || len(editorCtx.SelectedBlockIDs) > 0 || editorCtx.FocusedBlockID != "" {
+	if editorCtx.ActiveDocID != "" || editorCtx.ActiveDocTitle != "" || editorCtx.NotebookID != "" ||
+		len(editorCtx.SelectedBlockIDs) > 0 || editorCtx.FocusedBlockID != "" || len(editorCtx.VisibleBlockIDs) > 0 {
 		sb.WriteString("\n\n<editor_context>\n")
 		sb.WriteString("This is the user's editor state at the moment they sent the message. It may be stale by now.\n")
-		if editorCtx.ActiveDocID != "" {
-			sb.WriteString("Active document root block id: ")
-			sb.WriteString(editorCtx.ActiveDocID)
+		if editorCtx.ActiveDocID != "" || editorCtx.ActiveDocTitle != "" {
+			sb.WriteString("Active document: ")
+			if editorCtx.ActiveDocTitle != "" {
+				sb.WriteString(editorCtx.ActiveDocTitle)
+			} else {
+				sb.WriteString("(untitled)")
+			}
+			if editorCtx.ActiveDocID != "" {
+				sb.WriteString(" (root block id: ")
+				sb.WriteString(editorCtx.ActiveDocID)
+				if editorCtx.NotebookID != "" {
+					sb.WriteString(", notebook: ")
+					sb.WriteString(editorCtx.NotebookID)
+				}
+				sb.WriteString(")")
+			} else if editorCtx.NotebookID != "" {
+				sb.WriteString(" (notebook: ")
+				sb.WriteString(editorCtx.NotebookID)
+				sb.WriteString(")")
+			}
+			sb.WriteString("\n")
+		} else if editorCtx.NotebookID != "" {
+			sb.WriteString("Notebook: ")
+			sb.WriteString(editorCtx.NotebookID)
 			sb.WriteString("\n")
 		}
 		if editorCtx.FocusedBlockID != "" && editorCtx.FocusedBlockID != editorCtx.ActiveDocID {
@@ -843,6 +871,27 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 			for _, id := range editorCtx.SelectedBlockIDs {
 				sb.WriteString("- ")
 				sb.WriteString(id)
+				sb.WriteString("\n")
+			}
+		}
+		if len(editorCtx.VisibleBlockIDs) > 0 {
+			totalVisible := len(editorCtx.VisibleBlockIDs)
+			if totalVisible > maxVisibleBlockIDs {
+				sb.WriteString("Visible block ids (showing first ")
+				sb.WriteString(fmt.Sprintf("%d", maxVisibleBlockIDs))
+				sb.WriteString(" of ")
+				sb.WriteString(fmt.Sprintf("%d", totalVisible))
+				sb.WriteString("):\n")
+			} else {
+				sb.WriteString("Visible block ids:\n")
+			}
+			limit := totalVisible
+			if limit > maxVisibleBlockIDs {
+				limit = maxVisibleBlockIDs
+			}
+			for i := 0; i < limit; i++ {
+				sb.WriteString("- ")
+				sb.WriteString(editorCtx.VisibleBlockIDs[i])
 				sb.WriteString("\n")
 			}
 		}

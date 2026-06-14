@@ -25,6 +25,10 @@ import {
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
 
+// Limit on the number of visible block IDs injected into the system prompt to control token usage.
+// Mirrors kernel/agent/agent.go maxVisibleBlockIDs.
+const maxVisibleBlockIDs = 50;
+
 type EntryBase = { id?: string };
 
 type SessionEntry =
@@ -962,26 +966,63 @@ export class AgentChat extends Model {
         /// #endif
     }
 
-    private readEditorContext(editor: { protyle: { block?: { id?: string; rootID?: string }; wysiwyg?: { element?: HTMLElement } } }): IEditorContext | undefined {
+    private readEditorContext(editor: {
+        protyle: {
+            block?: { id?: string; rootID?: string };
+            wysiwyg?: { element?: HTMLElement };
+            contentElement?: HTMLElement;
+            notebookId?: string;
+            title?: { editElement?: HTMLElement };
+        };
+    }): IEditorContext | undefined {
         const p = editor.protyle;
         if (!p) {
             return undefined;
         }
         const activeDocID = p.block?.rootID;
         const focusedBlockID = p.block?.id;
+        const activeDocTitle = p.title?.editElement?.textContent?.trim() || undefined;
+        const notebookID = p.notebookId || undefined;
+
         const selectedBlockIDs: string[] = [];
         p.wysiwyg?.element?.querySelectorAll("[data-node-id].protyle-wysiwyg--select")
             ?.forEach(el => {
                 const id = (el as HTMLElement).getAttribute("data-node-id");
                 if (id) { selectedBlockIDs.push(id); }
             });
-        if (!activeDocID && !focusedBlockID && selectedBlockIDs.length === 0) {
+
+        // Visible blocks: top-level [data-node-id] children whose bounding rect intersects
+        // the scroll container viewport. Long docs are lazily loaded, so wysiwyg.element's
+        // children are already the loaded subset; this further narrows to what is on screen.
+        const visibleBlockIDs: string[] = [];
+        const scrollContainer = (p.contentElement || p.wysiwyg?.element?.parentElement as HTMLElement | undefined);
+        if (scrollContainer && p.wysiwyg?.element) {
+            const view = scrollContainer.getBoundingClientRect();
+            const children = p.wysiwyg.element.children;
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i] as HTMLElement;
+                const id = child.getAttribute("data-node-id");
+                if (!id) { continue; }
+                const rect = child.getBoundingClientRect();
+                if (rect.height === 0) { continue; }
+                if (rect.bottom >= view.top && rect.top <= view.bottom) {
+                    visibleBlockIDs.push(id);
+                }
+                if (visibleBlockIDs.length >= maxVisibleBlockIDs) { break; }
+            }
+        }
+
+        if (!activeDocID && !activeDocTitle && !notebookID &&
+            !focusedBlockID && selectedBlockIDs.length === 0 && visibleBlockIDs.length === 0) {
             return undefined;
         }
         const ctx: IEditorContext = {};
         if (activeDocID) { ctx.activeDocID = activeDocID; }
+        if (activeDocTitle) { ctx.activeDocTitle = activeDocTitle; }
+        if (notebookID) { ctx.notebookID = notebookID; }
         if (focusedBlockID && focusedBlockID !== activeDocID) { ctx.focusedBlockID = focusedBlockID; }
         if (selectedBlockIDs.length > 0) { ctx.selectedBlockIDs = selectedBlockIDs; }
+        if (visibleBlockIDs.length > 0) { ctx.visibleBlockIDs = visibleBlockIDs; }
         return ctx;
     }
 

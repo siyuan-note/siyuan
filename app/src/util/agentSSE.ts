@@ -44,8 +44,11 @@ export type ISSEResult = {
 
 export type IEditorContext = {
     activeDocID?: string;
+    activeDocTitle?: string;
+    notebookID?: string;
     focusedBlockID?: string;
     selectedBlockIDs?: string[];
+    visibleBlockIDs?: string[];
 };
 
 export async function fetchAgentSSE(

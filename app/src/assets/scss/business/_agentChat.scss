@@ -1168,7 +1168,7 @@ pre:hover .agent-chat__copy-wrap {
     box-shadow: var(--b3-dialog-shadow);
     border: 1px solid var(--b3-theme-surface-lighter);
     gap: 0;
-    padding: 8px 0;
+    padding: 8px;
     overflow: hidden;
 
     .agent-chat__nav-rail-marker {
@@ -1182,6 +1182,7 @@ pre:hover .agent-chat__copy-wrap {
         background-clip: padding-box;
         color: var(--b3-theme-on-background);
         border-radius: var(--b3-border-radius);
+        transition: none;
 
         &:hover {
             background: var(--b3-list-hover);
@@ -1191,7 +1192,6 @@ pre:hover .agent-chat__copy-wrap {
 
     .agent-chat__nav-rail-marker--active {
         background: var(--b3-list-hover);
-        color: var(--b3-theme-primary);
     }
 }
 

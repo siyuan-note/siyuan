@@ -1127,6 +1127,7 @@ pre:hover .agent-chat__copy-wrap {
     z-index: 10;
     border: 1px solid transparent;
     border-radius: var(--b3-border-radius-b);
+    padding: 6px 4px 6px 12px;
     transition: background 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out, gap 200ms ease-out;
 }
 
@@ -1144,12 +1145,17 @@ pre:hover .agent-chat__copy-wrap {
     text-overflow: ellipsis;
     font-size: 12px;
     line-height: 20px;
-    color: var(--b3-theme-on-surface);
+    color: transparent;
     border-radius: var(--b3-border-radius-b);
     transition: width 200ms ease-out, height 200ms ease-out,
-                opacity 200ms ease-out 50ms, padding 200ms ease-out,
-                background 200ms ease-out, line-height 200ms ease-out,
-                border-radius 200ms ease-out;
+                opacity 200ms ease-out, padding 200ms ease-out,
+                background 200ms ease-out, color 200ms ease-out,
+                line-height 200ms ease-out, border-radius 200ms ease-out;
+}
+
+.agent-chat__nav-rail-marker--active {
+    background-color: var(--b3-theme-primary);
+    opacity: 0.7;
 }
 
 .agent-chat__nav-rail--expanded {
@@ -1167,12 +1173,17 @@ pre:hover .agent-chat__copy-wrap {
         padding: 0 8px;
         background: transparent;
         background-clip: padding-box;
+        color: var(--b3-theme-on-surface);
         border-radius: 0;
 
         &:hover {
             background: var(--b3-theme-primary-lightest);
             color: var(--b3-theme-primary);
         }
+    }
+
+    .agent-chat__nav-rail-marker--active {
+        color: var(--b3-theme-primary);
     }
 }
 

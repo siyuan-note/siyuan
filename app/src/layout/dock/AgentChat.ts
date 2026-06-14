@@ -168,6 +168,7 @@ export class AgentChat extends Model {
             const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
             this.userScrolledUp = scrollHeight - scrollTop - clientHeight >= 20;
             this.scrollBottomBtn.classList.toggle("agent-chat__scroll-bottom--visible", this.userScrolledUp);
+            this.updateActiveMarker();
         });
 
         const messagesWrap = panel.querySelector(".agent-chat__messages-wrap") as HTMLElement;
@@ -395,6 +396,29 @@ export class AgentChat extends Model {
             marker.setAttribute("aria-label", escapeAriaLabel(escapeHtml(entry.content)));
             marker.textContent = entry.content.slice(0, 120);
             this.navRail.appendChild(marker);
+        }
+        this.updateActiveMarker();
+    }
+
+    private updateActiveMarker() {
+        const userMsgs = this.messagesContainer.querySelectorAll(".agent-chat__msg--user[data-message-id]");
+        if (userMsgs.length === 0) { return; }
+        const threshold = this.messagesContainer.scrollTop + 50;
+        let activeId = "";
+        for (let i = 0; i < userMsgs.length; i++) {
+            if ((userMsgs[i] as HTMLElement).offsetTop <= threshold) {
+                activeId = userMsgs[i].getAttribute("data-message-id") || "";
+            } else {
+                break;
+            }
+        }
+        if (!activeId && userMsgs.length > 0) {
+            activeId = userMsgs[0].getAttribute("data-message-id") || "";
+        }
+        const markers = this.navRail.children;
+        for (let i = 0; i < markers.length; i++) {
+            markers[i].classList.toggle("agent-chat__nav-rail-marker--active",
+                markers[i].getAttribute("data-message-id") === activeId);
         }
     }
 

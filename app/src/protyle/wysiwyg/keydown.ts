@@ -1712,10 +1712,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!taskItemElement) {
                 return;
             }
-            const html = taskItemElement.outerHTML;
-            toggleTaskListItem(taskItemElement);
-            taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, taskItemElement, html);
+            toggleTaskListItem(protyle, taskItemElement);
             event.preventDefault();
             event.stopPropagation();
             return;

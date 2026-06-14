@@ -3080,12 +3080,7 @@ export class WYSIWYG {
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             if (!protyle.disabled) {
-                                const taskItemElement = actionElement.parentElement;
-                                const html = taskItemElement.outerHTML;
-                                toggleTaskListItem(taskItemElement);
-                                taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                                taskItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-                                updateTransaction(protyle, taskItemElement, html);
+                                toggleTaskListItem(protyle, actionElement.parentElement);
                             }
                         } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {
                             if (protyle.block.showAll && protyle.block.id === actionId) {

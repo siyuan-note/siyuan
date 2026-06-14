@@ -58,7 +58,8 @@ export const updateListOrder = (listElement: Element, sIndex?: number) => {
     });
 };
 
-export const toggleTaskListItem = (taskItemElement: Element): void => {
+export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element): void => {
+    const html = taskItemElement.outerHTML;
     const marker = taskItemElement.getAttribute("data-task");
     const useElement = taskItemElement.querySelector("use");
     if (marker !== null && marker !== " ") {
@@ -70,6 +71,9 @@ export const toggleTaskListItem = (taskItemElement: Element): void => {
         taskItemElement.classList.add("protyle-task--done");
         useElement?.setAttribute("xlink:href", "#iconCheck");
     }
+    taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    taskItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+    updateTransaction(protyle, taskItemElement, html);
 };
 
 export const genListItemElement = (listItemElement: Element, offset = 0, wbr = false, startIndex?: number) => {

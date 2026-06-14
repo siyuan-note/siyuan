@@ -394,9 +394,10 @@ func MigrateAI(data []byte) *AI {
 		ai.Providers = append(ai.Providers, prov)
 
 		ai.Agent = &Agent{
-			SessionTimeout: getInt(oai, "agentTimeout"),
-			ConfirmTimeout: getInt(oai, "agentConfirmTimeout"),
-			MaxRetries:     getInt(oai, "agentMaxRetries"),
+			SessionTimeout:    getInt(oai, "agentTimeout"),
+			ConfirmTimeout:    getInt(oai, "agentConfirmTimeout"),
+			MaxRetries:        getInt(oai, "agentMaxRetries"),
+			MaxToolCallRounds: 64,
 		}
 	}
 

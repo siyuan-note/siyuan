@@ -87,6 +87,7 @@ export class AgentSessionPanel {
             });
 
             this.host.appendChild(this.popup);
+            this.popup.style.zIndex = (++window.siyuan.zIndex).toString();
 
             const btnRect = this.triggerBtn.getBoundingClientRect();
             setPosition(this.popup, btnRect.right - 280, btnRect.bottom, btnRect.height, btnRect.width);

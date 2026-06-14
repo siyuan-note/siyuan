@@ -311,29 +311,33 @@ func (ai *AI) DecryptAPIKeys() {
 		if p == nil || p.APIKey == "" {
 			continue
 		}
-		if dec := util.AESDecrypt(p.APIKey); len(dec) > 0 {
-			if plain, err := hex.DecodeString(string(dec)); err == nil {
-				p.APIKey = string(plain)
-			}
+		dec := util.AESDecrypt(p.APIKey)
+		if dec == nil {
+			continue
+		}
+		if plain, err := hex.DecodeString(string(dec)); err == nil {
+			p.APIKey = string(plain)
 		}
 	}
 	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
-		if dec := util.AESDecrypt(ai.Embedding.APIKey); len(dec) > 0 {
-			if plain, err := hex.DecodeString(string(dec)); err == nil {
-				ai.Embedding.APIKey = string(plain)
-			}
+		dec := util.AESDecrypt(ai.Embedding.APIKey)
+		if dec == nil {
+			return
+		}
+		if plain, err := hex.DecodeString(string(dec)); err == nil {
+			ai.Embedding.APIKey = string(plain)
 		}
 	}
 }
 
 func (ai *AI) EncryptAPIKeys() {
 	for _, p := range ai.Providers {
-		if p == nil {
+		if p == nil || p.APIKey == "" {
 			continue
 		}
 		p.APIKey = util.AESEncrypt(p.APIKey)
 	}
-	if ai.Embedding != nil {
+	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
 		ai.Embedding.APIKey = util.AESEncrypt(ai.Embedding.APIKey)
 	}
 }

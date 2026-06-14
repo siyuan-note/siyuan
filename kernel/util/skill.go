@@ -17,10 +17,12 @@
 package util
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
 )
 
@@ -93,6 +95,60 @@ func LoadSkillContent(name string) string {
 		}
 	}
 	return ""
+}
+
+func validateSkillName(name string) error {
+	if name == "" || name == "." || name == ".." {
+		return fmt.Errorf("invalid skill name: %s", name)
+	}
+	if strings.ContainsAny(name, `/\`) {
+		return fmt.Errorf("invalid skill name: %s", name)
+	}
+	dir := SkillsDir()
+	abs := filepath.Join(dir, name)
+	if !gulu.File.IsSubPath(dir, abs) {
+		return fmt.Errorf("invalid skill name: %s", name)
+	}
+	return nil
+}
+
+func ReadSkill(name string) (string, error) {
+	if err := validateSkillName(name); err != nil {
+		return "", err
+	}
+	skillMdPath := filepath.Join(SkillsDir(), name, "SKILL.md")
+	b, err := filelock.ReadFile(skillMdPath)
+	if err != nil {
+		return "", fmt.Errorf("skill not found: %s", name)
+	}
+	return string(b), nil
+}
+
+func SaveSkill(name, content string) error {
+	if err := validateSkillName(name); err != nil {
+		return err
+	}
+	dir := SkillsDir()
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+	skillDir := filepath.Join(dir, name)
+	if err := os.MkdirAll(skillDir, 0755); err != nil {
+		return err
+	}
+	skillMdPath := filepath.Join(skillDir, "SKILL.md")
+	return filelock.WriteFile(skillMdPath, []byte(content))
+}
+
+func RemoveSkill(name string) error {
+	if err := validateSkillName(name); err != nil {
+		return err
+	}
+	skillDir := filepath.Join(SkillsDir(), name)
+	if _, err := os.Stat(skillDir); os.IsNotExist(err) {
+		return fmt.Errorf("skill not found: %s", name)
+	}
+	return os.RemoveAll(skillDir)
 }
 
 func parseSkillFrontmatter(text string) (fm map[string]string, body string) {

@@ -534,6 +534,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/agent/saveSession", model.CheckAuth, model.CheckAdminRole, saveSession)
 	ginServer.Handle("POST", "/api/ai/agent/removeSession", model.CheckAuth, model.CheckAdminRole, removeSession)
 	ginServer.Handle("POST", "/api/ai/agent/lsSkills", model.CheckAuth, model.CheckAdminRole, lsSkills)
+	ginServer.Handle("POST", "/api/ai/agent/getSkill", model.CheckAuth, model.CheckAdminRole, getSkill)
+	ginServer.Handle("POST", "/api/ai/agent/saveSkill", model.CheckAuth, model.CheckAdminRole, saveSkill)
+	ginServer.Handle("POST", "/api/ai/agent/removeSkill", model.CheckAuth, model.CheckAdminRole, removeSkill)
 
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPetalEnabled)

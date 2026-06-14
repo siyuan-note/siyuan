@@ -378,3 +378,76 @@ func lsSkills(c *gin.Context) {
 	skills := util.DiscoverSkills()
 	ret.Data = skills
 }
+
+type skillGetReq struct {
+	Name string `json:"name"`
+}
+
+func getSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillGetReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	content, err := util.ReadSkill(req.Name)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]string{
+		"name":    req.Name,
+		"content": content,
+	}
+}
+
+type skillSaveReq struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+func saveSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillSaveReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	if err := util.SaveSkill(req.Name, req.Content); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+type skillRemoveReq struct {
+	Name string `json:"name"`
+}
+
+func removeSkill(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	req := &skillRemoveReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		return
+	}
+
+	if err := util.RemoveSkill(req.Name); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

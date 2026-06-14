@@ -1187,12 +1187,10 @@ pre:hover .agent-chat__copy-wrap {
     }
 }
 
-.agent-chat__msg--jumped {
+.agent-chat__msg--jumped .agent-chat__body {
     animation: agent-msg-jump 1.5s ease-out;
-    border-radius: var(--b3-border-radius-b);
 }
 
 @keyframes agent-msg-jump {
-    0%   { background: var(--b3-theme-primary-lightest); }
-    100% { background: transparent; }
+    20% { background-color: var(--b3-theme-primary-lightest); }
 }

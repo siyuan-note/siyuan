@@ -47,7 +47,7 @@ type SessionEntry =
 })
     | (EntryBase & {
     type: "assistant";
-    content: string;
+    content?: string;
     toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>;
     promptTokens?: number;
     completionTokens?: number;
@@ -697,6 +697,21 @@ export class AgentChat extends Model {
             (statusLabel ? '<div class="agent-chat__confirm-actions"><span class="agent-chat__confirm-done">' + statusLabel + "</span></div>" : "") +
             "</div>";
         this.messagesContainer.appendChild(el);
+    }
+
+    // 持久化前精简 toolCalls：question 工具的完整 questions 参数已由独立的 question entry 存储，
+    // assistant entry 的 toolCalls 里只需保留工具名和结果（供 LLM 上下文恢复），避免重复存储。
+    private slimToolCallsForPersistence(toolCalls: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>): Array<{ name: string; arguments: Record<string, unknown>; result?: string }> {
+        return toolCalls.map(tc => {
+            if (tc.name === "question" && tc.arguments && tc.arguments.questions) {
+                const slim = {...tc};
+                const slimArgs = {...tc.arguments};
+                delete slimArgs.questions;
+                slim.arguments = slimArgs;
+                return slim;
+            }
+            return tc;
+        });
     }
 
     private appendPersistedQuestion(entry: {
@@ -1371,7 +1386,7 @@ export class AgentChat extends Model {
             this.renderedToolNames = {};
             // Flush tool calls as assistant entry
             if (this.currentToolCalls.length > 0) {
-                this.entries.push({id: SessionStore.newSessionId(), type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
+                this.entries.push({id: SessionStore.newSessionId(), type: "assistant", toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)});
                 this.currentToolCalls = [];
         this.lastStepToolCount = 0;
             }
@@ -1620,7 +1635,7 @@ export class AgentChat extends Model {
                 id: this.currentAssistantEntryId || undefined,
                 type: "assistant",
                 content: this.currentContent,
-                toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined,
+                toolCalls: this.currentToolCalls.length > 0 ? this.slimToolCallsForPersistence(this.currentToolCalls) : undefined,
                 promptTokens: rPromptTokens || undefined,
                 completionTokens: rCompletionTokens || undefined,
                 // duration 统一用秒（与 thinking entry 一致）；addCopyButton 仍传毫秒 dur。
@@ -1628,7 +1643,7 @@ export class AgentChat extends Model {
                 timestamp: ts,
             });
         } else if (this.currentToolCalls.length > 0) {
-            this.entries.push({id: SessionStore.newSessionId(), type: "assistant", content: "", toolCalls: this.currentToolCalls.slice()});
+            this.entries.push({id: SessionStore.newSessionId(), type: "assistant", toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)});
         }
         this.currentAIElement = null;
         this.observeStickTarget(null);
@@ -1673,7 +1688,7 @@ export class AgentChat extends Model {
                 reasoning: this.currentThinkingReasoning,
                 reasoningContent: this.currentThinkingReasoningContent,
                 toolNames: toolNames.length > 0 ? toolNames : undefined,
-                content: this.currentThinkingStepContent,
+                content: this.currentThinkingStepContent || undefined,
             });
             this.lastStepToolCount = this.currentToolCalls.length;
             this.currentThinkingText = "";
@@ -1830,7 +1845,7 @@ export class AgentChat extends Model {
                 id: this.currentAssistantEntryId || undefined,
                 type: "assistant",
                 content: this.currentContent,
-                toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined,
+                toolCalls: this.currentToolCalls.length > 0 ? this.slimToolCallsForPersistence(this.currentToolCalls) : undefined,
                 promptTokens: rPromptTokens || undefined,
                 completionTokens: rCompletionTokens || undefined,
                 // duration 统一用秒（与 thinking entry 一致）；addCopyButton 仍传毫秒 dur。

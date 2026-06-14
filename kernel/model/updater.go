@@ -288,6 +288,9 @@ func CheckUpdate(showMsg bool) {
 	releaseLang := result["release"].(string)
 	if releaseLangArg := result["release_"+Conf.Lang]; nil != releaseLangArg {
 		releaseLang = releaseLangArg.(string)
+	} else if releaseLangArg := result["release_"+util.LangToFile(Conf.Lang)]; nil != releaseLangArg {
+		// 兼容云端 JSON 数据中历史下划线 key（release_zh_CN 等）
+		releaseLang = releaseLangArg.(string)
 	}
 
 	if isVersionUpToDate(ver) {

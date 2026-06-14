@@ -24,7 +24,11 @@ import (
 )
 
 func I18nTerm(language, key string) (ret string) {
+	// 优先按入参 language 拼 .json；找不到时按 BCP 47 ↔ 历史下划线文件名兼容回退。
 	p := filepath.Join(WorkingDir, "appearance", "langs", language+".json")
+	if _, err := os.Stat(p); nil != err {
+		p = filepath.Join(WorkingDir, "appearance", "langs", LangToFile(language)+".json")
+	}
 	data, err := os.ReadFile(p)
 	if err != nil {
 		return

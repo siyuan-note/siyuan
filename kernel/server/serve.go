@@ -493,10 +493,10 @@ func serveAppearance(ginServer *gin.Engine) {
 		} else if strings.Contains(c.Request.URL.Path, "/langs/") && strings.HasSuffix(c.Request.URL.Path, ".json") {
 			lang := path.Base(c.Request.URL.Path)
 			lang = strings.TrimSuffix(lang, ".json")
-			if "zh_CN" != lang && "en_US" != lang {
+			if "zh-CN" != lang && "en" != lang {
 				// 多语言配置缺失项使用对应英文配置项补齐 https://github.com/siyuan-note/siyuan/issues/5322
 
-				enUSFilePath := filepath.Join(appearancePath, "langs", "en_US.json")
+				enUSFilePath := filepath.Join(appearancePath, "langs", "en.json")
 				enUSData, err := os.ReadFile(enUSFilePath)
 				if err != nil {
 					logging.LogErrorf("read en_US.json [%s] failed: %s", enUSFilePath, err)

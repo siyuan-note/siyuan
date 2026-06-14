@@ -287,27 +287,21 @@ func (ai *AI) Normalize() {
 		if p == nil {
 			continue
 		}
-		if p.ID == "" {
+		if !ast.IsNodeIDPattern(p.ID) {
 			p.ID = ast.NewNodeID()
 		}
 		for _, m := range p.Models {
 			if m == nil {
 				continue
 			}
-			if m.ID == "" {
+			if !ast.IsNodeIDPattern(m.ID) {
 				m.ID = ast.NewNodeID()
-			}
-			if m.DisplayName == "" {
-				m.DisplayName = m.Name
 			}
 		}
 	}
 	if ai.Embedding != nil {
-		if ai.Embedding.ID == "" {
+		if !ast.IsNodeIDPattern(ai.Embedding.ID) {
 			ai.Embedding.ID = ast.NewNodeID()
-		}
-		if ai.Embedding.DisplayName == "" {
-			ai.Embedding.DisplayName = ai.Embedding.Name
 		}
 	}
 }

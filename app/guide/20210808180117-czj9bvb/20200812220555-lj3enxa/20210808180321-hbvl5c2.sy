@@ -7,7 +7,7 @@
 		"id": "20210808180321-hbvl5c2",
 		"title": "通用操作",
 		"type": "doc",
-		"updated": "20240612234642"
+		"updated": "20260614114901"
 	},
 	"Children": [
 		{
@@ -75,6 +75,23 @@
 					"TextMarkBlockRefID": "20200822191536-rm6hwid",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "窗口和页签"
+				}
+			]
+		},
+		{
+			"ID": "20260614114900-bmsqhop",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614114900-bmsqhop",
+				"updated": "20260614114901"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260613211020-87z3rss",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "内容统计"
 				}
 			]
 		},
@@ -406,7 +423,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240612234640-ocrdto3",
-				"updated": "20240612234642"
+				"updated": "20260614114826"
 			},
 			"Children": [
 				{
@@ -415,6 +432,40 @@
 					"TextMarkBlockRefID": "20240517031028-xqinazo",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "发布服务"
+				}
+			]
+		},
+		{
+			"ID": "20260614114830-g49ru2a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614114830-g49ru2a",
+				"updated": "20260614114831"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260612191136-feqbi1x",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "命令行接口"
+				}
+			]
+		},
+		{
+			"ID": "20260614114824-l77kohh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614114824-l77kohh",
+				"updated": "20260614114824"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260614104254-4ifhixg",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "网络代理"
 				}
 			]
 		}

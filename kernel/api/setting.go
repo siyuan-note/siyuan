@@ -202,18 +202,12 @@ func setAI(c *gin.Context) {
 		if nil == p {
 			continue
 		}
-		if p.APIKey != "" {
-			p.Enabled = true
-		}
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 30
 		}
 		for _, m := range p.Models {
 			if nil == m {
 				continue
-			}
-			if m.Name != "" {
-				m.Enabled = true
 			}
 			if 0 > m.MaxTokens {
 				m.MaxTokens = 0

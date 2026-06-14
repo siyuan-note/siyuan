@@ -44,9 +44,9 @@ type Agent struct {
 }
 
 type Embedding struct {
-	ID          string `json:"id,omitempty"`
+	ID          string `json:"id"`
 	DisplayName string `json:"displayName,omitempty"`
-	Enabled     bool   `json:"enabled,omitempty"`
+	Enabled     bool   `json:"enabled"`
 	APIKey      string `json:"apiKey"`
 	BaseURL     string `json:"baseURL"`
 	Name        string `json:"name"`
@@ -54,9 +54,9 @@ type Embedding struct {
 }
 
 type Provider struct {
-	ID             string   `json:"id,omitempty"`
+	ID             string   `json:"id"`
 	DisplayName    string   `json:"displayName,omitempty"`
-	Enabled        bool     `json:"enabled,omitempty"`
+	Enabled        bool     `json:"enabled"`
 	APIKey         string   `json:"apiKey"`
 	BaseURL        string   `json:"baseURL"`
 	RequestTimeout int      `json:"requestTimeout"`
@@ -64,9 +64,9 @@ type Provider struct {
 }
 
 type Model struct {
-	ID          string  `json:"id,omitempty"`
+	ID          string  `json:"id"`
 	DisplayName string  `json:"displayName,omitempty"`
-	Enabled     bool    `json:"enabled,omitempty"`
+	Enabled     bool    `json:"enabled"`
 	Name        string  `json:"name"`
 	MaxTokens   int     `json:"maxTokens"`
 	Temperature float64 `json:"temperature"`

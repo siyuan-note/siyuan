@@ -8,7 +8,7 @@
 		"id": "20240530101000-mpln2lp",
 		"title": "用語集",
 		"type": "doc",
-		"updated": "20250115163249"
+		"updated": "20260614111442"
 	},
 	"Children": [
 		{
@@ -222,7 +222,7 @@
 			"Properties": {
 				"ID": "20240530101000-96ap24d",
 				"id": "20240530101000-urpx8am",
-				"updated": "20240530101000"
+				"updated": "20260614111408"
 			},
 			"Children": [
 				{
@@ -389,7 +389,6 @@
 			"ID": "20240530101000-17rtvfz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-95puqko",
 				"id": "20240530101000-17rtvfz",
 				"updated": "20240530101000"
 			},
@@ -406,6 +405,243 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ メニューから行います。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-vk0xmpd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111408-vk0xmpd",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロック参照"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-qzyyj71",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111408-qzyyj71",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111408-bmw1qqx",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111408-bmw1qqx",
+						"updated": "20260614111408"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "参照とは別の場所のコンテンツへのリンクであり、読者を参照先へジャンプさせることができます。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-9gv28yr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111408-9gv28yr",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、ブロック参照は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ でトリガーされる別のコンテンツブロックへのリンクです。静的アンカーテキストと動的アンカーテキストの両方をサポートします。ブロック参照をクリックすると参照先のブロックにジャンプし、ホバーするとプレビューが表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-sm0q0gi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111408-sm0q0gi",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "バックリンク"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-qny0eh7",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111408-qny0eh7",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111408-4e5mgm4",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111408-4e5mgm4",
+						"updated": "20260614111408"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "バックリンク（Backlink）とは、他のページから現在のページへのリンクであり、双方向リンクシステムの重要な要素です。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-qpnxtl5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111408-qpnxtl5",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、バックリンクパネルに現在のブロックを参照しているすべてのブロックが表示されます。バックリンクはリンク（ブロック参照による直接的な関連付け）とメンション（テキストマッチングによる潜在的な関連付け）の2つの部分で構成されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-aut68xk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111408-aut68xk",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "メンション"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-b4jqt4a",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111408-b4jqt4a",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111408-f6b9b0i",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111408-f6b9b0i",
+						"updated": "20260614111408"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "メンション（Mention）とは、テキスト内で発見されたキーワードマッチングであり、潜在的な関連関係を発見するために使用されます。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-eyflmhq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111408-eyflmhq",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、メンションはバックリンクのリンク部分と似ていますが、ブロック参照で確立されるのではなく、コンテンツブロック名、エイリアス、参照アンカーテキストを検索して自動的にマッチングされたテキストコンテンツです。メンションはワンクリックでブロック参照に変換できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-8a0yvi6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111408-8a0yvi6",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "仮想参照"
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-aupje3s",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111408-aupje3s",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111408-4qsmcdm",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111408-4qsmcdm",
+						"updated": "20260614111408"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "仮想参照は、手動で作成することなく、関連する可能性のあるコンテンツブロックをテキスト内で自動的に特定する技術です。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111408-guewqrn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111408-guewqrn",
+				"updated": "20260614111408"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、仮想参照はコンテンツブロックの名前、エイリアス、アンカーテキストに基づいて自動的に検出され、エディタでは破線の下線で表示されます。ホバーすると対応するコンテンツブロックのプレビューが表示され、クリックすると正式なブロック参照に変換できます。設定 - エディタでオン/オフを切り替えられます。"
 				}
 			]
 		},
@@ -567,7 +803,7 @@
 			"Properties": {
 				"ID": "20240530101000-i9ge6g3",
 				"id": "20240530101000-rturqxy",
-				"updated": "20240530101000"
+				"updated": "20260614111431"
 			},
 			"Children": [
 				{
@@ -580,7 +816,6 @@
 			"ID": "20240530101000-ppikiul",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-zahhtm0",
 				"id": "20240530101000-ppikiul",
 				"updated": "20240530101000"
 			},
@@ -588,6 +823,243 @@
 				{
 					"Type": "NodeText",
 					"Data": "クラウドにアップロードされたローカルのタグ付きスナップショットです。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-taubi38",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-taubi38",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "バザール"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-9qypo5g",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-9qypo5g",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-0es045w",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-0es045w",
+						"updated": "20260614111431"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "バザール（Bazaar）はペルシャ語に由来し、商品取引が行われる場所を指します。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-f1sre8s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-f1sre8s",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、バザールはコミュニティ拡張機能の閲覧とインストールの入り口です。テーマ、アイコン、プラグイン、ウィジェット、テンプレートの5種類があります。アプリ内で直接検索、インストール、更新が可能です。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-lt22acr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-lt22acr",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "受信トレイ"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-hf09vm3",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-hf09vm3",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-xhi7168",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-xhi7168",
+						"updated": "20260614111431"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "受信トレイ（Inbox）は、処理待ちの情報を一時的に保管するコンテナです。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-rtrcw9g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-rtrcw9g",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、受信トレイはクラウドベースのクイックキャプチャ機能です。WeChat送信やAPI呼び出しでテキストをクラウドに一時保存し、後で受信トレイパネルからドキュメントに移動して整理できます。この機能にはサブスクリプションが必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-4r2ugxx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-4r2ugxx",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フラッシュカード"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-nhrve6j",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-nhrve6j",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-56kdl5g",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-56kdl5g",
+						"updated": "20260614111431"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "フラッシュカード（Flashcard）は、記憶トレーニングに使用されるカードで、表面に問題、裏面に答えが書かれ、間隔反復アルゴリズムで復習スケジュールが決められます。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-elxwoq9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-elxwoq9",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、フラッシュカードはコンテンツブロックに基づく間隔反復復習機能です。コンテンツブロックをフラッシュカードとして作成でき、システムは復習のパフォーマンスに基づいて次回の復習時間を自動的にスケジュールします。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-r7qhatv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111431-r7qhatv",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コマンドパレット"
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-qmhrbd1",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111431-qmhrbd1",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111431-657nzag",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111431-657nzag",
+						"updated": "20260614111431"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "コマンドパレット（Command Palette）は、キーボードからアプリケーション機能にすばやくアクセスする入り口で、ユーザーがキーワードを入力してコマンドを検索・実行できます。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111431-0jjd1x6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111431-0jjd1x6",
+				"updated": "20260614111431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Ctrl+Shift+P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ でコマンドパレットを呼び出し、パネルの開く、機能の切り替え、ドキュメントのナビゲーションなどの操作をメニューをたどることなくすばやく実行できます。"
 				}
 			]
 		},
@@ -989,7 +1461,7 @@
 			"Properties": {
 				"ID": "20240530101000-3m9drx0",
 				"id": "20240530101000-9mcnl5p",
-				"updated": "20240530101000"
+				"updated": "20260614111442"
 			},
 			"Children": [
 				{
@@ -1005,7 +1477,7 @@
 			"Properties": {
 				"ID": "20240530101000-a3ifxlm",
 				"id": "20240530101000-yikp9my",
-				"updated": "20240530101000"
+				"updated": "20260614111442"
 			},
 			"Children": [
 				{
@@ -1037,6 +1509,120 @@
 				{
 					"Type": "NodeText",
 					"Data": "できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111442-uzd7ap4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111442-uzd7ap4",
+				"updated": "20260614111442"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カーネル"
+				}
+			]
+		},
+		{
+			"ID": "20260614111442-r76ira9",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111442-r76ira9",
+				"updated": "20260614111442"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111442-t5qeayt",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111442-t5qeayt",
+						"updated": "20260614111442"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "カーネルはオペレーティングシステムの中核コンポーネントであり、プロセス、メモリ、デバイスドライバ、ファイルシステム、ネットワークなどを管理し、システムのパフォーマンスと安定性を決定します。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111442-xfcnmf9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111442-xfcnmf9",
+				"updated": "20260614111442"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、カーネルは起動後に実行されるバックエンドサービスプロセスを指し、データの読み書き、インデックス検索、同期バックアップなどの中核機能を担当します。フロントエンドは HTTP/WebSocket でカーネルと通信します。デスクトップ版とモバイル版にはカーネルが内蔵されており、Dockerデプロイではカーネルを個別に実行します。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111442-1h0w47v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111442-1h0w47v",
+				"updated": "20260614111442"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ワークスペース"
+				}
+			]
+		},
+		{
+			"ID": "20260614111442-ykut5zd",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111442-ykut5zd",
+				"updated": "20260614111442"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111442-rr22ro5",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111442-rr22ro5",
+						"updated": "20260614111442"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "ワークスペースは、ユーザーが作業するためのデータ環境であり、オペレーティングシステムのユーザーディレクトリに似ています。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111442-2c8f039",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111442-2c8f039",
+				"updated": "20260614111442"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源では、ワークスペースはすべてのデータを保存するフォルダです。ノートブック、ドキュメント、アセットファイル、設定、履歴などが含まれます。異なるワークスペースはファイルシステムのフォルダによって分離され、1つのワークスペースは1つのカーネルプロセスのみがサーブできます。"
 				}
 			]
 		}

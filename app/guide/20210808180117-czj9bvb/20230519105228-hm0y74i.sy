@@ -7,7 +7,7 @@
 		"id": "20230519105228-hm0y74i",
 		"title": "最新进展",
 		"type": "doc",
-		"updated": "20230617085456"
+		"updated": "20260614111937"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230519110202-1k238kq",
-				"updated": "20230617085456"
+				"updated": "20260614111937"
 			},
 			"Children": [
 				{
@@ -201,7 +201,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230519111123-ra6yjat"
+						"id": "20230519111123-ra6yjat",
+						"updated": "20260614111937"
 					},
 					"Children": [
 						{
@@ -209,12 +210,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230519111123-jwmarc1",
-								"updated": "20230519111143"
+								"updated": "20260614111937"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Twitter "
+									"Data": "X "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -228,8 +229,8 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
-									"TextMarkAHref": "https://twitter.com/b3logos",
-									"TextMarkTextContent": "https://twitter.com/b3logos"
+									"TextMarkAHref": "https://x.com/b3logos",
+									"TextMarkTextContent": "https://x.com/b3logos"
 								}
 							]
 						}

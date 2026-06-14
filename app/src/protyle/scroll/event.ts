@@ -26,7 +26,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             if (item.dataset.render !== "true") {
                 return;
             }
-            stickyRow(item, elementRect, "all");
+            stickyRow(item, element, "all");
             trimAVRows(item, elementRect);
         });
 

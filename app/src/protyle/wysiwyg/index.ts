@@ -766,7 +766,7 @@ export class WYSIWYG {
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
                         (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth + "px";
                     });
-                    stickyRow(nodeElement, contentRect, "bottom");
+                    stickyRow(nodeElement, protyle.contentElement, "bottom");
                 };
 
                 documentSelf.onmouseup = () => {
@@ -1808,10 +1808,9 @@ export class WYSIWYG {
     private bindEvent(protyle: IProtyle) {
         // 删除块时，av 头尾需重新计算位置
         protyle.observer = new ResizeObserver(() => {
-            const contentRect = protyle.contentElement.getBoundingClientRect();
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
                 if (item.querySelector(".av__scroll")) {
-                    stickyRow(item, contentRect, "all");
+                    stickyRow(item, protyle.contentElement, "all");
                 }
             });
         });

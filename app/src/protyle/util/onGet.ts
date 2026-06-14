@@ -447,10 +447,9 @@ export const enableProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="false"]').forEach(item => {
         item.setAttribute("draggable", "true");
     });
-    const contentRect = protyle.contentElement.getBoundingClientRect();
     protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
         if (item.querySelector(".av__scroll")) {
-            stickyRow(item, contentRect, "all");
+            stickyRow(item, protyle.contentElement, "all");
         }
     });
     if (protyle.breadcrumb) {

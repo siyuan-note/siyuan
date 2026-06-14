@@ -6,35 +6,64 @@
 		"id": "20210127203829-qe2mzof",
 		"title": "PDF annotation",
 		"type": "doc",
-		"updated": "20220502141039"
+		"updated": "20260614112547"
 	},
 	"Children": [
 		{
-			"ID": "20210923104343-69c6qn3",
+			"ID": "20260614112546-8xr6fj9",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210923104343-69c6qn3",
-				"updated": "20210923104349"
+				"id": "20260614112546-8xr6fj9",
+				"updated": "20260614112546"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Insert PDF asset"
+					"Data": "Overview"
 				}
 			]
 		},
 		{
-			"ID": "20210127203829-pgeb2cg",
+			"ID": "20260614112546-rvdkkuo",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210127203829-pgeb2cg",
-				"updated": "20210923104359"
+				"id": "20260614112546-rvdkkuo",
+				"updated": "20260614112546"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After the PDF file is uploaded and inserted through the editor, the PDF will be placed in the assets folder, and a link in the form of "
+					"Data": "SiYuan supports PDF file preview and annotation. You can mark up text or areas in a PDF and copy annotation references into documents, enabling two-way linking between literature reading and note writing."
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-0nfcwzb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260614112546-0nfcwzb",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Inserting a PDF Asset"
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-9iv29eu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112546-9iv29eu",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After uploading and inserting a PDF file through the editor, the PDF is placed in the assets folder and a link in the format "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,35 +72,36 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " will be generated in the document. Click the link to use SiYuan for preview."
+					"Data": "​ is generated in the document. Click the link to preview the PDF in SiYuan."
 				}
 			]
 		},
 		{
-			"ID": "20210923104400-zd9cymb",
+			"ID": "20260614112546-2o5u1qw",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210923104400-zd9cymb",
-				"updated": "20210923104417"
+				"id": "20260614112546-2o5u1qw",
+				"updated": "20260614112546"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Hyperlink page jump"
+					"Data": "Hyperlink Page Jump"
 				}
 			]
 		},
 		{
-			"ID": "20210127203843-1gpz3u0",
+			"ID": "20260614112546-umprdds",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210127203843-1gpz3u0"
+				"id": "20260614112546-umprdds",
+				"updated": "20260614112546"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Open the new tab to preview the PDF and support the specified page number. You need to add the parameter "
+					"Data": "When opening a PDF preview in a new tab, you can specify a page number by adding the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -80,7 +110,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to the link. For example, if you need to jump to the seventh page, edit the link to "
+					"Data": "​ parameter to the link. For example, to jump to page 7, edit the link to "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -89,17 +119,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ."
+					"Data": "​."
 				}
 			]
 		},
 		{
-			"ID": "20210923104413-csbeop3",
+			"ID": "20260614112546-arf81wv",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210923104413-csbeop3",
-				"updated": "20220502141027"
+				"id": "20260614112546-arf81wv",
+				"updated": "20260614112546"
 			},
 			"Children": [
 				{
@@ -109,83 +139,508 @@
 			]
 		},
 		{
-			"ID": "20210923104454-1f7keq6",
+			"ID": "20260614112546-m9odbls",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210923104454-1f7keq6",
-				"updated": "20220502141025"
+				"id": "20260614112546-m9odbls",
+				"updated": "20260614112546"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The PDF preview can be marked by selection, and the annotation can be copied to the document:"
+					"Data": "Annotate text or areas in the PDF preview and copy annotation references into documents for seamless integration between reading and note-taking."
 				}
 			]
 		},
 		{
-			"ID": "20210923104454-ltkpsaa",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260614112546-5wi5fud",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210923104454-ltkpsaa",
-				"updated": "20210923104540"
+				"id": "20260614112546-5wi5fud",
+				"updated": "20260614112546"
 			},
 			"Children": [
 				{
-					"ID": "20210923104454-mpxyw97",
+					"Type": "NodeText",
+					"Data": "Creating Annotations"
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-yxifrr2",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614112546-yxifrr2",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"ID": "20260614112546-oaf75rj",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210923104454-mpxyw97"
+						"id": "20260614112546-oaf75rj",
+						"updated": "20260614112546"
 					},
 					"Children": [
 						{
-							"ID": "20210923104454-6qow8vv",
+							"ID": "20260614112546-yt1cxsn",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210923104454-6qow8vv"
+								"id": "20260614112546-yt1cxsn",
+								"updated": "20260614112546"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Text Selection Highlight"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "Click the reference link in the document to open the PDF and jump to the annotation"
+									"Data": ": Select text in the PDF, choose a color from the popup toolbar, and a semi-transparent highlight is added. The annotation reference text is automatically copied to the clipboard and can be pasted directly into a document as a reference link"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20210923104454-tmvmpnq",
+					"ID": "20260614112546-4m1m9no",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210923104454-tmvmpnq",
-						"updated": "20210923104540"
+						"id": "20260614112546-4m1m9no",
+						"updated": "20260614112546"
 					},
 					"Children": [
 						{
-							"ID": "20210923104454-5rzj3lu",
+							"ID": "20260614112546-ymxupsb",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210923104454-5rzj3lu",
-								"updated": "20210923104540"
+								"id": "20260614112546-ymxupsb",
+								"updated": "20260614112546"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Rectangular Area Annotation"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "Hover the mark in the PDF to preview the ref block"
+									"Data": ": Click the area annotation button in the PDF toolbar, then drag to draw a rectangle on the PDF page. Two styles are supported: filled rectangle (with background color) and border rectangle (border only), switchable via the style toggle button in the annotation menu"
 								}
 							]
 						}
 					]
 				}
 			]
+		},
+		{
+			"ID": "20260614112546-ubmknif",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112546-ubmknif",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Annotations support 7 preset colors. Annotation data is automatically saved as a "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sya"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ file with the same name as the PDF, stored in the same directory as the PDF."
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-ceawwe7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614112546-ceawwe7",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Annotation Operations"
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-e0evr0f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112546-e0evr0f",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click an existing annotation on the PDF page to open the operation menu:"
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-kjml7ms",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614112546-kjml7ms",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"ID": "20260614112546-3jo2lja",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-3jo2lja",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-zme78dw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-zme78dw",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Change Color"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click a new color to change the annotation color"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112546-wk0uzin",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-wk0uzin",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-apu10hc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-apu10hc",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Toggle Style"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the style toggle button to switch between filled and border rectangles (area annotation only)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112546-4unao5n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-4unao5n",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-aib9wcl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-aib9wcl",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Delete Annotation"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the delete button to remove the annotation"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112546-r4outv0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-r4outv0",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-hwousww",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-hwousww",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Re-copy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the copy button to copy the annotation reference text to the clipboard again"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112546-fnm6efx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-fnm6efx",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-0m2nq8r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-0m2nq8r",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Relate Block"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the relate button, enter an existing block ID to manually link the annotation with a document block"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-6zixj7s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614112546-6zixj7s",
+				"updated": "20260614112547"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Annotation References"
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-eqpp2tn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112546-eqpp2tn",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Annotations support two-way linking with documents:"
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-bt18dbx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614112546-bt18dbx",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"ID": "20260614112546-2w5sr70",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-2w5sr70",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-z4cs86f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-z4cs86f",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Copy to Document"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": After creating an annotation, the reference text is in the format "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;\u0026lt;assets/xxx.pdf/annotationID \"selected text\"\u0026gt;\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ and can be pasted directly into a document as a reference link. Area annotations also include a screenshot of the annotated region when copied"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112546-bs8asmg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-bs8asmg",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-9s720qn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-9s720qn",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Jump from Document"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Clicking an annotation reference link in a document automatically opens the PDF and jumps to the annotated page, with the annotation rectangle highlighted briefly to aid location"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112546-hiknuhe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112546-hiknuhe",
+						"updated": "20260614112546"
+					},
+					"Children": [
+						{
+							"ID": "20260614112546-tjt095e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112546-tjt095e",
+								"updated": "20260614112546"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Backlink Preview"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Hover or click an annotation on the PDF page to view the list of document blocks that reference that annotation"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614112546-vd5hjju",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112546-vd5hjju",
+				"updated": "20260614112546"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The anchor text of annotation references in documents is editable. Right-click to modify the displayed text or convert to plain text."
+				}
+			]
+		},
+		{
+			"ID": "20260614112547-uu1ymgt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112547-uu1ymgt",
+				"updated": "20260614112547"
+			}
 		}
 	]
 }

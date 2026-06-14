@@ -6,16 +6,45 @@
 		"id": "20210127202655-2334vvv",
 		"title": "PDF 标注",
 		"type": "doc",
-		"updated": "20220502141008"
+		"updated": "20260614112550"
 	},
 	"Children": [
 		{
-			"ID": "20210923103658-jkmi4k7",
+			"ID": "20260614112525-7f8cngf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210923103658-jkmi4k7",
-				"updated": "20210923103704"
+				"id": "20260614112525-7f8cngf",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-y03qfjw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112525-y03qfjw",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源支持 PDF 文件预览和标注，可在 PDF 中对文字或区域进行标记，并将标注引用复制到文档中，实现文献阅读与笔记写作的双向联动。"
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-phcs46z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260614112525-phcs46z",
+				"updated": "20260614112525"
 			},
 			"Children": [
 				{
@@ -25,16 +54,16 @@
 			]
 		},
 		{
-			"ID": "20210127202655-eyv25b7",
+			"ID": "20260614112525-4sr0qh0",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210127202655-eyv25b7",
-				"updated": "20210811224214"
+				"id": "20260614112525-4sr0qh0",
+				"updated": "20260614112525"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "将 PDF 文件通过编辑器上传插入以后，PDF 将放到 assets 文件夹下，并在文档内生成形如 "
+					"Data": "将 PDF 文件通过编辑器上传插入后，PDF 将放到 assets 文件夹下，并在文档内生成形如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -43,17 +72,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 的链接。点击该链接可使用思源进行预览。"
+					"Data": "​ 的链接。点击该链接可使用思源进行预览。"
 				}
 			]
 		},
 		{
-			"ID": "20210923103705-4cxiau3",
+			"ID": "20260614112525-ksnhskd",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210923103705-4cxiau3",
-				"updated": "20210923103716"
+				"id": "20260614112525-ksnhskd",
+				"updated": "20260614112525"
 			},
 			"Children": [
 				{
@@ -63,10 +92,11 @@
 			]
 		},
 		{
-			"ID": "20210127203054-dp9le97",
+			"ID": "20260614112525-4ls5633",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210127203054-dp9le97"
+				"id": "20260614112525-4ls5633",
+				"updated": "20260614112525"
 			},
 			"Children": [
 				{
@@ -80,7 +110,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，例如需要跳转到第七页，则将链接编辑为 "
+					"Data": "​，例如需要跳转到第七页，则将链接编辑为 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -89,17 +119,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​。"
 				}
 			]
 		},
 		{
-			"ID": "20210923103628-oif5bk8",
+			"ID": "20260614112525-fpf9pcz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210923103628-oif5bk8",
-				"updated": "20220502141000"
+				"id": "20260614112525-fpf9pcz",
+				"updated": "20260614112525"
 			},
 			"Children": [
 				{
@@ -109,84 +139,508 @@
 			]
 		},
 		{
-			"ID": "20210923103723-8fz5i0j",
+			"ID": "20260614112525-yggq0m6",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210923103723-8fz5i0j",
-				"updated": "20220502141008"
+				"id": "20260614112525-yggq0m6",
+				"updated": "20260614112525"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "PDF 预览时可使用划选进行标注，标注可复制到文档中形成链接："
+					"Data": "在 PDF 预览中可对文本或区域进行标注，并将标注引用复制到文档中，实现文献阅读与笔记写作的联动。"
 				}
 			]
 		},
 		{
-			"ID": "20210923104112-fheqye1",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260614112525-9poxv90",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210923104112-fheqye1",
-				"updated": "20210923104220"
+				"id": "20260614112525-9poxv90",
+				"updated": "20260614112525"
 			},
 			"Children": [
 				{
-					"ID": "20210923104113-am5a0ei",
+					"Type": "NodeText",
+					"Data": "创建标注"
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-dntphkq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614112525-dntphkq",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"ID": "20260614112525-j464y7m",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210923104113-am5a0ei"
+						"id": "20260614112525-j464y7m",
+						"updated": "20260614112525"
 					},
 					"Children": [
 						{
-							"ID": "20210923104113-es0tpkd",
+							"ID": "20260614112525-rdv3cxy",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210923104113-es0tpkd",
-								"updated": "20210923104134"
+								"id": "20260614112525-rdv3cxy",
+								"updated": "20260614112525"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "文本选中高亮"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "在文档中点击引用链接可以打开 PDF 并跳转到标注"
+									"Data": "：在 PDF 中选中文字，弹出颜色工具栏，点击颜色即可添加半透明底色标注。同时标注引用文本自动复制到剪贴板，可直接粘贴到文档中形成引用链接"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20210923104137-p7qk722",
+					"ID": "20260614112525-q5q52oc",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210923104137-p7qk722",
-						"updated": "20210923104220"
+						"id": "20260614112525-q5q52oc",
+						"updated": "20260614112525"
 					},
 					"Children": [
 						{
-							"ID": "20210923104137-f2sv4l9",
+							"ID": "20260614112525-qp7atwz",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210923104137-f2sv4l9",
-								"updated": "20210923104220"
+								"id": "20260614112525-qp7atwz",
+								"updated": "20260614112525"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "矩形区域标注"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "在 PDF 中鼠标悬浮标注可预览引用标注的块"
+									"Data": "：点击 PDF 工具栏中的区域标注按钮，在 PDF 页面上拖拽绘制矩形区域。支持两种样式：填充矩形（带背景色）和边框矩形（仅边框），可通过标注菜单中的样式切换按钮切换"
 								}
 							]
 						}
 					]
 				}
 			]
+		},
+		{
+			"ID": "20260614112525-2u2fto6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112525-2u2fto6",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标注支持 7 种预设颜色，标注数据自动保存为与 PDF 同名的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sya"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 文件，存储在 PDF 所在目录下。"
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-vytqc80",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614112525-vytqc80",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标注操作"
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-gb6jegh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112525-gb6jegh",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 PDF 页面上点击已有标注可弹出操作菜单："
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-hym0gtw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614112525-hym0gtw",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"ID": "20260614112525-9vtf6uo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-9vtf6uo",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-j4uq7ze",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-j4uq7ze",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "改变颜色"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：点击新颜色即可更换标注颜色"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112525-idnmret",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-idnmret",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-hr7ctpy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-hr7ctpy",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "切换样式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：点击样式切换按钮可在填充矩形和边框矩形之间切换（仅区域标注）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112525-0enq0ue",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-0enq0ue",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-uajr8u9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-uajr8u9",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "删除标注"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：点击删除按钮移除标注"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112525-ssn6ua0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-ssn6ua0",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-mtbzm6w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-mtbzm6w",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "重新复制"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：点击复制按钮将标注引用文本重新复制到剪贴板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112525-zcis8ui",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-zcis8ui",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-ltc19xm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-ltc19xm",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "关联块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：点击关联按钮，输入已有块 ID，可手动建立标注与文档块的关联关系"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-5et45pu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614112525-5et45pu",
+				"updated": "20260614112550"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标注引用"
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-l01bo0h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112525-l01bo0h",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标注可与文档双向联动："
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-n9t0x76",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614112525-n9t0x76",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"ID": "20260614112525-r05ktp2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-r05ktp2",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-js4dxoo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-js4dxoo",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "复制到文档"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：创建标注后，标注引用文本格式为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;\u0026lt;assets/xxx.pdf/标注ID \"选中内容\"\u0026gt;\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，可直接粘贴到文档中形成标注引用链接。矩形标注复制时还会附带标注区域的截图图片"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112525-da5okm1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-da5okm1",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-moyrjzy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-moyrjzy",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "从文档跳转"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在文档中点击标注引用链接，会自动打开 PDF 并跳转到标注所在页面，同时标注矩形高亮闪烁以便定位"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614112525-2o947jj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614112525-2o947jj",
+						"updated": "20260614112525"
+					},
+					"Children": [
+						{
+							"ID": "20260614112525-pxqd5k4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614112525-pxqd5k4",
+								"updated": "20260614112525"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "反链预览"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在 PDF 页面上鼠标悬浮或点击标注，可查看文档中引用了该标注的块列表"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614112525-0c2c939",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112525-0c2c939",
+				"updated": "20260614112525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "文档中的标注引用锚文本支持编辑，可右键修改显示文本或转换为纯文本。"
+				}
+			]
+		},
+		{
+			"ID": "20260614112550-u2opz5r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614112550-u2opz5r",
+				"updated": "20260614112550"
+			}
 		}
 	]
 }

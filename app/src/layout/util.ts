@@ -481,7 +481,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     }
     if (window.siyuan.layout.leftDock.layout.children[0].element.classList.contains("fn__none") &&
         window.siyuan.layout.leftDock.layout.children[1].element.classList.contains("fn__none")) {
-        window.siyuan.layout.rightDock.layout.element.style.width = "0px";
+        window.siyuan.layout.leftDock.layout.element.style.width = "0px";
     }
     if (window.siyuan.layout.bottomDock.layout.children[0].element.classList.contains("fn__none") &&
         window.siyuan.layout.bottomDock.layout.children[1].element.classList.contains("fn__none")) {

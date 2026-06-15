@@ -330,7 +330,17 @@ func findUnindexedTreePathInAllBoxes(id string) (ret string) {
 		var rootIDs []string
 		rootIDPaths := map[string]string{}
 		for _, p := range paths {
+			base := filepath.ToSlash(p)
+			if !strings.HasSuffix(base, ".sy") {
+				continue
+			}
+			if strings.Contains(base, "/.siyuan/") {
+				continue
+			}
 			rootID := util.GetTreeID(p)
+			if !ast.IsNodeIDPattern(rootID) {
+				continue
+			}
 			rootIDs = append(rootIDs, rootID)
 			rootIDPaths[rootID] = p
 		}

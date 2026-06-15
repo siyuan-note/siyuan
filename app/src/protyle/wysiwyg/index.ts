@@ -1,4 +1,4 @@
-import {enableLuteMarkdownSyntax, getTextStar, paste, restoreLuteMarkdownSyntax} from "../util/paste";
+import {beforePaste, enableLuteMarkdownSyntax, getTextStar, paste, restoreLuteMarkdownSyntax} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -2447,25 +2447,7 @@ export class WYSIWYG {
             if (!blockElement) {
                 return;
             }
-            // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
-            const range = getSelection().getRangeAt(0);
-            protyle.toolbar.range = range;
-            const inlineElement = range.startContainer.parentElement;
-            if (range.toString() === "" && inlineElement.tagName === "SPAN") {
-                const currentTypes = (inlineElement.getAttribute("data-type") || "").split(" ");
-                if (currentTypes.includes("inline-memo") || currentTypes.includes("text") ||
-                    currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") ||
-                    currentTypes.includes("a")) {
-                    const offset = getSelectionOffset(inlineElement, blockElement, range);
-                    if (offset.start === 0) {
-                        range.setStartBefore(inlineElement);
-                        range.collapse(true);
-                    } else if (offset.start === inlineElement.textContent.length) {
-                        range.setEndAfter(inlineElement);
-                        range.collapse(false);
-                    }
-                }
-            }
+            beforePaste(protyle, blockElement)
             paste(protyle, event);
         });
 

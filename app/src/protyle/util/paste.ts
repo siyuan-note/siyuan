@@ -3,7 +3,7 @@ import {uploadFiles, uploadLocalFiles} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
-import {getEditorRange} from "./selection";
+import {getEditorRange, getSelectionOffset} from "./selection";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
 import {fetchPost} from "../../util/fetch";
@@ -18,6 +18,28 @@ import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
 import {resolveLinkDest} from "../toolbar/util";
+
+export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
+    // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
+    const range = getSelection().getRangeAt(0);
+    protyle.toolbar.range = range;
+    const inlineElement = range.startContainer.parentElement;
+    if (range.toString() === "" && inlineElement.tagName === "SPAN") {
+        const currentTypes = (inlineElement.getAttribute("data-type") || "").split(" ");
+        if (currentTypes.includes("inline-memo") || currentTypes.includes("text") ||
+            currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") ||
+            currentTypes.includes("a")) {
+            const offset = getSelectionOffset(inlineElement, blockElement, range);
+            if (offset.start === 0) {
+                range.setStartBefore(inlineElement);
+                range.collapse(true);
+            } else if (offset.start === inlineElement.textContent.length) {
+                range.setEndAfter(inlineElement);
+                range.collapse(false);
+            }
+        }
+    }
+};
 
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;

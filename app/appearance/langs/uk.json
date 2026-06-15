@@ -1,8 +1,8 @@
 {
   "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Автоматичний знімок створено",
-  "agentThinkingDoneTime": "Обдумано: %s",
-  "agentThinking": "Думає...",
+  "agentThinkingDoneTime": "Обдумано %s",
+  "agentThinking": "Думає",
   "manageSessions": "Керування сесіями",
   "scrollToBottom": "Прокрутити вниз",
   "featurePreview": "💡 Ця функція на ранній стадії попереднього перегляду, ще нестабільна. Зробіть резервну копію даних перед використанням",

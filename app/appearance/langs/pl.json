@@ -1,8 +1,8 @@
 {
   "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Automatyczna migawka utworzona",
-  "agentThinkingDoneTime": "Przemyślane: %s",
-  "agentThinking": "Myśli...",
+  "agentThinkingDoneTime": "Przemyślane %s",
+  "agentThinking": "Myśli",
   "manageSessions": "Zarządzaj sesjami",
   "scrollToBottom": "Przewiń na dół",
   "featurePreview": "💡 Ta funkcja jest we wczesnej fazie podglądu, wciąż niestabilna. Przed użyciem wykonaj kopię zapasową danych",

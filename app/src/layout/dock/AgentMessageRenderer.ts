@@ -90,7 +90,6 @@ export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknow
 export const renderRetryCardHTML = (attempt: number, maxRetries: number): string => {
     return '<div class="agent-chat__thinking-card">' +
     '<div class="agent-chat__thinking-header">' +
-        '<span class="agent-chat__thinking-dot"></span>' +
         '<span class="agent-chat__thinking-text">' + escapeHtml("Retrying (" + attempt + "/" + maxRetries + ")...") + "</span>" +
     "</div>" +
 "</div>";
@@ -129,7 +128,6 @@ export const createThinkingCardElement = (step: {reasoning: string; text: string
             '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
         "</span>" +
-        '<span class="agent-chat__thinking-dot fn__none"></span>' +
         '<span class="agent-chat__thinking-text">' + escapeHtml(step.text) + "</span>" +
     "</div>" +
     '<div class="agent-chat__thinking-body">' +
@@ -146,14 +144,9 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
     if (!header || !body || !expandIcon || !contractIcon) { return; }
     header.addEventListener("click", () => {
-        const isDone = el.classList.contains("agent-chat__msg--thinking-done");
-        if (isDone) {
-            const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
-            expandIcon.classList.toggle("fn__none", isExpanded);
-            contractIcon.classList.toggle("fn__none", !isExpanded);
-        } else {
-            body.classList.toggle("agent-chat__thinking-body--expanded");
-        }
+        const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
+        expandIcon.classList.toggle("fn__none", isExpanded);
+        contractIcon.classList.toggle("fn__none", !isExpanded);
     });
 };
 

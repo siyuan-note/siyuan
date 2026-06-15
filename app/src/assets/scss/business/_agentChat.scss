@@ -677,17 +677,6 @@ pre:hover .agent-chat__copy-wrap {
     user-select: none;
 }
 
-.agent-chat__thinking-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--b3-theme-primary-light);
-    animation: agentThinkingPulse 1.4s ease-in-out infinite;
-    flex-shrink: 0;
-    margin-right: 6px;
-    cursor: pointer;
-}
-
 .agent-chat__thinking-text {
     flex: 1;
 }
@@ -764,11 +753,6 @@ pre:hover .agent-chat__copy-wrap {
     font-size: 12px;
     color: var(--b3-theme-on-surface-light);
     white-space: nowrap;
-}
-
-@keyframes agentThinkingPulse {
-    0%, 100% { opacity: 0.4; transform: scale(0.8); }
-    50% { opacity: 1; transform: scale(1.2); }
 }
 
 .agent-chat__confirm-card {

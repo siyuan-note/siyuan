@@ -1,8 +1,8 @@
 {
   "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Snapshot otomatis dibuat",
-  "agentThinkingDoneTime": "Selesai berpikir: %s",
-  "agentThinking": "Berpikir...",
+  "agentThinkingDoneTime": "Selesai berpikir %s",
+  "agentThinking": "Berpikir",
   "manageSessions": "Kelola sesi",
   "scrollToBottom": "Gulir ke bawah",
   "featurePreview": "💡 Fitur ini dalam pratinjau awal, masih tidak stabil. Harap cadangkan data Anda sebelum digunakan",

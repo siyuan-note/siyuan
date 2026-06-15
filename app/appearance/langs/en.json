@@ -1,8 +1,8 @@
 {
   "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Auto snapshot created",
-  "agentThinkingDoneTime": "Thought: %s",
-  "agentThinking": "Thinking...",
+  "agentThinkingDoneTime": "Thought %s",
+  "agentThinking": "Thinking",
   "manageSessions": "Manage sessions",
   "scrollToBottom": "Scroll to bottom",
   "featurePreview": "💡 This feature is in early preview, still unstable. Please back up your data before use",

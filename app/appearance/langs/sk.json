@@ -1,8 +1,8 @@
 {
   "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Automatická snímka vytvorená",
-  "agentThinkingDoneTime": "Premyslené: %s",
-  "agentThinking": "Premýšľa...",
+  "agentThinkingDoneTime": "Premyslené %s",
+  "agentThinking": "Premýšľa",
   "manageSessions": "Spravovať relácie",
   "scrollToBottom": "Posunúť na koniec",
   "featurePreview": "💡 Táto funkcia je v ranom náhľade, zatiaľ nestabilná. Pred použitím si zálohujte údaje",

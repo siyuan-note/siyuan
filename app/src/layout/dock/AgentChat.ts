@@ -1314,7 +1314,7 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
-        let text = L.agentThinking || "Thinking...";
+        let text = L.agentThinking || "Thinking";
 
         this.currentThinkingText = text;
 
@@ -1363,13 +1363,9 @@ export class AgentChat extends Model {
             for (let i = 0; i < oldCards.length; i++) {
                 const card = oldCards[i] as HTMLElement;
                 card.classList.add("agent-chat__msg--thinking-done");
-                const dot = card.querySelector(".agent-chat__thinking-dot");
-                if (dot) {
-                    dot.classList.add("fn__none");
-                }
                 const txtEl = card.querySelector(".agent-chat__thinking-text");
                 if (txtEl) {
-                    txtEl.textContent = L.agentThinking || "Thinking...";
+                    txtEl.textContent = L.agentThinking || "Thinking";
                 }
             }
             if (this.currentThinkingStepContent && this.currentThinkingSteps.length > 0) {
@@ -1431,10 +1427,9 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__thinking-card">' +
             '<div class="agent-chat__thinking-header">' +
             '<span class="agent-chat__thinking-arrow">' +
-            '<svg class="agent-chat__thinking-arrow--expand fn__none"><use xlink:href="#iconExpand"></use></svg>' +
+            '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
             "</span>" +
-            '<span class="agent-chat__thinking-dot"></span>' +
             '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
             "</div>" +
             bodyHTML +
@@ -2155,7 +2150,6 @@ export class AgentChat extends Model {
             '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
             "</span>" +
-            '<span class="agent-chat__thinking-dot fn__none"></span>' +
             '<span class="agent-chat__thinking-text">' + escapeHtml(headerText) + "</span>" +
             "</div>" +
             '<div class="agent-chat__thinking-body">' +
@@ -2172,9 +2166,9 @@ export class AgentChat extends Model {
     private formatThinkingHeader(duration?: number): string {
         const L = window.siyuan.languages;
         if (duration && duration > 0) {
-            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(duration) + "s") : (L.agentThinking || "Thinking...");
+            return L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(duration) + "s") : (L.agentThinking || "Thinking");
         }
-        return L.agentThinking || "Thinking...";
+        return L.agentThinking || "Thinking";
     }
 
     private updateTokenDisplay() {
@@ -2222,7 +2216,7 @@ export class AgentChat extends Model {
         const tick = () => {
             const sec = Math.floor((Date.now() - this.requestStartTime) / 1000);
             const L = window.siyuan.languages;
-            const live = (L.agentThinking || "Thinking...") + " " + sec + "s";
+            const live = (L.agentThinking || "Thinking") + " " + sec + "s";
             const cards = this.messagesContainer.querySelectorAll(
                 ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-text"
             );
@@ -2249,8 +2243,8 @@ export class AgentChat extends Model {
         const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
         this.currentThinkingDuration = durSec;
         const doneText = durSec > 0
-            ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(durSec) + "s") : (L.agentThinking || "Thinking..."))
-            : (L.agentThinking || "Thinking...");
+            ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(durSec) + "s") : (L.agentThinking || "Thinking"))
+            : (L.agentThinking || "Thinking");
 
         const items = this.messagesContainer.querySelectorAll(
             ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
@@ -2262,14 +2256,6 @@ export class AgentChat extends Model {
                 if (streamingChat) { streamingChat.remove(); }
             }
             el.classList.add("agent-chat__msg--thinking-done");
-            const dot = el.querySelector(".agent-chat__thinking-dot");
-            if (dot) {
-                dot.classList.add("fn__none");
-            }
-            const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand");
-            if (expandIcon) {
-                expandIcon.classList.remove("fn__none");
-            }
             if (doneText) {
                 const textEl = el.querySelector(".agent-chat__thinking-text");
                 if (textEl) {

@@ -1,8 +1,8 @@
 {
   "rollbackCompleted": "Restauration terminée",
   "snapshotAutoCreated": "Instantané créé automatiquement",
-  "agentThinkingDoneTime": "Réflexion terminée : %s",
-  "agentThinking": "Réflexion...",
+  "agentThinkingDoneTime": "Réflexion terminée %s",
+  "agentThinking": "Réflexion",
   "manageSessions": "Gérer les sessions",
   "scrollToBottom": "Défiler vers le bas",
   "featurePreview": "💡 Cette fonctionnalité est en aperçu anticipé, encore instable. Veuillez sauvegarder vos données avant utilisation",

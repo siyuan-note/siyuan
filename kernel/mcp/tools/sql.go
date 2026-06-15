@@ -25,7 +25,7 @@ import (
 
 var SQLTool = &Tool{
 	Name:        "sql",
-	Description: "Execute read-only SQL queries on SiYuan's database.\n- query: Execute a SELECT-only SQL statement. Requires: stmt.",
+	Description: "Read-only SQL on SiYuan's database. Action: query(stmt) — SELECT only.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

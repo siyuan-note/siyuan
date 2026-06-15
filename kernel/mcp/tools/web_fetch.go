@@ -22,7 +22,7 @@ import (
 
 var WebFetchTool = &Tool{
 	Name:        "web_fetch",
-	Description: "Fetch the content of a web page and convert it to Markdown or plain text.\n- url: The web page URL to fetch (must start with http:// or https://).\n- format: Output format, 'markdown' (default) or 'text'.",
+	Description: "Fetch a web page and convert to Markdown or text. url (http/https), format: markdown (default) or text.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

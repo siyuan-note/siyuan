@@ -28,7 +28,7 @@ import (
 
 var NotebookTool = &Tool{
 	Name:        "notebook",
-	Description: "Notebook management for SiYuan.\n- list: List all notebooks.\n- open: Open a notebook. Requires: id.\n- close: Close a notebook. Requires: id.\n- create: Create a notebook. Requires: name.\n- rename: Rename a notebook. Requires: id, name.\n- remove: Remove a notebook. Requires: id.",
+	Description: "Notebook management. Actions: list(), open(id), close(id), create(name), rename(id, name), remove(id).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

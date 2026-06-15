@@ -27,7 +27,7 @@ import (
 
 var RepoTool = &Tool{
 	Name:        "repo",
-	Description: "Repository (data snapshot) operations for SiYuan.\n- list: List all snapshots. Optional: tag (bool), page (default 1).\n- create: Create a new snapshot. Optional: memo.\n- tag: Tag a snapshot. Requires: id, name.\n- untag: Remove a tag from snapshots. Requires: name.\n- checkout: Rollback to a snapshot. Requires: id.\n- diff: Diff two snapshots. Requires: left, right.\n- search: Search files within snapshots. Requires: keyword. Optional: page.\n- purge: Purge old snapshots.\n- file_get: Get file content from a snapshot. Requires: id.\n- file_rollback: Rollback a single file from snapshot. Requires: id.\n- file_open: Preview file content from snapshot. Requires: id.\n- file_export: Export file from snapshot to temp file. Requires: id.",
+	Description: "Repository (data snapshot) operations. Actions: list(tag?, page=1), create(memo?), tag(id, name), untag(name), checkout(id), diff(left, right), search(keyword, page?), purge(), file_get(id), file_rollback(id), file_open(id), file_export(id).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

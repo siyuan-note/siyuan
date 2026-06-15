@@ -29,7 +29,7 @@ import (
 
 var FileTool = &Tool{
 	Name:        "file",
-	Description: "Workspace file operations for SiYuan (paths are relative to workspace).\n- list: List directory contents. Requires: path. Optional: limit (default 200, 0 or negative for unlimited).\n- read: Read file content. Requires: path. Optional: offset, limit (default 200 lines when neither is specified, use limit=-1 for full file).\n- write: Write file content. Requires: path, data.\n- delete: Delete file or directory. Requires: path.\n- rename: Rename or move file. Requires: old, new.\n- copy: Copy file or directory. Requires: src, dst.\n- grep: Search file contents using regex pattern. Requires: pattern, path. Optional: include, context, limit (default 200).\n- find: Find files by glob pattern recursively. Requires: path. Optional: include (e.g. \"*.go\"), limit (default 200, 0 or negative for unlimited).\n- stat: Get file metadata (size, isDir, modTime). Requires: path.",
+	Description: "Workspace file operations (paths relative to workspace; debugging/log reading only — never use for workspace data). Actions: list(path, limit=200, 0/-1=unlimited), read(path, offset, limit; default 200 lines, limit=-1 for full), write(path, data), delete(path), rename(old, new), copy(src, dst), grep(pattern, path, include?, context?, limit=200), find(path, include?, limit=200), stat(path).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

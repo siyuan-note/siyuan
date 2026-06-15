@@ -25,7 +25,7 @@ import (
 
 var SkillTool = &Tool{
 	Name:        "skill",
-	Description: "Skill operations.\n- load: Load a skill's full instructions by name.\n- save: Create or update a skill by name with SKILL.md content.\n- remove: Delete a skill by name.\n- rename: Rename a skill (change directory name).\n- list: List all available skills.\n\n" + skillListDesc(),
+	Description: "Skill operations: load(name), save(name, content), remove(name), rename(name, new_name), list().\n\n" + skillListDesc(),
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

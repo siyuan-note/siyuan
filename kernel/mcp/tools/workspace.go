@@ -25,7 +25,7 @@ import (
 
 var WorkspaceTool = &Tool{
 	Name:        "workspace",
-	Description: "Workspace management for SiYuan.\n- list: List all registered workspaces.\n- info: Show current workspace info (path, version, valid).",
+	Description: "Workspace management. Actions: list(), info() (path, version, valid).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

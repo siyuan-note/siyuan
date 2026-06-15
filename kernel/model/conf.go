@@ -33,7 +33,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
-	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -613,19 +612,8 @@ func InitConf() {
 		if nil == p {
 			continue
 		}
-		if "" == p.BaseURL {
-			p.BaseURL = "https://api.openai.com/v1"
-		}
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 30
-		}
-		for _, m := range p.Models {
-			if nil == m {
-				continue
-			}
-			if "" == m.Name {
-				m.Name = openai.GPT3Dot5Turbo
-			}
 		}
 	}
 	if 0 > Conf.AI.Chat.MaxCompletionTokens {

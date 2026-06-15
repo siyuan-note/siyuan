@@ -32,10 +32,10 @@ type AI struct {
 	Agent     *Agent      `json:"agent"`
 	Chat      *Chat       `json:"chat"`
 	Providers []*Provider `json:"providers"`
-	Scenarios []*Scenario `json:"scenarios"`
 }
 
 type Agent struct {
+	ModelID             string  `json:"modelId"`
 	SessionTimeout      int     `json:"sessionTimeout"`
 	ConfirmTimeout      int     `json:"confirmTimeout"`
 	MaxRetries          int     `json:"maxRetries"`
@@ -48,6 +48,7 @@ type Agent struct {
 // here (instead of on Model) to mirror Agent and to decouple scenario behavior
 // from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
 type Chat struct {
+	ModelID             string  `json:"modelId"`
 	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
 	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
 	MaxCompletionTokens int     `json:"maxCompletionTokens"` // Alignment with Agent.MaxCompletionTokens
@@ -76,20 +77,10 @@ type Provider struct {
 // MaxContexts remain the persisted UI-facing config (the settings page still
 // reads/writes them). Chat holds the runtime view derived from them.
 type Model struct {
-	ID          string  `json:"id"`
-	DisplayName string  `json:"displayName,omitempty"`
-	Enabled     bool    `json:"enabled"`
-	Name        string  `json:"name"`
-}
-
-const (
-	ScenarioChat  = "chat"
-	ScenarioAgent = "agent"
-)
-
-type Scenario struct {
-	Name  string `json:"name"`
-	Model string `json:"model"`
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName,omitempty"`
+	Enabled     bool   `json:"enabled"`
+	Name        string `json:"name"`
 }
 
 type MCP struct {
@@ -107,8 +98,15 @@ type MCPServer struct {
 	Timeout int               `json:"timeout"`
 }
 
+func defaultEmbedding() *Embedding {
+	return &Embedding{Timeout: 30}
+}
+
 func NewAI() *AI {
 	ai := &AI{
+		Providers: []*Provider{},
+		MCP:       &MCP{Servers: []MCPServer{}},
+		Embedding: defaultEmbedding(),
 		Agent: &Agent{
 			SessionTimeout:      600,
 			ConfirmTimeout:      120,
@@ -265,22 +263,35 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	return nil, nil
 }
 
-func (ai *AI) GetScenarioModel(name string) (*Provider, *Model) {
-	if ai.Scenarios == nil {
+func (ai *AI) GetChatModel() (*Provider, *Model) {
+	if ai.Chat == nil || ai.Chat.ModelID == "" {
 		return nil, nil
 	}
-	for _, s := range ai.Scenarios {
-		if s != nil && s.Name == name && s.Model != "" {
-			return ai.GetModel(s.Model)
-		}
+	return ai.GetModel(ai.Chat.ModelID)
+}
+
+func (ai *AI) GetAgentModel() (*Provider, *Model) {
+	if ai.Agent == nil || ai.Agent.ModelID == "" {
+		return nil, nil
 	}
-	return nil, nil
+	return ai.GetModel(ai.Agent.ModelID)
 }
 
 func (ai *AI) Normalize() {
+	if ai.Providers == nil {
+		ai.Providers = []*Provider{}
+	}
+	if ai.MCP == nil {
+		ai.MCP = &MCP{Servers: []MCPServer{}}
+	} else if ai.MCP.Servers == nil {
+		ai.MCP.Servers = []MCPServer{}
+	}
 	for _, p := range ai.Providers {
 		if p == nil {
 			continue
+		}
+		if p.Models == nil {
+			p.Models = []*Model{}
 		}
 		if !ast.IsNodeIDPattern(p.ID) {
 			p.ID = ast.NewNodeID()
@@ -294,10 +305,14 @@ func (ai *AI) Normalize() {
 			}
 		}
 	}
-	if ai.Embedding != nil {
-		if !ast.IsNodeIDPattern(ai.Embedding.ID) {
-			ai.Embedding.ID = ast.NewNodeID()
-		}
+	if ai.Embedding == nil {
+		ai.Embedding = defaultEmbedding()
+	}
+	if ai.Embedding.Timeout < 1 {
+		ai.Embedding.Timeout = 30
+	}
+	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
+		ai.Embedding.ID = ast.NewNodeID()
 	}
 }
 
@@ -418,34 +433,48 @@ func MigrateAI(data []byte) *AI {
 	}
 
 	ai.Normalize()
+	assignDefaultModelIDs(ai)
 
-	if len(ai.Scenarios) == 0 {
-		var m *Model
-		for _, p := range ai.Providers {
-			if p == nil || len(p.APIKey) == 0 || !p.Enabled {
-				continue
-			}
-			for _, model := range p.Models {
-				if model != nil && model.Name != "" && model.Enabled {
-					m = model
-					break
-				}
-			}
-			if m != nil {
+	return ai
+}
+
+func assignDefaultModelIDs(ai *AI) {
+	if (ai.Chat != nil && ai.Chat.ModelID != "") || (ai.Agent != nil && ai.Agent.ModelID != "") {
+		return
+	}
+	var m *Model
+	for _, p := range ai.Providers {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+			continue
+		}
+		for _, model := range p.Models {
+			if model != nil && model.Name != "" && model.Enabled {
+				m = model
 				break
 			}
 		}
-		if m == nil && len(ai.Providers) > 0 && ai.Providers[0] != nil && len(ai.Providers[0].Models) > 0 {
-			m = ai.Providers[0].Models[0]
-		}
-		if m != nil && m.ID != "" {
-			ai.Scenarios = []*Scenario{
-				{Name: ScenarioChat, Model: m.ID},
-				{Name: ScenarioAgent, Model: m.ID},
-			}
+		if m != nil {
+			break
 		}
 	}
-	return ai
+	if m == nil && len(ai.Providers) > 0 && ai.Providers[0] != nil && len(ai.Providers[0].Models) > 0 {
+		m = ai.Providers[0].Models[0]
+	}
+	if m == nil || m.ID == "" {
+		return
+	}
+	if ai.Chat == nil {
+		ai.Chat = &Chat{}
+	}
+	if ai.Chat.ModelID == "" {
+		ai.Chat.ModelID = m.ID
+	}
+	if ai.Agent == nil {
+		ai.Agent = &Agent{MaxToolCallRounds: 64}
+	}
+	if ai.Agent.ModelID == "" {
+		ai.Agent.ModelID = m.ID
+	}
 }
 
 func findProviderByBaseURL(providers []*Provider, baseURL string) *Provider {

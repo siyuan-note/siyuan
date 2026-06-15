@@ -34,14 +34,14 @@ import (
 )
 
 type agentChatReq struct {
-	SessionID     string              `json:"sessionID"`
-	Message       string              `json:"message"`
-	Language      string              `json:"language"`
-	References    []agent.Reference   `json:"references"`
-	EditorContext  agent.EditorContext  `json:"editorContext"`
-	PluginActions  []agent.PluginAction `json:"pluginActions"`
-	Model         string              `json:"model,omitempty"`
-	Regenerate    bool                `json:"regenerate"`
+	SessionID     string               `json:"sessionID"`
+	Message       string               `json:"message"`
+	Language      string               `json:"language"`
+	References    []agent.Reference    `json:"references"`
+	EditorContext agent.EditorContext  `json:"editorContext"`
+	PluginActions []agent.PluginAction `json:"pluginActions"`
+	Model         string               `json:"model,omitempty"`
+	Regenerate    bool                 `json:"regenerate"`
 }
 
 type runningSession struct {
@@ -75,7 +75,7 @@ func agentChat(c *gin.Context) {
 	if modelID != "" {
 		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
 	} else {
-		selectedProvider, selectedModel = model.Conf.AI.GetScenarioModel(conf.ScenarioAgent)
+		selectedProvider, selectedModel = model.Conf.AI.GetAgentModel()
 	}
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()
@@ -233,7 +233,7 @@ func agentChatTitle(c *gin.Context) {
 	if modelID != "" {
 		selectedProvider, selectedModel = model.Conf.AI.GetModel(modelID)
 	} else {
-		selectedProvider, selectedModel = model.Conf.AI.GetScenarioModel(conf.ScenarioAgent)
+		selectedProvider, selectedModel = model.Conf.AI.GetAgentModel()
 	}
 	if nil == selectedProvider || nil == selectedModel {
 		ret := gulu.Ret.NewResult()

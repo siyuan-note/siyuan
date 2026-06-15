@@ -26,9 +26,9 @@
 
 <p align="center">
 <b>English</b>
-| <a href="README_zh-CN.md">中文</a>
-| <a href="README_ja.md">日本語</a>
-| <a href="README_tr.md">Türkçe</a>
+| <a href="README.zh-CN.md">中文</a>
+| <a href="README.ja.md">日本語</a>
+| <a href="README.tr.md">Türkçe</a>
 </p>
 
 ---

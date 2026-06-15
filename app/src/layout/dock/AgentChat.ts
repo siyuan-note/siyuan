@@ -121,6 +121,8 @@ export class AgentChat extends Model {
     private navExpandTimer = 0;
     // 思考计时器：流式进行时每 100ms 刷新未完成思考卡片的标题为「思考中... X.Xs」。
     private thinkingTimerId = 0;
+    // 输入框计时器：请求进行时每 1s 刷新底部「tokens · 累计耗时」显示。
+    private tokenTimerId = 0;
     // 上一个 thinking step 快照时 currentToolCalls 的长度基准，
     // 用于计算本轮新增的工具（避免 step.toolNames 累积重复历史工具）。
     private lastStepToolCount = 0;
@@ -367,6 +369,7 @@ export class AgentChat extends Model {
                     const requestSessionId = this.sessionId;
                     this.requestStartTime = Date.now();
                     this.currentThinkingDuration = 0;
+                    this.startTokenTimer();
                     fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
                         (event: ISSEResult) => {
                             if (this.sessionId !== requestSessionId) {
@@ -603,6 +606,7 @@ export class AgentChat extends Model {
         this.sessionPromptTokens = session.promptTokens || 0;
         this.sessionCompletionTokens = session.completionTokens || 0;
         this.sessionTotalDuration = session.totalDuration || 0;
+        this.stopTokenTimer();
         if (session.model) {
             this.selectedModel = session.model;
             this.updateModelLabel();
@@ -881,6 +885,7 @@ export class AgentChat extends Model {
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         this.hasInterveningCard = false;
+        this.stopTokenTimer();
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.classList.add("fn__none");
         }
@@ -954,6 +959,7 @@ export class AgentChat extends Model {
 
         this.requestStartTime = Date.now();
         this.currentThinkingDuration = 0;
+        this.startTokenTimer();
 
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
@@ -1649,6 +1655,7 @@ export class AgentChat extends Model {
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {
+            this.stopTokenTimer();
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
         }
@@ -1857,6 +1864,7 @@ export class AgentChat extends Model {
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {
+            this.stopTokenTimer();
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
         }
@@ -2171,20 +2179,24 @@ export class AgentChat extends Model {
         return L.agentThinking || "Thinking";
     }
 
-    private updateTokenDisplay() {
+    private updateTokenDisplay(overrideDurationMs?: number) {
         if (!this.tokenDisplayEl) {
             return;
         }
         const total = this.sessionPromptTokens + this.sessionCompletionTokens;
-        if (total === 0 && this.sessionTotalDuration === 0) {
+        const durationMs = overrideDurationMs !== undefined ? overrideDurationMs : this.sessionTotalDuration;
+        if (total === 0 && durationMs === 0) {
             return;
         }
-        let text = total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString();
-        if (this.sessionTotalDuration > 0) {
-            let seconds = Math.floor(this.sessionTotalDuration / 1000);
+        let text = total > 0
+            ? (total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString())
+            : "";
+        if (durationMs > 0) {
+            let seconds = Math.floor(durationMs / 1000);
             const minutes = Math.floor(seconds / 60);
             seconds = seconds % 60;
-            text += " \u00B7 " + (minutes > 0 ? minutes + "m" : "") + seconds + "s";
+            if (text) { text += " \u00B7 "; }
+            text += (minutes > 0 ? minutes + "m" : "") + seconds + "s";
         }
         this.tokenDisplayEl.textContent = text;
         this.tokenDisplayEl.classList.remove("fn__none");
@@ -2233,6 +2245,28 @@ export class AgentChat extends Model {
         if (this.thinkingTimerId) {
             clearInterval(this.thinkingTimerId);
             this.thinkingTimerId = 0;
+        }
+    }
+
+    // 启动输入框计时器，每 1s 刷新底部「tokens · 累计耗时」为「会话历史耗时 + 当前请求已耗时」。
+    private startTokenTimer() {
+        this.stopTokenTimer();
+        if (!this.requestStartTime) {
+            return;
+        }
+        const tick = () => {
+            const liveMs = this.sessionTotalDuration + (Date.now() - this.requestStartTime);
+            this.updateTokenDisplay(liveMs);
+        };
+        tick();
+        this.tokenTimerId = window.setInterval(tick, 1000);
+    }
+
+    // 停止输入框计时器（请求结束/切换会话/停止生成时调用，避免泄漏）。
+    private stopTokenTimer() {
+        if (this.tokenTimerId) {
+            clearInterval(this.tokenTimerId);
+            this.tokenTimerId = 0;
         }
     }
 

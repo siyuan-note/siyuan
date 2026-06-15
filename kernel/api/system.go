@@ -125,13 +125,26 @@ func getChangelog(c *gin.Context) {
 		return
 	}
 
-	changelogPath := filepath.Join(changelogsDir, "v"+util.Ver, "v"+util.Ver+"_"+model.Conf.Lang+".md")
-	if !gulu.File.IsExist(changelogPath) {
-		changelogPath = filepath.Join(changelogsDir, "v"+util.Ver, "v"+util.Ver+".md")
-		if !gulu.File.IsExist(changelogPath) {
-			logging.LogErrorf("changelog not found: %s", changelogPath)
-			return
+	// changelog 文件名查找顺序：
+	//   1. 新点号风格（v3.7.0+）：v3.7.0.zh-CN.md
+	//   2. 历史下划线风格（v3.6.x 及更早）：v3.6.5_zh_CN.md（老 lang 值通过 LangToFile 映射）
+	//   3. 默认英文：v3.7.0.md
+	verDir := filepath.Join(changelogsDir, "v"+util.Ver)
+	candidates := []string{
+		filepath.Join(verDir, "v"+util.Ver+"."+model.Conf.Lang+".md"),
+		filepath.Join(verDir, "v"+util.Ver+"_"+util.LangToFile(model.Conf.Lang)+".md"),
+		filepath.Join(verDir, "v"+util.Ver+".md"),
+	}
+	var changelogPath string
+	for _, p := range candidates {
+		if gulu.File.IsExist(p) {
+			changelogPath = p
+			break
 		}
+	}
+	if "" == changelogPath {
+		logging.LogErrorf("changelog not found in %s", verDir)
+		return
 	}
 
 	contentData, err := os.ReadFile(changelogPath)

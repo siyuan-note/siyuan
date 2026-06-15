@@ -363,7 +363,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		}
 
 		temperature := kernelModel.Conf.AI.Agent.Temperature
-		if temperature <= 0 {
+		if temperature < 0 || 2 < temperature {
 			temperature = 1.0
 		}
 		maxCompletionTokens := kernelModel.Conf.AI.Agent.MaxCompletionTokens

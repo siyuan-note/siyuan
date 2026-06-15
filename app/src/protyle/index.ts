@@ -332,6 +332,19 @@ export class Protyle {
                 }
             }
         });
+        // 聚焦块被分屏另一侧的删除操作连带删除时（容器块删除会级联删除其所有子孙块，如列表/超级块/引述等），当前页签的聚焦块已成为孤儿但仍显示，需退出聚焦
+        // Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
+        if (this.protyle.block.showAll && needCreateAction === "delete") {
+            fetchPost("/api/block/checkBlockExist", {id: this.protyle.block.id}, response => {
+                if (!response.data) {
+                    zoomOut({
+                        protyle: this.protyle,
+                        id: this.protyle.block.rootID
+                    });
+                }
+            });
+            return;
+        }
         if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID && needCreateAction) {
             if (needCreateAction === "delete" && this.protyle.block.showAll) {
                 if (this.protyle.options.handleEmptyContent) {

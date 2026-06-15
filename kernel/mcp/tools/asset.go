@@ -28,7 +28,7 @@ import (
 
 var AssetTool = &Tool{
 	Name:        "asset",
-	Description: "Asset management for SiYuan.\n- upload: Upload local files as workspace assets. Requires: id, files (comma-separated absolute paths).\n- unused: List unused assets.\n- clean: Clean unused assets. Optional: path (single unused asset path to remove).\n- stat: Get asset file metadata (size, modTime). Requires: path.",
+	Description: "Asset management. Actions: upload(id, files=comma-separated absolute paths), unused(), clean(path?), stat(path).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

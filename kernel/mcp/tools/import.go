@@ -25,7 +25,7 @@ import (
 
 var ImportTool = &Tool{
 	Name:        "import",
-	Description: "Import operations for SiYuan.\n- md: Import a Markdown file or directory. Requires: notebook, path (absolute local path). Optional: targetPath.\n- sy: Import a .sy.zip archive. Requires: notebook, path (absolute local path). Optional: targetPath.\n- data: Import a full data backup zip. Requires: path (absolute local path).",
+	Description: "Import operations (absolute local paths). Actions: md(notebook, path, targetPath?), sy(notebook, path, targetPath?) — .sy.zip, data(path) — full backup zip.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

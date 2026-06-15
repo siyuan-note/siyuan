@@ -23,11 +23,7 @@ package tools
 // convertMCPToolsToOpenAI() lists this tool for the LLM.
 var FrontendTool = &Tool{
 	Name: "frontend",
-	Description: "Frontend/UI actions in the SiYuan editor. These execute in the browser and may change what the user sees (open panels, scroll, navigate). The result tells you whether the action succeeded.\n" +
-		"- open_setting: Open the settings panel. Optional: query (search keyword to filter config items and locate a specific setting).\n" +
-		"- focus_block: Scroll the active editor to focus a specific block. Requires: id (block ID).\n" +
-		"- open_document: Open a document by its root block ID in a new tab. Requires: id.\n" +
-		"- open_search: Open the global search dialog. Optional: query (pre-filled search keyword).\nPlugins may register additional actions; see the <plugin_actions> section in the context for available plugin actions and use their full name (e.g. plugin__myplugin__myaction)",
+	Description: "Frontend/UI actions in the SiYuan editor (run in the browser; may change what the user sees). Actions: open_setting(query?), focus_block(id), open_document(id), open_search(query?). Plugins may register more — see <plugin_actions> and invoke by full name (e.g. plugin__myplugin__myaction).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -25,7 +25,7 @@ import (
 
 var OutlineTool = &Tool{
 	Name:        "outline",
-	Description: "Document outline operations for SiYuan.\n- get: Get the document outline (heading tree) by document ID. Requires: id.",
+	Description: "Document outline (heading tree). Action: get(id).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

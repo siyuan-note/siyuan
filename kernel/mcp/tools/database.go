@@ -28,7 +28,7 @@ import (
 
 var DatabaseTool = &Tool{
 	Name:        "database",
-	Description: "Attribute view (database) operations for SiYuan.\n- search: Search for attribute views by keyword. Requires: keyword.\n- get: Get attribute view details by ID. Requires: id.\n- render: Render attribute view table. Requires: id. Optional: viewID, query, page (default 1), pageSize (default 50).\n- keys: List all keys (fields) of a database. Requires: id.\n- key_add: Add a key (field) to a database. Requires: id, name, type. Optional: icon, prev.\n- key_remove: Remove a key from a database. Requires: id, keyID. Optional: removeRelationDest.\n- item_add: Add a row to a database. Requires: id. Optional: blockID, content, viewID, groupID, previousID, detached, ignoreDefaultFill.\n- item_remove: Remove rows from a database. Requires: id, itemIDs (comma-separated).\n- item_update: Update a cell value. Requires: id, keyID, itemID, value (JSON string).\n- unused: List unused databases.\n- clean: Clean unused databases. Optional: id (single database ID to clean).",
+	Description: "Attribute view (database) operations. Actions: search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs comma-separated), item_update(id, keyID, itemID, value as JSON string), unused(), clean(id?).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -24,7 +24,7 @@ import (
 
 var ExportTool = &Tool{
 	Name:        "export",
-	Description: "Export operations for SiYuan.\n- md: Export a document as Markdown. Requires: id.\n- html: Export a document as HTML. Requires: id.\n- preview: Export a document as preview HTML. Requires: id.\n- docx: Export a document as Word (.docx). Requires: id, output (output file path).\n- sy: Export a document as .sy.zip. Requires: id.\n- md-zip: Export a document as Markdown zip. Requires: id.\n- data: Export full workspace data backup.",
+	Description: "Export operations. Actions: md(id), html(id), preview(id), docx(id, output path), sy(id) → .sy.zip, md-zip(id), data() → full workspace backup.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -25,7 +25,7 @@ import (
 
 var TodoWriteTool = &Tool{
 	Name:        "todo_write",
-	Description: "Create and maintain a structured task list for the current session. Use this to track progress during multi-step work. Each call replaces the entire list.\n- todos: Array of todo items, each with: content (task description), status (one of: pending, in_progress, completed, cancelled).",
+	Description: "Maintain a session task list (each call replaces the list). todos[]: each {content, status: pending|in_progress|completed|cancelled}.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

@@ -22,7 +22,7 @@ import (
 
 var WebSearchTool = &Tool{
 	Name:        "web_search",
-	Description: "Search the web using Exa search engine. Returns search results as text.\n- query: Search keywords (required).",
+	Description: "Web search via Exa, returns text results. Action: query(keywords).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

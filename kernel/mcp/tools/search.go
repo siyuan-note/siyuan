@@ -25,7 +25,7 @@ import (
 
 var SearchTool = &Tool{
 	Name:        "search",
-	Description: "Search in SiYuan.\n- fulltext: Full-text keyword search. Required: query. Optional: page (default 1), pageSize (default 20), notebook, path, type, subtype, method, orderBy, groupBy.\n- semantic: Semantic (vector) search using AI embedding. Required: query. Optional: page (default 1), pageSize (default 20), notebook, path, type, subtype. Note: needs AI embedding configured in SiYuan settings.",
+	Description: "Search. Actions: fulltext(query, page=1, pageSize=20, notebook?, path?, type?, subtype?, method?, orderBy?, groupBy?), semantic(query, page=1, pageSize=20, notebook?, path?, type?, subtype?) — semantic needs AI embedding configured.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

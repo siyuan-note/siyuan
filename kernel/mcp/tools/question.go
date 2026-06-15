@@ -18,7 +18,7 @@ package tools
 
 var QuestionTool = &Tool{
 	Name:        "question",
-	Description: "Ask the user questions to clarify needs or gather preferences during execution.\n- questions: Array of questions, each with: header (short label), question (full text), options (array of {label, description}), multiple (allow multi-select, default false), custom (allow free-text answer, default true).",
+	Description: "Ask the user questions to clarify needs/preferences (do NOT use for plain-text option lists). questions[]: each {header (short label), question, options[] {label, description}, multiple?, custom?}.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

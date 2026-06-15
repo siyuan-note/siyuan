@@ -543,7 +543,12 @@ export const initKeyboardToolbar = () => {
                     window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
                 }
                 if (window.siyuan.mobile.size.landscape.height2 < window.innerHeight) {
-                    activeBlur();
+                    const isInputFocused = document.activeElement && (
+                        ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
+                        (document.activeElement as HTMLElement).isContentEditable);
+                    if (!isInputFocused) {
+                        activeBlur();
+                    }
                 } else if (!preventRender) {
                     renderKeyboardToolbar();
                 }
@@ -561,7 +566,12 @@ export const initKeyboardToolbar = () => {
                     window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
                 }
                 if (window.siyuan.mobile.size.portrait.height2 < window.innerHeight) {
-                    activeBlur();
+                    const isInputFocused = document.activeElement && (
+                        ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
+                        (document.activeElement as HTMLElement).isContentEditable);
+                    if (!isInputFocused) {
+                        activeBlur();
+                    }
                 } else if (!preventRender) {
                     renderKeyboardToolbar();
                 }

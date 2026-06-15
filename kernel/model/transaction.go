@@ -928,9 +928,10 @@ func (tx *Transaction) doLargeDelete(operations []*Operation) {
 
 	var ids []string
 	for _, operation := range operations {
-		tx.doDelete0(operation, tree)
-		ids = append(ids, operation.ID)
+		deletedNode := tx.doDelete0(operation, tree)
+		ids = append(ids, deletedNode.BlockIDs()...)
 	}
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	treenode.RemoveBlockTreesByIDs(ids)
 	tx.writeTree(tree)
 }
@@ -950,13 +951,16 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	tx.doDelete0(operation, tree)
-	treenode.RemoveBlockTree(operation.ID)
+	deletedNode := tx.doDelete0(operation, tree)
+	// 同步清理被删除容器块的索引节点及其子节点，否则删除列表/超级块等容器块后其子节点依然存在，ExistBlockTree 仍返回 true
+	// Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
+	deletedIDs := deletedNode.BlockIDs()
+	treenode.RemoveBlockTreesByIDs(deletedIDs)
 	tx.writeTree(tree)
 	return
 }
 
-func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) {
+func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) (deletedNode *ast.Node) {
 	node := treenode.GetNodeInTree(tree, operation.ID)
 	if nil == node {
 		return // move 以后的情况，列表项移动导致的状态异常 https://github.com/siyuan-note/insider/issues/961
@@ -1022,6 +1026,9 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) {
 	if needSyncDel2AvBlock {
 		syncDelete2AvBlock(node, tree, true, tx)
 	}
+
+	deletedNode = node
+	return
 }
 
 func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDelParent bool, tx *Transaction) {

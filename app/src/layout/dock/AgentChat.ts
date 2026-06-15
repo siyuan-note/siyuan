@@ -1314,7 +1314,7 @@ export class AgentChat extends Model {
         this.currentThinkingText = "";
         this.currentThinkingReasoning = reasoning;
         this.currentThinkingReasoningContent = "";
-        let text = L.agentThinking || "Thinking";
+        const text = L.agentThinking || "Thinking";
 
         this.currentThinkingText = text;
 

@@ -2447,7 +2447,7 @@ export class WYSIWYG {
             if (!blockElement) {
                 return;
             }
-            beforePaste(protyle, blockElement)
+            beforePaste(protyle, blockElement);
             paste(protyle, event);
         });
 

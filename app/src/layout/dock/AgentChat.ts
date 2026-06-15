@@ -232,7 +232,7 @@ export class AgentChat extends Model {
         const aiConfig = window.siyuan.config.ai;
         this.modelOptions = [];
         for (const prov of aiConfig.providers || []) {
-            for (const m of prov.models || []) {
+            for (const m of prov.models) {
                 const displayName = m.displayName || m.name;
                 if (!displayName) {
                     continue;

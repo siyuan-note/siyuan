@@ -86,7 +86,7 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 	util.PushEndlessProgress("Requesting...")
 	defer util.ClearPushProgress(100)
 
-	prov, m := Conf.AI.GetScenarioModel(conf.ScenarioChat)
+	prov, m := Conf.AI.GetChatModel()
 	if nil == prov || nil == m {
 		err = errors.New("no AI provider configured")
 		return

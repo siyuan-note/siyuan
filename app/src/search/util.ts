@@ -66,7 +66,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
             k: text,
             r: "",
             hasReplace: false,
-            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.embedding?.apiKey ? 0 : localData.method),
+            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.embedding.enabled ? 0 : localData.method),
             hPath: "",
             idPath: [],
             group: localData.group,

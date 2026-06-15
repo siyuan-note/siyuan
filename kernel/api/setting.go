@@ -234,9 +234,6 @@ func setAI(c *gin.Context) {
 	if nil == ai.Chat {
 		ai.Chat = model.Conf.AI.Chat
 	}
-	if len(ai.Scenarios) == 0 {
-		ai.Scenarios = model.Conf.AI.Scenarios
-	}
 
 	for i, p := range ai.Providers {
 		if nil == p {

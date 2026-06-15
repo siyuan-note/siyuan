@@ -114,23 +114,18 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
-        mcp?: IMCP;
-        embedding?: IEmbedding;
-        agent?: IAgent;
-        chat?: IChat;
-        providers?: IProvider[];
-        scenarios?: IScenario[];
-    }
-
-    export interface IScenario {
-        name: string;
-        model?: string;
+        providers: IProvider[];
+        chat: IChat;
+        agent: IAgent;
+        mcp: IMCP;
+        embedding: IEmbedding;
     }
 
     /**
      * AI agent global settings
      */
     export interface IAgent {
+        modelId: string;
         sessionTimeout: number;
         confirmTimeout: number;
         maxRetries: number;
@@ -143,6 +138,7 @@ declare namespace Config {
      * AI chat scenario behavior settings (mirrors IAgent)
      */
     export interface IChat {
+        modelId: string;
         maxHistoryMessages: number;
         temperature: number;
         maxCompletionTokens: number;
@@ -152,10 +148,10 @@ declare namespace Config {
      * Embedding model configuration
      */
     export interface IEmbedding {
-        id?: string;
-        enabled?: boolean;
-        apiKey: string;
+        id: string;
+        enabled: boolean;
         baseURL: string;
+        apiKey: string;
         name: string;
         timeout: number;
     }
@@ -164,13 +160,13 @@ declare namespace Config {
      * AI provider configuration
      */
     export interface IProvider {
-        id?: string;
+        id: string;
+        enabled: boolean;
         displayName?: string;
-        enabled?: boolean;
-        apiKey: string;
         baseURL: string;
+        apiKey: string;
         requestTimeout: number;
-        models?: IModel[];
+        models: IModel[];
     }
 
     /**
@@ -178,26 +174,26 @@ declare namespace Config {
      * live on IChat; Model holds only identity fields.
      */
     export interface IModel {
-        id?: string;
-        displayName?: string;
-        enabled?: boolean;
+        id: string;
+        enabled: boolean;
         name: string;
+        displayName?: string;
     }
 
     /**
      * MCP (Model Context Protocol) configuration
      */
     export interface IMCP {
-        servers?: IMCPServer[];
+        servers: IMCPServer[];
     }
 
     export interface IMCPServer {
-        name: string;
         enabled: boolean;
+        name: string;
+        url: string;
         type: string;
         command: string;
         args?: string[];
-        url: string;
         headers?: Record<string, string>;
         timeout: number;
     }

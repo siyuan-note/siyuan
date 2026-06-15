@@ -35,6 +35,8 @@
       border: 1px solid var(--b3-theme-surface-lighter);
       background-color: var(--b3-menu-background);
       padding: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--b3-scroll-color) transparent;
     }
 
     &::picker-icon {

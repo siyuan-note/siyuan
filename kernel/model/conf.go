@@ -597,7 +597,7 @@ func InitConf() {
 			ConfirmTimeout:      120,
 			MaxRetries:          3,
 			Temperature:         1.0,
-			MaxCompletionTokens: 4096,
+			MaxCompletionTokens: 0,
 			MaxToolCallRounds:   64,
 		}
 	}

@@ -261,21 +261,21 @@ type PluginAction struct {
 // SessionEntry 与前端 SessionStore.ts 中 entries 元素一一对应，
 // 是会话持久化的唯一数据源（不再单独持久化 messages）。
 type SessionEntry struct {
-	ID             string             `json:"id,omitempty"`
-	Type           string             `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
-	Content        string             `json:"content,omitempty"`
-	Steps          []SessionEntryStep `json:"steps,omitempty"`          // 仅 thinking
-	ToolCalls      []AgentToolCall    `json:"toolCalls,omitempty"`      // 仅 assistant
-	Duration       float64            `json:"duration,omitempty"`       // 秒（thinking/assistant 均可能带）
-	PromptTokens   int                `json:"promptTokens,omitempty"`   // 仅 assistant
-	CompletionTok  int                `json:"completionTokens,omitempty"`
-	Timestamp      int64              `json:"timestamp,omitempty"`
-	ReasoningCont  string             `json:"reasoningContent,omitempty"`
-	ConfirmName    string             `json:"confirmName,omitempty"`
-	ConfirmArgs    map[string]interface{} `json:"confirmArgs,omitempty"`
-	ConfirmID      string             `json:"confirmID,omitempty"`
-	ConfirmStatus  string             `json:"confirmStatus,omitempty"`
-	SnapshotID     string             `json:"snapshotID,omitempty"`
+	ID            string                 `json:"id,omitempty"`
+	Type          string                 `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
+	Content       string                 `json:"content,omitempty"`
+	Steps         []SessionEntryStep     `json:"steps,omitempty"`        // 仅 thinking
+	ToolCalls     []AgentToolCall        `json:"toolCalls,omitempty"`    // 仅 assistant
+	Duration      float64                `json:"duration,omitempty"`     // 秒（thinking/assistant 均可能带）
+	PromptTokens  int                    `json:"promptTokens,omitempty"` // 仅 assistant
+	CompletionTok int                    `json:"completionTokens,omitempty"`
+	Timestamp     int64                  `json:"timestamp,omitempty"`
+	ReasoningCont string                 `json:"reasoningContent,omitempty"`
+	ConfirmName   string                 `json:"confirmName,omitempty"`
+	ConfirmArgs   map[string]interface{} `json:"confirmArgs,omitempty"`
+	ConfirmID     string                 `json:"confirmID,omitempty"`
+	ConfirmStatus string                 `json:"confirmStatus,omitempty"`
+	SnapshotID    string                 `json:"snapshotID,omitempty"`
 }
 
 // SessionEntryStep 描述一次思考步骤。工具调用只保留名字列表，
@@ -287,18 +287,18 @@ type SessionEntryStep struct {
 }
 
 type agentCheckpoint struct {
-	ID               string           `json:"id"`
-	Title            string           `json:"title"`
-	Titled           bool             `json:"titled"`
-	Entries          []SessionEntry   `json:"entries"`
-	PromptTokens     int              `json:"promptTokens"`
-	CompletionTokens int              `json:"completionTokens"`
-	TotalDuration    int64            `json:"totalDuration"`
-	CreatedAt        int64            `json:"createdAt"`
-	UpdatedAt        int64            `json:"updatedAt"`
-	MessageHistory   []string         `json:"messageHistory,omitempty"`
-	Snapshots        []string         `json:"snapshots,omitempty"`
-	AlwaysAllow      bool             `json:"alwaysAllow,omitempty"`
+	ID               string         `json:"id"`
+	Title            string         `json:"title"`
+	Titled           bool           `json:"titled"`
+	Entries          []SessionEntry `json:"entries"`
+	PromptTokens     int            `json:"promptTokens"`
+	CompletionTokens int            `json:"completionTokens"`
+	TotalDuration    int64          `json:"totalDuration"`
+	CreatedAt        int64          `json:"createdAt"`
+	UpdatedAt        int64          `json:"updatedAt"`
+	MessageHistory   []string       `json:"messageHistory,omitempty"`
+	Snapshots        []string       `json:"snapshots,omitempty"`
+	AlwaysAllow      bool           `json:"alwaysAllow,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
@@ -367,8 +367,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			temperature = 1.0
 		}
 		maxCompletionTokens := kernelModel.Conf.AI.Agent.MaxCompletionTokens
-		if maxCompletionTokens <= 0 {
-			maxCompletionTokens = 4096
+		if maxCompletionTokens < 0 {
+			maxCompletionTokens = 0
 		}
 		maxRounds := kernelModel.Conf.AI.Agent.MaxToolCallRounds
 

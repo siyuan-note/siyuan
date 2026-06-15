@@ -8,17 +8,16 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20260427075639"
+		"updated": "20260614194354"
 	},
 	"Children": [
 		{
-			"ID": "20240530101000-9ez04zl",
+			"ID": "20260614194342-abyxmop",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-yoju3rl",
-				"id": "20240530101000-9ez04zl",
-				"updated": "20240530101000"
+				"id": "20260614194342-abyxmop",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
@@ -28,219 +27,188 @@
 			]
 		},
 		{
-			"ID": "20240530101000-fvdd66d",
+			"ID": "20260614194342-xzu9gq7",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-1fjzav9",
-				"id": "20240530101000-fvdd66d",
-				"updated": "20240530101000"
+				"id": "20260614194342-xzu9gq7",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "コンテンツブロックをフラッシュカードに設定すると、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://github.com/open-spaced-repetition/free-spaced-repetition-scheduler",
-					"TextMarkTextContent": "間隔反復アルゴリズム (FSRS)"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " によって自動的に復習がスケジュールされます。"
+					"Data": "コンテンツブロックをフラッシュカードとして設定すると、システムは間隔反復アルゴリズムFSRS（github repo: open-spaced-repetition/free-spaced-repetition-scheduler）によって自動的に復習をスケジュールし、忘却の臨界点で復習を促して短期記憶を長期記憶に変換します。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-qk7h7nt",
+			"ID": "20260614194342-wa0impz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-02s3v7s",
-				"id": "20240530101000-qk7h7nt",
-				"updated": "20240530101000"
+				"id": "20260614194342-wa0impz",
+				"updated": "20260614194354"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使い方"
+					"Data": "使用方法"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-o45zkpl",
+			"ID": "20260614194342-ubj6k3j",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-iec0mng",
-				"id": "20240530101000-o45zkpl",
-				"updated": "20240530101000"
+				"id": "20260614194342-ubj6k3j",
+				"updated": "20260614194354"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "コンテンツブロック"
+					"Data": "カード作成"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-j90r5jh",
+			"ID": "20260614194342-11wh5zy",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-a121l6l",
-				"id": "20240530101000-j90r5jh",
-				"updated": "20240530101000"
+				"id": "20260614194342-11wh5zy",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "フラッシュカードの作成を始める前にいくつかの基本的なルールを紹介します:"
+					"Data": "カード作成の前に、まず基本的なルールを説明します："
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-tcy5ojx",
+			"ID": "20260614194342-rtni63y",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-b0qi7bz",
-				"id": "20240530101000-tcy5ojx",
-				"updated": "20240530101000"
+				"id": "20260614194342-rtni63y",
+				"updated": "20260614194354"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-x0bx9ln",
+					"ID": "20260614194342-9t0gpm3",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-c6nscld",
-						"id": "20240530101000-x0bx9ln",
-						"updated": "20240530101000"
+						"id": "20260614194342-9t0gpm3",
+						"updated": "20260614194354"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-6psm3sf",
+							"ID": "20260614194342-wuqz36y",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-rtmzjbx",
-								"id": "20240530101000-6psm3sf",
-								"updated": "20240530101000"
+								"id": "20260614194342-wuqz36y",
+								"updated": "20260614194354"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コンテンツブロック内の"
+									"Data": "コンテンツブロック内の "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "mark",
-									"TextMarkTextContent": "ハイライト要素"
+									"TextMarkTextContent": "マーク"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "は穴埋め問題の解答になります"
+									"Data": " 要素は穴埋めの答えとして認識されます"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-gtjtb1j",
+					"ID": "20260614194342-4m5dpq0",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-11xm3f1",
-						"id": "20240530101000-gtjtb1j",
-						"updated": "20240530101000"
+						"id": "20260614194342-4m5dpq0",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-hkdbnrk",
+							"ID": "20260614194342-ataywjq",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-k5l9v3e",
-								"id": "20240530101000-hkdbnrk",
-								"updated": "20240530101000"
+								"id": "20260614194342-ataywjq",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "スーパーブロックをフラッシュカードに設定すると、スーパーブロックの最初のサブブロックが問題になり、残りのサブブロックが解答になります"
+									"Data": "スーパーブロックをフラッシュカードとして設定すると、最初の子ブロックが問題、残りの子ブロックが答えとして認識されます"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-xio8lt0",
+					"ID": "20260614194342-n24l75i",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-in8pi2c",
-						"id": "20240530101000-xio8lt0",
-						"updated": "20240530101000"
+						"id": "20260614194342-n24l75i",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-l6ewcie",
+							"ID": "20260614194342-nbhjhbz",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-1iaf55q",
-								"id": "20240530101000-l6ewcie",
-								"updated": "20240530101000"
+								"id": "20260614194342-nbhjhbz",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "リストまたはリスト項目をフラッシュカードに設定すると、サブリスト以外の部分が問題になり、サブリストが解答になります"
+									"Data": "リストまたはリスト項目をフラッシュカードとして設定すると、親リストが問題、子リストが答えとして認識されます"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-h0e75sm",
+					"ID": "20260614194342-hthq0jh",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-7mkalpd",
-						"id": "20240530101000-h0e75sm",
-						"updated": "20240530101000"
+						"id": "20260614194342-hthq0jh",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-z0pcdfv",
+							"ID": "20260614194342-l44sc0h",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-ncrpgz0",
-								"id": "20240530101000-z0pcdfv",
-								"updated": "20240530101000"
+								"id": "20260614194342-l44sc0h",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "見出しブロックをフラッシュカードに設定すると、見出しが問題"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "になり、"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "その下のブロックが解答になります"
+									"Data": "見出しブロックをフラッシュカードとして設定すると、見出しブロックが問題、その下のブロックが答えとして認識されます"
 								}
 							]
 						}
@@ -249,151 +217,178 @@
 			]
 		},
 		{
-			"ID": "20240530101000-jwqaqpp",
+			"ID": "20260614194342-j0b2uqb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-udde92o",
-				"id": "20240530101000-jwqaqpp",
-				"updated": "20240530101000"
+				"id": "20260614194342-j0b2uqb",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "これらのルールは、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "フラッシュカード"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ で調整できます。"
+					"Data": "これらのルールは 設定 - フラッシュカード で調整できます。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-qe3shsu",
+			"ID": "20260614194342-czeu6ff",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614194342-czeu6ff",
+				"updated": "20260614194342"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カードを作成するには：ブロックアイコンメニューから「クイックカード作成」を選択します。"
+				}
+			]
+		},
+		{
+			"ID": "20260614194342-fwtjfyw",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-qeaswsv",
-				"id": "20240530101000-qe3shsu",
-				"updated": "20260427075639"
+				"id": "20260614194342-fwtjfyw",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメントベース"
+					"Data": "復習"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-c0r3c95",
+			"ID": "20260614194342-sn68abb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-oz5qi78",
-				"id": "20240530101000-c0r3c95",
-				"updated": "20240530101000"
+				"id": "20260614194342-sn68abb",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "個々のドキュメント内でフラッシュカードを作成し、ドキュメントの階層構造を保ったまま管理と学習ができます。"
+					"Data": "以下の入り口から復習を開始できます。それぞれ復習範囲が異なります："
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-zwoiq6q",
+			"ID": "20260614194342-5mdvvbq",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-913r332",
-				"id": "20240530101000-zwoiq6q",
-				"updated": "20260427075639"
+				"id": "20260614194342-5mdvvbq",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-9e1wmro",
+					"ID": "20260614194342-vrl25pc",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-tlukkjk",
-						"id": "20240530101000-9e1wmro",
-						"updated": "20240530101000"
+						"id": "20260614194342-vrl25pc",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-5e2b9up",
+							"ID": "20260614194342-lxq5016",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-b3oelfk",
-								"id": "20240530101000-5e2b9up",
-								"updated": "20240530101000"
+								"id": "20260614194342-lxq5016",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロックメニューから "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "クイックカード作成"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ を選択してフラッシュカードを作成します"
+									"Data": "ドキュメントパネルでドキュメントを右クリックして「フラッシュカード - 間隔反復」を選択すると、そのドキュメントと子ドキュメントのカードを復習します"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-im99nvd",
+					"ID": "20260614194342-q03p61e",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-vcruzq3",
-						"id": "20240530101000-im99nvd",
-						"updated": "20260427075639"
+						"id": "20260614194342-q03p61e",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-c29kp9t",
+							"ID": "20260614194342-z0ffjb7",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240530101000-c29kp9t",
-								"updated": "20260427075639"
+								"id": "20260614194342-z0ffjb7",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "メインメニューまたはドキュメントパネルの右クリックメニューから "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "フラッシュカード"
-								},
+									"Data": "エディタでドキュメントブロックアイコンの「フラッシュカード - 間隔反復」をクリックすると、現在のドキュメントと子ドキュメントのカードを復習します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614194342-781l7xo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614194342-781l7xo",
+						"updated": "20260614194342"
+					},
+					"Children": [
+						{
+							"ID": "20260614194342-0xrzgbf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614194342-0xrzgbf",
+								"updated": "20260614194342"
+							},
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択して復習を開始します"
+									"Data": "ノートブックを右クリックして「フラッシュカード - 間隔反復」を選択すると、そのノートブック内の全ドキュメントのカードを復習します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614194342-rcrnnre",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614194342-rcrnnre",
+						"updated": "20260614194342"
+					},
+					"Children": [
+						{
+							"ID": "20260614194342-1n3zxb6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614194342-1n3zxb6",
+								"updated": "20260614194342"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "上部メインメニューの「フラッシュカード」をクリックすると、全ノートブックの期限到来カードを復習します"
 								}
 							]
 						}
@@ -402,119 +397,322 @@
 			]
 		},
 		{
-			"ID": "20240530101000-5b74ad8",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"ID": "20240530101000-76l7blz",
-				"id": "20240530101000-5b74ad8",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "カードデッキベース"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-utnt6pc",
+			"ID": "20260614194342-4coyfp4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-ow61m1g",
-				"id": "20240530101000-utnt6pc",
-				"updated": "20240530101000"
+				"id": "20260614194342-4coyfp4",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "複数のドキュメントからフラッシュカードを作成し、それらを統一されたカードデッキにまとめて管理します。"
+					"Data": "復習を開始すると、画面に保留中のカードが1枚ずつ表示されます。各カードは最初に問題面を表示し、「答えを表示」をクリックするかスペース/Enterで答え面を表示して、自分の理解度に応じて評価します："
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-qjiiphe",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260614194342-n6qh499",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
 			"Properties": {
-				"ID": "20240530101000-wtu09dv",
-				"id": "20240530101000-qjiiphe",
-				"updated": "20240530101000"
+				"colgroup": "||",
+				"id": "20260614194342-n6qh499",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-wqzr01z",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-s5y4zji",
-						"id": "20240530101000-wqzr01z",
-						"updated": "20240530101000"
-					},
+					"Type": "NodeTableHead",
+					"Data": "thead",
 					"Children": [
 						{
-							"ID": "20240530101000-0zmgb67",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-xgwln7o",
-								"id": "20240530101000-0zmgb67",
-								"updated": "20240530101000"
-							},
+							"Type": "NodeTableRow",
+							"Data": "tr",
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "ブロックメニューから "
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "評価"
+										}
+									]
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "デッキに追加"
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "ショートカット"
+										}
+									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": "​ を選択し、コンテンツブロックをカードデッキに追加してフラッシュカードを作成します"
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "説明"
+										}
+									]
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-j9vh4zu",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-zc0lh5j",
-						"id": "20240530101000-j9vh4zu",
-						"updated": "20240530101000"
-					},
+					"Type": "NodeTableRow",
+					"Data": "tr",
 					"Children": [
 						{
-							"ID": "20240530101000-hic6mky",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-8wczdeo",
-								"id": "20240530101000-hic6mky",
-								"updated": "20240530101000"
-							},
+							"Type": "NodeTableCell",
+							"Data": "td",
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "メインメニューから "
+									"Data": "もう一度"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "フラッシュカード"
+									"TextMarkType": "code",
+									"TextMarkTextContent": "1"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択して復習を開始します"
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "j"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "a"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "完全に忘れた、再学習が必要"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "難しい"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "k"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "s"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思い出せたがかなり苦労した"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "良い"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "3"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "l"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "d"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "正しく思い出せた"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "簡単"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "4"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ";"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "f"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "非常に簡単に思い出せた"
 								}
 							]
 						}
@@ -523,55 +721,26 @@
 			]
 		},
 		{
-			"ID": "20240530101000-zrb3e4v",
+			"ID": "20260614194342-ulwyhdw",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-0086u20",
-				"id": "20240530101000-zrb3e4v",
-				"updated": "20240530101000"
+				"id": "20260614194342-ulwyhdw",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "この利用方法はデフォルトでは無効になっています。必要に応じて、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "フラッシュカード"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "デッキ"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ で有効にできますが、ドキュメントベースのフラッシュカードほど柔軟ではないため非推奨です。"
+					"Data": "答えを表示した後、スペースとEnterでも「良い」評価を直接トリガーできます。評価はカードの復習間隔に直接影響します——高い評価は次回復習までの時間を延長し、低い評価は短縮します。システムはFSRSアルゴリズムを使用して、各ユーザーの評価履歴に基づいて復習スケジュールを自動的に最適化します。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-2v0vteq",
+			"ID": "20260614194342-lme1lzb",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-5om708r",
-				"id": "20240530101000-2v0vteq",
-				"updated": "20240530101000"
+				"id": "20260614194342-lme1lzb",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
@@ -581,86 +750,64 @@
 			]
 		},
 		{
-			"ID": "20240530101000-l6yhzdo",
+			"ID": "20260614194342-ym036b7",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-e3fi58m",
-				"id": "20240530101000-l6yhzdo",
-				"updated": "20240530101000"
+				"id": "20260614194342-ym036b7",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "設定 - フラッシュカード では、フラッシュカードのグローバル設定を調整できます。"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "新規カード上限"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": "と"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "フラッシュカード"
+					"TextMarkType": "strong",
+					"TextMarkTextContent": "旧カード上限"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ から、フラッシュカードに関するグローバル設定を調整できます。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "新しいカードの制限"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ と "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "古いカードの制限"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ は、ドキュメントブロックのカスタム属性で上書きできます:"
+					"Data": "は、ドキュメントブロックのカスタム属性を使用してドキュメントごとに上書きできます："
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-hptui6i",
+			"ID": "20260614194342-estpmxz",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-bq7bz7i",
-				"id": "20240530101000-hptui6i",
-				"updated": "20240530101000"
+				"id": "20260614194342-estpmxz",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-sdzm7er",
+					"ID": "20260614194342-ku56psx",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-t1eq5j9",
-						"id": "20240530101000-sdzm7er",
-						"updated": "20240530101000"
+						"id": "20260614194342-ku56psx",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-6i63n17",
+							"ID": "20260614194342-syptttu",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-28h34vv",
-								"id": "20240530101000-6i63n17",
-								"updated": "20240530101000"
+								"id": "20260614194342-syptttu",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
@@ -674,32 +821,30 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-q6ywzjd",
+					"ID": "20260614194342-onj38wa",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-a9mgp0h",
-						"id": "20240530101000-q6ywzjd",
-						"updated": "20240530101000"
+						"id": "20260614194342-onj38wa",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-33vvjzo",
+							"ID": "20260614194342-aeglyhw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-aedzppj",
-								"id": "20240530101000-33vvjzo",
-								"updated": "20240530101000"
+								"id": "20260614194342-aeglyhw",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
@@ -713,7 +858,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						}
@@ -722,86 +867,32 @@
 			]
 		},
 		{
-			"ID": "20240530101000-6wmn8b9",
+			"ID": "20260614194342-yipnx6o",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-jtw0e11",
-				"id": "20240530101000-6wmn8b9",
-				"updated": "20240530101000"
+				"id": "20260614194342-yipnx6o",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "image"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/image-20240128113001-pee8l86.png"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "これらはドキュメントごとに独立して設定されます。例えば、親ドキュメントが5、子ドキュメントが10に設定されている場合、親ドキュメントから復習すると5枚が表示され、子ドキュメントの設定は結合されません。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-ap9j1uv",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-zlsgfqf",
-				"id": "20240530101000-ap9j1uv",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "これらはドキュメントごとに個別に設定でき、互いに影響しません。たとえば、親ドキュメントが 5、子ドキュメントが 10 に設定されている場合、親ドキュメントから復習するときは 5 になり、子ドキュメントの設定は影響しません。"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-a52gcpg",
+			"ID": "20260614194342-wgheguv",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-ls0ndwy",
-				"id": "20240530101000-a52gcpg",
-				"updated": "20240530101000"
+				"id": "20260614194342-wgheguv",
+				"updated": "20260614194342"
 			},
 			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意事項"
+					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
@@ -810,181 +901,71 @@
 			]
 		},
 		{
-			"ID": "20240530101000-d6uunq1",
+			"ID": "20260614194342-uf7skpp",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-z4si0xr",
-				"id": "20240530101000-d6uunq1",
-				"updated": "20240530101000"
+				"id": "20260614194342-uf7skpp",
+				"updated": "20260614194342"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-pdy51g3",
+					"ID": "20260614194342-4qkfd64",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-f4yl5vr",
-						"id": "20240530101000-pdy51g3",
-						"updated": "20240530101000"
+						"id": "20260614194342-4qkfd64",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-86yep9i",
+							"ID": "20260614194342-6gwqv9j",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-6ehtg65",
-								"id": "20240530101000-86yep9i",
-								"updated": "20240530101000"
+								"id": "20260614194342-6gwqv9j",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コンテンツブロックが削除されると (または ID が変更されると)、対応するフラッシュカードが無効になります"
+									"Data": "コンテンツブロックが削除される（またはIDが変更される）と、対応するフラッシュカードは無効になります"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-2x2nl6g",
+					"ID": "20260614194342-j38rmaz",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-nqepj6g",
-						"id": "20240530101000-2x2nl6g",
-						"updated": "20240530101000"
+						"id": "20260614194342-j38rmaz",
+						"updated": "20260614194342"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-bzcglyl",
+							"ID": "20260614194342-kcsttan",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-8meagcg",
-								"id": "20240530101000-bzcglyl",
-								"updated": "20240530101000"
+								"id": "20260614194342-kcsttan",
+								"updated": "20260614194342"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "カードデッキを有効にすることは推奨されません。この方法は非推奨とされており、使用し続けると解決できない問題が発生する可能性があります"
+									"Data": "カードデッキは推奨されません。この機能は廃止されており、解決できない問題が発生する可能性があります"
 								}
 							]
 						}
 					]
 				}
 			]
-		},
-		{
-			"ID": "20240530101000-9nojehc",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"ID": "20240530101000-c8f0wxm",
-				"id": "20240530101000-9nojehc",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "技術的な実装"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-cq876xo",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"ID": "20240530101000-xi4t5rv",
-				"id": "20240530101000-cq876xo",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"ID": "20240530101000-x0gv21x",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-hqvaxyc",
-						"id": "20240530101000-x0gv21x",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-hnjranx",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-t5et7wg",
-								"id": "20240530101000-hnjranx",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "カードデッキのデータは "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "workspace/data/storage/riff/"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ フォルダに MessagePack 形式で保存されます"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240530101000-9p87s9m",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-anf9zdq",
-						"id": "20240530101000-9p87s9m",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-cjmaeqm",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-vpi8bjz",
-								"id": "20240530101000-cjmaeqm",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "起動時にすべてのカードデッキデータがメモリにロードされ、その後はデータ同期が完了するたびにリロードされます"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-0ljbvyr",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-z2or7ec",
-				"id": "20240530101000-0ljbvyr"
-			}
 		}
 	]
 }

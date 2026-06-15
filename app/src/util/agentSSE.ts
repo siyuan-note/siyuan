@@ -40,6 +40,20 @@ export type ISSEResult = {
 } | {
     type: "snapshot";
     snapshotID: string;
+} | {
+    type: "frontend_tool_call";
+    callID: string;
+    name: string;
+    arguments: Record<string, unknown>;
+};
+
+export type IEditorContext = {
+    activeDocID?: string;
+    activeDocTitle?: string;
+    notebookID?: string;
+    focusedBlockID?: string;
+    selectedBlockIDs?: string[];
+    visibleBlockIDs?: string[];
 };
 
 export async function fetchAgentSSE(
@@ -52,12 +66,16 @@ export async function fetchAgentSSE(
     sessionID?: string,
     model?: string,
     regenerate?: boolean,
+    editorContext?: IEditorContext,
+    pluginActions?: Array<{name: string; description: string}>,
 ): Promise<void> {
     try {
         const body: Record<string, unknown> = {message: message, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
         if (model) { body.model = model; }
         if (regenerate) { body.regenerate = regenerate; }
+        if (editorContext) { body.editorContext = editorContext; }
+        if (pluginActions && pluginActions.length > 0) { body.pluginActions = pluginActions; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",
@@ -195,6 +213,13 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
             return {type: "reasoning", token: data.token as string};
         case "snapshot":
             return {type: "snapshot", snapshotID: data.snapshotID as string};
+        case "frontend_tool_call":
+            return {
+                type: "frontend_tool_call",
+                callID: data.callID as string,
+                name: data.name as string,
+                arguments: (data.arguments || {}) as Record<string, unknown>,
+            };
         default:
             return null;
     }

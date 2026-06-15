@@ -210,9 +210,9 @@ const genWeekdayOptions = (lang: string, weekdayType: string) => {
     if (lang === "") {
         lang = window.siyuan.config.lang;
     }
-    if (lang === "zh_CN") {
+    if (lang === "zh-CN") {
         currentLang = 1;
-    } else if (lang === "zh_CHT") {
+    } else if (lang === "zh-TW") {
         currentLang = 2;
     }
     return `<option value="1" ${weekdayType === "1" ? " selected" : ""}>${dynamicWeekdayLang[1][currentLang]}</option>
@@ -339,9 +339,9 @@ export const openEmojiPanel = (
                 <span class="fn__space--small"></span>
                 <select class="b3-select fn__flex-1">
                     <option value="" ${dynamicCurrentObj.lang === "" ? " selected" : ""}>${window.siyuan.languages.themeOS}</option>
-                    <option value="en_US" ${dynamicCurrentObj.lang === "en_US" ? " selected" : ""}>English (en_US)</option>
-                    <option value="zh_CHT" ${dynamicCurrentObj.lang === "zh_CHT" ? " selected" : ""}>繁體中文 (zh_CHT)</option>
-                    <option value="zh_CN" ${dynamicCurrentObj.lang === "zh_CN" ? " selected" : ""}>简体中文 (zh_CN)</option>
+                    <option value="en" ${dynamicCurrentObj.lang === "en" ? " selected" : ""}>English (en)</option>
+                    <option value="zh-TW" ${dynamicCurrentObj.lang === "zh-TW" ? " selected" : ""}>繁體中文 (zh-TW)</option>
+                    <option value="zh-CN" ${dynamicCurrentObj.lang === "zh-CN" ? " selected" : ""}>简体中文 (zh-CN)</option>
                 </select>
                 <span class="fn__space"></span>
             </div>
@@ -740,20 +740,20 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
 };
 
 export const getEmojiDesc = (emoji: IEmojiItem) => {
-    if (window.siyuan.config.lang === "zh_CN") {
+    if (window.siyuan.config.lang === "zh-CN") {
         return emoji.description_zh_cn;
     }
-    if (window.siyuan.config.lang === "ja_JP") {
+    if (window.siyuan.config.lang === "ja") {
         return emoji.description_ja_jp;
     }
     return emoji.description;
 };
 
 export const getEmojiTitle = (index: number) => {
-    if (window.siyuan.config.lang === "zh_CN") {
+    if (window.siyuan.config.lang === "zh-CN") {
         return window.siyuan.emojis[index].title_zh_cn;
     }
-    if (window.siyuan.config.lang === "ja_JP") {
+    if (window.siyuan.config.lang === "ja") {
         return window.siyuan.emojis[index].title_ja_jp;
     }
     return window.siyuan.emojis[index].title;

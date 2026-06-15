@@ -7,7 +7,7 @@
 		"id": "20240530101000-bpj42r0",
 		"title": "テーマ",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260614110343"
 	},
 	"Children": [
 		{
@@ -120,7 +120,7 @@
 			"Properties": {
 				"ID": "20240530101000-qlk99nz",
 				"id": "20240530101000-jscq707",
-				"updated": "20240530101000"
+				"updated": "20260614110343"
 			},
 			"Children": [
 				{
@@ -136,7 +136,6 @@
 				"Typ": 1
 			},
 			"Properties": {
-				"ID": "20240530101000-9cg5rtu",
 				"id": "20240530101000-xcqie6f",
 				"updated": "20240530101000"
 			},
@@ -151,7 +150,6 @@
 						"Num": 1
 					},
 					"Properties": {
-						"ID": "20240530101000-x46eb8o",
 						"id": "20240530101000-4wzco4a",
 						"updated": "20240530101000"
 					},
@@ -160,7 +158,6 @@
 							"ID": "20240530101000-m6yns9u",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-llezsqn",
 								"id": "20240530101000-m6yns9u",
 								"updated": "20240530101000"
 							},
@@ -210,7 +207,6 @@
 						"Num": 2
 					},
 					"Properties": {
-						"ID": "20240530101000-36fmhrc",
 						"id": "20240530101000-8fjf4cb",
 						"updated": "20240530101000"
 					},
@@ -219,7 +215,6 @@
 							"ID": "20240530101000-orpozhw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-y6bvbz9",
 								"id": "20240530101000-orpozhw",
 								"updated": "20240530101000"
 							},
@@ -242,7 +237,6 @@
 						"Num": 3
 					},
 					"Properties": {
-						"ID": "20240530101000-cqdhydw",
 						"id": "20240530101000-bjxyn1f",
 						"updated": "20240530101000"
 					},
@@ -251,7 +245,6 @@
 							"ID": "20240530101000-lqv9vdg",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-rc511aa",
 								"id": "20240530101000-lqv9vdg",
 								"updated": "20240530101000"
 							},
@@ -276,7 +269,6 @@
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"ID": "20240530101000-xhmwnww",
 								"id": "20240530101000-tdmmpe4",
 								"updated": "20240530101000"
 							},
@@ -311,7 +303,6 @@
 						"Num": 4
 					},
 					"Properties": {
-						"ID": "20240530101000-xt43zy6",
 						"id": "20240530101000-ti1p2s6",
 						"updated": "20240530101000"
 					},
@@ -320,7 +311,6 @@
 							"ID": "20240530101000-9ujjfze",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-8r094ba",
 								"id": "20240530101000-9ujjfze",
 								"updated": "20240530101000"
 							},
@@ -343,7 +333,6 @@
 						"Num": 5
 					},
 					"Properties": {
-						"ID": "20240530101000-adhdn1e",
 						"id": "20240530101000-m3elc2w",
 						"updated": "20240530101000"
 					},
@@ -352,7 +341,6 @@
 							"ID": "20240530101000-n6kyto7",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-nh5qh66",
 								"id": "20240530101000-n6kyto7",
 								"updated": "20240530101000"
 							},
@@ -360,6 +348,287 @@
 								{
 									"Type": "NodeText",
 									"Data": "確認ボタンをクリックします"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614110343-mwu2dgv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614110343-mwu2dgv",
+				"updated": "20260614110343"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コードスニペットはCSSとJSの2種類をサポートしています："
+				}
+			]
+		},
+		{
+			"ID": "20260614110343-i8a5eds",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614110343-i8a5eds",
+				"updated": "20260614110343"
+			},
+			"Children": [
+				{
+					"ID": "20260614110343-fyuiu5e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110343-fyuiu5e",
+						"updated": "20260614110343"
+					},
+					"Children": [
+						{
+							"ID": "20260614110343-bbavust",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110343-bbavust",
+								"updated": "20260614110343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "CSSスニペット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：テーマスタイルを上書きするために使用します。例えば、色変数の変更、レイアウト間隔の調整など。テーマおよびtheme.cssのCSS変数を参照して作成します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110343-hv3lym2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110343-hv3lym2",
+						"updated": "20260614110343"
+					},
+					"Children": [
+						{
+							"ID": "20260614110343-7r9p0mu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110343-7r9p0mu",
+								"updated": "20260614110343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "JSスニペット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：アプリの動作を拡張または変更するために使用します。コードはアプリ起動時に実行されます。例えば、ショートカットのカスタマイズ、UI要素の変更、機能の追加など"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614110343-8aisjsu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614110343-8aisjsu",
+				"updated": "20260614110343"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スニペット管理："
+				}
+			]
+		},
+		{
+			"ID": "20260614110343-lw1ds54",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614110343-lw1ds54",
+				"updated": "20260614110343"
+			},
+			"Children": [
+				{
+					"ID": "20260614110343-7y7pdjp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110343-7y7pdjp",
+						"updated": "20260614110343"
+					},
+					"Children": [
+						{
+							"ID": "20260614110343-w70lyzh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110343-w70lyzh",
+								"updated": "20260614110343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "新規スニペット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：対応するタブでプラスボタンをクリックして新規スニペットを追加"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110343-9ffxu3j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110343-9ffxu3j",
+						"updated": "20260614110343"
+					},
+					"Children": [
+						{
+							"ID": "20260614110343-1nmk4kg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110343-1nmk4kg",
+								"updated": "20260614110343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編集/削除"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：スニペットパネルで内容を直接編集またはスニペット全体を削除"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110343-1k00pyg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110343-1k00pyg",
+						"updated": "20260614110343"
+					},
+					"Children": [
+						{
+							"ID": "20260614110343-hebgx23",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110343-hebgx23",
+								"updated": "20260614110343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "個別トグル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：各スニペットは個別に有効/無効を切り替え可能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110343-lu5y5x9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110343-lu5y5x9",
+						"updated": "20260614110343"
+					},
+					"Children": [
+						{
+							"ID": "20260614110343-d8kgwt1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110343-d8kgwt1",
+								"updated": "20260614110343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "グローバルトグル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：タブの上部にCSSとJSのグローバルトグルがあり、オフにするとそのタイプのすべてのスニペットが無効になります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110343-p8dxftu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110343-p8dxftu",
+						"updated": "20260614110343"
+					},
+					"Children": [
+						{
+							"ID": "20260614110343-3vycuuq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110343-3vycuuq",
+								"updated": "20260614110343"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "検索"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：スニペット名や内容で検索可能"
 								}
 							]
 						}

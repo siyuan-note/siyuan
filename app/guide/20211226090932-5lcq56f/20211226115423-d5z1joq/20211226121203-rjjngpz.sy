@@ -7,7 +7,7 @@
 		"id": "20211226121203-rjjngpz",
 		"title": "通用作業",
 		"type": "doc",
-		"updated": "20240612234711"
+		"updated": "20260614115236"
 	},
 	"Children": [
 		{
@@ -75,6 +75,23 @@
 					"TextMarkBlockRefID": "20211226123216-tlxw66f",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "視窗和分頁"
+				}
+			]
+		},
+		{
+			"ID": "20260614115224-gzluk00",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115224-gzluk00",
+				"updated": "20260614115224"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260613211829-rjgkboa",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "內容統計"
 				}
 			]
 		},
@@ -415,6 +432,40 @@
 					"TextMarkBlockRefID": "20240517031052-mgoxs16",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "發布服務"
+				}
+			]
+		},
+		{
+			"ID": "20260614115232-kvqapxs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115232-kvqapxs",
+				"updated": "20260614115232"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260612191214-ymtlxn2",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "命令列"
+				}
+			]
+		},
+		{
+			"ID": "20260614115236-jmnrtbu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115236-jmnrtbu",
+				"updated": "20260614115236"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260614104322-shrqj15",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "網路代理"
 				}
 			]
 		}

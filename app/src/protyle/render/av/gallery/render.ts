@@ -1,16 +1,11 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
-import {escapeAttr} from "../../../../util/escape";
-import {unicode2Emoji} from "../../../../emoji";
-import {cellValueIsEmpty, renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
 import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
 import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
 import {processRender} from "../../../util/processCode";
-import {getColIconByType, getColNameByType} from "../col";
-import {getCompressURL} from "../../../../util/image";
 import {getPageSize} from "../groups";
 /// #if MOBILE
 import {activeBlur} from "../../../../mobile/util/keyboardToolbar";
@@ -250,7 +245,7 @@ export const renderGallery = async (options: {
     const virtualData: { [key: string]: IAVVirtualData } = {};
     options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-        if (!item.querySelector(".av__gallery-item")) {
+        if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
             return;
         }
         virtualData[item.getAttribute("data-group-id") || "all"] = ({

@@ -205,19 +205,17 @@ func setAI(c *gin.Context) {
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 30
 		}
-		for _, m := range p.Models {
-			if nil == m {
-				continue
-			}
-			if 0 > m.MaxTokens {
-				m.MaxTokens = 0
-			}
-			if 0 >= m.Temperature || 2 < m.Temperature {
-				m.Temperature = 1.0
-			}
-			if 1 > m.MaxContexts || 64 < m.MaxContexts {
-				m.MaxContexts = 7
-			}
+	}
+
+	if nil != ai.Chat {
+		if 0 > ai.Chat.MaxCompletionTokens {
+			ai.Chat.MaxCompletionTokens = 0
+		}
+		if 0 >= ai.Chat.Temperature || 2 < ai.Chat.Temperature {
+			ai.Chat.Temperature = 1.0
+		}
+		if 1 > ai.Chat.MaxHistoryMessages || 64 < ai.Chat.MaxHistoryMessages {
+			ai.Chat.MaxHistoryMessages = 7
 		}
 	}
 
@@ -233,6 +231,9 @@ func setAI(c *gin.Context) {
 	if nil == ai.Agent {
 		ai.Agent = model.Conf.AI.Agent
 	}
+	if nil == ai.Chat {
+		ai.Chat = model.Conf.AI.Chat
+	}
 
 	for i, p := range ai.Providers {
 		if nil == p {
@@ -243,6 +244,7 @@ func setAI(c *gin.Context) {
 		}
 	}
 	model.Conf.AI = ai
+
 	model.Conf.AI.Normalize()
 	model.Conf.Save()
 
@@ -608,7 +610,7 @@ func setAppearance(c *gin.Context) {
 
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
-	model.Conf.Lang = appearance.Lang
+	model.Conf.Lang = util.MigrateLang(appearance.Lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()
 	model.InitAppearance()

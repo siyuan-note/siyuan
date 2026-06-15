@@ -6,7 +6,7 @@
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
 		"type": "doc",
-		"updated": "20230821210822"
+		"updated": "20260614110327"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806105512-qod53ij",
-				"updated": "20230418093608"
+				"updated": "20260614110327"
 			},
 			"Children": [
 				{
@@ -330,6 +330,287 @@
 								{
 									"Type": "NodeText",
 									"Data": "點擊確定按鈕"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614110327-nq24t6j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614110327-nq24t6j",
+				"updated": "20260614110327"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "程式碼片段支援 CSS 和 JS 兩種類型："
+				}
+			]
+		},
+		{
+			"ID": "20260614110327-4jbtxv8",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614110327-4jbtxv8",
+				"updated": "20260614110327"
+			},
+			"Children": [
+				{
+					"ID": "20260614110327-plgrr94",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110327-plgrr94",
+						"updated": "20260614110327"
+					},
+					"Children": [
+						{
+							"ID": "20260614110327-84j31p8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110327-84j31p8",
+								"updated": "20260614110327"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "CSS 片段"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：用於覆寫主題樣式，如修改顏色變數、調整佈局間距等。編寫時參照主題和 theme.css 中的 CSS 變數"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110327-hh2bdy8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110327-hh2bdy8",
+						"updated": "20260614110327"
+					},
+					"Children": [
+						{
+							"ID": "20260614110327-kfm77mk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110327-kfm77mk",
+								"updated": "20260614110327"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "JS 片段"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：用於擴充或修改應用行為，程式碼會在應用啟動時執行。例如自訂快捷操作、修改介面元素、新增功能等"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614110327-pc8qibe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614110327-pc8qibe",
+				"updated": "20260614110327"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "片段管理："
+				}
+			]
+		},
+		{
+			"ID": "20260614110327-w6ouiii",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614110327-w6ouiii",
+				"updated": "20260614110327"
+			},
+			"Children": [
+				{
+					"ID": "20260614110327-v9b9b3q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110327-v9b9b3q",
+						"updated": "20260614110327"
+					},
+					"Children": [
+						{
+							"ID": "20260614110327-ns0e6m7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110327-ns0e6m7",
+								"updated": "20260614110327"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "新增片段"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在對應頁籤中點擊加號按鈕新增片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110327-y17bxmr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110327-y17bxmr",
+						"updated": "20260614110327"
+					},
+					"Children": [
+						{
+							"ID": "20260614110327-aaeij3i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110327-aaeij3i",
+								"updated": "20260614110327"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "編輯/刪除"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在片段面板中直接編輯內容或刪除整個片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110327-j3fsbsm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110327-j3fsbsm",
+						"updated": "20260614110327"
+					},
+					"Children": [
+						{
+							"ID": "20260614110327-791v9hy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110327-791v9hy",
+								"updated": "20260614110327"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "單獨開關"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：每個片段可單獨啟用或停用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110327-puqm9v9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110327-puqm9v9",
+						"updated": "20260614110327"
+					},
+					"Children": [
+						{
+							"ID": "20260614110327-dp0wda1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110327-dp0wda1",
+								"updated": "20260614110327"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "全域開關"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：頁籤頂部有 CSS 和 JS 的全域總開關，關閉後該類型的所有片段都不生效"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110327-ra4hu3c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110327-ra4hu3c",
+						"updated": "20260614110327"
+					},
+					"Children": [
+						{
+							"ID": "20260614110327-f095xo9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110327-f095xo9",
+								"updated": "20260614110327"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "搜尋"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：支援按片段名稱或內容搜尋"
 								}
 							]
 						}

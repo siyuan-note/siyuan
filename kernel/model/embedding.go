@@ -438,11 +438,11 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 }
 
 func isEmbeddingEnabled() bool {
-	return nil != Conf.AI.Embedding && len(Conf.AI.Embedding.APIKey) > 0
+	return nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
 }
 
 func embeddingKey() string {
-	if nil != Conf.AI.Embedding && "" != Conf.AI.Embedding.APIKey {
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.APIKey {
 		return Conf.AI.Embedding.APIKey
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != v {
@@ -452,7 +452,7 @@ func embeddingKey() string {
 }
 
 func embeddingBaseURL() string {
-	if nil != Conf.AI.Embedding && "" != Conf.AI.Embedding.BaseURL {
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.BaseURL {
 		return Conf.AI.Embedding.BaseURL
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != v {
@@ -462,14 +462,14 @@ func embeddingBaseURL() string {
 }
 
 func embeddingTimeout() int {
-	if nil != Conf.AI.Embedding && 0 < Conf.AI.Embedding.Timeout {
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && 0 < Conf.AI.Embedding.Timeout {
 		return Conf.AI.Embedding.Timeout
 	}
 	return 30
 }
 
 func embeddingModel() string {
-	if nil != Conf.AI.Embedding && "" != Conf.AI.Embedding.Name {
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.Name {
 		return Conf.AI.Embedding.Name
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != v {

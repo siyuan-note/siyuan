@@ -6,7 +6,7 @@
 		"id": "20220708102441-u6wopo9",
 		"title": "資料備份",
 		"type": "doc",
-		"updated": "20220708104039"
+		"updated": "20260614145114"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220708102525-9u6agxx",
-				"updated": "20220708102525"
+				"updated": "20260614145114"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220708102525-ndq4bzu",
-				"updated": "20220708104039"
+				"updated": "20260614145114"
 			},
 			"Children": [
 				{
@@ -45,7 +45,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "上傳到雲端。"
+					"Data": "上傳到雲端，用於災難復原。與資料同步不同：同步的目的是保持多裝置資料一致，備份是手動上傳快照存檔以備不時之需。"
 				}
 			]
 		},

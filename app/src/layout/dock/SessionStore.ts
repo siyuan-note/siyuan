@@ -23,15 +23,29 @@ export interface AgentSession {
     model?: string;
     messages?: Array<{role: string; content: string; toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>}>;
     entries?: Array<{
-        type: "user" | "thinking" | "assistant" | "confirm" | "snapshot" | "rollback";
+        id?: string;
+        type: "user" | "thinking" | "assistant" | "confirm" | "question" | "snapshot" | "rollback";
         content?: string;
-        steps?: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>;
+        // thinking step：新格式只含 reasoning/reasoningContent/toolNames/content；
+        // text/toolCalls 仅为读取老数据而保留为可选（渲染时归一化）。
+        steps?: Array<{
+            reasoning: string;
+            reasoningContent: string;
+            toolNames?: string[];
+            content?: string;
+            text?: string;
+            toolCalls?: Array<{name: string; result?: string}>
+        }>;
         reasoningContent?: string;
         toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>;
+        duration?: number;
         confirmName?: string;
         confirmArgs?: Record<string, unknown>;
         confirmID?: string;
         confirmStatus?: string;
+        questionID?: string;
+        questions?: Array<Record<string, unknown>>;
+        questionStatus?: string;
         snapshotID?: string;
     }>;
     snapshots?: string[];

@@ -114,16 +114,18 @@ declare namespace Config {
      * Artificial Intelligence (AI) related configuration
      */
     export interface IAI {
-        mcp?: IMCP;
-        embedding?: IEmbedding;
-        agent?: IAgent;
-        providers?: IProvider[];
+        providers: IProvider[];
+        chat: IChat;
+        agent: IAgent;
+        mcp: IMCP;
+        embedding: IEmbedding;
     }
 
     /**
      * AI agent global settings
      */
     export interface IAgent {
+        modelId: string;
         sessionTimeout: number;
         confirmTimeout: number;
         maxRetries: number;
@@ -133,14 +135,23 @@ declare namespace Config {
     }
 
     /**
+     * AI chat scenario behavior settings (mirrors IAgent)
+     */
+    export interface IChat {
+        modelId: string;
+        maxHistoryMessages: number;
+        temperature: number;
+        maxCompletionTokens: number;
+    }
+
+    /**
      * Embedding model configuration
      */
     export interface IEmbedding {
-        id?: string;
-        displayName?: string;
-        enabled?: boolean;
-        apiKey: string;
+        id: string;
+        enabled: boolean;
         baseURL: string;
+        apiKey: string;
         name: string;
         timeout: number;
     }
@@ -149,42 +160,40 @@ declare namespace Config {
      * AI provider configuration
      */
     export interface IProvider {
-        id?: string;
+        id: string;
+        enabled: boolean;
         displayName?: string;
-        enabled?: boolean;
-        apiKey: string;
         baseURL: string;
+        apiKey: string;
         requestTimeout: number;
-        models?: IModel[];
+        models: IModel[];
     }
 
     /**
-     * AI model configuration
+     * AI model configuration. Behavior params (maxTokens/temperature/maxContexts)
+     * live on IChat; Model holds only identity fields.
      */
     export interface IModel {
-        id?: string;
-        displayName?: string;
-        enabled?: boolean;
+        id: string;
+        enabled: boolean;
         name: string;
-        maxTokens: number;
-        temperature: number;
-        maxContexts: number;
+        displayName?: string;
     }
 
     /**
      * MCP (Model Context Protocol) configuration
      */
     export interface IMCP {
-        servers?: IMCPServer[];
+        servers: IMCPServer[];
     }
 
     export interface IMCPServer {
-        name: string;
         enabled: boolean;
+        name: string;
+        url: string;
         type: string;
         command: string;
         args?: string[];
-        url: string;
         headers?: Record<string, string>;
         timeout: number;
     }
@@ -292,27 +301,27 @@ declare namespace Config {
      * Same as {@link IAppearance.lang}
      */
     export type TLang =
-        "en_US"
-        | "ar_SA"
-        | "de_DE"
-        | "es_ES"
-        | "fr_FR"
-        | "he_IL"
-        | "hi_IN"
-        | "id_ID"
-        | "it_IT"
-        | "ja_JP"
-        | "ko_KR"
-        | "pl_PL"
-        | "pt_BR"
-        | "ru_RU"
-        | "sk_SK"
-        | "tr_TR"
-        | "uk_UA"
-        | "th_TH"
-        | "nl_NL"
-        | "zh_CN"
-        | "zh_CHT";
+        "en"
+        | "ar"
+        | "de"
+        | "es"
+        | "fr"
+        | "he"
+        | "hi"
+        | "id"
+        | "it"
+        | "ja"
+        | "ko"
+        | "pl"
+        | "pt-BR"
+        | "ru"
+        | "sk"
+        | "tr"
+        | "uk"
+        | "th"
+        | "nl"
+        | "zh-CN"
+        | "zh-TW";
 
     /**
      * SiYuan bazaar related configuration

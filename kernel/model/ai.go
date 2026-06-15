@@ -62,7 +62,7 @@ func chatGPT(msg string, cloud bool) (ret string) {
 		return
 	}
 
-	ret, retCtxMsgs, err := chatGPTContinueWrite(msg, cachedContextMsg, cloud)
+	ret, retCtxMsgs, err := chatGPTComplete(msg, cachedContextMsg, cloud)
 	if err != nil {
 		return
 	}
@@ -75,25 +75,31 @@ func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
 	if "" != action {
 		msg = action + ":\n\n" + msg
 	}
-	ret, _, err := chatGPTContinueWrite(msg, nil, cloud)
+	ret, _, err := chatGPTComplete(msg, nil, cloud)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string, err error) {
+func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string, err error) {
 	util.PushEndlessProgress("Requesting...")
 	defer util.ClearPushProgress(100)
 
-	prov, m := Conf.AI.GetModel("")
+	prov, m := Conf.AI.GetChatModel()
 	if nil == prov || nil == m {
 		err = errors.New("no AI provider configured")
 		return
 	}
 
-	if m.MaxContexts < len(contextMsgs) {
-		contextMsgs = contextMsgs[len(contextMsgs)-m.MaxContexts:]
+	chat := Conf.AI.Chat
+	if nil == chat {
+		err = errors.New("no AI chat config")
+		return
+	}
+
+	if chat.MaxHistoryMessages < len(contextMsgs) {
+		contextMsgs = contextMsgs[len(contextMsgs)-chat.MaxHistoryMessages:]
 	}
 
 	var gpt GPT
@@ -101,26 +107,29 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 		gpt = &CloudGPT{}
 	} else {
 		gpt = &OpenAIGPT{
-			c:       util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
-			m:       m,
-			timeout: prov.RequestTimeout,
+			c:                   util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
+			m:                   m,
+			timeout:             prov.RequestTimeout,
+			maxCompletionTokens: chat.MaxCompletionTokens,
+			temperature:         chat.Temperature,
 		}
 	}
 
-	buf := &bytes.Buffer{}
-	for i := 0; i < m.MaxContexts; i++ {
-		part, stop, chatErr := gpt.chat(msg, contextMsgs)
-		buf.WriteString(part)
-
-		if stop || nil != chatErr {
-			break
-		}
-
-		util.PushEndlessProgress("Continue requesting...")
+	part, stop, chatErr := gpt.chat(msg, contextMsgs)
+	if nil != chatErr {
+		err = chatErr
+		return
 	}
 
-	ret = buf.String()
-	ret = strings.TrimSpace(ret)
+	// stop==false means finish_reason=length: the output was truncated at
+	// MaxCompletionTokens. Retrying the same prompt would almost certainly hit
+	// the same limit again, so we return whatever was produced and notify the
+	// user instead of silently looping. See https://github.com/siyuan-note/siyuan/issues/17797
+	if !stop {
+		util.PushMsg(Conf.Language(297), 5000)
+	}
+
+	ret = strings.TrimSpace(part)
 	if "" != ret {
 		retContextMsgs = append(retContextMsgs, msg, ret)
 	}
@@ -180,13 +189,15 @@ type GPT interface {
 }
 
 type OpenAIGPT struct {
-	c       *openai.Client
-	m       *conf.Model
-	timeout int
+	c                   *openai.Client
+	m                   *conf.Model
+	timeout             int
+	maxCompletionTokens int
+	temperature         float64
 }
 
 func (gpt *OpenAIGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
-	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.m.Name, gpt.m.MaxTokens, gpt.m.Temperature, gpt.timeout)
+	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.m.Name, gpt.maxCompletionTokens, gpt.temperature, gpt.timeout)
 }
 
 type CloudGPT struct {

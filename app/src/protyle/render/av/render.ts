@@ -289,7 +289,7 @@ const afterRenderTable = (options: ITableOptions) => {
     } else if (editRect && !options.protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
         setTimeout(() => {
-            stickyRow(options.blockElement, editRect, "top");
+            stickyRow(options.blockElement, options.protyle.contentElement, "top");
         }, Constants.TIMEOUT_LOAD);
     }
     if (options.resetData.footerTransform) {
@@ -300,7 +300,7 @@ const afterRenderTable = (options: ITableOptions) => {
     } else if (editRect && !options.protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
         setTimeout(() => {
-            stickyRow(options.blockElement, editRect, "bottom");
+            stickyRow(options.blockElement, options.protyle.contentElement, "bottom");
         }, Constants.TIMEOUT_LOAD);
     }
     if (options.resetData.selectCellId) {
@@ -507,7 +507,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const virtualData: { [key: string]: IAVVirtualData } = {};
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
             pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-            if (!item.querySelector(".av__row")) {
+            if (!item.querySelector(".av__row") || e.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
                 return;
             }
             virtualData[item.getAttribute("data-group-id") || "all"] = ({

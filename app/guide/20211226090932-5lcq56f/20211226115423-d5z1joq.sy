@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"type": "doc",
-		"updated": "20260426180215"
+		"updated": "20260614115640"
 	},
 	"Children": [
 		{
@@ -1115,7 +1115,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20240508003607-ly1ymgz",
-				"updated": "20240612234708"
+				"updated": "20260614115640"
 			},
 			"Children": [
 				{
@@ -1130,7 +1130,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20240508003213-9bmv8pp",
-						"updated": "20240612234708"
+						"updated": "20260614115640"
 					},
 					"Children": [
 						{
@@ -1147,7 +1147,7 @@
 							"Properties": {
 								"id": "20240508003014-k4zlgm3",
 								"style": "background-color: var(--b3-font-background5);",
-								"updated": "20240612234708"
+								"updated": "20260614115640"
 							},
 							"Children": [
 								{
@@ -1161,7 +1161,7 @@
 							"Type": "NodeSuperBlock",
 							"Properties": {
 								"id": "20240508003208-gg30n9v",
-								"updated": "20240612234708"
+								"updated": "20260614115640"
 							},
 							"Children": [
 								{
@@ -1176,7 +1176,7 @@
 									"Type": "NodeSuperBlock",
 									"Properties": {
 										"id": "20240508003200-iv7gx1r",
-										"updated": "20240508003208"
+										"updated": "20260614115640"
 									},
 									"Children": [
 										{
@@ -1221,19 +1221,19 @@
 											]
 										},
 										{
-											"ID": "20240508003148-jp3y8te",
+											"ID": "20260614115639-ndq5zps",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20240508003148-jp3y8te",
-												"updated": "20240508003201"
+												"id": "20260614115639-ndq5zps",
+												"updated": "20260614115640"
 											},
 											"Children": [
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "block-ref",
-													"TextMarkBlockRefID": "20211226123302-akitvb1",
+													"TextMarkBlockRefID": "20211226123241-51pujtr",
 													"TextMarkBlockRefSubtype": "d",
-													"TextMarkTextContent": "導入和導出"
+													"TextMarkTextContent": "剪藏"
 												}
 											]
 										},
@@ -1251,6 +1251,23 @@
 													"TextMarkBlockRefID": "20211226123216-tlxw66f",
 													"TextMarkBlockRefSubtype": "d",
 													"TextMarkTextContent": "視窗和分頁"
+												}
+											]
+										},
+										{
+											"ID": "20260614115217-aro076n",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260614115217-aro076n",
+												"updated": "20260614115217"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20260613211829-rjgkboa",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "內容統計"
 												}
 											]
 										},
@@ -1391,31 +1408,11 @@
 											]
 										},
 										{
-											"Type": "NodeSuperBlockCloseMarker"
-										}
-									]
-								},
-								{
-									"ID": "20240508003205-qtrvst8",
-									"Type": "NodeSuperBlock",
-									"Properties": {
-										"id": "20240508003205-qtrvst8",
-										"updated": "20240612234708"
-									},
-									"Children": [
-										{
-											"Type": "NodeSuperBlockOpenMarker"
-										},
-										{
-											"Type": "NodeSuperBlockLayoutMarker",
-											"Data": "row"
-										},
-										{
 											"ID": "20240508003148-zxasxvc",
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20240508003148-zxasxvc",
-												"updated": "20240508003206"
+												"updated": "20260614115220"
 											},
 											"Children": [
 												{
@@ -1426,6 +1423,26 @@
 													"TextMarkTextContent": "虛擬引用"
 												}
 											]
+										},
+										{
+											"Type": "NodeSuperBlockCloseMarker"
+										}
+									]
+								},
+								{
+									"ID": "20240508003205-qtrvst8",
+									"Type": "NodeSuperBlock",
+									"Properties": {
+										"id": "20240508003205-qtrvst8",
+										"updated": "20260614115251"
+									},
+									"Children": [
+										{
+											"Type": "NodeSuperBlockOpenMarker"
+										},
+										{
+											"Type": "NodeSuperBlockLayoutMarker",
+											"Data": "row"
 										},
 										{
 											"ID": "20240508003148-9rsuky2",
@@ -1611,6 +1628,40 @@
 													"TextMarkBlockRefID": "20240517031052-mgoxs16",
 													"TextMarkBlockRefSubtype": "d",
 													"TextMarkTextContent": "發布服務"
+												}
+											]
+										},
+										{
+											"ID": "20260614115244-r4q13v0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260614115244-r4q13v0",
+												"updated": "20260614115245"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20260612191214-ymtlxn2",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "命令列"
+												}
+											]
+										},
+										{
+											"ID": "20260614115251-6u978zg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260614115251-6u978zg",
+												"updated": "20260614115251"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20260614104322-shrqj15",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "網路代理"
 												}
 											]
 										},

@@ -19,21 +19,19 @@ package agent
 import (
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-var sessionIDRegexp = regexp.MustCompile(`^[a-zA-Z0-9]{14,26}$`)
-
 func isValidSessionID(id string) bool {
-	return sessionIDRegexp.MatchString(id)
+	return ast.IsNodeIDPattern(id)
 }
 
 var indexMu sync.Mutex
@@ -303,7 +301,9 @@ func SaveSession(data []byte) error {
 			for k, v := range existingData {
 				if _, ok := newData[k]; !ok {
 					switch k {
-					case "createdAt", "titled", "messageHistory", "thinkingSteps", "entries", "snapshots", "id":
+					// messages 不再保留：以 entries 为唯一持久化数据源，
+					// 前端下次保存时会用 entries 覆盖，老 messages 字段自然清除。
+					case "createdAt", "titled", "messageHistory", "entries", "snapshots", "id", "alwaysAllow":
 						newData[k] = v
 					}
 				}

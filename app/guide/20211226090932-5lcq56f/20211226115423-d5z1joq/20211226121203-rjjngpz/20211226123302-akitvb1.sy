@@ -6,7 +6,7 @@
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
 		"type": "doc",
-		"updated": "20260426180205"
+		"updated": "20260614201259"
 	},
 	"Children": [
 		{
@@ -197,7 +197,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185951-ewyusg9",
-				"updated": "20250115150840"
+				"updated": "20260614201247"
 			},
 			"Children": [
 				{
@@ -388,13 +388,46 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
 					"TextMarkTextContent": "注意"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：使用前請務必留意，避免已有資料被覆蓋無法恢復。"
+					"Data": "​：使用前請務必留意，避免已有資料被覆蓋無法恢復。"
+				}
+			]
+		},
+		{
+			"ID": "20260614201247-kregnjm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614201247-kregnjm",
+				"updated": "20260614201247"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip"
+				}
+			]
+		},
+		{
+			"ID": "20260614201247-kjiv7qf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614201247-kjiv7qf",
+				"updated": "20260614201247"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": ".sy.zip 是思源原生文件格式，用於匯入從其他思源工作空間匯出的單個文件。支援直接拖拽 .sy.zip 檔案到文件面板中完成匯入，匯入後的文件包含完整的內容、子文件、資源檔案以及區塊屬性。"
 				}
 			]
 		},
@@ -507,7 +540,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223850-k4b4s53",
-				"updated": "20260426180205"
+				"updated": "20260614201259"
 			},
 			"Children": [
 				{
@@ -574,14 +607,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220317223850-pf0tfuv"
+						"id": "20220317223850-pf0tfuv",
+						"updated": "20220317223850"
 					},
 					"Children": [
 						{
 							"ID": "20220317223850-2uya521",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220317223850-2uya521"
+								"id": "20220317223850-2uya521",
+								"updated": "20220317223850"
 							},
 							"Children": [
 								{
@@ -600,14 +635,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220317223850-6rl8nmz"
+						"id": "20220317223850-6rl8nmz",
+						"updated": "20220317223850"
 					},
 					"Children": [
 						{
 							"ID": "20220317223850-vd88jo9",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220317223850-vd88jo9"
+								"id": "20220317223850-vd88jo9",
+								"updated": "20220317223850"
 							},
 							"Children": [
 								{
@@ -626,14 +663,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220317223850-n5o3dey"
+						"id": "20220317223850-n5o3dey",
+						"updated": "20220317223850"
 					},
 					"Children": [
 						{
 							"ID": "20220317223850-41ry7ml",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220317223850-41ry7ml"
+								"id": "20220317223850-41ry7ml",
+								"updated": "20220317223850"
 							},
 							"Children": [
 								{
@@ -652,14 +691,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220317223850-i461rjt"
+						"id": "20220317223850-i461rjt",
+						"updated": "20220317223850"
 					},
 					"Children": [
 						{
 							"ID": "20220317223850-w7mp1ff",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220317223850-w7mp1ff"
+								"id": "20220317223850-w7mp1ff",
+								"updated": "20220317223850"
 							},
 							"Children": [
 								{
@@ -669,6 +710,48 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260614201255-w4sor3z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614201255-w4sor3z",
+						"updated": "20260614201255"
+					},
+					"Children": [
+						{
+							"ID": "20260614201255-amslbza",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614201255-amslbza",
+								"updated": "20260614201258"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".sy.zip"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614201258-xrk25st",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614201258-xrk25st",
+				"updated": "20260614201259"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "其中 .sy.zip 是思源原生格式，匯出後包含文件及其子文件的完整內容、資源檔案和區塊屬性，適合在不同工作空間之間遷移文件或分享給其他思源使用者。"
 				}
 			]
 		},

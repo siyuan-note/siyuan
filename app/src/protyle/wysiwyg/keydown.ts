@@ -46,7 +46,7 @@ import {
     updateTransaction
 } from "./transaction";
 import {fontEvent} from "../toolbar/Font";
-import {addSubList, listIndent, listOutdent} from "./list";
+import {addSubList, listIndent, listOutdent, toggleTaskListItem} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {cancelSB, insertEmptyBlock, jumpToParent} from "../../block/util";
 import {isLocalPath} from "../../util/pathName";
@@ -1712,16 +1712,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!taskItemElement) {
                 return;
             }
-            const html = taskItemElement.outerHTML;
-            if (taskItemElement.classList.contains("protyle-task--done")) {
-                taskItemElement.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                taskItemElement.classList.remove("protyle-task--done");
-            } else {
-                taskItemElement.querySelector("use").setAttribute("xlink:href", "#iconCheck");
-                taskItemElement.classList.add("protyle-task--done");
-            }
-            taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, taskItemElement, html);
+            toggleTaskListItem(protyle, taskItemElement);
             event.preventDefault();
             event.stopPropagation();
             return;

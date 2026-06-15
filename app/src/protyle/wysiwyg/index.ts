@@ -45,6 +45,7 @@ import {
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
+import {toggleTaskListItem} from "./list";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -765,7 +766,7 @@ export class WYSIWYG {
                     scrollElement.querySelectorAll(".av__row, .av__row--footer").forEach(item => {
                         (item.querySelector(`[data-col-id="${dragColId}"]`) as HTMLElement).style.width = newWidth + "px";
                     });
-                    stickyRow(nodeElement, contentRect, "bottom");
+                    stickyRow(nodeElement, protyle.contentElement, "bottom");
                 };
 
                 documentSelf.onmouseup = () => {
@@ -1807,10 +1808,9 @@ export class WYSIWYG {
     private bindEvent(protyle: IProtyle) {
         // 删除块时，av 头尾需重新计算位置
         protyle.observer = new ResizeObserver(() => {
-            const contentRect = protyle.contentElement.getBoundingClientRect();
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
                 if (item.querySelector(".av__scroll")) {
-                    stickyRow(item, contentRect, "all");
+                    stickyRow(item, protyle.contentElement, "all");
                 }
             });
         });
@@ -3079,19 +3079,7 @@ export class WYSIWYG {
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             if (!protyle.disabled) {
-                                const html = actionElement.parentElement.outerHTML;
-                                if (actionElement.parentElement.classList.contains("protyle-task--done")) {
-                                    actionElement.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
-                                    actionElement.parentElement.classList.remove("protyle-task--done");
-                                    actionElement.parentElement.setAttribute("data-task", " ");
-                                } else {
-                                    actionElement.querySelector("use").setAttribute("xlink:href", "#iconCheck");
-                                    actionElement.parentElement.classList.add("protyle-task--done");
-                                    actionElement.parentElement.setAttribute("data-task", "X");
-                                }
-                                actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                                actionElement.parentElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-                                updateTransaction(protyle, actionElement.parentElement, html);
+                                toggleTaskListItem(protyle, actionElement.parentElement);
                             }
                         } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {
                             if (protyle.block.showAll && protyle.block.id === actionId) {

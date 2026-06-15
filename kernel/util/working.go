@@ -119,7 +119,7 @@ func Boot() {
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "", "ar_SA/de_DE/en_US/es_ES/fr_FR/he_IL/hi_IN/id_ID/it_IT/ja_JP/ko_KR/nl_NL/pl_PL/pt_BR/ru_RU/sk_SK/th_TH/tr_TR/uk_UA/zh_CHT/zh_CN")
+	lang := flag.String("lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/th/tr/uk/zh-CN/zh-TW")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
@@ -131,7 +131,7 @@ func Boot() {
 	lang = coalesceToEnvVar(lang, "SIYUAN_LANG")
 
 	if "" != *lang {
-		Lang = *lang
+		Lang = MigrateLang(*lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	}
 	Mode = *mode
 	ServerPort = *port
@@ -294,6 +294,10 @@ func initWorkspaceDir(workspaceArg string) {
 		WorkspaceDir = workspaceArg
 	}
 
+	// 归一化路径分隔符，使 WorkspaceDir 与 filepath.Join(WorkspaceDir, ...) 派生出的目录（HistoryDir/DataDir 等）保持一致
+	// 否则 Windows 上用正斜杠启动（--workspace="D:/foo"）时，strings.TrimPrefix(path, util.WorkspaceDir) 会因分隔符不同而失败 https://github.com/siyuan-note/siyuan/issues/17862
+	WorkspaceDir = filepath.Clean(WorkspaceDir)
+
 	if !gulu.File.IsDir(WorkspaceDir) {
 		logging.LogWarnf("use the default workspace [%s] since the specified workspace [%s] is not a dir", defaultWorkspaceDir, WorkspaceDir)
 		if err := os.MkdirAll(defaultWorkspaceDir, 0755); err != nil && !os.IsExist(err) {
@@ -341,7 +345,7 @@ func DeduplicateWorkspacePaths(paths []string) []string {
 	seen := map[string]bool{}
 	var result []string
 	for _, p := range paths {
-		key := strings.ToLower(p)
+		key := strings.ToLower(filepath.Clean(p)) // 归一化后再去重，使 D:/foo、D:\foo、D:\foo\ 等被识别为同一工作空间 https://github.com/siyuan-note/siyuan/issues/17862
 		if seen[key] {
 			continue
 		}
@@ -394,6 +398,7 @@ func ReadWorkspacePaths() (ret []string, err error) {
 		}
 
 		d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
+		d = filepath.Clean(d)             // 归一化路径分隔符，清理历史持久化的斜杠差异（如 D:/foo 与 D:\foo） https://github.com/siyuan-note/siyuan/issues/17862
 		if gulu.File.IsDir(d) {
 			tmp = append(tmp, d)
 		} else {

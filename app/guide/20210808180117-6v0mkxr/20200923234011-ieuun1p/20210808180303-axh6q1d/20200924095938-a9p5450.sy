@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20230821210921"
+		"updated": "20260614110310"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806105232-qhlgs5w",
-				"updated": "20230418093116"
+				"updated": "20260614110310"
 			},
 			"Children": [
 				{
@@ -330,6 +330,287 @@
 								{
 									"Type": "NodeText",
 									"Data": "Click the Confirm button"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614110310-z99s6hu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614110310-z99s6hu",
+				"updated": "20260614110310"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Code snippets support two types: CSS and JS:"
+				}
+			]
+		},
+		{
+			"ID": "20260614110310-tlla101",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614110310-tlla101",
+				"updated": "20260614110310"
+			},
+			"Children": [
+				{
+					"ID": "20260614110310-8eyjob0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110310-8eyjob0",
+						"updated": "20260614110310"
+					},
+					"Children": [
+						{
+							"ID": "20260614110310-clh5kgd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110310-clh5kgd",
+								"updated": "20260614110310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "CSS Snippets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Used to override theme styles, such as modifying color variables, adjusting layout spacing, etc. Refer to the CSS variables in the theme and theme.css when writing"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110310-jz6pydt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110310-jz6pydt",
+						"updated": "20260614110310"
+					},
+					"Children": [
+						{
+							"ID": "20260614110310-h57tmai",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110310-h57tmai",
+								"updated": "20260614110310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "JS Snippets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Used to extend or modify application behavior. The code executes when the app starts, such as customizing shortcuts, modifying UI elements, adding features, etc."
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614110310-u0yvn5j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614110310-u0yvn5j",
+				"updated": "20260614110310"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Snippet Management:"
+				}
+			]
+		},
+		{
+			"ID": "20260614110310-sq8k5yq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260614110310-sq8k5yq",
+				"updated": "20260614110310"
+			},
+			"Children": [
+				{
+					"ID": "20260614110310-5wfoxyf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110310-5wfoxyf",
+						"updated": "20260614110310"
+					},
+					"Children": [
+						{
+							"ID": "20260614110310-13k52h3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110310-13k52h3",
+								"updated": "20260614110310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Add Snippet"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the plus button in the corresponding tab to add a new snippet"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110310-lzkqfz7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110310-lzkqfz7",
+						"updated": "20260614110310"
+					},
+					"Children": [
+						{
+							"ID": "20260614110310-jv7x6f0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110310-jv7x6f0",
+								"updated": "20260614110310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Edit/Delete"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Edit content directly or delete the entire snippet in the snippet panel"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110310-9l11u08",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110310-9l11u08",
+						"updated": "20260614110310"
+					},
+					"Children": [
+						{
+							"ID": "20260614110310-3nxv6x9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110310-3nxv6x9",
+								"updated": "20260614110310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Individual Toggle"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Each snippet can be enabled or disabled individually"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110310-8zdp3ui",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110310-8zdp3ui",
+						"updated": "20260614110310"
+					},
+					"Children": [
+						{
+							"ID": "20260614110310-ol2tita",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110310-ol2tita",
+								"updated": "20260614110310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Global Toggle"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": There are global CSS and JS toggles at the top of the tabs. When disabled, all snippets of that type will not take effect"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614110310-yw69pyw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614110310-yw69pyw",
+						"updated": "20260614110310"
+					},
+					"Children": [
+						{
+							"ID": "20260614110310-i3i7ced",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614110310-i3i7ced",
+								"updated": "20260614110310"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports searching by snippet name or content"
 								}
 							]
 						}

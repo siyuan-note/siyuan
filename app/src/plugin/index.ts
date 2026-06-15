@@ -23,6 +23,7 @@ import {uninstall} from "./uninstall";
 import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
+import {registerAction} from "../layout/dock/frontendActions";
 
 export class Plugin {
     private app: App;
@@ -51,6 +52,9 @@ export class Plugin {
     public setting: Setting;
     public statusBarIcons: Element[] = [];
     public commands: ICommand[] = [];
+    // Full names of agent actions this plugin registered (plugin__<name>__<action>), tracked
+    // so they can be unregistered on uninstall.
+    public agentActions: string[] = [];
     public models: {
         /// #if !MOBILE
         [key: string]: (options: { tab: Tab, data: any }) => Custom
@@ -408,6 +412,22 @@ export class Plugin {
         };
         return this.models[type2];
         /// #endif
+    }
+
+    // Register a frontend action that the AI agent can discover and invoke. The action is exposed
+    // to the LLM under the full name "plugin__<pluginName>__<name>" with the given description, and
+    // is dispatched via the "frontend" tool. On uninstall, all registered actions are removed.
+    public addAgentAction(options: {
+        name: string,
+        description: string,
+        handler: (args: Record<string, unknown>, app: App) => Promise<{result?: string; error?: string}>
+    }): string {
+        const fullName = "plugin__" + this.name + "__" + options.name;
+        if (!this.agentActions.includes(fullName)) {
+            registerAction({name: fullName, description: options.description, handler: options.handler});
+            this.agentActions.push(fullName);
+        }
+        return fullName;
     }
 
     public addDock(options: {

@@ -457,6 +457,15 @@ type="checkbox">
                 checkElement.classList.add("fn__none");
             }
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
+                const repoURL = bazaar.element.querySelector("#configBazaarReadme .item__side")?.getAttribute("data-repourl");
+                bazaar._data.downloaded.find((i) => {
+                    if (i.repoURL === repoURL) {
+                        bazaar._renderReadme(bazaarType, true, i);
+                        return true;
+                    }
+                });
+            }
         });
     },
     _data: {
@@ -617,28 +626,36 @@ type="checkbox">
             let pkgItem: IBazaarItem;
             if (repoElement) {
                 const repo = repoElement.getAttribute("data-repourl");
-                for (const bazaarType of ["plugins", "themes", "icons", "templates", "widgets"] as TBazaarType[]) {
-                    let item = bazaar._data.update[bazaarType]?.find((i) => i.repoURL === repo);
-                    if (!item) {
-                        item = bazaar._data[bazaarType]?.find((i) => i.repoURL === repo);
+                if (hasClosestByAttribute(repoElement, "data-type", "downloaded") ||
+                    hasClosestByAttribute(repoElement, "data-download", "true")) {
+                    for (const bazaarType of ["plugins", "themes", "icons", "templates", "widgets"] as TBazaarType[]) {
+                        const item = bazaar._data.update[bazaarType]?.find((i) => i.repoURL === repo);
+                        if (item) {
+                            pkgType = bazaarType;
+                            pkgItem = item;
+                            break;
+                        }
                     }
-                    if (item) {
-                        pkgType = bazaarType;
-                        pkgItem = item;
-                        break;
-                    }
-                }
-                if (!pkgType) {
-                    bazaar._data.downloaded.find((i) => {
-                        if (i.repoURL === repo) {
-                            const activeBtn = bazaar.element.querySelector("#configBazaarDownloaded")?.previousElementSibling?.querySelector(".b3-button:not(.b3-button--outline)") as HTMLElement;
-                            if (activeBtn?.getAttribute("data-type")) {
-                                pkgType = bazaar._myType2Type(activeBtn.getAttribute("data-type"));
-                                pkgItem = i;
-                                return true;
+                    if (!pkgType) {
+                        const activeBtn = bazaar.element.querySelector("#configBazaarDownloaded")?.previousElementSibling?.querySelector(".b3-button:not(.b3-button--outline)") as HTMLElement;
+                        if (activeBtn?.getAttribute("data-type")) {
+                            const activeBazaarType = bazaar._myType2Type(activeBtn.getAttribute("data-type"));
+                            const item = bazaar._data.downloaded.find((i) => i.repoURL === repo);
+                            if (item) {
+                                pkgType = activeBazaarType;
+                                pkgItem = item;
                             }
                         }
-                    });
+                    }
+                } else {
+                    for (const bazaarType of ["plugins", "themes", "icons", "templates", "widgets"] as TBazaarType[]) {
+                        const item = bazaar._data[bazaarType]?.find((i) => i.repoURL === repo);
+                        if (item) {
+                            pkgType = bazaarType;
+                            pkgItem = item;
+                            break;
+                        }
+                    }
                 }
             }
             while (target && !target.isEqualNode(bazaar.element)) {
@@ -708,14 +725,6 @@ type="checkbox">
                                 return;
                             }
                             bazaar._onBazaar(response, pkgType);
-                            if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
-                                bazaar._data[pkgType].find((i) => {
-                                    if (i.repoURL === pkgItem.repoURL) {
-                                        bazaar._renderReadme(pkgType, bazaar.element.querySelector("#configBazaarReadme .item__side").getAttribute("data-download") === "true", i);
-                                        return true;
-                                    }
-                                });
-                            }
                             bazaar._genMyHTML(pkgType, app, false);
                             if (pkgType === "plugins") {
                                 if (window.siyuan.config.bazaar.petalDisabled) {
@@ -779,14 +788,6 @@ type="checkbox">
                             }, response => {
                                 this._genMyHTML(pkgType, app);
                                 bazaar._onBazaar(response, pkgType);
-                                if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
-                                    bazaar._data[pkgType].find((i) => {
-                                        if (i.repoURL === pkgItem.repoURL) {
-                                            bazaar._renderReadme(pkgType, bazaar.element.querySelector("#configBazaarReadme .item__side").getAttribute("data-download") === "true", i);
-                                            return true;
-                                        }
-                                    });
-                                }
                             });
                         });
                     }

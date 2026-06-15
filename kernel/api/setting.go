@@ -211,7 +211,7 @@ func setAI(c *gin.Context) {
 		if 0 > ai.Chat.MaxCompletionTokens {
 			ai.Chat.MaxCompletionTokens = 0
 		}
-		if 0 >= ai.Chat.Temperature || 2 < ai.Chat.Temperature {
+		if 0 > ai.Chat.Temperature || 2 < ai.Chat.Temperature {
 			ai.Chat.Temperature = 1.0
 		}
 		if 1 > ai.Chat.MaxHistoryMessages || 64 < ai.Chat.MaxHistoryMessages {

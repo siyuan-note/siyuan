@@ -619,7 +619,7 @@ func InitConf() {
 	if 0 > Conf.AI.Chat.MaxCompletionTokens {
 		Conf.AI.Chat.MaxCompletionTokens = 0
 	}
-	if 0 >= Conf.AI.Chat.Temperature || 2 < Conf.AI.Chat.Temperature {
+	if 0 > Conf.AI.Chat.Temperature || 2 < Conf.AI.Chat.Temperature {
 		Conf.AI.Chat.Temperature = 1.0
 	}
 	if 1 > Conf.AI.Chat.MaxHistoryMessages || 64 < Conf.AI.Chat.MaxHistoryMessages {

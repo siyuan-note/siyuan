@@ -621,7 +621,7 @@ const initKernel = (workspace, port, lang) => {
             resolve(false);
             return;
         }
-        const cmds = ["--port", kernelPort, "--wd", appDir, "--attach-ui"];
+        const cmds = ["serve", "--port", kernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
             cmds.push("--mode", "dev");
         }

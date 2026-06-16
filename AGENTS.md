@@ -121,3 +121,4 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 
 1. **Comments:** Wrap code comments at 120 characters
 2. **Comments:** Describe what the code does, not what it replaced — don't reference the old implementation in comments
+3. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line

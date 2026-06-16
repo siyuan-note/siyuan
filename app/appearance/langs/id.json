@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "Sesi ini sedang sibuk di instansi lain",
+  "agentMirrorStreaming": "Instansi lain sedang mengobrol...",
+  "rollbackCompleted": "Putar balik selesai",
   "snapshotAutoCreated": "Snapshot otomatis dibuat",
   "agentThinkingDoneTime": "Selesai berpikir %s",
   "agentThinking": "Berpikir",

@@ -1,6 +1,10 @@
 import {fetchSyncPost} from "../../util/fetch";
+import {Constants} from "../../constants";
 
 const API = "/api/ai/agent";
+
+// 标识发起者 app，后端 saveSession/removeSession 据此排除自身、向其他实例广播会话变更。
+const APP_HEADER = {"X-SiYuan-App-ID": Constants.SIYUAN_APPID};
 
 export interface SessionIndexItem {
     id: string;
@@ -84,11 +88,11 @@ export const SessionStore = {
 
     async save(session: AgentSession): Promise<void> {
         session.updatedAt = Date.now();
-        await fetchSyncPost(API + "/saveSession", session);
+        await fetchSyncPost(API + "/saveSession", session, APP_HEADER);
     },
 
     async remove(id: string): Promise<void> {
-        await fetchSyncPost(API + "/removeSession", {id});
+        await fetchSyncPost(API + "/removeSession", {id}, APP_HEADER);
     },
 
     async rename(id: string, newTitle: string): Promise<void> {

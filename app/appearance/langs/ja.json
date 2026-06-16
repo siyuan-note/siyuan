@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "このセッションは別のインスタンスで使用中です",
+  "agentMirrorStreaming": "別のインスタンスがチャット中...",
   "rollbackCompleted": "ロールバック完了",
   "snapshotAutoCreated": "自動スナップショットが作成されました",
   "agentThinkingDoneTime": "考え済み %s",

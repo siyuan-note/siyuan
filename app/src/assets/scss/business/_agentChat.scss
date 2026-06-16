@@ -1186,3 +1186,29 @@ pre:hover .agent-chat__copy-wrap {
 @keyframes agent-msg-jump {
     20% { background-color: var(--b3-theme-primary-lightest); }
 }
+
+.agent-chat__msg--mirror {
+    justify-content: center;
+}
+
+.agent-chat__body--mirror {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--b3-theme-on-surface-light);
+    font-size: 14px;
+}
+
+.agent-chat__mirror-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--b3-theme-on-surface-light);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: agent-mirror-spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes agent-mirror-spin {
+    to { transform: rotate(360deg); }
+}

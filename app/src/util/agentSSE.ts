@@ -47,6 +47,8 @@ export type ISSEResult = {
     arguments: Record<string, unknown>;
 };
 
+import {Constants} from "../constants";
+
 export type IEditorContext = {
     activeDocID?: string;
     activeDocTitle?: string;
@@ -55,6 +57,16 @@ export type IEditorContext = {
     selectedBlockIDs?: string[];
     visibleBlockIDs?: string[];
 };
+
+// AgentHttpError 承载 HTTP 状态码，调用方可据此区分"互斥拒绝"(409) 等语义错误。
+export class AgentHttpError extends Error {
+    public status: number;
+    constructor(message: string, status: number) {
+        super(message);
+        this.name = "AgentHttpError";
+        this.status = status;
+    }
+}
 
 export async function fetchAgentSSE(
     message: string,
@@ -79,13 +91,28 @@ export async function fetchAgentSSE(
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: {
+                "Content-Type": "application/json",
+                // 标识发起者 app，后端据此排除发起者自身的 ws 广播，并做实例级互斥。
+                "X-SiYuan-App-ID": Constants.SIYUAN_APPID,
+            },
             body: JSON.stringify(body),
             signal: signal,
         });
 
         if (!response.ok) {
-            onError(new Error(window.siyuan.languages._kernel[28]));
+            // 409 表示该会话正在其他实例对话中（实例级互斥）。优先用后端返回的 msg，否则用 i18n 兜底。
+            let msg = window.siyuan.languages._kernel[28];
+            if (response.status === 409) {
+                try {
+                    const data = await response.json();
+                    if (data && data.msg) { msg = data.msg; }
+                } catch (e) {
+                    // 读取 JSON 失败时使用 i18n
+                }
+                msg = window.siyuan.languages.agentChatBusy || msg;
+            }
+            onError(new AgentHttpError(msg, response.status));
             return;
         }
 

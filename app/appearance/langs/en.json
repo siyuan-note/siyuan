@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "This session is busy in another instance",
+  "agentMirrorStreaming": "Another instance is chatting...",
   "rollbackCompleted": "Rollback completed",
   "snapshotAutoCreated": "Auto snapshot created",
   "agentThinkingDoneTime": "Thought %s",

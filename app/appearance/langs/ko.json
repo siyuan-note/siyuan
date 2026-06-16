@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "이 세션은 다른 인스턴스에서 사용 중입니다",
+  "agentMirrorStreaming": "다른 인스턴스가 채팅 중...",
   "rollbackCompleted": "롤백 완료",
   "snapshotAutoCreated": "자동 스냅샷 생성됨",
   "agentThinkingDoneTime": "생각함 %s",

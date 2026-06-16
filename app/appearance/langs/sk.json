@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "Táto relácia je zaneprázdnená v inej inštancii",
+  "agentMirrorStreaming": "Iná inštancia komunikuje...",
+  "rollbackCompleted": "Návrat späť dokončený",
   "snapshotAutoCreated": "Automatická snímka vytvorená",
   "agentThinkingDoneTime": "Premyslené %s",
   "agentThinking": "Premýšľa",

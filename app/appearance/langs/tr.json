@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "Bu oturum başka bir örnekte meşgul",
+  "agentMirrorStreaming": "Başka bir örnek sohbet ediyor...",
+  "rollbackCompleted": "Geri alma tamamlandı",
   "snapshotAutoCreated": "Otomatik anlık görüntü oluşturuldu",
   "agentThinkingDoneTime": "Düşünüldü %s",
   "agentThinking": "Düşünüyor",

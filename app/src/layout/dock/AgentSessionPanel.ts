@@ -245,7 +245,9 @@ export class AgentSessionPanel {
         }
     }
 
-    private async refresh() {
+    // 跨实例会话变更（ws agentSessionChanged）时由 AgentChat.onWsMessage 调用，刷新已打开的列表。
+    // popup 未打开时直接返回（下次 toggle/render 会拉取最新数据），避免无谓请求。
+    async refresh() {
         const itemsContainer = this.popup?.querySelector(".b3-menu__items") as HTMLElement;
         if (!itemsContainer) { return; }
         const result = await SessionStore.list({page: 1, pageSize: 30, keyword: this.searchKeyword});

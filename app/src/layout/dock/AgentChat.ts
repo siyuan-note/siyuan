@@ -1,7 +1,8 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {App} from "../../index";
-import {fetchAgentSSE, IEditorContext, ISSEResult} from "../../util/agentSSE";
+import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult} from "../../util/agentSSE";
+import {genUUID} from "../../util/genID";
 import {mountComposer} from "./AgentComposer";
 import {getAllEditor} from "../getAll";
 import "./frontendActions";
@@ -119,6 +120,10 @@ export class AgentChat extends Model {
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
     private navExpandTimer = 0;
+    // 镜像态：当前会话正由其他实例流式对话，本实例处于只读占位锁定，期间不重绘当前视图。
+    // 由 ws 的 streamStart/streamEnd 事件驱动，与发起者的 isStreaming 互斥（发起者走 SSE）。
+    private mirrorLocked = false;
+    private mirrorPlaceholderEl: HTMLElement | null = null;
     // 思考计时器：流式进行时每 100ms 刷新未完成思考卡片的标题为「思考中... X.Xs」。
     private thinkingTimerId = 0;
     // 输入框计时器：请求进行时每 1s 刷新底部「tokens · 累计耗时」显示。
@@ -135,6 +140,13 @@ export class AgentChat extends Model {
         this.sessionTitle = this.defaultTitle;
         this.initUI();
         this.bindEvents();
+        // 接入 ws 以接收跨实例的会话变更通知（agentSessionChanged）。
+        // AgentChat dock 是单例常驻，ws 随之常驻，与 Backlink/Bookmark 等现有 dock 一致。
+        this.connect({
+            id: genUUID(),
+            type: "agentChat",
+            msgCallback: (data) => this.onWsMessage(data),
+        });
     }
 
     private initUI() {
@@ -581,8 +593,161 @@ export class AgentChat extends Model {
         await SessionStore.save(session);
     }
 
+    // 处理 ws 推送的跨实例会话变更通知。核心时序控制：
+    // - streamStart：其他实例开始流式，本实例（若看同一会话且非自身流式中）进入占位锁定。
+    // - streamEnd：其他实例流式结束，本实例从磁盘拉取整条会话重绘（唯一重绘触发点）。
+    // - update：会话列表元数据刷新，不重绘当前视图（回避流式中途半截 saveSession 数据的时序问题）。
+    // - delete：当前会话被删除则清空视图。
+    private onWsMessage(data: IWebSocketData) {
+        if (!data || data.cmd !== "agentSessionChanged") {
+            return;
+        }
+        const payload = data.data as { sessionID: string; action: string } | undefined;
+        if (!payload) {
+            return;
+        }
+        // 所有变更都刷新会话列表（标题/时间/增删）。
+        this.sessionPanel?.refresh();
+        // 只处理当前会话；其他会话的变化仅体现在列表刷新里。
+        if (payload.sessionID !== this.sessionId) {
+            return;
+        }
+        // 发起者自身流式中忽略（它走 SSE 自渲染）。
+        if (this.isStreaming) {
+            return;
+        }
+        switch (payload.action) {
+            case "streamStart":
+                this.mirrorLocked = true;
+                this.showMirrorPlaceholder();
+                break;
+            case "streamEnd":
+                this.mirrorLocked = false;
+                void this.reloadFromDisk();
+                break;
+            case "update":
+                // 仅元数据变更（如标题），会话列表已刷新。不重绘当前视图以避免读到流式中途的半截数据。
+                break;
+            case "delete":
+                this.mirrorLocked = false;
+                this.handleCurrentSessionDeleted();
+                break;
+        }
+    }
+
+    // 显示"其他实例正在对话中…"只读占位条。不进入 setStreaming 态（不切换 stop 按钮、不置灰 composer）。
+    private showMirrorPlaceholder() {
+        if (this.mirrorPlaceholderEl) {
+            return;
+        }
+        this.removeMirrorPlaceholder();
+        const L = window.siyuan.languages;
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--mirror";
+        el.innerHTML = '<div class="agent-chat__body agent-chat__body--mirror">' +
+            '<span class="agent-chat__mirror-spinner"></span>' +
+            "<span>" + escapeHtml(L.agentMirrorStreaming || "Another instance is chatting...") + "</span>" +
+            "</div>";
+        this.messagesContainer.appendChild(el);
+        this.mirrorPlaceholderEl = el;
+        this.scrollToBottom();
+    }
+
+    private removeMirrorPlaceholder() {
+        if (this.mirrorPlaceholderEl) {
+            this.mirrorPlaceholderEl.remove();
+            this.mirrorPlaceholderEl = null;
+        }
+    }
+
+    // 镜像端从磁盘拉取整条会话权威数据重绘。仅 entries 变化时清空重绘，避免无谓跳变。
+    private async reloadFromDisk() {
+        const targetSessionId = this.sessionId;
+        const session = await SessionStore.load(targetSessionId);
+        this.removeMirrorPlaceholder();
+        // await 期间用户可能已切换会话，丢弃过期结果。
+        if (targetSessionId !== this.sessionId) {
+            return;
+        }
+        if (!session) {
+            return;
+        }
+        const newEntries = this.buildEntriesFromSession(session);
+        if (this.entriesEqual(newEntries, this.entries)) {
+            // 内容未变，仅更新元数据（标题等）。
+            this.updateMetaFromSession(session);
+            return;
+        }
+        const atBottom = this.isScrolledToBottom();
+        const savedScroll = this.messagesContainer.scrollTop;
+        this.entries = newEntries;
+        this.updateMetaFromSession(session);
+        this.messagesContainer.innerHTML = "";
+        this.renderLoadedSession(session);
+        this.rebuildNavMarkers();
+        if (atBottom) {
+            this.scrollToBottom(true);
+        } else {
+            this.messagesContainer.scrollTop = savedScroll;
+        }
+    }
+
+    // 从 session 更新标题/时间戳/token 计数/model 等元数据，不动 entries 与 DOM。
+    private updateMetaFromSession(session: AgentSession) {
+        this.sessionTitle = session.title || this.defaultTitle;
+        this.hasTitled = session.titled !== false;
+        this.sessionCreatedAt = session.createdAt || this.sessionCreatedAt;
+        this.sessionPromptTokens = session.promptTokens || 0;
+        this.sessionCompletionTokens = session.completionTokens || 0;
+        this.sessionTotalDuration = session.totalDuration || 0;
+        if (session.model) {
+            this.selectedModel = session.model;
+            this.updateModelLabel();
+        }
+        this.titleElement.textContent = this.sessionTitle;
+        this.updateTokenDisplay();
+    }
+
+    // 浅比较两个 entries 数组是否等价（用于判断是否需要重绘）。用 JSON 序列化比较，简单可靠。
+    private entriesEqual(a: SessionEntry[], b: SessionEntry[]): boolean {
+        if (a === b) {
+            return true;
+        }
+        if (a.length !== b.length) {
+            return false;
+        }
+        return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    private isScrolledToBottom(): boolean {
+        const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
+        return scrollHeight - scrollTop - clientHeight <= 60;
+    }
+
+    // 当前会话被其他实例删除时，清空到欢迎页。不调 saveSession（会话已不存在于磁盘）。
+    private handleCurrentSessionDeleted() {
+        this.removeMirrorPlaceholder();
+        this.entries = [];
+        this.sessionId = SessionStore.newSessionId();
+        this.sessionCreatedAt = Date.now();
+        this.sessionTitle = this.defaultTitle;
+        this.hasTitled = false;
+        this.currentAIElement = null;
+        this.currentContent = "";
+        this.fullContent = "";
+        this.currentToolCalls = [];
+        this.pendingConfirms = [];
+        this.messagesContainer.innerHTML = "";
+        this.rebuildNavMarkers();
+        this.titleElement.textContent = this.defaultTitle;
+        this.showWelcome();
+        this.scrollToBottom(true);
+    }
+
     private async switchSession(id: string) {
         this.setStreaming(false);
+        this.mirrorLocked = false;
+        this.removeMirrorPlaceholder();
         this.finishActiveThinking();
         this.flushThinkingStep();
         await this.saveSession();
@@ -863,6 +1028,8 @@ export class AgentChat extends Model {
             this.abortController = null;
         }
         this.setStreaming(false);
+        this.mirrorLocked = false;
+        this.removeMirrorPlaceholder();
         this.finishActiveThinking();
         this.flushThinkingStep();
         await this.saveSession();
@@ -979,6 +1146,11 @@ export class AgentChat extends Model {
                 if (this.sessionId !== requestSessionId) {
                     return;
                 }
+                // 409：该会话正在其他实例对话中（实例级互斥）。回滚刚追加的 user 消息，不进入流式。
+                if (err instanceof AgentHttpError && err.status === 409) {
+                    this.handleConflictReject(userEntryId);
+                    return;
+                }
                 return this.handleError(err);
             },
             this.abortController.signal,
@@ -988,6 +1160,26 @@ export class AgentChat extends Model {
             editorContext,
             pluginActions,
         );
+    }
+
+    // 实例级互斥被拒（409）：回滚 sendMessage 已追加的 user 消息与磁盘保存，恢复到发送前状态。
+    private async handleConflictReject(userEntryId: string) {
+        this.setStreaming(false);
+        // 回滚 entries 里的 user entry。
+        const idx = this.entries.findIndex(e => e.id === userEntryId);
+        if (idx >= 0) {
+            this.entries.splice(idx, 1);
+        }
+        // 回滚 DOM 上的 user 消息元素。
+        const userEl = this.messagesContainer.querySelector('.agent-chat__msg--user[data-message-id="' + userEntryId + '"]');
+        if (userEl) {
+            userEl.remove();
+        }
+        this.rebuildNavMarkers();
+        // 恢复磁盘到发送前状态（entries 已不含该 user 消息）。
+        await this.saveSession();
+        const L = window.siyuan.languages;
+        showMessage(L.agentChatBusy || "This session is busy in another instance", 3000);
     }
 
     // Capture a read-only snapshot of the user's editor to inject into the system prompt.
@@ -1569,6 +1761,8 @@ export class AgentChat extends Model {
 
         // Re-submit
         this.setStreaming(true);
+        this.mirrorLocked = false;
+        this.removeMirrorPlaceholder();
         const lastUserEntry = this.entries[this.entries.length - 1];
         const lastUserText = lastUserEntry.type === "user" ? lastUserEntry.content : "";
         this.abortController = new AbortController();
@@ -1585,6 +1779,13 @@ export class AgentChat extends Model {
             },
             (err: Error) => {
                 if (this.sessionId !== requestSessionId) {
+                    return;
+                }
+                // 409：该会话正在其他实例对话中（实例级互斥），不进入流式。
+                if (err instanceof AgentHttpError && err.status === 409) {
+                    this.setStreaming(false);
+                    const L = window.siyuan.languages;
+                    showMessage(L.agentChatBusy || "This session is busy in another instance", 3000);
                     return;
                 }
                 return this.handleError(err);

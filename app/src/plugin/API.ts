@@ -9,7 +9,7 @@ import {openFile, openFileById} from "../editor/util";
 import {openNewWindow, openNewWindowById} from "../window/openNewWindow";
 import {Tab} from "../layout/Tab";
 /// #endif
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
 import * as platformUtils from "./platformUtils";
 import {App} from "../index";
 import {Constants} from "../constants";
@@ -17,13 +17,12 @@ import {Setting} from "./Setting";
 import {Menu} from "./Menu";
 import {Protyle} from "../protyle";
 import {openMobileFileById} from "../mobile/editor";
-import {lockScreen, exitSiYuan} from "../dialog/processSystem";
+import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
-import {getAllModels, getAllTabs} from "../layout/getAll";
 /// #endif
-import {getAllEditor} from "../layout/getAll";
+import {getAllEditor, getAllModels, getAllTabs} from "../layout/getAll";
 import {openSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
@@ -361,6 +360,7 @@ export const API = {
     Menu,
     Setting,
     getAllEditor,
+    saveExportFile,
     /// #if !MOBILE
     getActiveTab,
     getAllModels,

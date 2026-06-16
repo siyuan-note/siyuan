@@ -10,6 +10,7 @@ import {setNoteBook} from "../util/pathName";
 import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {getLuteInstance} from "../protyle/render/setLute";
 import * as dayjs from "dayjs";
 
 export const getRandomEmoji = () => {
@@ -760,20 +761,23 @@ export const getEmojiTitle = (index: number) => {
 };
 
 const putEmojis = (protyle: IProtyle) => {
-    if (window.siyuan.emojis[0].items.length > 0) {
+    const lute = getLuteInstance();
+    if (lute && window.siyuan.emojis[0].items.length > 0) {
         const emojis: IObject = {};
         window.siyuan.emojis[0].items.forEach(emojiITem => {
             emojis[emojiITem.keywords] = protyle.options.hint.emojiPath + "/" + emojiITem.unicode;
         });
-        protyle.lute.PutEmojis(emojis);
+        // Lute 已为所有编辑器共享单例，PutEmojis 只需调用一次
+        lute.PutEmojis(emojis);
     }
 };
 
 export const reloadEmoji = () => {
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
-        getAllEditor().forEach(item => {
-            putEmojis(item.protyle);
-        });
+        const editors = getAllEditor();
+        if (editors.length > 0) {
+            putEmojis(editors[0].protyle);
+        }
     });
 };

@@ -40,6 +40,26 @@ export const initWindowEvent = (app: App) => {
         windowMouseMove(event, mouseIsEnter);
     });
 
+    // 横向滚动表格时重新定位表格列宽调整手柄 https://github.com/siyuan-note/siyuan/issues/13828
+    window.addEventListener("scroll", (event: Event) => {
+        const scrollElement = event.target as HTMLElement;
+        // 仅处理表格内容容器（.table 块的 firstElementChild）的滚动
+        if (!scrollElement.parentElement || !scrollElement.parentElement.classList.contains("table")) {
+            return;
+        }
+        const resizeElement = scrollElement.parentElement.querySelector(".table__resize") as HTMLElement;
+        if (!resizeElement) {
+            return;
+        }
+        const baseLeft = resizeElement.getAttribute("data-left");
+        const style = resizeElement.getAttribute("style");
+        if (baseLeft === null || !style || style.indexOf("display:block") === -1) {
+            return;
+        }
+        const left = parseInt(baseLeft) - scrollElement.scrollLeft;
+        resizeElement.setAttribute("style", style.replace(/left: ?-?\d+px;/, `left: ${Math.round(left)}px;`));
+    }, true);
+
     let scrollTarget: HTMLElement | false;
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (event.dataTransfer.types.includes("text/plain")) {
@@ -116,6 +136,7 @@ export const initWindowEvent = (app: App) => {
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;
+        document.body.classList.remove("shift--pressed");
         /// #if BROWSER
         setWebViewFocusable();
         /// #endif

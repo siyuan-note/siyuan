@@ -42,7 +42,7 @@ var (
 )
 
 func HookDesktopUIProcJob() {
-	if util.ContainerStd != util.Container || "dev" == util.Mode {
+	if !util.AttachUI || util.ContainerStd != util.Container || "dev" == util.Mode {
 		return
 	}
 

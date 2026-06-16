@@ -54,4 +54,6 @@ COPY --from=go-build --chmod=755 /kernel/kernel /kernel/entrypoint.sh .
 COPY --from=node-build /artifacts .
 
 ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]
-CMD ["/opt/siyuan/kernel"]
+# 默认启动伺服。若通过 `docker run` / `command:` 传额外参数，需自行带上 `serve` 子命令，
+# 否则用户参数会整体覆盖 CMD。
+CMD ["/opt/siyuan/kernel", "serve"]

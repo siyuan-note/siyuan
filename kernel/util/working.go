@@ -51,6 +51,7 @@ const (
 var (
 	RunInContainer             = false // 是否运行在容器中
 	SiYuanAccessAuthCodeBypass = false // 是否跳过空锁屏密码检查
+	AttachUI                   = false // 是否绑定桌面 UI 进程生命周期（Electron 拉起时为 true，手动 serve 为 false）
 )
 
 func initEnvVars() {
@@ -113,30 +114,38 @@ func InitWorkspace(workspacePath, wdPath string) {
 func Boot() {
 	IncBootProgress(3, "Booting kernel...")
 
+	// 由标准库 flag 解析 os.Args，再走统一的 BootWithFlags。
 	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/SiYuan/")
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
 	port := flag.String("port", "0", "port of the HTTP server")
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
+	attachUI := flag.Bool("attach-ui", false, "attach kernel lifecycle to desktop UI process (used by Electron)")
 	lang := flag.String("lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/th/tr/uk/zh-CN/zh-TW")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
+	BootWithFlags(*workspacePath, *wdPath, *port, *readOnly, *accessAuthCode, *lang, *mode, *ssl, *attachUI)
+}
+
+// BootWithFlags 接收已解析好的启动参数，完成环境变量回退、全局变量赋值、工作空间初始化与加锁等启动收尾工作。Boot()（标准库 flag 解析）和 serve 子命令（cobra 解析）都走这个统一入口。
+func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, mode string, ssl, attachUI bool) {
 	// Fallback to env vars if commandline args are not set
 	// valid only for CLI args that default to "", as the
 	// others have explicit (sane) defaults
-	workspacePath = coalesceToEnvVar(workspacePath, "SIYUAN_WORKSPACE_PATH")
-	accessAuthCode = coalesceToEnvVar(accessAuthCode, "SIYUAN_ACCESS_AUTH_CODE")
-	lang = coalesceToEnvVar(lang, "SIYUAN_LANG")
+	workspacePath = *coalesceToEnvVar(&workspacePath, "SIYUAN_WORKSPACE_PATH")
+	accessAuthCode = *coalesceToEnvVar(&accessAuthCode, "SIYUAN_ACCESS_AUTH_CODE")
+	lang = *coalesceToEnvVar(&lang, "SIYUAN_LANG")
 
-	if "" != *lang {
-		Lang = MigrateLang(*lang) // 兼容历史下划线值，如 zh_CN → zh-CN
+	if "" != lang {
+		Lang = MigrateLang(lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	}
-	Mode = *mode
-	ServerPort = *port
-	ReadOnly, _ = strconv.ParseBool(*readOnly)
-	AccessAuthCode = *accessAuthCode
+	Mode = mode
+	ServerPort = port
+	ReadOnly, _ = strconv.ParseBool(readOnly)
+	AttachUI = attachUI
+	AccessAuthCode = accessAuthCode
 	AccessAuthCode = RemoveInvalid(AccessAuthCode)
 	AccessAuthCode = strings.TrimSpace(AccessAuthCode)
 	Container = ContainerStd
@@ -169,9 +178,9 @@ func Boot() {
 	UserAgent = UserAgent + " " + Container + "/" + runtime.GOOS
 	httpclient.SetUserAgent(UserAgent)
 
-	InitWorkspace(*workspacePath, *wdPath)
+	InitWorkspace(workspacePath, wdPath)
 
-	SSL = *ssl
+	SSL = ssl
 	logging.SetLogPath(LogPath)
 
 	// 工作空间仅允许被一个内核进程伺服

@@ -115,7 +115,7 @@ declare namespace Config {
      */
     export interface IAI {
         providers: IProvider[];
-        chat: IChat;
+        editing: IEditing;
         agent: IAgent;
         mcp: IMCP;
         embedding: IEmbedding;
@@ -135,9 +135,9 @@ declare namespace Config {
     }
 
     /**
-     * AI chat scenario behavior settings (mirrors IAgent)
+     * AI in-editor chat scenario behavior settings (mirrors IAgent)
      */
-    export interface IChat {
+    export interface IEditing {
         modelId: string;
         maxHistoryMessages: number;
         temperature: number;
@@ -171,7 +171,7 @@ declare namespace Config {
 
     /**
      * AI model configuration. Behavior params (maxTokens/temperature/maxContexts)
-     * live on IChat; Model holds only identity fields.
+     * live on IEditing; Model holds only identity fields.
      */
     export interface IModel {
         id: string;

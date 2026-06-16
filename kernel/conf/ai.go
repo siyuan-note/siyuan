@@ -30,7 +30,7 @@ type AI struct {
 	MCP       *MCP        `json:"mcp"`
 	Embedding *Embedding  `json:"embedding"`
 	Agent     *Agent      `json:"agent"`
-	Chat      *Chat       `json:"chat"`
+	Editing   *Editing    `json:"editing"`
 	Providers []*Provider `json:"providers"`
 }
 
@@ -44,10 +44,10 @@ type Agent struct {
 	MaxToolCallRounds   int     `json:"maxToolCallRounds"`
 }
 
-// Chat holds behavior parameters used by the chat scenario. They are kept
-// here (instead of on Model) to mirror Agent and to decouple scenario behavior
-// from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
-type Chat struct {
+// Editing holds behavior parameters used by the in-editor chat scenario. They
+// are kept here (instead of on Model) to mirror Agent and to decouple scenario
+// behavior from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
+type Editing struct {
 	ModelID             string  `json:"modelId"`
 	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
 	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
@@ -75,7 +75,7 @@ type Provider struct {
 
 // Model is the provider-scoped model registry entry. MaxTokens/Temperature/
 // MaxContexts remain the persisted UI-facing config (the settings page still
-// reads/writes them). Chat holds the runtime view derived from them.
+// reads/writes them). Editing holds the runtime view derived from them.
 type Model struct {
 	ID          string `json:"id"`
 	DisplayName string `json:"displayName,omitempty"`
@@ -115,7 +115,7 @@ func NewAI() *AI {
 			MaxCompletionTokens: 0,
 			MaxToolCallRounds:   64,
 		},
-		Chat: &Chat{
+		Editing: &Editing{
 			MaxHistoryMessages:  7,
 			Temperature:         1.0,
 			MaxCompletionTokens: 0,
@@ -145,17 +145,17 @@ func NewAI() *AI {
 		}
 		if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
 			if v, err := strconv.Atoi(maxTokens); err == nil {
-				ai.Chat.MaxCompletionTokens = v
+				ai.Editing.MaxCompletionTokens = v
 			}
 		}
 		if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
 			if v, err := strconv.ParseFloat(temperature, 64); err == nil {
-				ai.Chat.Temperature = v
+				ai.Editing.Temperature = v
 			}
 		}
 		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
 			if v, err := strconv.Atoi(maxContexts); err == nil {
-				ai.Chat.MaxHistoryMessages = v
+				ai.Editing.MaxHistoryMessages = v
 			}
 		}
 
@@ -263,11 +263,11 @@ func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	return nil, nil
 }
 
-func (ai *AI) GetChatModel() (*Provider, *Model) {
-	if ai.Chat == nil || ai.Chat.ModelID == "" {
+func (ai *AI) GetEditingModel() (*Provider, *Model) {
+	if ai.Editing == nil || ai.Editing.ModelID == "" {
 		return nil, nil
 	}
-	return ai.GetModel(ai.Chat.ModelID)
+	return ai.GetModel(ai.Editing.ModelID)
 }
 
 func (ai *AI) GetAgentModel() (*Provider, *Model) {
@@ -403,7 +403,7 @@ func MigrateAI(data []byte) *AI {
 		}
 
 		maxContexts := getInt(oai, "apiMaxContexts")
-		ai.Chat = &Chat{
+		ai.Editing = &Editing{
 			MaxHistoryMessages:  maxContexts,
 			Temperature:         getFloat(oai, "apiTemperature"),
 			MaxCompletionTokens: getInt(oai, "apiMaxTokens"),
@@ -439,7 +439,7 @@ func MigrateAI(data []byte) *AI {
 }
 
 func assignDefaultModelIDs(ai *AI) {
-	if (ai.Chat != nil && ai.Chat.ModelID != "") || (ai.Agent != nil && ai.Agent.ModelID != "") {
+	if (ai.Editing != nil && ai.Editing.ModelID != "") || (ai.Agent != nil && ai.Agent.ModelID != "") {
 		return
 	}
 	var m *Model
@@ -463,11 +463,11 @@ func assignDefaultModelIDs(ai *AI) {
 	if m == nil || m.ID == "" {
 		return
 	}
-	if ai.Chat == nil {
-		ai.Chat = &Chat{}
+	if ai.Editing == nil {
+		ai.Editing = &Editing{}
 	}
-	if ai.Chat.ModelID == "" {
-		ai.Chat.ModelID = m.ID
+	if ai.Editing.ModelID == "" {
+		ai.Editing.ModelID = m.ID
 	}
 	if ai.Agent == nil {
 		ai.Agent = &Agent{MaxToolCallRounds: 64}

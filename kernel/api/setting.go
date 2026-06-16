@@ -207,15 +207,15 @@ func setAI(c *gin.Context) {
 		}
 	}
 
-	if nil != ai.Chat {
-		if 0 > ai.Chat.MaxCompletionTokens {
-			ai.Chat.MaxCompletionTokens = 0
+	if nil != ai.Editing {
+		if 0 > ai.Editing.MaxCompletionTokens {
+			ai.Editing.MaxCompletionTokens = 0
 		}
-		if 0 > ai.Chat.Temperature || 2 < ai.Chat.Temperature {
-			ai.Chat.Temperature = 1.0
+		if 0 > ai.Editing.Temperature || 2 < ai.Editing.Temperature {
+			ai.Editing.Temperature = 1.0
 		}
-		if 1 > ai.Chat.MaxHistoryMessages || 64 < ai.Chat.MaxHistoryMessages {
-			ai.Chat.MaxHistoryMessages = 7
+		if 1 > ai.Editing.MaxHistoryMessages || 64 < ai.Editing.MaxHistoryMessages {
+			ai.Editing.MaxHistoryMessages = 7
 		}
 	}
 
@@ -231,8 +231,8 @@ func setAI(c *gin.Context) {
 	if nil == ai.Agent {
 		ai.Agent = model.Conf.AI.Agent
 	}
-	if nil == ai.Chat {
-		ai.Chat = model.Conf.AI.Chat
+	if nil == ai.Editing {
+		ai.Editing = model.Conf.AI.Editing
 	}
 
 	for i, p := range ai.Providers {

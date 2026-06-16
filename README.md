@@ -204,6 +204,8 @@ The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan
 
 Use the following parameters when running the container with `docker run b3log/siyuan`:
 
+> **Note:** Since v3.7.0, the `serve` subcommand must be passed explicitly (e.g. `docker run b3log/siyuan serve --workspace=...`). Previously the kernel auto-detected bare flags; that implicit behavior has been removed for clarity. Run `docker run --rm b3log/siyuan serve --help` to see all serving options.
+
 - `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
 - `--accessAuthCode`: Specifies the lock screen password
 
@@ -215,6 +217,7 @@ docker run -d \
   -p 6806:6806 \
   -e PUID=1001 -e PGID=1002 \
   b3log/siyuan \
+  serve \
   --workspace=workspace_dir_container \
   --accessAuthCode=xxx
 ```
@@ -238,6 +241,7 @@ docker run -d \
   -p 6806:6806 \
   -e PUID=1001 -e PGID=1002 \
   b3log/siyuan \
+  serve \
   --workspace=/siyuan/workspace/ \
   --accessAuthCode=xxx
 ```
@@ -251,7 +255,7 @@ version: "3.9"
 services:
   main:
     image: b3log/siyuan
-    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
+    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
     ports:
       - 6806:6806
     volumes:
@@ -343,7 +347,7 @@ services:
   siyuan:
     image: b3log/siyuan
     container_name: siyuan
-    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
+    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
     ports:
       - 6806:6806
     volumes:

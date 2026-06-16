@@ -20,29 +20,11 @@ package main
 
 import (
 	"os"
-	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/cli/cmd"
 )
 
 func main() {
-	// Auto-detect: --flag style args → kernel serve mode,
-	// but only if no known subcommand is present
-	subCmdFound := false
-	for i := 1; i < len(os.Args); i++ {
-		if !strings.HasPrefix(os.Args[i], "-") && cmd.HasSubCommand(os.Args[i]) {
-			subCmdFound = true
-			break
-		}
-	}
-	if !subCmdFound && len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "-") {
-		switch os.Args[1] {
-		case "--help", "-h", "--version", "-v":
-			// let cobra handle these
-		default:
-			os.Args = append([]string{os.Args[0], "serve"}, os.Args[1:]...)
-		}
-	}
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}

@@ -86,20 +86,20 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 	util.PushEndlessProgress("Requesting...")
 	defer util.ClearPushProgress(100)
 
-	prov, m := Conf.AI.GetChatModel()
+	prov, m := Conf.AI.GetEditingModel()
 	if nil == prov || nil == m {
 		err = errors.New("no AI provider configured")
 		return
 	}
 
-	chat := Conf.AI.Chat
-	if nil == chat {
-		err = errors.New("no AI chat config")
+	editing := Conf.AI.Editing
+	if nil == editing {
+		err = errors.New("no AI editing config")
 		return
 	}
 
-	if chat.MaxHistoryMessages < len(contextMsgs) {
-		contextMsgs = contextMsgs[len(contextMsgs)-chat.MaxHistoryMessages:]
+	if editing.MaxHistoryMessages < len(contextMsgs) {
+		contextMsgs = contextMsgs[len(contextMsgs)-editing.MaxHistoryMessages:]
 	}
 
 	var gpt GPT
@@ -110,8 +110,8 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 			c:                   util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
 			m:                   m,
 			timeout:             prov.RequestTimeout,
-			maxCompletionTokens: chat.MaxCompletionTokens,
-			temperature:         chat.Temperature,
+			maxCompletionTokens: editing.MaxCompletionTokens,
+			temperature:         editing.Temperature,
 		}
 	}
 

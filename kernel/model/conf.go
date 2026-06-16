@@ -601,8 +601,8 @@ func InitConf() {
 			MaxToolCallRounds:   64,
 		}
 	}
-	if nil == Conf.AI.Chat {
-		Conf.AI.Chat = &conf.Chat{
+	if nil == Conf.AI.Editing {
+		Conf.AI.Editing = &conf.Editing{
 			MaxHistoryMessages:  7,
 			Temperature:         1.0,
 			MaxCompletionTokens: 0,
@@ -616,14 +616,14 @@ func InitConf() {
 			p.RequestTimeout = 30
 		}
 	}
-	if 0 > Conf.AI.Chat.MaxCompletionTokens {
-		Conf.AI.Chat.MaxCompletionTokens = 0
+	if 0 > Conf.AI.Editing.MaxCompletionTokens {
+		Conf.AI.Editing.MaxCompletionTokens = 0
 	}
-	if 0 > Conf.AI.Chat.Temperature || 2 < Conf.AI.Chat.Temperature {
-		Conf.AI.Chat.Temperature = 1.0
+	if 0 > Conf.AI.Editing.Temperature || 2 < Conf.AI.Editing.Temperature {
+		Conf.AI.Editing.Temperature = 1.0
 	}
-	if 1 > Conf.AI.Chat.MaxHistoryMessages || 64 < Conf.AI.Chat.MaxHistoryMessages {
-		Conf.AI.Chat.MaxHistoryMessages = 7
+	if 1 > Conf.AI.Editing.MaxHistoryMessages || 64 < Conf.AI.Editing.MaxHistoryMessages {
+		Conf.AI.Editing.MaxHistoryMessages = 7
 	}
 
 	for _, p := range Conf.AI.Providers {
@@ -644,9 +644,9 @@ func InitConf() {
 				p.BaseURL,
 				p.RequestTimeout,
 				m.Name,
-				Conf.AI.Chat.MaxCompletionTokens,
-				Conf.AI.Chat.Temperature,
-				Conf.AI.Chat.MaxHistoryMessages)
+				Conf.AI.Editing.MaxCompletionTokens,
+				Conf.AI.Editing.Temperature,
+				Conf.AI.Editing.MaxHistoryMessages)
 		}
 	}
 

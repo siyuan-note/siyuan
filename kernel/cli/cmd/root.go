@@ -46,18 +46,11 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		// 确定工作目录
-		if exePath, err := os.Executable(); err == nil {
-			if resolved, err2 := filepath.EvalSymlinks(exePath); err2 == nil {
-				exePath = resolved
-			}
-			util.WorkingDir = filepath.Dir(exePath)
-		}
-
-		// 尝试在常见位置查找 appearance 目录
-		appDir := findAppDir()
-		if appDir != "" {
-			util.WorkingDir = appDir
+		// 默认工作目录取内核可执行文件所在目录的上一级（打包后的 resources/，appearance/、stage/ 所在目录），
+		// 而非内核可执行文件所在目录本身（resources/kernel/）。resolveWorkingDir() 会校验 appearance/langs 实际存在，
+		// 兼容开发态等多种目录布局。
+		if workingDir := resolveWorkingDir(); workingDir != "" {
+			util.WorkingDir = workingDir
 		}
 
 		langsDir := filepath.Join(util.WorkingDir, "appearance", "langs")
@@ -96,7 +89,10 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-func findAppDir() string {
+// resolveWorkingDir 从内核可执行文件路径出发，探测若干候选目录，返回首个包含 appearance/langs 的目录作为
+// 工作目录（打包后为 resources/，开发态视目录布局而定）；找不到返回空串。rootCmd.PersistentPreRunE 与
+// serve 子命令的 --wd 默认值都走这个函数，确保两条启动路径行为一致。
+func resolveWorkingDir() string {
 	if exePath, err := os.Executable(); err == nil {
 		if resolved, err2 := filepath.EvalSymlinks(exePath); err2 == nil {
 			exePath = resolved

@@ -374,7 +374,7 @@ export const moveColumnToRight = (protyle: IProtyle, range: Range, cellElement: 
 };
 
 export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) => {
-    const cellElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+    const cellElement = (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
     const nodeElement = hasClosestBlock(range.startContainer) as HTMLTableElement;
     if (!cellElement || !nodeElement) {
         return false;
@@ -549,7 +549,16 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             if (!nextElement) {
                 return false;
             }
-            range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
+            let rowSpan = cellElement.rowSpan;
+            while (rowSpan > 1) {
+                rowSpan--;
+                nextElement = nextElement.nextElementSibling as HTMLTableRowElement;
+            }
+            let nextCellElement = nextElement.cells[getColIndex(cellElement)];
+            while (nextCellElement.classList.contains("fn__none") && nextCellElement.nextElementSibling) {
+                nextCellElement = nextCellElement.previousElementSibling as HTMLTableCellElement;
+            }
+            range.selectNodeContents(nextCellElement);
             range.collapse(true);
             scrollCenter(protyle);
             event.preventDefault();
@@ -871,7 +880,14 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
 export const getTableRangeHTML = (tableElement: HTMLElement, startCell: HTMLElement, endCell: HTMLElement) => {
     // 1. 建立二维网格映射，记录每个物理单元格的网格坐标、跨度及其所属行（用于保留 thead/tbody 划分）
     // grid[r][c] = cell（每个单元格占据 rowspan×colspan 个网格位置）
-    type CellInfo = { cell: HTMLTableCellElement; row: number; col: number; rowspan: number; colspan: number; tr: HTMLTableRowElement };
+    type CellInfo = {
+        cell: HTMLTableCellElement;
+        row: number;
+        col: number;
+        rowspan: number;
+        colspan: number;
+        tr: HTMLTableRowElement
+    };
     const cellInfos: CellInfo[] = [];
     // sectionOfRow[r] = 该网格行对应的原始 section（"thead" | "tbody"），用于输出时划分 thead/tbody
     const sectionOfRow: string[] = [];
@@ -933,7 +949,13 @@ export const getTableRangeHTML = (tableElement: HTMLElement, startCell: HTMLElem
     const selColEnd = Math.max(startInfo.col + startInfo.colspan - 1, endInfo.col + endInfo.colspan - 1);
 
     // 4. 枚举与选区有交集的单元格，计算在新表格中的行号、列号和跨度
-    type OutCell = { newCell: HTMLTableCellElement; newRow: number; newCol: number; newRowspan: number; newColspan: number };
+    type OutCell = {
+        newCell: HTMLTableCellElement;
+        newRow: number;
+        newCol: number;
+        newRowspan: number;
+        newColspan: number
+    };
     const outCells: OutCell[] = [];
     cellInfos.forEach(info => {
         // 判断该单元格的网格范围是否与选区有交集

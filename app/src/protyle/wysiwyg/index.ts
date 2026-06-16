@@ -409,7 +409,7 @@ export class WYSIWYG {
                 let startCell: HTMLElement = null;
                 let endCell: HTMLElement = null;
                 const allCells = Array.from(tableElement.querySelectorAll("th, td")) as HTMLElement[];
-                allCells.forEach(item => {
+                allCells.forEach((item: HTMLTableCellElement) => {
                     if (item.classList.contains("fn__none")) {
                         return;
                     }

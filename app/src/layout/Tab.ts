@@ -7,7 +7,7 @@ import {Constants} from "../constants";
 import {escapeHtml, escapeLessThans} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
-import {hideTooltip, showTooltip} from "../dialog/tooltip";
+import {hideTooltip, showTooltipIfPointerOver} from "../dialog/tooltip";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
 import {ipcRenderer} from "electron";
@@ -73,7 +73,7 @@ export class Tab {
                         id
                     }, (response) => {
                         if (!this.headElement.getAttribute("aria-label")) {
-                            showTooltip(escapeLessThans(response.data), this.headElement);
+                            showTooltipIfPointerOver(escapeLessThans(response.data), this.headElement);
                         }
                         this.headElement.setAttribute("aria-label", escapeLessThans(response.data));
                     });

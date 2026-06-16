@@ -1,7 +1,7 @@
 import {BlockPanel} from "./Panel";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {hideTooltip, showTooltip} from "../dialog/tooltip";
+import {hideTooltip, showTooltip, showTooltipIfPointerOver} from "../dialog/tooltip";
 import {getIdFromSYProtocol, isLocalPath} from "../util/pathName";
 import {App} from "../index";
 import {Constants} from "../constants";
@@ -10,7 +10,6 @@ import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
 
 let popoverTargetElement: HTMLElement;
-let notebookItemElement: HTMLElement | false;
 export const initBlockPopover = (app: App) => {
     let timeout: number;
     let timeoutHide: number;
@@ -110,9 +109,9 @@ export const initBlockPopover = (app: App) => {
                             assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
                         try {
-                            showTooltip(decodeURIComponent(assetTip), aElement, tooltipClass, event, tooltipSpace);
+                            showTooltipIfPointerOver(decodeURIComponent(assetTip), aElement, tooltipClass, event, tooltipSpace);
                         } catch (e) {
-                            showTooltip(assetTip, aElement, tooltipClass, event, tooltipSpace);
+                            showTooltipIfPointerOver(assetTip, aElement, tooltipClass, event, tooltipSpace);
                         }
                     });
                     tip = "";
@@ -121,20 +120,13 @@ export const initBlockPopover = (app: App) => {
                 }
             }
 
-            notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+            const notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
             if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {
                 fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
                     const boxData = response.data.boxInfo;
                     const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
-                    const scopeNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
-                    if (notebookItemElement && scopeNotebookItemElement && (notebookItemElement === scopeNotebookItemElement)) {
-                        showTooltip(tip, notebookItemElement);
-                    }
-                    if (scopeNotebookItemElement &&
-                        scopeNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
-                        scopeNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
-                        scopeNotebookItemElement.setAttribute("aria-label", tip);
-                    }
+                    showTooltipIfPointerOver(tip, notebookItemElement);
+                    notebookItemElement.setAttribute("aria-label", tip);
                 });
             }
 

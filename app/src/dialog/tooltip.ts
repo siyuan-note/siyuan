@@ -1,5 +1,30 @@
 import {isMobile} from "../util/functions";
 
+export const isPointerOverElement = (target: Element) => {
+    const coords = window.siyuan.coordinates;
+    if (!coords) {
+        return false;
+    }
+    const underMouse = document.elementFromPoint(coords.clientX, coords.clientY) as HTMLElement;
+    return !!underMouse && (target === underMouse || target.contains(underMouse));
+};
+
+/**
+ * 在异步回调中显示 tooltip。回调返回时会检查鼠标指针是否仍在 target 上，避免鼠标已离开后仍弹出 tooltip。
+ */
+export const showTooltipIfPointerOver = (
+    message: string,
+    target: Element,
+    tooltipClass?: string,
+    event?: MouseEvent,
+    space: number = 0.5,
+) => {
+    if (!isPointerOverElement(target)) {
+        return;
+    }
+    showTooltip(message, target, tooltipClass, event, space);
+};
+
 export const showTooltip = (
     message: string,
     target: Element,

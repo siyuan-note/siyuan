@@ -445,7 +445,7 @@ table[contenteditable="false"] + .protyle-action__table > .table__resize {
 }
 
 // 按下 Shift 时隐藏表格列宽调整手柄，以便 Shift+滚轮可以横向滚动表格 https://github.com/siyuan-note/siyuan/issues/13828
-body.shift--pressed .table__resize {
+body.body--shift-pressed .table__resize {
   display: none !important;
 }
 

@@ -21,8 +21,9 @@ import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
+import {getAllModels, getAllTabs} from "../layout/getAll";
 /// #endif
-import {getAllEditor, getAllModels, getAllTabs} from "../layout/getAll";
+import {getAllEditor} from "../layout/getAll";
 import {openSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";

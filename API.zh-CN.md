@@ -40,6 +40,22 @@
 * [属性](#属性)
     * [设置块属性](#设置块属性)
     * [获取块属性](#获取块属性)
+* [数据库](#数据库)
+    * [渲染](#渲染)
+    * [获取](#获取)
+    * [获取主键值](#获取主键值)
+    * [搜索](#搜索)
+    * [设置单元格值](#设置单元格值)
+    * [添加条目](#添加条目)
+    * [移除条目](#移除条目)
+    * [切换布局](#切换布局)
+    * [设置分组](#设置分组)
+    * [获取过滤与排序](#获取过滤与排序)
+    * [设置过滤与排序](#设置过滤与排序)
+    * [添加字段](#添加字段)
+    * [移除字段](#移除字段)
+    * [设置全局字段排序](#设置全局字段排序)
+    * [设置视图内字段排序](#设置视图内字段排序)
 * [SQL](#SQL)
     * [执行 SQL 查询](#执行-SQL-查询)
     * [提交事务](#提交事务)
@@ -1572,3 +1588,840 @@
   ```
 
     * `data`: 精度为毫秒
+
+## 数据库
+
+数据库（内核中为“属性视图”）以字段（列）和条目（行）的形式存储结构化数据。每个数据库由 `avID` 标识，可通过一个或多个数据库块（`blockID`）嵌入到文档中。一个数据库可包含多个不同布局类型的视图（`viewID`）：`table`（表格）、`gallery`（卡片）和 `kanban`（看板）。
+
+字段类型（`keyType`）如下：
+
+| 取值         | 说明                 |
+|--------------|----------------------|
+| `block`      | 主键（绑定的块）     |
+| `text`       | 文本                 |
+| `number`     | 数字                 |
+| `date`       | 日期                 |
+| `select`     | 单选                 |
+| `mSelect`    | 多选                 |
+| `url`        | URL                  |
+| `email`      | 邮箱                 |
+| `phone`      | 电话                 |
+| `mAsset`     | 资源                 |
+| `template`   | 模板                 |
+| `created`    | 创建时间             |
+| `updated`    | 更新时间             |
+| `checkbox`   | 复选框               |
+| `relation`   | 关联                 |
+| `rollup`     | 汇总                 |
+| `lineNumber` | 行号                 |
+
+### 渲染
+
+* `/api/av/renderAttributeView`
+* 参数
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "",
+    "page": 1,
+    "pageSize": 50,
+    "query": "",
+    "groupPaging": {},
+    "createIfNotExist": true
+  }
+  ```
+
+    * `id`: 数据库 ID
+    * `blockID`: 嵌入该数据库的数据库块，用于解析当前视图和发布权限。渲染独立数据库时可省略
+    * `viewID`: 要渲染的视图。省略时使用当前视图（`viewID` 字段）
+    * `page`: 页码，从 1 开始。默认为 `1`
+    * `pageSize`: 每页条目数。`-1` 或省略表示使用视图默认值（`50`）
+    * `query`: 可选的主键值全文过滤关键字
+    * `groupPaging`: 分组（看板）视图的可选分页配置
+    * `createIfNotExist`: 为 `true`（默认）时，若数据库不存在视图则创建默认视图
+* 返回值（真实响应，表格布局，展示一行）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "API 测试",
+      "id": "20240118120204-kwyzf77",
+      "viewType": "table",
+      "viewID": "20240118120204-7rnmyc1",
+      "isMirror": false,
+      "views": [
+        {
+          "id": "20240118120204-7rnmyc1",
+          "icon": "",
+          "name": "表格",
+          "desc": "",
+          "hideAttrViewName": false,
+          "type": "table",
+          "pageSize": 50
+        }
+      ],
+      "view": {
+        "id": "20240118120204-7rnmyc1",
+        "icon": "",
+        "name": "表格",
+        "desc": "",
+        "hideAttrViewName": false,
+        "filters": [],
+        "sorts": [],
+        "group": null,
+        "pageSize": 50,
+        "showIcon": true,
+        "wrapField": false,
+        "groupFolded": false,
+        "groupHidden": 0,
+        "columns": [
+          {
+            "id": "20240118120204-w6cggab",
+            "name": "主键",
+            "type": "block",
+            "icon": "",
+            "wrap": false,
+            "hidden": false,
+            "desc": "",
+            "calc": null,
+            "numberFormat": "",
+            "template": "",
+            "pin": false,
+            "width": ""
+          }
+        ],
+        "rows": [
+          {
+            "id": "20240118203831-fkfvvtx",
+            "cells": [
+              {
+                "id": "20240118203911-xrg9obl",
+                "value": {
+                  "id": "20240118203911-xrg9obl",
+                  "keyID": "20240118120204-w6cggab",
+                  "blockID": "20240118203831-fkfvvtx",
+                  "type": "block",
+                  "createdAt": 1706843791000,
+                  "updatedAt": 1706843791000,
+                  "block": {
+                    "id": "20240118203831-fkfvvtx",
+                    "content": "3",
+                    "created": 1706843791000,
+                    "updated": 1706843791000
+                  }
+                },
+                "valueType": "block",
+                "color": "",
+                "bgColor": ""
+              }
+            ]
+          }
+        ],
+        "rowCount": 5
+      }
+    }
+  }
+  ```
+
+    * `data.view`: 渲染后的视图实例。结构随 `viewType` 而变——`table` 返回 `columns`/`rows`/`rowCount`，`gallery` 返回 `columns`/`rows`，`kanban` 返回 `columns`/`groups`（每个分组本身也是视图实例，含 `groupKey`/`groupValue`）。`view` 还包含 `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden`。注意：启用的过滤/分组可能使 `rows` 为空，即使 `rowCount` > 0
+    * `data.view.columns[]`: 每列含 `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`pin`/`width`；`select`/`mSelect` 列还额外包含 `options`
+    * `data.view.rows[].id`: **行 ID**（一个条目 ID）。对于绑定行，它等于绑定的块 ID；对于独立行，它是生成的条目 ID，与任何块都不同
+    * `data.view.rows[].cells[].value`: 一个 `Value` 对象——所有 value 形态见 [设置单元格值](#设置单元格值)。`createdAt`/`updatedAt` 为 int64 毫秒时间戳
+    * `data.views`: 所有视图的元数据（不含行数据）
+    * `data.isMirror`: 当数据库块为数据库的镜像（只读副本）时为 `true`
+
+### 获取
+
+* `/api/av/getAttributeView`
+* 参数
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77"
+  }
+  ```
+
+    * `id`: 数据库 ID
+* 返回值（真实响应，已裁剪——`keyValues`/`views` 数组做了截断）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "av": {
+        "spec": 4,
+        "id": "20240118120204-kwyzf77",
+        "name": "API 测试",
+        "keyValues": [
+          {
+            "key": {
+              "id": "20240118120204-w6cggab",
+              "name": "主键",
+              "type": "block",
+              "icon": "",
+              "desc": "",
+              "numberFormat": "",
+              "template": ""
+            },
+            "values": [
+              {
+                "id": "20240118203911-xrg9obl",
+                "keyID": "20240118120204-w6cggab",
+                "blockID": "20240118203831-fkfvvtx",
+                "type": "block",
+                "createdAt": 1706843791000,
+                "updatedAt": 1706843791000,
+                "block": {
+                  "id": "20240118203831-fkfvvtx",
+                  "content": "3",
+                  "created": 1706843791000,
+                  "updated": 1706843791000
+                }
+              }
+            ]
+          }
+        ],
+        "keyIDs": null,
+        "viewID": "20240118120204-7rnmyc1",
+        "views": [
+          {
+            "id": "20240118120204-7rnmyc1",
+            "icon": "",
+            "name": "表格",
+            "hideAttrViewName": false,
+            "desc": "",
+            "pageSize": 50,
+            "type": "table",
+            "table": {
+              "spec": 0,
+              "id": "20240118120204-grokgmm",
+              "showIcon": true,
+              "wrapField": false,
+              "columns": [
+                {
+                  "id": "20240118120204-w6cggab",
+                  "wrap": false,
+                  "hidden": false,
+                  "pin": false,
+                  "width": ""
+                }
+              ],
+              "rowIds": null
+            },
+            "itemIds": ["20240118203818-ct041hj", "20240118203855-sqzbja0", "20240118203831-fkfvvtx", "20240118203842-kc31ovy", "20240531235026-uiap07y"],
+            "groupCreated": 0,
+            "groupItemIds": null,
+            "groupFolded": false,
+            "groupHidden": 0,
+            "groupSort": 0
+          }
+        ]
+      }
+    }
+  }
+  ```
+
+    * `data.av`: 完整的 `AttributeView` 定义——字段（`keyValues`）、字段顺序（`keyIDs`，可能为 `null`）、当前视图（`viewID`）、以及所有视图的原始布局配置（`table`/`gallery`/`kanban`）和条目顺序（`itemIds`）。返回原始定义（不含渲染后的行或分页）；需要计算后的行数据请使用 [渲染](#渲染)
+
+### 获取主键值
+
+* `/api/av/getAttributeViewPrimaryKeyValues`
+* 参数
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "keyword": "",
+    "page": 1,
+    "pageSize": 16
+  }
+  ```
+
+    * `id`: 数据库 ID
+    * `keyword`: 可选的主键文本子串过滤（不区分大小写）
+    * `page`: 页码，从 1 开始。默认为 `1`
+    * `pageSize`: 每页条目数。`-1` 或省略表示 `16`。结果按 `block.updated` 倒序排序
+* 返回值（真实响应，展示一个值）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "API 测试",
+      "blockIDs": ["20240118120201-kldj15t"],
+      "rows": {
+        "key": {
+          "id": "20240118120204-w6cggab",
+          "name": "主键",
+          "type": "block",
+          "icon": "",
+          "desc": "",
+          "numberFormat": "",
+          "template": ""
+        },
+        "values": [
+          {
+            "id": "20240118203911-xrg9obl",
+            "keyID": "20240118120204-w6cggab",
+            "blockID": "20240118203831-fkfvvtx",
+            "type": "block",
+            "createdAt": 1706843791000,
+            "updatedAt": 1706843791000,
+            "block": {
+              "id": "20240118203831-fkfvvtx",
+              "content": "3",
+              "created": 1706843791000,
+              "updated": 1706843791000
+            }
+          }
+        ]
+      }
+    }
+  }
+  ```
+
+    * `data.rows`: 一个 `KeyValues` 对象，包含主键（`block`）字段及其分页后的值
+    * `data.blockIDs`: 引用该数据库的所有数据库块（镜像）ID
+
+### 搜索
+
+* `/api/av/searchAttributeView`
+* 参数
+
+  ```json
+  {
+    "keyword": "API",
+    "excludes": []
+  }
+  ```
+
+    * `keyword`: 搜索关键字（匹配数据库名称）
+    * `excludes`: 可选，需从结果中排除的数据库 ID 列表
+* 返回值（真实响应）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "results": [
+        {
+          "avID": "20240118120204-kwyzf77",
+          "avName": "API 测试",
+          "viewName": "",
+          "viewID": "",
+          "viewLayout": "",
+          "blockID": "20240118120201-kldj15t",
+          "hPath": "正在跟进的问题/数据库/API",
+          "children": [
+            {
+              "avID": "20240118120204-kwyzf77",
+              "avName": "API 测试",
+              "viewName": "表格",
+              "viewID": "20240118120204-7rnmyc1",
+              "viewLayout": "table",
+              "blockID": "20240118120201-kldj15t",
+              "hPath": "正在跟进的问题/数据库/API"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.results[]`: 每个顶层结果按 `avID` 聚合一个数据库；其 `children[]` 列出该数据库的各个视图（`viewName`/`viewID`/`viewLayout`）
+
+### 设置单元格值
+
+更新单个单元格（某一行的某个字段）。这是单元格值的主要写入接口。请求中的 `value` 是一个部分 `Value` 对象，其结构取决于字段的 `keyType`。常见 value 结构如下：
+
+| `keyType`  | `value` 结构                                                                                                         |
+|------------|----------------------------------------------------------------------------------------------------------------------|
+| `block`    | `{"block": {"content": "第一行", "id": "<绑定块ID>"}, "isDetached": false}`                                          |
+| `text`     | `{"text": {"content": "文本"}}`                                                                                      |
+| `number`   | `{"number": {"content": 42, "isNotEmpty": true}}`（清空用 `{"isNotEmpty": false}`）                                  |
+| `date`     | `{"date": {"content": 1676042451000, "isNotEmpty": true}}`（毫秒时间戳）                                             |
+| `select`   | `{"mSelect": [{"content": "已完成", "color": "1"}]}`（至多一个选项）                                                 |
+| `mSelect`  | `{"mSelect": [{"content": "A", "color": "1"}, {"content": "B", "color": "2"}]}`                                      |
+| `url`      | `{"url": {"content": "https://siyuan.com"}}`                                                                         |
+| `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
+| `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
+| `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
+
+> ⚠️ `itemID` 是**行 ID**（[渲染](#渲染) 返回的 `rows[].id`）。对于绑定行，行 ID 等于绑定的块 ID；对于独立行，它是生成的条目 ID。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
+
+* `/api/av/setAttributeViewBlockAttr`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240531232156-ahsyx8l",
+    "itemID": "20240118203831-fkfvvtx",
+    "value": {
+      "type": "number",
+      "number": {
+        "content": 42,
+        "isNotEmpty": true
+      }
+    }
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `keyID`: 字段 ID（被更新的列）
+    * `itemID`: **行 ID**（[渲染](#渲染) 返回的 `rows[].id`）。旧参数 `rowID` 已弃用，将于 2026-12-01 后删除，请改用 `itemID`
+    * `value`: 部分 `Value` 对象（见上表）。未知或不支持的键会被忽略
+* 返回值（真实响应，数字值）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "value": {
+        "id": "20240531235048-4zisj1p",
+        "keyID": "20240531232156-ahsyx8l",
+        "blockID": "20240118203831-fkfvvtx",
+        "type": "number",
+        "createdAt": 1717170648596,
+        "updatedAt": 1781610266432,
+        "number": {
+          "content": 42,
+          "isNotEmpty": true,
+          "format": "",
+          "formattedContent": "42"
+        }
+      }
+    }
+  }
+  ```
+
+    * `data.value`: 更新后规范化完成的值（含 `number.formattedContent` 等计算字段）。请使用该返回值刷新 UI，无需重新发送请求体
+
+### 添加条目
+
+添加一个或多个条目（行）。每个来源既可绑定已有块（`isDetached: false`），也可创建仅存在于视图内的独立行（`isDetached: true`）。
+
+* `/api/av/addAttributeViewBlocks`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "",
+    "groupID": "",
+    "previousID": "",
+    "srcs": [
+      {
+        "id": "20240118120201-kldj15t",
+        "isDetached": false,
+        "content": "新行"
+      }
+    ],
+    "ignoreDefaultFill": false
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `blockID`: 拥有该数据库的数据库块（用于解析目标视图/分组）
+    * `viewID`: 目标视图。省略时使用当前视图
+    * `groupID`: 看板视图的目标分组 ID。表格/卡片视图可省略
+    * `previousID`: 在此条目 ID 之后插入。为空表示追加到末尾
+    * `srcs[].id`: 绑定块时（`isDetached: false`）为要绑定的块 ID，需符合节点 ID 格式
+    * `srcs[].isDetached`: `true` 创建独立行；`false` 绑定已有块
+    * `srcs[].content`: 主键的显示文本（`isDetached: true` 时使用，或覆盖绑定块的内容）
+    * `srcs[].itemID`: 可选，显式指定条目 ID。省略时自动生成
+    * `ignoreDefaultFill`: 为 `true` 时，跳过向过滤/分组字段自动填充默认值
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+    * 该接口返回 `null`；成功后请调用 [渲染](#渲染) 获取更新后的行（含更新单元格所需的新行 ID）
+
+### 移除条目
+
+移除一个或多个条目（行）。独立行会被删除；绑定块会解绑（不会删除底层文档块）。
+
+* `/api/av/removeAttributeViewBlocks`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "srcIDs": ["20240118203831-fkfvvtx"]
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `srcIDs`: 要移除的行 ID（[渲染](#渲染) 返回的 `rows[].id`）列表
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### 切换布局
+
+在 `table`（表格）、`gallery`（卡片）和 `kanban`（看板）之间切换当前视图的布局类型。成功时服务端会重新渲染并返回视图（结构与 [渲染](#渲染) 相同）。
+
+* `/api/av/changeAttrViewLayout`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "layoutType": "kanban"
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `blockID`: 拥有该视图的数据库块
+    * `layoutType`: 目标布局——`table`、`gallery`、`kanban` 之一
+* 返回值：与 [渲染](#渲染) 返回结构相同。当切换到 `kanban` 且已配置分组时，`data.view` 携带 `groups[]` 数组；每个分组是视图实例，含 `groupKey`、`groupValue`，以及看板特有字段（`coverFrom`、`cardAspectRatio`、`cardSize`、`fitImage`、`displayFieldName`、`fillColBackgroundColor`、`fields`）
+
+### 设置分组
+
+为看板视图设置或清除分组规则。当 `group.field` 为空时移除分组。成功时服务端会重新渲染并返回视图。
+
+* `/api/av/setAttrViewGroup`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "group": {
+      "field": "20240118203822-io6ofxb",
+      "method": 0,
+      "order": 0,
+      "hideEmpty": false
+    }
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `blockID`: 拥有该视图的数据库块
+    * `group`: 分组规则
+    * `group.field`: 用于分组的字段（列）ID。为空字符串表示移除分组
+    * `group.method`: 分组方式——`0` 按值、`1` 按数字范围、`2` 按相对日期、`3` 按天、`4` 按周、`5` 按月、`6` 按年
+    * `group.range`: 可选。`method` 为 `1`（数字范围）时必填：`{ "numStart": 0, "numEnd": 100, "numStep": 10 }`
+    * `group.order`: 分组排序——`0` 升序、`1` 降序、`2` 手动、`3` 按选项顺序
+    * `group.hideEmpty`: 是否隐藏空分组
+* 返回值：与 [渲染](#渲染) 返回结构相同
+
+### 获取过滤与排序
+
+返回绑定到数据库块的视图当前的过滤和排序规则。
+
+* `/api/av/getAttributeViewFilterSort`
+* 参数
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t"
+  }
+  ```
+
+    * `id`: 数据库 ID
+    * `blockID`: 拥有该视图的数据库块
+* 返回值（真实响应，未配置过滤/排序）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "filters": [],
+      "sorts": []
+    }
+  }
+  ```
+
+  配置后（真实抓取的响应），过滤与排序形如：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "filters": [
+        {
+          "column": "20240118203822-io6ofxb",
+          "operator": "=",
+          "value": {
+            "type": "select",
+            "mSelect": [
+              { "content": "已完成", "color": "1" }
+            ]
+          }
+        }
+      ],
+      "sorts": [
+        {
+          "column": "20240118120204-w6cggab",
+          "order": "DESC"
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.filters`: `ViewFilter` 数组
+    * `data.filters[].column`: 过滤规则作用的字段（列）ID
+    * `data.filters[].operator`: 过滤操作符（见下方操作符表）
+    * `data.filters[].value`: 过滤值，一个 `Value` 对象（结构见 [设置单元格值](#设置单元格值)）
+    * `data.filters[].relativeDate`: 可选，日期过滤使用的相对时间描述（`{ "count": 7, "unit": 0, "direction": -1 }`；`unit`：`0` 天、`1` 周、`2` 月、`3` 年；`direction`：`-1` 前、`0` 当前、`1` 后）
+    * `data.sorts`: `ViewSort` 数组
+    * `data.sorts[].column`: 排序规则作用的字段（列）ID
+    * `data.sorts[].order`: `ASC` 或 `DESC`
+
+  过滤操作符：
+
+  | 取值                | 说明           |
+  |---------------------|----------------|
+  | `=`                 | 等于           |
+  | `!=`                | 不等于         |
+  | `>`                 | 大于           |
+  | `>=`                | 大于等于       |
+  | `<`                 | 小于           |
+  | `<=`                | 小于等于       |
+  | `Contains`          | 包含           |
+  | `Does not contains` | 不包含         |
+  | `Is empty`          | 为空           |
+  | `Is not empty`      | 不为空         |
+  | `Starts with`       | 以...开头      |
+  | `Ends with`         | 以...结尾      |
+  | `Is between`        | 介于之间       |
+  | `Is true`           | 为真（复选框） |
+  | `Is false`          | 为假（复选框） |
+
+### 设置过滤与排序
+
+过滤和排序通过事务接口 `/api/transactions`（注意是复数）持久化，因为修改它们属于可撤销的编辑事务。把每条规则变更包进一个 `doOperations` 条目，`action` 取 `setAttrViewFilters` 或 `setAttrViewSorts`，`data` 字段是完整的新数组（将整体替换视图现有规则）。
+
+* `/api/transactions`
+* 参数
+
+  ```json
+  {
+    "reqId": 1781610129661,
+    "app": "",
+    "session": "",
+    "transactions": [
+      {
+        "doOperations": [
+          {
+            "action": "setAttrViewFilters",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118203822-io6ofxb",
+                "operator": "=",
+                "value": {
+                  "type": "select",
+                  "mSelect": [
+                    { "content": "已完成", "color": "1" }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "action": "setAttrViewSorts",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118120204-w6cggab",
+                "order": "DESC"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+    * `reqId`: 必填。客户端生成的时间戳/随机数（数字），用于标记事务以支持撤销/重做
+    * `app` / `session`: 可选。用于限定产生的 WebSocket 推送，使其它客户端/会话能刷新
+    * `transactions[].doOperations[]`: 每个要替换的规则集对应一个操作
+    * `doOperations[].action`: `setAttrViewFilters` 替换过滤规则，`setAttrViewSorts` 替换排序规则
+    * `doOperations[].avID`: 数据库 ID
+    * `doOperations[].blockID`: 拥有该视图的数据库块
+    * `doOperations[].data`: 完整的 `ViewFilter` 或 `ViewSort` 新数组（结构见 [获取过滤与排序](#获取过滤与排序)）。传 `[]` 可清空
+* 返回值（真实响应，回显提交的操作，并附带服务端分配的 `timestamp`）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "timestamp": 1781610129661,
+        "doOperations": [
+          {
+            "action": "setAttrViewFilters",
+            "id": "",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118203822-io6ofxb",
+                "operator": "=",
+                "value": {
+                  "type": "select",
+                  "mSelect": [{ "content": "已完成", "color": "1" }]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+    * 调用成功后，可通过 [获取过滤与排序](#获取过滤与排序) 验证是否已持久化
+
+### 添加字段
+
+添加新字段（列）。该字段会被添加到每个视图（表格/卡片/看板）中 `previousKeyID` 之后的位置（为空时使用默认位置）。
+
+* `/api/av/addAttributeViewKey`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118120204-7k9wzbp",
+    "keyName": "状态",
+    "keyType": "select",
+    "keyIcon": "",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `keyID`: 新字段 ID。需为 `Lute.NewNodeID()` 生成的合法节点 ID（14 位时间戳 + `-` + 7 位随机字母数字，如 `20240118120204-abc1234`）
+    * `keyName`: 字段显示名
+    * `keyType`: 字段类型——`text`、`number`、`date`、`select`、`mSelect`、`url`、`email`、`phone`、`mAsset`、`template`、`created`、`updated`、`checkbox`、`relation`、`rollup`、`lineNumber` 之一。`block`（主键）不能通过该接口添加
+    * `keyIcon`: 可选字段图标（emoji 或空字符串）
+    * `previousKeyID`: 在此字段 ID 之后插入新列。为空字符串时使用布局默认位置（表格插入到首位，卡片/看板插入到末尾）
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### 移除字段
+
+移除字段（列）及其所有值。若 `keyID` 不存在，返回 `code: -1`、`msg: "key not found"`。
+
+* `/api/av/removeAttributeViewKey`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118120204-7k9wzbp",
+    "removeRelationDest": false
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `keyID`: 要移除的字段 ID
+    * `removeRelationDest`: 为 `true` 且字段为关联类型时，同时移除目标数据库中对应的反向关联字段。默认为 `false`
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### 设置全局字段排序
+
+全局重排字段（列）——将 `keyID` 移动到字段顺序中 `previousKeyID` 之后的位置，影响所有视图。
+
+* `/api/av/sortAttributeViewKey`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118203822-io6ofxb",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `keyID`: 要移动的字段 ID
+    * `previousKeyID`: `keyID` 应置于其后的字段 ID。为空字符串表示移动到首位
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### 设置视图内字段排序
+
+在单个视图的布局内重排列（例如表格的列顺序），不改变全局字段顺序。
+
+* `/api/av/sortAttributeViewViewKey`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "viewID": "20240118120204-7rnmyc1",
+    "keyID": "20240118203822-io6ofxb",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `viewID`: 目标视图。为空时使用当前视图
+    * `keyID`: 要移动的字段 ID
+    * `previousKeyID`: `keyID` 应置于其后的字段 ID。为空字符串表示移动到首位
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```

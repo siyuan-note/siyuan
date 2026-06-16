@@ -1,6 +1,6 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
-import {initNativeDialogOverride, setStorageVal} from "../protyle/util/compatibility";
+import {initNativeDialogOverride, isWindows, setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
 import * as fs from "fs";
@@ -412,6 +412,9 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
+    }
+    if (isWindows()) {
+        document.body.classList.add("body--win32-browser");
     }
     /// #endif
 };

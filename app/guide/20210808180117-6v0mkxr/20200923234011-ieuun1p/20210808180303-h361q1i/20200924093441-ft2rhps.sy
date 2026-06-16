@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260616221443"
+		"updated": "20260616224215"
 	},
 	"Children": [
 		{
@@ -2093,7 +2093,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091509-yzs0dlz",
-				"updated": "20260616221443"
+				"updated": "20260616224215"
 			},
 			"Children": [
 				{
@@ -2271,7 +2271,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260616221442-2iocv82",
-				"updated": "20260616221443"
+				"updated": "20260616224215"
 			},
 			"Children": [
 				{
@@ -2294,7 +2294,18 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, both equivalent. Using them enables syntax highlighting for SiYuan template syntax. When exporting, the code block is not exported as a code block, but converted to plain paragraph text instead."
+					"Data": "​, both equivalent. Using them enables syntax highlighting for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "SiYuan template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " syntax. When exporting, the code block is not exported as a code block, but converted to plain paragraph text instead."
 				}
 			]
 		},

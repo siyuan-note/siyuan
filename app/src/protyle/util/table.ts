@@ -510,7 +510,23 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             if (!previousElement || previousElement?.tagName === "COL") {
                 return false;
             }
-            range.selectNodeContents(previousElement.cells[getColIndex(cellElement)]);
+            const currentColIndex = getColIndex(cellElement);
+            let newCellElement = previousElement.cells[currentColIndex];
+            while (previousElement) {
+                let i = 0;
+                while (newCellElement && newCellElement.classList.contains("fn__none")) {
+                    i++;
+                    newCellElement = newCellElement.previousElementSibling as HTMLTableCellElement;
+                }
+                if (newCellElement.colSpan < 2 && i !== 0) {
+                    previousElement = previousElement.previousElementSibling as HTMLTableRowElement;
+                    newCellElement = previousElement.cells[currentColIndex];
+                } else if (newCellElement.colSpan > i) {
+                    break;
+                }
+            }
+
+            range.selectNodeContents(newCellElement);
             range.collapse(false);
             scrollCenter(protyle);
             event.preventDefault();

@@ -109,7 +109,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 
 ## 5. Project-specific rules
 
-1. **i18n:** New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`); sync `app/changelogs/` for user-visible changes
+1. **i18n:** New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`)
 2. **Domains:** `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
 3. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
 4. **Frontend verification:** Do not use `npx webpack` to verify changes

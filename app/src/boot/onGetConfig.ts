@@ -55,40 +55,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
-        // 为已有用户添加 agent chat 停靠按钮
-        // 用户可能把图标拖到 left/right/bottom 任一停靠栏，需遍历所有位置查重并清理多余项
-        const docks = ["left", "right", "bottom"] as const;
-        const dockData = (key: typeof docks[number]) => window.siyuan.config.uiLayout?.[key]?.data;
-        let hasAgentChat = false;
-        for (const key of docks) {
-            const sections = dockData(key);
-            if (!sections) continue;
-            let firstFound = false;
-            // 逆序遍历各分区，仅保留第一个 agentChat，删除多余的
-            for (const sub of sections) {
-                if (!sub) continue;
-                for (let i = sub.length - 1; i >= 0; i--) {
-                    if (sub[i] && sub[i].type === "agentChat") {
-                        if (!firstFound) {
-                            firstFound = true;
-                            hasAgentChat = true;
-                        } else {
-                            sub.splice(i, 1);
-                        }
-                    }
-                }
-            }
-        }
-        // 若所有停靠栏都没有 agentChat，则补一个到右侧停靠栏上半区
-        // agentChat 的定义统一来源于 SIYUAN_EMPTY_LAYOUT，避免硬编码与默认布局不一致
-        if (!hasAgentChat) {
-            const rightSections = dockData("right");
-            const emptyAgentChat = Constants.SIYUAN_EMPTY_LAYOUT.right.data[0]
-                ?.find((item: Config.IUILayoutDockTab) => item.type === "agentChat");
-            if (rightSections?.[0] && emptyAgentChat) {
-                rightSections[0].unshift({...emptyAgentChat});
-            }
-        }
         try {
             JSONToLayout(app, isStart);
             setTimeout(() => {

@@ -1444,6 +1444,176 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 	return
 }
 
+// DuplicateAttributeViewRow 创建源行的纯文本副本，复制除主键、Rollup、Created、Updated 外的所有字段值，
+// 双向关联同步更新目标属性视图的反向关联列。新行 ID 由调用方（前端）生成并通过 newRowID 传入，
+// 副本插入到 previousItemID（通常为最后选中的条目）之后。
+func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, newRowID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	blockKeyValues := attrView.GetBlockKeyValues()
+	if nil == blockKeyValues {
+		err = fmt.Errorf("attribute view [%s] has no block key", avID)
+		return
+	}
+
+	srcBlockVal := blockKeyValues.GetValue(srcRowID)
+	if nil == srcBlockVal {
+		err = fmt.Errorf("source row [%s] not found in attribute view [%s]", srcRowID, avID)
+		return
+	}
+
+	if "" == newRowID {
+		newRowID = ast.NewNodeID()
+	}
+
+	now := util.CurrentTimeMillis()
+
+	// 创建副本的主键值，强制为纯文本（非绑定块）
+	blockContent := ""
+	if nil != srcBlockVal.Block {
+		blockContent = srcBlockVal.Block.Content
+	}
+	newBlockVal := &av.Value{
+		ID:         ast.NewNodeID(),
+		KeyID:      blockKeyValues.Key.ID,
+		BlockID:    newRowID,
+		Type:       av.KeyTypeBlock,
+		IsDetached: true,
+		CreatedAt:  now,
+		UpdatedAt:  now,
+		Block:      &av.ValueBlock{Content: blockContent, Created: now, Updated: now},
+	}
+	blockKeyValues.Values = append(blockKeyValues.Values, newBlockVal)
+
+	// 收集双向关联字段，循环结束后统一处理，避免跨属性视图重复 parse/save
+	type pendingTwoWay struct {
+		key *av.Key
+		val *av.Value
+	}
+	var pendingTwoWays []*pendingTwoWay
+
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeBlock == keyValues.Key.Type {
+			continue // 主键已处理
+		}
+		if av.KeyTypeRollup == keyValues.Key.Type || av.KeyTypeCreated == keyValues.Key.Type || av.KeyTypeUpdated == keyValues.Key.Type {
+			continue // 汇总/创建时间/更新时间字段在渲染或自动生成时处理，不复制
+		}
+
+		srcVal := keyValues.GetValue(srcRowID)
+		if nil == srcVal {
+			continue // 源行该字段无值，跳过
+		}
+
+		newVal := srcVal.Clone()
+		if nil == newVal {
+			continue
+		}
+		newVal.ID = ast.NewNodeID()
+		newVal.BlockID = newRowID
+		newVal.IsDetached = false
+		newVal.CreatedAt = now
+		newVal.UpdatedAt = now
+		newVal.IsRenderAutoFill = false
+		if nil != newVal.Relation {
+			newVal.Relation.Contents = nil // 清除渲染期数据
+		}
+
+		// 单选/多选选项同步，保证目标属性视图存在对应选项 https://github.com/siyuan-note/siyuan/issues/12475
+		if av.KeyTypeSelect == newVal.Type || av.KeyTypeMSelect == newVal.Type {
+			if 0 < len(newVal.MSelect) {
+				for _, valOpt := range newVal.MSelect {
+					if opt := keyValues.Key.GetOption(valOpt.Content); nil == opt {
+						opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+						keyValues.Key.Options = append(keyValues.Key.Options, opt)
+					} else {
+						valOpt.Color = opt.Color
+					}
+				}
+			}
+		}
+
+		keyValues.Values = append(keyValues.Values, newVal)
+
+		// 双向关联值收集，稍后统一更新目标属性视图的反向列
+		if av.KeyTypeRelation == newVal.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay && 0 < len(newVal.Relation.BlockIDs) {
+			pendingTwoWays = append(pendingTwoWays, &pendingTwoWay{key: keyValues.Key, val: newVal})
+		}
+	}
+
+	// 在所有视图上添加新行，插入位置为 previousItemID 之后
+	for _, v := range attrView.Views {
+		addRowToViewItems(v, newRowID, previousItemID)
+	}
+
+	// 统一处理双向关联：按目标属性视图聚合，每个目标只 parse/save 一次
+	twoWayByDestAv := map[string][]*pendingTwoWay{}
+	for _, p := range pendingTwoWays {
+		destAvID := p.key.Relation.AvID
+		twoWayByDestAv[destAvID] = append(twoWayByDestAv[destAvID], p)
+	}
+	for destAvID, items := range twoWayByDestAv {
+		if destAvID == attrView.ID {
+			// 自关联，直接在内存对象上更新，随主属性视图一起保存
+			for _, p := range items {
+				updateTwoWayRelationDestAttrView(attrView, p.key, p.val, 1, nil)
+			}
+			continue
+		}
+
+		destAv, parseErr := av.ParseAttributeView(destAvID)
+		if nil != parseErr || nil == destAv {
+			logging.LogWarnf("parse dest attribute view [%s] failed: %s", destAvID, parseErr)
+			continue
+		}
+		for _, p := range items {
+			// 复用反向更新逻辑，传入 mode=1（增加）、oldBlockIDs 为空
+			updateTwoWayRelationDestAttrView(destAv, p.key, p.val, 1, nil)
+		}
+		regenAttrViewGroups(destAv)
+		if saveErr := av.SaveAttributeView(destAv); nil != saveErr {
+			logging.LogErrorf("save dest attribute view [%s] failed: %s", destAvID, saveErr)
+		}
+		if nil != tx {
+			tx.relatedAvIDs = append(tx.relatedAvIDs, destAvID)
+		}
+		ReloadAttrView(destAvID)
+	}
+
+	regenAttrViewGroups(attrView)
+	if err = av.SaveAttributeView(attrView); err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	return
+}
+
+// addRowToViewItems 将 newRowID 插入到视图及其所有分组的项目列表中，位置在 previousItemID 之后；
+// 若 previousItemID 为空或未找到，则追加到末尾。
+func addRowToViewItems(view *av.View, newRowID, previousItemID string) {
+	view.ItemIDs = insertItemAfter(view.ItemIDs, newRowID, previousItemID)
+	for _, g := range view.Groups {
+		g.GroupItemIDs = insertItemAfter(g.GroupItemIDs, newRowID, previousItemID)
+	}
+}
+
+// insertItemAfter 将 item 插入到 items 中 previousItemID 之后；若 previousItemID 为空或未找到，则追加到末尾。
+func insertItemAfter(items []string, item, previousItemID string) []string {
+	if "" != previousItemID {
+		for i, id := range items {
+			if id == previousItemID {
+				items = append(items[:i+1], append([]string{item}, items[i+1:]...)...)
+				return items
+			}
+		}
+	}
+	return append(items, item)
+}
+
 func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error) {
 	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
 	oldAvPath := filepath.Join(storageAvDir, avID+".json")
@@ -2836,6 +3006,20 @@ func getMirrorBlocksNodes(avID string) (trees []*parse.Tree, nodes []*ast.Node) 
 
 	for _, tree := range mirrorBlockTrees {
 		trees = append(trees, tree)
+	}
+	return
+}
+
+func (tx *Transaction) doDuplicateAttrViewRow(operation *Operation) (ret *TxErr) {
+	srcRowID := ""
+	if 0 < len(operation.SrcIDs) {
+		srcRowID = operation.SrcIDs[0]
+	}
+	if "" == srcRowID {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: "source row id is empty"}
+	}
+	if err := DuplicateAttributeViewRow(tx, operation.AvID, operation.PreviousID, srcRowID, operation.ID); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }

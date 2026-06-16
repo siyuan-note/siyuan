@@ -753,3 +753,45 @@ export const insertRows = (options: {
     }
     options.blockElement.setAttribute("updated", newUpdated);
 };
+
+export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowElements: HTMLElement[]) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const newRowIDs: string[] = [];
+    // 副本统一插入到最后选中的条目之后，按源序排列
+    const anchorID = rowElements[rowElements.length - 1].getAttribute("data-id");
+    let previousID = anchorID;
+    rowElements.forEach(rowElement => {
+        const newRowID = Lute.NewNodeID();
+        newRowIDs.push(newRowID);
+        const srcRowID = rowElement.getAttribute("data-id");
+        doOperations.push({
+            action: "duplicateAttrViewRow",
+            avID,
+            id: newRowID,
+            srcIDs: [srcRowID],
+            previousID,
+        });
+        // 后续副本接在前一个副本之后，保证源序
+        previousID = newRowID;
+    });
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+    doOperations.push({
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: newUpdated,
+    });
+    undoOperations.push({
+        action: "removeAttrViewBlock",
+        srcIDs: newRowIDs,
+        avID,
+    });
+    undoOperations.push({
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: blockElement.getAttribute("updated")
+    });
+    transaction(protyle, doOperations, undoOperations);
+    blockElement.setAttribute("updated", newUpdated);
+};

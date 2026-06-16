@@ -150,6 +150,8 @@ func agentChat(c *gin.Context) {
 		select {
 		case event, ok := <-eventCh:
 			if !ok {
+				// 流正常结束（done 已写入 SSE）。通知镜像端解除占位锁定；
+				// 实际内容重绘由发起者前端随后的 saveSession 广播（update）驱动，确保读到落盘后的完整数据。
 				broadcastAgentSessionChanged(app, req.SessionID, "streamEnd")
 				sessionsMu.Lock()
 				delete(runningSessions, req.SessionID)
@@ -157,7 +159,7 @@ func agentChat(c *gin.Context) {
 				return
 			}
 			if err := writeSSE(c, event); err != nil {
-				// 客户端断开导致写失败，同样通知镜像端流结束，避免占位条悬挂。
+				// 客户端断开导致写失败，同样通知镜像端解除锁定，避免占位条悬挂。
 				broadcastAgentSessionChanged(app, req.SessionID, "streamEnd")
 				return
 			}

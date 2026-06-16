@@ -598,6 +598,15 @@ export class AgentChat extends Model {
     // - streamEnd：其他实例流式结束，本实例从磁盘拉取整条会话重绘（唯一重绘触发点）。
     // - update：会话列表元数据刷新，不重绘当前视图（回避流式中途半截 saveSession 数据的时序问题）。
     // - delete：当前会话被删除则清空视图。
+    // 处理 ws 推送的跨实例会话变更通知。核心时序控制：
+    // - streamStart：其他实例开始流式。立即从磁盘拉取一次（发起者发消息时已把 user 消息落盘），
+    //   让本轮用户新消息尽快可见，然后进入占位锁定显示"AI 回复生成中"。
+    // - update：发起者 saveSession 落盘后广播（含流式结束写完整 AI 回复的那次）。每次都重绘，
+    //   保证镜像端始终显示发起者已落盘的最新内容。流式中途的 saveSession 只写已完成的历史
+    //   （正在生成的回复在 finishResponse 才入 entries），不会读到半截数据。
+    // - streamEnd：后端 eventCh 关闭（流结束）。此时发起者前端可能尚未 saveSession 落盘，
+    //   故只解除占位锁定、不重绘；完整内容由随后的 update 广播驱动重绘。
+    // - delete：当前会话被删除则清空视图。
     private onWsMessage(data: IWebSocketData) {
         if (!data || data.cmd !== "agentSessionChanged") {
             return;
@@ -618,15 +627,18 @@ export class AgentChat extends Model {
         }
         switch (payload.action) {
             case "streamStart":
+                // 标记处于其他实例流式中，reloadFromDisk 重绘后会据此保留占位条。
                 this.mirrorLocked = true;
-                this.showMirrorPlaceholder();
-                break;
-            case "streamEnd":
-                this.mirrorLocked = false;
+                // 立即拉取一次：发起者发消息时已 saveSession 写入 user 消息，让本轮新消息尽快可见。
                 void this.reloadFromDisk();
                 break;
+            case "streamEnd":
+                // 流结束，解除占位锁定并移除占位条。不重绘——完整内容由随后的 update 广播驱动。
+                this.mirrorLocked = false;
+                this.removeMirrorPlaceholder();
+                break;
             case "update":
-                // 仅元数据变更（如标题），会话列表已刷新。不重绘当前视图以避免读到流式中途的半截数据。
+                void this.reloadFromDisk();
                 break;
             case "delete":
                 this.mirrorLocked = false;
@@ -664,7 +676,6 @@ export class AgentChat extends Model {
     private async reloadFromDisk() {
         const targetSessionId = this.sessionId;
         const session = await SessionStore.load(targetSessionId);
-        this.removeMirrorPlaceholder();
         // await 期间用户可能已切换会话，丢弃过期结果。
         if (targetSessionId !== this.sessionId) {
             return;
@@ -689,6 +700,12 @@ export class AgentChat extends Model {
             this.scrollToBottom(true);
         } else {
             this.messagesContainer.scrollTop = savedScroll;
+        }
+        // 重绘会清空 DOM（含占位条）；若仍处于其他实例的流式中，重新显示占位条。
+        if (this.mirrorLocked) {
+            this.showMirrorPlaceholder();
+        } else {
+            this.removeMirrorPlaceholder();
         }
     }
 

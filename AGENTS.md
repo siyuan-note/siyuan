@@ -114,4 +114,10 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 2. **Domains:** `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
 3. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
 4. **Frontend verification:** Do not use `npx webpack` to verify changes
-5. **Comments:** Wrap code comments at 120 characters
+
+---
+
+## 6. Coding conventions
+
+1. **Comments:** Wrap code comments at 120 characters
+2. **Comments:** Describe what the code does, not what it replaced — don't reference the old implementation in comments

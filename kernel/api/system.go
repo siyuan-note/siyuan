@@ -17,6 +17,8 @@
 package api
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -713,6 +715,64 @@ func bootProgress(c *gin.Context) {
 
 	progress, details := util.GetBootProgressDetails()
 	ret.Data = map[string]any{"progress": progress, "details": details}
+}
+
+// bootProgressSSE 以 Server-Sent Events 推送启动进度，仅在进度发生变化时写一帧。
+func bootProgressSSE(c *gin.Context) {
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Writer.Flush()
+
+	flusher, ok := c.Writer.(http.Flusher)
+	if !ok {
+		return
+	}
+
+	// 连接后立即推送当前进度，避免等待第一个 tick
+	progress, details := util.GetBootProgressDetails()
+	lastProgress, lastDetails := progress, details
+	if err := writeBootProgressSSE(c, flusher, progress, details); err != nil {
+		return
+	}
+	if 100 <= progress {
+		return
+	}
+
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+	ctx := c.Request.Context()
+	for {
+		select {
+		case <-ctx.Done():
+			// 客户端断开连接
+			return
+		case <-ticker.C:
+			progress, details = util.GetBootProgressDetails()
+			if progress == lastProgress && details == lastDetails {
+				continue
+			}
+			lastProgress, lastDetails = progress, details
+			if err := writeBootProgressSSE(c, flusher, progress, details); err != nil {
+				return
+			}
+			if 100 <= progress {
+				return
+			}
+		}
+	}
+}
+
+func writeBootProgressSSE(c *gin.Context, flusher http.Flusher, progress int32, details string) error {
+	data, err := json.Marshal(map[string]any{"progress": progress, "details": details})
+	if err != nil {
+		return err
+	}
+	if _, err = fmt.Fprintf(c.Writer, "data: %s\n\n", data); err != nil {
+		return err
+	}
+	flusher.Flush()
+	return nil
 }
 
 func setAppearanceMode(c *gin.Context) {

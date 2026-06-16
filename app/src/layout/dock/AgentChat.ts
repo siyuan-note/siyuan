@@ -1562,7 +1562,6 @@ export class AgentChat extends Model {
             }
         this.currentAIElement = null;
         this.currentAssistantEntryId = "";
-        this.currentThinkingEntryId = "";
         this.currentContent = "";
         } else if (reasoning === "processing" && this.currentContent) {
             this.attachStepContent(this.currentContent);
@@ -1981,7 +1980,7 @@ export class AgentChat extends Model {
         this.renderedToolNames = {};
         this.clearThinking();
         const el = document.createElement("div");
-        el.className = "agent-chat__msg agent-chat__msg--thinking";
+        el.className = "agent-chat__msg agent-chat__msg--retry";
         el.innerHTML = renderRetryCardHTML(attempt, maxRetries);
         this.insertBeforeAI(el);
         this.scrollToBottom(true);

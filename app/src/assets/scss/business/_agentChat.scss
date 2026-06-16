@@ -658,6 +658,10 @@ pre:hover .agent-chat__copy-wrap {
     align-items: stretch;
 }
 
+.agent-chat__msg--retry {
+    align-items: stretch;
+}
+
 .agent-chat__thinking-card {
     border: none;
     border-radius: var(--b3-border-radius);

@@ -1,11 +1,5 @@
 import {updateTransaction} from "../wysiwyg/transaction";
-import {
-    getSelectionOffset,
-    focusByWbr,
-    focusByRange,
-    focusBlock,
-    getSelectionPosition,
-} from "./selection";
+import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, getSelectionPosition,} from "./selection";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";
@@ -868,4 +862,181 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
     inputElement.value = captionElement?.textContent || "";
     inputElement.focus();
     inputElement.select();
+};
+
+// getTableRangeHTML 根据起始单元格到结束单元格的矩形区域，重建一个合法的 <table> HTML。
+// 用于表格内跨多单元格的文本选区复制/剪切：原 range.cloneContents()/extractContents() 会产出残缺片段。
+// 算法：建立原表格的二维网格映射，确定选区的网格范围，枚举其中的物理单元格，
+// 并根据每个单元格在新表格（选区）中的实际跨度重新计算 colspan/rowspan，避免维度错位。
+export const getTableRangeHTML = (tableElement: HTMLElement, startCell: HTMLElement, endCell: HTMLElement) => {
+    // 1. 建立二维网格映射，记录每个物理单元格的网格坐标、跨度及其所属行（用于保留 thead/tbody 划分）
+    // grid[r][c] = cell（每个单元格占据 rowspan×colspan 个网格位置）
+    type CellInfo = { cell: HTMLTableCellElement; row: number; col: number; rowspan: number; colspan: number; tr: HTMLTableRowElement };
+    const cellInfos: CellInfo[] = [];
+    // sectionOfRow[r] = 该网格行对应的原始 section（"thead" | "tbody"），用于输出时划分 thead/tbody
+    const sectionOfRow: string[] = [];
+    const grid: (HTMLTableCellElement | null)[][] = [];
+    const getCS = (cell: HTMLTableCellElement, attr: string) => {
+        const v = cell.getAttribute(attr);
+        if (!v) {
+            return 1;
+        }
+        const n = parseInt(v, 10);
+        return isNaN(n) || n < 1 ? 1 : n;
+    };
+    const ensureRow = (r: number) => {
+        while (grid.length <= r) {
+            grid.push([]);
+            sectionOfRow.push("");
+        }
+    };
+    const trElements = Array.from(tableElement.querySelectorAll("tr"));
+    trElements.forEach((tr, rowIdx) => {
+        ensureRow(rowIdx);
+        // 判定该 tr 所属的 section
+        const section = (tr.parentElement && (tr.parentElement.tagName === "THEAD")) ? "thead" : "tbody";
+        sectionOfRow[rowIdx] = section;
+        let colIdx = 0;
+        tr.querySelectorAll("th, td").forEach((cell: HTMLTableCellElement) => {
+            if (cell.classList.contains("fn__none")) {
+                return; // 跳过合并单元格的占位
+            }
+            const rowspan = getCS(cell, "rowspan");
+            const colspan = getCS(cell, "colspan");
+            // 找到当前行第一个空闲列
+            while (grid[rowIdx][colIdx]) {
+                colIdx++;
+            }
+            cellInfos.push({cell, row: rowIdx, col: colIdx, rowspan, colspan, tr: tr as HTMLTableRowElement});
+            // 占据网格
+            for (let dr = 0; dr < rowspan; dr++) {
+                ensureRow(rowIdx + dr);
+                for (let dc = 0; dc < colspan; dc++) {
+                    grid[rowIdx + dr][colIdx + dc] = cell;
+                }
+            }
+            colIdx += colspan;
+        });
+    });
+
+    // 2. 确定 startCell/endCell 的网格坐标
+    const startInfo = cellInfos.find(info => info.cell === startCell);
+    const endInfo = cellInfos.find(info => info.cell === endCell);
+    if (!startInfo || !endInfo) {
+        return "";
+    }
+
+    // 3. 计算选区网格范围（包含 startCell/endCell 各自的合并跨度）
+    const selRowStart = Math.min(startInfo.row, endInfo.row);
+    const selRowEnd = Math.max(startInfo.row + startInfo.rowspan - 1, endInfo.row + endInfo.rowspan - 1);
+    const selColStart = Math.min(startInfo.col, endInfo.col);
+    const selColEnd = Math.max(startInfo.col + startInfo.colspan - 1, endInfo.col + endInfo.colspan - 1);
+
+    // 4. 枚举与选区有交集的单元格，计算在新表格中的行号、列号和跨度
+    type OutCell = { newCell: HTMLTableCellElement; newRow: number; newCol: number; newRowspan: number; newColspan: number };
+    const outCells: OutCell[] = [];
+    cellInfos.forEach(info => {
+        // 判断该单元格的网格范围是否与选区有交集
+        const interRowStart = Math.max(info.row, selRowStart);
+        const interRowEnd = Math.min(info.row + info.rowspan - 1, selRowEnd);
+        const interColStart = Math.max(info.col, selColStart);
+        const interColEnd = Math.min(info.col + info.colspan - 1, selColEnd);
+        if (interRowStart > interRowEnd || interColStart > interColEnd) {
+            return; // 无交集
+        }
+        // 重新计算在新表格中的跨度（= 交集部分的跨度）
+        const newRow = interRowStart - selRowStart;
+        const newCol = interColStart - selColStart;
+        const newRowspan = interRowEnd - interRowStart + 1;
+        const newColspan = interColEnd - interColStart + 1;
+        const newCell = info.cell.cloneNode(true) as HTMLTableCellElement;
+        // 移除占位 class（避免被误认为 fn__none）
+        newCell.classList.remove("fn__none");
+        if (newRowspan > 1) {
+            newCell.setAttribute("rowspan", String(newRowspan));
+        } else {
+            newCell.removeAttribute("rowspan");
+        }
+        if (newColspan > 1) {
+            newCell.setAttribute("colspan", String(newColspan));
+        } else {
+            newCell.removeAttribute("colspan");
+        }
+        outCells.push({newCell, newRow, newCol, newRowspan, newColspan});
+    });
+
+    // 5. 按新行列号输出。需建立输出网格以正确处理 rowspan 占位：
+    // 当某单元格 newRowspan > 1 跨多行时，后续行对应列要插入 class="fn__none" 占位单元格
+    //（与思源内部合并单元格规范一致），否则行列对应关系会错乱。
+    // 占位单元格的 th/td 类型、所属 section（thead/tbody）均跟随原表格对应位置，保留表头划分。
+    if (outCells.length === 0) {
+        return "";
+    }
+    const maxOutRow = outCells.reduce((m, oc) => Math.max(m, oc.newRow + oc.newRowspan - 1), 0);
+    const maxOutCol = outCells.reduce((m, oc) => Math.max(m, oc.newCol + oc.newColspan - 1), 0);
+    // coveredTag[r][c] = 原表格中该网格位置对应的占位单元格标签名（"th" 或 "td"）
+    const coveredTag: string[][] = [];
+    const outGrid: (OutCell | null)[][] = [];
+    for (let r = 0; r <= maxOutRow; r++) {
+        outGrid.push(new Array(maxOutCol + 1).fill(null));
+        coveredTag.push(new Array(maxOutCol + 1).fill(""));
+    }
+    // 按 newRow, newCol 排序后填充，确保起始格先于其占位被处理
+    outCells.sort((a, b) => a.newRow - b.newRow || a.newCol - b.newCol);
+    outCells.forEach(oc => {
+        outGrid[oc.newRow][oc.newCol] = oc;
+        // 标记被 rowspan/colspan 覆盖的位置，并记录原始占位的标签名
+        for (let dr = 0; dr < oc.newRowspan; dr++) {
+            for (let dc = 0; dc < oc.newColspan; dc++) {
+                if (dr === 0 && dc === 0) {
+                    continue; // 起始格本身
+                }
+                const rr = oc.newRow + dr;
+                const cc = oc.newCol + dc;
+                if (rr <= maxOutRow && cc <= maxOutCol) {
+                    // 查原表格该位置的占位单元格类型
+                    const origRow = selRowStart + rr;
+                    const origCol = selColStart + cc;
+                    const origCell = (origRow < grid.length && origCol < grid[origRow].length) ? grid[origRow][origCol] : null;
+                    coveredTag[rr][cc] = origCell ? origCell.tagName.toLowerCase() : "td";
+                }
+            }
+        }
+    });
+    // 计算每个输出行所属的原始 section
+    const outSection = (outRow: number) => {
+        const origRow = selRowStart + outRow;
+        return (origRow < sectionOfRow.length && sectionOfRow[origRow]) ? sectionOfRow[origRow] : "tbody";
+    };
+    let html = "<table>";
+    let curSection = "";
+    for (let r = 0; r <= maxOutRow; r++) {
+        const section = outSection(r);
+        if (section !== curSection) {
+            if (curSection) {
+                html += `</${curSection}>`;
+            }
+            html += `<${section}>`;
+            curSection = section;
+        }
+        html += "<tr>";
+        for (let c = 0; c <= maxOutCol; c++) {
+            const slot = outGrid[r][c];
+            if (slot) {
+                html += slot.newCell.outerHTML;
+            } else if (coveredTag[r][c]) {
+                // 被 rowspan/colspan 覆盖的占位，保留原始 th/td 标签
+                html += `<${coveredTag[r][c]} class="fn__none"></${coveredTag[r][c]}>`;
+            } else {
+                // 选区内空洞（理论上不应发生），补空 td
+                html += "<td></td>";
+            }
+        }
+        html += "</tr>";
+    }
+    if (curSection) {
+        html += `</${curSection}>`;
+    }
+    html += "</table>";
+    return html;
 };

@@ -790,7 +790,7 @@ export class AgentChat extends Model {
                         this.renderMergedThinkingCard(normSteps, entryId, dur);
                     }
                     break;
-                case "assistant":
+                case "assistant": {
                     const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; promptTokens?: number; completionTokens?: number; duration?: number; timestamp?: number };
                     if (a.toolCalls && a.toolCalls.length > 0) {
                         this.appendPersistedToolCalls(a.content, a.toolCalls, a.promptTokens, a.completionTokens, a.duration, a.timestamp, entryId);
@@ -798,6 +798,7 @@ export class AgentChat extends Model {
                         this.appendPersistedAssistant(a.content, a.promptTokens, a.completionTokens, a.duration, a.timestamp, entryId);
                     }
                     break;
+                }
                 case "confirm":
                     this.appendPersistedConfirm(entry as unknown as {
                         id?: string;

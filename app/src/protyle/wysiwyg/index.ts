@@ -69,7 +69,7 @@ import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} 
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
-import {clearTableCell, isIncludeCell, setTableAlign, updateTableTitle} from "../util/table";
+import {clearTableCell, getTableRangeHTML, isIncludeCell, setTableAlign, updateTableTitle} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
@@ -277,6 +277,24 @@ export class WYSIWYG {
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
+            // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
+            let selectTableRange = false;
+            let tableRangeElement: HTMLElement = null;
+            let tableRangeStartCell: HTMLElement = null;
+            let tableRangeEndCell: HTMLElement = null;
+            if (!selectTableElement) {
+                const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+                const endCell = hasClosestByTag(range.endContainer, "TD") || hasClosestByTag(range.endContainer, "TH");
+                if (startCell && endCell && startCell !== endCell) {
+                    const startTable = (startCell as HTMLElement).closest("table");
+                    if (startTable && startTable === (endCell as HTMLElement).closest("table")) {
+                        selectTableRange = true;
+                        tableRangeElement = (startCell as HTMLElement).closest('[data-type="NodeTable"]') as HTMLElement;
+                        tableRangeStartCell = startCell as HTMLElement;
+                        tableRangeEndCell = endCell as HTMLElement;
+                    }
+                }
+            }
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
@@ -385,28 +403,34 @@ export class WYSIWYG {
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
                 const scrollTop = nodeElement.querySelector("table").scrollTop;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
-                html = "<table>";
-                nodeElement.querySelectorAll("tr").forEach(rowElement => {
-                    const rowCells: HTMLTableCellElement[] = [];
-                    rowElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                        if (!item.classList.contains("fn__none") && isIncludeCell({
-                            tableSelectElement,
-                            scrollLeft,
-                            scrollTop,
-                            item,
-                        })) {
-                            rowCells.push(item);
+                const tableElement = nodeElement.querySelector("table");
+                // 通过框选几何范围确定 startCell/endCell，复用 getTableRangeHTML 的网格映射逻辑
+                //（它会正确保留 thead/tbody、补齐 fn__none 占位、重新计算 colspan/rowspan）
+                let startCell: HTMLElement = null;
+                let endCell: HTMLElement = null;
+                const allCells = Array.from(tableElement.querySelectorAll("th, td")) as HTMLElement[];
+                allCells.forEach(item => {
+                    if (item.classList.contains("fn__none")) {
+                        return;
+                    }
+                    if (isIncludeCell({tableSelectElement, scrollLeft, scrollTop, item})) {
+                        if (!startCell) {
+                            startCell = item;
                         }
-                    });
-                    if (rowCells.length > 0) {
-                        html += "<tr>";
-                        rowCells.forEach(cell => {
-                            html += cell.outerHTML;
-                        });
-                        html += "</tr>";
+                        endCell = item;
                     }
                 });
-                html += "</table>";
+                if (startCell && endCell) {
+                    html = getTableRangeHTML(tableElement, startCell, endCell);
+                } else {
+                    html = "<table></table>";
+                }
+                textPlain = protyle.lute.HTML2Md(html);
+            } else if (selectTableRange) {
+                // 表格内跨多单元格的文本选区：按网格映射重建合法 table，重新计算 colspan/rowspan。
+                // 后续统一构建 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头）
+                const tableElement = tableRangeElement.querySelector("table");
+                html = getTableRangeHTML(tableElement, tableRangeStartCell, tableRangeEndCell);
                 textPlain = protyle.lute.HTML2Md(html);
             } else {
                 const tempElement = document.createElement("div");
@@ -504,11 +528,22 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
-                const textSiyuan = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+                // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
+                //（GFM 表格只有单行表头，markdown 往返会丢失多行 thead 和单元格 th 属性）
+                let textSiyuan: string;
+                if (selectTableElement || selectTableRange) {
+                    // 表格选区：html 已是合法 <table>...</table>（含 thead/tbody/fn__none 占位），
+                    // 构建最小化 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头，往返会丢失多行 thead）
+                    const newId = Lute.NewNodeID();
+                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    html = textSiyuan;
+                } else {
+                    textSiyuan = html;
+                }
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ(selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ((selectTableElement || selectTableRange) ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {
                     try {
@@ -1857,6 +1892,24 @@ export class WYSIWYG {
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
             const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
+            // 表格内跨多单元格的文本选区：range.cloneContents() 会产出残缺的 td/tr 片段，需要重建合法 table
+            let selectTableRange = false;
+            let tableRangeElement: HTMLElement = null;
+            let tableRangeStartCell: HTMLElement = null;
+            let tableRangeEndCell: HTMLElement = null;
+            if (!selectTableElement) {
+                const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+                const endCell = hasClosestByTag(range.endContainer, "TD") || hasClosestByTag(range.endContainer, "TH");
+                if (startCell && endCell && startCell !== endCell) {
+                    const startTable = (startCell as HTMLElement).closest("table");
+                    if (startTable && startTable === (endCell as HTMLElement).closest("table")) {
+                        selectTableRange = true;
+                        tableRangeElement = (startCell as HTMLElement).closest('[data-type="NodeTable"]') as HTMLElement;
+                        tableRangeStartCell = startCell as HTMLElement;
+                        tableRangeEndCell = endCell as HTMLElement;
+                    }
+                }
+            }
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             const cloneElement = range.cloneContents();
             if (selectElements.length === 0 && range.toString() === "" && !cloneElement.querySelector("img") &&
@@ -1933,7 +1986,7 @@ export class WYSIWYG {
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
                 const scrollTop = nodeElement.querySelector("table").scrollTop;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
-                html = "<table>";
+                const tableElement = nodeElement.querySelector("table");
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                     if (!item.classList.contains("fn__none") && isIncludeCell({
                         tableSelectElement,
@@ -1954,19 +2007,15 @@ export class WYSIWYG {
                 const oldHTML = nodeElement.outerHTML;
                 nodeElement.querySelector("wbr")?.remove();
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                selectCellElements.forEach((item, index) => {
-                    if (index === 0 || !item.previousElementSibling ||
-                        item.previousElementSibling !== selectCellElements[index - 1]) {
-                        html += "<tr>";
-                    }
-                    html += item.outerHTML;
-                    if (!item.nextElementSibling || !selectCellElements[index + 1] ||
-                        item.nextElementSibling !== selectCellElements[index + 1]) {
-                        html += "</tr>";
-                    }
+                // 用 getTableRangeHTML 重建合法表格（与 copy 一致），同时清空选区内单元格内容
+                if (selectCellElements.length > 0) {
+                    html = getTableRangeHTML(tableElement, selectCellElements[0], selectCellElements[selectCellElements.length - 1]);
+                } else {
+                    html = "<table></table>";
+                }
+                selectCellElements.forEach((item) => {
                     item.innerHTML = "";
                 });
-                html += "</table>";
                 textPlain = protyle.lute.HTML2Md(html);
                 updateTransaction(protyle, nodeElement, oldHTML);
             } else {
@@ -2018,8 +2067,25 @@ export class WYSIWYG {
                     range.deleteContents();
                     tempElement.append(newSpanElement);
                 } else {
-                    if (cloneElement.querySelectorAll("td, th").length > 0) {
-                        // 表格内多格子 cut https://github.com/siyuan-note/insider/issues/564
+                    if (selectTableRange) {
+                        // 表格内跨多单元格的文本选区：按网格映射重建合法 table，重新计算 colspan/rowspan。
+                        // 必须在 extractContents 删除原内容前计算，否则 getBoundingClientRect 拿不到原始位置
+                        const tableElement = tableRangeElement.querySelector("table");
+                        const newTableHTML = getTableRangeHTML(tableElement, tableRangeStartCell, tableRangeEndCell);
+                        // 放入 tempElement 以便后续 html = tempElement.innerHTML 取用（裸 table，后续统一包 BlockDOM）
+                        tempElement.innerHTML = newTableHTML;
+                        textPlain = protyle.lute.HTML2Md(newTableHTML);
+                        // 删除选区内容并修复表格 DOM
+                        const wbrElement = document.createElement("wbr");
+                        range.insertNode(wbrElement);
+                        range.setStartAfter(wbrElement);
+                        range.extractContents();
+                        nodeElement.outerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+                        nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
+                        mathRender(nodeElement);
+                        focusByWbr(nodeElement, range);
+                    } else if (cloneElement.querySelectorAll("td, th").length > 0) {
+                        // 表格内多格子 cut https://github.com/siyuan-note/siyuan/issues/564
                         const wbrElement = document.createElement("wbr");
                         range.insertNode(wbrElement);
                         range.setStartAfter(wbrElement);
@@ -2110,11 +2176,20 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
-                const textSiyuan = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+                // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
+                let textSiyuan: string;
+                if (selectTableElement || selectTableRange) {
+                    // 表格选区：html 已是合法 <table>...</table>，构建最小化 NodeTable BlockDOM，不走 markdown 往返
+                    const newId = Lute.NewNodeID();
+                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    html = textSiyuan;
+                } else {
+                    textSiyuan = html;
+                }
                 restoreLuteMarkdownSyntax(protyle);
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ(selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ((selectTableElement || selectTableRange) ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {
                     try {

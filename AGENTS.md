@@ -13,11 +13,6 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 | Go | see `go` directive | `kernel/go.mod` |
 | Node (+ pnpm) | see CI matrix | `.github/workflows/cd.yml`, `app/package.json` (`packageManager` field) |
 
-Two build-time requirements that aren't separate installs (see §5 #1–2): the Go
-build needs a C compiler with `CGO_ENABLED=1` (sqlite3 is cgo), and every
-`go build` / `go test` must pass `-tags fts5`. Re-read the sources above before
-pinning a version in commands or docs.
-
 ---
 
 ## 2. Related repositories (navigation)
@@ -72,16 +67,11 @@ Top level (repo root):
 |---|---|
 | `kernel/` | Go backend — server, data engine, API, all domain logic |
 | `app/` | TypeScript frontend (Electron/web), built by webpack into `app/stage/build/` |
-| `app/electron/` | Electron main process |
-| `app/pandoc/` | Bundled pandoc binary (document conversion) |
 | `app/appearance/` | Themes, icons, **i18n** (`appearance/langs/*.json`) |
 | `app/stage/` | Build output served by the kernel |
 | `app/changelogs/` | Per-version changelog markdown |
 | `.github/` | `CONTRIBUTING.md` (+zh-CN), `SECURITY.md`, `CODE_OF_CONDUCT.md`, `PULL_REQUEST_TEMPLATE.md`, issue templates, `workflows/` |
 | `scripts/` | Release packaging: `win-build.bat`, `darwin-build.sh`, `linux-build.sh`, `parse-changelog.py`, `check-lang-keys.py` |
-| `README*.md` | README in EN / zh-CN / ja / tr |
-| `API*.md` | HTTP API reference in EN / zh-CN / ja |
-| `CHANGELOG.md`, `Dockerfile`, `LICENSE` | — |
 
 ### Major `kernel/` packages (under `kernel/`)
 
@@ -141,6 +131,5 @@ and standalone exported HTML files — so rich content renders outside the edito
 
 1. **i18n:** New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`); sync `app/changelogs/` for user-visible changes
 2. **Domains:** `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
-3. **Line endings:** LF for `.go`, `.ts`, `.json`, `.scss` (`.gitattributes`)
-4. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
-5. **Frontend verification:** Do not use `npx webpack` to verify changes
+3. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
+4. **Frontend verification:** Do not use `npx webpack` to verify changes

@@ -1,6 +1,6 @@
 **English**
-| [中文](API_zh-CN.md)
-| [日本語](API_ja.md)
+| [中文](API.zh-CN.md)
+| [日本語](API.ja.md)
 
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)

@@ -27,8 +27,8 @@
 <p align="center">
 <a href="README.md">English</a>
 | <b>中文</b>
-| <a href="README_ja.md">日本�?/a>
-| <a href="README_tr.md">Türkçe</a>
+| <a href="README.ja.md">日本�?/a>
+| <a href="README.tr.md">Türkçe</a>
 </p>
 
 ---
@@ -113,7 +113,7 @@
 - JavaScript/CSS 代码片段
 - Android/iOS/鸿蒙 App
 - Docker 部署
-- [API](API_zh-CN.md)
+- [API](API.zh-CN.md)
 - 社区集市
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)�?
@@ -518,7 +518,7 @@ ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 
 ## 🛠�?开发指�?
 
-见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh-CN.md)�?
+见：[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.zh-CN.md)�?
 
 ## �?常见问题和解�?
 
@@ -557,7 +557,7 @@ ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 - [鸿蒙端](https://github.com/siyuan-note/siyuan-harmony)
 - [Chrome 剪藏扩展](https://github.com/siyuan-note/siyuan-chrome)
 
-更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh-CN.md)�?
+更多细节请参考[开发指南](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.zh-CN.md)�?
 
 ### 如何升级到新版本�?
 

@@ -26,8 +26,8 @@
 
 <p align="center">
 <a href="README.md">English</a>
-| <a href="README_zh-CN.md">中文</a>
-| <a href="README_ja.md">日本�?/a>
+| <a href="README.zh-CN.md">中文</a>
+| <a href="README.ja.md">日本�?/a>
 | <b>Türkçe</b>
 </p>
 

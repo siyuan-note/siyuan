@@ -531,7 +531,7 @@ export class AgentChat extends Model {
             }
         });
         this.scrollBottomBtn.addEventListener("click", () => {
-            this.scrollToBottom(true);
+            this.scrollToBottom(true, true);
         });
     }
 
@@ -1575,13 +1575,20 @@ export class AgentChat extends Model {
 
         if (reasoning === "processing" && this.hasInterveningCard) {
             const L = window.siyuan.languages;
+            // 与 finishActiveThinking 对齐：先把本张思考卡片的耗时算出来，
+            // 既用于 DOM 显示「已思考 Xs」，也用于落盘 entry.duration（重载后仍能显示正确耗时）。
+            const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
+            this.currentThinkingDuration = durSec;
+            const doneText = durSec > 0
+                ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(durSec) + "s") : (L.agentThinking || "Thinking"))
+                : (L.agentThinking || "Thinking");
             const oldCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)");
             for (let i = 0; i < oldCards.length; i++) {
                 const card = oldCards[i] as HTMLElement;
                 card.classList.add("agent-chat__msg--thinking-done");
                 const txtEl = card.querySelector(".agent-chat__thinking-text");
                 if (txtEl) {
-                    txtEl.textContent = L.agentThinking || "Thinking";
+                    txtEl.textContent = doneText;
                 }
             }
             if (this.currentThinkingStepContent && this.currentThinkingSteps.length > 0) {
@@ -1592,6 +1599,8 @@ export class AgentChat extends Model {
                 this.entries.push({id: this.currentThinkingEntryId || undefined, type: "thinking", steps: this.currentThinkingSteps.slice(), duration: this.currentThinkingDuration || undefined});
                 this.currentThinkingSteps = [];
                 this.currentThinkingEntryId = "";
+                // 已落盘的卡片耗时归零，避免下一张思考卡片读到上一张的残留值。
+                this.currentThinkingDuration = 0;
             }
             // 卡片边界：一张思考卡片已落盘，重置工具名去重表，使下一张卡片独立显示本轮工具
             // （与重载路径 renderMergedThinkingCard 的单卡片局部去重 seenTools 对齐）。
@@ -2527,7 +2536,7 @@ export class AgentChat extends Model {
         }
     }
 
-    private scrollToBottom(force = false) {
+    private scrollToBottom(force = false, smooth = false) {
         if (!force && this.userScrolledUp) { return; }
         // Guard with a flag so the resulting scroll event can be told apart from
         // a user-driven scroll. Without this, the programmatic stick-to-bottom
@@ -2536,12 +2545,34 @@ export class AgentChat extends Model {
         // immediately breaks follow-scroll.
         this.programmaticScroll = true;
         requestAnimationFrame(() => {
-            this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-            // Reset the flag only after the scroll event caused by this write has
-            // been dispatched (a second RAF runs after layout/event delivery).
-            requestAnimationFrame(() => {
-                this.programmaticScroll = false;
-            });
+            if (smooth) {
+                // Smooth scrolling fires scroll events asynchronously throughout the
+                // animation, so keep the guard raised until scrolling settles: on
+                // scrollend, on a 1s timeout fallback, or immediately if the user
+                // wheels/touches during the animation (counts as a user scroll).
+                const finish = () => {
+                    this.messagesContainer.removeEventListener("scrollend", finish);
+                    this.messagesContainer.removeEventListener("wheel", onWheel);
+                    clearTimeout(timer);
+                    this.programmaticScroll = false;
+                };
+                const onWheel = () => {
+                    this.messagesContainer.removeEventListener("scrollend", finish);
+                    clearTimeout(timer);
+                    this.programmaticScroll = false;
+                };
+                const timer = window.setTimeout(finish, 1000);
+                this.messagesContainer.addEventListener("scrollend", finish, {once: true});
+                this.messagesContainer.addEventListener("wheel", onWheel, {once: true, passive: true});
+                this.messagesContainer.scrollTo({top: this.messagesContainer.scrollHeight, behavior: "smooth"});
+            } else {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+                // Reset the flag only after the scroll event caused by this write has
+                // been dispatched (a second RAF runs after layout/event delivery).
+                requestAnimationFrame(() => {
+                    this.programmaticScroll = false;
+                });
+            }
         });
     }
 

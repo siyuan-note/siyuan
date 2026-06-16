@@ -1138,8 +1138,6 @@ export class WYSIWYG {
 
             let mouseElement: Element;
             let moveCellElement: HTMLElement;
-            let startFirstElement: Element;
-            let endLastElement: Element;
             this.element.querySelectorAll("iframe").forEach(item => {
                 item.style.pointerEvents = "none";
             });
@@ -1236,9 +1234,19 @@ export class WYSIWYG {
                         });
                     }
                 }
+                if (!nodeElement) {
+                    const breadElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
+                    if (breadElement) {
+                        nodeElement = breadElement.nextElementSibling as HTMLElement;
+                    }
+                }
+                if (!nodeElement) {
+                    return;
+                }
                 protyle.selectElement.classList.remove("fn__none");
                 // 向左选择，遇到 gutter 就不会弹出 toolbar
                 hideElements(["gutter"], protyle);
+                const selectStartY = nodeElement.getBoundingClientRect().top;
                 let newTop = 0;
                 let newLeft = 0;
                 let newWidth = 0;
@@ -1299,12 +1307,10 @@ export class WYSIWYG {
                 }
                 hideElements(["select"], protyle);
                 let firstElement;
-                if (moveEvent.clientY > y) {
-                    firstElement = startFirstElement || document.elementFromPoint(newLeft, newTop);
-                    endLastElement = undefined;
+                if (moveEvent.clientY > selectStartY) {
+                    firstElement = nodeElement;
                 } else {
                     firstElement = document.elementFromPoint(newLeft, newTop);
-                    startFirstElement = undefined;
                 }
                 if (!firstElement) {
                     return;
@@ -1321,18 +1327,7 @@ export class WYSIWYG {
                 if (!firstBlockElement && firstElement.classList.contains("protyle-breadcrumb__bar")) {
                     firstBlockElement = firstElement.nextElementSibling as HTMLElement;
                 }
-                if (moveEvent.clientY > y) {
-                    if (!startFirstElement) {
-                        // 向上选择导致滚动条滚动到顶部再向下选择至 > y 时，firstBlockElement 为 undefined https://ld246.com/article/1705233964097
-                        if (!firstBlockElement) {
-                            firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
-                            if (firstBlockElement.classList.contains("protyle-breadcrumb__bar")) {
-                                firstBlockElement = firstBlockElement.nextElementSibling as HTMLElement;
-                            }
-                        }
-                        startFirstElement = firstBlockElement;
-                    }
-                } else if (!firstBlockElement &&
+                if (moveEvent.clientY <= selectStartY && !firstBlockElement &&
                     // https://github.com/siyuan-note/siyuan/issues/7580
                     moveEvent.clientY < protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
                     firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
@@ -1352,7 +1347,8 @@ export class WYSIWYG {
                 }
 
                 let hasJump = false;
-                const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight);
+                // 向上划选时，A 始终是最后一个块，故以 A 的实时底边作为遍历终点，避免滚动后选不中 https://github.com/siyuan-note/siyuan/issues/14664
+                const selectBottom = moveEvent.clientY <= selectStartY ? nodeElement.getBoundingClientRect().bottom : (newTop + newHeight);
                 while (currentElement) {
                     if (currentElement && !currentElement.classList.contains("protyle-attr")) {
                         const currentRect = currentElement.getBoundingClientRect();
@@ -1401,9 +1397,6 @@ export class WYSIWYG {
                         hasJump = true;
                     }
                 }
-                if (moveEvent.clientY <= y && !endLastElement) {
-                    endLastElement = selectElements[selectElements.length - 1];
-                }
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
                     !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
                     !selectElements[0].classList.contains("sb")) {
@@ -1427,8 +1420,6 @@ export class WYSIWYG {
                 documentSelf.ondragstart = null;
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
-                startFirstElement = undefined;
-                endLastElement = undefined;
                 // 多选表格单元格后，选择菜单中的居左，然后 shift+左 选中的文字无法显示选中背景，因此需移除
                 // 多选块后 shift+左 选中的文字无法显示选中背景，因此需移除
                 protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");

@@ -570,7 +570,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 writeText(text);
             }
         }, {
-            id: "duplicateRow",
+            id: "duplicate",
             iconHTML: "",
             label: window.siyuan.languages.duplicate,
             click: () => {

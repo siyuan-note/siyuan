@@ -51,6 +51,7 @@ const (
 var (
 	RunInContainer             = false // 是否运行在容器中
 	SiYuanAccessAuthCodeBypass = false // 是否跳过空锁屏密码检查
+	AttachUI                   = false // 是否绑定桌面 UI 进程生命周期（Electron 拉起时为 true，手动 serve 为 false）
 )
 
 func initEnvVars() {
@@ -119,6 +120,7 @@ func Boot() {
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
+	attachUI := flag.Bool("attach-ui", false, "attach kernel lifecycle to desktop UI process (used by Electron)")
 	lang := flag.String("lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/th/tr/uk/zh-CN/zh-TW")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
@@ -136,6 +138,7 @@ func Boot() {
 	Mode = *mode
 	ServerPort = *port
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
+	AttachUI = *attachUI
 	AccessAuthCode = *accessAuthCode
 	AccessAuthCode = RemoveInvalid(AccessAuthCode)
 	AccessAuthCode = strings.TrimSpace(AccessAuthCode)

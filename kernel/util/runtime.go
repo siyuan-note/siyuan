@@ -117,8 +117,10 @@ func logBootInfo() {
 
 		if ghw.DriveTypeSSD.String() != driveType {
 			logging.LogWarnf("workspace dir [%s] is not in SSD drive, performance may be affected", WorkspaceDir)
-			WaitForUILoaded()
-			time.Sleep(3 * time.Second)
+			if AttachUI {
+				WaitForUILoaded()
+				time.Sleep(3 * time.Second)
+			}
 			PushErrMsg(Langs[Lang][278], 15000)
 		}
 	}()

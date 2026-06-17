@@ -25,7 +25,7 @@ import (
 
 var RefTool = &Tool{
 	Name:        "ref",
-	Description: "Reference and backlink operations for SiYuan.\n- backlinks: Get backlinks for a block/document. Requires: id. Optional: keyword, sort.\n- mentions: Get mentions of a block/document. Requires: id. Optional: keyword, sort.\n- refresh: Refresh backlink index for a block/document. Requires: id.",
+	Description: "Reference/backlink operations. Actions: backlinks(id, keyword?, sort?), mentions(id, keyword?, sort?), refresh(id).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

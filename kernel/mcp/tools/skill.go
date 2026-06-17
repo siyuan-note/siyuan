@@ -25,13 +25,16 @@ import (
 
 var SkillTool = &Tool{
 	Name:        "skill",
-	Description: "Load a specialized skill. Available skills are listed below.\n\n" + skillListDesc() + "\n\nThe skill tool loads the full instructions and resources for a skill when invoked. The skill name must match one of the listed skills.",
+	Description: "Skill operations: load(name), save(name, content), remove(name), rename(name, new_name), list().\n\n" + skillListDesc(),
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"name": {Type: "string", Description: "The name of the skill to load"},
+			"action":   {Type: "string", Description: "Operation", Enum: []string{"load", "save", "remove", "rename", "list"}},
+			"name":     {Type: "string", Description: "Skill name (directory name)"},
+			"content":  {Type: "string", Description: "SKILL.md full content with YAML frontmatter (for save)"},
+			"new_name": {Type: "string", Description: "New skill name (for rename)"},
 		},
-		Required: []string{"name"},
+		Required: []string{"action"},
 	},
 	Handler: skillHandler,
 }
@@ -41,6 +44,26 @@ func init() {
 }
 
 func skillHandler(args map[string]interface{}) (CallToolResult, error) {
+	action, _ := args["action"].(string)
+	switch action {
+	case "load", "":
+		return skillLoad(args)
+	case "save":
+		return skillSave(args)
+	case "remove":
+		return skillRemove(args)
+	case "rename":
+		return skillRename(args)
+	case "list":
+		return skillList(args)
+	}
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [load, save, remove, rename, list]"}},
+		IsError: true,
+	}, nil
+}
+
+func skillLoad(args map[string]interface{}) (CallToolResult, error) {
 	name, _ := args["name"].(string)
 	if name == "" {
 		return CallToolResult{
@@ -60,6 +83,101 @@ func skillHandler(args map[string]interface{}) (CallToolResult, error) {
 	result := "<skill_content name=\"" + name + "\">\n\n" + content + "\n\n</skill_content>"
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: result}},
+	}, nil
+}
+
+func skillSave(args map[string]interface{}) (CallToolResult, error) {
+	name, _ := args["name"].(string)
+	if name == "" {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "skill name is required"}},
+			IsError: true,
+		}, nil
+	}
+	content, _ := args["content"].(string)
+	if content == "" {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "skill content is required"}},
+			IsError: true,
+		}, nil
+	}
+
+	if err := util.SaveSkill(name, content); err != nil {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: err.Error()}},
+			IsError: true,
+		}, nil
+	}
+
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: "skill saved: " + name}},
+	}, nil
+}
+
+func skillRemove(args map[string]interface{}) (CallToolResult, error) {
+	name, _ := args["name"].(string)
+	if name == "" {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "skill name is required"}},
+			IsError: true,
+		}, nil
+	}
+
+	if err := util.RemoveSkill(name); err != nil {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: err.Error()}},
+			IsError: true,
+		}, nil
+	}
+
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: "skill removed: " + name}},
+	}, nil
+}
+
+func skillRename(args map[string]interface{}) (CallToolResult, error) {
+	name, _ := args["name"].(string)
+	if name == "" {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "skill name is required"}},
+			IsError: true,
+		}, nil
+	}
+	newName, _ := args["new_name"].(string)
+	if newName == "" {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "new skill name is required"}},
+			IsError: true,
+		}, nil
+	}
+
+	if err := util.RenameSkill(name, newName); err != nil {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: err.Error()}},
+			IsError: true,
+		}, nil
+	}
+
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: "skill renamed: " + name + " -> " + newName}},
+	}, nil
+}
+
+func skillList(args map[string]interface{}) (CallToolResult, error) {
+	skills := util.DiscoverSkills()
+	if len(skills) == 0 {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "no skills available"}},
+		}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString("available skills:\n")
+	for _, s := range skills {
+		sb.WriteString("- **" + s.Name + "**: " + s.Description + "\n")
+	}
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: sb.String()}},
 	}, nil
 }
 

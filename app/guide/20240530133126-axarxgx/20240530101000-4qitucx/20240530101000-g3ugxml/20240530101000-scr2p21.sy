@@ -7,95 +7,237 @@
 		"id": "20240530101000-scr2p21",
 		"title": "デイリーノート",
 		"type": "doc",
-		"updated": "20241008202730"
+		"updated": "20260614205030"
 	},
 	"Children": [
 		{
-			"ID": "20240530101000-bzkce2v",
-			"Type": "NodeParagraph",
+			"ID": "20260613180757-9fax3mg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20240530101000-bzkce2v",
-				"updated": "20241008202730"
+				"id": "20260613180757-9fax3mg",
+				"updated": "20260613180757"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "デイリーノートを通じて素早く文書を作成できる、デイリーノート機能への入り口は上部のメインメニュにあります。"
+					"Data": "概要"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-efq2rys",
+			"ID": "20260613180757-3duthz8",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20240530101000-efq2rys",
-				"updated": "20241008202721"
+				"id": "20260613180757-3duthz8",
+				"updated": "20260613180757"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "デイリーノート機能を使用する前にノートブックを右クリックするか、名前の横の "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "︙"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ メニューから "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ を選択してデイリーノートの構成を行う必要があります:"
+					"Data": "日記は日付ごとにドキュメントを素早く作成・特定する方法です。日々の生活記録、作業ログ、日次ToDoなどに活用できます。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-111m8e8",
+			"ID": "20260613180757-m1xjudy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613180757-m1xjudy",
+				"updated": "20260613180757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "作成と表示"
+				}
+			]
+		},
+		{
+			"ID": "20260613180757-woy35en",
 			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
+			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-voi46yb",
-				"id": "20240530101000-111m8e8",
-				"updated": "20240530101000"
+				"id": "20260613180757-woy35en",
+				"updated": "20260613180757"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-vc0r6k5",
+					"ID": "20260613180757-78fcrm7",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-1728f2g",
-						"id": "20240530101000-vc0r6k5",
-						"updated": "20240530101000"
+						"id": "20260613180757-78fcrm7",
+						"updated": "20260613180757"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-kvqlmu5",
+							"ID": "20260613180757-c15blfn",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-8eho9tm",
-								"id": "20240530101000-kvqlmu5",
-								"updated": "20240530101000"
+								"id": "20260613180757-c15blfn",
+								"updated": "20260613180757"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "入り口"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：上部メインメニューの「日記」ボタンをクリック、またはショートカット "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Alt+5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（macOSでは "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "⌃5"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613180757-fk9m8xs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613180757-fk9m8xs",
+						"updated": "20260613180757"
+					},
+					"Children": [
+						{
+							"ID": "20260613180757-9xrw4jd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613180757-9xrw4jd",
+								"updated": "20260613180757"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "ショートカットの動作"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：ショートカットで日記を開く際、前回選択したノートブックが使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613180757-5v7czcr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613180757-5v7czcr",
+						"updated": "20260613180757"
+					},
+					"Children": [
+						{
+							"ID": "20260613180757-iu677jw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613180757-iu677jw",
+								"updated": "20260613180757"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "初回表示"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：当日の日記を開く際、該当日付のドキュメントがまだ存在しない場合は、設定された保存パスとテンプレートに基づいて生成されます。既に存在する場合はそのまま開きます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613180757-yov9hyx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260613180757-yov9hyx",
+				"updated": "20260614205030"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定"
+				}
+			]
+		},
+		{
+			"ID": "20260613180757-8kulpid",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613180757-8kulpid",
+				"updated": "20260613180757"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノートブックを右クリックして「設定」を開き、日記の新規作成設定で以下を構成します："
+				}
+			]
+		},
+		{
+			"ID": "20260613180757-remoxwo",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613180757-remoxwo",
+				"updated": "20260614205030"
+			},
+			"Children": [
+				{
+					"ID": "20260613180757-pay58c2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613180757-pay58c2",
+						"updated": "20260614205030"
+					},
+					"Children": [
+						{
+							"ID": "20260613180757-9mdalx4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613180757-9mdalx4",
+								"updated": "20260613180822"
 							},
 							"Children": [
 								{
@@ -105,7 +247,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": ノートブック配下のパスで"
+									"Data": "：ノートブック内での日記ドキュメントの保存パスを設定します。"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -116,46 +258,201 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "をサポートしています"
+									"Data": "に対応。"
+								}
+							]
+						},
+						{
+							"ID": "20260613180757-fd3y2ud",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613180757-fd3y2ud",
+								"updated": "20260614205030"
+							},
+							"Children": [
+								{
+									"ID": "20260613180757-rf1bcgm",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613180757-rf1bcgm",
+										"updated": "20260614205030"
+									},
+									"Children": [
+										{
+											"ID": "20260613180757-t0qa9w7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613180757-t0qa9w7",
+												"updated": "20260613180757"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "よく使う例："
+												}
+											]
+										},
+										{
+											"ID": "20260613180757-axvbmyh",
+											"Type": "NodeList",
+											"ListData": {},
+											"Properties": {
+												"id": "20260613180757-axvbmyh",
+												"updated": "20260614205030"
+											},
+											"Children": [
+												{
+													"ID": "20260613180757-scbibzs",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20260613180757-scbibzs",
+														"updated": "20260614205030"
+													},
+													"Children": [
+														{
+															"ID": "20260613180757-w6l4cv0",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260613180757-w6l4cv0",
+																"updated": "20260614205030"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "​"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "/日記/{{now | date \"2006/01/2006-01-02\"}}"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ — 年/月ごとにグループ化、1日1ファイル"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20260613180757-2b5fqm0",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20260613180757-2b5fqm0",
+														"updated": "20260613180757"
+													},
+													"Children": [
+														{
+															"ID": "20260613180757-jn8y57y",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260613180757-jn8y57y",
+																"updated": "20260613180757"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "​"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "/日記/{{now | date \"2006-01-02\"}}"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ — すべての日記を1フォルダに"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20260613180757-v2zvkcf",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20260613180757-v2zvkcf",
+														"updated": "20260613180757"
+													},
+													"Children": [
+														{
+															"ID": "20260613180757-8opit6u",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20260613180757-8opit6u",
+																"updated": "20260613180757"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "​"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "/{{now | date \"2006/01/02\"}}"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ — ルート直下に日付ごとにグループ化"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-angh67v",
+					"ID": "20260613180757-gj5qq5r",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-8treyg9",
-						"id": "20240530101000-angh67v",
-						"updated": "20240530101000"
+						"id": "20260613180757-gj5qq5r",
+						"updated": "20260613180757"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-2kvpd3c",
+							"ID": "20260613180757-oo56ugn",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-dncfakg",
-								"id": "20240530101000-2kvpd3c",
-								"updated": "20240530101000"
+								"id": "20260613180757-oo56ugn",
+								"updated": "20260613180757"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "strong",
-									"TextMarkTextContent": "テンプレートパス (オプション)"
+									"TextMarkTextContent": "テンプレートパス"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": 指定するとデイリーノートを作成する際の初期コンテンツとして使用されます"
+									"Data": "（任意）：既存のドキュメントを日記テンプレートとして選択します。新しい日記が作成される際、テンプレートの内容が初期コンテンツとして使用されます。日次ToDo構成や日報テンプレートなどによく使われます。"
 								}
 							]
 						}
@@ -164,37 +461,114 @@
 			]
 		},
 		{
-			"ID": "20240530101000-5xrl4u3",
-			"Type": "NodeParagraph",
+			"ID": "20260613180757-im9quzu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-ez01ww6",
-				"id": "20240530101000-5xrl4u3",
-				"updated": "20240530101000"
+				"id": "20260613180757-im9quzu",
+				"updated": "20260613180757"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ヒント: テンプレートで"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20240530101000-1vvnhju",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "埋め込みコンテンツブロック"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "を使用すると、To-Do リストや毎日確認が必要なコンテンツブロックをまとめることができます。"
+					"Data": "ヒント"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-u3n65qy",
+			"ID": "20260613180757-3etyima",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613180757-3etyima",
+				"updated": "20260613181306"
+			},
+			"Children": [
+				{
+					"ID": "20260613180757-my13b82",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613180757-my13b82",
+						"updated": "20260613181306"
+					},
+					"Children": [
+						{
+							"ID": "20260613180757-n55d7po",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613180757-n55d7po",
+								"updated": "20260613181306"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "ToDoの埋め込み集約"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：日記テンプレートで"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-1vvnhju",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "埋め込みコンテンツブロック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を使用すると、ToDo項目や毎日確認したいコンテンツブロックを集約できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613180757-d1sryca",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613180757-d1sryca",
+						"updated": "20260613180757"
+					},
+					"Children": [
+						{
+							"ID": "20260613180757-n71exsn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613180757-n71exsn",
+								"updated": "20260613180757"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "ノートブックごとの設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：各ノートブックで日記の保存パスとテンプレートを独立して設定でき、互いに影響しません"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613180757-0drnkk3",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-bed7bvz",
-				"id": "20240530101000-u3n65qy"
+				"id": "20260613180757-0drnkk3",
+				"updated": "20260613180757"
 			}
 		}
 	]

@@ -1,7 +1,7 @@
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
-import {getAllModels} from "../layout/getAll";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
 import {setTabPosition} from "../layout/tabUtil";
 /// #endif
@@ -10,7 +10,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
-import {getAllEditor} from "../layout/getAll";
+import {unregisterAction} from "../layout/dock/frontendActions";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -52,6 +52,8 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
                 plugin.topBarIcons.splice(i, 1);
                 i--;
             }
+            // rm agent actions
+            plugin.agentActions.forEach(name => unregisterAction(name));
             /// #if !MOBILE
             // rm statusBar
             plugin.statusBarIcons.forEach(item => {

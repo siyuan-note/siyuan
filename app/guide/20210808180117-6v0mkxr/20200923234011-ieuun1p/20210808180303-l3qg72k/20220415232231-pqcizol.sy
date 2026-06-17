@@ -6,7 +6,7 @@
 		"id": "20220415232231-pqcizol",
 		"title": "Query syntax",
 		"type": "doc",
-		"updated": "20250115150346"
+		"updated": "20260613193430"
 	},
 	"Children": [
 		{
@@ -958,7 +958,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415233433-mnuypxn",
-				"updated": "20220415234726"
+				"updated": "20260613193430"
 			},
 			"Children": [
 				{
@@ -1124,179 +1124,12 @@
 			]
 		},
 		{
-			"ID": "20220415233433-g35tpdb",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220415233433-g35tpdb",
-				"updated": "20220415233433"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Case Sensitive"
-				}
-			]
-		},
-		{
-			"ID": "20220415233433-sux85ge",
+			"ID": "20260613193430-9q9g9da",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220415233433-sux85ge",
-				"updated": "20220415233433"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If the "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Settings"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Search"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Case Sensitivity"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " option is enabled, the search will be case-sensitive. By default, this option is disabled, that is, insensitive upper and lower case."
-				}
-			]
-		},
-		{
-			"ID": "20220415233433-i4kcfj4",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415233433-i4kcfj4",
-				"updated": "20220415233433"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Since the tokenizer is case-sensitive, we build two virtual tables to index separately:"
-				}
-			]
-		},
-		{
-			"ID": "20220415233433-f30zc20",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220415233433-f30zc20",
-				"updated": "20220415233433"
-			},
-			"Children": [
-				{
-					"ID": "20220415233433-t271q5k",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220415233433-t271q5k",
-						"updated": "20220415233433"
-					},
-					"Children": [
-						{
-							"ID": "20220415233433-90wb0ni",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220415233433-90wb0ni",
-								"updated": "20220415233433"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ": word segmentation by character"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220415233433-1tgbpan",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220415233433-1tgbpan",
-						"updated": "20220415233433"
-					},
-					"Children": [
-						{
-							"ID": "20220415233433-dctynln",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220415233433-dctynln",
-								"updated": "20220415233433"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts_case_insensitive"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ": Convert English letters to lowercase participles"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220415233433-tcac279",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415233433-tcac279",
-				"updated": "20230802221616"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "The disadvantage of this is that it increases disk space usage and reduces indexing performance, but there is currently no better solution, so it can only be done first. In addition, diacritics are not supported, only supported case insensitive."
-				}
-			]
-		},
-		{
-			"ID": "20220415233433-hexjxcl",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415233433-hexjxcl",
-				"updated": "20220415233433"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If you have a better implementation, please let us know, thank you very much."
-				}
-			]
+				"id": "20260613193430-9q9g9da",
+				"updated": "20260613193430"
+			}
 		}
 	]
 }

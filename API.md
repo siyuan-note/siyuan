@@ -1,6 +1,6 @@
 **English**
-| [中文](API_zh_CN.md)
-| [日本語](API_ja_JP.md)
+| [中文](API.zh-CN.md)
+| [日本語](API.ja.md)
 
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
@@ -40,6 +40,22 @@
 * [Attributes](#Attributes)
     * [Set block attributes](#Set-block-attributes)
     * [Get block attributes](#Get-block-attributes)
+* [Database](#Database)
+    * [Render](#Render)
+    * [Get](#Get)
+    * [Get primary key values](#Get-primary-key-values)
+    * [Search](#Search)
+    * [Set a cell value](#Set-a-cell-value)
+    * [Add items](#Add-items)
+    * [Remove items](#Remove-items)
+    * [Change layout](#Change-layout)
+    * [Set grouping](#Set-grouping)
+    * [Get filter and sort](#Get-filter-and-sort)
+    * [Set filter and sort](#Set-filter-and-sort)
+    * [Add a field](#Add-a-field)
+    * [Remove a field](#Remove-a-field)
+    * [Set global field sort](#Set-global-field-sort)
+    * [Set per-view field sort](#Set-per-view-field-sort)
 * [SQL](#SQL)
     * [Execute SQL query](#Execute-SQL-query)
     * [Flush transaction](#Flush-transaction)
@@ -1583,3 +1599,840 @@ Note: To ensure data security, access to this interface is prohibited in Publish
   ```
 
     * `data`: Precision in milliseconds
+
+## Database
+
+A database (internally an "attribute view") stores structured data as fields (columns) and items (rows). Each database is identified by an `avID` and can be embedded into a document through one or more database blocks (`blockID`). A single database may contain multiple views (`viewID`) of different layout types: `table`, `gallery`, and `kanban`.
+
+The field types (`keyType`) are:
+
+| Value        | Description                |
+|--------------|----------------------------|
+| `block`      | Primary key (bound block)  |
+| `text`       | Text                       |
+| `number`     | Number                     |
+| `date`       | Date                       |
+| `select`     | Single select              |
+| `mSelect`    | Multi-select               |
+| `url`        | URL                        |
+| `email`      | Email                      |
+| `phone`      | Phone                      |
+| `mAsset`     | Asset                      |
+| `template`   | Template                   |
+| `created`    | Creation time              |
+| `updated`    | Update time                |
+| `checkbox`   | Checkbox                   |
+| `relation`   | Relation                   |
+| `rollup`     | Rollup                     |
+| `lineNumber` | Line number                |
+
+### Render
+
+* `/api/av/renderAttributeView`
+* Parameters
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "",
+    "page": 1,
+    "pageSize": 50,
+    "query": "",
+    "groupPaging": {},
+    "createIfNotExist": true
+  }
+  ```
+
+    * `id`: Database ID
+    * `blockID`: The database block that embeds this database. Used to resolve the active view and publish access. Omit when rendering a detached database.
+    * `viewID`: The view to render. When omitted, the current view (`viewID` field) is used
+    * `page`: Page number, 1-based. Defaults to `1`
+    * `pageSize`: Items per page. `-1` or omitted means use the view's default (`50`)
+    * `query`: Optional full-text filter for the primary-key values
+    * `groupPaging`: Optional paging configuration for grouped (kanban) views
+    * `createIfNotExist`: When `true` (default), create a default view if the database has none
+* Return value (real response, table layout, one row shown):
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "API 测试",
+      "id": "20240118120204-kwyzf77",
+      "viewType": "table",
+      "viewID": "20240118120204-7rnmyc1",
+      "isMirror": false,
+      "views": [
+        {
+          "id": "20240118120204-7rnmyc1",
+          "icon": "",
+          "name": "表格",
+          "desc": "",
+          "hideAttrViewName": false,
+          "type": "table",
+          "pageSize": 50
+        }
+      ],
+      "view": {
+        "id": "20240118120204-7rnmyc1",
+        "icon": "",
+        "name": "表格",
+        "desc": "",
+        "hideAttrViewName": false,
+        "filters": [],
+        "sorts": [],
+        "group": null,
+        "pageSize": 50,
+        "showIcon": true,
+        "wrapField": false,
+        "groupFolded": false,
+        "groupHidden": 0,
+        "columns": [
+          {
+            "id": "20240118120204-w6cggab",
+            "name": "主键",
+            "type": "block",
+            "icon": "",
+            "wrap": false,
+            "hidden": false,
+            "desc": "",
+            "calc": null,
+            "numberFormat": "",
+            "template": "",
+            "pin": false,
+            "width": ""
+          }
+        ],
+        "rows": [
+          {
+            "id": "20240118203831-fkfvvtx",
+            "cells": [
+              {
+                "id": "20240118203911-xrg9obl",
+                "value": {
+                  "id": "20240118203911-xrg9obl",
+                  "keyID": "20240118120204-w6cggab",
+                  "blockID": "20240118203831-fkfvvtx",
+                  "type": "block",
+                  "createdAt": 1706843791000,
+                  "updatedAt": 1706843791000,
+                  "block": {
+                    "id": "20240118203831-fkfvvtx",
+                    "content": "3",
+                    "created": 1706843791000,
+                    "updated": 1706843791000
+                  }
+                },
+                "valueType": "block",
+                "color": "",
+                "bgColor": ""
+              }
+            ]
+          }
+        ],
+        "rowCount": 5
+      }
+    }
+  }
+  ```
+
+    * `data.view`: The rendered viewable instance. Shape depends on `viewType` — `table` returns `columns`/`rows`/`rowCount`, `gallery` returns `columns`/`rows`, `kanban` returns `columns`/`groups` (each group is itself a view instance with `groupKey`/`groupValue`). `view` also carries `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, `groupHidden`. Note: active filters/grouping can make `rows` empty even when `rowCount` > 0
+    * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `pin`, `width`; `select`/`mSelect` columns additionally carry `options`
+    * `data.view.rows[].id`: The **row ID** (an item ID). For a bound row this is the same as the bound block ID; for a detached row it is a generated item ID distinct from any block
+    * `data.view.rows[].cells[].value`: A `Value` object — see [Set a cell value](#Set-a-cell-value) for all value shapes. `createdAt`/`updatedAt` are int64 millisecond timestamps
+    * `data.views`: Metadata of every view (no rows)
+    * `data.isMirror`: `true` when the database block is a mirror (read-only copy) of the database
+
+### Get
+
+* `/api/av/getAttributeView`
+* Parameters
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77"
+  }
+  ```
+
+    * `id`: Database ID
+* Return value (real response, trimmed — `keyValues`/`views` arrays truncated):
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "av": {
+        "spec": 4,
+        "id": "20240118120204-kwyzf77",
+        "name": "API 测试",
+        "keyValues": [
+          {
+            "key": {
+              "id": "20240118120204-w6cggab",
+              "name": "主键",
+              "type": "block",
+              "icon": "",
+              "desc": "",
+              "numberFormat": "",
+              "template": ""
+            },
+            "values": [
+              {
+                "id": "20240118203911-xrg9obl",
+                "keyID": "20240118120204-w6cggab",
+                "blockID": "20240118203831-fkfvvtx",
+                "type": "block",
+                "createdAt": 1706843791000,
+                "updatedAt": 1706843791000,
+                "block": {
+                  "id": "20240118203831-fkfvvtx",
+                  "content": "3",
+                  "created": 1706843791000,
+                  "updated": 1706843791000
+                }
+              }
+            ]
+          }
+        ],
+        "keyIDs": null,
+        "viewID": "20240118120204-7rnmyc1",
+        "views": [
+          {
+            "id": "20240118120204-7rnmyc1",
+            "icon": "",
+            "name": "表格",
+            "hideAttrViewName": false,
+            "desc": "",
+            "pageSize": 50,
+            "type": "table",
+            "table": {
+              "spec": 0,
+              "id": "20240118120204-grokgmm",
+              "showIcon": true,
+              "wrapField": false,
+              "columns": [
+                {
+                  "id": "20240118120204-w6cggab",
+                  "wrap": false,
+                  "hidden": false,
+                  "pin": false,
+                  "width": ""
+                }
+              ],
+              "rowIds": null
+            },
+            "itemIds": ["20240118203818-ct041hj", "20240118203855-sqzbja0", "20240118203831-fkfvvtx", "20240118203842-kc31ovy", "20240531235026-uiap07y"],
+            "groupCreated": 0,
+            "groupItemIds": null,
+            "groupFolded": false,
+            "groupHidden": 0,
+            "groupSort": 0
+          }
+        ]
+      }
+    }
+  }
+  ```
+
+    * `data.av`: The full `AttributeView` definition — fields (`keyValues`), field ordering (`keyIDs`, may be `null`), current view (`viewID`), and all views with their raw layout config (`table`/`gallery`/`kanban`) and item ordering (`itemIds`). Returns the raw definition (no rendered rows or pagination); use [Render](#Render) for computed rows
+
+### Get primary key values
+
+* `/api/av/getAttributeViewPrimaryKeyValues`
+* Parameters
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "keyword": "",
+    "page": 1,
+    "pageSize": 16
+  }
+  ```
+
+    * `id`: Database ID
+    * `keyword`: Optional substring filter against primary-key text (case-insensitive)
+    * `page`: Page number, 1-based. Defaults to `1`
+    * `pageSize`: Items per page. `-1` or omitted means `16`. Values are sorted by `block.updated` descending
+* Return value (real response, one value shown):
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "API 测试",
+      "blockIDs": ["20240118120201-kldj15t"],
+      "rows": {
+        "key": {
+          "id": "20240118120204-w6cggab",
+          "name": "主键",
+          "type": "block",
+          "icon": "",
+          "desc": "",
+          "numberFormat": "",
+          "template": ""
+        },
+        "values": [
+          {
+            "id": "20240118203911-xrg9obl",
+            "keyID": "20240118120204-w6cggab",
+            "blockID": "20240118203831-fkfvvtx",
+            "type": "block",
+            "createdAt": 1706843791000,
+            "updatedAt": 1706843791000,
+            "block": {
+              "id": "20240118203831-fkfvvtx",
+              "content": "3",
+              "created": 1706843791000,
+              "updated": 1706843791000
+            }
+          }
+        ]
+      }
+    }
+  }
+  ```
+
+    * `data.rows`: A `KeyValues` object holding the primary-key (`block`) field and its paginated values
+    * `data.blockIDs`: IDs of all database blocks (mirrors) that reference this database
+
+### Search
+
+* `/api/av/searchAttributeView`
+* Parameters
+
+  ```json
+  {
+    "keyword": "API",
+    "excludes": []
+  }
+  ```
+
+    * `keyword`: Search keyword (matches database name)
+    * `excludes`: Optional list of database IDs to exclude from the results
+* Return value (real response):
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "results": [
+        {
+          "avID": "20240118120204-kwyzf77",
+          "avName": "API 测试",
+          "viewName": "",
+          "viewID": "",
+          "viewLayout": "",
+          "blockID": "20240118120201-kldj15t",
+          "hPath": "正在跟进的问题/数据库/API",
+          "children": [
+            {
+              "avID": "20240118120204-kwyzf77",
+              "avName": "API 测试",
+              "viewName": "表格",
+              "viewID": "20240118120204-7rnmyc1",
+              "viewLayout": "table",
+              "blockID": "20240118120201-kldj15t",
+              "hPath": "正在跟进的问题/数据库/API"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.results[]`: Each top-level result groups a database by `avID`; its `children[]` list the individual views (`viewName`/`viewID`/`viewLayout`)
+
+### Set a cell value
+
+Updates a single cell (one field of one row). This is the primary write endpoint for cell values. The request `value` is a partial `Value` object whose shape depends on the field's `keyType`. The most common value shapes are:
+
+| `keyType`  | `value` shape                                                                                                        |
+|------------|----------------------------------------------------------------------------------------------------------------------|
+| `block`    | `{"block": {"content": "First row", "id": "<boundBlockID>"}, "isDetached": false}`                                  |
+| `text`     | `{"text": {"content": "Some text"}}`                                                                                 |
+| `number`   | `{"number": {"content": 42, "isNotEmpty": true}}` (clear with `{"isNotEmpty": false}`)                               |
+| `date`     | `{"date": {"content": 1676042451000, "isNotEmpty": true}}` (millisecond timestamp)                                  |
+| `select`   | `{"mSelect": [{"content": "Done", "color": "1"}]}` (at most one option)                                             |
+| `mSelect`  | `{"mSelect": [{"content": "A", "color": "1"}, {"content": "B", "color": "2"}]}`                                      |
+| `url`      | `{"url": {"content": "https://siyuan.com"}}`                                                                         |
+| `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
+| `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
+| `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
+
+> ⚠️ `itemID` is the **row ID** (`rows[].id` from [Render](#Render)). For a bound row the row ID equals the bound block ID; for a detached row it is a generated item ID. Passing the wrong ID stores the value as an orphan that does not appear in the rendered cell.
+
+* `/api/av/setAttributeViewBlockAttr`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240531232156-ahsyx8l",
+    "itemID": "20240118203831-fkfvvtx",
+    "value": {
+      "type": "number",
+      "number": {
+        "content": 42,
+        "isNotEmpty": true
+      }
+    }
+  }
+  ```
+
+    * `avID`: Database ID
+    * `keyID`: Field ID (the column being updated)
+    * `itemID`: **Row ID** (`rows[].id` from [Render](#Render)). The legacy `rowID` parameter is deprecated and will be removed after 2026-12-01; use `itemID` instead
+    * `value`: Partial `Value` object (see the table above). Unknown or unsupported keys are ignored
+* Return value (real response, number value):
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "value": {
+        "id": "20240531235048-4zisj1p",
+        "keyID": "20240531232156-ahsyx8l",
+        "blockID": "20240118203831-fkfvvtx",
+        "type": "number",
+        "createdAt": 1717170648596,
+        "updatedAt": 1781610266432,
+        "number": {
+          "content": 42,
+          "isNotEmpty": true,
+          "format": "",
+          "formattedContent": "42"
+        }
+      }
+    }
+  }
+  ```
+
+    * `data.value`: The fully-normalized value after the update (with computed fields such as `number.formattedContent`). Use this to refresh the UI rather than re-sending the request payload
+
+### Add items
+
+Adds one or more items (rows). Each source can either bind an existing block (`isDetached: false`) or create a detached row that only lives inside the view (`isDetached: true`).
+
+* `/api/av/addAttributeViewBlocks`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "",
+    "groupID": "",
+    "previousID": "",
+    "srcs": [
+      {
+        "id": "20240118120201-kldj15t",
+        "isDetached": false,
+        "content": "New row"
+      }
+    ],
+    "ignoreDefaultFill": false
+  }
+  ```
+
+    * `avID`: Database ID
+    * `blockID`: The database block that owns this database (resolves target view/group)
+    * `viewID`: Target view. When omitted, the current view is used
+    * `groupID`: Target group ID for kanban views. Omit for table/gallery
+    * `previousID`: Insert after this item ID. Empty means append to the end
+    * `srcs[].id`: For bound blocks (`isDetached: false`), the block ID to bind. Must match the node ID pattern
+    * `srcs[].isDetached`: `true` to create a detached row; `false` to bind an existing block
+    * `srcs[].content`: Display text for the primary key (used when `isDetached: true`, or to override the bound block's content)
+    * `srcs[].itemID`: Optional explicit item ID. Auto-generated when omitted
+    * `ignoreDefaultFill`: When `true`, skip auto-filling default values into filter/group fields
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+    * The endpoint returns `null`; after it succeeds, call [Render](#Render) to fetch the updated rows (including the new row IDs needed for cell updates)
+
+### Remove items
+
+Removes one or more items (rows). Detached rows are deleted; bound blocks are unbound (the underlying document block is not deleted).
+
+* `/api/av/removeAttributeViewBlocks`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "srcIDs": ["20240118203831-fkfvvtx"]
+  }
+  ```
+
+    * `avID`: Database ID
+    * `srcIDs`: Row IDs (`rows[].id` from [Render](#Render)) to remove
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### Change layout
+
+Switches the layout type of the current view between `table`, `gallery`, and `kanban`. On success the server re-renders the view and returns it (same shape as [Render](#Render)).
+
+* `/api/av/changeAttrViewLayout`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "layoutType": "kanban"
+  }
+  ```
+
+    * `avID`: Database ID
+    * `blockID`: The database block that owns the view
+    * `layoutType`: Target layout — one of `table`, `gallery`, `kanban`
+* Return value: same shape as [Render](#Render). When switching to `kanban` and a group is configured, `data.view` carries a `groups[]` array; each group is a view instance with `groupKey`, `groupValue`, plus kanban-specific fields (`coverFrom`, `cardAspectRatio`, `cardSize`, `fitImage`, `displayFieldName`, `fillColBackgroundColor`, `fields`)
+
+### Set grouping
+
+Sets or clears the grouping rule for a kanban view. When `group.field` is empty, grouping is removed. On success the server re-renders the view and returns it.
+
+* `/api/av/setAttrViewGroup`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "group": {
+      "field": "20240118203822-io6ofxb",
+      "method": 0,
+      "order": 0,
+      "hideEmpty": false
+    }
+  }
+  ```
+
+    * `avID`: Database ID
+    * `blockID`: The database block that owns the view
+    * `group`: Grouping rule
+    * `group.field`: Field (column) ID to group by. Empty string removes grouping
+    * `group.method`: Group method — `0` by value, `1` by number range, `2` by relative date, `3` by day, `4` by week, `5` by month, `6` by year
+    * `group.range`: Optional. Required when `method` is `1` (number range): `{ "numStart": 0, "numEnd": 100, "numStep": 10 }`
+    * `group.order`: Group ordering — `0` ascending, `1` descending, `2` manual, `3` follow select-option order
+    * `group.hideEmpty`: Whether to hide empty groups
+* Return value: same shape as [Render](#Render)
+
+### Get filter and sort
+
+Returns the current filter and sort rules of the view bound to a database block.
+
+* `/api/av/getAttributeViewFilterSort`
+* Parameters
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t"
+  }
+  ```
+
+    * `id`: Database ID
+    * `blockID`: The database block that owns the view
+* Return value (real response, no filters/sorts configured):
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "filters": [],
+      "sorts": []
+    }
+  }
+  ```
+
+  When configured (real captured response), a filter and sort look like:
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "filters": [
+        {
+          "column": "20240118203822-io6ofxb",
+          "operator": "=",
+          "value": {
+            "type": "select",
+            "mSelect": [
+              { "content": "Done", "color": "1" }
+            ]
+          }
+        }
+      ],
+      "sorts": [
+        {
+          "column": "20240118120204-w6cggab",
+          "order": "DESC"
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.filters`: Array of `ViewFilter`
+    * `data.filters[].column`: Field (column) ID the filter applies to
+    * `data.filters[].operator`: Filter operator (see the operator table below)
+    * `data.filters[].value`: Filter value, a `Value` object (see [Set a cell value](#Set-a-cell-value) for the value shapes)
+    * `data.filters[].relativeDate`: Optional relative-date descriptor used by date filters (`{ "count": 7, "unit": 0, "direction": -1 }`; `unit`: `0` day, `1` week, `2` month, `3` year; `direction`: `-1` before, `0` this, `1` after)
+    * `data.sorts`: Array of `ViewSort`
+    * `data.sorts[].column`: Field (column) ID the sort applies to
+    * `data.sorts[].order`: `ASC` or `DESC`
+
+  Filter operators:
+
+  | Value                | Description          |
+  |----------------------|----------------------|
+  | `=`                  | Equals               |
+  | `!=`                 | Not equals           |
+  | `>`                  | Greater than         |
+  | `>=`                 | Greater or equal     |
+  | `<`                  | Less than            |
+  | `<=`                 | Less or equal        |
+  | `Contains`           | Contains             |
+  | `Does not contains`  | Does not contain     |
+  | `Is empty`           | Is empty             |
+  | `Is not empty`       | Is not empty         |
+  | `Starts with`        | Starts with          |
+  | `Ends with`          | Ends with            |
+  | `Is between`         | Is between           |
+  | `Is true`            | Is true (checkbox)   |
+  | `Is false`           | Is false (checkbox)  |
+
+### Set filter and sort
+
+Filters and sorts are persisted through the transaction endpoint `/api/transactions` (plural), because changing them is part of an undoable editing transaction. Wrap each rule change in a `doOperations` entry whose `action` is `setAttrViewFilters` or `setAttrViewSorts`; the `data` field is the full new array (it replaces the view's existing rules entirely).
+
+* `/api/transactions`
+* Parameters
+
+  ```json
+  {
+    "reqId": 1781610129661,
+    "app": "",
+    "session": "",
+    "transactions": [
+      {
+        "doOperations": [
+          {
+            "action": "setAttrViewFilters",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118203822-io6ofxb",
+                "operator": "=",
+                "value": {
+                  "type": "select",
+                  "mSelect": [
+                    { "content": "Done", "color": "1" }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "action": "setAttrViewSorts",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118120204-w6cggab",
+                "order": "DESC"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+    * `reqId`: Required. A client-generated timestamp/nonce (number); tags the transaction for undo/redo
+    * `app` / `session`: Optional. Used to scope the resulting WebSocket push so other clients/sessions can refresh
+    * `transactions[].doOperations[]`: One operation per rule set to replace
+    * `doOperations[].action`: `setAttrViewFilters` to replace filters, or `setAttrViewSorts` to replace sorts
+    * `doOperations[].avID`: Database ID
+    * `doOperations[].blockID`: The database block that owns the view
+    * `doOperations[].data`: Full new array of `ViewFilter` or `ViewSort` objects (see [Get filter and sort](#Get-filter-and-sort)). Pass `[]` to clear
+* Return value (real response, echoes the submitted operations with a server-assigned `timestamp`):
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "timestamp": 1781610129661,
+        "doOperations": [
+          {
+            "action": "setAttrViewFilters",
+            "id": "",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118203822-io6ofxb",
+                "operator": "=",
+                "value": {
+                  "type": "select",
+                  "mSelect": [{ "content": "Done", "color": "1" }]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+    * After a successful call, verify persistence via [Get filter and sort](#Get-filter-and-sort)
+
+### Add a field
+
+Adds a new field (column). The field is appended to every view (table/gallery/kanban) at the position after `previousKeyID` (or at the default position when empty).
+
+* `/api/av/addAttributeViewKey`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118120204-7k9wzbp",
+    "keyName": "状态",
+    "keyType": "select",
+    "keyIcon": "",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: Database ID
+    * `keyID`: ID for the new field. Must be a valid node ID generated by `Lute.NewNodeID()` (14-digit timestamp + `-` + 7-char random alphanumerics, e.g. `20240118120204-abc1234`)
+    * `keyName`: Field display name
+    * `keyType`: Field type — one of `text`, `number`, `date`, `select`, `mSelect`, `url`, `email`, `phone`, `mAsset`, `template`, `created`, `updated`, `checkbox`, `relation`, `rollup`, `lineNumber`. `block` (primary key) cannot be added through this endpoint
+    * `keyIcon`: Optional field icon (emoji or empty string)
+    * `previousKeyID`: Insert the new column after this field ID. Empty string uses the layout default (first column for table, last for gallery/kanban)
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### Remove a field
+
+Removes a field (column) and all of its values. Returns `code: -1` with `msg: "key not found"` if `keyID` does not exist.
+
+* `/api/av/removeAttributeViewKey`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118120204-7k9wzbp",
+    "removeRelationDest": false
+  }
+  ```
+
+    * `avID`: Database ID
+    * `keyID`: Field ID to remove
+    * `removeRelationDest`: When `true` and the field is a relation, also remove the corresponding back-relation field from the destination database. Defaults to `false`
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### Set global field sort
+
+Reorders a field (column) globally — moves `keyID` to the position after `previousKeyID` in the field ordering, affecting every view.
+
+* `/api/av/sortAttributeViewKey`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118203822-io6ofxb",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: Database ID
+    * `keyID`: Field ID to move
+    * `previousKeyID`: Field ID after which `keyID` should be placed. Empty string moves it to the first position
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### Set per-view field sort
+
+Reorders a column within a single view's layout (e.g. a table's column order), without changing the global field ordering.
+
+* `/api/av/sortAttributeViewViewKey`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "viewID": "20240118120204-7rnmyc1",
+    "keyID": "20240118203822-io6ofxb",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: Database ID
+    * `viewID`: Target view. When empty, uses the current view
+    * `keyID`: Field ID to move
+    * `previousKeyID`: Field ID after which `keyID` should be placed. Empty string moves it to the first position
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```

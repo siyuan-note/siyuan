@@ -24,9 +24,15 @@ import (
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func isValidSessionID(id string) bool {
+	return ast.IsNodeIDPattern(id)
+}
 
 var indexMu sync.Mutex
 
@@ -77,7 +83,9 @@ func saveSessionIndex(index map[string]*SessionIndexItem) {
 		return
 	}
 	_ = os.MkdirAll(filepath.Dir(sessionsIndexPath()), 0755)
-	_ = filelock.WriteFile(sessionsIndexPath(), data)
+	if err := filelock.WriteFile(sessionsIndexPath(), data); err != nil {
+		logging.LogErrorf("save session index failed: %s", err)
+	}
 }
 
 func rebuildSessionIndex() map[string]*SessionIndexItem {
@@ -151,57 +159,8 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 	if index == nil || len(index) == 0 {
 		index = rebuildSessionIndex()
 	}
-
-	if index != nil {
-		entries, err := os.ReadDir(sessionsDir())
-		if err == nil {
-			dirMap := map[string]bool{}
-			for _, entry := range entries {
-				if entry.IsDir() {
-					dirMap[entry.Name()] = true
-				}
-			}
-
-			needsSave := false
-
-			for id := range index {
-				if !dirMap[id] {
-					delete(index, id)
-					needsSave = true
-				}
-			}
-
-			for id := range dirMap {
-				if _, ok := index[id]; !ok {
-					sessionPath := filepath.Join(sessionsDir(), id, "session.json")
-					sessionData, err := os.ReadFile(sessionPath)
-					if err == nil {
-						var meta sessionMeta
-						if gulu.JSON.UnmarshalJSON(sessionData, &meta) == nil && meta.ID != "" {
-							title := meta.Title
-							if title == "" {
-								title = "AI Agent"
-							}
-							index[id] = &SessionIndexItem{
-								ID:        meta.ID,
-								Title:     title,
-								CreatedAt: meta.CreatedAt,
-								UpdatedAt: meta.UpdatedAt,
-							}
-							needsSave = true
-						}
-					}
-				}
-			}
-
-			if needsSave {
-				saveSessionIndex(index)
-			}
-		}
-	}
-	indexMu.Unlock()
-
 	if index == nil {
+		indexMu.Unlock()
 		return &SessionListResult{
 			Sessions: []*SessionIndexItem{},
 			Total:    0,
@@ -209,6 +168,61 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 			PageSize: pageSize,
 		}
 	}
+	snapshot := make(map[string]*SessionIndexItem, len(index))
+	for k, v := range index {
+		snapshot[k] = v
+	}
+	indexMu.Unlock()
+
+	entries, err := os.ReadDir(sessionsDir())
+	if err == nil {
+		dirMap := map[string]bool{}
+		for _, entry := range entries {
+			if entry.IsDir() {
+				dirMap[entry.Name()] = true
+			}
+		}
+
+		needsSave := false
+
+		for id := range snapshot {
+			if !dirMap[id] {
+				delete(snapshot, id)
+				needsSave = true
+			}
+		}
+
+		for id := range dirMap {
+			if _, ok := snapshot[id]; !ok {
+				sessionPath := filepath.Join(sessionsDir(), id, "session.json")
+				sessionData, err := os.ReadFile(sessionPath)
+				if err == nil {
+					var meta sessionMeta
+					if gulu.JSON.UnmarshalJSON(sessionData, &meta) == nil && meta.ID != "" {
+						title := meta.Title
+						if title == "" {
+							title = "AI Agent"
+						}
+						snapshot[id] = &SessionIndexItem{
+							ID:        meta.ID,
+							Title:     title,
+							CreatedAt: meta.CreatedAt,
+							UpdatedAt: meta.UpdatedAt,
+						}
+						needsSave = true
+					}
+				}
+			}
+		}
+
+		if needsSave {
+			indexMu.Lock()
+			saveSessionIndex(snapshot)
+			indexMu.Unlock()
+		}
+	}
+
+	index = snapshot
 
 	items := make([]*SessionIndexItem, 0, len(index))
 	for _, item := range index {
@@ -251,7 +265,7 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 }
 
 func GetSession(id string) (map[string]interface{}, error) {
-	if id == "" {
+	if id == "" || !isValidSessionID(id) {
 		return nil, nil
 	}
 	sessionPath := filepath.Join(sessionsDir(), id, "session.json")
@@ -268,12 +282,14 @@ func GetSession(id string) (map[string]interface{}, error) {
 
 func SaveSession(data []byte) error {
 	var meta sessionMeta
-	if err := gulu.JSON.UnmarshalJSON(data, &meta); err != nil || meta.ID == "" {
+	if err := gulu.JSON.UnmarshalJSON(data, &meta); err != nil || meta.ID == "" || !isValidSessionID(meta.ID) {
 		return nil
 	}
 
 	dir := filepath.Join(sessionsDir(), meta.ID)
-	_ = os.MkdirAll(dir, 0755)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		logging.LogErrorf("create session dir failed: %s", err)
+	}
 	path := filepath.Join(dir, "session.json")
 
 	existing, err := os.ReadFile(path)
@@ -284,7 +300,12 @@ func SaveSession(data []byte) error {
 			gulu.JSON.UnmarshalJSON(data, &newData) == nil {
 			for k, v := range existingData {
 				if _, ok := newData[k]; !ok {
-					newData[k] = v
+					switch k {
+					// messages 不再保留：以 entries 为唯一持久化数据源，
+					// 前端下次保存时会用 entries 覆盖，老 messages 字段自然清除。
+					case "createdAt", "titled", "messageHistory", "entries", "snapshots", "id", "alwaysAllow":
+						newData[k] = v
+					}
 				}
 			}
 			merged, err := gulu.JSON.MarshalIndentJSON(newData, "", "\t")
@@ -302,7 +323,9 @@ func SaveSession(data []byte) error {
 		}
 	}
 
-	_ = filelock.WriteFile(path, data)
+	if err := filelock.WriteFile(path, data); err != nil {
+		logging.LogErrorf("save session file failed: %s", err)
+	}
 
 	title := meta.Title
 	if title == "" {
@@ -314,7 +337,7 @@ func SaveSession(data []byte) error {
 }
 
 func DeleteSession(id string) error {
-	if id == "" {
+	if id == "" || !isValidSessionID(id) {
 		return nil
 	}
 

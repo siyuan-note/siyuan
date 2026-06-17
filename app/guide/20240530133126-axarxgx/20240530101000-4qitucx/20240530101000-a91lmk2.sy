@@ -8,9 +8,371 @@
 		"id": "20240530101000-a91lmk2",
 		"title": "高度な検索",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260613193509"
 	},
 	"Children": [
+		{
+			"ID": "20260613193509-xedpmdl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193509-xedpmdl",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-ircy5x0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193509-ircy5x0",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "グローバル検索はクエリ構文による高度な検索をサポートし、AND/OR/NOT論理組合せ、タイプフィルタリング、フィールドフィルタリングなどが利用できます。データベーステーブル直接検索、インデックス除外、検索除外などの高度な機能も提供し、単純なキーワードから複雑な条件まであらゆる検索ニーズに対応します。以下のサブドキュメントでは、各機能の詳細な使い方を紹介します。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-avyxr38",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193509-avyxr38",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "大文字/小文字の区別"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-k9kj9ol",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193509-k9kj9ol",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定 - 検索 - 大文字/小文字を区別 で設定できます。デフォルトはオフで、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ の検索結果は同じになります。オンにすると検索は大文字/小文字を厳密に区別します。このオプションを切り替えた後、インデックスの再構築が完了するまで有効になりません。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-eeostl9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193509-eeostl9",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "簡体字/繁体字の区別"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-703emtd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193509-703emtd",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定 - 検索 - 繁簡を区別 で設定できます。デフォルトはオンで、「经济」を検索しても「經濟」には一致しません。オフにすると、「经济」の検索で「经济」と「經濟」の両方に一致します。このオプションを切り替えた後、インデックスの再構築が完了するまで有効になりません。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-byuidqn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193509-byuidqn",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "置換"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-f05vi6z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193509-f05vi6z",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検索ダイアログにはテキスト置換機能が統合されており、検索結果の一括置換が可能です。"
+				}
+			]
+		},
+		{
+			"ID": "20260613193509-i2in6rr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613193509-i2in6rr",
+				"updated": "20260613193509"
+			},
+			"Children": [
+				{
+					"ID": "20260613193509-01mcz0t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193509-01mcz0t",
+						"updated": "20260613193509"
+					},
+					"Children": [
+						{
+							"ID": "20260613193509-3a19rho",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193509-3a19rho",
+								"updated": "20260613193509"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "入り口"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：検索ダイアログ（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​）で置換アイコンボタンをクリックすると、置換入力行が展開されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193509-iy4g4jw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193509-iy4g4jw",
+						"updated": "20260613193509"
+					},
+					"Children": [
+						{
+							"ID": "20260613193509-ukgmyq1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193509-ukgmyq1",
+								"updated": "20260613193509"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "置換操作"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								}
+							]
+						},
+						{
+							"ID": "20260613193509-5ssc4xe",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613193509-5ssc4xe",
+								"updated": "20260613193509"
+							},
+							"Children": [
+								{
+									"ID": "20260613193509-4w8c0rk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613193509-4w8c0rk",
+										"updated": "20260613193509"
+									},
+									"Children": [
+										{
+											"ID": "20260613193509-wderbmd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613193509-wderbmd",
+												"updated": "20260613193509"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "検索結果リストからレコードを選択し「↵ 置換」をクリックすると、その一件のみ置換"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613193509-ayr0q5u",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613193509-ayr0q5u",
+										"updated": "20260613193509"
+									},
+									"Children": [
+										{
+											"ID": "20260613193509-gb3x5qf",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613193509-gb3x5qf",
+												"updated": "20260613193509"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "「すべて置換」をクリックすると、現在の検索結果のすべての一致項目を一括置換"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193509-osc4f74",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193509-osc4f74",
+						"updated": "20260613193509"
+					},
+					"Children": [
+						{
+							"ID": "20260613193509-ymtfly6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193509-ymtfly6",
+								"updated": "20260613193509"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "置換タイプ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：置換フィルターをクリックして置換範囲（コンテンツブロックテキスト、名前、エイリアス、メモなど）を選択"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193509-xvgjid2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193509-xvgjid2",
+						"updated": "20260613193509"
+					},
+					"Children": [
+						{
+							"ID": "20260613193509-x2zxtbc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193509-x2zxtbc",
+								"updated": "20260613193509"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "注意事項"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：置換後は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+Z"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ での取り消しはできません。実行前にシステムが自動的にファイル履歴を生成します。復元が必要な場合はデータ履歴からロールバックしてください"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20240530101000-lgs50ee",
 			"Type": "NodeParagraph",

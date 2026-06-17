@@ -447,10 +447,9 @@ export const enableProtyle = (protyle: IProtyle) => {
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="false"]').forEach(item => {
         item.setAttribute("draggable", "true");
     });
-    const contentRect = protyle.contentElement.getBoundingClientRect();
     protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
         if (item.querySelector(".av__scroll")) {
-            stickyRow(item, contentRect, "all");
+            stickyRow(item, protyle.contentElement, "all");
         }
     });
     if (protyle.breadcrumb) {
@@ -523,7 +522,25 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         return;
     }
     // 加强定位
+    // 使用 AbortController 监听用户手势（滚轮/触摸/方向键），一旦用户主动滚动即停止强制定位，否则顶部为数据库等异步渲染块撑高内容时会反复重置滚动位置
+    const userScrollAbort = new AbortController();
+    const onUserScroll = () => userScrollAbort.abort();
+    protyle.contentElement.addEventListener("wheel", onUserScroll, {capture: true, signal: userScrollAbort.signal});
+    protyle.contentElement.addEventListener("touchstart", onUserScroll, {capture: true, signal: userScrollAbort.signal});
+    protyle.contentElement.addEventListener("touchmove", onUserScroll, {capture: true, signal: userScrollAbort.signal});
+    protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        // 仅拦截会触发滚动的按键，避免影响正常编辑输入
+        if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {
+            userScrollAbort.abort();
+        }
+    }, {capture: true, signal: userScrollAbort.signal});
     protyle.observerLoad = new ResizeObserver(() => {
+        if (userScrollAbort.signal.aborted) {
+            // 用户已主动滚动，停止强制定位并将滚动权交还给用户
+            protyle.observerLoad.disconnect();
+            protyle.observer.observe(protyle.wysiwyg.element);
+            return;
+        }
         if (hasScrollTop) {
             protyle.contentElement.scrollTop = scrollAttr.scrollTop;
         }
@@ -537,11 +554,13 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     protyle.observer.unobserve(protyle.wysiwyg.element);
     setTimeout(() => {
         protyle.observerLoad.disconnect();
+        userScrollAbort.abort();
         protyle.observer.observe(protyle.wysiwyg.element);
     }, 1000 * 3);
 
     if (focusElement === protyle.wysiwyg.element.firstElementChild && !hasScrollTop) {
         protyle.observerLoad.disconnect();
+        userScrollAbort.abort();
     }
 };
 

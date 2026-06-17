@@ -52,7 +52,9 @@ export const hasClosestByAttribute = (element: Node, attr: string, value: string
     }
     let e = element as HTMLElement;
     let isClosest = false;
-    while (e && !isClosest && (top ? e.tagName !== "BODY" : !e.classList.contains("protyle-wysiwyg"))) {
+    while (e && !isClosest && (top ? e.tagName !== "BODY" : (
+        !e.classList.contains("protyle-wysiwyg") &&!e.classList.contains("b3-typography")
+    ))) {
         if (typeof value === "string" && e.getAttribute(attr)?.split(" ").includes(value)) {
             isClosest = true;
         } else if (typeof value !== "string" && e.hasAttribute(attr)) {

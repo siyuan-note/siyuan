@@ -6,7 +6,7 @@
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
 		"type": "doc",
-		"updated": "20250218120940"
+		"updated": "20260614203347"
 	},
 	"Children": [
 		{
@@ -1119,7 +1119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230808120347-yy5m46r",
-				"updated": "20220307092835"
+				"updated": "20260614203347"
 			},
 			"Children": [
 				{
@@ -1135,7 +1135,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230808120347-um16u4f",
-				"updated": "20231120213300"
+				"updated": "20260614203347"
 			},
 			"Children": [
 				{
@@ -1189,6 +1189,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "请勿同时使用第三方同步盘和思源同步，可能会导致数据损坏"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260614203346-ezgc1h8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614203346-ezgc1h8",
+						"updated": "20260614203347"
+					},
+					"Children": [
+						{
+							"ID": "20260614203346-9lo6xlu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614203346-9lo6xlu",
+								"updated": "20260614203347"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思源会自动检测工作空间是否位于第三方同步目录下，如果检测到会强制退出以防止数据损坏"
 								}
 							]
 						}

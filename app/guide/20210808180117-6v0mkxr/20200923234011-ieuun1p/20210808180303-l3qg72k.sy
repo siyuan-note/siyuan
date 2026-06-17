@@ -7,9 +7,371 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20240508004303"
+		"updated": "20260613193423"
 	},
 	"Children": [
+		{
+			"ID": "20260613193423-e3tpcuq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193423-e3tpcuq",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-ahdqtz9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193423-ahdqtz9",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Global search supports query syntax for advanced search, including AND/OR/NOT logic, type filtering, and field filtering. It also offers advanced features such as direct database table queries, index exclusion, and search exclusion, covering everything from simple keywords to complex conditions. The following sub-documents introduce each of these features in detail."
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-4fjlvrg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193423-4fjlvrg",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Case Sensitivity"
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-qw5e4r0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193423-qw5e4r0",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configurable in Settings - Search - Case Sensitive. Disabled by default, meaning searching "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "hello"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ returns the same results. When enabled, search strictly differentiates case. After toggling this option, you must wait for index rebuilding to complete before it takes effect."
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-1oey891",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193423-1oey891",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Simplified/Traditional Sensitivity"
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-f3tgfru",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193423-f3tgfru",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configurable in Settings - Search - Distinguish Simplified/Traditional. Enabled by default, meaning searching \"经济\" will not match \"經濟\". When disabled, searching \"经济\" matches both \"经济\" and \"經濟\". After toggling this option, you must wait for index rebuilding to complete before it takes effect."
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-ws0z1u9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613193423-ws0z1u9",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Replace"
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-cq5kwkr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613193423-cq5kwkr",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The search dialog integrates a text replacement feature, allowing batch replacement of search results."
+				}
+			]
+		},
+		{
+			"ID": "20260613193423-6o0q64d",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613193423-6o0q64d",
+				"updated": "20260613193423"
+			},
+			"Children": [
+				{
+					"ID": "20260613193423-3lwdirc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193423-3lwdirc",
+						"updated": "20260613193423"
+					},
+					"Children": [
+						{
+							"ID": "20260613193423-8b9pf9i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193423-8b9pf9i",
+								"updated": "20260613193423"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Entry"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the replace icon button in the search dialog ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+P"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​) to expand the replace input row"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193423-rzx5n7z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193423-rzx5n7z",
+						"updated": "20260613193423"
+					},
+					"Children": [
+						{
+							"ID": "20260613193423-dzmd0tb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193423-dzmd0tb",
+								"updated": "20260613193423"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Replace Operations"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613193423-5n4eflq",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20260613193423-5n4eflq",
+								"updated": "20260613193423"
+							},
+							"Children": [
+								{
+									"ID": "20260613193423-2jnykws",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613193423-2jnykws",
+										"updated": "20260613193423"
+									},
+									"Children": [
+										{
+											"ID": "20260613193423-d16yt1t",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613193423-d16yt1t",
+												"updated": "20260613193423"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Select a record in the search result list and click \"↵ Replace\" to replace that individual entry"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613193423-khlop5q",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20260613193423-khlop5q",
+										"updated": "20260613193423"
+									},
+									"Children": [
+										{
+											"ID": "20260613193423-tw68eeg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613193423-tw68eeg",
+												"updated": "20260613193423"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Click \"Replace All\" to replace all matches in the current search results at once"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193423-jtdrurt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193423-jtdrurt",
+						"updated": "20260613193423"
+					},
+					"Children": [
+						{
+							"ID": "20260613193423-6bvw8be",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193423-6bvw8be",
+								"updated": "20260613193423"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Replace Types"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click the replace filter to select the replacement scope (content block text, name, alias, memo, etc.)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613193423-9tqsg45",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613193423-9tqsg45",
+						"updated": "20260613193423"
+					},
+					"Children": [
+						{
+							"ID": "20260613193423-0whdff2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613193423-0whdff2",
+								"updated": "20260613193423"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Note"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+Z"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ undo is not supported after replacement. The system automatically generates file history before execution; use data history rollback to restore if needed"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20240508004303-nqo982y",
 			"Type": "NodeParagraph",

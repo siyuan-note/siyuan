@@ -374,13 +374,7 @@ func checkBlockExist(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	b, err := model.GetBlock(id, nil)
-	if errors.Is(err, model.ErrIndexing) {
-		ret.Code = 0
-		ret.Data = false
-		return
-	}
-	ret.Data = nil != b
+	ret.Data = treenode.ExistBlockTree(id)
 }
 
 func checkBlocksExist(c *gin.Context) {

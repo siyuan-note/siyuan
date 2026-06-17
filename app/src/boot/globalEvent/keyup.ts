@@ -12,6 +12,7 @@ export const windowKeyUp = (app: App, event: KeyboardEvent) => {
     window.siyuan.ctrlIsPressed = false;
     window.siyuan.shiftIsPressed = false;
     window.siyuan.altIsPressed = false;
+    document.body.classList.remove("body--shift-pressed");
     const switchDialog = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === Constants.DIALOG_SWITCHTAB) {
             return true;

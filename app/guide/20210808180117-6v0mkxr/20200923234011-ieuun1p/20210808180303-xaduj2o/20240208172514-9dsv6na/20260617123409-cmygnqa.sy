@@ -1,0 +1,1077 @@
+{
+	"ID": "20260617123409-cmygnqa",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260617123409-cmygnqa",
+		"title": "Table Calculation",
+		"type": "doc",
+		"updated": "20260617123642"
+	},
+	"Children": [
+		{
+			"ID": "20260617123606-x0dt9wd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123606-x0dt9wd",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-9x9bs6v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123606-9x9bs6v",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The bottom of a database table supports summary calculations for each column. Click the calculation bar at the bottom of a column to choose a calculation method. All field types except line number support table calculations."
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-ijcp7v8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123606-ijcp7v8",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Built-in Calculations"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-i7bgwsl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123606-i7bgwsl",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The available calculation methods are displayed automatically based on the field type:"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-tq23wtj",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260617123606-tq23wtj",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"ID": "20260617123606-9dhbf6h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123606-9dhbf6h",
+						"updated": "20260617123606"
+					},
+					"Children": [
+						{
+							"ID": "20260617123606-0sm14vv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123606-0sm14vv",
+								"updated": "20260617123606"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Count"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": total, not empty, distinct"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123606-7u9ljgh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123606-7u9ljgh",
+						"updated": "20260617123606"
+					},
+					"Children": [
+						{
+							"ID": "20260617123606-3re790m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123606-3re790m",
+								"updated": "20260617123606"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Percentage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": percent empty, percent not empty"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123606-x4c7tr9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123606-x4c7tr9",
+						"updated": "20260617123606"
+					},
+					"Children": [
+						{
+							"ID": "20260617123606-pywq09e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123606-pywq09e",
+								"updated": "20260617123606"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Numeric statistics"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": sum, average, median, min, max, range"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123606-gqzq2fs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123606-gqzq2fs",
+						"updated": "20260617123606"
+					},
+					"Children": [
+						{
+							"ID": "20260617123606-foh81m4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123606-foh81m4",
+								"updated": "20260617123606"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Checkbox"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": checked, unchecked, and their percentages"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123606-hntgn0m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123606-hntgn0m",
+						"updated": "20260617123606"
+					},
+					"Children": [
+						{
+							"ID": "20260617123606-2uplobz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123606-2uplobz",
+								"updated": "20260617123606"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Date"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": earliest, latest"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-q8959c7",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260617123606-q8959c7",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260617123606-51xeqe6",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260617123606-51xeqe6",
+						"updated": "20260617123606"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "When the row-level result of a rollup field is numeric (e.g. the row-level calculation is a count), the numeric statistics methods also become available."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-hmer6rw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123606-hmer6rw",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Template Calculation"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-wx8nslr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123606-wx8nslr",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When the built-in calculations cannot meet your needs, choose \"Template\" to write a formula that performs custom statistics on the entire column."
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-azl5vps",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123606-azl5vps",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click the calculation bar and select \"Template\", then enter a formula in the dialog that appears. If the result can be parsed as a number, it is displayed according to the column's number format; otherwise, it is displayed as plain text."
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-099e9jn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123606-099e9jn",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Available Variables"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-8i1ggi1",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260617123606-8i1ggi1",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Variable"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Meaning"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".values"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The numeric array parsed from the entire column"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".strings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The array of each value's text form in the column"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".raw"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The array of raw values in the column"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".count"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Total number of values"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sum"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Sum of the numbers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".avg"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Average of the numbers"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".min"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Minimum value"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".max"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Maximum value"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".median"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Median value"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-a1r19o6",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260617123606-a1r19o6",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260617123606-lynr37v",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260617123606-lynr37v",
+						"updated": "20260617123606"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "The number of elements in "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".values"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ depends on the column type: single-value columns such as number and text count one value per row; multi-value columns such as multi-select and asset count each option separately (consistent with the native \"Count values\" semantics)."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-ymsesa4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123606-ymsesa4",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Syntax"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-op64wuq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123606-op64wuq",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Template calculation uses the same Go template syntax as \"Template snippet\", with delimiters "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and functions following the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "http://masterminds.github.io/sprig/",
+					"TextMarkTextContent": "sprig"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " specification. See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Template snippet"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for details."
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-tlytmd9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123606-tlytmd9",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Examples"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-lbs4ju7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123606-lbs4ju7",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The following are all scenarios that built-in calculations cannot directly handle:"
+				}
+			]
+		},
+		{
+			"ID": "20260617123606-51zc0nr",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260617123606-51zc0nr",
+				"updated": "20260617123606"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Scenario"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Template"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Count of values greater than 100"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .values (gt . 100))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Percentage of values greater than 0"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (gt . 0))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Percentage of values equal to 0"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (eq . 0))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Count of values above average"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .values (gt . .avg))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Fail rate (percentage below 60)"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (lt . 60))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Rows starting with \"TODO\""
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "`.action{len"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

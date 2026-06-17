@@ -493,10 +493,10 @@ func serveAppearance(ginServer *gin.Engine) {
 		} else if strings.Contains(c.Request.URL.Path, "/langs/") && strings.HasSuffix(c.Request.URL.Path, ".json") {
 			lang := path.Base(c.Request.URL.Path)
 			lang = strings.TrimSuffix(lang, ".json")
-			if "zh_CN" != lang && "en_US" != lang {
+			if "zh-CN" != lang && "en" != lang {
 				// 多语言配置缺失项使用对应英文配置项补齐 https://github.com/siyuan-note/siyuan/issues/5322
 
-				enUSFilePath := filepath.Join(appearancePath, "langs", "en_US.json")
+				enUSFilePath := filepath.Join(appearancePath, "langs", "en.json")
 				enUSData, err := os.ReadFile(enUSFilePath)
 				if err != nil {
 					logging.LogErrorf("read en_US.json [%s] failed: %s", enUSFilePath, err)
@@ -597,10 +597,15 @@ func serveAuthPage(c *gin.Context) {
 		"appearanceMode":         model.Conf.Appearance.Mode,
 		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
 		"workspace":              util.WorkspaceName,
-		"workspacePath":          util.WorkspaceDir,
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
-		"workspaceDir":           util.WorkspaceDir,
+		// 浏览器环境下不返回工作空间绝对路径，避免泄露用户名等敏感信息
+		// 原生客户端（桌面 Electron，授权页 siyuan-init IPC 仅在 Electron 内执行）照常返回真实路径
+		// REF: https://github.com/siyuan-note/siyuan/issues/17410
+		"workspaceDir": util.WorkspaceDir,
+	}
+	if util.IsBrowserRequest(c) {
+		model["workspaceDir"] = ""
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); err != nil {

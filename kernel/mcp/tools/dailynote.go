@@ -25,7 +25,7 @@ import (
 
 var DailynoteTool = &Tool{
 	Name:        "dailynote",
-	Description: "Daily note (dailynote) operations for SiYuan.\n- create: Create today's daily note. Requires: notebook.\n- append: Append a block to today's daily note. Requires: notebook, data. Optional: dataType.\n- prepend: Prepend a block to today's daily note. Requires: notebook, data. Optional: dataType.",
+	Description: "Daily note operations. Actions: create(notebook) — create/open today's note, append(notebook, data, dataType?) / prepend(...) add a block.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

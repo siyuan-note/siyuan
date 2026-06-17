@@ -5,9 +5,10 @@ import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {stickyRow} from "../render/av/row";
-import {trimAVRows} from "../render/av/virtualScroll";
+import {trimAVRowsSync} from "../render/av/virtualScroll";
 
 let getIndexTimeout: number;
+const avScrollPending = new WeakSet<HTMLElement>();
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     element.addEventListener("scroll", () => {
         const elementRect = element.getBoundingClientRect();
@@ -26,8 +27,18 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             if (item.dataset.render !== "true") {
                 return;
             }
-            stickyRow(item, elementRect, "all");
-            trimAVRows(item, elementRect);
+            // stickyRow 与 trimAVRows 合并到每块每帧一个 rAF：先 stickyRow（读布局为主），
+            // 再 trimAVRowsSync（增删行）。合并避免两个独立 rAF 跨回调读写交错触发重排；
+            // 先读后写避免 trim 的 DOM 写入让 sticky 的几何读取成为强制重排。
+            if (avScrollPending.has(item)) {
+                return;
+            }
+            avScrollPending.add(item);
+            requestAnimationFrame(() => {
+                avScrollPending.delete(item);
+                stickyRow(item, element, "all");
+                trimAVRowsSync(item, elementRect);
+            });
         });
 
         if (!protyle.element.classList.contains("block__edit") && !isMobile()) {

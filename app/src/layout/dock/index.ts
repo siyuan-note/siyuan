@@ -728,7 +728,23 @@ export class Dock {
 
         // 等待 dock 面板动画结束
         if (this.pin) {
-            setTimeout(() => {
+            let rafId: number;
+            const updateTabPos = () => {
+                setTabPosition(true);
+                rafId = requestAnimationFrame(updateTabPos);
+            };
+            rafId = requestAnimationFrame(updateTabPos);
+
+            const onTransitionEnd = (event: TransitionEvent) => {
+                if (event.propertyName !== "width") return;
+                cancelAnimationFrame(rafId);
+                this.layout.element.removeEventListener("transitionend", onTransitionEnd);
+                setTabPosition();
+            };
+            this.layout.element.addEventListener("transitionend", onTransitionEnd);
+            window.setTimeout(() => {
+                cancelAnimationFrame(rafId);
+                this.layout.element.removeEventListener("transitionend", onTransitionEnd);
                 setTabPosition();
             }, Constants.TIMEOUT_TRANSITION);
         }

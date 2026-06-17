@@ -25,7 +25,7 @@ import (
 
 var SystemTool = &Tool{
 	Name:        "system",
-	Description: "System information for SiYuan.\n- version: Get SiYuan version string.\n- current_time: Get current server time.\n- workspace: Get workspace directory path.",
+	Description: "System info. Actions: version(), current_time(), workspace().",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

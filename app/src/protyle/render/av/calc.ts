@@ -4,6 +4,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
+import {Dialog} from "../../../dialog";
 
 const calcItem = (options: {
     menu: Menu,
@@ -14,28 +15,34 @@ const calcItem = (options: {
     data?: IAV, // rollup
     target: HTMLElement,
     avId: string,
-    blockID: string
+    blockID: string,
+    template?: string,
+    oldTemplate?: string
 }) => {
     options.menu.addItem({
         iconHTML: "",
         label: getNameByOperator(options.operator, !!options.data),
         click() {
             if (!options.data) {
+                const doData: IAVCalc = {operator: options.operator};
+                if (options.operator === "Template" && options.template) {
+                    doData.template = options.template;
+                }
+                const undoData: IAVCalc = {operator: options.oldOperator};
+                if (options.oldOperator === "Template" && options.oldTemplate) {
+                    undoData.template = options.oldTemplate;
+                }
                 transaction(options.protyle, [{
                     action: "setAttrViewColCalc",
                     avID: options.avId,
                     id: options.colId,
-                    data: {
-                        operator: options.operator
-                    },
+                    data: doData,
                     blockID: options.blockID
                 }], [{
                     action: "setAttrViewColCalc",
                     avID: options.avId,
                     id: options.colId,
-                    data: {
-                        operator: options.oldOperator
-                    },
+                    data: undoData,
                     blockID: options.blockID
                 }]);
             } else {
@@ -283,8 +290,16 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
     }
     let rollupIsNumber = false;
     if (type === "rollup") {
+        // 行级汇总结果本身就是数字的操作（如计数、百分比、复选统计），即使目标字段不是数字类型，
+        // 底部计算也应支持 Sum/Average 等数字计算方式
+        const numericRowCalcOperators = [
+            "Count all", "Count values", "Count unique values", "Count empty", "Count not empty",
+            "Percent empty", "Percent not empty", "Percent unique values",
+            "Checked", "Unchecked", "Percent checked", "Percent unchecked",
+        ];
         let relationKeyID: string;
         let keyID: string;
+        let rowCalcOperator: string;
         let avData = panelData?.data;
         if (!avData) {
             const avResponse = await fetchSyncPost("/api/av/renderAttributeView", {id: avId});
@@ -295,9 +310,13 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             if (item.id === colId) {
                 relationKeyID = item.rollup?.relationKeyID;
                 keyID = item.rollup?.keyID;
+                rowCalcOperator = item.rollup?.calc?.operator;
                 return true;
             }
         });
+        if (numericRowCalcOperators.includes(rowCalcOperator)) {
+            rollupIsNumber = true;
+        }
         if (relationKeyID && keyID) {
             let relationAvId: string;
             getFieldsByData(avData).find((item) => {
@@ -310,7 +329,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
                 const colResponse = await fetchSyncPost("/api/av/getAttributeView", {id: relationAvId});
                 colResponse.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
                     if (item.key.id === keyID) {
-                        rollupIsNumber = item.key.type === "number";
+                        rollupIsNumber = item.key.type === "number" || rollupIsNumber;
                         return true;
                     }
                 });
@@ -419,6 +438,69 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             target: calcElement
         });
     }
+    // 底部计算支持自定义模板统计
+    // 获取当前列已有的模板内容（footer 路径下需异步拉取列数据）
+    let currentTemplate = "";
+    if (panelData?.data) {
+        const colData = getFieldsByData(panelData.data).find((item) => item.id === colId);
+        currentTemplate = colData?.calc?.template || "";
+    } else {
+        const avResponse = await fetchSyncPost("/api/av/renderAttributeView", {id: avId});
+        const colData = getFieldsByData(avResponse.data).find((item) => item.id === colId);
+        currentTemplate = colData?.calc?.template || "";
+    }
+    // 提交模板统计：将底部计算切换为 Template 并写入模板内容
+    const submitTemplate = (templateContent: string) => {
+        const doData: IAVCalc = {operator: "Template", template: templateContent};
+        const undoData: IAVCalc = {operator: oldOperator || ""};
+        if (oldOperator === "Template" && currentTemplate) {
+            undoData.template = currentTemplate;
+        }
+        transaction(protyle, [{
+            action: "setAttrViewColCalc",
+            avID: avId,
+            id: colId,
+            data: doData,
+            blockID
+        }], [{
+            action: "setAttrViewColCalc",
+            avID: avId,
+            id: colId,
+            data: undoData,
+            blockID
+        }]);
+    };
+    menu.addItem({
+        iconHTML: "",
+        label: getNameByOperator("Template", !!panelData?.data),
+        click() {
+            menu.close();
+            const dialog = new Dialog({
+                title: window.siyuan.languages.calcOperatorTemplate,
+                content: `<div class="b3-dialog__content">
+    <textarea spellcheck="false" class="fn__block b3-text-field" placeholder="${window.siyuan.languages.rollupTemplateTip}" rows="8" style="resize: vertical;font-family: var(--b3-font-family-code);">${currentTemplate}</textarea>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                width: "520px",
+            });
+            const textarea = dialog.element.querySelector("textarea") as HTMLTextAreaElement;
+            const confirmBtn = dialog.element.querySelector(".b3-button--text") as HTMLButtonElement;
+            const cancelBtn = dialog.element.querySelector(".b3-button--cancel") as HTMLButtonElement;
+            const confirm = () => {
+                submitTemplate(textarea.value);
+                dialog.destroy();
+            };
+            confirmBtn.addEventListener("click", confirm);
+            cancelBtn.addEventListener("click", () => {
+                dialog.destroy();
+            });
+            dialog.bindInput(textarea, confirm);
+            textarea.focus();
+        }
+    });
     const calcRect = calcElement.getBoundingClientRect();
     menu.open({x: Math.max(x || 0, calcRect.left), y: calcRect.bottom, h: calcRect.height});
 };
@@ -431,6 +513,9 @@ export const getCalcValue = (column: IAVColumn) => {
     if (column.calc.operator === "Earliest" || column.calc.operator === "Latest" ||
         (column.calc.operator === "Range" && ["date", "created", "updated"].includes(column.type))) {
         resultCalc = column.calc.result[column.type as "date"];
+    } else if (column.calc.operator === "Template") {
+        // 自定义模板统计：数字输出走 number，文本输出走 text
+        resultCalc = column.calc.result.number || column.calc.result.text;
     }
     let value = "";
     switch (column.calc.operator) {
@@ -494,6 +579,9 @@ export const getCalcValue = (column: IAVColumn) => {
         case  "Percent unchecked":
             value = `<span>${resultCalc.formattedContent}</span><small>${window.siyuan.languages.percentUnchecked}</small>`;
             break;
+        case  "Template":
+            value = `<span>${resultCalc.formattedContent ?? resultCalc.content}</span><small>${window.siyuan.languages.calcResultTemplate}</small>`;
+            break;
     }
     return value;
 };
@@ -545,6 +633,8 @@ export const getNameByOperator = (operator: string, isRollup: boolean) => {
             return window.siyuan.languages.calcOperatorEarliest;
         case "Latest":
             return window.siyuan.languages.calcOperatorLatest;
+        case "Template":
+            return window.siyuan.languages.calcOperatorTemplate;
         default:
             return "";
     }

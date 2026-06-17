@@ -8,7 +8,7 @@
 		"id": "20240530101000-g3ugxml",
 		"title": "基本操作",
 		"type": "doc",
-		"updated": "20240612234753"
+		"updated": "20260614115755"
 	},
 	"Children": [
 		{
@@ -69,7 +69,6 @@
 			"ID": "20240530101000-4hjmzhr",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-6tne9ks",
 				"id": "20240530101000-4hjmzhr",
 				"updated": "20240530101000"
 			},
@@ -80,6 +79,23 @@
 					"TextMarkBlockRefID": "20240530101000-7yv4y5z",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "ウィンドウとタブ"
+				}
+			]
+		},
+		{
+			"ID": "20260614115734-dwabovh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115734-dwabovh",
+				"updated": "20260614115734"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260613211946-ods0v99",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "コンテンツ統計"
 				}
 			]
 		},
@@ -439,6 +455,40 @@
 					"TextMarkBlockRefID": "20240610233601-ylh1mvk",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "サービスを公開"
+				}
+			]
+		},
+		{
+			"ID": "20260614115740-jcx6678",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115740-jcx6678",
+				"updated": "20260614115741"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260612192417-fb4ueux",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "コマンドラインインターフェース"
+				}
+			]
+		},
+		{
+			"ID": "20260614115755-uzkirsi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614115755-uzkirsi",
+				"updated": "20260614115755"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260614104715-xe51jlk",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "ネットワークプロキシ"
 				}
 			]
 		}

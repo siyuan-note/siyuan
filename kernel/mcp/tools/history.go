@@ -27,7 +27,7 @@ import (
 
 var HistoryTool = &Tool{
 	Name:        "history",
-	Description: "Document history operations for SiYuan.\n- list: Search document history. Optional: query, notebook, op (delete/update/create), type (0=name,1=content,2=asset,3=docID,4=database), page.\n- search: Search document history by keyword. Requires: query. Optional: notebook, op, type, page.\n- get: Get historical content of a document by history path. Requires: path.\n- rollback: Rollback a document to a historical version. Requires: path.\n- clear: Clear all history.",
+	Description: "Document history operations. Actions: list(query?, notebook?, op?, type?, page?), search(query, notebook?, op?, type?, page?), get(path), rollback(path), clear().",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

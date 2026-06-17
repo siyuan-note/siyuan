@@ -25,7 +25,7 @@ import (
 
 var TagTool = &Tool{
 	Name:        "tag",
-	Description: "Tag management for SiYuan.\n- list: List all tags or search by keyword. Optional: keyword.\n- rename: Rename a tag. Requires: old, new.\n- remove: Remove a tag. Requires: label.",
+	Description: "Tag management. Actions: list(keyword?), rename(old, new), remove(label).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

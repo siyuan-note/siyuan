@@ -23,6 +23,8 @@ import {getWorkspaceName} from "./processTitle";
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
+    // 同步写入 data-lang 便于第三方主题做兼容选择器迁移（如 [data-lang="zh-CN"]），详见 https://github.com/siyuan-note/siyuan/issues/7098
+    htmlElement.setAttribute("data-lang", window.siyuan.config.appearance.lang);
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
     htmlElement.setAttribute("data-backend", getBackend());
     htmlElement.setAttribute("data-theme-mode", getThemeMode());

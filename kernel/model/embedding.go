@@ -193,7 +193,7 @@ func decodeVector(b []byte) []float32 {
 }
 
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
-	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), Conf.AI.OpenAI.APITimeout)
+	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
 	if err != nil {
 		if util.IsNetworkError(err) {
 			embeddingStop.Store(true)
@@ -298,7 +298,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		return
 	}
 
-	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), Conf.AI.OpenAI.APITimeout)
+	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
 	if err != nil || 1 > len(vectors) {
 		logging.LogErrorf("get query embedding failed")
 		return
@@ -438,12 +438,12 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 }
 
 func isEmbeddingEnabled() bool {
-	return "" != embeddingKey()
+	return nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
 }
 
 func embeddingKey() string {
-	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIKey {
-		return p.APIKey
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.APIKey {
+		return Conf.AI.Embedding.APIKey
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != v {
 		return v
@@ -452,8 +452,8 @@ func embeddingKey() string {
 }
 
 func embeddingBaseURL() string {
-	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIBaseURL {
-		return p.APIBaseURL
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.BaseURL {
+		return Conf.AI.Embedding.BaseURL
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != v {
 		return v
@@ -461,9 +461,16 @@ func embeddingBaseURL() string {
 	return ""
 }
 
+func embeddingTimeout() int {
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && 0 < Conf.AI.Embedding.Timeout {
+		return Conf.AI.Embedding.Timeout
+	}
+	return 30
+}
+
 func embeddingModel() string {
-	if p := Conf.AI.GetEmbeddingProvider(); p != nil && "" != p.APIModel {
-		return p.APIModel
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && "" != Conf.AI.Embedding.Name {
+		return Conf.AI.Embedding.Name
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != v {
 		return v

@@ -7,7 +7,7 @@
 		"id": "20240530101000-vejnh1k",
 		"title": "クエリ構文",
 		"type": "doc",
-		"updated": "20250115150339"
+		"updated": "20260613193647"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-tyyk26i",
 				"id": "20240530101000-omyfbt2",
-				"updated": "20250115150339"
+				"updated": "20260613193647"
 			},
 			"Children": [
 				{
@@ -31,7 +31,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-cdbpnhl",
-				"updated": "20250115150339"
+				"updated": "20260613193647"
 			},
 			"Children": [
 				{
@@ -1058,7 +1058,7 @@
 			"Properties": {
 				"ID": "20240530101000-lk1pndp",
 				"id": "20240530101000-xs3ijea",
-				"updated": "20240530101000"
+				"updated": "20260612224348"
 			},
 			"Children": [
 				{
@@ -1217,7 +1217,6 @@
 			"ID": "20240530101000-qp5o4ek",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-ljeeoua",
 				"id": "20240530101000-qp5o4ek",
 				"updated": "20240530101000"
 			},
@@ -1225,199 +1224,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "さらに API を通じて全文検索も可能です。"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-1g2pqf0",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"ID": "20240530101000-h2bp41f",
-				"id": "20240530101000-1g2pqf0",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "大文字と小文字の区別"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-487vhsj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-0g77o70",
-				"id": "20240530101000-487vhsj",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "検索で大文字と小文字を区別するかどうかは、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設定"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "検索"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "大文字と小文字を区別する"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ で切り替えられます (デフォルトでは無効)"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-opd2vs9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-0oqxdzy",
-				"id": "20240530101000-opd2vs9",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "トークナイザーは大文字と小文字を区別するため、以下の 2 つの仮想テーブルを作成してそれぞれにインデックスを作成しています:"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-x7la8mo",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"ID": "20240530101000-kgf28ta",
-				"id": "20240530101000-x7la8mo",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"ID": "20240530101000-75hwibv",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-6xvr3xo",
-						"id": "20240530101000-75hwibv",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-jcybx7f",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-g8irjyx",
-								"id": "20240530101000-jcybx7f",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​: 文字をそのままトークン化します"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240530101000-pbiaqrk",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-hq2l9j2",
-						"id": "20240530101000-pbiaqrk",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-5ak7mpo",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-vo2l1nu",
-								"id": "20240530101000-5ak7mpo",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts_case_insensitive"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​: 英字を小文字に変換してトークン化します"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-1afmxcx",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-19tqpom",
-				"id": "20240530101000-1afmxcx",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "この方法ではストレージ容量の増加やインデックス作成速度の低下といった課題がありますが、現時点では他に良い方法がないため採用されています。また、発音区別符号付き文字の大文字と小文字を区別した検索は現在サポートされていません。"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-fb45smk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-ocapi8p",
-				"id": "20240530101000-fb45smk",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "より良い実装方法がありましたら、ぜひお知らせください。"
 				}
 			]
 		},

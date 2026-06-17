@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20251211094305"
+		"updated": "20260616224215"
 	},
 	"Children": [
 		{
@@ -2093,7 +2093,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091509-yzs0dlz",
-				"updated": "20210415200924"
+				"updated": "20260616224215"
 			},
 			"Children": [
 				{
@@ -2143,7 +2143,8 @@
 			"ID": "20210104091509-3a5p9xt",
 			"Type": "NodeBlockquote",
 			"Properties": {
-				"id": "20210104091509-3a5p9xt"
+				"id": "20210104091509-3a5p9xt",
+				"updated": "20260616221442"
 			},
 			"Children": [
 				{
@@ -2154,7 +2155,8 @@
 					"ID": "20210104091509-ozjt2fc",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20210104091509-ozjt2fc"
+						"id": "20210104091509-ozjt2fc",
+						"updated": "20210104091509"
 					},
 					"Children": [
 						{
@@ -2168,7 +2170,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2177,7 +2179,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2186,7 +2188,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2195,7 +2197,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2204,7 +2206,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2213,7 +2215,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2222,7 +2224,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2231,7 +2233,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2240,7 +2242,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2249,7 +2251,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2258,9 +2260,52 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " ..."
+							"Data": "​ ..."
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260616221442-2iocv82",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260616221442-2iocv82",
+				"updated": "20260616224215"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Additionally, code block language supports "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan-template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, both equivalent. Using them enables syntax highlighting for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204184532-3qm9l8n",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "SiYuan template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " syntax. When exporting, the code block is not exported as a code block, but converted to plain paragraph text instead."
 				}
 			]
 		},

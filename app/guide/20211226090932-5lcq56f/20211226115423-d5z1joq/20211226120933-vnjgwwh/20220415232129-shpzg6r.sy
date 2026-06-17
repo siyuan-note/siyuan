@@ -6,7 +6,7 @@
 		"id": "20220415232129-shpzg6r",
 		"title": "查詢語法",
 		"type": "doc",
-		"updated": "20250115150514"
+		"updated": "20260613193329"
 	},
 	"Children": [
 		{
@@ -962,7 +962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-1juhjxd",
-				"updated": "20250115150514"
+				"updated": "20260613193329"
 			},
 			"Children": [
 				{
@@ -1128,179 +1128,12 @@
 			]
 		},
 		{
-			"ID": "20220415232130-8ia0bhj",
-			"Type": "NodeHeading",
-			"HeadingLevel": 3,
-			"Properties": {
-				"id": "20220415232130-8ia0bhj",
-				"updated": "20220415232130"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "大小寫敏感"
-				}
-			]
-		},
-		{
-			"ID": "20220415232130-xwpb33n",
+			"ID": "20260613193329-bossusf",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20220415232130-xwpb33n",
-				"updated": "20220415232130"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果開啟了 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "搜索"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "區分大小寫"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 選項，則搜索會區分大小寫，預設該選項是關閉的，即不區分大小寫。"
-				}
-			]
-		},
-		{
-			"ID": "20220415232130-z1fwurj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415232130-z1fwurj",
-				"updated": "20220415232130"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "由於分詞器是區分大小寫的，所以我們構建了兩張虛擬表來分別索引："
-				}
-			]
-		},
-		{
-			"ID": "20220415232130-83f3pq6",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20220415232130-83f3pq6",
-				"updated": "20220415232130"
-			},
-			"Children": [
-				{
-					"ID": "20220415232130-fr8nexn",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220415232130-fr8nexn",
-						"updated": "20220415232130"
-					},
-					"Children": [
-						{
-							"ID": "20220415232130-ivobyfz",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220415232130-ivobyfz",
-								"updated": "20220415232130"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：按字符原樣分詞"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20220415232130-1r29zfb",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20220415232130-1r29zfb",
-						"updated": "20220415232130"
-					},
-					"Children": [
-						{
-							"ID": "20220415232130-j4oaowk",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20220415232130-j4oaowk",
-								"updated": "20220415232130"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "blocks_fts_case_insensitive"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "：將英文字母轉換為小寫分詞"
-								}
-							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20220415232130-yjj7ba6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415232130-yjj7ba6",
-				"updated": "20230802221509"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "這樣做的缺點是增加了磁碟空間佔用和降低了索引性能，但是目前暫時沒有更好的方案，所以只能先這樣了。另外，不支持變音符號，僅支持忽略大小寫。"
-				}
-			]
-		},
-		{
-			"ID": "20220415232130-t5o6exk",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20220415232130-t5o6exk",
-				"updated": "20220415232130"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果你有更好的實現方案，歡迎告訴我們，非常感謝。"
-				}
-			]
+				"id": "20260613193329-bossusf",
+				"updated": "20260613193329"
+			}
 		}
 	]
 }

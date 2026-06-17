@@ -1,7 +1,6 @@
 import type {App} from "../index";
 import {hideMessage} from "../dialog/message";
 import {hideElements} from "../protyle/ui/hideElements";
-import {reloadProtyle} from "../protyle/util/reload";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {fetchPost} from "./fetch";
 import {Constants} from "../constants";

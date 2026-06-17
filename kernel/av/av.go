@@ -28,6 +28,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/goccy/go-json"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -526,10 +527,10 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 	}
 
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
-	if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
+	if err = json.Unmarshal(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
 			mapAv := map[string]any{}
-			if err = gulu.JSON.UnmarshalJSON(data, &mapAv); err != nil {
+			if err = json.Unmarshal(data, &mapAv); err != nil {
 				logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 				return
 			}
@@ -567,13 +568,13 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 				}
 			}
 
-			data, err = gulu.JSON.MarshalJSON(mapAv)
+			data, err = json.Marshal(mapAv)
 			if err != nil {
 				logging.LogErrorf("marshal attribute view [%s] failed: %s", avID, err)
 				return
 			}
 
-			if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
+			if err = json.Unmarshal(data, ret); err != nil {
 				logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 				return
 			}

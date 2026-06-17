@@ -1,6 +1,10 @@
 import {fetchSyncPost} from "../../util/fetch";
+import {Constants} from "../../constants";
 
 const API = "/api/ai/agent";
+
+// 标识发起者 app，后端 saveSession/removeSession 据此排除自身、向其他实例广播会话变更。
+const APP_HEADER = {"X-SiYuan-App-ID": Constants.SIYUAN_APPID};
 
 export interface SessionIndexItem {
     id: string;
@@ -23,15 +27,29 @@ export interface AgentSession {
     model?: string;
     messages?: Array<{role: string; content: string; toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>}>;
     entries?: Array<{
-        type: "user" | "thinking" | "assistant" | "confirm" | "snapshot" | "rollback";
+        id?: string;
+        type: "user" | "thinking" | "assistant" | "confirm" | "question" | "snapshot" | "rollback";
         content?: string;
-        steps?: Array<{reasoning: string; text: string; toolCalls: Array<{name: string; result?: string}>; reasoningContent: string}>;
+        // thinking step：新格式只含 reasoning/reasoningContent/toolNames/content；
+        // text/toolCalls 仅为读取老数据而保留为可选（渲染时归一化）。
+        steps?: Array<{
+            reasoning: string;
+            reasoningContent: string;
+            toolNames?: string[];
+            content?: string;
+            text?: string;
+            toolCalls?: Array<{name: string; result?: string}>
+        }>;
         reasoningContent?: string;
         toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>;
+        duration?: number;
         confirmName?: string;
         confirmArgs?: Record<string, unknown>;
         confirmID?: string;
         confirmStatus?: string;
+        questionID?: string;
+        questions?: Array<Record<string, unknown>>;
+        questionStatus?: string;
         snapshotID?: string;
     }>;
     snapshots?: string[];
@@ -70,11 +88,11 @@ export const SessionStore = {
 
     async save(session: AgentSession): Promise<void> {
         session.updatedAt = Date.now();
-        await fetchSyncPost(API + "/saveSession", session);
+        await fetchSyncPost(API + "/saveSession", session, APP_HEADER);
     },
 
     async remove(id: string): Promise<void> {
-        await fetchSyncPost(API + "/removeSession", {id});
+        await fetchSyncPost(API + "/removeSession", {id}, APP_HEADER);
     },
 
     async rename(id: string, newTitle: string): Promise<void> {

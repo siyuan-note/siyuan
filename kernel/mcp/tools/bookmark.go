@@ -25,7 +25,7 @@ import (
 
 var BookmarkTool = &Tool{
 	Name:        "bookmark",
-	Description: "Bookmark management for SiYuan.\n- list: List all bookmarks with block counts.\n- labels: List all bookmark labels.\n- remove: Remove a bookmark. Requires: label.\n- rename: Rename a bookmark. Requires: old, new.",
+	Description: "Bookmark management. Actions: list(), labels(), remove(label), rename(old, new).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

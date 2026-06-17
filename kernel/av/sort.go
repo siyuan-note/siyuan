@@ -51,13 +51,33 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 	}
 
 	var fieldIndexSorts []*FieldIndexSort
+	fields := collection.GetFields()
 	for _, s := range sorts {
-		for i, c := range collection.GetFields() {
+		for i, c := range fields {
 			if c.GetID() == s.Column {
 				fieldIndexSorts = append(fieldIndexSorts, &FieldIndexSort{Index: i, Order: s.Order})
 				break
 			}
 		}
+	}
+
+	// 预算每个排序字段的选项顺序映射，避免在比较器内每次比较都重建（O(N log N) 次比较 × 每次 O(选项数)）
+	optionSortByIndex := map[int]map[string]int{}
+	for _, fis := range fieldIndexSorts {
+		field := fields[fis.Index]
+		fieldType := field.GetType()
+		if KeyTypeSelect != fieldType && KeyTypeMSelect != fieldType {
+			continue
+		}
+		key, _ := attrView.GetKey(field.GetID())
+		if nil == key {
+			continue
+		}
+		optionSort := map[string]int{}
+		for i, op := range key.Options {
+			optionSort[op.Name] = i
+		}
+		optionSortByIndex[fis.Index] = optionSort
 	}
 
 	items := collection.GetItems()
@@ -120,7 +140,7 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 				}
 			}
 
-			result := val1.Compare(val2, attrView)
+			result := val1.Compare(val2, optionSortByIndex[fieldIndexSort.Index])
 			if 0 == result {
 				sorted = false
 				continue
@@ -158,7 +178,7 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 	}
 }
 
-func (value *Value) Compare(other *Value, attrView *AttributeView) int {
+func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other.Block {
@@ -267,13 +287,9 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect && nil != other.MSelect {
-			// 按设置的选项顺序排序
-			key, _ := attrView.GetKey(value.KeyID)
-			optionSort := map[string]int{}
-			if nil != key {
-				for i, op := range key.Options {
-					optionSort[op.Name] = i
-				}
+			// 按设置的选项顺序排序，optionSort 由外层 Sort 按字段预算好后传入
+			if nil == optionSort {
+				optionSort = map[string]int{}
 			}
 
 			vLen := len(value.MSelect)

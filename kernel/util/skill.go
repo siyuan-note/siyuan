@@ -17,10 +17,12 @@
 package util
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
 )
 
@@ -95,6 +97,79 @@ func LoadSkillContent(name string) string {
 	return ""
 }
 
+func validateSkillName(name string) error {
+	if name == "" || name == "." || name == ".." {
+		return fmt.Errorf("invalid skill name: %s", name)
+	}
+	if strings.ContainsAny(name, `/\`) {
+		return fmt.Errorf("invalid skill name: %s", name)
+	}
+	dir := SkillsDir()
+	abs := filepath.Join(dir, name)
+	if !gulu.File.IsSubPath(dir, abs) {
+		return fmt.Errorf("invalid skill name: %s", name)
+	}
+	return nil
+}
+
+func ReadSkill(name string) (string, error) {
+	if err := validateSkillName(name); err != nil {
+		return "", err
+	}
+	skillMdPath := filepath.Join(SkillsDir(), name, "SKILL.md")
+	b, err := filelock.ReadFile(skillMdPath)
+	if err != nil {
+		return "", fmt.Errorf("skill not found: %s", name)
+	}
+	return string(b), nil
+}
+
+func SaveSkill(name, content string) error {
+	if err := validateSkillName(name); err != nil {
+		return err
+	}
+	dir := SkillsDir()
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+	skillDir := filepath.Join(dir, name)
+	if err := os.MkdirAll(skillDir, 0755); err != nil {
+		return err
+	}
+	skillMdPath := filepath.Join(skillDir, "SKILL.md")
+	return filelock.WriteFile(skillMdPath, []byte(content))
+}
+
+func RemoveSkill(name string) error {
+	if err := validateSkillName(name); err != nil {
+		return err
+	}
+	skillDir := filepath.Join(SkillsDir(), name)
+	if _, err := os.Stat(skillDir); os.IsNotExist(err) {
+		return fmt.Errorf("skill not found: %s", name)
+	}
+	return os.RemoveAll(skillDir)
+}
+
+func RenameSkill(oldName, newName string) error {
+	if err := validateSkillName(oldName); err != nil {
+		return err
+	}
+	if err := validateSkillName(newName); err != nil {
+		return err
+	}
+	dir := SkillsDir()
+	oldDir := filepath.Join(dir, oldName)
+	newDir := filepath.Join(dir, newName)
+	if _, err := os.Stat(oldDir); os.IsNotExist(err) {
+		return fmt.Errorf("skill not found: %s", oldName)
+	}
+	if _, err := os.Stat(newDir); err == nil {
+		return fmt.Errorf("skill already exists: %s", newName)
+	}
+	return os.Rename(oldDir, newDir)
+}
+
 func parseSkillFrontmatter(text string) (fm map[string]string, body string) {
 	fm = map[string]string{}
 	text = strings.TrimSpace(text)
@@ -134,8 +209,9 @@ func firstLine(text string) string {
 	if idx > 0 {
 		text = text[:idx]
 	}
-	if len(text) > 200 {
-		text = text[:200] + "..."
+	runes := []rune(text)
+	if len(runes) > 200 {
+		text = string(runes[:200]) + "..."
 	}
 	return text
 }

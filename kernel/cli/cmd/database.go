@@ -97,7 +97,7 @@ var databaseRenderCmd = &cobra.Command{
 			size = 50
 		}
 
-		_, attrView, err := model.RenderAttributeView("", avID, viewID, query, page, size, nil, false)
+		_, attrView, err := model.RenderAttributeView("", avID, viewID, query, page, size, nil, false, false)
 		if err != nil {
 			return err
 		}

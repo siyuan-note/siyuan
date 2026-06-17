@@ -17,29 +17,80 @@
 package conf
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"os"
 	"strconv"
 
-	"github.com/siyuan-note/siyuan/kernel/util"
-
 	"github.com/88250/lute/ast"
-	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type AI struct {
-	OpenAI    *OpenAI    `json:"openAI"`
-	MCP       *MCPConfig `json:"mcp"`
-	Providers []*OpenAI  `json:"providers,omitempty"`
+	MCP       *MCP        `json:"mcp"`
+	Embedding *Embedding  `json:"embedding"`
+	Agent     *Agent      `json:"agent"`
+	Editing   *Editing    `json:"editing"`
+	Providers []*Provider `json:"providers"`
 }
 
-type MCPConfig struct {
+type Agent struct {
+	ModelID             string  `json:"modelId"`
+	SessionTimeout      int     `json:"sessionTimeout"`
+	ConfirmTimeout      int     `json:"confirmTimeout"`
+	MaxRetries          int     `json:"maxRetries"`
+	Temperature         float64 `json:"temperature"`
+	MaxCompletionTokens int     `json:"maxCompletionTokens"`
+	MaxToolCallRounds   int     `json:"maxToolCallRounds"`
+}
+
+// Editing holds behavior parameters used by the in-editor chat scenario. They
+// are kept here (instead of on Model) to mirror Agent and to decouple scenario
+// behavior from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
+type Editing struct {
+	ModelID             string  `json:"modelId"`
+	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
+	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
+	MaxCompletionTokens int     `json:"maxCompletionTokens"` // Alignment with Agent.MaxCompletionTokens
+}
+
+type Embedding struct {
+	ID      string `json:"id"`
+	Enabled bool   `json:"enabled"`
+	APIKey  string `json:"apiKey"`
+	BaseURL string `json:"baseURL"`
+	Name    string `json:"name"`
+	Timeout int    `json:"timeout"`
+}
+
+type Provider struct {
+	ID             string   `json:"id"`
+	DisplayName    string   `json:"displayName,omitempty"`
+	Enabled        bool     `json:"enabled"`
+	APIKey         string   `json:"apiKey"`
+	BaseURL        string   `json:"baseURL"`
+	RequestTimeout int      `json:"requestTimeout"`
+	Models         []*Model `json:"models"`
+}
+
+// Model is the provider-scoped model registry entry. MaxTokens/Temperature/
+// MaxContexts remain the persisted UI-facing config (the settings page still
+// reads/writes them). Editing holds the runtime view derived from them.
+type Model struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName,omitempty"`
+	Enabled     bool   `json:"enabled"`
+	Name        string `json:"name"`
+}
+
+type MCP struct {
 	Servers []MCPServer `json:"servers"`
 }
 
 type MCPServer struct {
 	Name    string            `json:"name"`
 	Enabled bool              `json:"enabled"`
-	Type    string            `json:"type"` // "stdio" | "http"
+	Type    string            `json:"type"`
 	Command string            `json:"command"`
 	Args    []string          `json:"args"`
 	URL     string            `json:"url"`
@@ -47,207 +98,517 @@ type MCPServer struct {
 	Timeout int               `json:"timeout"`
 }
 
-type OpenAI struct {
-	ID                  string  `json:"id,omitempty"`   // immutable unique identifier
-	Name                string  `json:"name,omitempty"` // display name, defaults to apiModel
-	APIKey              string  `json:"apiKey"`
-	APITimeout          int     `json:"apiTimeout"`
-	APIProxy            string  `json:"apiProxy"`
-	APIModel            string  `json:"apiModel"`
-	APIMaxTokens        int     `json:"apiMaxTokens"`
-	APITemperature      float64 `json:"apiTemperature"`
-	APIMaxContexts      int     `json:"apiMaxContexts"`
-	APIBaseURL          string  `json:"apiBaseURL"`
-	APIUserAgent        string  `json:"apiUserAgent"`
-	APIProvider         string  `json:"apiProvider"`         // OpenAI, Azure
-	APIVersion          string  `json:"apiVersion"`          // Azure API version
-	Type                string  `json:"type,omitempty"`      // empty or "chat" = chat model, "embedding" = embedding model
-	AgentTimeout        int     `json:"agentTimeout"`        // total session timeout, seconds, 0 = no limit
-	AgentConfirmTimeout int     `json:"agentConfirmTimeout"` // confirmation timeout, seconds
-	AgentMaxRetries     int     `json:"agentMaxRetries"`     // max API retry attempts on failure
-	Enabled             *bool   `json:"enabled,omitempty"`
+func defaultEmbedding() *Embedding {
+	return &Embedding{Timeout: 30}
 }
 
 func NewAI() *AI {
-	openAI := &OpenAI{
-		APITemperature:      1.0,
-		APIMaxContexts:      7,
-		APITimeout:          30,
-		APIModel:            openai.GPT3Dot5Turbo,
-		APIBaseURL:          "https://api.openai.com/v1",
-		APIUserAgent:        util.UserAgent,
-		APIProvider:         "OpenAI",
-		AgentTimeout:        600,
-		AgentConfirmTimeout: 120,
-		AgentMaxRetries:     3,
+	ai := &AI{
+		Providers: []*Provider{},
+		MCP:       &MCP{Servers: []MCPServer{}},
+		Embedding: defaultEmbedding(),
+		Agent: &Agent{
+			SessionTimeout:      600,
+			ConfirmTimeout:      120,
+			MaxRetries:          3,
+			Temperature:         1.0,
+			MaxCompletionTokens: 0,
+			MaxToolCallRounds:   64,
+		},
+		Editing: &Editing{
+			MaxHistoryMessages:  7,
+			Temperature:         1.0,
+			MaxCompletionTokens: 0,
+		},
 	}
 
-	openAI.APIKey = os.Getenv("SIYUAN_OPENAI_API_KEY")
+	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
+	apiModel := os.Getenv("SIYUAN_OPENAI_API_MODEL")
+	apiBaseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL")
 
-	if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
-		timeoutInt, err := strconv.Atoi(timeout)
-		if err == nil {
-			openAI.APITimeout = timeoutInt
+	if apiKey != "" && apiModel != "" && apiBaseURL != "" {
+		provider := &Provider{
+			BaseURL:        apiBaseURL,
+			RequestTimeout: 30,
+			Enabled:        true,
+			APIKey:         apiKey,
 		}
-	}
-
-	if proxy := os.Getenv("SIYUAN_OPENAI_API_PROXY"); "" != proxy {
-		openAI.APIProxy = proxy
-	}
-
-	if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
-		maxTokensInt, err := strconv.Atoi(maxTokens)
-		if err == nil {
-			openAI.APIMaxTokens = maxTokensInt
+		if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
+			if v, err := strconv.Atoi(timeout); err == nil {
+				provider.RequestTimeout = v
+			}
 		}
-	}
 
-	if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
-		temperatureFloat, err := strconv.ParseFloat(temperature, 64)
-		if err == nil {
-			openAI.APITemperature = temperatureFloat
+		model := &Model{
+			Name:    apiModel,
+			Enabled: true,
 		}
-	}
-
-	if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
-		maxContextsInt, err := strconv.Atoi(maxContexts)
-		if err == nil {
-			openAI.APIMaxContexts = maxContextsInt
+		if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
+			if v, err := strconv.Atoi(maxTokens); err == nil {
+				ai.Editing.MaxCompletionTokens = v
+			}
 		}
+		if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
+			if v, err := strconv.ParseFloat(temperature, 64); err == nil {
+				ai.Editing.Temperature = v
+			}
+		}
+		if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
+			if v, err := strconv.Atoi(maxContexts); err == nil {
+				ai.Editing.MaxHistoryMessages = v
+			}
+		}
+
+		provider.Models = append(provider.Models, model)
+		ai.Providers = append(ai.Providers, provider)
 	}
 
-	if baseURL := os.Getenv("SIYUAN_OPENAI_API_BASE_URL"); "" != baseURL {
-		openAI.APIBaseURL = baseURL
-	}
-
-	if userAgent := os.Getenv("SIYUAN_OPENAI_API_USER_AGENT"); "" != userAgent {
-		openAI.APIUserAgent = userAgent
-	}
-	embeddingAPIKey := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY")
-	embeddingBaseURL := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL")
-	embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL")
-	var providers []*OpenAI
-	if "" != embeddingAPIKey && "" != embeddingBaseURL && "" != embeddingModel {
-		providers = append(providers, &OpenAI{
-			APIKey:     embeddingAPIKey,
-			APITimeout: 30,
-			APIBaseURL: embeddingBaseURL,
-			APIModel:   embeddingModel,
-			Type:       "embedding",
-			Enabled:    &[]bool{true}[0],
-		})
-	}
 	if agentTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_TIMEOUT"); "" != agentTimeout {
 		if v, err := strconv.Atoi(agentTimeout); err == nil {
-			openAI.AgentTimeout = v
+			ai.Agent.SessionTimeout = v
 		}
 	}
 	if agentConfirmTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_CONFIRM_TIMEOUT"); "" != agentConfirmTimeout {
 		if v, err := strconv.Atoi(agentConfirmTimeout); err == nil {
-			openAI.AgentConfirmTimeout = v
+			ai.Agent.ConfirmTimeout = v
 		}
 	}
 	if agentMaxRetries := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_RETRIES"); "" != agentMaxRetries {
 		if v, err := strconv.Atoi(agentMaxRetries); err == nil {
-			openAI.AgentMaxRetries = v
+			ai.Agent.MaxRetries = v
 		}
 	}
-	return &AI{OpenAI: openAI, Providers: providers}
-}
-
-func (p *OpenAI) DisplayName() string {
-	if p.Name != "" {
-		return p.Name
+	if agentTemperature := os.Getenv("SIYUAN_OPENAI_AGENT_TEMPERATURE"); "" != agentTemperature {
+		if v, err := strconv.ParseFloat(agentTemperature, 64); err == nil {
+			ai.Agent.Temperature = v
+		}
 	}
-	return p.APIModel
-}
+	if agentMaxCompletionTokens := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_COMPLETION_TOKENS"); "" != agentMaxCompletionTokens {
+		if v, err := strconv.Atoi(agentMaxCompletionTokens); err == nil {
+			ai.Agent.MaxCompletionTokens = v
+		}
+	}
+	if agentMaxToolCallRounds := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_TOOL_CALL_ROUNDS"); "" != agentMaxToolCallRounds {
+		if v, err := strconv.Atoi(agentMaxToolCallRounds); err == nil {
+			ai.Agent.MaxToolCallRounds = v
+		}
+	}
 
-func (p *OpenAI) IsEnabled() bool {
-	return p.Enabled == nil || *p.Enabled
+	embeddingKey := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY")
+	embeddingBaseURL := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL")
+	embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL")
+	if "" != embeddingKey && "" != embeddingBaseURL && "" != embeddingModel {
+		ai.Embedding = &Embedding{
+			APIKey:  embeddingKey,
+			BaseURL: embeddingBaseURL,
+			Name:    embeddingModel,
+			Timeout: 30,
+		}
+	}
+
+	return ai
 }
 
 func (ai *AI) HasAnyProvider() bool {
-	if ai.OpenAI != nil && ai.OpenAI.APIKey != "" && ai.OpenAI.IsEnabled() {
-		return true
-	}
 	for _, p := range ai.Providers {
-		if p != nil && p.APIKey != "" && p.IsEnabled() {
-			return true
+		if p != nil && len(p.APIKey) > 0 && p.Enabled {
+			for _, m := range p.Models {
+				if m.Name != "" && m.Enabled {
+					return true
+				}
+			}
 		}
 	}
 	return false
 }
 
-func (ai *AI) GetProvider(id string) *OpenAI {
+func (ai *AI) GetModel(id string) (*Provider, *Model) {
 	if id == "" {
-		if ai.OpenAI != nil && ai.OpenAI.IsEnabled() && ai.OpenAI.APIKey != "" {
-			return ai.OpenAI
+		return nil, nil
+	}
+
+	for _, p := range ai.Providers {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+			continue
 		}
-		for _, p := range ai.Providers {
-			if p != nil && p.IsEnabled() && p.APIKey != "" {
-				return p
+		for _, m := range p.Models {
+			if m.ID == id && m.Enabled {
+				return p, m
 			}
 		}
-		return ai.OpenAI
 	}
 
 	for _, p := range ai.Providers {
-		if p != nil && p.ID == id && p.IsEnabled() && p.APIKey != "" {
-			return p
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+			continue
 		}
-	}
-	if ai.OpenAI != nil && ai.OpenAI.ID == id && ai.OpenAI.IsEnabled() && ai.OpenAI.APIKey != "" {
-		return ai.OpenAI
+		for _, m := range p.Models {
+			if m.DisplayName == id && m.Enabled {
+				return p, m
+			}
+		}
 	}
 
 	for _, p := range ai.Providers {
-		if p != nil && p.Name == id && p.IsEnabled() && p.APIKey != "" {
-			return p
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+			continue
 		}
-	}
-	if ai.OpenAI != nil && ai.OpenAI.Name == id && ai.OpenAI.IsEnabled() && ai.OpenAI.APIKey != "" {
-		return ai.OpenAI
+		for _, m := range p.Models {
+			if m.Name == id && m.Enabled {
+				return p, m
+			}
+		}
 	}
 
-	for _, p := range ai.Providers {
-		if p != nil && p.APIModel == id && p.IsEnabled() && p.APIKey != "" {
-			return p
-		}
+	return nil, nil
+}
+
+func (ai *AI) GetEditingModel() (*Provider, *Model) {
+	if ai.Editing == nil || ai.Editing.ModelID == "" {
+		return nil, nil
 	}
-	return ai.OpenAI
+	return ai.GetModel(ai.Editing.ModelID)
+}
+
+func (ai *AI) GetAgentModel() (*Provider, *Model) {
+	if ai.Agent == nil || ai.Agent.ModelID == "" {
+		return nil, nil
+	}
+	return ai.GetModel(ai.Agent.ModelID)
 }
 
 func (ai *AI) Normalize() {
-	if nil == ai.OpenAI {
-		ai.OpenAI = &OpenAI{}
+	if ai.Providers == nil {
+		ai.Providers = []*Provider{}
 	}
-	if "" == ai.OpenAI.ID {
-		ai.OpenAI.ID = ast.NewNodeID()
-	}
-	if "" == ai.OpenAI.Name {
-		ai.OpenAI.Name = ai.OpenAI.APIModel
+	if ai.MCP == nil {
+		ai.MCP = &MCP{Servers: []MCPServer{}}
+	} else if ai.MCP.Servers == nil {
+		ai.MCP.Servers = []MCPServer{}
 	}
 	for _, p := range ai.Providers {
-		if nil == p {
+		if p == nil {
 			continue
 		}
-		if "" == p.ID {
+		if p.Models == nil {
+			p.Models = []*Model{}
+		}
+		if !ast.IsNodeIDPattern(p.ID) {
 			p.ID = ast.NewNodeID()
 		}
-		if "" == p.Name {
-			p.Name = p.APIModel
+		for _, m := range p.Models {
+			if m == nil {
+				continue
+			}
+			if !ast.IsNodeIDPattern(m.ID) {
+				m.ID = ast.NewNodeID()
+			}
+		}
+	}
+	if ai.Embedding == nil {
+		ai.Embedding = defaultEmbedding()
+	}
+	if ai.Embedding.Timeout < 1 {
+		ai.Embedding.Timeout = 30
+	}
+	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
+		ai.Embedding.ID = ast.NewNodeID()
+	}
+}
+
+func (ai *AI) DecryptAPIKeys() {
+	for _, p := range ai.Providers {
+		if p == nil || p.APIKey == "" {
+			continue
+		}
+		dec := util.AESDecrypt(p.APIKey)
+		if dec == nil {
+			continue
+		}
+		if plain, err := hex.DecodeString(string(dec)); err == nil {
+			p.APIKey = string(plain)
+		}
+	}
+	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
+		dec := util.AESDecrypt(ai.Embedding.APIKey)
+		if dec == nil {
+			return
+		}
+		if plain, err := hex.DecodeString(string(dec)); err == nil {
+			ai.Embedding.APIKey = string(plain)
 		}
 	}
 }
 
-func (ai *AI) GetEmbeddingProvider() *OpenAI {
+func (ai *AI) EncryptAPIKeys() {
 	for _, p := range ai.Providers {
-		if p != nil && p.Type == "embedding" {
+		if p == nil || p.APIKey == "" {
+			continue
+		}
+		p.APIKey = util.AESEncrypt(p.APIKey)
+	}
+	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
+		ai.Embedding.APIKey = util.AESEncrypt(ai.Embedding.APIKey)
+	}
+}
+
+func NeedsAIMigration(data []byte) bool {
+	var topRaw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &topRaw); err != nil {
+		return false
+	}
+	aiRaw, ok := topRaw["ai"]
+	if !ok {
+		return false
+	}
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(aiRaw, &raw); err != nil {
+		return false
+	}
+	_, ok = raw["openAI"]
+	return ok
+}
+
+func MigrateAI(data []byte) *AI {
+	var topRaw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &topRaw); err != nil {
+		return NewAI()
+	}
+	aiRaw, ok := topRaw["ai"]
+	if !ok {
+		return NewAI()
+	}
+	var raw map[string]any
+	if err := json.Unmarshal(aiRaw, &raw); err != nil {
+		return NewAI()
+	}
+
+	ai := &AI{}
+
+	if mcp, ok := raw["mcp"].(map[string]any); ok {
+		ai.MCP = migrateMCP(mcp)
+	}
+
+	if oai, ok := raw["openAI"].(map[string]any); ok {
+		prov := migrateProvider(oai)
+		m := migrateModel(oai)
+		prov.Models = append(prov.Models, m)
+		ai.Providers = append(ai.Providers, prov)
+
+		ai.Agent = &Agent{
+			SessionTimeout:    getInt(oai, "agentTimeout"),
+			ConfirmTimeout:    getInt(oai, "agentConfirmTimeout"),
+			MaxRetries:        getInt(oai, "agentMaxRetries"),
+			MaxToolCallRounds: 64,
+		}
+
+		maxContexts := getInt(oai, "apiMaxContexts")
+		ai.Editing = &Editing{
+			MaxHistoryMessages:  maxContexts,
+			Temperature:         getFloat(oai, "apiTemperature"),
+			MaxCompletionTokens: getInt(oai, "apiMaxTokens"),
+		}
+	}
+
+	if provs, ok := raw["providers"].([]any); ok {
+		for _, item := range provs {
+			p, ok2 := item.(map[string]any)
+			if !ok2 {
+				continue
+			}
+			if getString(p, "type") == "embedding" {
+				ai.Embedding = migrateEmbedding(p)
+			} else {
+				m := migrateModel(p)
+				oldBaseURL := getString(p, "apiBaseURL")
+				if existing := findProviderByBaseURL(ai.Providers, oldBaseURL); existing != nil {
+					existing.Models = append(existing.Models, m)
+				} else {
+					prov := migrateProvider(p)
+					prov.Models = append(prov.Models, m)
+					ai.Providers = append(ai.Providers, prov)
+				}
+			}
+		}
+	}
+
+	ai.Normalize()
+	assignDefaultModelIDs(ai)
+
+	return ai
+}
+
+func assignDefaultModelIDs(ai *AI) {
+	if (ai.Editing != nil && ai.Editing.ModelID != "") || (ai.Agent != nil && ai.Agent.ModelID != "") {
+		return
+	}
+	var m *Model
+	for _, p := range ai.Providers {
+		if p == nil || len(p.APIKey) == 0 || !p.Enabled {
+			continue
+		}
+		for _, model := range p.Models {
+			if model != nil && model.Name != "" && model.Enabled {
+				m = model
+				break
+			}
+		}
+		if m != nil {
+			break
+		}
+	}
+	if m == nil && len(ai.Providers) > 0 && ai.Providers[0] != nil && len(ai.Providers[0].Models) > 0 {
+		m = ai.Providers[0].Models[0]
+	}
+	if m == nil || m.ID == "" {
+		return
+	}
+	if ai.Editing == nil {
+		ai.Editing = &Editing{}
+	}
+	if ai.Editing.ModelID == "" {
+		ai.Editing.ModelID = m.ID
+	}
+	if ai.Agent == nil {
+		ai.Agent = &Agent{MaxToolCallRounds: 64}
+	}
+	if ai.Agent.ModelID == "" {
+		ai.Agent.ModelID = m.ID
+	}
+}
+
+func findProviderByBaseURL(providers []*Provider, baseURL string) *Provider {
+	for _, p := range providers {
+		if p != nil && p.BaseURL == baseURL && baseURL != "" {
 			return p
 		}
 	}
-	if ai.OpenAI != nil && ai.OpenAI.Type == "embedding" {
-		return ai.OpenAI
+	return nil
+}
+
+func migrateMCP(raw map[string]any) *MCP {
+	mcp := &MCP{}
+	servers, ok := raw["servers"].([]any)
+	if !ok {
+		return mcp
+	}
+	for _, s := range servers {
+		sm, ok2 := s.(map[string]any)
+		if !ok2 {
+			continue
+		}
+		mcp.Servers = append(mcp.Servers, MCPServer{
+			Name:    getString(sm, "name"),
+			Enabled: getBool(sm, "enabled"),
+			Type:    getString(sm, "type"),
+			Command: getString(sm, "command"),
+			Args:    getStringSlice(sm, "args"),
+			URL:     getString(sm, "url"),
+			Headers: getStringMap(sm, "headers"),
+			Timeout: getInt(sm, "timeout"),
+		})
+	}
+	return mcp
+}
+
+func migrateProvider(raw map[string]any) *Provider {
+	return &Provider{
+		ID:             getString(raw, "id"),
+		Enabled:        true,
+		APIKey:         getString(raw, "apiKey"),
+		BaseURL:        getString(raw, "apiBaseURL"),
+		RequestTimeout: getInt(raw, "apiTimeout"),
+	}
+}
+
+func migrateModel(raw map[string]any) *Model {
+	enabled := true
+	if v, ok := raw["enabled"]; ok {
+		if b, ok2 := v.(bool); ok2 && !b {
+			enabled = false
+		}
+	}
+	return &Model{
+		ID:          getString(raw, "id"),
+		DisplayName: getString(raw, "name"),
+		Enabled:     enabled,
+		Name:        getString(raw, "apiModel"),
+	}
+}
+
+func migrateEmbedding(raw map[string]any) *Embedding {
+	return &Embedding{
+		ID:      getString(raw, "id"),
+		Enabled: getBool(raw, "enabled"),
+		APIKey:  getString(raw, "apiKey"),
+		BaseURL: getString(raw, "apiBaseURL"),
+		Name:    getString(raw, "apiModel"),
+		Timeout: getInt(raw, "apiTimeout"),
+	}
+}
+
+func getString(m map[string]any, key string) string {
+	if v, ok := m[key]; ok {
+		if s, ok := v.(string); ok {
+			return s
+		}
+	}
+	return ""
+}
+
+func getInt(m map[string]any, key string) int {
+	if v, ok := m[key]; ok {
+		if f, ok := v.(float64); ok {
+			return int(f)
+		}
+	}
+	return 0
+}
+
+func getFloat(m map[string]any, key string) float64 {
+	if v, ok := m[key]; ok {
+		if f, ok := v.(float64); ok {
+			return f
+		}
+	}
+	return 0
+}
+
+func getBool(m map[string]any, key string) bool {
+	if v, ok := m[key]; ok {
+		if b, ok := v.(bool); ok {
+			return b
+		}
+	}
+	return false
+}
+
+func getStringSlice(m map[string]any, key string) []string {
+	if v, ok := m[key]; ok {
+		if arr, ok := v.([]any); ok {
+			ret := make([]string, 0, len(arr))
+			for _, item := range arr {
+				if s, ok := item.(string); ok {
+					ret = append(ret, s)
+				}
+			}
+			return ret
+		}
+	}
+	return nil
+}
+
+func getStringMap(m map[string]any, key string) map[string]string {
+	if v, ok := m[key]; ok {
+		if sm, ok := v.(map[string]any); ok {
+			ret := make(map[string]string)
+			for k, val := range sm {
+				if s, ok := val.(string); ok {
+					ret[k] = s
+				}
+			}
+			return ret
+		}
 	}
 	return nil
 }

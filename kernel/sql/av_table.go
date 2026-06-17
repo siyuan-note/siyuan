@@ -22,7 +22,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView) (ret *av.Table) {
+func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView, ignoreRows bool) (ret *av.Table) {
 	viewable := attrView.RenderedViewables[view.ID]
 	if nil != viewable {
 		ret = viewable.(*av.Table)
@@ -68,24 +68,34 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		})
 	}
 
+	// 菜单等只需要字段/视图元数据的场景，跳过全部行处理
+	if ignoreRows {
+		return
+	}
+
 	rowsValues := generateAttrViewItems(attrView, view) // 生成行
 	filterNotFoundAttrViewItems(rowsValues)             // 过滤掉不存在的行
 
 	// 生成行单元格
 	for rowID, rowValues := range rowsValues {
+		// 按字段 ID 建索引，避免后续列循环里对每个单元格做线性查找
+		kvByCol := map[string]*av.KeyValues{}
+		for _, keyValues := range rowValues {
+			if _, ok := kvByCol[keyValues.Key.ID]; !ok { // 同一字段存在多个值时只取第一个
+				kvByCol[keyValues.Key.ID] = keyValues
+			}
+		}
+
 		var tableRow av.TableRow
 		for _, col := range ret.Columns {
 			var tableCell *av.TableCell
-			for _, keyValues := range rowValues {
-				if keyValues.Key.ID == col.ID {
-					tableCell = &av.TableCell{
-						BaseValue: &av.BaseValue{
-							ID:        keyValues.Values[0].ID,
-							Value:     keyValues.Values[0],
-							ValueType: col.Type,
-						},
-					}
-					break
+			if keyValues, ok := kvByCol[col.ID]; ok {
+				tableCell = &av.TableCell{
+					BaseValue: &av.BaseValue{
+						ID:        keyValues.Values[0].ID,
+						Value:     keyValues.Values[0],
+						ValueType: col.Type,
+					},
 				}
 			}
 			if nil == tableCell {

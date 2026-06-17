@@ -187,11 +187,14 @@ export const filterHotkey = (event: KeyboardEvent, app: App) => {
     if (!event.altKey && event.shiftKey && isNotCtrl(event)) {
         if (event.key === "Shift") {
             window.siyuan.shiftIsPressed = true;
+            // 按下 Shift 时隐藏表格列宽调整手柄，以便 Shift+滚轮可以横向滚动表格 https://github.com/siyuan-note/siyuan/issues/13828
+            document.body.classList.add("body--shift-pressed");
             if (!event.repeat) {
                 showPopover(app, true);
             }
         } else {
             window.siyuan.shiftIsPressed = false;
+            document.body.classList.remove("body--shift-pressed");
         }
     }
 

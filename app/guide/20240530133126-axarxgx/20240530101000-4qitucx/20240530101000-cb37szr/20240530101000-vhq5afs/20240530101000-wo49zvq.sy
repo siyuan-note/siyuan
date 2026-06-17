@@ -7,7 +7,7 @@
 		"id": "20240530101000-wo49zvq",
 		"title": "データ同期",
 		"type": "doc",
-		"updated": "20250218121028"
+		"updated": "20260614203609"
 	},
 	"Children": [
 		{
@@ -1244,7 +1244,7 @@
 			"Properties": {
 				"ID": "20240530101000-swfnh4f",
 				"id": "20240530101000-vqxael9",
-				"updated": "20240530101000"
+				"updated": "20260614203609"
 			},
 			"Children": [
 				{
@@ -1267,9 +1267,8 @@
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-367d9gp",
 				"id": "20240530101000-b9usy7v",
-				"updated": "20240530101000"
+				"updated": "20260614203609"
 			},
 			"Children": [
 				{
@@ -1280,7 +1279,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-0sjbaci",
 						"id": "20240530101000-c9q7obp",
 						"updated": "20240530101000"
 					},
@@ -1289,7 +1287,6 @@
 							"ID": "20240530101000-h8hzdf2",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-lqp0zwk",
 								"id": "20240530101000-h8hzdf2",
 								"updated": "20240530101000"
 							},
@@ -1310,7 +1307,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-xkfm80w",
 						"id": "20240530101000-7vuijma",
 						"updated": "20240530101000"
 					},
@@ -1319,7 +1315,6 @@
 							"ID": "20240530101000-zxpjv1c",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-aeypsh5",
 								"id": "20240530101000-zxpjv1c",
 								"updated": "20240530101000"
 							},
@@ -1333,6 +1328,34 @@
 					]
 				},
 				{
+					"ID": "20260614203609-yjktil5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260614203609-yjktil5",
+						"updated": "20260614203609"
+					},
+					"Children": [
+						{
+							"ID": "20260614203609-vst7qpa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260614203609-vst7qpa",
+								"updated": "20260614203609"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "思源はワークスペースがサードパーティ同期ディレクトリにあるかどうかを自動的に検出し、検出された場合はデータ破損を防ぐために強制終了します"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20240530101000-qa5ly1a",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -1340,7 +1363,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-y5g79kg",
 						"id": "20240530101000-qa5ly1a",
 						"updated": "20240530101000"
 					},
@@ -1349,7 +1371,6 @@
 							"ID": "20240530101000-efjn8rn",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-0oy5yf2",
 								"id": "20240530101000-efjn8rn",
 								"updated": "20240530101000"
 							},
@@ -1370,7 +1391,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-0bxti66",
 						"id": "20240530101000-11n6jg5",
 						"updated": "20240530101000"
 					},
@@ -1379,7 +1399,6 @@
 							"ID": "20240530101000-tr5niom",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-1u0sqf7",
 								"id": "20240530101000-tr5niom",
 								"updated": "20240530101000"
 							},
@@ -1400,7 +1419,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-qb73b16",
 						"id": "20240530101000-bm1ml3x",
 						"updated": "20240530101000"
 					},
@@ -1409,7 +1427,6 @@
 							"ID": "20240530101000-pp6vwso",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-cyhhinm",
 								"id": "20240530101000-pp6vwso",
 								"updated": "20240530101000"
 							},
@@ -1425,7 +1442,6 @@
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"ID": "20240530101000-imjum3b",
 								"id": "20240530101000-63wynzi",
 								"updated": "20240530101000"
 							},
@@ -1438,7 +1454,6 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"ID": "20240530101000-crebw17",
 										"id": "20240530101000-08f8659",
 										"updated": "20240530101000"
 									},
@@ -1447,7 +1462,6 @@
 											"ID": "20240530101000-5smqqv3",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"ID": "20240530101000-pw9gmsj",
 												"id": "20240530101000-5smqqv3",
 												"updated": "20240530101000"
 											},
@@ -1486,7 +1500,6 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"ID": "20240530101000-wzok3ca",
 										"id": "20240530101000-593dl27",
 										"updated": "20240530101000"
 									},
@@ -1495,7 +1508,6 @@
 											"ID": "20240530101000-xlcljcw",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"ID": "20240530101000-8d7v8y1",
 												"id": "20240530101000-xlcljcw",
 												"updated": "20240530101000"
 											},
@@ -1528,7 +1540,6 @@
 											"ID": "20240530101000-y5jzeo3",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"ID": "20240530101000-f4i0cyw",
 												"id": "20240530101000-y5jzeo3",
 												"updated": "20240530101000"
 											}

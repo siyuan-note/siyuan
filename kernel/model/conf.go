@@ -33,7 +33,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
-	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -129,13 +128,29 @@ func InitConf() {
 		if data, err := os.ReadFile(confPath); err != nil {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		} else {
-			if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
+			if conf.NeedsAIMigration(data) {
+				if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
+					logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+				} else {
+					Conf.AI = conf.MigrateAI(data)
+					if nil != Conf.Search && Conf.Search.HanSensitive == nil {
+						Conf.Search.SetHanSensitive(true)
+					}
+					if nil != Conf.AI {
+						Conf.AI.DecryptAPIKeys()
+					}
+					Conf.Save()
+					logging.LogInfof("migrated AI config [%s]", confPath)
+				}
+			} else if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
 				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
 			} else {
 				logging.LogInfof("loaded conf [%s]", confPath)
 				if nil != Conf.Search && Conf.Search.HanSensitive == nil {
-					// 旧版本配置无 hanSensitive 字段：保持既往行为（区分繁简）
 					Conf.Search.SetHanSensitive(true)
+				}
+				if nil != Conf.AI {
+					Conf.AI.DecryptAPIKeys()
 				}
 			}
 		}
@@ -162,27 +177,38 @@ func InitConf() {
 
 			if userLang, err := locale.Detect(); err == nil {
 				var supportLangs []language.Tag
+				langStrByTag := make(map[language.Tag]string)
 				for lang := range util.Langs {
 					if tag, err := language.Parse(lang); err == nil {
 						supportLangs = append(supportLangs, tag)
+						langStrByTag[tag] = lang
 					} else {
 						logging.LogErrorf("load language [%s] failed: %s", lang, err)
 					}
 				}
 				matcher := language.NewMatcher(supportLangs)
-				lang, _, _ := matcher.Match(userLang)
-				base, _ := lang.Base()
-				region, _ := lang.Region()
-				util.Lang = base.String() + "_" + region.String()
+				matchedTag, _, _ := matcher.Match(userLang)
+				if langStr, ok := langStrByTag[matchedTag]; ok {
+					util.Lang = langStr
+				} else {
+					util.Lang = "en"
+				}
 				Conf.Lang = util.Lang
 				logging.LogInfof("initialized language [%s] based on device locale", Conf.Lang)
 			} else {
-				logging.LogDebugf("check device locale failed [%s], using default language [en_US]", err)
-				util.Lang = "en_US"
+				logging.LogDebugf("check device locale failed [%s], using default language [en]", err)
+				util.Lang = "en"
 				Conf.Lang = util.Lang
 			}
 		}
 		util.Lang = Conf.Lang
+	}
+
+	// 历史下划线语言代码迁移为 BCP 47 新值（zh_CN → zh-CN 等）
+	if migrated := util.MigrateLang(Conf.Lang); migrated != Conf.Lang {
+		logging.LogInfof("migrate legacy lang [%s] → [%s]", Conf.Lang, migrated)
+		Conf.Lang = migrated
+		util.Lang = migrated
 	}
 
 	Conf.Langs = loadLangs()
@@ -197,10 +223,23 @@ func InitConf() {
 		}
 	}
 	if !langOK {
-		Conf.Lang = "en_US"
+		Conf.Lang = "en"
 		util.Lang = Conf.Lang
 	}
 	Conf.Appearance.Lang = Conf.Lang
+
+	// 历史下划线命名的 i18n 文件（zh_CN.json 等）已重命名为 BCP 47（zh-CN.json 等），
+	// 清理 ConfDir/appearance/langs/ 下的旧名残留，避免僵尸文件。详见 kernel/util/lang.go
+	if langsDir := filepath.Join(util.AppearancePath, "langs"); gulu.File.IsDir(langsDir) {
+		for _, stem := range []string{"zh_CN", "zh_CHT", "en_US", "de_DE", "fr_FR", "es_ES", "pt_BR",
+			"it_IT", "ja_JP", "ko_KR", "ru_RU", "uk_UA", "pl_PL", "nl_NL", "ar_SA", "he_IL",
+			"hi_IN", "id_ID", "th_TH", "tr_TR", "sk_SK"} {
+			oldPath := filepath.Join(langsDir, stem+".json")
+			if gulu.File.IsExist(oldPath) {
+				os.RemoveAll(oldPath)
+			}
+		}
+	}
 	if "ant" == Conf.Appearance.Icon || "material" == Conf.Appearance.Icon {
 		// v3.7.0 移除了 ant/material 图标包，如果用户之前选择了这两个其中之一，升级后改为 litheness 图标包，避免图标显示异常 https://github.com/siyuan-note/siyuan/issues/7976
 		Conf.Appearance.Icon = "litheness"
@@ -344,9 +383,7 @@ func InitConf() {
 
 	if nil == Conf.System {
 		Conf.System = conf.NewSystem()
-		if util.ContainerIOS != util.Container {
-			Conf.OpenHelp = true
-		}
+		Conf.OpenHelp = true
 	} else {
 		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
 		if 0 < cmp {
@@ -554,58 +591,71 @@ func InitConf() {
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
 	}
-	if "" == Conf.AI.OpenAI.APIModel {
-		Conf.AI.OpenAI.APIModel = openai.GPT3Dot5Turbo
+	if nil == Conf.AI.Agent {
+		Conf.AI.Agent = &conf.Agent{
+			SessionTimeout:      600,
+			ConfirmTimeout:      120,
+			MaxRetries:          3,
+			Temperature:         1.0,
+			MaxCompletionTokens: 0,
+			MaxToolCallRounds:   64,
+		}
 	}
-	if "" == Conf.AI.OpenAI.APIUserAgent {
-		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
+	if nil == Conf.AI.Editing {
+		Conf.AI.Editing = &conf.Editing{
+			MaxHistoryMessages:  7,
+			Temperature:         1.0,
+			MaxCompletionTokens: 0,
+		}
 	}
-	if strings.HasPrefix(Conf.AI.OpenAI.APIUserAgent, "SiYuan/") {
-		Conf.AI.OpenAI.APIUserAgent = util.UserAgent
+	for _, p := range Conf.AI.Providers {
+		if nil == p {
+			continue
+		}
+		if 1 > p.RequestTimeout {
+			p.RequestTimeout = 30
+		}
 	}
-	if "" == Conf.AI.OpenAI.APIProvider {
-		Conf.AI.OpenAI.APIProvider = "OpenAI"
+	if 0 > Conf.AI.Editing.MaxCompletionTokens {
+		Conf.AI.Editing.MaxCompletionTokens = 0
 	}
-	if 0 > Conf.AI.OpenAI.APIMaxTokens {
-		Conf.AI.OpenAI.APIMaxTokens = 0
+	if 0 > Conf.AI.Editing.Temperature || 2 < Conf.AI.Editing.Temperature {
+		Conf.AI.Editing.Temperature = 1.0
 	}
-	if 0 >= Conf.AI.OpenAI.APITemperature || 2 < Conf.AI.OpenAI.APITemperature {
-		Conf.AI.OpenAI.APITemperature = 1.0
-	}
-	if 1 > Conf.AI.OpenAI.APIMaxContexts || 64 < Conf.AI.OpenAI.APIMaxContexts {
-		Conf.AI.OpenAI.APIMaxContexts = 7
-	}
-	if nil == Conf.AI.OpenAI.Enabled && Conf.AI.OpenAI.APIBaseURL != "" && Conf.AI.OpenAI.APIKey != "" {
-		t := true
-		Conf.AI.OpenAI.Enabled = &t
-	}
-
-	if "" != Conf.AI.OpenAI.APIKey {
-		logging.LogInfof("OpenAI API enabled\n"+
-			"    userAgent=%s\n"+
-			"    baseURL=%s\n"+
-			"    timeout=%ds\n"+
-			"    proxy=%s\n"+
-			"    model=%s\n"+
-			"    maxTokens=%d\n"+
-			"    temperature=%.1f\n"+
-			"    maxContexts=%d",
-			Conf.AI.OpenAI.APIUserAgent,
-			Conf.AI.OpenAI.APIBaseURL,
-			Conf.AI.OpenAI.APITimeout,
-			Conf.AI.OpenAI.APIProxy,
-			Conf.AI.OpenAI.APIModel,
-			Conf.AI.OpenAI.APIMaxTokens,
-			Conf.AI.OpenAI.APITemperature,
-			Conf.AI.OpenAI.APIMaxContexts)
+	if 1 > Conf.AI.Editing.MaxHistoryMessages || 64 < Conf.AI.Editing.MaxHistoryMessages {
+		Conf.AI.Editing.MaxHistoryMessages = 7
 	}
 
-	if embeddingProvider := Conf.AI.GetEmbeddingProvider(); embeddingProvider != nil {
+	for _, p := range Conf.AI.Providers {
+		if p == nil || len(p.APIKey) == 0 {
+			continue
+		}
+		for _, m := range p.Models {
+			if m.Name == "" {
+				continue
+			}
+			logging.LogInfof("AI provider enabled\n"+
+				"    baseURL=%s\n"+
+				"    timeout=%ds\n"+
+				"    model=%s\n"+
+				"    maxCompletionTokens=%d\n"+
+				"    temperature=%.1f\n"+
+				"    maxHistoryMessages=%d",
+				p.BaseURL,
+				p.RequestTimeout,
+				m.Name,
+				Conf.AI.Editing.MaxCompletionTokens,
+				Conf.AI.Editing.Temperature,
+				Conf.AI.Editing.MaxHistoryMessages)
+		}
+	}
+
+	if Conf.AI.Embedding != nil && len(Conf.AI.Embedding.APIKey) > 0 {
 		logging.LogInfof("embedding API enabled\n"+
 			"    baseURL=%s\n"+
 			"    model=%s",
-			embeddingProvider.APIBaseURL,
-			embeddingProvider.APIModel)
+			Conf.AI.Embedding.BaseURL,
+			Conf.AI.Embedding.Name)
 	}
 
 	Conf.AI.Normalize()
@@ -903,6 +953,11 @@ func (conf *AppConf) Save() {
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
 
+	if nil != Conf.AI {
+		Conf.AI.EncryptAPIKeys()
+		defer Conf.AI.DecryptAPIKeys()
+	}
+
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	oldData, err := filelock.ReadFile(confPath)
@@ -1022,7 +1077,7 @@ func (conf *AppConf) language(num int) (ret string) {
 	if "" != ret {
 		return
 	}
-	ret = util.Langs["en_US"][num]
+	ret = util.Langs["en"][num]
 	return
 }
 

@@ -1,0 +1,5958 @@
+{
+	"ID": "20260613155453-sgecaav",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260613155453-sgecaav",
+		"title": "Field Types",
+		"type": "doc",
+		"updated": "20260613194210"
+	},
+	"Children": [
+		{
+			"ID": "20260613155453-piff4he",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-piff4he",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-fj7c7pk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-fj7c7pk",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The following table lists all field types and their core characteristics:"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ga53qn2",
+			"Type": "NodeTable",
+			"Data": "| Field Type | Use Case | Sortable | Filterable | Aggregatable | Special Template Suffix |\n|---------|---------|--------|--------|--------|------------|\n| Text | Titles, descriptions, arbitrary text | √ | √ | × | — |\n| Number | Amounts, quantities, ratings | √ | √ | √ | — |\n| Date | Deadlines, birthdays, creation dates | √ | √ | × | `_end` |\n| Select | Status, category, priority | √ | √ | × | — |\n| Multi-Select | Tags, multi-category | √ | √ | × | `_str` |\n| URL | External links, references | × | √ | × | — |\n| Email | Contact email | × | √ | × | — |\n| Phone | Contact phone | × | √ | × | — |\n| Checkbox | Completed/not, enabled/disabled | √ | √ | × | — |\n| Primary Key (Block) | Unique record identifier, can bind to a content block | √ | √ | × | `_created` |\n| Asset | Attachments, images, files | × | × | × | — |\n| Relation | Cross-database record relations | × | √ | × | — |\n| Rollup | Statistical calculations based on relation fields | √ | √ | √ | — |\n| Template | Auto-fill default values | × | × | × | — |\n| Created Time | Record creation time (auto) | √ | √ | × | — |\n| Updated Time | Record last modified time (auto) | √ | √ | × | — |\n| Line Number | Auto-increment sequence number | √ | √ | × | — |",
+			"TableAligns": [
+				0,
+				0,
+				0,
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"id": "20260613155453-ga53qn2",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Field Type"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Use Case"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Sortable"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Filterable"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Aggregatable"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Special Template Suffix"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Titles, descriptions, arbitrary text"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Number"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Amounts, quantities, ratings"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Date"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Deadlines, birthdays, creation dates"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_end"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Status, category, priority"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Multi-Select"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tags, multi-category"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "URL"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "External links, references"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Email"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Contact email"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Phone"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Contact phone"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Checkbox"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Completed/not, enabled/disabled"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Primary Key (Block)"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Unique record identifier, can bind to a content block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_created"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Asset"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Attachments, images, files"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Relation"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Cross-database record relations"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Rollup"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Statistical calculations based on relation fields"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Template"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Auto-fill default values"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Created Time"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Record creation time (auto)"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Updated Time"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Record last modified time (auto)"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"TableAligns": [
+						0,
+						0,
+						0,
+						0,
+						0,
+						0
+					],
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Line Number"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Auto-increment sequence number"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "√"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "×"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "—"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-il6daqu",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260613155453-il6daqu",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e "
+				},
+				{
+					"ID": "20260613155453-ogc2pir",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260613155453-ogc2pir",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "strong",
+							"TextMarkTextContent": "Template Syntax Reference"
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-umg3u6k",
+					"Type": "NodeList",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-umg3u6k",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-xwj32oq",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-xwj32oq",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-9ley2n0",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-9ley2n0",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.fieldName}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " retrieves the formatted value of a field, applicable to all field types"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-g3ohx9k",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-g3ohx9k",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-rqbc3ll",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-rqbc3ll",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.fieldName_str}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " converts multi-select values to a comma-separated string, "
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "only for multi-select"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-vuylg53",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-vuylg53",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-12vdux3",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-12vdux3",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.fieldName_end}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " retrieves the end date of a date field, "
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "only for date"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-76mi19w",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-76mi19w",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-4ese2dh",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-4ese2dh",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.fieldName_created}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " retrieves the creation time of the block bound to the primary key field, "
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "strong",
+											"TextMarkTextContent": "only for primary key"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-nb8e9pj",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-nb8e9pj",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-g18d7yc",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-g18d7yc",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{.fieldName_raw}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " retrieves the raw value object of a field, applicable to all field types"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-fbqqrdz",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-fbqqrdz",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-a6giqbo",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-a6giqbo",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{index . \"entryCreated\"}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " and "
+										},
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{index . \"entryUpdated\"}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " access the creation/update time of the row's bound block"
+										}
+									]
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-85s2az3",
+							"Type": "NodeListItem",
+							"Data": "-",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-85s2az3",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-pdzu4wn",
+									"Type": "NodeParagraph",
+									"Properties": {
+										"id": "20260613155453-pdzu4wn",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"Type": "NodeTextMark",
+											"TextMarkType": "code",
+											"TextMarkTextContent": ".action{index .id_mod \"fieldID\"}"
+										},
+										{
+											"Type": "NodeText",
+											"Data": " accesses the formatted value by field ID"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-6df7phn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-6df7phn",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Text"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-rws5ely",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-rws5ely",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used for storing titles, descriptions, and any text content."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-c1c1f0s",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-c1c1f0s",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-rhzqopz",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-rhzqopz",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-1l4frnq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-1l4frnq",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When creating, you can check \"Multi-line\" to use a multi-line text box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-iak54ph",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-iak54ph",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-gkly2lg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-gkly2lg",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Type directly in the cell; use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Shift+Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " for line breaks in multi-line mode"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-gcgdtj5",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-gcgdtj5",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ho4re1z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ho4re1z",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports fuzzy search matching"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-ph8tbu8",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ph8tbu8",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-6iphzao",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-6iphzao",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted by pinyin or Unicode code points"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-j0stc70",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-j0stc70",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Number"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ecbk72s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-ecbk72s",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used for storing amounts, quantities, ratings, and other numeric information."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-l873oba",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-l873oba",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-vfwy9zx",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-vfwy9zx",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-jocsybi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-jocsybi",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When creating, you can choose the number format — integer, decimal, percentage, currency"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-c3fl92i",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-c3fl92i",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-gyrshb1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-gyrshb1",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Enter numbers directly in the cell; adjust the format in the settings panel"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-tpjmefq",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-tpjmefq",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-heu830o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-heu830o",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports greater than/less than/equal to/range conditions"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-i2qk0xa",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-i2qk0xa",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-o028s4h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-o028s4h",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted by numeric value"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-kbm31av",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-kbm31av",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-fh9vhou",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-fh9vhou",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Aggregation Support"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Rollup fields can calculate sum, average, max, min, count, etc. on this column"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-tvixbm7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-tvixbm7",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Date"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-3tiq5c7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-3tiq5c7",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used for storing dates or date-times."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-pjxds7m",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-pjxds7m",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-t337ggc",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-t337ggc",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-obpjohc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-obpjohc",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When creating, you can check \"Include Time\"; date range (start and end dates) can be configured"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-609e1jo",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-609e1jo",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-un2imsf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-un2imsf",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click in the cell to open the date picker"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-lbc7iza",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-lbc7iza",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-sb6k7ec",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-sb6k7ec",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports specific day, before/after a day, between two dates, has value/no value, etc."
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-vg7k78l",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-vg7k78l",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-b8hpbjy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-b8hpbjy",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted chronologically"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-zetjhkw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-zetjhkw",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Select"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-wx7pwrs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-wx7pwrs",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose a single value from a preset list of options."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-aamqftw",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-aamqftw",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-jmw4fub",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-jmw4fub",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-20iz6hl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-20iz6hl",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": After creating, you can add, edit, and delete options, and set a color tag for each option"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-yj7islu",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-yj7islu",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-l2i35xi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-l2i35xi",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click in the cell to open the option list and select one"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-l3vn3oa",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-l3vn3oa",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-gbputl0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-gbputl0",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports equals/not equals a specific option, has value/no value"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-v8saw89",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-v8saw89",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-nwngox6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-nwngox6",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted by the order of options in the list"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-mb0sqjh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-mb0sqjh",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Multi-Select"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-vdzqtyk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-vdzqtyk",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose zero, one, or multiple values from a preset list of options."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-bdvakcg",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-bdvakcg",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-9wcu0no",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-9wcu0no",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-pjl63pc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-pjl63pc",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": After creating, you can add, edit, delete, drag-to-reorder options, and set color tags"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-pknlqsn",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-pknlqsn",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ndzdjy4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ndzdjy4",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click in the cell to open the option list and check multiple items"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-5xtzzdb",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-5xtzzdb",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-elsjnnj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-elsjnnj",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports contains/does not contain a specific option. When \"contains\" is selected, a record matches as long as it includes the specified option"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-p5kwinw",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-p5kwinw",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3a95o47",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3a95o47",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted by the order of options in the list"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-fy19kko",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-fy19kko",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-beu205p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-beu205p",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Template Reference"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.fieldName}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " retrieves multi-select values; "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "_str"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " suffix converts to a comma-separated string"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-tk8pa5o",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-tk8pa5o",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-m3rc0g3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-m3rc0g3",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Difference from Select"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Allows assigning multiple tag values to one field, suitable for multi-dimensional classification scenarios"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-jfx4vmt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-jfx4vmt",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "URL"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-nrsfl01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-nrsfl01",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used for storing URL links."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-4e6m0u7",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-4e6m0u7",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-yr79v5j",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-yr79v5j",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-z0jrvqq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-z0jrvqq",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Enter or paste a URL into the cell"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-qd03fyc",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-qd03fyc",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-u5yulit",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-u5yulit",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click to open in browser"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-dshvkpq",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-dshvkpq",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-toxrgqy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-toxrgqy",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports fuzzy search"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-1qk77l5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-1qk77l5",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Email"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-5s5fgqm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-5s5fgqm",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used for storing email addresses."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ktj3t1j",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-ktj3t1j",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-ec8kfpt",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ec8kfpt",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-319hrf3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-319hrf3",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Enter an email address directly into the cell"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-j1p8u07",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-j1p8u07",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-qrk7tpp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-qrk7tpp",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click to invoke the default email client"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-q4taqmy",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-q4taqmy",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-qneetyr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-qneetyr",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports fuzzy search"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-76h9e0m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-76h9e0m",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Phone"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-sptanh8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-sptanh8",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used for storing phone numbers."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-augjwnh",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-augjwnh",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-dgovgl9",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-dgovgl9",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-msqvqt2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-msqvqt2",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Enter a phone number directly into the cell"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-65rinc3",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-65rinc3",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-56wwvp0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-56wwvp0",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": On mobile, click to invoke the dialer"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-99yfwdd",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-99yfwdd",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-kk4ry4x",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-kk4ry4x",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports fuzzy search"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-8xovwl5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-8xovwl5",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Checkbox"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-i2eeeyz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-i2eeeyz",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used to represent boolean states such as yes/no, on/off."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-e2ivfgl",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-e2ivfgl",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-wtrcffw",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-wtrcffw",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ywcll2h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ywcll2h",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click in the cell to check or uncheck"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-xqe2bk4",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-xqe2bk4",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-zbrdjlv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-zbrdjlv",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports checked/unchecked conditions"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-j7xy3ar",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-j7xy3ar",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-g6zli9r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-g6zli9r",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Checked items can be placed first or last"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-nz8xbd6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-nz8xbd6",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Primary Key (Block)"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-0ahugdf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-0ahugdf",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The unique identifier for each record in a database. In content-block-type records, the primary key is bound to the corresponding content block, thereby connecting structured data with unstructured content. Each table must have exactly one primary key field."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-nsinh0n",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-nsinh0n",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-w8tnhbf",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-w8tnhbf",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-sdbzgtx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-sdbzgtx",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Creation"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Automatically generated when the database is created; no manual addition needed"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-9xb44ut",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-9xb44ut",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-nng1w3a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-nng1w3a",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Binding Methods"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-el2hw4f",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-el2hw4f",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-n622tfn",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-n622tfn",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-el7ibet",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-el7ibet",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Content block records: Bind by dragging a block to the database view, or via the block icon menu \"Add to Database\""
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-og0aedx",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-og0aedx",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-w3iz03p",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-w3iz03p",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Non-content block records: Add entries directly in the view; the primary key is automatically generated by the system"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-qq56gei",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-qq56gei",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-gpod9l7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-gpod9l7",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": In content block records, the cell shows a summary of the bound block's content; hover to preview, click to jump"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-ufsztba",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ufsztba",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ytr34wl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ytr34wl",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Notes"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": The binding relationship cannot be modified directly through the cell; if the content block is deleted, the corresponding record is also deleted"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-mqf6drg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-mqf6drg",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Asset"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-btrf748",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-btrf748",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Used for storing attachments, images, files, and other resource files."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-zy0p7ap",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-zy0p7ap",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-0w746vf",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-0w746vf",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-udfiq30",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-udfiq30",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-c55ot9j",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-c55ot9j",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-kjj6xf3",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-kjj6xf3",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-99uj5fe",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-99uj5fe",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Drag and drop files from the file manager into the cell"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-hrvajlo",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-hrvajlo",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-0kcy9zg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-0kcy9zg",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Click the upload button in the cell to select local files"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-3og6pif",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-3og6pif",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-geamvua",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-geamvua",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Drag images from the inbox to the cell"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-wqyke4g",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-wqyke4g",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-ulkrk5v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-ulkrk5v",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Supported File Types"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Images, PDFs, Office documents, archives, and any other file types"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-3ni6nbb",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-3ni6nbb",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3uebvmk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3uebvmk",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Images are previewed as thumbnails; other files show a type icon and filename; click to open or download"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-dehtq1p",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-dehtq1p",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-rut9nso",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-rut9nso",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Notes"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Multi-asset fields support storing multiple files; filtering and sorting are not supported"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-unpy2mo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-unpy2mo",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Relation"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-5ma8geo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-5ma8geo",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Establishes cross-database record relationships, the core mechanism for inter-database collaboration."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-b4gshar",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-b4gshar",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-g3ekozu",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-g3ekozu",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-l4gnk12",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-l4gnk12",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When creating, you must select the \"target database\" for the relation"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-4t2t5z2",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-4t2t5z2",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-hg9uxhx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-hg9uxhx",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Click in the cell to search and select one or more records from the target database's record list"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-hppc5mc",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-hppc5mc",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3bwkrmd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3bwkrmd",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Relation Direction"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-5ju0v9h",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-5ju0v9h",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-i4xzund",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-i4xzund",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-lb33d79",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-lb33d79",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "When creating a relation field, you can choose whether to automatically create a reverse relation field in the target database (bidirectional relation)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-gb99848",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-gb99848",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-c1zdgix",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-c1zdgix",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "A unidirectional relation is only visible in the current database"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-q9y7pjp",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-q9y7pjp",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-mheww77",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-mheww77",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports has value/no value filtering"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-mkq5zv2",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-mkq5zv2",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3kozj52",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3kozj52",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Notes"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": The relation field stores references to target database entries; when the target entry is deleted, the relation is automatically cleared"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-emnjshi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-emnjshi",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Rollup"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-xkqnioo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-xkqnioo",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Performs statistical calculations on a field in the target database based on a relation field."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-0l9p6s1",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-0l9p6s1",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-mu4xqk4",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-mu4xqk4",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-tm5s2nq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-tm5s2nq",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Prerequisite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": A relation field must already exist"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-76ffpcu",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-76ffpcu",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3zqteh8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3zqteh8",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When creating, specify \"which relation field to base on\", \"target field\", and \"rollup function\""
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-gqzpnra",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-gqzpnra",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-n7isxp9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-n7isxp9",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Rollup Functions"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ":"
+								}
+							]
+						},
+						{
+							"ID": "20260613155453-7huszho",
+							"Type": "NodeList",
+							"ListData": {
+								"Tight": true,
+								"BulletChar": 45,
+								"Padding": 2,
+								"Marker": "LQ==",
+								"Num": -1
+							},
+							"Properties": {
+								"id": "20260613155453-7huszho",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"ID": "20260613155453-15pe18g",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-15pe18g",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-i9pz1wc",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-i9pz1wc",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Sum (SUM), Average (AVG), Maximum (MAX), Minimum (MIN)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-jcue3b8",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-jcue3b8",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-0rw40bs",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-0rw40bs",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Count (COUNT), Distinct Count (COUNT DISTINCT)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-mk7k947",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-mk7k947",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-095fpq4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-095fpq4",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Earliest (EARLIEST), Latest (LATEST) (date fields)"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20260613155453-iddvs40",
+									"Type": "NodeListItem",
+									"Data": "-",
+									"ListData": {
+										"Tight": true,
+										"BulletChar": 45,
+										"Padding": 2,
+										"Marker": "LQ==",
+										"Num": -1
+									},
+									"Properties": {
+										"id": "20260613155453-iddvs40",
+										"updated": "20260613155453"
+									},
+									"Children": [
+										{
+											"ID": "20260613155453-skxfyqr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260613155453-skxfyqr",
+												"updated": "20260613155453"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Range (RANGE), Median (MEDIAN) (numeric fields)"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-wpokuxk",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-wpokuxk",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-dorubwe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-dorubwe",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Rollup values are calculated automatically and cannot be manually edited"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-x2o9khm",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-x2o9khm",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-sim2v90",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-sim2v90",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Can be sorted by calculated result"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-km0mqlw",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-km0mqlw",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-8qfuwae",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-8qfuwae",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Notes"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": If the relation field is deleted, the corresponding rollup field is also deleted"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-o7g7a51",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-o7g7a51",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Template"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-gkx6sf4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-gkx6sf4",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Auto-fills default values when creating a new entry."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-ofn8y2q",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-ofn8y2q",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-wmf9e06",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-wmf9e06",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-1u3jtru",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-1u3jtru",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Configuration"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When creating, you can write a default value text that supports template variable syntax"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-3lcusyc",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-3lcusyc",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-lb3dbcl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-lb3dbcl",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Auto-fill Rule"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": When a new entry is created, the template field value is automatically populated with the preset content"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-blfciea",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-blfciea",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-cbeigp6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-cbeigp6",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Template Variables"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Can use syntax like "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{.fieldName}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to reference values of other fields in the same row of the same database"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-9ctn9dv",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-9ctn9dv",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-uwspv67",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-uwspv67",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Notes"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Unlike \"Template Snippets\", this template only applies to default value population of database entries"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-lridmci",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-lridmci",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Created Time"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-setkknr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-setkknr",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatically records the creation time of an entry."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-8x2e186",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-8x2e186",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-wqjlu8f",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-wqjlu8f",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-xyuejyt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-xyuejyt",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Auto-filled and cannot be manually modified"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-xz9xkbf",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-xz9xkbf",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-pwrl1zz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-pwrl1zz",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Same as date fields, supports time range filtering"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-kvqwb1p",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-kvqwb1p",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-cra28tl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-cra28tl",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted chronologically"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-1zmd4dw",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-1zmd4dw",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-mxl1z3v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-mxl1z3v",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Notes"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": The value remains fixed after the record is created"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-vr78bzj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-vr78bzj",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Updated Time"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-btqsyau",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-btqsyau",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Automatically records the last modified time of an entry."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-49ccegq",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-49ccegq",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-5o20x3i",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-5o20x3i",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-kxezueh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-kxezueh",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Auto-filled and refreshed automatically after any field modification of the entry"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-rg7v5x1",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-rg7v5x1",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3wn68zc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3wn68zc",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Same as date fields"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-74oaq52",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-74oaq52",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-zioo240",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-zioo240",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted chronologically"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-w8ra8nu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-w8ra8nu",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Line Number"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-mux3rk0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613155453-mux3rk0",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Auto-increment sequence number."
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-zntpn6w",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-zntpn6w",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-123bfag",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-123bfag",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-57vbfhh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-57vbfhh",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Editing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Auto-generated and cannot be manually modified"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-5lbg1gm",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-5lbg1gm",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-8a20o95",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-8a20o95",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Display"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Starts from 1 and auto-increments"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-wza2gsu",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-wza2gsu",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-zo9m05z",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-zo9m05z",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Sorting"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Sorted by numeric value"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-1c1tn47",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-1c1tn47",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-3f2j8bn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-3f2j8bn",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Filtering"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Supports numeric comparisons such as greater than/less than/equal to"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-3csuzpg",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-3csuzpg",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-vsugay1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-vsugay1",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Notes"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": Line numbers are assigned when entries are created; deleting an entry in the middle does not cause subsequent entries to be renumbered"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-gmsny8w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613155453-gmsny8w",
+				"updated": "20260613194210"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Tips"
+				}
+			]
+		},
+		{
+			"ID": "20260613155453-xr3qxqc",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 45,
+				"Padding": 2,
+				"Marker": "LQ==",
+				"Num": -1
+			},
+			"Properties": {
+				"id": "20260613155453-xr3qxqc",
+				"updated": "20260613155453"
+			},
+			"Children": [
+				{
+					"ID": "20260613155453-w0ru0o1",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-w0ru0o1",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-t35kjmf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-t35kjmf",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Need to bind a content block as the record body → The system auto-generates the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Primary Key"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " field; drag blocks to the database or bind via the block icon menu"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-a0igynp",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-a0igynp",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-b4ihtsm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-b4ihtsm",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Recording amounts/inventory/ratings with statistics → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Number"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", combined with rollup fields for sum/average"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-o2opwvp",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-o2opwvp",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-0kjc9ro",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-0kjc9ro",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Recording status workflows (To-do/In Progress/Done) → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Select"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-gaqeio0",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-gaqeio0",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-aq2i81t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-aq2i81t",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Multi-label classification (an article belonging to multiple categories) → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Multi-Select"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-7e61dkq",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-7e61dkq",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-fsuknze",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-fsuknze",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Need to relate data across databases → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Relation"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", combined with "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Rollup"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " for cross-table statistics"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-umj8fgm",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-umj8fgm",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-11lieax",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-11lieax",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Automatically recording entry time info → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Created Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " + "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Updated Time"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-0y3ej7b",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-0y3ej7b",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-nvnriuj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-nvnriuj",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Need ordered sequence numbers → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Line Number"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-i1h15vb",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-i1h15vb",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-y5h2pr2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-y5h2pr2",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Need to upload screenshots/attachments → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Asset"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-tp3mzen",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-tp3mzen",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-q49ejhg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-q49ejhg",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Need to pre-fill default values for new entries → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Template"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613155453-ema8uu3",
+					"Type": "NodeListItem",
+					"Data": "-",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 45,
+						"Padding": 2,
+						"Marker": "LQ==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260613155453-ema8uu3",
+						"updated": "20260613155453"
+					},
+					"Children": [
+						{
+							"ID": "20260613155453-qbj94rc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613155453-qbj94rc",
+								"updated": "20260613155453"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Need clickable links/email/phone → "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "URL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Email"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "Phone"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613194210-97mctn5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613194210-97mctn5",
+				"updated": "20260613194210"
+			}
+		}
+	]
+}

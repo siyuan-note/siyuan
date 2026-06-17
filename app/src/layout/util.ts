@@ -224,6 +224,59 @@ export const getAllLayout = () => {
     return layoutJSON;
 };
 
+const DOCK_KEYS = ["left", "right", "bottom"] as const;
+
+// agentChat 停靠按钮：已存在则去重，不存在则按默认布局补全
+const ensureAgentChatDock = (layout: Pick<Config.IUiLayout, "left" | "right" | "bottom">) => {
+    let hasAgentChat = false;
+    for (const key of DOCK_KEYS) {
+        const sections = layout[key]?.data;
+        if (!sections) {
+            continue;
+        }
+        for (const sub of sections) {
+            if (!sub) {
+                continue;
+            }
+            for (let i = 0; i < sub.length; i++) {
+                if (sub[i]?.type !== "agentChat") {
+                    continue;
+                }
+                if (hasAgentChat) {
+                    sub.splice(i, 1);
+                    i--;
+                } else {
+                    hasAgentChat = true;
+                }
+            }
+        }
+    }
+    if (!hasAgentChat) {
+        for (const key of DOCK_KEYS) {
+            const sections = Constants.SIYUAN_EMPTY_LAYOUT[key]?.data;
+            if (!sections) {
+                continue;
+            }
+            for (let sectionIndex = 0; sectionIndex < sections.length; sectionIndex++) {
+                const sub = sections[sectionIndex];
+                if (!sub) {
+                    continue;
+                }
+                for (let itemIndex = 0; itemIndex < sub.length; itemIndex++) {
+                    const item = sub[itemIndex];
+                    if (item?.type === "agentChat") {
+                        const targetSections = layout[key]?.data;
+                        if (targetSections?.[sectionIndex]) {
+                            targetSections[sectionIndex].splice(itemIndex, 0, {...item});
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+    }
+};
+
 const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
     dockItem.forEach((existSubItem, index) => {
         if (window.siyuan.isPublish && (existSubItem.type === "inbox" || existSubItem.type === "agentChat")) {
@@ -239,6 +292,7 @@ const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
 };
 
 const JSONToDock = (json: any, app: App) => {
+    ensureAgentChatDock(json);
     json.left.data.forEach((existItem: Config.IUILayoutDockTab[]) => {
         initInternalDock(existItem);
     });
@@ -481,7 +535,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     }
     if (window.siyuan.layout.leftDock.layout.children[0].element.classList.contains("fn__none") &&
         window.siyuan.layout.leftDock.layout.children[1].element.classList.contains("fn__none")) {
-        window.siyuan.layout.rightDock.layout.element.style.width = "0px";
+        window.siyuan.layout.leftDock.layout.element.style.width = "0px";
     }
     if (window.siyuan.layout.bottomDock.layout.children[0].element.classList.contains("fn__none") &&
         window.siyuan.layout.bottomDock.layout.children[1].element.classList.contains("fn__none")) {

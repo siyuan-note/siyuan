@@ -181,7 +181,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         html += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     }
 
-   tableRow.cells.forEach((cell, index) => {
+    tableRow.cells.forEach((cell, index) => {
         const column = tableData.columns[index];
         if (column.hidden) {
             return;
@@ -384,40 +384,177 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
     });
 };
 
-export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {
+const applyFixedClip = (el: HTMLElement, scrollEl: HTMLElement) => {
+    const scrollLeft = scrollEl.scrollLeft;
+    const clientWidth = scrollEl.clientWidth;
+    const scrollWidth = scrollEl.scrollWidth;
+    if (scrollWidth <= clientWidth) {
+        if (el.style.clipPath) {
+            el.style.clipPath = "";
+        }
+        return;
+    }
+    const right = Math.max(0, scrollWidth - scrollLeft - clientWidth);
+    el.style.clipPath = `inset(0 ${right}px 0 ${scrollLeft}px)`;
+};
+
+const stickyScrollElMap = new WeakMap<HTMLElement, HTMLElement>();
+
+const bindHeaderScrollSync = (blockElement: HTMLElement, scrollEl: HTMLElement) => {
+    if (stickyScrollElMap.get(blockElement) === scrollEl) {
+        return;
+    }
+    stickyScrollElMap.set(blockElement, scrollEl);
+    const syncHeaders = () => {
+        const x = -scrollEl.scrollLeft;
+        blockElement.querySelectorAll(".av__row--header--fixed, .av__row--footer--fixed").forEach((el: HTMLElement) => {
+            el.style.transform = `translateX(${x}px)`;
+            applyFixedClip(el, scrollEl);
+        });
+    };
+    scrollEl.addEventListener("scroll", syncHeaders, {passive: true});
+    if (scrollEl.scrollLeft > 0) {
+        syncHeaders();
+    }
+};
+
+const addFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass: string, height: number, width: number) => {
+    item.classList.add(fixedClass);
+    const placeholder = document.createElement("div");
+    placeholder.className = placeholderClass;
+    placeholder.style.height = height + "px";
+    placeholder.style.width = width + "px";
+    item.insertAdjacentElement("afterend", placeholder);
+};
+
+const removeFixedRow = (item: HTMLElement, fixedClass: string, placeholderClass: string) => {
+    if (!item.classList.contains(fixedClass)) {
+        return;
+    }
+    item.classList.remove(fixedClass);
+    item.style.top = "";
+    item.style.bottom = "";
+    item.style.left = "";
+    item.style.width = "";
+    item.style.transform = "";
+    item.style.clipPath = "";
+    const next = item.nextElementSibling as HTMLElement;
+    if (next?.classList.contains(placeholderClass)) {
+        next.remove();
+    }
+};
+
+const syncFixedRowPos = (item: HTMLElement, bodyRect: DOMRect, scrollLeft: number, scrollEl: HTMLElement) => {
+    item.style.left = Math.round(bodyRect.left + scrollLeft) + "px";
+    item.style.width = Math.round(bodyRect.width) + "px";
+    item.style.transform = `translateX(${-scrollLeft}px)`;
+    if (scrollEl) {
+        applyFixedClip(item, scrollEl);
+    }
+};
+
+export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement, status: "top" | "bottom" | "all") => {
     if (blockElement.dataset.avType !== "table") {
         return;
     }
-    // 只读模式下也需固定 https://github.com/siyuan-note/siyuan/issues/11338
-    const headerElements = blockElement.querySelectorAll(".av__row--header");
-    if (headerElements.length > 0 && (status === "top" || status === "all")) {
-        headerElements.forEach((item: HTMLElement) => {
-            const bodyRect = item.parentElement.getBoundingClientRect();
-            const distance = Math.floor(elementRect.top - bodyRect.top);
-            if (distance > 0 && distance < bodyRect.height - item.clientHeight) {
-                item.style.transform = `translateY(${distance}px)`;
-            } else {
-                item.style.transform = "";
+    const scrollEl = blockElement.querySelector(".av__scroll") as HTMLElement;
+    if (scrollEl) {
+        bindHeaderScrollSync(blockElement, scrollEl);
+    }
+
+    // 先批量读取所有几何信息，再统一写入 style，避免读-写交错触发强制重排
+    const elementRect = scrollElement.getBoundingClientRect();
+    const scrollTop = scrollElement.scrollTop;
+    const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
+    const doTop = status === "top" || status === "all";
+    const doBottom = status === "bottom" || status === "all";
+
+    // 第一遍：纯读取，收集每个 header/footer 的几何与判定结果
+    const headerTasks: Array<{
+        item: HTMLElement;
+        bodyRect: DOMRect;
+        headerH: number;
+        shouldFix: boolean;
+        scrollLeft: number;
+        scrollEl: HTMLElement;
+    }> = [];
+    const footerTasks: Array<{
+        item: HTMLElement;
+        bodyRect: DOMRect;
+        footerH: number;
+        shouldFix: boolean;
+        scrollLeft: number;
+        scrollEl: HTMLElement;
+    }> = [];
+    if (doTop) {
+        blockElement.querySelectorAll(".av__row--header").forEach((item: HTMLElement) => {
+            const body = item.parentElement as HTMLElement;
+            const bodyRect = body.getBoundingClientRect();
+            const offset = Math.round(bodyRect.top - elementRect.top + scrollTop);
+            const headerH = item.offsetHeight;
+            const bodyH = body.offsetHeight;
+            headerTasks.push({
+                item,
+                bodyRect,
+                headerH,
+                shouldFix: scrollTop > offset && scrollTop < offset + bodyH,
+                scrollLeft,
+                scrollEl,
+            });
+        });
+    }
+    if (doBottom) {
+        blockElement.querySelectorAll(".av__row--footer").forEach((item: HTMLElement) => {
+            if (!item.querySelector(".av__calc--ashow")) {
+                return;
             }
+            const body = item.parentElement as HTMLElement;
+            const bodyRect = body.getBoundingClientRect();
+            const bottomInit = Math.round(bodyRect.bottom + scrollTop);
+            const footerH = item.offsetHeight;
+            const bodyH = body.offsetHeight;
+            const bottomOffset = bottomInit - Math.round(elementRect.bottom);
+            const footerDist = bottomInit - scrollTop - Math.round(elementRect.bottom);
+            footerTasks.push({
+                item,
+                bodyRect,
+                footerH,
+                shouldFix: scrollTop < bottomOffset && footerDist < bodyH - footerH,
+                scrollLeft,
+                scrollEl,
+            });
         });
     }
 
-    const footerElements = blockElement.querySelectorAll(".av__row--footer");
-    if (footerElements.length > 0 && (status === "bottom" || status === "all")) {
-        footerElements.forEach((item: HTMLElement) => {
-            if (item.querySelector(".av__calc--ashow")) {
-                const bodyRect = item.parentElement.getBoundingClientRect();
-                const distance = Math.ceil(elementRect.bottom - bodyRect.bottom);
-                if (distance < 0 && -distance < bodyRect.height - item.clientHeight) {
-                    item.style.transform = `translateY(${distance}px)`;
-                } else {
-                    item.style.transform = "";
-                }
-            } else {
-                item.style.transform = "";
+    // 第二遍：纯写入，此时不再读取布局，仅触发一次重排
+    const stickyTop = Math.round(elementRect.top);
+    const stickyBottom = Math.round(window.innerHeight - elementRect.bottom);
+    headerTasks.forEach((task) => {
+        const {item, bodyRect, headerH, shouldFix} = task;
+        if (shouldFix) {
+            if (!item.classList.contains("av__row--header--fixed")) {
+                addFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder", headerH, Math.round(bodyRect.width));
             }
-        });
-    }
+            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
+            item.style.top = bodyRect.bottom < stickyTop + headerH
+                ? Math.round(bodyRect.bottom - headerH) + "px"
+                : stickyTop + "px";
+        } else {
+            removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
+        }
+    });
+    footerTasks.forEach((task) => {
+        const {item, bodyRect, footerH, shouldFix} = task;
+        if (shouldFix) {
+            if (!item.classList.contains("av__row--footer--fixed")) {
+                addFixedRow(item, "av__row--footer--fixed", "av__row--footer--placeholder", footerH, Math.round(bodyRect.width));
+            }
+            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
+            item.style.bottom = stickyBottom + "px";
+        } else {
+            removeFixedRow(item, "av__row--footer--fixed", "av__row--footer--placeholder");
+        }
+    });
 };
 
 const updatePageSize = (options: {
@@ -595,7 +732,7 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     rowElements.forEach(item => {
         item.remove();
     });
-    stickyRow(blockElement, protyle.contentElement.getBoundingClientRect(), "all");
+    stickyRow(blockElement, protyle.contentElement, "all");
     updateHeader(blockElement.querySelector(".av__row"));
     blockElement.setAttribute("updated", newUpdated);
 };
@@ -659,4 +796,46 @@ export const insertRows = (options: {
         });
     }
     options.blockElement.setAttribute("updated", newUpdated);
+};
+
+export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowElements: HTMLElement[]) => {
+    const avID = blockElement.getAttribute("data-av-id");
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const newRowIDs: string[] = [];
+    // 副本统一插入到最后选中的条目之后，按源序排列
+    const anchorID = rowElements[rowElements.length - 1].getAttribute("data-id");
+    let previousID = anchorID;
+    rowElements.forEach(rowElement => {
+        const newRowID = Lute.NewNodeID();
+        newRowIDs.push(newRowID);
+        const srcRowID = rowElement.getAttribute("data-id");
+        doOperations.push({
+            action: "duplicateAttrViewRow",
+            avID,
+            id: newRowID,
+            srcIDs: [srcRowID],
+            previousID,
+        });
+        // 后续副本接在前一个副本之后，保证源序
+        previousID = newRowID;
+    });
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+    doOperations.push({
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: newUpdated,
+    });
+    undoOperations.push({
+        action: "removeAttrViewBlock",
+        srcIDs: newRowIDs,
+        avID,
+    });
+    undoOperations.push({
+        action: "doUpdateUpdated",
+        id: blockElement.dataset.nodeId,
+        data: blockElement.getAttribute("updated")
+    });
+    transaction(protyle, doOperations, undoOperations);
+    blockElement.setAttribute("updated", newUpdated);
 };

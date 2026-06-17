@@ -26,9 +26,9 @@
 
 <p align="center">
 <b>English</b>
-| <a href="README_zh_CN.md">中文</a>
-| <a href="README_ja_JP.md">日本語</a>
-| <a href="README_tr_TR.md">Türkçe</a>
+| <a href="README.zh-CN.md">中文</a>
+| <a href="README.ja.md">日本語</a>
+| <a href="README.tr.md">Türkçe</a>
 </p>
 
 ---
@@ -204,6 +204,8 @@ The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan
 
 Use the following parameters when running the container with `docker run b3log/siyuan`:
 
+> **Note:** Since v3.7.0, the `serve` subcommand must be passed explicitly (e.g. `docker run b3log/siyuan serve --workspace=...`). Previously the kernel auto-detected bare flags; that implicit behavior has been removed for clarity. Run `docker run --rm b3log/siyuan serve --help` to see all serving options.
+
 - `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
 - `--accessAuthCode`: Specifies the lock screen password
 
@@ -215,6 +217,7 @@ docker run -d \
   -p 6806:6806 \
   -e PUID=1001 -e PGID=1002 \
   b3log/siyuan \
+  serve \
   --workspace=workspace_dir_container \
   --accessAuthCode=xxx
 ```
@@ -227,7 +230,7 @@ docker run -d \
 - `accessAuthCode`: Lock screen password (please **be sure to modify**, otherwise anyone can access your data)
   - Alternatively, it's possible to set the lock screen password via the `SIYUAN_ACCESS_AUTH_CODE` env variable. The commandline will always have the priority, if both are set
   - To disable the lock screen password set the env variable `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`
-- `SIYUAN_LANG`: Interface language (optional, defaults to `en_US` if unset in Docker). Omit it if you want the language chosen in **Settings** to persist across restarts; if set, it is applied on every startup and overrides the saved setting
+- `SIYUAN_LANG`: Interface language (optional, defaults to `en` if unset in Docker). Accepts BCP 47 tags like `zh-CN`/`zh-TW`/`en`/`ja`/`pt-BR`; legacy underscore values like `zh_CN`/`en_US` are also accepted for backward compatibility. Omit it if you want the language chosen in **Settings** to persist across restarts; if set, it is applied on every startup and overrides the saved setting
   - Alternatively, use the `--lang` command-line parameter. If both are set, the command-line takes priority
 
 To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:
@@ -238,6 +241,7 @@ docker run -d \
   -p 6806:6806 \
   -e PUID=1001 -e PGID=1002 \
   b3log/siyuan \
+  serve \
   --workspace=/siyuan/workspace/ \
   --accessAuthCode=xxx
 ```
@@ -251,7 +255,7 @@ version: "3.9"
 services:
   main:
     image: b3log/siyuan
-    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
+    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
     ports:
       - 6806:6806
     volumes:
@@ -343,7 +347,7 @@ services:
   siyuan:
     image: b3log/siyuan
     container_name: siyuan
-    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
+    command: ['serve', '--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
     ports:
       - 6806:6806
     volumes:

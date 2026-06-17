@@ -194,11 +194,6 @@
       }
     }
 
-    &--header,
-    &--footer {
-      background-color: var(--b3-parent-background);
-    }
-
     &--footer {
       display: flex;
       border-top: 1px solid var(--b3-theme-surface-lighter);
@@ -252,6 +247,15 @@
         &:hover {
           background-color: var(--b3-list-hover);
         }
+      }
+    }
+
+    &--header,
+    &--footer {
+      background-color: var(--b3-parent-background);
+
+      &--fixed {
+        position: fixed;
       }
     }
 

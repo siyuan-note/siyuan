@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {Hint} from "./hint";
-import {setLute} from "./render/setLute";
+import {getLute} from "./render/setLute";
 import {Preview} from "./preview";
 import {addLoading, initUI, removeLoading} from "./ui/initUI";
 import {Undo} from "./undo";
@@ -24,6 +24,7 @@ import {
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 import {getDocDisplayName} from "../util/pathName";
+import {initMirror, refreshUndoButtons, syncMirrorFromBroadcast} from "./undo/globalUndo";
 /// #if !MOBILE
 import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
@@ -300,12 +301,17 @@ export class Protyle {
     }
 
     private onTransaction(data: IWebSocketData) {
+        // 多窗口/多端：用广播附带的撤销状态同步本地镜像
+        if (data.context?.undoState) {
+            syncMirrorFromBroadcast(data.context.undoState);
+        }
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
             data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
             this.protyle.preview.render(this.protyle);
             return;
         }
         let needCreateAction = "";
+        let hasDeleteOp = false;
         data.data[0].doOperations.find((item: IOperation) => {
             if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
                 // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
@@ -325,6 +331,9 @@ export class Protyle {
                 /// #endif
                 return true;
             } else {
+                if (item.action === "delete") {
+                    hasDeleteOp = true;
+                }
                 onTransaction(this.protyle, [item], false);
                 // 反链面板移除元素后，文档为空
                 if (!(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
@@ -332,6 +341,19 @@ export class Protyle {
                 }
             }
         });
+        // 聚焦块被分屏另一侧的删除操作连带删除时（容器块删除会级联删除其所有子孙块，如列表/超级块/引述等），当前页签的聚焦块已成为孤儿但仍显示，需退出聚焦
+        // Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
+        if (this.protyle.block.showAll && hasDeleteOp) {
+            fetchPost("/api/block/checkBlockExist", {id: this.protyle.block.id}, response => {
+                if (!response.data) {
+                    zoomOut({
+                        protyle: this.protyle,
+                        id: this.protyle.block.rootID
+                    });
+                }
+            });
+            return;
+        }
         if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID && needCreateAction) {
             if (needCreateAction === "delete" && this.protyle.block.showAll) {
                 if (this.protyle.options.handleEmptyContent) {
@@ -345,9 +367,13 @@ export class Protyle {
                 }
             } else {
                 // 不能使用 transaction，否则分屏后会重复添加
-                this.protyle.undo.clear();
+                refreshUndoButtons(this.protyle);
                 this.reload(false);
             }
+        }
+        // undo/redo 重放广播到达后，整批操作已应用，重置 lastHTMLs 防下次本地编辑算错逆操作
+        if (data.context?.isUndoReplay === true) {
+            this.protyle.wysiwyg.lastHTMLs = {};
         }
     }
 
@@ -373,6 +399,10 @@ export class Protyle {
     }
 
     private afterOnGet(mergedOptions: IProtyleOptions) {
+        // 文档加载完成后初始化撤销镜像（低频，不在 selectionchange 热路径）
+        if (this.protyle.block?.rootID) {
+            initMirror(this.protyle.block.rootID);
+        }
         if (this.protyle.model) {
             /// #if !MOBILE
             if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS) || mergedOptions.action?.includes(Constants.CB_GET_OPENNEW)) {
@@ -427,7 +457,7 @@ export class Protyle {
     }
 
     private init() {
-        this.protyle.lute = setLute({
+        this.protyle.lute = getLute({
             emojiSite: this.protyle.options.hint.emojiPath,
             emojis: this.protyle.options.hint.emoji,
             headingAnchor: false,

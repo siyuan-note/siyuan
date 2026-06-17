@@ -6,95 +6,721 @@
 		"id": "20200822191536-rm6hwid",
 		"title": "窗口和页签",
 		"type": "doc",
-		"updated": "20230128004223"
+		"updated": "20260613204557"
 	},
 	"Children": [
 		{
-			"ID": "20210104091259-0s2m8p3",
-			"Type": "NodeParagraph",
+			"ID": "20260613204349-c97d9sh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091259-0s2m8p3",
-				"updated": "20210302223646"
+				"id": "20260613204349-c97d9sh",
+				"updated": "20260613204349"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支持多窗口和多页签，这样可以方便地进行文档编辑和查看。"
+					"Data": "概述"
 				}
 			]
 		},
 		{
-			"ID": "20210104091259-avxiiqx",
+			"ID": "20260613204349-a1gj5q8",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091259-avxiiqx"
+				"id": "20260613204349-a1gj5q8",
+				"updated": "20260613204349"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "页签上支持上下和左右分屏，打开的所有页签是实时同步内容的。比如对于相同一份文档进行多开页签，在其中一个页签中编辑保存后，其他页签也会自动同步最新内容，在享受多开的便利时避免脏数据覆盖。"
+					"Data": "思源支持多窗口和多页签，方便进行文档编辑和查看。"
 				}
 			]
 		},
 		{
-			"ID": "20210104091259-0hewfsu",
-			"Type": "NodeParagraph",
+			"ID": "20260613204349-f3c4f3q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091259-0hewfsu"
+				"id": "20260613204349-f3c4f3q",
+				"updated": "20260613204349"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "除了文档保存是同步的，保存后产生的关联渲染也是同步的，文档相关的内容块预览以及关系图都是实时刷新，这样能在最小限度上排除干扰，让我们将注意力集中在笔记内容上。"
+					"Data": "页签"
 				}
 			]
 		},
 		{
-			"ID": "20210104091259-k921oy3",
-			"Type": "NodeParagraph",
+			"ID": "20260613204349-j3v5olp",
+			"Type": "NodeList",
+			"ListData": {},
 			"Properties": {
-				"id": "20210104091259-k921oy3"
+				"id": "20260613204349-j3v5olp",
+				"updated": "20260613204349"
 			},
 			"Children": [
 				{
-					"Type": "NodeText",
-					"Data": "除了分屏操作，页签也支持拖拽，这样我们能够随心所欲地布置整个界面，在自己最舒服的布局下记录笔记和整理知识。"
+					"ID": "20260613204349-gbdusyv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-gbdusyv",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-713mvfm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-713mvfm",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "新建"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在文档面板中点击文档即可在新页签中打开"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-dqwyk48",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-dqwyk48",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-fliru9e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-fliru9e",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "关闭"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：右键页签选择「关闭」，或使用快捷键 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-lqpzno3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-lqpzno3",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-hqw8gh2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-hqw8gh2",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "恢复"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+Shift+T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 重新打开最近关闭的页签"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-s6cbn11",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-s6cbn11",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-w4ny52c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-w4ny52c",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "切换"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+Shift+["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+Shift+]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 切换到上一个/下一个页签，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+1~9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 跳转到指定页签"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-pia8dhl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-pia8dhl",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-288i0p4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-288i0p4",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "拖拽"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：页签支持拖拽排序，可以自由调整页签位置"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20210104091259-86iaf33",
-			"Type": "NodeParagraph",
+			"ID": "20260613204349-81ggat5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091259-86iaf33",
-				"updated": "20230128004223"
+				"id": "20260613204349-81ggat5",
+				"updated": "20260613204349"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果你正在使用的设备屏幕较小，可以考虑"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "block-ref",
-					"TextMarkBlockRefID": "20201004184819-nj8ibyg",
-					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "通过浏览器使用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，这样就能通过浏览器实例进行整体界面切换。如果你只需要将页签转换为独立的窗口，可以在页签上右键点击 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "移动到新窗口"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​，或者将页签拖拽到当前窗口之外的地方后释放拖拽，这样也能将该页签转换为独立的窗口。"
+					"Data": "分屏"
 				}
 			]
+		},
+		{
+			"ID": "20260613204349-dnr2xq4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613204349-dnr2xq4",
+				"updated": "20260613204349"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签支持上下和左右分屏，以满足多文档同时查看的需求。"
+				}
+			]
+		},
+		{
+			"ID": "20260613204349-ccpeaot",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613204349-ccpeaot",
+				"updated": "20260613204349"
+			},
+			"Children": [
+				{
+					"ID": "20260613204349-c2y86oh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-c2y86oh",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-1buqlj3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-1buqlj3",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "分屏方式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：将页签拖拽到编辑区域的上/下/左/右边缘即可分屏，也可在页签右键菜单中选择分屏方向"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-5gf3cnp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-5gf3cnp",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-1i5qgrl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-1i5qgrl",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "调整大小"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：拖拽分屏边界可以调整各区域大小"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-373m2pl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-373m2pl",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-h1dccfo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-h1dccfo",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "取消分屏"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：右键页签选择「取消分屏」，或在设置-快捷键中为取消分屏配置快捷键"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-dbwyu7u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-dbwyu7u",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-d9mojy7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-d9mojy7",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "实时同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：打开的所有页签是实时同步内容的。同一份文档在多页签中编辑保存后，其他页签会自动同步最新内容，避免脏数据覆盖。除了内容同步，关联渲染也会同步刷新，内容块预览和关系图实时更新"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613204349-1dbfz13",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613204349-1dbfz13",
+				"updated": "20260613204349"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "多窗口"
+				}
+			]
+		},
+		{
+			"ID": "20260613204349-je7adco",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613204349-je7adco",
+				"updated": "20260613204349"
+			},
+			"Children": [
+				{
+					"ID": "20260613204349-m2dno7y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-m2dno7y",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-znlgltr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-znlgltr",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "移动到新窗口"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：右键页签选择「移动到新窗口」，或将页签拖拽到当前窗口之外释放"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-4ezvemn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-4ezvemn",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-wam5e9d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-wam5e9d",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "窗口间拖拽"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：页签可以在不同窗口之间拖拽转移"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613204349-qlvuia3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260613204349-qlvuia3",
+				"updated": "20260613204557"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "导航"
+				}
+			]
+		},
+		{
+			"ID": "20260613204349-ep9y21l",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260613204349-ep9y21l",
+				"updated": "20260613204349"
+			},
+			"Children": [
+				{
+					"ID": "20260613204349-hkbgmbt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-hkbgmbt",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-k0g4ovk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-k0g4ovk",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "前进/后退"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：工具栏中的前进后退按钮可快速在浏览记录间跳转"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-2pnsf77",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-2pnsf77",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-hhl97pv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-hhl97pv",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "最近的文档"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 打开最近文档列表，快速定位最近打开的文档"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-hlfn3k6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-hlfn3k6",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-npf0oq4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-npf0oq4",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "定位文档"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：点击文档面板顶部的定位按钮，可在文档面板中快速定位到当前打开的文档"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260613204349-la3uhjb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260613204349-la3uhjb",
+						"updated": "20260613204349"
+					},
+					"Children": [
+						{
+							"ID": "20260613204349-9x6jtfx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260613204349-9x6jtfx",
+								"updated": "20260613204349"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "页签切换"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：通过 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Ctrl+Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 跳转到下一个编辑页签"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260613204557-mvypn09",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260613204557-mvypn09",
+				"updated": "20260613204557"
+			}
 		}
 	]
 }

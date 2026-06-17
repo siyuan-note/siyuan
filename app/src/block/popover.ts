@@ -7,10 +7,14 @@ import {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
 import {isTouchDevice} from "../util/functions";
-import {escapeAriaLabel, escapeHtml} from "../util/escape";
+import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../util/escape";
+import {getInstanceById} from "../layout/util";
+import {Editor} from "../editor";
+import {Tab} from "../layout/Tab";
 
 let popoverTargetElement: HTMLElement;
-let notebookItemElement: HTMLElement | false;
+// 异步获取信息后再显示 tooltip，鼠标已移走时需中断请求 https://github.com/siyuan-note/siyuan/issues/14823
+let tooltipAbortController: AbortController | null = null;
 export const initBlockPopover = (app: App) => {
     let timeout: number;
     let timeoutHide: number;
@@ -21,6 +25,11 @@ export const initBlockPopover = (app: App) => {
             window.siyuan.dragElement || document.onmousemove) {
             hideTooltip();
             return;
+        }
+        // 鼠标进入新元素时中断上一轮尚未完成的 tooltip 信息请求
+        if (tooltipAbortController) {
+            tooltipAbortController.abort();
+            tooltipAbortController = null;
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByClassName(event.target, "ariaLabel") ||
@@ -101,7 +110,13 @@ export const initBlockPopover = (app: App) => {
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
                     let assetTip = tip;
+                    tooltipAbortController = new AbortController();
+                    const signal = tooltipAbortController.signal;
+                    const capturedController = tooltipAbortController;
                     fetchPost("/api/asset/statAsset", {path: href}, (response) => {
+                        if (signal.aborted) {
+                            return;
+                        }
                         if (response.code === 1) {
                             if (title) {
                                 assetTip += '<div class="fn__hr"></div><span>' + title + "</span>";
@@ -114,28 +129,68 @@ export const initBlockPopover = (app: App) => {
                         } catch (e) {
                             showTooltip(assetTip, aElement, tooltipClass, event, tooltipSpace);
                         }
-                    });
+                        if (tooltipAbortController === capturedController) {
+                            tooltipAbortController = null;
+                        }
+                    }, undefined, undefined, signal);
                     tip = "";
                 } else if (title) {
                     tip = (tip ? (tip + '<div class="fn__hr"></div>') : "") + "<span>" + title + "</span>";
                 }
             }
 
-            notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+            const tabElement = hasClosestByAttribute(event.target, "data-type", "tab-header");
+            if (tabElement) {
+                const tab = getInstanceById(tabElement.getAttribute("data-id"));
+                if (tab instanceof Tab) {
+                    let id = "";
+                    if (tab.model instanceof Editor && tab.model.editor?.protyle?.block?.rootID) {
+                        id = (tab.model as Editor).editor.protyle.block.rootID;
+                    } else if (!tab.model) {
+                        const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
+                        if (initData && initData.instance === "Editor") {
+                            id = initData.blockId;
+                        }
+                    }
+                    if (id) {
+                        tooltipAbortController = new AbortController();
+                        const signal = tooltipAbortController.signal;
+                        const capturedController = tooltipAbortController;
+                        fetchPost("/api/filetree/getFullHPathByID", {
+                            id
+                        }, (response) => {
+                            if (signal.aborted) {
+                                return;
+                            }
+                            showTooltip(escapeLessThans(response.data), tab.headElement);
+                            tab.headElement.setAttribute("aria-label", escapeLessThans(response.data));
+                            if (tooltipAbortController === capturedController) {
+                                tooltipAbortController = null;
+                            }
+                        }, undefined, undefined, signal);
+                    } else {
+                        tab.headElement.setAttribute("aria-label", escapeLessThans(tab.title));
+                    }
+                }
+            }
+
+            const notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
             if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {
+                tooltipAbortController = new AbortController();
+                const signal = tooltipAbortController.signal;
+                const capturedController = tooltipAbortController;
                 fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
+                    if (signal.aborted) {
+                        return;
+                    }
                     const boxData = response.data.boxInfo;
                     const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
-                    const scopeNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
-                    if (notebookItemElement && scopeNotebookItemElement && (notebookItemElement === scopeNotebookItemElement)) {
-                        showTooltip(tip, notebookItemElement);
+                    showTooltip(tip, notebookItemElement as Element);
+                    (notebookItemElement as HTMLElement).setAttribute("aria-label", tip);
+                    if (tooltipAbortController === capturedController) {
+                        tooltipAbortController = null;
                     }
-                    if (scopeNotebookItemElement &&
-                        scopeNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
-                        scopeNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
-                        scopeNotebookItemElement.setAttribute("aria-label", tip);
-                    }
-                });
+                }, undefined, undefined, signal);
             }
 
             if (tip && !aElement.classList.contains("b3-tooltips")) {

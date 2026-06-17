@@ -31,6 +31,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("GET", "/api/system/bootProgress", bootProgress)
 	ginServer.Handle("POST", "/api/system/bootProgress", bootProgress)
+	ginServer.Handle("GET", "/api/system/bootProgressSSE", bootProgressSSE)
 	ginServer.Handle("GET", "/api/system/version", version)
 	ginServer.Handle("POST", "/api/system/version", version)
 	ginServer.Handle("POST", "/api/system/currentTime", currentTime)
@@ -383,6 +384,10 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/template/renderSprig", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renderSprig)
 
 	ginServer.Handle("POST", "/api/transactions", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performTransactions)
+	ginServer.Handle("POST", "/api/transactions/undoState", model.CheckAuth, model.CheckReadonly, undoState)
+	ginServer.Handle("POST", "/api/transactions/undo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performUndo)
+	ginServer.Handle("POST", "/api/transactions/redo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performRedo)
+	ginServer.Handle("POST", "/api/transactions/clearHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearHistory)
 
 	ginServer.Handle("POST", "/api/setting/setAccount", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccount)
 	ginServer.Handle("POST", "/api/setting/setEditor", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setEditor)
@@ -529,12 +534,17 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/agent/chat", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChat)
 	ginServer.Handle("POST", "/api/ai/agent/confirm", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatConfirm)
 	ginServer.Handle("POST", "/api/ai/agent/question", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatQuestion)
+	ginServer.Handle("POST", "/api/ai/agent/frontendToolResult", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatFrontendResult)
 	ginServer.Handle("POST", "/api/ai/agent/title", model.CheckAuth, model.CheckAdminRole, agentChatTitle)
 	ginServer.Handle("POST", "/api/ai/agent/lsSessions", model.CheckAuth, model.CheckAdminRole, lsSessions)
 	ginServer.Handle("POST", "/api/ai/agent/getSession", model.CheckAuth, model.CheckAdminRole, getSession)
-	ginServer.Handle("POST", "/api/ai/agent/saveSession", model.CheckAuth, model.CheckAdminRole, saveSession)
-	ginServer.Handle("POST", "/api/ai/agent/removeSession", model.CheckAuth, model.CheckAdminRole, removeSession)
+	ginServer.Handle("POST", "/api/ai/agent/saveSession", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, saveSession)
+	ginServer.Handle("POST", "/api/ai/agent/removeSession", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSession)
 	ginServer.Handle("POST", "/api/ai/agent/lsSkills", model.CheckAuth, model.CheckAdminRole, lsSkills)
+	ginServer.Handle("POST", "/api/ai/agent/getSkill", model.CheckAuth, model.CheckAdminRole, getSkill)
+	ginServer.Handle("POST", "/api/ai/agent/saveSkill", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, saveSkill)
+	ginServer.Handle("POST", "/api/ai/agent/removeSkill", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSkill)
+	ginServer.Handle("POST", "/api/ai/agent/renameSkill", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameSkill)
 
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPetalEnabled)

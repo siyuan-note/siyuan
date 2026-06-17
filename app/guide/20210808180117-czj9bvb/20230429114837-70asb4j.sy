@@ -7,7 +7,7 @@
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
 		"type": "doc",
-		"updated": "20260426175514"
+		"updated": "20260614111125"
 	},
 	"Children": [
 		{
@@ -244,7 +244,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-q6cq7i0",
-				"updated": "20250115163216"
+				"updated": "20260614111005"
 			},
 			"Children": [
 				{
@@ -403,6 +403,243 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 菜单中；所见即所得编辑和只读模式切换位于顶栏右上角。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-c27f27s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111005-c27f27s",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "块引用"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-6zxn191",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111005-6zxn191",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111005-bzt75h3",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111005-bzt75h3",
+						"updated": "20260614111005"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "引用是指向另一处内容的链接，使读者可以跳转到被引用的位置。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-m1tl9vr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111005-m1tl9vr",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，块引用是通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "(("
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 触发的指向另一个内容块的链接，支持静态锚文本和动态锚文本两种方式。点击块引用可跳转到被引用的块，悬浮可预览。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-9ulvxm3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111005-9ulvxm3",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "反链"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-k9p9osd",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111005-k9p9osd",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111005-9a9zmoe",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111005-9a9zmoe",
+						"updated": "20260614111005"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "反向链接（Backlink）是指其他页面中指向当前页面的链接，是双向链接体系的重要组成部分。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-ywbfy4d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111005-ywbfy4d",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，反链面板展示了所有引用了当前块的块。反链分为两部分：链接（通过块引用直接关联）和提及（通过文本匹配的潜在关联）。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-45044w9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111005-45044w9",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提及"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-vixtoin",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111005-vixtoin",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111005-zjs8gpx",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111005-zjs8gpx",
+						"updated": "20260614111005"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "提及（Mention）是指在文本中发现的关键词匹配，用于发现潜在的关联关系。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-vf96ulv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111005-vf96ulv",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，提及类似反链中的链接部分，但不是通过块引用建立的，而是通过搜索内容块名称、别名和引用锚文本来自动匹配的文本内容。提及可一键转换为块引用。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-6sdm2sp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111005-6sdm2sp",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "虚拟引用"
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-n5e9skj",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111005-n5e9skj",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111005-lbdlmqo",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111005-lbdlmqo",
+						"updated": "20260614111005"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "虚拟引用是一种自动发现潜在引用关系的技术，无需用户手动创建即可在文本中标识可能存在关联的内容块。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111005-4emt0wz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111005-4emt0wz",
+				"updated": "20260614111005"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，虚拟引用基于内容块的命名、别名和锚文本进行自动探测，在编辑器中以虚线下划线标识。鼠标悬浮可预览对应的内容块，点击可转换为正式的块引用。可在 设置 - 编辑器 中开启或关闭。"
 				}
 			]
 		},
@@ -891,7 +1128,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-7grcqq5",
-				"updated": "20250115163119"
+				"updated": "20260614111026"
 			},
 			"Children": [
 				{
@@ -947,12 +1184,249 @@
 			]
 		},
 		{
+			"ID": "20260614111026-m6i3oiu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111026-m6i3oiu",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "集市"
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-lumv7vo",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111026-lumv7vo",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111026-cwuwynl",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111026-cwuwynl",
+						"updated": "20260614111026"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "集市（Bazaar）源自波斯语，指集中进行商品交易的场所。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-uvaw8ee",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111026-uvaw8ee",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，集市是浏览和安装社区扩展的入口，包括主题、图标、插件、挂件和模板五种类型。用户可直接在应用内搜索、安装和更新。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-5liph7e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111026-5liph7e",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "收集箱"
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-2tseloa",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111026-2tseloa",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111026-xdcaei3",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111026-xdcaei3",
+						"updated": "20260614111026"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "收集箱（Inbox）是临时存放待处理信息的容器。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-dc7bowt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111026-dc7bowt",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，收集箱是云端快速记录功能，通过微信发送或 API 调用将文本暂存到云端，之后可在收集箱面板中将其移动到文档中进行整理。该功能需要订阅会员。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-0vnv22g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111026-0vnv22g",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "闪卡"
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-7aoj3h9",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111026-7aoj3h9",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111026-82gt37c",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111026-82gt37c",
+						"updated": "20260614111026"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "闪卡（Flashcard）是一种用于记忆训练的卡片，正面写问题，背面写答案，通过间隔重复算法安排复习时间。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-4ssawa0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111026-4ssawa0",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，闪卡是基于内容块的间隔重复复习功能。可将内容块制作为闪卡，系统根据复习表现自动安排下次复习时间。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-6d10qhl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111026-6d10qhl",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "命令面板"
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-nywn8fz",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111026-nywn8fz",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111026-cstr53w",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111026-cstr53w",
+						"updated": "20260614111026"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "命令面板（Command Palette）是一种通过键盘快速访问应用功能的入口，用户输入关键词即可搜索和执行命令。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111026-l60fd37",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111026-l60fd37",
+				"updated": "20260614111026"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "Ctrl+Shift+P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 调用命令面板，可快速执行打开面板、切换功能、导航文档等操作，无需通过菜单逐级查找。"
+				}
+			]
+		},
+		{
 			"ID": "20230429114837-ecvrylp",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-ecvrylp",
-				"updated": "20230428204437"
+				"updated": "20260614111112"
 			},
 			"Children": [
 				{
@@ -977,7 +1451,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-ki1rovi",
-				"updated": "20230428204126"
+				"updated": "20260614111112"
 			},
 			"Children": [
 				{
@@ -1010,6 +1484,128 @@
 					"Data": "。"
 				}
 			]
+		},
+		{
+			"ID": "20260614111112-t0moz97",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111112-t0moz97",
+				"updated": "20260614111112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内核"
+				}
+			]
+		},
+		{
+			"ID": "20260614111112-i55rnwt",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111112-i55rnwt",
+				"updated": "20260614111112"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111112-m8sb27o",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111112-m8sb27o",
+						"updated": "20260614111112"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "内核是操作系统的核心组件，负责管理系统的进程、内存、设备驱动程序、文件和网络系统等，决定着系统的性能和稳定性。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111112-jjguke0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111112-jjguke0",
+				"updated": "20260614111112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，内核指的是启动后运行的后端服务进程，负责数据读写、索引搜索、同步备份等核心功能。前端界面通过 HTTP/WebSocket 与内核通信。桌面端和移动端内置内核，Docker 部署时单独运行内核。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111112-bap890v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260614111112-bap890v",
+				"updated": "20260614111125"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "工作空间"
+				}
+			]
+		},
+		{
+			"ID": "20260614111112-im9m9ym",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260614111112-im9m9ym",
+				"updated": "20260614111112"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260614111112-qj6hwvm",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260614111112-qj6hwvm",
+						"updated": "20260614111112"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "工作空间是用户进行工作时的数据环境，类似于操作系统中的用户目录。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260614111112-p34ltqx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111112-p34ltqx",
+				"updated": "20260614111112"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在思源中，工作空间是一个文件夹，用于保存所有数据，包括笔记本、文档、资源文件、配置和历史记录等。不同工作空间通过文件系统文件夹相互隔离，一个工作空间只能被一个内核进程伺服。"
+				}
+			]
+		},
+		{
+			"ID": "20260614111125-dedu7v4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260614111125-dedu7v4",
+				"updated": "20260614111125"
+			}
 		}
 	]
 }

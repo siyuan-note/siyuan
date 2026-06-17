@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20251211094029"
+		"updated": "20260616224229"
 	},
 	"Children": [
 		{
@@ -2091,7 +2091,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091228-cwrynj4",
-				"updated": "20210415200530"
+				"updated": "20260616224229"
 			},
 			"Children": [
 				{
@@ -2136,7 +2136,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20210104091228-zphf09i",
-				"updated": "20210104091228"
+				"updated": "20260616221353"
 			},
 			"Children": [
 				{
@@ -2162,7 +2162,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2171,7 +2171,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2180,7 +2180,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2189,7 +2189,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2198,7 +2198,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2207,7 +2207,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2216,7 +2216,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2225,7 +2225,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2234,7 +2234,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2243,7 +2243,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2252,9 +2252,52 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " ..."
+							"Data": "​ ..."
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260616221353-d3vta43",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260616221353-d3vta43",
+				"updated": "20260616224229"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另外，代码块语言还支持 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan-template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，两者等价。使用后会启用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204181006-7bkppue",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "思源模板"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "语法的高亮显示；导出时，该代码块不会以代码块形式导出，而是转为普通段落文本。"
 				}
 			]
 		},

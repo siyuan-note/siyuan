@@ -1,6 +1,6 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
-import {initNativeDialogOverride, setStorageVal} from "../protyle/util/compatibility";
+import {initNativeDialogOverride, isWindows, setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
 import * as fs from "fs";
@@ -55,20 +55,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
-        // 为已有用户添加 agent chat 停靠按钮
-        if (window.siyuan.config.uiLayout && window.siyuan.config.uiLayout.right &&
-            window.siyuan.config.uiLayout.right.data && window.siyuan.config.uiLayout.right.data.length > 0) {
-            const section = window.siyuan.config.uiLayout.right.data[0];
-            if (section) {
-                let found = false;
-                for (let i = 0; i < section.length; i++) {
-                    if (section[i] && section[i].type === "agentChat") { found = true; break; }
-                }
-                if (!found) {
-                    section.unshift({type: "agentChat", size: {width: 340, height: 0}, show: false, icon: "iconSparkles", hotkeyLangId: "agentChat"});
-                }
-            }
-        }
         try {
             JSONToLayout(app, isStart);
             setTimeout(() => {
@@ -392,6 +378,9 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");
+    }
+    if (isWindows()) {
+        document.body.classList.add("body--win32-browser");
     }
     /// #endif
 };

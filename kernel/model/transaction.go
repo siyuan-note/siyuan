@@ -61,6 +61,27 @@ func FlushTxQueue() {
 	}
 }
 
+// PerformTxSync 同步执行单笔事务并返回错误，供 undo/redo 重放使用。
+// 与异步入队的 PerformTransactions 不同，这里直接持有 flushLock 串行执行 performTx，
+// 失败时返回原始错误（不转成推送消息），调用方据此回滚撤销栈状态。
+func PerformTxSync(tx *Transaction) (err error) {
+	defer logging.Recover()
+	// 初始化事务互斥锁（异步路径 PerformTransactions 在入队前初始化，同步路径这里补上）
+	if nil == tx.m {
+		tx.m = &sync.Mutex{}
+	}
+	flushLock.Lock()
+	isFlushing = true
+	defer func() {
+		isFlushing = false
+		flushLock.Unlock()
+	}()
+	if txErr := performTx(tx); nil != txErr {
+		return txErr
+	}
+	return
+}
+
 var (
 	txQueue    = make(chan *Transaction, 7)
 	flushLock  = sync.Mutex{}
@@ -143,6 +164,19 @@ type TxErr struct {
 	code int
 	msg  string
 	id   string
+}
+
+// Error 实现 error 接口，供跨包（如 undo API）读取事务错误信息。
+func (e *TxErr) Error() string {
+	if "" != e.id {
+		return e.msg + " [" + e.id + "]"
+	}
+	return e.msg
+}
+
+// Code 返回事务错误码。
+func (e *TxErr) Code() int {
+	return e.code
 }
 
 func performTx(tx *Transaction) (ret *TxErr) {
@@ -279,8 +313,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewViewIcon(op)
 			case "setAttrViewViewDesc":
 				ret = tx.doSetAttrViewViewDesc(op)
-			case "duplicateAttrViewView":
-				ret = tx.doDuplicateAttrViewView(op)
+		case "duplicateAttrViewView":
+			ret = tx.doDuplicateAttrViewView(op)
+		case "duplicateAttrViewRow":
+			ret = tx.doDuplicateAttrViewRow(op)
 			case "sortAttrViewView":
 				ret = tx.doSortAttrViewView(op)
 			case "updateAttrViewColRelation":
@@ -928,9 +964,10 @@ func (tx *Transaction) doLargeDelete(operations []*Operation) {
 
 	var ids []string
 	for _, operation := range operations {
-		tx.doDelete0(operation, tree)
-		ids = append(ids, operation.ID)
+		deletedNode := tx.doDelete0(operation, tree)
+		ids = append(ids, deletedNode.BlockIDs()...)
 	}
+	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	treenode.RemoveBlockTreesByIDs(ids)
 	tx.writeTree(tree)
 }
@@ -950,13 +987,16 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	tx.doDelete0(operation, tree)
-	treenode.RemoveBlockTree(operation.ID)
+	deletedNode := tx.doDelete0(operation, tree)
+	// 同步清理被删除容器块的索引节点及其子节点，否则删除列表/超级块等容器块后其子节点依然存在，ExistBlockTree 仍返回 true
+	// Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
+	deletedIDs := deletedNode.BlockIDs()
+	treenode.RemoveBlockTreesByIDs(deletedIDs)
 	tx.writeTree(tree)
 	return
 }
 
-func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) {
+func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) (deletedNode *ast.Node) {
 	node := treenode.GetNodeInTree(tree, operation.ID)
 	if nil == node {
 		return // move 以后的情况，列表项移动导致的状态异常 https://github.com/siyuan-note/insider/issues/961
@@ -1022,6 +1062,9 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) {
 	if needSyncDel2AvBlock {
 		syncDelete2AvBlock(node, tree, true, tx)
 	}
+
+	deletedNode = node
+	return
 }
 
 func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDelParent bool, tx *Transaction) {
@@ -1824,6 +1867,9 @@ type Transaction struct {
 	isGlobalAssets     bool   // 是否属于全局资源
 	assetsDir          string // 资源目录路径
 
+	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
+	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
+
 	luteEngine *lute.Lute
 	m          *sync.Mutex
 	state      atomic.Int32 // 0: 初始化，1：未提交，:2: 已提交，3: 已回滚
@@ -1836,6 +1882,26 @@ func (tx *Transaction) GetChangedRootIDs() (ret []string) {
 
 	for _, id := range tx.changedRootIDs {
 		ret = append(ret, id)
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+// MarkFromAPI 标记事务来自 /api/transactions HTTP 入口，供全局撤销日志捕获判别。
+func (tx *Transaction) MarkFromAPI() {
+	tx.fromAPI = true
+}
+
+// MarkReplay 标记事务为 undo/redo 重放构造，重放不再进入撤销日志。
+func (tx *Transaction) MarkReplay() {
+	tx.isReplay = true
+}
+
+// GetMutatedRootIDs 返回真正被写盘修改结构的树 rootID，不含 refreshDynamicRefTexts 刷新的引用树。
+// 用于跨文档撤销判定：单文档编辑返回 1 个 rootID，跨文档移动返回多个，引用文本刷新不计入。
+func (tx *Transaction) GetMutatedRootIDs() (ret []string) {
+	for t := range tx.trees {
+		ret = append(ret, t)
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
@@ -1888,6 +1954,8 @@ func (tx *Transaction) commit() (err error) {
 
 	IncSync()
 	tx.state.Store(2)
+	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
+	GlobalUndoLog.Record(tx)
 	tx.m.Unlock()
 	return
 }

@@ -204,8 +204,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             action: "insert",
             data: newElement.outerHTML,
             id: newId,
-            previousID: blockElement.previousElementSibling?.previousElementSibling?.getAttribute("data-node-id"),
-            parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID
+            nextID: blockElement.getAttribute("data-node-id"),
         }], [{
             action: "delete",
             id: newId,

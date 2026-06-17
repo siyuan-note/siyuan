@@ -66,7 +66,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
             k: text,
             r: "",
             hasReplace: false,
-            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.providers?.find(p => p.type === "embedding")?.apiKey ? 0 : localData.method),
+            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.embedding.enabled ? 0 : localData.method),
             hPath: "",
             idPath: [],
             group: localData.group,
@@ -1313,7 +1313,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
         if (rmCurrentCriteria) {
             element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         }
-        const listElement =  element.querySelector("#searchList") as HTMLElement;
+        const listElement = element.querySelector("#searchList") as HTMLElement;
         const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
         loadingElement.classList.remove("fn__none");
         loadingElement.style.top = listElement.offsetTop + "px";
@@ -1513,7 +1513,7 @@ ${countHTML}
             if (!currentList.previousElementSibling && currentList.parentElement.previousElementSibling) {
                 currentList.parentElement.previousElementSibling.scrollIntoView();
             } else {
-                currentList.scrollIntoView();
+                currentList.parentElement.scrollTop = currentList.offsetTop - 9;
             }
         }
     }

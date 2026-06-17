@@ -65,7 +65,7 @@ export const openSnippets = () => {
 <div class="fn__flex-1" style="overflow:auto;padding: 16px 24px">
     <div>
         <div class="fn__flex">
-            <div class="b3-form__icon fn__flex-1">
+            <div class="b3-form__icon fn__flex-1" style="overflow: visible">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <input data-type="css" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input fn__block">
             </div>
@@ -80,7 +80,7 @@ export const openSnippets = () => {
     </div>
     <div class="fn__none">
         <div class="fn__flex">
-             <div class="b3-form__icon fn__flex-1">
+             <div class="b3-form__icon fn__flex-1" style="overflow: visible">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <input data-type="js" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input fn__block">
             </div>

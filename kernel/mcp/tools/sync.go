@@ -24,7 +24,7 @@ import (
 
 var SyncTool = &Tool{
 	Name:        "sync",
-	Description: "Data sync operations for SiYuan.\n- perform: Trigger a full data sync (upload + download).\n- upload: Upload local data to cloud only.\n- download: Download cloud data to local only.\n- status: Get current sync status and configuration.",
+	Description: "Data sync operations. Actions: perform() (full upload+download), upload(), download(), status().",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

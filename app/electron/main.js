@@ -171,7 +171,7 @@ const hotKey2Electron = (key) => {
  */
 const resolveAppLanguage = (languageTags) => {
     if (!languageTags || languageTags.length === 0) {
-        return "en_US";
+        return "en";
     }
 
     const tag = languageTags[0].toLowerCase();
@@ -180,40 +180,40 @@ const resolveAppLanguage = (languageTags) => {
 
     if (language === "zh") {
         if (tag.includes("hant")) {
-            return "zh_CHT";
+            return "zh-TW";
         }
         if (tag.includes("hans") || tag.includes("cn") || tag.includes("sg")) {
-            return "zh_CN";
+            return "zh-CN";
         }
         if (tag.includes("tw") || tag.includes("hk") || tag.includes("mo")) {
-            return "zh_CHT";
+            return "zh-TW";
         }
-        return "zh_CN";
+        return "zh-CN";
     }
 
     const languageMapping = {
-        "en": "en_US",
-        "ar": "ar_SA",
-        "de": "de_DE",
-        "es": "es_ES",
-        "fr": "fr_FR",
-        "he": "he_IL",
-        "hi": "hi_IN",
-        "id": "id_ID",
-        "it": "it_IT",
-        "ja": "ja_JP",
-        "ko": "ko_KR",
-        "nl": "nl_NL",
-        "pl": "pl_PL",
-        "pt": "pt_BR",
-        "ru": "ru_RU",
-        "sk": "sk_SK",
-        "th": "th_TH",
-        "tr": "tr_TR",
-        "uk": "uk_UA",
+        "en": "en",
+        "ar": "ar",
+        "de": "de",
+        "es": "es",
+        "fr": "fr",
+        "he": "he",
+        "hi": "hi",
+        "id": "id",
+        "it": "it",
+        "ja": "ja",
+        "ko": "ko",
+        "nl": "nl",
+        "pl": "pl",
+        "pt": "pt-BR",
+        "ru": "ru",
+        "sk": "sk",
+        "th": "th",
+        "tr": "tr",
+        "uk": "uk",
     };
 
-    return languageMapping[language] || "en_US";
+    return languageMapping[language] || "en";
 };
 
 const exitApp = (port, errorWindowId) => {
@@ -621,7 +621,7 @@ const initKernel = (workspace, port, lang) => {
             resolve(false);
             return;
         }
-        const cmds = ["--port", kernelPort, "--wd", appDir];
+        const cmds = ["serve", "--port", kernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
             cmds.push("--mode", "dev");
         }

@@ -1,5 +1,5 @@
 **English**
-| [中文](CONTRIBUTING_zh_CN.md)
+| [中文](CONTRIBUTING.zh-CN.md)
 
 ## Get the source code
 
@@ -45,8 +45,8 @@ Note: In the development environment, the kernel process will not be automatical
 * Windows: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
 * Linux/macOS: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
-* Windows: `./SiYuan-Kernel.exe --wd=.. --mode=dev`
-* Linux/macOS: `./SiYuan-Kernel --wd=.. --mode=dev`
+* Windows: `./SiYuan-Kernel.exe serve --mode=dev`
+* Linux/macOS: `./SiYuan-Kernel serve --mode=dev`
 
 ### iOS
 

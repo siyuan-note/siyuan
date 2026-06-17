@@ -203,6 +203,7 @@ const (
 	RepoCheckout        = "task.repo.checkout"         // 从快照中检出
 	RepoAutoPurge       = "task.repo.autoPurge"        // 自动清理数据仓库
 	DatabaseIndexFull   = "task.database.index.full"   // 重建索引
+	DatabaseIndexFTS    = "task.database.index.fts"    // 重建搜索索引
 	DatabaseIndex       = "task.database.index"        // 数据库索引
 	DatabaseIndexCommit = "task.database.index.commit" // 数据库索引提交
 	DatabaseIndexRef    = "task.database.index.ref"    // 数据库索引引用
@@ -231,6 +232,7 @@ var uniqueActions = []string{
 	RepoCheckout,
 	RepoAutoPurge,
 	DatabaseIndexFull,
+	DatabaseIndexFTS,
 	DatabaseIndexCommit,
 	OCRImage,
 	HistoryGenerateFile,

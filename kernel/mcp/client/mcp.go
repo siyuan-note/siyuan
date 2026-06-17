@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os/exec"
 	"strings"
 	"sync"
@@ -32,7 +33,7 @@ import (
 )
 
 const (
-	mcpTimeout = 30 * time.Second
+	defaultMCPServerTimeout = 30 * time.Second
 )
 
 type Connection struct {
@@ -50,6 +51,28 @@ func EnsureMCPConnected(servers []conf.MCPServer) {
 	mcpOnce.Do(func() {
 		mcpConns = connectServers(servers)
 	})
+}
+
+// serverTimeout 归一化服务器配置的超时（秒），未配置或非法时回退到默认值。
+func serverTimeout(server conf.MCPServer) time.Duration {
+	if server.Timeout > 0 {
+		return time.Duration(server.Timeout) * time.Second
+	}
+	return defaultMCPServerTimeout
+}
+
+// headerRoundTripper 把 server 配置的自定义 HTTP 头附加到每个出站请求上。
+type headerRoundTripper struct {
+	base    http.RoundTripper
+	headers map[string]string
+}
+
+func (h *headerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	clone := req.Clone(req.Context())
+	for k, v := range h.headers {
+		clone.Header.Set(k, v)
+	}
+	return h.base.RoundTrip(clone)
 }
 
 func DisconnectMCP() {
@@ -72,7 +95,7 @@ func connectServers(servers []conf.MCPServer) []Connection {
 			continue
 		}
 
-		listCtx, listCancel := context.WithTimeout(context.Background(), mcpTimeout)
+		listCtx, listCancel := context.WithTimeout(context.Background(), serverTimeout(server))
 		toolList, err := session.ListTools(listCtx, nil)
 		listCancel()
 		if err != nil {
@@ -98,7 +121,7 @@ func connectServers(servers []conf.MCPServer) []Connection {
 				Name:        name,
 				Description: desc,
 				InputSchema: convertMCPSchema(tool.InputSchema),
-				Handler:     mcpToolHandler(session, tool.Name),
+				Handler:     mcpToolHandler(session, tool.Name, serverTimeout(server)),
 			})
 			registered++
 		}
@@ -159,7 +182,7 @@ func connectStdio(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession
 		return nil, nil, fmt.Errorf("start command: %w", err)
 	}
 
-	connectCtx, connectCancel := context.WithTimeout(context.Background(), mcpTimeout)
+	connectCtx, connectCancel := context.WithTimeout(context.Background(), serverTimeout(server))
 	defer connectCancel()
 	transport := &mcp.IOTransport{Reader: stdout, Writer: stdin}
 	session, err := client.Connect(connectCtx, transport, nil)
@@ -180,8 +203,16 @@ func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession,
 	transport := &mcp.StreamableClientTransport{
 		Endpoint: server.URL,
 	}
+	if len(server.Headers) > 0 {
+		transport.HTTPClient = &http.Client{
+			Transport: &headerRoundTripper{
+				base:    http.DefaultTransport,
+				headers: server.Headers,
+			},
+		}
+	}
 
-	connectCtx, connectCancel := context.WithTimeout(context.Background(), mcpTimeout)
+	connectCtx, connectCancel := context.WithTimeout(context.Background(), serverTimeout(server))
 	defer connectCancel()
 	session, err := client.Connect(connectCtx, transport, nil)
 	if err != nil {
@@ -191,9 +222,9 @@ func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession,
 	return session, nil, nil
 }
 
-func mcpToolHandler(session *mcp.ClientSession, toolName string) func(args map[string]interface{}) (tools.CallToolResult, error) {
+func mcpToolHandler(session *mcp.ClientSession, toolName string, timeout time.Duration) func(args map[string]interface{}) (tools.CallToolResult, error) {
 	return func(args map[string]interface{}) (tools.CallToolResult, error) {
-		ctx, cancel := context.WithTimeout(context.Background(), mcpTimeout)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
 		result, err := session.CallTool(ctx, &mcp.CallToolParams{

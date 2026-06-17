@@ -254,6 +254,9 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
                     let firstNode = range.startContainer.childNodes[range.startOffset] || range.startContainer.firstChild;
                     while (firstNode) {
                         if (firstNode.textContent === "" && firstNode.nodeType === 3) {
+                            if (!firstNode.previousSibling) {
+                                break;
+                            }
                             firstNode = firstNode.previousSibling;
                         } else {
                             break;
@@ -265,6 +268,9 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
                     let lastNode = range.startContainer.childNodes[range.startOffset] || range.startContainer.lastChild;
                     while (lastNode) {
                         if (lastNode.textContent === "" && lastNode.nodeType === 3) {
+                            if (!lastNode.previousSibling) {
+                                break;
+                            }
                             lastNode = lastNode.previousSibling;
                         } else {
                             break;

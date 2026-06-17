@@ -157,7 +157,7 @@ func unescapePackageDisplayStrings(pkg *Package) {
 	}
 }
 
-// GetPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
+// GetPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en、en_US（历史命名兼容），再回退 fallback。
 func GetPreferredLocaleString(m LocaleStrings, fallback string) string {
 	if len(m) == 0 {
 		return fallback
@@ -165,7 +165,14 @@ func GetPreferredLocaleString(m LocaleStrings, fallback string) string {
 	if v := strings.TrimSpace(m[util.Lang]); "" != v {
 		return v
 	}
+	// 兼容集市 JSON 数据中历史下划线 key（zh_CN、en_US 等）
+	if v := strings.TrimSpace(m[util.LangToFile(util.Lang)]); "" != v {
+		return v
+	}
 	if v := strings.TrimSpace(m["default"]); "" != v {
+		return v
+	}
+	if v := strings.TrimSpace(m["en"]); "" != v {
 		return v
 	}
 	if v := strings.TrimSpace(m["en_US"]); "" != v {

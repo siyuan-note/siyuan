@@ -57,10 +57,9 @@ export const resize = (protyle: IProtyle) => {
             protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(protyle.contentElement.clientHeight - 49, 200)}px`);
         }
         if (!protyle.disabled) {
-            const contentRect = protyle.contentElement.getBoundingClientRect();
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
                 if (item.querySelector(".av__scroll")) {
-                    stickyRow(item, contentRect, "all");
+                    stickyRow(item, protyle.contentElement, "all");
                 }
             });
         }

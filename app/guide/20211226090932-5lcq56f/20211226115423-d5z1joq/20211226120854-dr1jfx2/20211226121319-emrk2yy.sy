@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20251211094201"
+		"updated": "20260616224253"
 	},
 	"Children": [
 		{
@@ -2089,7 +2089,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122008-fcs48nq",
-				"updated": "20211228135827"
+				"updated": "20260616224253"
 			},
 			"Children": [
 				{
@@ -2134,7 +2134,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20211226122008-ukzwvpl",
-				"updated": "20211228134904"
+				"updated": "20260616221535"
 			},
 			"Children": [
 				{
@@ -2160,7 +2160,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2169,7 +2169,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2178,7 +2178,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2187,7 +2187,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2196,7 +2196,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2205,7 +2205,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2214,7 +2214,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2223,7 +2223,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2232,7 +2232,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2241,7 +2241,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": ", "
+							"Data": "​, "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -2250,9 +2250,52 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " ..."
+							"Data": "​ ..."
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260616221535-0iq3rxe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260616221535-0iq3rxe",
+				"updated": "20260616224253"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "另外，程式碼區塊語言還支援 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan-template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，兩者等價。使用後會啟用"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226123004-dplpw0o",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "思源範本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "語法的高亮顯示；匯出時，該程式碼區塊不會以程式碼區塊形式匯出，而是轉為普通段落文字。"
 				}
 			]
 		},

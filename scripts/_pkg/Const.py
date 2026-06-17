@@ -1,4 +1,5 @@
 docmap_siyuan = {
+    "Breaking": "Breaking",
     "Feature": "Feature",
     "Enhancement": "Enhancement",
     "Bug": "Bugfix",

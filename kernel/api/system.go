@@ -574,6 +574,17 @@ func getConf(c *gin.Context) {
 		maskedConf = model.FilterConfByPublishIgnore(publishIgnore, maskedConf)
 	}
 
+	// 浏览器环境下不返回工作空间绝对路径，避免泄露用户名等敏感信息
+	// 原生客户端（桌面 Electron、移动端）UA 以 "SiYuan/" 开头，照常返回真实路径
+	// REF: https://github.com/siyuan-note/siyuan/issues/17410
+	if util.IsBrowserRequest(c) {
+		maskedConf.System.WorkspaceDir = ""
+		maskedConf.System.AppDir = ""
+		maskedConf.System.ConfDir = ""
+		maskedConf.System.DataDir = ""
+		maskedConf.System.HomeDir = ""
+	}
+
 	ret.Data = map[string]any{
 		"conf":      maskedConf,
 		"start":     !util.IsUILoaded,

@@ -16,7 +16,7 @@ import {
     hasPreviousSibling
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
-import {cancelSB, genEmptyElement} from "../../block/util";
+import {cancelSB, genEmptyElement, getSbChildCount} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
 import {zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
@@ -226,7 +226,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             }
         }
         if (deletes.length > 0) {
-            if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock" && topParentElement.childElementCount === 2) {
+            if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(topParentElement) === 1) {
                 const sbData = await cancelSB(protyle, topParentElement, range);
                 transaction(protyle, deletes.concat(sbData.doOperations), sbData.undoOperations.concat(inserts.reverse()));
             } else {
@@ -469,7 +469,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }];
                 blockElement.remove();
                 // 取消超级块
-                if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
+                if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(parentElement) === 1) {
                     const sbData = await cancelSB(protyle, parentElement);
                     transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
                 } else {
@@ -588,7 +588,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             id: previousId,
         });
     }
-    if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
+    if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(parentElement) === 1) {
         const sbData = await cancelSB(protyle, parentElement);
         transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
     } else {

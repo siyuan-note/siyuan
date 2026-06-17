@@ -1,5 +1,6 @@
 import {hasClosestBlock, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
+import {getSbChildCount} from "../../block/util";
 
 export const getParentBlock = (element: Element) => {
     if (element.parentElement.classList.contains("callout-content") ||
@@ -180,9 +181,9 @@ export const getTopAloneElement = (topSourceElement: Element) => {
                 break;
             }
         }
-    } else if ("NodeSuperBlock" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 2) {
+    } else if ("NodeSuperBlock" === topSourceElement.parentElement.getAttribute("data-type") && getSbChildCount(topSourceElement.parentElement) === 1) {
         while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
-            if (topSourceElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" && topSourceElement.parentElement.childElementCount === 2) {
+            if (topSourceElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(topSourceElement.parentElement) === 1) {
                 topSourceElement = topSourceElement.parentElement;
             } else {
                 topSourceElement = getTopAloneElement(topSourceElement);

@@ -13,7 +13,7 @@ import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {avRender, refreshAV} from "../render/av/render";
 import {removeFoldHeading} from "../util/heading";
-import {cancelSB, genEmptyElement, genSBElement} from "../../block/util";
+import {cancelSB, genEmptyElement, genSBElement, getSbChildCount, refreshSbResize} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
@@ -1049,8 +1049,15 @@ export const turnsIntoOneTransaction = async (options: {
             blockRender(options.protyle, item);
         }
     });
+    // 子块移入完成后刷新超级块拖拽手柄 https://github.com/siyuan-note/siyuan/issues/9521
+    if (parentElement.classList.contains("sb")) {
+        refreshSbResize(parentElement);
+    } else if (parentElement.parentElement && parentElement.parentElement.classList.contains("sb")) {
+        // 引述/列表/标注嵌入超级块时刷新父超级块
+        refreshSbResize(parentElement.parentElement);
+    }
     if ((["Blocks2Blockquote", "Blocks2Callout"].includes(options.type) || options.type.endsWith("Ls")) &&
-        parentElement.parentElement.classList.contains("sb") && parentElement.parentElement.childElementCount === 2) {
+        parentElement.parentElement.classList.contains("sb") && getSbChildCount(parentElement.parentElement) === 1) {
         const cancelOperations = await cancelSB(options.protyle, parentElement.parentElement);
         doOperations.push(...cancelOperations.doOperations);
         undoOperations.splice(0, 0, ...cancelOperations.undoOperations);

@@ -50,6 +50,8 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
                 getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>");
             }
             nodeElement.lastElementChild.remove();
+            // 清理残留的拖拽手柄，避免被当作兄弟块移出 https://github.com/siyuan-note/siyuan/issues/9521
+            nodeElement.querySelectorAll(".sb__resize").forEach(handle => handle.remove());
             nodeElement.replaceWith(...nodeElement.children);
             if (range) {
                 focusByWbr(protyle.wysiwyg.element, range);
@@ -92,6 +94,31 @@ export const genSBElement = (layout: string, id?: string, attrHTML?: string) => 
     sbElement.setAttribute("data-sb-layout", layout);
     sbElement.innerHTML = attrHTML || `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     return sbElement;
+};
+
+// 统计超级块内的真实子块数量（排除 sb__resize 手柄、protyle-attr 等装饰元素）
+// https://github.com/siyuan-note/siyuan/issues/9521
+export const getSbChildCount = (sbElement: Element) =>
+    sbElement.querySelectorAll(":scope > [data-node-id]").length;
+
+// 刷新超级块横向布局下的拖拽手柄：col 布局在每两个相邻子块间插入 sb__resize，非 col 移除全部
+// 手柄是纯装饰元素，回流时由 lute 的 genASTByBlockDOM 按 sb__resize class 忽略，不产生幽灵块
+// https://github.com/siyuan-note/siyuan/issues/9521
+export const refreshSbResize = (sbElement: Element) => {
+    if (!sbElement || !sbElement.classList.contains("sb")) {
+        return;
+    }
+    sbElement.querySelectorAll(":scope > .sb__resize").forEach(item => item.remove());
+    if (sbElement.getAttribute("data-sb-layout") !== "col") {
+        return;
+    }
+    const children = Array.from(sbElement.querySelectorAll(":scope > [data-node-id]"));
+    for (let i = 0; i < children.length - 1; i++) {
+        const handle = document.createElement("span");
+        handle.setAttribute("class", "sb__resize");
+        handle.setAttribute("contenteditable", "false");
+        children[i].after(handle);
+    }
 };
 
 export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "parent" | "next" | "previous") => {

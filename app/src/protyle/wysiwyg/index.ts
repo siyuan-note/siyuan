@@ -788,6 +788,53 @@ export class WYSIWYG {
             const mostBottom = protyleRect.bottom;
             const y = event.clientY;
             const contentRect = protyle.contentElement.getBoundingClientRect();
+            // 超级块横向布局下拖拽调整子块宽度 https://github.com/siyuan-note/siyuan/issues/9521
+            if (!protyle.disabled && target.classList.contains("sb__resize")) {
+                const sbElement = target.parentElement;
+                const previousElement = target.previousElementSibling as HTMLElement;
+                if (!sbElement || !previousElement || !previousElement.hasAttribute("data-node-id") ||
+                    sbElement.getAttribute("data-sb-layout") !== "col") {
+                    return;
+                }
+                const x = event.clientX;
+                const sbWidth = sbElement.clientWidth;
+                const oldWidth = previousElement.clientWidth;
+                const oldHTML = previousElement.outerHTML;
+                target.classList.add("sb__resize--drag");
+                // @ts-ignore
+                previousElement.style.webkitUserModify = "read-only";
+                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    let newWidth = oldWidth + (moveEvent.clientX - x);
+                    // 最小宽度限制为超级块宽度的 10%
+                    const minWidth = sbWidth * 0.1;
+                    // 最大宽度限制为超级块宽度减去最小宽度（保证至少还有一个兄弟块的空间）
+                    const maxWidth = sbWidth * 0.9;
+                    newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+                    // 用 style.width + flex:none，与 genWidths 菜单、图片缩放一致，菜单可自动回显/持久化
+                    previousElement.style.width = newWidth + "px";
+                    previousElement.style.flex = "none";
+                };
+                documentSelf.onmouseup = () => {
+                    target.classList.remove("sb__resize--drag");
+                    // @ts-ignore
+                    previousElement.style.webkitUserModify = "";
+                    documentSelf.onmousemove = null;
+                    documentSelf.onmouseup = null;
+                    documentSelf.ondragstart = null;
+                    documentSelf.onselectstart = null;
+                    documentSelf.onselect = null;
+                    // 转为百分比写入 style.width + flex:none，复用既有 genWidths 菜单的回显与持久化
+                    const finalWidth = previousElement.clientWidth;
+                    const pct = Math.round(finalWidth / sbWidth * 1000) / 10;
+                    previousElement.style.width = pct + "%";
+                    previousElement.style.flex = "none";
+                    previousElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                    updateTransaction(protyle, previousElement, oldHTML);
+                };
+                this.preventClick = true;
+                event.preventDefault();
+                return;
+            }
             // av col resize
             if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
                 if (!nodeElement) {

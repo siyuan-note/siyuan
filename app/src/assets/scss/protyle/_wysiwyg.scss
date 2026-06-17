@@ -279,7 +279,6 @@
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
-        column-gap: 1.5em;
 
         & > div {
           flex: 1 0 10%;
@@ -290,6 +289,24 @@
           &:last-child {
             margin-right: 0;
           }
+        }
+
+        // 超级块内拖拽调整子块宽度的手柄 https://github.com/siyuan-note/siyuan/issues/9521
+        > .sb__resize {
+          align-self: stretch;
+          width: 4px;
+          border-radius: var(--b3-border-radius);
+          cursor: col-resize;
+          touch-action: none;
+          opacity: 0;
+          transition: var(--b3-color-transition);
+          margin-right: 16px;
+          z-index: 5;
+        }
+
+        &:hover > .sb__resize {
+          opacity: 1;
+          background-color: var(--b3-border-color);
         }
 
         .sb {

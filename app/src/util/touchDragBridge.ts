@@ -40,6 +40,7 @@ const handleManualTouchStart = (e: TouchEvent) => {
         !target.closest(".av__drag-fill") &&
         !target.closest(".protyle-action__drag") &&
         !target.closest(".table__resize") &&
+        !target.closest(".sb__resize") &&
         !target.closest(".protyle-background__img") &&
         !target.closest(".b3-chip")) return;
 

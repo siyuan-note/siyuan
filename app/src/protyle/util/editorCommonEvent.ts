@@ -9,7 +9,7 @@ import {
 } from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
-import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock} from "../../block/util";
+import {cancelSB, genEmptyElement, genSBElement, getSbChildCount, insertEmptyBlock, refreshSbResize} from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
 import {getParentBlock, getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
@@ -188,7 +188,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                         sameElement.remove();
                     }
                 }
-                if (topSourceParentElement.classList.contains("sb") && topSourceParentElement.childElementCount === 2) {
+                if (topSourceParentElement.classList.contains("sb") && getSbChildCount(topSourceParentElement) === 1) {
                     // 拖拽后，sb 只剩下一个元素
                     if (isSameDoc) {
                         const sbData = await cancelSB(protyle, topSourceParentElement);
@@ -210,7 +210,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                         /// #endif
                     }
                 }
-            } else if (oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
+            } else if (oldSourceParentElement.classList.contains("sb") && getSbChildCount(oldSourceParentElement) === 1) {
                 // 拖拽后，sb 只剩下一个元素
                 if (isSameDoc) {
                     const sbData = await cancelSB(protyle, oldSourceParentElement);
@@ -436,6 +436,8 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         doOperations.push(...foldOperations.doOperations);
         undoOperations.splice(0, 0, ...foldOperations.undoOperations);
     });
+    // 子块移入完成后刷新拖拽手柄 https://github.com/siyuan-note/siyuan/issues/9521
+    refreshSbResize(sbElement);
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {

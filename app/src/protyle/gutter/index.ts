@@ -2674,7 +2674,12 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 if (["NodeBlockquote", "NodeCallout"].includes(type)) {
                     space += 10;
                 }
-                if ((nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) ||
+                // 前一个块兄弟（跳过 sb__resize 拖拽手柄，手柄无 data-node-id）
+                let previousBlock = nodeElement.previousElementSibling;
+                while (previousBlock && !previousBlock.getAttribute("data-node-id")) {
+                    previousBlock = previousBlock.previousElementSibling;
+                }
+                if ((previousBlock && previousBlock.getAttribute("data-node-id")) ||
                     nodeElement.parentElement.classList.contains("callout-content")) {
                     // 前一个块存在时，只显示到当前层级
                     hideParent = true;

@@ -7,6 +7,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {clearSelect} from "./clear";
 import {removeFoldHeading} from "./heading";
 import {getTopAloneElement} from "../wysiwyg/getBlock";
+import {getSbChildCount} from "../../block/util";
 
 export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolean,
                         isRemove?: boolean, addLoading = true, getOperations = false) => {
@@ -98,7 +99,8 @@ const isFoldable = (el: Element) => {
     const type = el.getAttribute("data-type");
     return type === "NodeHeading" ||
         (type === "NodeCallout" && el.querySelector(".callout-content").childElementCount > 1) ||
-        ((type === "NodeListItem" || type === "NodeBlockquote" || type === "NodeSuperBlock") && el.childElementCount > 3);
+        ((type === "NodeListItem" || type === "NodeBlockquote") && el.childElementCount > 3) ||
+        (type === "NodeSuperBlock" && getSbChildCount(el) > 1);
 };
 
 export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]) => {

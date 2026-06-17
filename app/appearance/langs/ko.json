@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "템플릿",
+  "calcResultTemplate": "템플릿",
+  "rollupTemplateTip": "예: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "이 세션은 다른 인스턴스에서 사용 중입니다",
   "agentMirrorStreaming": "다른 인스턴스가 채팅 중...",
   "rollbackCompleted": "롤백 완료",

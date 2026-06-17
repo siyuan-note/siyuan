@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "Šablóna",
+  "calcResultTemplate": "Šablóna",
+  "rollupTemplateTip": "Príklad: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "Táto relácia je zaneprázdnená v inej inštancii",
   "agentMirrorStreaming": "Iná inštancia komunikuje...",
   "rollbackCompleted": "Návrat späť dokončený",

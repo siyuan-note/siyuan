@@ -25,8 +25,9 @@ import (
 
 // FieldCalc 描述了字段计算操作和结果的结构。
 type FieldCalc struct {
-	Operator CalcOperator `json:"operator"` // 计算操作符
-	Result   *Value       `json:"result"`   // 计算结果
+	Operator CalcOperator `json:"operator"`           // 计算操作符
+	Result   *Value       `json:"result"`             // 计算结果
+	Template string       `json:"template,omitempty"` // 自定义模板统计内容，仅当 Operator 为 CalcOperatorTemplate 时使用
 }
 
 type CalcOperator string
@@ -54,6 +55,7 @@ const (
 	CalcOperatorUnchecked           CalcOperator = "Unchecked"
 	CalcOperatorPercentChecked      CalcOperator = "Percent checked"
 	CalcOperatorPercentUnchecked    CalcOperator = "Percent unchecked"
+	CalcOperatorTemplate            CalcOperator = "Template"
 )
 
 func Calc(viewable Viewable, attrView *AttributeView) {
@@ -1935,6 +1937,32 @@ func calcFieldRollup(collection Collection, field Field, fieldIndex int) {
 		}
 		if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
 			calc.Result = &Value{Number: NewFormattedValueNumber(maxVal-minVal, field.GetNumberFormat())}
+		}
+	case CalcOperatorTemplate:
+		// 自定义模板统计：对整列已汇总的值执行用户编写的 .action{...} 模板
+		nums := []float64{}
+		strs := []string{}
+		raw := []*Value{}
+		for _, item := range collection.GetItems() {
+			values := item.GetValues()
+			if nil != values[fieldIndex] && nil != values[fieldIndex].Rollup && 0 < len(values[fieldIndex].Rollup.Contents) {
+				for _, content := range values[fieldIndex].Rollup.Contents {
+					val, _ := util.Convert2Float(content.String(false))
+					nums = append(nums, val)
+					strs = append(strs, content.String(false))
+					raw = append(raw, content)
+				}
+			}
+		}
+		if 0 == len(nums) {
+			return
+		}
+		ctx := buildRollupTemplateContext(nums, strs, raw)
+		rendered, asNumber, isNumber := evalRollupTemplate(calc.Template, ctx)
+		if isNumber {
+			calc.Result = &Value{Number: NewFormattedValueNumber(asNumber, field.GetNumberFormat())}
+		} else if "" != rendered {
+			calc.Result = &Value{Type: KeyTypeText, Text: &ValueText{Content: rendered}}
 		}
 	}
 }

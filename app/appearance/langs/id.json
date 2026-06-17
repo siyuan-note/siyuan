@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "Templat",
+  "calcResultTemplate": "Templat",
+  "rollupTemplateTip": "Contoh: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "Sesi ini sedang sibuk di instansi lain",
   "agentMirrorStreaming": "Instansi lain sedang mengobrol...",
   "rollbackCompleted": "Putar balik selesai",

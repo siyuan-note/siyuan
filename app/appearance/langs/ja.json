@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "テンプレート",
+  "calcResultTemplate": "テンプレート",
+  "rollupTemplateTip": "例: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "このセッションは別のインスタンスで使用中です",
   "agentMirrorStreaming": "別のインスタンスがチャット中...",
   "rollbackCompleted": "ロールバック完了",

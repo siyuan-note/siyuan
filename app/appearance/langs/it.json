@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "Modello",
+  "calcResultTemplate": "Modello",
+  "rollupTemplateTip": "Esempio: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "Questa sessione è occupata in un'altra istanza",
   "agentMirrorStreaming": "Un'altra istanza sta chattando...",
   "rollbackCompleted": "Rollback completato",

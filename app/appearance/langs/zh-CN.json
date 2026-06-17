@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "模板",
+  "calcResultTemplate": "模板",
+  "rollupTemplateTip": "示例：.action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "该会话正在其他实例对话中",
   "agentMirrorStreaming": "其他实例正在对话中…",
   "rollbackCompleted": "已完成回滚",

@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "Şablon",
+  "calcResultTemplate": "Şablon",
+  "rollupTemplateTip": "Örnek: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "Bu oturum başka bir örnekte meşgul",
   "agentMirrorStreaming": "Başka bir örnek sohbet ediyor...",
   "rollbackCompleted": "Geri alma tamamlandı",

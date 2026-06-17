@@ -1180,6 +1180,7 @@ interface IAVCellRollupValue {
 
 interface IAVCalc {
     operator?: string,
+    template?: string,
     result?: IAVCellValue
 }
 

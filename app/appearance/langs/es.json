@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "Plantilla",
+  "calcResultTemplate": "Plantilla",
+  "rollupTemplateTip": "Ejemplo: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "Esta sesión está ocupada en otra instancia",
   "agentMirrorStreaming": "Otra instancia está conversando...",
   "rollbackCompleted": "Restauración completada",

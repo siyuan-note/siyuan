@@ -18,11 +18,14 @@ package model
 
 import (
 	"fmt"
+	"regexp"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 // UndoEntry 是撤销栈中的一条记录。跨文档操作（MutatedRootIDs 含多个 rootID）的 entry
@@ -362,4 +365,107 @@ func cloneOperations(ops []*Operation) []*Operation {
 		ret[i] = &cloned
 	}
 	return ret
+}
+
+var dataNodeIDPattern = regexp.MustCompile(`data-node-id="([^"]+)"`)
+var refcountAttrPattern = regexp.MustCompile(`\s*refcount="[^"]*"`)
+var refcountDivPattern = regexp.MustCompile(`<div class="protyle-attr--refcount[^"]*"[^>]*>.*?</div>`)
+
+// ResolveReplayDuplicateIds 在 undo/redo 重放事务前解决块 ID 冲突。
+// 场景：剪切块 X 后粘贴到别处（保留原 ID），再撤销剪切会 insert X，而 X 已存在于粘贴处，产生重复 ID。
+// 这里对即将重放的 insert 操作做检查——若其引入的 ID 在块树中已存在，则在正反向操作及关联字段
+// （ID/ParentID/PreviousID/NextID 与 Data 内联 ID）上统一替换为新 ID。
+// 替换同时作用于 do/undo 两套操作：重放只执行 doOperations，但若不同步改 undoOperations，
+// 随后对同一 entry 的 redo 会沿用旧 ID 再次撞库。
+func ResolveReplayDuplicateIds(tx *Transaction) {
+	if nil == tx || !tx.isReplay {
+		return
+	}
+
+	// 收集所有 insert 操作引入的块 ID（op.ID + Data 内联的 data-node-id）
+	ids := map[string]struct{}{}
+	collect := func(ops []*Operation) {
+		for _, op := range ops {
+			if "insert" != op.Action {
+				continue
+			}
+			if "" != op.ID && ast.IsNodeIDPattern(op.ID) {
+				ids[op.ID] = struct{}{}
+			}
+			data, ok := op.Data.(string)
+			if !ok {
+				continue
+			}
+			for _, m := range dataNodeIDPattern.FindAllStringSubmatch(data, -1) {
+				if ast.IsNodeIDPattern(m[1]) {
+					ids[m[1]] = struct{}{}
+				}
+			}
+		}
+	}
+	collect(tx.DoOperations)
+	// 注意：只检测 DoOperations（实际执行的操作），不检测 UndoOperations。
+	// UndoOperations 在 redo 时会作为新的 DoOperations 再次过 ResolveReplayDuplicateIds。
+	// 若 undo 时也检测 UndoOperations 的 insert，会把 redo 用的 ID 换新，
+	// 污染 DoOperations 的对应 delete（do/undo 共享 replacements），导致撤销删除错误 ID。
+	if 0 == len(ids) {
+		return
+	}
+
+	idList := make([]string, 0, len(ids))
+	for id := range ids {
+		idList = append(idList, id)
+	}
+	exist := treenode.ExistBlockTrees(idList)
+
+	// 已存在的 ID 生成替换
+	replacements := map[string]string{}
+	for _, id := range idList {
+		if exist[id] {
+			replacements[id] = ast.NewNodeID()
+		}
+	}
+	if 0 == len(replacements) {
+		return
+	}
+
+	// 对 do/undo 两套操作统一替换 ID 及关联字段
+	apply := func(ops []*Operation) {
+		for _, op := range ops {
+			// 记录本操作的 ID 是否被换新（在改 op.ID 之前判断，否则 replacements 的 key 是 oldID 查不到）
+			_, idReplaced := replacements[op.ID]
+			if newID, ok := replacements[op.ID]; ok {
+				op.ID = newID
+			}
+			if newID, ok := replacements[op.ParentID]; ok {
+				op.ParentID = newID
+			}
+			if newID, ok := replacements[op.PreviousID]; ok {
+				op.PreviousID = newID
+			}
+			if newID, ok := replacements[op.NextID]; ok {
+				op.NextID = newID
+			}
+			data, ok := op.Data.(string)
+			if !ok {
+				continue
+			}
+			for oldID, newID := range replacements {
+				data = dataNodeIDPattern.ReplaceAllStringFunc(data, func(match string) string {
+					if sub := dataNodeIDPattern.FindStringSubmatch(match); len(sub) > 1 && sub[1] == oldID {
+						return `data-node-id="` + newID + `"`
+					}
+					return match
+				})
+			}
+			// ID 被换新的块（剪切粘贴后撤销恢复的副本）清除引用角标，避免显示旧的 refcount。
+			// 角标由 kernel 异步刷新（refreshRefCount）重建为正确值。
+			if idReplaced {
+				data = refcountDivPattern.ReplaceAllString(data, "")
+				data = refcountAttrPattern.ReplaceAllString(data, "")
+			}
+			op.Data = data
+		}
+	}
+	apply(tx.DoOperations)
 }

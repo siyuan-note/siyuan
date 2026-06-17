@@ -202,6 +202,8 @@ func performUndo(c *gin.Context) {
 		UndoOperations: entry.DoOperationsForReplay(),
 	}
 	tx.MarkReplay()
+	// 重放前解决剪切后粘贴造成的块 ID 冲突（已存在的 ID 换新，避免重复）
+	model.ResolveReplayDuplicateIds(tx)
 
 	if err := model.PerformTxSync(tx); nil != err {
 		// 逆操作执行失败，回滚执行栈。返回 code=0 + data.failed=true（而非 code=-1），
@@ -221,9 +223,10 @@ func performUndo(c *gin.Context) {
 	pushUndoTransactions(app, session, []*model.Transaction{tx}, true, crossDoc)
 
 	canUndo, canRedo, _ := model.GlobalUndoLog.State(rootID)
+	// 返回重放后（已解决 ID 冲突）的 tx 操作，前端乐观应用与 kernel 落盘一致
 	ret.Data = map[string]any{
-		"doOperations":   entry.DoOperationsForReplay(),
-		"undoOperations": entry.UndoOperationsForReplay(),
+		"doOperations":   tx.DoOperations,
+		"undoOperations": tx.UndoOperations,
 		"mutatedRootIDs": entry.MutatedRootIDs(),
 		"canUndo":        canUndo,
 		"canRedo":        canRedo,
@@ -265,6 +268,8 @@ func performRedo(c *gin.Context) {
 		UndoOperations: entry.UndoOperationsForReplay(),
 	}
 	tx.MarkReplay()
+	// 重放前解决剪切后粘贴造成的块 ID 冲突（已存在的 ID 换新，避免重复）
+	model.ResolveReplayDuplicateIds(tx)
 
 	if err := model.PerformTxSync(tx); nil != err {
 		// 重做失败，回滚执行栈。返回 code=0 + data.failed=true（避免前端 isUndoing 死锁）。
@@ -283,9 +288,10 @@ func performRedo(c *gin.Context) {
 	pushUndoTransactions(app, session, []*model.Transaction{tx}, true, crossDoc)
 
 	canUndo, canRedo, _ := model.GlobalUndoLog.State(rootID)
+	// 返回重放后（已解决 ID 冲突）的 tx 操作，前端乐观应用与 kernel 落盘一致
 	ret.Data = map[string]any{
-		"doOperations":   entry.DoOperationsForReplay(),
-		"undoOperations": entry.UndoOperationsForReplay(),
+		"doOperations":   tx.DoOperations,
+		"undoOperations": tx.UndoOperations,
 		"mutatedRootIDs": entry.MutatedRootIDs(),
 		"canUndo":        canUndo,
 		"canRedo":        canRedo,

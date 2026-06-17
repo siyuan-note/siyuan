@@ -493,10 +493,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             });
             const existResponse = await fetchSyncPost("/api/block/checkBlocksExist", {ids: oldIds});
             pastedBlockElements.forEach((e) => {
-                if (existResponse.data[e.getAttribute("data-node-id")] !== false) {
+                const originalId = e.getAttribute("data-node-id");
+                const isCutPaste = existResponse.data[originalId] === false; // 剪切来的（原块已删）
+                if (!isCutPaste) {
+                    // 复制粘贴：生成新 ID
                     e.setAttribute("data-node-id", Lute.NewNodeID());
                 }
-                clearBlockElement(e);
+                clearBlockElement(e, isCutPaste); // 剪切粘贴保留引用角标
             });
         }
         if (nodeElement.classList.contains("table")) {

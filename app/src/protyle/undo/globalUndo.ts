@@ -212,16 +212,16 @@ export const requestUndo = async (protyle: IProtyle) => {
         markMirror(rootID, {canUndo: !!data.canUndo, canRedo: !!data.canRedo});
         const mutatedRootIDs: string[] = data.mutatedRootIDs || [];
         if (mutatedRootIDs.length > 1) {
-            // 跨文档撤销：undoOperations 的锚点分散在多个文档，当前 protyle 无法本地乐观应用。
+            // 跨文档撤销：doOperations 的锚点分散在多个文档，当前 protyle 无法本地乐观应用。
             // 改为靠 kernel 广播（含发起方）刷新所有涉及文档的 DOM。
             // 这里不调 renderLocal，避免在错误 protyle 上应用跨文档 move 导致前后端不一致。
             refreshUndoButtons(protyle);
             // 广播会到达当前窗口（/undo 对跨文档用 PushModeBroadcast），触发 onTransaction 刷新 DOM
         } else {
-            // 单文档撤销：发起窗口本地乐观应用（isUndo=true，保光标/折叠/zoom）
-            protyle.undo.renderLocal(protyle, data.undoOperations, false);
+            // 单文档撤销：发起窗口本地乐观应用 doOperations（kernel 实际执行的操作，如 insert 恢复块）
+            protyle.undo.renderLocal(protyle, data.doOperations, false);
             refreshUndoButtons(protyle);
-            const focusBlockId = data.undoOperations?.find((op: IOperation) => op.action === "insert")?.id;
+            const focusBlockId = data.doOperations?.find((op: IOperation) => op.action === "insert")?.id;
             focusRootIDs(mutatedRootIDs, focusBlockId);
         }
     });

@@ -165,12 +165,21 @@ export const requestUndo = async (protyle: IProtyle) => {
 
     if (peekMutatedRootIDs.length > 1) {
         const names = await resolveRootNames(peekMutatedRootIDs);
+        // 确认期间拦截当前编辑器的键盘输入（遮罩只挡鼠标点击，不挡键盘冒泡）
+        const blockInput = (e: Event) => {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+        };
+        protyle.wysiwyg.element.addEventListener("keydown", blockInput, true);
+        protyle.wysiwyg.element.addEventListener("beforeinput", blockInput, true);
         const confirmed = await new Promise<boolean>((resolve) => {
             confirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
                 `${window.siyuan.languages.undoCrossDocConfirm}<br>${names.join(" / ")}`,
                 () => resolve(true),
                 () => resolve(false));
         });
+        protyle.wysiwyg.element.removeEventListener("keydown", blockInput, true);
+        protyle.wysiwyg.element.removeEventListener("beforeinput", blockInput, true);
         if (!confirmed) {
             isUndoing = false; // 拒绝，复位锁，栈与镜像不动
             return;

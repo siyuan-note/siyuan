@@ -442,16 +442,13 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
     if (type === "rollup") {
         // 获取当前列已有的模板内容（footer 路径下需异步拉取列数据）
         let currentTemplate = "";
-        let currentTemplateOperator = "";
         if (panelData?.data) {
             const colData = getFieldsByData(panelData.data).find((item) => item.id === colId);
             currentTemplate = colData?.calc?.template || "";
-            currentTemplateOperator = colData?.calc?.operator;
         } else {
             const avResponse = await fetchSyncPost("/api/av/renderAttributeView", {id: avId});
             const colData = getFieldsByData(avResponse.data).find((item) => item.id === colId);
             currentTemplate = colData?.calc?.template || "";
-            currentTemplateOperator = colData?.calc?.operator;
         }
         // 提交模板统计：将底部计算切换为 Template 并写入模板内容
         const submitTemplate = (templateContent: string) => {
@@ -477,7 +474,6 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         menu.addItem({
             iconHTML: "",
             label: getNameByOperator("Template", !!panelData?.data),
-            current: currentTemplateOperator === "Template",
             click() {
                 menu.close();
                 const dialog = new Dialog({

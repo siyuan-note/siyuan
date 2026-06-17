@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
@@ -374,6 +375,25 @@ func checkBlockExist(c *gin.Context) {
 
 	id := arg["id"].(string)
 	ret.Data = treenode.ExistBlockTree(id)
+}
+
+func checkBlocksExist(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, idArg := range idsArg {
+		if id, idOk := idArg.(string); idOk && ast.IsNodeIDPattern(id) {
+			ids = append(ids, id)
+		}
+	}
+	ret.Data = treenode.ExistBlockTrees(ids)
 }
 
 func getDocInfo(c *gin.Context) {

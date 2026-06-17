@@ -6,7 +6,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./h
 import {getEditorRange, getSelectionOffset} from "./selection";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
@@ -482,12 +482,23 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
         }
         let isBlock = false;
-        tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
-            const newId = Lute.NewNodeID();
-            e.setAttribute("data-node-id", newId);
-            clearBlockElement(e);
+        const pastedBlockElements = tempElement.querySelectorAll("[data-node-id]");
+        if (pastedBlockElements.length > 0) {
             isBlock = true;
-        });
+            // 剪切后粘贴时原块已被删除,保留原 ID 可避免该块被其他位置的引用失效;
+            // 仅当 ID 仍存在(复制粘贴)时才生成新 ID
+            const oldIds: string[] = [];
+            pastedBlockElements.forEach((e) => {
+                oldIds.push(e.getAttribute("data-node-id"));
+            });
+            const existResponse = await fetchSyncPost("/api/block/checkBlocksExist", {ids: oldIds});
+            pastedBlockElements.forEach((e) => {
+                if (existResponse.data[e.getAttribute("data-node-id")] !== false) {
+                    e.setAttribute("data-node-id", Lute.NewNodeID());
+                }
+                clearBlockElement(e);
+            });
+        }
         if (nodeElement.classList.contains("table")) {
             isBlock = false;
         }

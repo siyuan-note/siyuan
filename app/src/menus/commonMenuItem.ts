@@ -11,10 +11,10 @@ import {
     isInHarmony,
     isInIOS,
     isInMobileApp,
-    openByMobile,
     saveExportFile,
     writeText
 } from "../protyle/util/compatibility";
+import {openByMobile} from "../editor/openLink";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";

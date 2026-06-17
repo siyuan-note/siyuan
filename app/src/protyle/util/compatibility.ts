@@ -4,9 +4,6 @@ import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-/// #if MOBILE
-import {processSYLink} from "../../editor/openLink";
-/// #endif
 import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
 import {hideMessage, showMessage} from "../../dialog/message";
 
@@ -64,39 +61,6 @@ export const getTextSiyuanFromTextHTML = (html: string) => {
         textSiyuan,
         textHtml
     };
-};
-
-export const openByMobile = (uri: string) => {
-    if (!uri) {
-        return;
-    }
-    /// #if MOBILE
-    if (processSYLink(window.siyuan.ws.app, uri)) {
-        return;
-    }
-    /// #endif
-    if (isInIOS()) {
-        if (uri.startsWith("assets/")) {
-            // iOS 16.7 之前的版本，uri 需要 encodeURIComponent
-            window.webkit.messageHandlers.openLink.postMessage(location.origin + "/assets/" + encodeURIComponent(uri.replace("assets/", "")));
-        } else if (uri.startsWith("/")) {
-            // 导出 zip 返回的是已经 encode 过的，因此不能再 encode
-            window.webkit.messageHandlers.openLink.postMessage(location.origin + uri);
-        } else {
-            try {
-                new URL(uri);
-                window.webkit.messageHandlers.openLink.postMessage(uri);
-            } catch (e) {
-                window.webkit.messageHandlers.openLink.postMessage("https://" + uri);
-            }
-        }
-    } else if (isInAndroid()) {
-        window.JSAndroid.openExternal(uri);
-    } else if (isInHarmony()) {
-        window.JSHarmony.openExternal(uri);
-    } else {
-        window.open(uri);
-    }
 };
 
 export const saveExportFile = async (uri: string, msgId?: string) => {
@@ -696,4 +660,3 @@ export const initNativeDialogOverride = () => {
     };
 };
 /// #endif
-

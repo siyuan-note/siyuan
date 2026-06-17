@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Эта отмена повлияет на следующие документы. Продолжить?",
   "calcOperatorTemplate": "Шаблон",
   "calcResultTemplate": "Шаблон",
   "rollupTemplateTip": "Пример: .action{div (len (filter .values (gt . 0))) (len .values)}",

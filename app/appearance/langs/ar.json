@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "سيؤثر هذا التراجع على المستندات التالية. هل تريد المتابعة؟",
   "calcOperatorTemplate": "قالب",
   "calcResultTemplate": "قالب",
   "rollupTemplateTip": "مثال: .action{div (len (filter .values (gt . 0))) (len .values)}",

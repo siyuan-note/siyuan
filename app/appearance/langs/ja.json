@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "この操作は以下のドキュメントに影響します。続行しますか？",
   "calcOperatorTemplate": "テンプレート",
   "calcResultTemplate": "テンプレート",
   "rollupTemplateTip": "例: .action{div (len (filter .values (gt . 0))) (len .values)}",

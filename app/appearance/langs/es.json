@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Este deshacer afectará a los siguientes documentos. ¿Continuar?",
   "calcOperatorTemplate": "Plantilla",
   "calcResultTemplate": "Plantilla",
   "rollupTemplateTip": "Ejemplo: .action{div (len (filter .values (gt . 0))) (len .values)}",

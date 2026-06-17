@@ -24,6 +24,7 @@ import {
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 import {getDocDisplayName} from "../util/pathName";
+import {initMirror, refreshUndoButtons, syncMirrorFromBroadcast} from "./undo/globalUndo";
 /// #if !MOBILE
 import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
@@ -300,6 +301,10 @@ export class Protyle {
     }
 
     private onTransaction(data: IWebSocketData) {
+        // 多窗口/多端：用广播附带的撤销状态同步本地镜像
+        if (data.context?.undoState) {
+            syncMirrorFromBroadcast(data.context.undoState);
+        }
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
             data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
             this.protyle.preview.render(this.protyle);
@@ -362,9 +367,13 @@ export class Protyle {
                 }
             } else {
                 // 不能使用 transaction，否则分屏后会重复添加
-                this.protyle.undo.clear();
+                refreshUndoButtons(this.protyle);
                 this.reload(false);
             }
+        }
+        // undo/redo 重放广播到达后，整批操作已应用，重置 lastHTMLs 防下次本地编辑算错逆操作
+        if (data.context?.isUndoReplay === true) {
+            this.protyle.wysiwyg.lastHTMLs = {};
         }
     }
 
@@ -390,6 +399,10 @@ export class Protyle {
     }
 
     private afterOnGet(mergedOptions: IProtyleOptions) {
+        // 文档加载完成后初始化撤销镜像（低频，不在 selectionchange 热路径）
+        if (this.protyle.block?.rootID) {
+            initMirror(this.protyle.block.rootID);
+        }
         if (this.protyle.model) {
             /// #if !MOBILE
             if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS) || mergedOptions.action?.includes(Constants.CB_GET_OPENNEW)) {

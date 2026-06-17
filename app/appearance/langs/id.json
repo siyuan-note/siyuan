@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Pembatalan ini akan memengaruhi dokumen berikut. Lanjutkan?",
   "calcOperatorTemplate": "Templat",
   "calcResultTemplate": "Templat",
   "rollupTemplateTip": "Contoh: .action{div (len (filter .values (gt . 0))) (len .values)}",

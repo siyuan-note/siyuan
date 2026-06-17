@@ -889,7 +889,7 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 			for _, g := range view.Groups {
 				groupViewable := sql.RenderGroupView(attrView, view, g, "")
 				// 必须经过渲染才能得到最终的条目数
-				renderViewableInstance(groupViewable, view, attrView, 1, -1)
+				renderViewableInstance(groupViewable, view, attrView, 1, -1, false)
 				if g.GroupHidden == 0 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 1
 				}
@@ -898,7 +898,7 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 		if oldHideEmpty && !view.Group.HideEmpty { // 禁用隐藏空分组
 			for _, g := range view.Groups {
 				groupViewable := sql.RenderGroupView(attrView, view, g, "")
-				renderViewableInstance(groupViewable, view, attrView, 1, -1)
+				renderViewableInstance(groupViewable, view, attrView, 1, -1, false)
 				if g.GroupHidden == 1 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 0
 				}
@@ -2065,7 +2065,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// 渲染填充 attrView.KeyValues
-		sql.RenderView(attrView, view, "")
+		sql.RenderView(attrView, view, "", false)
 
 		var keyValues []*av.KeyValues
 		for _, kv := range attrView.KeyValues {
@@ -2152,7 +2152,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	group := view.Group
 	view.Groups = nil
-	viewable := sql.RenderView(attrView, view, "")
+	viewable := sql.RenderView(attrView, view, "", false)
 	var items []av.Item
 	for _, item := range viewable.(av.Collection).GetItems() {
 		items = append(items, item)

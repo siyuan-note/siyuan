@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Dieser Rückgängig-Vorgang wirkt sich auf die folgenden Dokumente aus. Fortfahren?",
   "calcOperatorTemplate": "Vorlage",
   "calcResultTemplate": "Vorlage",
   "rollupTemplateTip": "Beispiel: .action{div (len (filter .values (gt . 0))) (len .values)}",

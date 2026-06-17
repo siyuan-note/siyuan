@@ -228,6 +228,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getDocInfo", model.CheckAuth, getDocInfo)
 	ginServer.Handle("POST", "/api/block/getDocsInfo", model.CheckAuth, getDocsInfo)
 	ginServer.Handle("POST", "/api/block/checkBlockExist", model.CheckAuth, checkBlockExist)
+	ginServer.Handle("POST", "/api/block/checkBlocksExist", model.CheckAuth, checkBlocksExist)
 	ginServer.Handle("POST", "/api/block/getUnfoldedParentID", model.CheckAuth, getUnfoldedParentID)
 	ginServer.Handle("POST", "/api/block/checkBlockFold", model.CheckAuth, checkBlockFold)
 	ginServer.Handle("POST", "/api/block/insertBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, insertBlock)
@@ -383,6 +384,10 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/template/renderSprig", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renderSprig)
 
 	ginServer.Handle("POST", "/api/transactions", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performTransactions)
+	ginServer.Handle("POST", "/api/transactions/undoState", model.CheckAuth, model.CheckReadonly, undoState)
+	ginServer.Handle("POST", "/api/transactions/undo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performUndo)
+	ginServer.Handle("POST", "/api/transactions/redo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performRedo)
+	ginServer.Handle("POST", "/api/transactions/clearHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearHistory)
 
 	ginServer.Handle("POST", "/api/setting/setAccount", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccount)
 	ginServer.Handle("POST", "/api/setting/setEditor", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setEditor)

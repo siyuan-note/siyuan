@@ -22,6 +22,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	goccyJSON "github.com/goccy/go-json"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -216,7 +217,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false)
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false, false)
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -245,7 +246,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false)
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false, false)
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
@@ -868,19 +869,31 @@ func renderAttributeView(c *gin.Context) {
 		createIfNotExist = createIfNotExistArg.(bool)
 	}
 
-	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, createIfNotExist)
+	ignoreRows := false
+	ignoreRowsArg := arg["ignoreRows"]
+	if nil != ignoreRowsArg {
+		ignoreRows = ignoreRowsArg.(bool)
+	}
+
+	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows)
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)
 		retDataMap["view"] = model.FilterViewByPublishAccess(c, publishAccess, retDataMap["view"].(av.Viewable))
 	}
 
-	c.JSON(http.StatusOK, ret)
+	// 大体量响应（如全量数据库视图）用 goccy 序列化后直接写字节，跳过 gin 内部基于标准库的二次序列化
+	marshalBytes, marshalErr := goccyJSON.Marshal(ret)
+	if nil != marshalErr || 0 == len(marshalBytes) {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	c.Data(http.StatusOK, "application/json; charset=utf-8", marshalBytes)
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist bool) (ret *gulu.Result) {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
-	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize, groupPaging, createIfNotExist)
+	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -891,11 +904,11 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	for _, v := range attrView.Views {
 		views = append(views, &av.ViewData{
 			ID:               v.ID,
-			Icon:             v.Icon,
-			Name:             v.Name,
-			Desc:             v.Desc,
+			Icon:              v.Icon,
+			Name:              v.Name,
+			Desc:              v.Desc,
 			HideAttrViewName: v.HideAttrViewName,
-			Type:             v.LayoutType,
+			Type:              v.LayoutType,
 			PageSize:         v.PageSize,
 		})
 	}

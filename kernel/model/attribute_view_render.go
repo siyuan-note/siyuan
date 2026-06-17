@@ -35,7 +35,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
@@ -62,7 +62,7 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, ignoreRows)
 	return
 }
 
@@ -74,7 +74,7 @@ const (
 	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]any) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows bool) (viewable av.Viewable, err error) {
 	// 获取待渲染的视图
 	view, err := getRenderAttributeViewView(attrView, viewID, nodeID)
 	if nil != err {
@@ -86,14 +86,16 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 	upgradeAttributeViewSpec(attrView)
 
 	// 渲染视图
-	viewable = sql.RenderView(attrView, view, query)
-	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
+	viewable = sql.RenderView(attrView, view, query, ignoreRows)
+	err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows)
 	if nil != err {
 		return
 	}
 
 	// 渲染分组视图
-	err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging)
+	if !ignoreRows {
+		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging)
+	}
 	return
 }
 
@@ -190,7 +192,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			}
 		}
 
-		err = renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize)
+		err = renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, false)
 		if nil != err {
 			return
 		}
@@ -400,10 +402,15 @@ func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
 	return av.KeyTypeTemplate == groupKey.Type
 }
 
-func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int) (err error) {
+func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int, ignoreRows bool) (err error) {
 	if nil == viewable {
 		err = av.ErrViewNotFound
 		logging.LogErrorf("render attribute view [%s] failed", attrView.ID)
+		return
+	}
+
+	// ignoreRows 时行已为空，跳过 filter/sort/calc 和分页（菜单不需要行数据）
+	if ignoreRows {
 		return
 	}
 
@@ -547,7 +554,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil, false)
 	return
 }
 
@@ -607,6 +614,6 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, false)
 	return
 }

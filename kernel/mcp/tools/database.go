@@ -156,7 +156,7 @@ func databaseRender(args map[string]interface{}) (CallToolResult, error) {
 		pageSize = int(v)
 	}
 
-	viewable, _, err := model.RenderAttributeView("", id, viewID, query, page, pageSize, nil, false)
+	viewable, _, err := model.RenderAttributeView("", id, viewID, query, page, pageSize, nil, false, false)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "render failed: " + err.Error()}}, IsError: true}, nil
 	}

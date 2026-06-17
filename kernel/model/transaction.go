@@ -61,6 +61,27 @@ func FlushTxQueue() {
 	}
 }
 
+// PerformTxSync 同步执行单笔事务并返回错误，供 undo/redo 重放使用。
+// 与异步入队的 PerformTransactions 不同，这里直接持有 flushLock 串行执行 performTx，
+// 失败时返回原始错误（不转成推送消息），调用方据此回滚撤销栈状态。
+func PerformTxSync(tx *Transaction) (err error) {
+	defer logging.Recover()
+	// 初始化事务互斥锁（异步路径 PerformTransactions 在入队前初始化，同步路径这里补上）
+	if nil == tx.m {
+		tx.m = &sync.Mutex{}
+	}
+	flushLock.Lock()
+	isFlushing = true
+	defer func() {
+		isFlushing = false
+		flushLock.Unlock()
+	}()
+	if txErr := performTx(tx); nil != txErr {
+		return txErr
+	}
+	return
+}
+
 var (
 	txQueue    = make(chan *Transaction, 7)
 	flushLock  = sync.Mutex{}
@@ -143,6 +164,19 @@ type TxErr struct {
 	code int
 	msg  string
 	id   string
+}
+
+// Error 实现 error 接口，供跨包（如 undo API）读取事务错误信息。
+func (e *TxErr) Error() string {
+	if "" != e.id {
+		return e.msg + " [" + e.id + "]"
+	}
+	return e.msg
+}
+
+// Code 返回事务错误码。
+func (e *TxErr) Code() int {
+	return e.code
 }
 
 func performTx(tx *Transaction) (ret *TxErr) {
@@ -1833,6 +1867,9 @@ type Transaction struct {
 	isGlobalAssets     bool   // 是否属于全局资源
 	assetsDir          string // 资源目录路径
 
+	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
+	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
+
 	luteEngine *lute.Lute
 	m          *sync.Mutex
 	state      atomic.Int32 // 0: 初始化，1：未提交，:2: 已提交，3: 已回滚
@@ -1845,6 +1882,26 @@ func (tx *Transaction) GetChangedRootIDs() (ret []string) {
 
 	for _, id := range tx.changedRootIDs {
 		ret = append(ret, id)
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+// MarkFromAPI 标记事务来自 /api/transactions HTTP 入口，供全局撤销日志捕获判别。
+func (tx *Transaction) MarkFromAPI() {
+	tx.fromAPI = true
+}
+
+// MarkReplay 标记事务为 undo/redo 重放构造，重放不再进入撤销日志。
+func (tx *Transaction) MarkReplay() {
+	tx.isReplay = true
+}
+
+// GetMutatedRootIDs 返回真正被写盘修改结构的树 rootID，不含 refreshDynamicRefTexts 刷新的引用树。
+// 用于跨文档撤销判定：单文档编辑返回 1 个 rootID，跨文档移动返回多个，引用文本刷新不计入。
+func (tx *Transaction) GetMutatedRootIDs() (ret []string) {
+	for t := range tx.trees {
+		ret = append(ret, t)
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
@@ -1897,6 +1954,8 @@ func (tx *Transaction) commit() (err error) {
 
 	IncSync()
 	tx.state.Store(2)
+	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
+	GlobalUndoLog.Record(tx)
 	tx.m.Unlock()
 	return
 }

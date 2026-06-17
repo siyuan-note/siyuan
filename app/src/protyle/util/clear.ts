@@ -1,11 +1,13 @@
 import {updateHeader} from "../render/av/row";
 import {Constants} from "../../constants";
 
-export const clearBlockElement = (element: Element) => {
+export const clearBlockElement = (element: Element, keepRefcount = false) => {
     element.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
     element.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
-    element.removeAttribute("refcount");
-    element.querySelector(".protyle-attr--refcount")?.remove();
+    if (!keepRefcount) {
+        element.removeAttribute("refcount");
+        element.querySelector(".protyle-attr--refcount")?.remove();
+    }
     element.querySelector(".protyle-attr--av")?.remove();
     element.removeAttribute("custom-avs");
     element.getAttributeNames().forEach(attr => {

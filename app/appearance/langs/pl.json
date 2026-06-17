@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "To cofnięcie wpłynie na następujące dokumenty. Kontynuować?",
   "calcOperatorTemplate": "Szablon",
   "calcResultTemplate": "Szablon",
   "rollupTemplateTip": "Przykład: .action{div (len (filter .values (gt . 0))) (len .values)}",

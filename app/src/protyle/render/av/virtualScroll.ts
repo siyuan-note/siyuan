@@ -77,7 +77,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
             if (rect.bottom < bottomLimit) {
                 lastVisibleIndex = parseInt(currentRows[i].getAttribute("data-index"));
             } else {
-                if (isScrollingUp && toRemoveAbove.length + 10 < currentRows.length) {
+                if (isScrollingUp && toRemoveBelow.length + 10 < currentRows.length) {
                     toRemoveBelow.push(currentRows[i]);
                 }
             }
@@ -91,24 +91,40 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         }
         if (!isScrollingUp) {
             if (toRemoveAbove.length > 0) {
-                let removeHeight = 0;
+                // 先在移除前批量读取几何信息（读到的是稳定布局），避免与 row.remove() 交替
+                // 触发 N 次强制重排。gallery 分支沿用原「相邻行 offsetTop 比较」语义。
+                const removeHeights: number[] = [];
+                let galleryAccumulated = 0;
                 toRemoveAbove.forEach((row, index) => {
+                    // nextElementSibling 是纯 DOM 树属性，不触发重排，可每轮读取。
+                    // 循环结束后 topElement 指向最后一个被移除行的下一个兄弟（首个未移除行），
+                    // 作为后续 spacer 插入/insertAdjacentHTML 的锚点。
                     topElement = row.nextElementSibling as HTMLElement;
                     if (type === "table") {
-                        removeHeight += row.offsetHeight;
+                        removeHeights.push(row.offsetHeight);
                     } else if (type === "gallery") {
-                        if (removeHeight === 0 || topElement.offsetTop !== row.offsetTop) {
-                            removeHeight += row.offsetHeight;
+                        if (galleryAccumulated === 0 || topElement.offsetTop !== row.offsetTop) {
+                            let h = row.offsetHeight;
                             if (state.topSpacerHeight !== 0 && index !== 0) {
-                                removeHeight += 16; // .av__kanban-group gap: 16px;
+                                h += 16; // .av__kanban-group gap: 16px;
                             }
+                            galleryAccumulated += h;
+                            removeHeights.push(h);
+                        } else {
+                            removeHeights.push(0);
                         }
                     } else if (type === "kanban") {
+                        let h = row.offsetHeight;
                         if (state.topSpacerHeight !== 0 && index !== 0) {
-                            removeHeight += 16; // .av__kanban-group gap: 16px;
+                            h += 16; // .av__kanban-group gap: 16px;
                         }
-                        removeHeight += row.offsetHeight;
+                        removeHeights.push(h);
                     }
+                });
+                // 再统一移除，此时不再读取布局，仅触发一次重排
+                let removeHeight = 0;
+                toRemoveAbove.forEach((row, index) => {
+                    removeHeight += removeHeights[index];
                     row.remove();
                 });
                 state.topSpacerHeight += removeHeight;

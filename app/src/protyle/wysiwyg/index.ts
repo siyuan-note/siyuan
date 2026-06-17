@@ -21,6 +21,7 @@ import {
 import {Constants} from "../../constants";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
+import {getDiagramBlock, previewDiagram} from "../preview/diagram";
 import {
     contentMenu,
     enterBack,
@@ -2689,6 +2690,13 @@ export class WYSIWYG {
             if (event.target.tagName === "IMG" && !event.target.classList.contains("emoji")) {
                 previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
                 return;
+            }
+            // https://github.com/siyuan-note/siyuan/issues/12691
+            const diagramElement = getDiagramBlock(hasClosestBlock(event.target) as HTMLElement);
+            if (diagramElement) {
+                previewDiagram(diagramElement);
+                event.stopPropagation();
+                event.preventDefault();
             }
         });
         let mobileBlur = false;

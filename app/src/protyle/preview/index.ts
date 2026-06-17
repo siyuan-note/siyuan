@@ -3,6 +3,7 @@ import {focusByRange} from "../util/selection";
 import {showMessage} from "../../dialog/message";
 import {isLocalPath, pathPosix} from "../../util/pathName";
 import {previewDocImage} from "./image";
+import {getDiagramBlock, previewDiagram} from "./diagram";
 import {needSubscribe} from "../../util/needSubscribe";
 import {Constants} from "../../constants";
 import {getSearch, isMobile} from "../../util/functions";
@@ -19,7 +20,7 @@ import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
 import {getPadding} from "../ui/initUI";
-import {hasClosestByAttribute} from "../util/hasClosest";
+import {hasTopClosestByAttribute} from "../util/hasClosest";
 import {addScriptSync} from "../util/addScript";
 
 export class Preview {
@@ -146,7 +147,7 @@ export class Preview {
                 }
                 target = target.parentElement;
             }
-            const nodeElement = hasClosestByAttribute(event.target as HTMLElement, "id", undefined);
+            const nodeElement = hasTopClosestByAttribute(event.target as HTMLElement, "id", undefined);
             if (nodeElement) {
                 // 用于点击后大纲定位
                 this.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
@@ -164,6 +165,13 @@ export class Preview {
                 /// #else
                 window.siyuan.mobile.docks.outline?.setCurrentByPreview(nodeElement);
                 /// #endif
+                const diagramElement = getDiagramBlock(nodeElement);
+                if (diagramElement) {
+                    previewDiagram(diagramElement);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
             }
         });
 

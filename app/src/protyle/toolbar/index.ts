@@ -1061,7 +1061,7 @@ export class Toolbar {
                 return;
             }
             setTimeout(() => {
-                addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
+                addScript("${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
                     (renderElement as HTMLHtmlElement).style.display = "inline-block";
                     window.htmlToImage.toBlob(renderElement).then(blob => {
                         (renderElement as HTMLHtmlElement).style.display = "";

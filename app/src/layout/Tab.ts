@@ -25,6 +25,8 @@ export class Tab {
     public title: string;
     public icon: string;
     public docIcon: string;
+    // 鼠标已移走时中断尚未完成的完整路径请求 https://github.com/siyuan-note/siyuan/issues/14823
+    public hPathAbortController: AbortController | null = null;
 
     constructor(options: ITab) {
         this.id = genUUID();
@@ -69,16 +71,34 @@ export class Tab {
                     }
                 }
                 if (id) {
+                    if (this.hPathAbortController) {
+                        this.hPathAbortController.abort();
+                    }
+                    this.hPathAbortController = new AbortController();
+                    const signal = this.hPathAbortController.signal;
+                    const capturedController = this.hPathAbortController;
                     fetchPost("/api/filetree/getFullHPathByID", {
                         id
                     }, (response) => {
+                        if (signal.aborted) {
+                            return;
+                        }
                         if (!this.headElement.getAttribute("aria-label")) {
                             showTooltip(escapeLessThans(response.data), this.headElement);
                         }
                         this.headElement.setAttribute("aria-label", escapeLessThans(response.data));
-                    });
+                        if (this.hPathAbortController === capturedController) {
+                            this.hPathAbortController = null;
+                        }
+                    }, undefined, undefined, signal);
                 } else {
                     this.headElement.setAttribute("aria-label", escapeLessThans(this.title));
+                }
+            });
+            this.headElement.addEventListener("mouseleave", () => {
+                if (this.hPathAbortController) {
+                    this.hPathAbortController.abort();
+                    this.hPathAbortController = null;
                 }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {

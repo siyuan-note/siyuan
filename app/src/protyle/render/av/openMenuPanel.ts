@@ -79,12 +79,15 @@ export const openMenuPanel = (options: {
     }
     const avID = options.blockElement.getAttribute("data-av-id");
     const avPageSize = getPageSize(options.blockElement);
+    // config/properties/sorts/filters/switcher 菜单只需要字段/视图元数据，不需要行数据，跳过行渲染以提升大体量视图下的响应速度
+    const ignoreRows = ["config", "properties", "sorts", "filters", "switcher"].includes(options.type);
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
         pageSize: avPageSize.unGroupPageSize,
         groupPaging: avPageSize.groupPageSize,
-        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        ignoreRows,
     }, (response) => {
         avPanelElement = document.querySelector(".av__panel");
         if (avPanelElement) {

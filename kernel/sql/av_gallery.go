@@ -18,7 +18,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView) (ret *av.Gallery) {
+func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView, ignoreRows bool) (ret *av.Gallery) {
 	viewable := attrView.RenderedViewables[view.ID]
 	if nil != viewable {
 		ret = viewable.(*av.Gallery)
@@ -66,6 +66,11 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 				Updated:      key.Updated,
 			},
 		})
+	}
+
+	// 菜单等只需要字段/视图元数据的场景，跳过全部卡片处理
+	if ignoreRows {
+		return
 	}
 
 	cardsValues := generateAttrViewItems(attrView, view) // 生成卡片

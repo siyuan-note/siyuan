@@ -9,6 +9,9 @@ interface IBodyState {
     view: IAVView;
     topSpacerHeight: number;
     pinIndex?: number;
+    // 缓存的行高，避免每帧读 currentRows[0].offsetHeight（强制重排来源）。
+    // 表格行高在渲染后基本稳定，用缓存值做外推/分页计算即可，少量偏差不影响正确性。
+    rowHeight?: number;
 }
 
 const dataStore = new Map<string, {
@@ -52,21 +55,30 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
             return;
         }
         let topElement = currentRows[0];
-        const spacerElement = bodyEl.querySelector(".av__spacer") as HTMLElement;
+        // body 在本次 trim 期间被并发重渲（如 avRender）时 currentRows 为过期快照，需跳过
+        if (!topElement.isConnected) {
+            return;
+        }
+        try {
+            const spacerElement = bodyEl.querySelector(".av__spacer") as HTMLElement;
         let firstVisibleIndex: number;
         let lastVisibleIndex: number;
         const toRemoveAbove: HTMLElement[] = [];
         const toRemoveBelow: HTMLElement[] = [];
         let galleryColumn = type === "gallery" ? 0 : 1;
-        const rowHeight = currentRows[0].offsetHeight;
+        // 行高缓存，避免每帧读 offsetHeight 触发布局
+        const rowHeight = state.rowHeight || currentRows[0].offsetHeight;
+        state.rowHeight = rowHeight;
         const firstTop = currentRows[0].getBoundingClientRect().top;
+        let foundFirstVisible = false;
         for (let i = 0; i < currentRows.length; i++) {
             const rect = currentRows[i].getBoundingClientRect();
             if (rect.top === firstTop) {
                 galleryColumn++;
             }
             if (rect.top > topLimit) {
-                if (typeof firstVisibleIndex === "undefined") {
+                if (!foundFirstVisible) {
+                    foundFirstVisible = true;
                     firstVisibleIndex = parseInt(currentRows[i].getAttribute("data-index"));
                 }
             } else {
@@ -80,6 +92,10 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 if (isScrollingUp && toRemoveBelow.length + 10 < currentRows.length) {
                     toRemoveBelow.push(currentRows[i]);
                 }
+                // 表格下滚时 top 单调递增，后续行必然都在下方，可提前结束扫描
+                if (type === "table" && !isScrollingUp) {
+                    break;
+                }
             }
             if (i === currentRows.length - 1 && !isScrollingUp && rect.bottom < bottomLimit) {
                 lastVisibleIndex = Math.min(state.renderedEnd + Math.ceil((bottomLimit - rect.bottom) / rowHeight) * galleryColumn, dataRows.length - 1);
@@ -91,40 +107,43 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         }
         if (!isScrollingUp) {
             if (toRemoveAbove.length > 0) {
-                // 先在移除前批量读取几何信息（读到的是稳定布局），避免与 row.remove() 交替
-                // 触发 N 次强制重排。gallery 分支沿用原「相邻行 offsetTop 比较」语义。
-                const removeHeights: number[] = [];
-                let galleryAccumulated = 0;
-                toRemoveAbove.forEach((row, index) => {
-                    // nextElementSibling 是纯 DOM 树属性，不触发重排，可每轮读取。
-                    // 循环结束后 topElement 指向最后一个被移除行的下一个兄弟（首个未移除行），
-                    // 作为后续 spacer 插入/insertAdjacentHTML 的锚点。
-                    topElement = row.nextElementSibling as HTMLElement;
-                    if (type === "table") {
-                        removeHeights.push(row.offsetHeight);
-                    } else if (type === "gallery") {
-                        if (galleryAccumulated === 0 || topElement.offsetTop !== row.offsetTop) {
+                // 计算被移除行的总高度并累加到 topSpacerHeight，保持文档总高度不变、视口不跳。
+                // table 为连续前缀，用首行 top 与首个保留行 top 之差求得精确总高度；
+                // gallery/kanban 多列布局需逐行读取以判断换行。
+                let removeHeight = 0;
+                topElement = toRemoveAbove[toRemoveAbove.length - 1].nextElementSibling as HTMLElement;
+                if (type === "table" && topElement) {
+                    const removeStartTop = toRemoveAbove[0].getBoundingClientRect().top;
+                    const removeEndTop = topElement.getBoundingClientRect().top;
+                    removeHeight = Math.round(removeEndTop - removeStartTop);
+                } else {
+                    const removeHeights: number[] = [];
+                    let galleryAccumulated = 0;
+                    toRemoveAbove.forEach((row, index) => {
+                        topElement = row.nextElementSibling as HTMLElement;
+                        if (type === "gallery") {
+                            if (galleryAccumulated === 0 || topElement.offsetTop !== row.offsetTop) {
+                                let h = row.offsetHeight;
+                                if (state.topSpacerHeight !== 0 && index !== 0) {
+                                    h += 16; // .av__kanban-group gap: 16px;
+                                }
+                                galleryAccumulated += h;
+                                removeHeights.push(h);
+                            } else {
+                                removeHeights.push(0);
+                            }
+                        } else { // kanban
                             let h = row.offsetHeight;
                             if (state.topSpacerHeight !== 0 && index !== 0) {
                                 h += 16; // .av__kanban-group gap: 16px;
                             }
-                            galleryAccumulated += h;
                             removeHeights.push(h);
-                        } else {
-                            removeHeights.push(0);
                         }
-                    } else if (type === "kanban") {
-                        let h = row.offsetHeight;
-                        if (state.topSpacerHeight !== 0 && index !== 0) {
-                            h += 16; // .av__kanban-group gap: 16px;
-                        }
-                        removeHeights.push(h);
-                    }
-                });
-                // 再统一移除，此时不再读取布局，仅触发一次重排
-                let removeHeight = 0;
-                toRemoveAbove.forEach((row, index) => {
-                    removeHeight += removeHeights[index];
+                    });
+                    removeHeight = removeHeights.reduce((sum, h) => sum + h, 0);
+                }
+                // 统一移除，此时不再读取布局，仅触发一次重排
+                toRemoveAbove.forEach((row) => {
                     row.remove();
                 });
                 state.topSpacerHeight += removeHeight;
@@ -132,24 +151,33 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
 
                 if (spacerElement) {
                     spacerElement.style.height = state.topSpacerHeight + "px";
-                } else if (state.topSpacerHeight > 0) {
+                } else if (state.topSpacerHeight > 0 && topElement.isConnected) {
                     topElement.insertAdjacentHTML("beforebegin", `<div class="av__spacer" style="height:${state.topSpacerHeight}px"></div>`);
                 }
-                protyle.contentElement.scrollTop = lastScrollTop;
             }
 
             if (lastVisibleIndex > state.renderedEnd) {
+                // 限制单帧渲染的新行数为一个视口，避免快速下滚时一次性拼出/插入大量 HTML，
+                // 超出部分由后续滚动帧补齐
+                const rowsPerViewport = Math.ceil(viewportHeight / Math.max(rowHeight, 1));
+                const maxRowsPerFrame = rowsPerViewport * (galleryColumn || 1);
+                if (lastVisibleIndex > state.renderedEnd + maxRowsPerFrame) {
+                    lastVisibleIndex = state.renderedEnd + maxRowsPerFrame;
+                }
                 let rowsHTML = "";
+                const viewType = blockElement.getAttribute("data-av-type") as TAVView;
                 for (let i = state.renderedEnd + 1; i <= lastVisibleIndex; i++) {
                     rowsHTML += getRowHTML({
                         data: state.view,
                         row: dataRows[i],
                         rowIndex: i,
                         pinIndex: state.pinIndex,
-                        type: blockElement.getAttribute("data-av-type") as TAVView
+                        type: viewType
                     });
                 }
-                bottomElement.insertAdjacentHTML("beforebegin", rowsHTML);
+                if (bottomElement && bottomElement.isConnected) {
+                    bottomElement.insertAdjacentHTML("beforebegin", rowsHTML);
+                }
                 state.renderedEnd = lastVisibleIndex;
             }
         } else {
@@ -160,14 +188,18 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
 
             if (typeof firstVisibleIndex === "number" && firstVisibleIndex < state.renderedStart) {
                 let rowsHTML = "";
+                const viewType = blockElement.getAttribute("data-av-type") as TAVView;
                 for (let i = firstVisibleIndex; i < state.renderedStart; i++) {
                     rowsHTML += getRowHTML({
                         data: state.view,
                         row: dataRows[i],
                         rowIndex: i,
                         pinIndex: state.pinIndex,
-                        type: blockElement.getAttribute("data-av-type") as TAVView
+                        type: viewType
                     });
+                }
+                if (!topElement.isConnected) {
+                    return;
                 }
                 topElement.insertAdjacentHTML("beforebegin", rowsHTML);
 
@@ -196,10 +228,11 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                     spacerElement.style.height = state.topSpacerHeight + "px";
                 }
                 state.renderedStart = firstVisibleIndex;
-                protyle.contentElement.scrollTop = lastScrollTop;
             }
         }
-        bodyStates.set(bodyEl, state);
+        } finally {
+            bodyStates.set(bodyEl, state);
+        }
     });
 };
 
@@ -222,6 +255,15 @@ export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): voi
         trimPending.delete(blockElement);
         doTrim(blockElement, elementRect);
     });
+};
+
+// 同步执行 doTrim（不另起 rAF），供已处于 rAF 回调中的调用方使用，例如 scroll 事件中
+// 与 stickyRow 合并到同一 rAF。调用方负责保证不在同一帧重复调用（外部已有 avScrollPending 去重）。
+export const trimAVRowsSync = (blockElement: HTMLElement, elementRect: DOMRect): void => {
+    if (blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
+        return;
+    }
+    doTrim(blockElement, elementRect);
 };
 
 export const initVirtualScroll = (options: {

@@ -111,7 +111,21 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 	return
 }
 
-func renderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
+// compileTemplateField 解析模板内容并返回可复用的已编译模板，避免在逐行渲染时反复解析。
+func compileTemplateField(tplContent string) (tpl *template.Template, err error) {
+	goTpl := template.New("").Delims(".action{", "}")
+	tplFuncMap := filesys.BuiltInTemplateFuncs()
+	SQLTemplateFuncs(&tplFuncMap)
+	goTpl = goTpl.Funcs(tplFuncMap)
+	tpl, err = goTpl.Parse(tplContent)
+	if err != nil {
+		logging.LogWarnf("parse template [%s] failed: %s", tplContent, err)
+		return
+	}
+	return
+}
+
+func executeTemplateField(tpl *template.Template, ial map[string]string, keyValues []*av.KeyValues) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)
 		if nil != block {
@@ -128,16 +142,6 @@ func renderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 		if nil != block && nil != block.Block {
 			ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
 		}
-	}
-
-	goTpl := template.New("").Delims(".action{", "}")
-	tplFuncMap := filesys.BuiltInTemplateFuncs()
-	SQLTemplateFuncs(&tplFuncMap)
-	goTpl = goTpl.Funcs(tplFuncMap)
-	tpl, err := goTpl.Parse(tplContent)
-	if err != nil {
-		logging.LogWarnf("parse template [%s] failed: %s", tplContent, err)
-		return
 	}
 
 	buf := &bytes.Buffer{}
@@ -261,7 +265,6 @@ func renderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	}
 
 	if err = tpl.Execute(buf, dataModel); err != nil {
-		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
 		return
 	}
 	ret = buf.String()
@@ -620,6 +623,9 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 	}
 
 	templateKeys, _ := GetTemplateKeysByResolutionOrder(attrView)
+	// 按模板内容缓存已编译模板，避免逐行重复 Parse。坏内容缓存为 nil，保留原先「逐行设置 err 并继续」的语义。
+	tplCache := map[string]*template.Template{}
+	compileErrCache := map[string]error{}
 	for _, templateKey := range templateKeys {
 		for _, item := range collection.GetItems() {
 			value := item.GetValue(templateKey.ID)
@@ -637,7 +643,24 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 				ial = map[string]string{}
 			}
 
-			content, renderErr := renderTemplateField(ial, keyValues, value.Template.Content)
+			var content string
+			var renderErr error
+			tpl, tried := tplCache[value.Template.Content]
+			if !tried {
+				compiled, compileErr := compileTemplateField(value.Template.Content)
+				tplCache[value.Template.Content] = compiled // 坏内容时 compiled 为 nil，仍写入缓存
+				if nil != compileErr {
+					compileErrCache[value.Template.Content] = compileErr
+					renderErr = compileErr
+				} else {
+					tpl = compiled
+				}
+			} else if nil == tpl {
+				renderErr = compileErrCache[value.Template.Content] // 复用首次解析的错误
+			}
+			if nil == renderErr {
+				content, renderErr = executeTemplateField(tpl, ial, keyValues)
+			}
 			if nil != renderErr {
 				key, _ := attrView.GetKey(value.KeyID)
 				keyName := ""

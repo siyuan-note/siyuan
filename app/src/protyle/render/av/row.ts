@@ -462,32 +462,48 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
         bindHeaderScrollSync(blockElement, scrollEl);
     }
 
+    // 先批量读取所有几何信息，再统一写入 style，避免读-写交错触发强制重排
     const elementRect = scrollElement.getBoundingClientRect();
     const scrollTop = scrollElement.scrollTop;
-    if (status === "top" || status === "all") {
+    const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
+    const doTop = status === "top" || status === "all";
+    const doBottom = status === "bottom" || status === "all";
+
+    // 第一遍：纯读取，收集每个 header/footer 的几何与判定结果
+    const headerTasks: Array<{
+        item: HTMLElement;
+        bodyRect: DOMRect;
+        headerH: number;
+        shouldFix: boolean;
+        scrollLeft: number;
+        scrollEl: HTMLElement;
+    }> = [];
+    const footerTasks: Array<{
+        item: HTMLElement;
+        bodyRect: DOMRect;
+        footerH: number;
+        shouldFix: boolean;
+        scrollLeft: number;
+        scrollEl: HTMLElement;
+    }> = [];
+    if (doTop) {
         blockElement.querySelectorAll(".av__row--header").forEach((item: HTMLElement) => {
             const body = item.parentElement as HTMLElement;
             const bodyRect = body.getBoundingClientRect();
             const offset = Math.round(bodyRect.top - elementRect.top + scrollTop);
             const headerH = item.offsetHeight;
             const bodyH = body.offsetHeight;
-            if (scrollTop > offset && scrollTop < offset + bodyH) {
-                const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
-                if (!item.classList.contains("av__row--header--fixed")) {
-                    addFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder", headerH, Math.round(bodyRect.width));
-                }
-                syncFixedRowPos(item, bodyRect, scrollLeft, scrollEl);
-                const stickyTop = Math.round(elementRect.top);
-                item.style.top = bodyRect.bottom < stickyTop + headerH
-                    ? Math.round(bodyRect.bottom - headerH) + "px"
-                    : stickyTop + "px";
-            } else {
-                removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
-            }
+            headerTasks.push({
+                item,
+                bodyRect,
+                headerH,
+                shouldFix: scrollTop > offset && scrollTop < offset + bodyH,
+                scrollLeft,
+                scrollEl,
+            });
         });
     }
-
-    if (status === "bottom" || status === "all") {
+    if (doBottom) {
         blockElement.querySelectorAll(".av__row--footer").forEach((item: HTMLElement) => {
             if (!item.querySelector(".av__calc--ashow")) {
                 return;
@@ -499,18 +515,46 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             const bodyH = body.offsetHeight;
             const bottomOffset = bottomInit - Math.round(elementRect.bottom);
             const footerDist = bottomInit - scrollTop - Math.round(elementRect.bottom);
-            if (scrollTop < bottomOffset && footerDist < bodyH - footerH) {
-                const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
-                if (!item.classList.contains("av__row--footer--fixed")) {
-                    addFixedRow(item, "av__row--footer--fixed", "av__row--footer-placeholder", footerH, Math.round(bodyRect.width));
-                }
-                syncFixedRowPos(item, bodyRect, scrollLeft, scrollEl);
-                item.style.bottom = Math.round(window.innerHeight - elementRect.bottom) + "px";
-            } else {
-                removeFixedRow(item, "av__row--footer--fixed", "av__row--footer-placeholder");
-            }
+            footerTasks.push({
+                item,
+                bodyRect,
+                footerH,
+                shouldFix: scrollTop < bottomOffset && footerDist < bodyH - footerH,
+                scrollLeft,
+                scrollEl,
+            });
         });
     }
+
+    // 第二遍：纯写入，此时不再读取布局，仅触发一次重排
+    const stickyTop = Math.round(elementRect.top);
+    const stickyBottom = Math.round(window.innerHeight - elementRect.bottom);
+    headerTasks.forEach((task) => {
+        const {item, bodyRect, headerH, shouldFix} = task;
+        if (shouldFix) {
+            if (!item.classList.contains("av__row--header--fixed")) {
+                addFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder", headerH, Math.round(bodyRect.width));
+            }
+            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
+            item.style.top = bodyRect.bottom < stickyTop + headerH
+                ? Math.round(bodyRect.bottom - headerH) + "px"
+                : stickyTop + "px";
+        } else {
+            removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
+        }
+    });
+    footerTasks.forEach((task) => {
+        const {item, bodyRect, footerH, shouldFix} = task;
+        if (shouldFix) {
+            if (!item.classList.contains("av__row--footer--fixed")) {
+                addFixedRow(item, "av__row--footer--fixed", "av__row--footer--placeholder", footerH, Math.round(bodyRect.width));
+            }
+            syncFixedRowPos(item, bodyRect, task.scrollLeft, task.scrollEl);
+            item.style.bottom = stickyBottom + "px";
+        } else {
+            removeFixedRow(item, "av__row--footer--fixed", "av__row--footer--placeholder");
+        }
+    });
 };
 
 const updatePageSize = (options: {

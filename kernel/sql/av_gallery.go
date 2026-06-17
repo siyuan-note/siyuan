@@ -85,19 +85,24 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 
 	// 生成卡片字段值
 	for cardID, cardValues := range cardsValues {
+		// 按字段 ID 建索引，避免后续字段循环里对每个字段做线性查找
+		kvByField := map[string]*av.KeyValues{}
+		for _, keyValues := range cardValues {
+			if _, ok := kvByField[keyValues.Key.ID]; !ok { // 同一字段存在多个值时只取第一个
+				kvByField[keyValues.Key.ID] = keyValues
+			}
+		}
+
 		var galleryCard av.GalleryCard
 		for _, field := range ret.Fields {
 			var fieldValue *av.GalleryFieldValue
-			for _, keyValues := range cardValues {
-				if keyValues.Key.ID == field.ID {
-					fieldValue = &av.GalleryFieldValue{
-						BaseValue: &av.BaseValue{
-							ID:        keyValues.Values[0].ID,
-							Value:     keyValues.Values[0],
-							ValueType: field.Type,
-						},
-					}
-					break
+			if keyValues, ok := kvByField[field.ID]; ok {
+				fieldValue = &av.GalleryFieldValue{
+					BaseValue: &av.BaseValue{
+						ID:        keyValues.Values[0].ID,
+						Value:     keyValues.Values[0],
+						ValueType: field.Type,
+					},
 				}
 			}
 			if nil == fieldValue {

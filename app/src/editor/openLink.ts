@@ -104,7 +104,7 @@ export const processSiYuanUri = (app: App, uri: string) => {
     let uriObj: URL;
     try {
         uriObj = new URL(uri);
-        if (isSiYuanUriProtocol(uriObj)) {
+        if (!isSiYuanUriProtocol(uriObj)) {
             return false;
         }
     } catch (error) {

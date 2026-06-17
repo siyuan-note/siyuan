@@ -4,6 +4,8 @@ import {addScript} from "../../protyle/util/addScript";
 import {Constants} from "../../constants";
 import {mathRender} from "../../protyle/render/mathRender";
 import {showMessage} from "../../dialog/message";
+import {processSYLink} from "../../editor/openLink";
+import type {App} from "../../index";
 
 export const renderTodoList = (result: string): string => {
     const L = window.siyuan.languages;
@@ -216,7 +218,7 @@ export const addCopyButtons = (container: HTMLElement): void => {
     });
 };
 
-export const postRender = (container: HTMLElement): void => {
+export const postRender = (container: HTMLElement, app?: App): void => {
     container.querySelectorAll(".language-math").forEach((el) => {
         if (el.hasAttribute("data-subtype")) { return; }
         const content = el.textContent || "";
@@ -245,4 +247,19 @@ export const postRender = (container: HTMLElement): void => {
     highlightCodeBlocks(container);
     mathRender(container);
     addCopyButtons(container);
+    if (!app) {
+        return;
+    }
+    // MarkdownStr 渲染出的 siyuan:// 块链接只是普通 <a href>，需补全 data-type/data-href
+    // 才能接入全局 popover 浮窗系统；dock 内无 protyle 点击链路，需自行绑定点击打开块。
+    container.querySelectorAll<HTMLAnchorElement>('a[href^="siyuan://"]').forEach((a) => {
+        const href = a.getAttribute("href") || "";
+        a.setAttribute("data-type", "a");
+        a.setAttribute("data-href", href);
+        a.addEventListener("click", (event: MouseEvent) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void processSYLink(app, href);
+        });
+    });
 };

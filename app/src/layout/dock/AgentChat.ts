@@ -818,7 +818,7 @@ export class AgentChat extends Model {
         }
         el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
-        postRender(el);
+        postRender(el, this.app);
         // entry.duration 存的是秒，addCopyButton 期望毫秒。
         this.addCopyButton(el, content, promptTokens, completionTokens, duration ? duration * 1000 : undefined, timestamp);
     }
@@ -1461,7 +1461,7 @@ export class AgentChat extends Model {
                 thinkBody.appendChild(chatEl);
             }
             chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
-            postRender(chatEl);
+            postRender(chatEl, this.app);
             this.scrollToBottom();
             return;
         }
@@ -1477,7 +1477,7 @@ export class AgentChat extends Model {
                 const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
                 if (bodyEl) {
                     bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
-                    postRender(bodyEl);
+                    postRender(bodyEl, this.app);
                     void bodyEl.offsetHeight; // force reflow
                     this.scrollToBottom();
                 }
@@ -1492,7 +1492,7 @@ export class AgentChat extends Model {
             const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
             if (bodyEl) {
                 bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
-                postRender(bodyEl);
+                postRender(bodyEl, this.app);
             }
         }
     }
@@ -1844,7 +1844,7 @@ export class AgentChat extends Model {
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
             el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
-            postRender(el);
+            postRender(el, this.app);
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
@@ -2061,7 +2061,7 @@ export class AgentChat extends Model {
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
             el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
-            postRender(el);
+            postRender(el, this.app);
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
@@ -2394,7 +2394,7 @@ export class AgentChat extends Model {
 
         bindThinkingCardToggle(el);
         this.messagesContainer.appendChild(el);
-        postRender(el);
+        postRender(el, this.app);
     }
 
     // 由 duration 经 i18n 生成"已思考：Xs"标题文本；无 duration 时回退到"思考中..."。

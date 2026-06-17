@@ -302,6 +302,8 @@ func calcFieldTemplate(collection Collection, field Field, fieldIndex int) {
 		if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
 			calc.Result = &Value{Number: NewFormattedValueNumber(maxVal-minVal, field.GetNumberFormat())}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -391,6 +393,8 @@ func calcFieldMAsset(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -480,6 +484,8 @@ func calcFieldMSelect(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -565,6 +571,8 @@ func calcFieldSelect(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -704,6 +712,8 @@ func calcFieldDate(collection Collection, field Field, fieldIndex int) {
 		if 0 != earliest && 0 != latest {
 			calc.Result = &Value{Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -870,6 +880,8 @@ func calcFieldNumber(collection Collection, field Field, fieldIndex int) {
 		if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
 			calc.Result = &Value{Number: NewFormattedValueNumber(maxVal-minVal, field.GetNumberFormat())}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -955,6 +967,8 @@ func calcFieldText(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1040,6 +1054,8 @@ func calcFieldURL(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1125,6 +1141,8 @@ func calcFieldEmail(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1210,6 +1228,8 @@ func calcFieldPhone(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1295,6 +1315,8 @@ func calcFieldBlock(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1441,6 +1463,8 @@ func calcFieldCreated(collection Collection, field Field, fieldIndex int, attrVi
 
 			calc.Result = &Value{Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration, isNotTime)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1587,6 +1611,8 @@ func calcFieldUpdated(collection Collection, field Field, fieldIndex int, attrVi
 
 			calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration, isNotTime)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1635,6 +1661,8 @@ func calcFieldCheckbox(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUnchecked)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 
@@ -1724,6 +1752,8 @@ func calcFieldRelation(collection Collection, field Field, fieldIndex int) {
 		if 0 < len(collection.GetItems()) {
 			calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(collection.GetItems())), NumberFormatPercent)}
 		}
+	case CalcOperatorTemplate:
+		calcFieldByTemplate(collection, field, fieldIndex)
 	}
 }
 

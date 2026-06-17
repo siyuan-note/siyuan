@@ -26,6 +26,7 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // buildRollupTemplateContext 构造模板统计可用的数据上下文。
@@ -113,4 +114,57 @@ func evalRollupTemplate(templateContent string, ctx map[string]any) (rendered st
 		}
 	}
 	return
+}
+
+// collectFieldValues 通用收集整列行值，用于任意字段类型的模板统计。
+// 单值类型：每行收集一个值；多值类型（MSelect/MAsset）：每个子值单独收集，与原生 CountValues 语义一致。
+// 空值判断用 IsBlank()（类型感知，正确处理 Checkbox/Created 等边界）。
+func collectFieldValues(collection Collection, fieldIndex int) (nums []float64, strs []string, raw []*Value) {
+	for _, item := range collection.GetItems() {
+		values := item.GetValues()
+		if nil == values[fieldIndex] || values[fieldIndex].IsBlank() {
+			continue
+		}
+		v := values[fieldIndex]
+		switch v.Type {
+		case KeyTypeMSelect:
+			for _, sel := range v.MSelect {
+				val, _ := util.Convert2Float(sel.Content)
+				nums = append(nums, val)
+				strs = append(strs, sel.Content)
+				raw = append(raw, &Value{Type: KeyTypeSelect, MSelect: []*ValueSelect{sel}})
+			}
+		case KeyTypeMAsset:
+			for _, ast := range v.MAsset {
+				content := ast.Name + " " + ast.Content
+				val, _ := util.Convert2Float(content)
+				nums = append(nums, val)
+				strs = append(strs, content)
+				raw = append(raw, &Value{Type: KeyTypeMAsset, MAsset: []*ValueAsset{ast}})
+			}
+		default:
+			val, _ := util.Convert2Float(v.String(false))
+			nums = append(nums, val)
+			strs = append(strs, v.String(false))
+			raw = append(raw, v)
+		}
+	}
+	return
+}
+
+// calcFieldByTemplate 对任意字段类型执行模板统计（通用入口，非 Rollup）。
+// 与 calcFieldRollup 中的 Template 分支不同，此处按整列行值收集，不遍历 Rollup.Contents。
+func calcFieldByTemplate(collection Collection, field Field, fieldIndex int) {
+	nums, strs, raw := collectFieldValues(collection, fieldIndex)
+	if 0 == len(nums) {
+		return
+	}
+	calc := field.GetCalc()
+	ctx := buildRollupTemplateContext(nums, strs, raw)
+	rendered, asNumber, isNumber := evalRollupTemplate(calc.Template, ctx)
+	if isNumber {
+		calc.Result = &Value{Number: NewFormattedValueNumber(asNumber, field.GetNumberFormat())}
+	} else if "" != rendered {
+		calc.Result = &Value{Type: KeyTypeText, Text: &ValueText{Content: rendered}}
+	}
 }

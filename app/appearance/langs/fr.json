@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Cette annulation affectera les documents suivants. Continuer ?",
   "calcOperatorTemplate": "Modèle",
   "calcResultTemplate": "Modèle",
   "rollupTemplateTip": "Exemple: .action{div (len (filter .values (gt . 0))) (len .values)}",

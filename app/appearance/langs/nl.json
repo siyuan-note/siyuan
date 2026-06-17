@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Deze ongedaanmakerking beïnvloedt de volgende documenten. Doorgaan?",
   "calcOperatorTemplate": "Sjabloon",
   "calcResultTemplate": "Sjabloon",
   "rollupTemplateTip": "Voorbeeld: .action{div (len (filter .values (gt . 0))) (len .values)}",

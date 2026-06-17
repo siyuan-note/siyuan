@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Це скасування вплине на наступні документи. Продовжити?",
   "calcOperatorTemplate": "Шаблон",
   "calcResultTemplate": "Шаблон",
   "rollupTemplateTip": "Приклад: .action{div (len (filter .values (gt . 0))) (len .values)}",

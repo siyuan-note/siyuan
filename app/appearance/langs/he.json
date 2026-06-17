@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "ביטול זה ישפיע על המסמכים הבאים. להמשיך?",
   "calcOperatorTemplate": "תבנית",
   "calcResultTemplate": "תבנית",
   "rollupTemplateTip": "דוגמה: .action{div (len (filter .values (gt . 0))) (len .values)}",

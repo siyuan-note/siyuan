@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "이 실행 취소는 다음 문서에 영향을 미칩니다. 계속하시겠습니까?",
   "calcOperatorTemplate": "템플릿",
   "calcResultTemplate": "템플릿",
   "rollupTemplateTip": "예: .action{div (len (filter .values (gt . 0))) (len .values)}",

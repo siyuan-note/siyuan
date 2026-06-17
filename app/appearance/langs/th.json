@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "การยกเลิกนี้จะมีผลต่อเอกสารต่อไปนี้ ดำเนินการต่อหรือไม่",
   "calcOperatorTemplate": "เทมเพลต",
   "calcResultTemplate": "เทมเพลต",
   "rollupTemplateTip": "ตัวอย่าง: .action{div (len (filter .values (gt . 0))) (len .values)}",

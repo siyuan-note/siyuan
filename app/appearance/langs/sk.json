@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Táto akcia vrátenia späť ovplyvní nasledujúce dokumenty. Pokračovať?",
   "calcOperatorTemplate": "Šablóna",
   "calcResultTemplate": "Šablóna",
   "rollupTemplateTip": "Príklad: .action{div (len (filter .values (gt . 0))) (len .values)}",

@@ -1,4 +1,5 @@
 {
+  "undoCrossDocConfirm": "Bu geri alma aşağıdaki belgeleri etkileyecek. Devam edilsin mi?",
   "calcOperatorTemplate": "Şablon",
   "calcResultTemplate": "Şablon",
   "rollupTemplateTip": "Örnek: .action{div (len (filter .values (gt . 0))) (len .values)}",

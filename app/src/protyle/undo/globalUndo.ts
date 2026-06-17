@@ -174,7 +174,7 @@ export const requestUndo = async (protyle: IProtyle) => {
         protyle.wysiwyg.element.addEventListener("beforeinput", blockInput, true);
         const confirmed = await new Promise<boolean>((resolve) => {
             confirmDialog(`⚠️ ${window.siyuan.languages.undo}`,
-                `${window.siyuan.languages.undoCrossDocConfirm}<br>${names.join(" / ")}`,
+                `${window.siyuan.languages.undoCrossDocConfirm}<div style="margin-top: 8px;">${names.map(n => `• ${n}`).join("<br>")}</div>`,
                 () => resolve(true),
                 () => resolve(false));
         });

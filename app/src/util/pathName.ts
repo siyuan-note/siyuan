@@ -46,10 +46,10 @@ export const isSiYuanUriProtocol = (uri: URL | string | null | undefined): boole
 
 /**
  * Parse siyuan://blocks/20221031001313-rk7sd0e?focus=1&fullscreen=1
- * @param uri - the siyuan block url to parse
- * @returns the block id and other info, or null if the url is not a valid siyuan block url
+ * @param uri - the siyuan block uri to parse
+ * @returns the block id and other info, or null if the uri is not a valid siyuan block uri
  */
-export const parseSiYuanUriBlockInfo = (uri: URL | string | null | undefined): ISYProtocolBlocksInfo | null => {
+export const parseSiYuanUriBlockInfo = (uri: URL | string | null | undefined): ISiYuanUriBlockInfo | null => {
     try {
         if (uri == null) return null;
 

@@ -155,6 +155,104 @@ hljs.registerLanguage("mlir",function(){"use strict";return function(e){
             className:"symbol",variants:[{begin:"%"+s+"([:#]\\d+)?"},{begin:"\\^"+s},{
                 begin:"#"+s}]},e.C_NUMBER_MODE]}}}());
 
+// https://www.renpy.org/doc/html/language_basics.html
+// https://github.com/renpy/vscode-language-renpy
+// Ren'Py script language support.
+hljs.registerLanguage("renpy", (hljs) => {
+    const IDENT = /[A-Za-z_][A-Za-z0-9_]*/;
+    const INTERPOLATION = {
+        className: "subst",
+        begin: /\[[^\]\n]+\]/
+    };
+    const TEXT_TAG = {
+        className: "subst",
+        begin: /\{\/?[A-Za-z#][^{}\n]*\}/
+    };
+    const STRING_CONTAINS = [
+        hljs.BACKSLASH_ESCAPE,
+        INTERPOLATION,
+        TEXT_TAG
+    ];
+    const QUOTE_STRING_MODE = {
+        className: "string",
+        begin: /"/,
+        end: /"/,
+        contains: STRING_CONTAINS
+    };
+    const APOS_STRING_MODE = {
+        className: "string",
+        begin: /'/,
+        end: /'/,
+        contains: STRING_CONTAINS
+    };
+    const BACKTICK_STRING_MODE = {
+        className: "string",
+        begin: /`/,
+        end: /`/,
+        contains: STRING_CONTAINS
+    };
+    const RENPY_KEYWORDS = [
+        "add", "at", "behind", "call", "camera", "centered", "contains",
+        "default", "define", "drag", "draggroup", "early", "elif", "else",
+        "event", "expression", "extend", "for", "from", "hide", "hotspot",
+        "if", "image", "init", "jump", "key", "label", "layeredimage",
+        "menu", "nvl", "on", "onlayer", "pass", "pause", "play", "python",
+        "queue", "repeat", "return", "scene", "screen", "set", "show",
+        "side", "sound", "spacing", "stop", "style", "style_prefix", "text",
+        "textbutton", "time", "timer", "transform", "translate", "use",
+        "voice", "while", "with", "window", "zorder"
+    ].join(" ");
+    const PYTHON_KEYWORDS = [
+        "and", "as", "assert", "async", "await", "break", "class",
+        "continue", "def", "del", "except", "False", "finally", "for",
+        "from", "global", "import", "in", "is", "lambda", "None",
+        "nonlocal", "not", "or", "raise", "True", "try", "yield"
+    ].join(" ");
+
+    return {
+        name: "Ren'Py",
+        aliases: ["rpy"],
+        keywords: {
+            keyword: `${RENPY_KEYWORDS} ${PYTHON_KEYWORDS}`,
+            literal: "True False None yes no",
+            built_in: "Character DynamicCharacter Solid Null Fade Dissolve MoveTransition Pause SetVariable ToggleVariable Show Hide Jump Call Return Function Play Queue Stop"
+        },
+        contains: [
+            hljs.HASH_COMMENT_MODE,
+            QUOTE_STRING_MODE,
+            APOS_STRING_MODE,
+            BACKTICK_STRING_MODE,
+            hljs.NUMBER_MODE,
+            {
+                className: "meta",
+                begin: /^\s*\$+/,
+                end: /$/,
+                contains: [
+                    hljs.HASH_COMMENT_MODE,
+                    QUOTE_STRING_MODE,
+                    APOS_STRING_MODE,
+                    BACKTICK_STRING_MODE,
+                    hljs.NUMBER_MODE
+                ]
+            },
+            {
+                className: "section",
+                begin: /^\s*(label|screen|transform|style|image|layeredimage|translate)\s+/,
+                end: /:/,
+                keywords: "label screen transform style image layeredimage translate"
+            },
+            {
+                className: "title",
+                begin: new RegExp(`^\\s*${IDENT.source}(?=\\s+["'\`])`)
+            },
+            {
+                className: "variable",
+                begin: /\[[^\]\n]+\]/
+            }
+        ]
+    };
+});
+
 // https://github.com/siyuan-note/siyuan/pull/15345
 hljs.registerLanguage('template', function (hljs) {
 

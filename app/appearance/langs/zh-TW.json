@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "該會話正在其他實例對話中",
+  "agentMirrorStreaming": "其他實例正在對話中…",
   "rollbackCompleted": "已完成回滾",
   "snapshotAutoCreated": "已自動創建資料快照",
   "agentThinkingDoneTime": "已思考 %s",

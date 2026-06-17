@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "เซสชันนี้ไม่ว่างในอินสแตนซ์อื่น",
+  "agentMirrorStreaming": "อินสแตนซ์อื่นกำลังแชท...",
+  "rollbackCompleted": "การย้อนกลับเสร็จสิ้น",
   "snapshotAutoCreated": "สร้างสแนปช็อตอัตโนมัติ",
   "agentThinkingDoneTime": "คิดแล้ว %s",
   "agentThinking": "กำลังคิด",

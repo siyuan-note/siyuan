@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "هذه الجلسة مشغولة في نسخة أخرى",
+  "agentMirrorStreaming": "نسخة أخرى تجري محادثة...",
+  "rollbackCompleted": "تمت الاستعادة",
   "snapshotAutoCreated": "تم إنشاء لقطة تلقائيا",
   "agentThinkingDoneTime": "تم التفكير %s",
   "agentThinking": "يفكر",

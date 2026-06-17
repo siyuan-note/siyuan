@@ -123,10 +123,13 @@ export const fetchPost = (
     });
 };
 
-export const fetchSyncPost = async (url: string, data?: any) => {
+export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>) => {
     const init: RequestInit = {
         method: "POST",
     };
+    if (headers) {
+        init.headers = headers;
+    }
     if (data) {
         if (data instanceof FormData) {
             init.body = data;

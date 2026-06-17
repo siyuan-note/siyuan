@@ -214,6 +214,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
         textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
+        // 临界区：Lute 已是所有编辑器共享的单例，此处临时把 inline-syntax 标志置 true 再恢复。
+        // enable/transform/restore 必须保持同步执行，中间不得插入 await，否则并发编辑器的
+        // 转换调用（如实时输入的 SpinBlockDOM）会读到被改写的标志而产生错误输出。
         enableLuteMarkdownSyntax(protyle);
         const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
         restoreLuteMarkdownSyntax(protyle);

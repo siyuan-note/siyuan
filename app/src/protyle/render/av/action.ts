@@ -16,7 +16,7 @@ import {
     updateHeaderCell
 } from "./cell";
 import {addCol, getColIconByType, showColMenu} from "./col";
-import {deleteRow, insertRows, selectRow, setPageSize, updateHeader} from "./row";
+import {deleteRow, duplicateRows, insertRows, selectRow, setPageSize, updateHeader} from "./row";
 import {emitOpenMenu} from "../../../plugin/EventBus";
 import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
@@ -568,6 +568,13 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     }
                 });
                 writeText(text);
+            }
+        }, {
+            id: "duplicate",
+            iconHTML: "",
+            label: window.siyuan.languages.duplicate,
+            click: () => {
+                duplicateRows(blockElement, protyle, rowElements);
             }
         });
     }

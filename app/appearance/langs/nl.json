@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "Deze sessie is bezet in een andere instantie",
+  "agentMirrorStreaming": "Een andere instantie is aan het chatten...",
+  "rollbackCompleted": "Terugdraaien voltooid",
   "snapshotAutoCreated": "Automatische snapshot gemaakt",
   "agentThinkingDoneTime": "Nagedacht %s",
   "agentThinking": "Denkt na",

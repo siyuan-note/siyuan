@@ -1,4 +1,33 @@
-export const setLute = (options: ILuteOptions) => {
+// Lute 配置全部读取全局 window.siyuan.config / window.siyuan.emojis，跨编辑器一致，
+// 因此所有 Protyle 编辑器共用同一个 Lute 实例，将内存与初始化开销从 O(编辑器数) 降为 O(1)。
+// AgentChat 维持自身的独立 Lute.New() 实例，不经过此处。
+let luteInstance: Lute | undefined;
+
+/**
+ * 获取（首次调用时创建）共享 Lute 单例。
+ *
+ * 仅在首次创建时应用 options，后续调用直接返回已缓存的实例 ——
+ * Lute 配置本就源于全局 config，跨编辑器一致，无需按编辑器区分。
+ */
+export const getLute = (options: ILuteOptions): Lute => {
+    if (!luteInstance) {
+        luteInstance = setLute(options);
+    }
+    return luteInstance;
+};
+
+/**
+ * 直接获取已初始化的共享 Lute 单例。
+ * 供 emoji 等无需传入 options 的场景使用；尚未创建时返回 undefined。
+ */
+export const getLuteInstance = (): Lute | undefined => {
+    return luteInstance;
+};
+
+/**
+ * 根据全局配置与传入选项构建一个新的 Lute 实例，供共享单例初始化使用。
+ */
+const setLute = (options: ILuteOptions) => {
     const lute: Lute = Lute.New();
     lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
     lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);

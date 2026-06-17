@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "Questa sessione è occupata in un'altra istanza",
+  "agentMirrorStreaming": "Un'altra istanza sta chattando...",
   "rollbackCompleted": "Rollback completato",
   "snapshotAutoCreated": "Snapshot creato automaticamente",
   "agentThinkingDoneTime": "Pensato %s",

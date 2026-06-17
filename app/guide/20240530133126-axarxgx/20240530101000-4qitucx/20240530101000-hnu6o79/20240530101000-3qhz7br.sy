@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20251211094239"
+		"updated": "20260616224517"
 	},
 	"Children": [
 		{
@@ -2262,7 +2262,7 @@
 			"Properties": {
 				"ID": "20240530101000-uzacfgz",
 				"id": "20240530101000-5sk45b0",
-				"updated": "20240530101000"
+				"updated": "20260616224517"
 			},
 			"Children": [
 				{
@@ -2317,7 +2317,7 @@
 			"Properties": {
 				"ID": "20240530101000-50kyrr5",
 				"id": "20240530101000-62q5hwk",
-				"updated": "20240530101000"
+				"updated": "20260616221517"
 			},
 			"Children": [
 				{
@@ -2328,7 +2328,6 @@
 					"ID": "20240530101000-zi30x91",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"ID": "20240530101000-ik1dy40",
 						"id": "20240530101000-zi30x91",
 						"updated": "20240530101000"
 					},
@@ -2437,6 +2436,49 @@
 							"Data": "​ ..."
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260616221517-fc7uscf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260616221517-fc7uscf",
+				"updated": "20260616224517"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "また、コードブロック言語として "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan-template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ もサポートされており、両者は同等です。使用すると"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-6x9ivi7",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "思源テンプレート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "構文のハイライトが有効になり、エクスポート時にはコードブロックとしてエクスポートされず、通常の段落テキストに変換されます。"
 				}
 			]
 		},

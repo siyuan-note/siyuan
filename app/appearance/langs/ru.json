@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "Этот сеанс занят в другом экземпляре",
+  "agentMirrorStreaming": "Другой экземпляр ведёт чат...",
   "rollbackCompleted": "Откат завершён",
   "snapshotAutoCreated": "Автоматический снимок создан",
   "agentThinkingDoneTime": "Обдумано %s",

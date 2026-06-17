@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "Ta sesja jest zajęta w innej instancji",
+  "agentMirrorStreaming": "Inna instancja prowadzi rozmowę...",
+  "rollbackCompleted": "Przywracanie zakończone",
   "snapshotAutoCreated": "Automatyczna migawka utworzona",
   "agentThinkingDoneTime": "Przemyślane %s",
   "agentThinking": "Myśli",

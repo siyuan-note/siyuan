@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "מופע זה עסוק במופע אחר",
+  "agentMirrorStreaming": "מופע אחר בצ'אט...",
+  "rollbackCompleted": "השחזור הושלם",
   "snapshotAutoCreated": "נוצרה תמונת מצב אוטומטית",
   "agentThinkingDoneTime": "חשב %s",
   "agentThinking": "חושב",

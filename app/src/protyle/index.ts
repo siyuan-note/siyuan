@@ -1,6 +1,6 @@
 import {Constants} from "../constants";
 import {Hint} from "./hint";
-import {setLute} from "./render/setLute";
+import {getLute} from "./render/setLute";
 import {Preview} from "./preview";
 import {addLoading, initUI, removeLoading} from "./ui/initUI";
 import {Undo} from "./undo";
@@ -444,7 +444,7 @@ export class Protyle {
     }
 
     private init() {
-        this.protyle.lute = setLute({
+        this.protyle.lute = getLute({
             emojiSite: this.protyle.options.hint.emojiPath,
             emojis: this.protyle.options.hint.emoji,
             headingAnchor: false,

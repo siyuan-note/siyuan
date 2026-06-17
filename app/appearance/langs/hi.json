@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "यह सत्र किसी अन्य इंस्टेंस में व्यस्त है",
+  "agentMirrorStreaming": "कोई अन्य इंस्टेंस चैट कर रहा है...",
+  "rollbackCompleted": "रोलबैक पूर्ण",
   "snapshotAutoCreated": "स्वचालित स्नैपशॉट बनाया गया",
   "agentThinkingDoneTime": "सोच लिया %s",
   "agentThinking": "सोच रहा है",

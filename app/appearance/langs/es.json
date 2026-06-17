@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "Esta sesión está ocupada en otra instancia",
+  "agentMirrorStreaming": "Otra instancia está conversando...",
   "rollbackCompleted": "Restauración completada",
   "snapshotAutoCreated": "Instantánea creada automáticamente",
   "agentThinkingDoneTime": "Pensado %s",

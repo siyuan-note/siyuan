@@ -279,8 +279,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewViewIcon(op)
 			case "setAttrViewViewDesc":
 				ret = tx.doSetAttrViewViewDesc(op)
-			case "duplicateAttrViewView":
-				ret = tx.doDuplicateAttrViewView(op)
+		case "duplicateAttrViewView":
+			ret = tx.doDuplicateAttrViewView(op)
+		case "duplicateAttrViewRow":
+			ret = tx.doDuplicateAttrViewRow(op)
 			case "sortAttrViewView":
 				ret = tx.doSortAttrViewView(op)
 			case "updateAttrViewColRelation":

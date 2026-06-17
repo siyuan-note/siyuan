@@ -1,5 +1,7 @@
 {
-  "rollbackCompleted": "Rollback completed",
+  "agentChatBusy": "Цей сеанс зайнято в іншому екземплярі",
+  "agentMirrorStreaming": "Інший екземпляр веде чат...",
+  "rollbackCompleted": "Відкат завершено",
   "snapshotAutoCreated": "Автоматичний знімок створено",
   "agentThinkingDoneTime": "Обдумано %s",
   "agentThinking": "Думає",

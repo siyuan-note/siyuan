@@ -3,7 +3,10 @@ import {Constants} from "../constants";
 import {pathPosix} from "./pathName";
 
 export const getWorkspaceName = () => {
-    return pathPosix().basename(window.siyuan.config.system.workspaceDir.replace(/\\/g, "/"));
+    const dir = window.siyuan.config.system.workspaceDir;
+    // 浏览器环境下内核不返回工作空间绝对路径，回退到应用名以避免标题/顶栏出现空段
+    // https://github.com/siyuan-note/siyuan/issues/17410
+    return dir ? pathPosix().basename(dir.replace(/\\/g, "/")) : window.siyuan.languages.siyuanNote;
 };
 
 export const setTitle = (title: string, showVersionTitle = false) => {

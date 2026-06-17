@@ -40,6 +40,22 @@
 * [属性](#属性)
     * [ブロック属性を設定](#ブロック属性を設定)
     * [ブロック属性を取得](#ブロック属性を取得)
+* [データベース](#データベース)
+    * [レンダリング](#レンダリング)
+    * [取得](#取得)
+    * [主キー値を取得](#主キー値を取得)
+    * [検索](#検索)
+    * [セル値を設定](#セル値を設定)
+    * [アイテムを追加](#アイテムを追加)
+    * [アイテムを削除](#アイテムを削除)
+    * [レイアウトを切り替え](#レイアウトを切り替え)
+    * [グループ化を設定](#グループ化を設定)
+    * [フィルターとソートを取得](#フィルターとソートを取得)
+    * [フィルターとソートを設定](#フィルターとソートを設定)
+    * [フィールドを追加](#フィールドを追加)
+    * [フィールドを削除](#フィールドを削除)
+    * [グローバルのフィールドソートを設定](#グローバルのフィールドソートを設定)
+    * [ビュー内のフィールドソートを設定](#ビュー内のフィールドソートを設定)
 * [SQL](#SQL)
     * [SQLクエリを実行](#SQLクエリを実行)
     * [トランザクションをフラッシュ](#トランザクションをフラッシュ)
@@ -1572,3 +1588,840 @@
   ```
 
     * `data`: ミリ秒精度
+
+## データベース
+
+データベース（内部では「属性ビュー」）は、フィールド（列）とアイテム（行）として構造化データを格納します。各データベースは `avID` で識別され、1 つ以上のデータベースブロック（`blockID`）を通じてドキュメントに埋め込めます。1 つのデータベースは複数の異なるレイアウトタイプのビュー（`viewID`）を持てます：`table`（テーブル）、`gallery`（ギャラリー）、`kanban`（カンバン）。
+
+フィールドタイプ（`keyType`）は以下の通りです：
+
+| 値          | 説明                   |
+|-------------|------------------------|
+| `block`     | 主キー（紐づくブロック）|
+| `text`      | テキスト               |
+| `number`    | 数値                   |
+| `date`      | 日付                   |
+| `select`    | 単一選択               |
+| `mSelect`   | 複数選択               |
+| `url`       | URL                    |
+| `email`     | メール                 |
+| `phone`     | 電話                   |
+| `mAsset`    | アセット               |
+| `template`  | テンプレート           |
+| `created`   | 作成日時               |
+| `updated`   | 更新日時               |
+| `checkbox`  | チェックボックス       |
+| `relation`  | 関連                   |
+| `rollup`    | ロールアップ           |
+| `lineNumber`| 行番号                 |
+
+### レンダリング
+
+* `/api/av/renderAttributeView`
+* パラメータ
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "",
+    "page": 1,
+    "pageSize": 50,
+    "query": "",
+    "groupPaging": {},
+    "createIfNotExist": true
+  }
+  ```
+
+    * `id`: データベース ID
+    * `blockID`: このデータベースを埋め込むデータベースブロック。アクティブなビューや公開権限の解決に使用します。独立したデータベースをレンダリングする場合は省略します
+    * `viewID`: レンダリングするビュー。省略時は現在のビュー（`viewID` フィールド）を使用
+    * `page`: ページ番号（1 始まり）。デフォルトは `1`
+    * `pageSize`: 1 ページあたりのアイテム数。`-1` または省略時はビューのデフォルト（`50`）を使用
+    * `query`: 主キー値に対する任意の全文フィルターキーワード
+    * `groupPaging`: グループ化（カンバン）ビューの任意のページング設定
+    * `createIfNotExist`: `true`（デフォルト）の場合、データベースにビューが無ければデフォルトビューを作成
+* 戻り値（実際のレスポンス、テーブルレイアウト、1 行を表示）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "API テスト",
+      "id": "20240118120204-kwyzf77",
+      "viewType": "table",
+      "viewID": "20240118120204-7rnmyc1",
+      "isMirror": false,
+      "views": [
+        {
+          "id": "20240118120204-7rnmyc1",
+          "icon": "",
+          "name": "テーブル",
+          "desc": "",
+          "hideAttrViewName": false,
+          "type": "table",
+          "pageSize": 50
+        }
+      ],
+      "view": {
+        "id": "20240118120204-7rnmyc1",
+        "icon": "",
+        "name": "テーブル",
+        "desc": "",
+        "hideAttrViewName": false,
+        "filters": [],
+        "sorts": [],
+        "group": null,
+        "pageSize": 50,
+        "showIcon": true,
+        "wrapField": false,
+        "groupFolded": false,
+        "groupHidden": 0,
+        "columns": [
+          {
+            "id": "20240118120204-w6cggab",
+            "name": "主キー",
+            "type": "block",
+            "icon": "",
+            "wrap": false,
+            "hidden": false,
+            "desc": "",
+            "calc": null,
+            "numberFormat": "",
+            "template": "",
+            "pin": false,
+            "width": ""
+          }
+        ],
+        "rows": [
+          {
+            "id": "20240118203831-fkfvvtx",
+            "cells": [
+              {
+                "id": "20240118203911-xrg9obl",
+                "value": {
+                  "id": "20240118203911-xrg9obl",
+                  "keyID": "20240118120204-w6cggab",
+                  "blockID": "20240118203831-fkfvvtx",
+                  "type": "block",
+                  "createdAt": 1706843791000,
+                  "updatedAt": 1706843791000,
+                  "block": {
+                    "id": "20240118203831-fkfvvtx",
+                    "content": "3",
+                    "created": 1706843791000,
+                    "updated": 1706843791000
+                  }
+                },
+                "valueType": "block",
+                "color": "",
+                "bgColor": ""
+              }
+            ]
+          }
+        ],
+        "rowCount": 5
+      }
+    }
+  }
+  ```
+
+    * `data.view`: レンダリングされたビューインスタンス。形状は `viewType` により異なります——`table` は `columns`/`rows`/`rowCount`、`gallery` は `columns`/`rows`、`kanban` は `columns`/`groups`（各グループ自体が `groupKey`/`groupValue` を持つビューインスタンス）を返します。`view` は `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden` も含みます。注意：有効なフィルター/グループ化により、`rowCount` > 0 でも `rows` が空になることがあります
+    * `data.view.columns[]`: 各列は `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`pin`/`width` を持ちます；`select`/`mSelect` 列はさらに `options` を含みます
+    * `data.view.rows[].id`: **行 ID**（アイテム ID）。紐づく行の場合は紐づくブロック ID と同じです；独立行の場合は生成されたアイテム ID で、いかなるブロックとも異なります
+    * `data.view.rows[].cells[].value`: `Value` オブジェクト——すべての value 形状は [セル値を設定](#セル値を設定) を参照。`createdAt`/`updatedAt` は int64 ミリ秒タイムスタンプ
+    * `data.views`: 全ビューのメタデータ（行データなし）
+    * `data.isMirror`: データベースブロックがデータベースのミラー（読み取り専用コピー）の場合 `true`
+
+### 取得
+
+* `/api/av/getAttributeView`
+* パラメータ
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77"
+  }
+  ```
+
+    * `id`: データベース ID
+* 戻り値（実際のレスポンス、トリム済み——`keyValues`/`views` 配列は省略）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "av": {
+        "spec": 4,
+        "id": "20240118120204-kwyzf77",
+        "name": "API テスト",
+        "keyValues": [
+          {
+            "key": {
+              "id": "20240118120204-w6cggab",
+              "name": "主キー",
+              "type": "block",
+              "icon": "",
+              "desc": "",
+              "numberFormat": "",
+              "template": ""
+            },
+            "values": [
+              {
+                "id": "20240118203911-xrg9obl",
+                "keyID": "20240118120204-w6cggab",
+                "blockID": "20240118203831-fkfvvtx",
+                "type": "block",
+                "createdAt": 1706843791000,
+                "updatedAt": 1706843791000,
+                "block": {
+                  "id": "20240118203831-fkfvvtx",
+                  "content": "3",
+                  "created": 1706843791000,
+                  "updated": 1706843791000
+                }
+              }
+            ]
+          }
+        ],
+        "keyIDs": null,
+        "viewID": "20240118120204-7rnmyc1",
+        "views": [
+          {
+            "id": "20240118120204-7rnmyc1",
+            "icon": "",
+            "name": "テーブル",
+            "hideAttrViewName": false,
+            "desc": "",
+            "pageSize": 50,
+            "type": "table",
+            "table": {
+              "spec": 0,
+              "id": "20240118120204-grokgmm",
+              "showIcon": true,
+              "wrapField": false,
+              "columns": [
+                {
+                  "id": "20240118120204-w6cggab",
+                  "wrap": false,
+                  "hidden": false,
+                  "pin": false,
+                  "width": ""
+                }
+              ],
+              "rowIds": null
+            },
+            "itemIds": ["20240118203818-ct041hj", "20240118203855-sqzbja0", "20240118203831-fkfvvtx", "20240118203842-kc31ovy", "20240531235026-uiap07y"],
+            "groupCreated": 0,
+            "groupItemIds": null,
+            "groupFolded": false,
+            "groupHidden": 0,
+            "groupSort": 0
+          }
+        ]
+      }
+    }
+  }
+  ```
+
+    * `data.av`: 完全な `AttributeView` 定義——フィールド（`keyValues`）、フィールド順序（`keyIDs`、`null` の場合あり）、現在のビュー（`viewID`）、および全ビューの生のレイアウト設定（`table`/`gallery`/`kanban`）とアイテム順序（`itemIds`）。生の定義を返します（レンダリング後の行やページングを含まない）；計算後の行データが必要な場合は [レンダリング](#レンダリング) を使用してください
+
+### 主キー値を取得
+
+* `/api/av/getAttributeViewPrimaryKeyValues`
+* パラメータ
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "keyword": "",
+    "page": 1,
+    "pageSize": 16
+  }
+  ```
+
+    * `id`: データベース ID
+    * `keyword`: 主キーテキストに対する任意の部分一致フィルター（大文字小文字を区別しない）
+    * `page`: ページ番号（1 始まり）。デフォルトは `1`
+    * `pageSize`: 1 ページあたりのアイテム数。`-1` または省略時は `16`。結果は `block.updated` の降順
+* 戻り値（実際のレスポンス、1 値を表示）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "name": "API テスト",
+      "blockIDs": ["20240118120201-kldj15t"],
+      "rows": {
+        "key": {
+          "id": "20240118120204-w6cggab",
+          "name": "主キー",
+          "type": "block",
+          "icon": "",
+          "desc": "",
+          "numberFormat": "",
+          "template": ""
+        },
+        "values": [
+          {
+            "id": "20240118203911-xrg9obl",
+            "keyID": "20240118120204-w6cggab",
+            "blockID": "20240118203831-fkfvvtx",
+            "type": "block",
+            "createdAt": 1706843791000,
+            "updatedAt": 1706843791000,
+            "block": {
+              "id": "20240118203831-fkfvvtx",
+              "content": "3",
+              "created": 1706843791000,
+              "updated": 1706843791000
+            }
+          }
+        ]
+      }
+    }
+  }
+  ```
+
+    * `data.rows`: 主キー（`block`）フィールドとそのページングされた値を保持する `KeyValues` オブジェクト
+    * `data.blockIDs`: このデータベースを参照する全データベースブロック（ミラー）の ID
+
+### 検索
+
+* `/api/av/searchAttributeView`
+* パラメータ
+
+  ```json
+  {
+    "keyword": "API",
+    "excludes": []
+  }
+  ```
+
+    * `keyword`: 検索キーワード（データベース名に一致）
+    * `excludes`: 任意。結果から除外するデータベース ID のリスト
+* 戻り値（実際のレスポンス）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "results": [
+        {
+          "avID": "20240118120204-kwyzf77",
+          "avName": "API テスト",
+          "viewName": "",
+          "viewID": "",
+          "viewLayout": "",
+          "blockID": "20240118120201-kldj15t",
+          "hPath": "正在跟进的问题/数据库/API",
+          "children": [
+            {
+              "avID": "20240118120204-kwyzf77",
+              "avName": "API テスト",
+              "viewName": "テーブル",
+              "viewID": "20240118120204-7rnmyc1",
+              "viewLayout": "table",
+              "blockID": "20240118120201-kldj15t",
+              "hPath": "正在跟进的问题/数据库/API"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.results[]`: 各トップレベル結果は `avID` ごとにデータベースを集約します；その `children[]` が各ビュー（`viewName`/`viewID`/`viewLayout`）を列挙します
+
+### セル値を設定
+
+1 つのセル（1 行の 1 フィールド）を更新します。セル値の主要な書き込みエンドポイントです。リクエストの `value` はフィールドの `keyType` に応じた部分 `Value` オブジェクトです。主な value の形状は以下の通りです：
+
+| `keyType`  | `value` の形状                                                                                                       |
+|------------|----------------------------------------------------------------------------------------------------------------------|
+| `block`    | `{"block": {"content": "1行目", "id": "<紐づくブロックID>"}, "isDetached": false}`                                  |
+| `text`     | `{"text": {"content": "テキスト"}}`                                                                                  |
+| `number`   | `{"number": {"content": 42, "isNotEmpty": true}}`（クリアは `{"isNotEmpty": false}`）                                |
+| `date`     | `{"date": {"content": 1676042451000, "isNotEmpty": true}}`（ミリ秒タイムスタンプ）                                   |
+| `select`   | `{"mSelect": [{"content": "完了", "color": "1"}]}`（最大1つ）                                                         |
+| `mSelect`  | `{"mSelect": [{"content": "A", "color": "1"}, {"content": "B", "color": "2"}]}`                                      |
+| `url`      | `{"url": {"content": "https://siyuan.com"}}`                                                                         |
+| `email`    | `{"email": {"content": "a@b.com"}}`                                                                                  |
+| `phone`    | `{"phone": {"content": "1234567890"}}`                                                                               |
+| `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
+
+> ⚠️ `itemID` は**行 ID**（[レンダリング](#レンダリング) が返す `rows[].id`）です。紐づく行の場合は行 ID は紐づくブロック ID と等しく、独立行の場合は生成されたアイテム ID です。誤った ID を渡すと、値はレンダリングされたセルに現れない孤立データとして保存されます。
+
+* `/api/av/setAttributeViewBlockAttr`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240531232156-ahsyx8l",
+    "itemID": "20240118203831-fkfvvtx",
+    "value": {
+      "type": "number",
+      "number": {
+        "content": 42,
+        "isNotEmpty": true
+      }
+    }
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `keyID`: フィールド ID（更新対象の列）
+    * `itemID`: **行 ID**（[レンダリング](#レンダリング) が返す `rows[].id`）。従来の `rowID` パラメータは非推奨で 2026-12-01 以降に削除されるため、`itemID` を使用してください
+    * `value`: 部分 `Value` オブジェクト（上記表を参照）。未知または未サポートのキーは無視されます
+* 戻り値（実際のレスポンス、数値）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "value": {
+        "id": "20240531235048-4zisj1p",
+        "keyID": "20240531232156-ahsyx8l",
+        "blockID": "20240118203831-fkfvvtx",
+        "type": "number",
+        "createdAt": 1717170648596,
+        "updatedAt": 1781610266432,
+        "number": {
+          "content": 42,
+          "isNotEmpty": true,
+          "format": "",
+          "formattedContent": "42"
+        }
+      }
+    }
+  }
+  ```
+
+    * `data.value`: 更新後に正規化された値（`number.formattedContent` などの計算フィールドを含む）。リクエストペイロードを再送せず、この戻り値で UI を更新してください
+
+### アイテムを追加
+
+1つ以上のアイテム（行）を追加します。各ソースは既存ブロックを紐づける（`isDetached: false`）か、ビュー内にのみ存在する独立行を作成（`isDetached: true`）できます。
+
+* `/api/av/addAttributeViewBlocks`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "",
+    "groupID": "",
+    "previousID": "",
+    "srcs": [
+      {
+        "id": "20240118120201-kldj15t",
+        "isDetached": false,
+        "content": "新しい行"
+      }
+    ],
+    "ignoreDefaultFill": false
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `blockID`: このデータベースを所有するデータベースブロック（ターゲットビュー/グループの解決に使用）
+    * `viewID`: ターゲットビュー。省略時は現在のビューを使用
+    * `groupID`: カンバンビューのターゲットグループ ID。テーブル/ギャラリーでは省略可
+    * `previousID`: このアイテム ID の後に挿入。空の場合は末尾に追加
+    * `srcs[].id`: ブロックを紐づける場合（`isDetached: false`）、紐づけるブロック ID。ノード ID 形式である必要があります
+    * `srcs[].isDetached`: `true` で独立行を作成、`false` で既存ブロックを紐づけ
+    * `srcs[].content`: 主キーの表示テキスト（`isDetached: true` の場合、または紐づくブロックの内容を上書きする場合に使用）
+    * `srcs[].itemID`: 任意。アイテム ID を明示指定。省略時は自動生成
+    * `ignoreDefaultFill`: `true` の場合、フィルター/グループフィールドへのデフォルト値の自動入力をスキップ
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+    * このエンドポイントは `null` を返します。成功後、[レンダリング](#レンダリング) を呼び出して更新された行（セル更新に必要な新しい行 ID を含む）を取得してください
+
+### アイテムを削除
+
+1つ以上のアイテム（行）を削除します。独立行は削除され、紐づくブロックは紐付け解除されます（元のドキュメントブロックは削除されません）。
+
+* `/api/av/removeAttributeViewBlocks`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "srcIDs": ["20240118203831-fkfvvtx"]
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `srcIDs`: 削除する行 ID（[レンダリング](#レンダリング) が返す `rows[].id`）のリスト
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### レイアウトを切り替え
+
+現在のビューのレイアウトタイプを `table`（テーブル）、`gallery`（ギャラリー）、`kanban`（カンバン）の間で切り替えます。成功時、サーバーはビューを再レンダリングして返します（[レンダリング](#レンダリング) と同じ形状）。
+
+* `/api/av/changeAttrViewLayout`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "layoutType": "kanban"
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `blockID`: このビューを所有するデータベースブロック
+    * `layoutType`: ターゲットレイアウト——`table`、`gallery`、`kanban` のいずれか
+* 戻り値：[レンダリング](#レンダリング) の戻り値と同じ形状。`kanban` に切り替えてグループが設定されている場合、`data.view` は `groups[]` 配列を持ちます；各グループはビューインスタンスで、`groupKey`、`groupValue`、およびカンバン固有フィールド（`coverFrom`、`cardAspectRatio`、`cardSize`、`fitImage`、`displayFieldName`、`fillColBackgroundColor`、`fields`）を含みます
+
+### グループ化を設定
+
+カンバンビューのグループ化ルールを設定またはクリアします。`group.field` が空の場合、グループ化を削除します。成功時、サーバーはビューを再レンダリングして返します。
+
+* `/api/av/setAttrViewGroup`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "group": {
+      "field": "20240118203822-io6ofxb",
+      "method": 0,
+      "order": 0,
+      "hideEmpty": false
+    }
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `blockID`: このビューを所有するデータベースブロック
+    * `group`: グループ化ルール
+    * `group.field`: グループ化の基準フィールド（列）ID。空文字列でグループ化を削除
+    * `group.method`: グループ化方式——`0` 値ごと、`1` 数値範囲、`2` 相対日付、`3` 日ごと、`4` 週ごと、`5` 月ごと、`6` 年ごと
+    * `group.range`: 任意。`method` が `1`（数値範囲）の場合は必須：`{ "numStart": 0, "numEnd": 100, "numStep": 10 }`
+    * `group.order`: グループの並び順——`0` 昇順、`1` 降順、`2` 手動、`3` 選択肢の順序に従う
+    * `group.hideEmpty`: 空のグループを非表示にするか
+* 戻り値：[レンダリング](#レンダリング) の戻り値と同じ形状
+
+### フィルターとソートを取得
+
+データベースブロックに紐づくビューの現在のフィルターおよびソートルールを返します。
+
+* `/api/av/getAttributeViewFilterSort`
+* パラメータ
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t"
+  }
+  ```
+
+    * `id`: データベース ID
+    * `blockID`: このビューを所有するデータベースブロック
+* 戻り値（実際のレスポンス、フィルター/ソート未設定）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "filters": [],
+      "sorts": []
+    }
+  }
+  ```
+
+  設定後（実際に取得したレスポンス）、フィルターとソートは以下の形になります：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "filters": [
+        {
+          "column": "20240118203822-io6ofxb",
+          "operator": "=",
+          "value": {
+            "type": "select",
+            "mSelect": [
+              { "content": "完了", "color": "1" }
+            ]
+          }
+        }
+      ],
+      "sorts": [
+        {
+          "column": "20240118120204-w6cggab",
+          "order": "DESC"
+        }
+      ]
+    }
+  }
+  ```
+
+    * `data.filters`: `ViewFilter` の配列
+    * `data.filters[].column`: フィルターが適用されるフィールド（列）ID
+    * `data.filters[].operator`: フィルター演算子（下記の演算子表を参照）
+    * `data.filters[].value`: フィルター値。`Value` オブジェクト（形状は [セル値を設定](#セル値を設定) を参照）
+    * `data.filters[].relativeDate`: 任意。日付フィルターが使用する相対日時記述子（`{ "count": 7, "unit": 0, "direction": -1 }`、`unit`：`0` 日、`1` 週、`2` 月、`3` 年、`direction`：`-1` 前、`0` 今期、`1` 後）
+    * `data.sorts`: `ViewSort` の配列
+    * `data.sorts[].column`: ソートが適用されるフィールド（列）ID
+    * `data.sorts[].order`: `ASC` または `DESC`
+
+  フィルター演算子：
+
+  | 値                   | 説明                   |
+  |----------------------|------------------------|
+  | `=`                  | 等しい                 |
+  | `!=`                 | 等しくない             |
+  | `>`                  | より大きい             |
+  | `>=`                 | 以上                   |
+  | `<`                  | より小さい             |
+  | `<=`                 | 以下                   |
+  | `Contains`           | 含む                   |
+  | `Does not contains`  | 含まない               |
+  | `Is empty`           | 空である               |
+  | `Is not empty`       | 空でない               |
+  | `Starts with`        | 〜で始まる             |
+  | `Ends with`          | 〜で終わる             |
+  | `Is between`         | の間である             |
+  | `Is true`            | 真（チェックボックス） |
+  | `Is false`           | 偽（チェックボックス） |
+
+### フィルターとソートを設定
+
+フィルターとソートは、変更がアンドゥ可能な編集トランザクションの一部であるため、トランザクションエンドポイント `/api/transactions`（複数形）を通じて永続化します。各ルール変更を `doOperations` エントリに包み、`action` を `setAttrViewFilters` または `setAttrViewSorts` とし、`data` フィールドに完全な新しい配列を指定します（ビューの既存ルールを完全に置き換えます）。
+
+* `/api/transactions`
+* パラメータ
+
+  ```json
+  {
+    "reqId": 1781610129661,
+    "app": "",
+    "session": "",
+    "transactions": [
+      {
+        "doOperations": [
+          {
+            "action": "setAttrViewFilters",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118203822-io6ofxb",
+                "operator": "=",
+                "value": {
+                  "type": "select",
+                  "mSelect": [
+                    { "content": "完了", "color": "1" }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "action": "setAttrViewSorts",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118120204-w6cggab",
+                "order": "DESC"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+    * `reqId`: 必須。クライアントが生成したタイムスタンプ/ノンス（数値）。アンドゥ/リドゥ用にトランザクションをタグ付けします
+    * `app` / `session`: 任意。結果の WebSocket プッシュをスコープし、他のクライアント/セッションがリフレッシュできるようにします
+    * `transactions[].doOperations[]`: 置換するルールセットごとに1つの操作
+    * `doOperations[].action`: `setAttrViewFilters` でフィルターを置換、`setAttrViewSorts` でソートを置換
+    * `doOperations[].avID`: データベース ID
+    * `doOperations[].blockID`: このビューを所有するデータベースブロック
+    * `doOperations[].data`: 完全な新しい `ViewFilter` または `ViewSort` の配列（形状は [フィルターとソートを取得](#フィルターとソートを取得) を参照）。`[]` を渡してクリア
+* 戻り値（実際のレスポンス、送信した操作をエコーし、サーバー割り当ての `timestamp` を付加）：
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": [
+      {
+        "timestamp": 1781610129661,
+        "doOperations": [
+          {
+            "action": "setAttrViewFilters",
+            "id": "",
+            "avID": "20240118120204-kwyzf77",
+            "blockID": "20240118120201-kldj15t",
+            "data": [
+              {
+                "column": "20240118203822-io6ofxb",
+                "operator": "=",
+                "value": {
+                  "type": "select",
+                  "mSelect": [{ "content": "完了", "color": "1" }]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  ```
+
+    * 呼び出し成功後、[フィルターとソートを取得](#フィルターとソートを取得) で永続化されたか確認できます
+
+### フィールドを追加
+
+新しいフィールド（列）を追加します。フィールドは全ビュー（テーブル/ギャラリー/カンバン）の `previousKeyID` の後の位置に追加されます（空の場合はデフォルト位置）。
+
+* `/api/av/addAttributeViewKey`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118120204-7k9wzbp",
+    "keyName": "ステータス",
+    "keyType": "select",
+    "keyIcon": "",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `keyID`: 新しいフィールドの ID。`Lute.NewNodeID()` で生成された有効なノード ID（14 桁のタイムスタンプ + `-` + 7 文字のランダム英数字、例：`20240118120204-abc1234`）である必要があります
+    * `keyName`: フィールドの表示名
+    * `keyType`: フィールドタイプ——`text`、`number`、`date`、`select`、`mSelect`、`url`、`email`、`phone`、`mAsset`、`template`、`created`、`updated`、`checkbox`、`relation`、`rollup`、`lineNumber` のいずれか。`block`（主キー）はこのエンドポイントから追加できません
+    * `keyIcon`: 任意のフィールドアイコン（emoji または空文字列）
+    * `previousKeyID`: このフィールド ID の後に新しい列を挿入。空文字列の場合はレイアウトのデフォルト位置（テーブルは先頭、ギャラリー/カンバンは末尾）を使用
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### フィールドを削除
+
+フィールド（列）とその全ての値を削除します。`keyID` が存在しない場合、`code: -1`、`msg: "key not found"` を返します。
+
+* `/api/av/removeAttributeViewKey`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118120204-7k9wzbp",
+    "removeRelationDest": false
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `keyID`: 削除するフィールド ID
+    * `removeRelationDest`: `true` かつフィールドが関連型の場合、宛先データベースの対応する逆関連フィールドも削除します。デフォルトは `false`
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### グローバルのフィールドソートを設定
+
+フィールド（列）を全体として並べ替えます——`keyID` をフィールド順序の `previousKeyID` の後の位置に移動し、全ビューに影響します。
+
+* `/api/av/sortAttributeViewKey`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "keyID": "20240118203822-io6ofxb",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `keyID`: 移動するフィールド ID
+    * `previousKeyID`: `keyID` をその後に配置するフィールド ID。空文字列で先頭に移動
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### ビュー内のフィールドソートを設定
+
+全体のフィールド順序を変えずに、単一ビューのレイアウト内で列を並べ替えます（例：テーブルの列順序）。
+
+* `/api/av/sortAttributeViewViewKey`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "viewID": "20240118120204-7rnmyc1",
+    "keyID": "20240118203822-io6ofxb",
+    "previousKeyID": "20240118120204-w6cggab"
+  }
+  ```
+
+    * `avID`: データベース ID
+    * `viewID`: ターゲットビュー。空の場合は現在のビューを使用
+    * `keyID`: 移動するフィールド ID
+    * `previousKeyID`: `keyID` をその後に配置するフィールド ID。空文字列で先頭に移動
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```

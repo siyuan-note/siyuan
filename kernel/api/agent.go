@@ -95,14 +95,26 @@ func agentChat(c *gin.Context) {
 		maxRetries = 3
 	}
 
-	var eventCh <-chan agent.AgentEvent
+	app := c.GetHeader("X-SiYuan-App-ID")
 
 	ctx, cancel := context.WithCancel(c.Request.Context())
-	defer cancel()
-	eventCh = agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries)
+	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries)
+
+	// 实例级互斥：同一 session 同时只允许一个活跃流。
+	// 检查+占用在同一把锁内（compare-and-set），失败时 cancel 释放刚启动的 goroutine 防泄漏。
 	sessionsMu.Lock()
+	if _, ok := runningSessions[req.SessionID]; ok {
+		sessionsMu.Unlock()
+		cancel()
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "session is busy in another instance"
+		c.JSON(http.StatusConflict, ret)
+		return
+	}
 	runningSessions[req.SessionID] = &runningSession{eventCh: eventCh}
 	sessionsMu.Unlock()
+	defer cancel()
 	defer func() {
 		sessionsMu.Lock()
 		delete(runningSessions, req.SessionID)
@@ -131,20 +143,32 @@ func agentChat(c *gin.Context) {
 	}
 	deadline := time.After(totalTimeout)
 
+	// 通知其他实例：该会话的流已开始，镜像端可显示"对话进行中"占位。
+	broadcastAgentSessionChanged(app, req.SessionID, "streamStart")
+
 	for {
 		select {
 		case event, ok := <-eventCh:
 			if !ok {
+				// 流正常结束（done 已写入 SSE）。通知镜像端解除占位锁定；
+				// 实际内容重绘由发起者前端随后的 saveSession 广播（update）驱动，确保读到落盘后的完整数据。
+				broadcastAgentSessionChanged(app, req.SessionID, "streamEnd")
 				sessionsMu.Lock()
 				delete(runningSessions, req.SessionID)
 				sessionsMu.Unlock()
 				return
 			}
 			if err := writeSSE(c, event); err != nil {
+				// 客户端断开导致写失败，同样通知镜像端解除锁定，避免占位条悬挂。
+				broadcastAgentSessionChanged(app, req.SessionID, "streamEnd")
 				return
 			}
 			flusher.Flush()
+		case <-c.Request.Context().Done():
+			broadcastAgentSessionChanged(app, req.SessionID, "streamEnd")
+			return
 		case <-deadline:
+			broadcastAgentSessionChanged(app, req.SessionID, "streamEnd")
 			writeSSEError(c, model.Conf.Language(24))
 			flusher.Flush()
 			return
@@ -315,6 +339,8 @@ func removeSession(c *gin.Context) {
 	}
 
 	_ = agent.DeleteSession(req.ID)
+	// 通知其他实例：会话已删除，刷新列表；若为当前会话则清空视图。
+	broadcastAgentSessionChanged(c.GetHeader("X-SiYuan-App-ID"), req.ID, "delete")
 	ret := gulu.Ret.NewResult()
 	c.JSON(http.StatusOK, ret)
 }
@@ -330,8 +356,29 @@ func saveSession(c *gin.Context) {
 	}
 
 	_ = agent.SaveSession(body)
+	// 从 body 解出 sessionID 用于广播。update 仅触发其他实例刷新会话列表元数据，
+	// 不触发当前视图重绘（重绘由 streamEnd 负责），回避流式中途半截数据的时序问题。
+	var meta sessionMeta
+	if gulu.JSON.UnmarshalJSON(body, &meta) == nil && meta.ID != "" {
+		broadcastAgentSessionChanged(c.GetHeader("X-SiYuan-App-ID"), meta.ID, "update")
+	}
 	ret := gulu.Ret.NewResult()
 	c.JSON(http.StatusOK, ret)
+}
+
+// broadcastAgentSessionChanged 向除发起者 app 外、所有打开了 agentChat dock 的实例推送会话变更通知。
+// action: streamStart / streamEnd / update / delete。排除发起者 app（它已通过 SSE 自渲染或本地持有最新状态）。
+func broadcastAgentSessionChanged(app, sessionID, action string) {
+	if "" == app || "" == sessionID {
+		return
+	}
+	data := map[string]string{"sessionID": sessionID, "action": action}
+	util.BroadcastByTypeAndExcludeApp(app, "agentChat", "agentSessionChanged", 0, "", data)
+}
+
+// sessionMeta 用于从 saveSession 的 body 中解析出会话 ID，agent 包内也有同名字段，此处独立定义避免循环依赖。
+type sessionMeta struct {
+	ID string `json:"id"`
 }
 
 func writeSSE(c *gin.Context, event agent.AgentEvent) error {

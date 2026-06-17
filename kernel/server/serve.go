@@ -597,10 +597,15 @@ func serveAuthPage(c *gin.Context) {
 		"appearanceMode":         model.Conf.Appearance.Mode,
 		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
 		"workspace":              util.WorkspaceName,
-		"workspacePath":          util.WorkspaceDir,
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
-		"workspaceDir":           util.WorkspaceDir,
+		// 浏览器环境下不返回工作空间绝对路径，避免泄露用户名等敏感信息
+		// 原生客户端（桌面 Electron，授权页 siyuan-init IPC 仅在 Electron 内执行）照常返回真实路径
+		// REF: https://github.com/siyuan-note/siyuan/issues/17410
+		"workspaceDir": util.WorkspaceDir,
+	}
+	if util.IsBrowserRequest(c) {
+		model["workspaceDir"] = ""
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); err != nil {

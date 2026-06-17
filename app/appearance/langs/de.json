@@ -1,4 +1,6 @@
 {
+  "agentChatBusy": "Diese Sitzung ist in einer anderen Instanz belegt",
+  "agentMirrorStreaming": "Eine andere Instanz schreibt...",
   "rollbackCompleted": "Rollback abgeschlossen",
   "snapshotAutoCreated": "Automatischer Snapshot erstellt",
   "agentThinkingDoneTime": "Nachgedacht %s",

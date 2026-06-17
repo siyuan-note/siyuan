@@ -283,8 +283,16 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
     }
     let rollupIsNumber = false;
     if (type === "rollup") {
+        // 行级汇总结果本身就是数字的操作（如计数、百分比、复选统计），即使目标字段不是数字类型，
+        // 底部计算也应支持 Sum/Average 等数字计算方式
+        const numericRowCalcOperators = [
+            "Count all", "Count values", "Count unique values", "Count empty", "Count not empty",
+            "Percent empty", "Percent not empty", "Percent unique values",
+            "Checked", "Unchecked", "Percent checked", "Percent unchecked",
+        ];
         let relationKeyID: string;
         let keyID: string;
+        let rowCalcOperator: string;
         let avData = panelData?.data;
         if (!avData) {
             const avResponse = await fetchSyncPost("/api/av/renderAttributeView", {id: avId});
@@ -295,9 +303,13 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             if (item.id === colId) {
                 relationKeyID = item.rollup?.relationKeyID;
                 keyID = item.rollup?.keyID;
+                rowCalcOperator = item.rollup?.calc?.operator;
                 return true;
             }
         });
+        if (numericRowCalcOperators.includes(rowCalcOperator)) {
+            rollupIsNumber = true;
+        }
         if (relationKeyID && keyID) {
             let relationAvId: string;
             getFieldsByData(avData).find((item) => {
@@ -310,7 +322,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
                 const colResponse = await fetchSyncPost("/api/av/getAttributeView", {id: relationAvId});
                 colResponse.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
                     if (item.key.id === keyID) {
-                        rollupIsNumber = item.key.type === "number";
+                        rollupIsNumber = item.key.type === "number" || rollupIsNumber;
                         return true;
                     }
                 });

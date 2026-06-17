@@ -2,7 +2,7 @@ import {Constants} from "../../constants";
 import {addScript} from "../util/addScript";
 import {fetchPost} from "../../util/fetch";
 
-export const previewImages = (srcList: string[], currentSrc?: string) => {
+export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.7`, "protyleViewerScript").then(() => {
         const imagesElement = document.createElement("ul");
         let html = "";
@@ -30,6 +30,9 @@ export const previewImages = (srcList: string[], currentSrc?: string) => {
             transition: false,
             hidden: function () {
                 window.siyuan.viewer.destroy();
+                if (onHidden) {
+                    onHidden();
+                }
             },
             toolbar: {
                 zoomIn: true,

@@ -32,9 +32,6 @@ export const previewDiagram = (diagramElement: HTMLElement) => {
             return;
         }
         const url = URL.createObjectURL(blob);
-        previewImages([url], url);
-        // viewerjs copies the <img src> into its own container, so the object URL can be
-        // released once the viewer has finished reading it.
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        previewImages([url], url, () => URL.revokeObjectURL(url));
     });
 };

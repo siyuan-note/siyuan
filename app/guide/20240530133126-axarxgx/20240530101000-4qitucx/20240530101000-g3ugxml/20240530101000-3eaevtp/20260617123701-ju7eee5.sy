@@ -1,0 +1,1156 @@
+{
+	"ID": "20260617123701-ju7eee5",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260617123701-ju7eee5",
+		"title": "テーブル計算",
+		"type": "doc",
+		"updated": "20260617123957"
+	},
+	"Children": [
+		{
+			"ID": "20260617123957-1ylgn0m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123957-1ylgn0m",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-9o2p1g6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123957-9o2p1g6",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベーステーブルの下部では、各列に対する集計計算をサポートしています。列の下部にある計算バーをクリックすると、計算方法を選択できます。行番号列を除くすべてのフィールドタイプでテーブル計算を利用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-pjwdpkm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123957-pjwdpkm",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "組み込みの計算方法"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-f5ceeb8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123957-f5ceeb8",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "フィールドタイプに応じて、対応する計算方法が自動的に表示されます："
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-3j9ynn5",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260617123957-3j9ynn5",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"ID": "20260617123957-r21m4vw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123957-r21m4vw",
+						"updated": "20260617123957"
+					},
+					"Children": [
+						{
+							"ID": "20260617123957-orqaaq7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123957-orqaaq7",
+								"updated": "20260617123957"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "カウント"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：合計、空でない、重複なし"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123957-eradk95",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123957-eradk95",
+						"updated": "20260617123957"
+					},
+					"Children": [
+						{
+							"ID": "20260617123957-vugmcap",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123957-vugmcap",
+								"updated": "20260617123957"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "パーセンテージ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：空の割合、空でない割合"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123957-3ugtg91",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123957-3ugtg91",
+						"updated": "20260617123957"
+					},
+					"Children": [
+						{
+							"ID": "20260617123957-wcie6fa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123957-wcie6fa",
+								"updated": "20260617123957"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "数値統計"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：合計、平均、中央値、最小値、最大値、範囲"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123957-d4drj60",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123957-d4drj60",
+						"updated": "20260617123957"
+					},
+					"Children": [
+						{
+							"ID": "20260617123957-mm1z3ns",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123957-mm1z3ns",
+								"updated": "20260617123957"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "チェックボックス"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：チェック数、未チェック数およびそれぞれの割合"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123957-1dq1ca3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123957-1dq1ca3",
+						"updated": "20260617123957"
+					},
+					"Children": [
+						{
+							"ID": "20260617123957-vdj4tz8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123957-vdj4tz8",
+								"updated": "20260617123957"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "日付"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：最も早い日、最も遅い日"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-ptz7ds6",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260617123957-ptz7ds6",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260617123957-5ddn11u",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260617123957-5ddn11u",
+						"updated": "20260617123957"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "ロールアップフィールドの行レベルの結果が数値の場合（例：行レベルの計算がカウントの場合）、数値統計の計算方法も自動的に利用可能になります。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-18l2dhx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123957-18l2dhx",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレート計算"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-to0ooq9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123957-to0ooq9",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "組み込みの計算方法ではニーズを満たせない場合、「テンプレート」を選択して、数式を記述することで列全体のデータに対するカスタム集計を行えます。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-eisx8oo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123957-eisx8oo",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "計算バーをクリックして「テンプレート」を選択し、表示されたダイアログに数式を入力します。結果が数値として解析できる場合は列の数値書式で表示され、それ以外の場合はプレーンテキストとして表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-f2rjl5x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123957-f2rjl5x",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用可能な変数"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-7h2i427",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260617123957-7h2i427",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "変数"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "意味"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".values"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列全体から解析された数値配列"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".strings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列内の各値のテキスト形式の配列"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".raw"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列内の生の値の配列"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".count"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "値の総数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sum"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数値の合計"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".avg"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数値の平均"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".min"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最小値"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".max"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最大値"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".median"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "中央値"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-2ke0gnj",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260617123957-2ke0gnj",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260617123957-cl8rwey",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260617123957-cl8rwey",
+						"updated": "20260617123957"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "​"
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".values"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ の要素数は列タイプによって異なります：数値やテキストなどの単一値列は各行につき 1 つの値としてカウントされ、複数選択やアセットなどの複数値列は各オプションを個別にカウントします（ネイティブの「値をカウント」と同じ基準です）。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-djnp3a6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123957-djnp3a6",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "構文"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-gfyrrt0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123957-gfyrrt0",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレート計算は「テンプレートスニペット」と同じ Go テンプレート構文を使用し、区切り文字は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、関数は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "http://masterminds.github.io/sprig/",
+					"TextMarkTextContent": "sprig"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 仕様に従います。詳細は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-6x9ivi7",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "テンプレートスニペット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-3v235ow",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123957-3v235ow",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例"
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-qoe0bvo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123957-qoe0bvo",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以下はすべて、組み込みの計算方法では直接実現できないシナリオです："
+				}
+			]
+		},
+		{
+			"ID": "20260617123957-otmfbep",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260617123957-otmfbep",
+				"updated": "20260617123957"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "シナリオ"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "テンプレート"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "100 より大きい値の数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .values (gt . 100))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "0 より大きい値の割合"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (gt . 0))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "0 に等しい値の割合"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (eq . 0))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "平均より大きい値の数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .values (gt . .avg))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不合格率（60 未満の割合）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (lt . 60))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "「タスク」で始まる行数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .strings (hasPrefix . \"タスク\"))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "キーワードを含む行数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .strings (contains . \"緊急\"))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重複なしオプション数（複数選択列）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (uniq .strings)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

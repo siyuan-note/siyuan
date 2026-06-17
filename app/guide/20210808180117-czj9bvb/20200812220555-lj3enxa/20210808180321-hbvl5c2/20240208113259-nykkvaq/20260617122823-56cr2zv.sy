@@ -1,0 +1,1156 @@
+{
+	"ID": "20260617122823-56cr2zv",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260617122823-56cr2zv",
+		"title": "表格计算",
+		"type": "doc",
+		"updated": "20260617123133"
+	},
+	"Children": [
+		{
+			"ID": "20260617123133-xuj0t5o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123133-xuj0t5o",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-8gpbx0q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123133-8gpbx0q",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据库表格底部支持对每列进行汇总计算。点击列底部的计算栏即可选择计算方式。除行号列外，所有字段类型均支持表格计算。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-lnn22xa",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123133-lnn22xa",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "预置计算方式"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-v9amx9f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123133-v9amx9f",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "根据字段类型自动显示对应的计算方式："
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-duq0mgw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260617123133-duq0mgw",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"ID": "20260617123133-szen60v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123133-szen60v",
+						"updated": "20260617123133"
+					},
+					"Children": [
+						{
+							"ID": "20260617123133-uutupj9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123133-uutupj9",
+								"updated": "20260617123133"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "计数"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：总数、非空、去重"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123133-115yi0i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123133-115yi0i",
+						"updated": "20260617123133"
+					},
+					"Children": [
+						{
+							"ID": "20260617123133-q4rdnyk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123133-q4rdnyk",
+								"updated": "20260617123133"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "百分比"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：空值占比、非空占比"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123133-v1c7cj8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123133-v1c7cj8",
+						"updated": "20260617123133"
+					},
+					"Children": [
+						{
+							"ID": "20260617123133-432lyyn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123133-432lyyn",
+								"updated": "20260617123133"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "数值统计"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：求和、平均值、中位数、最小值、最大值、极差"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123133-h0o8ddb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123133-h0o8ddb",
+						"updated": "20260617123133"
+					},
+					"Children": [
+						{
+							"ID": "20260617123133-hbji2v9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123133-hbji2v9",
+								"updated": "20260617123133"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "复选框"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：勾选数、未勾选数及对应占比"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260617123133-zu4315m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260617123133-zu4315m",
+						"updated": "20260617123133"
+					},
+					"Children": [
+						{
+							"ID": "20260617123133-c8vyqdf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260617123133-c8vyqdf",
+								"updated": "20260617123133"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "日期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：最早值、最晚值"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-jgu4uov",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260617123133-jgu4uov",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260617123133-kisih1g",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260617123133-kisih1g",
+						"updated": "20260617123133"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "汇总字段的行级结果若为数字（例如行级用了计数），数值统计类计算方式也会自动可用。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-yfcvt0u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260617123133-yfcvt0u",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板计算"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-utx342v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123133-utx342v",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "当预置的计算方式无法满足需求时，可选择「模板」，通过编写公式对整列数据进行自定义统计。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-2m0y6ng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123133-2m0y6ng",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "点击计算栏选择「模板」，在弹出的对话框中输入公式。结果能解析为数字时按列的数字格式显示，否则原样显示为文本。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-jv887ic",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123133-jv887ic",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可用变量"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-p695ffr",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260617123133-p695ffr",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "变量"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "含义"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".values"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "整列解析出的数字数组"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".strings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "整列各值的文本形式数组"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".raw"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "整列原始值数组"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".count"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "值的总数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".sum"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数字总和"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".avg"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数字平均值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".min"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最小值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".max"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最大值"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".median"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "中位数"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-cr7ylh4",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20260617123133-cr7ylh4",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20260617123133-qqnng8v",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20260617123133-qqnng8v",
+						"updated": "20260617123133"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "​"
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "code",
+							"TextMarkTextContent": ".values"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ 的元素个数取决于列类型：数字、文本等单值列每行算一个值；多选、资源等多值列每个选项单独算一个值（与原生「计算值数量」口径一致）。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-x9hwxlb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123133-x9hwxlb",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "语法"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-uf5x4ef",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123133-uf5x4ef",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板计算采用与「模板片段」一致的 Go 模板语法，分隔符为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，函数遵循 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "http://masterminds.github.io/sprig/",
+					"TextMarkTextContent": "sprig"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 规范，详见 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201204181006-7bkppue",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "模板片段"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 章节。"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-14b9ta3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260617123133-14b9ta3",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "示例"
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-fw07vb9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260617123133-fw07vb9",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以下均为预置计算方式无法直接实现的场景："
+				}
+			]
+		},
+		{
+			"ID": "20260617123133-jgyu512",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260617123133-jgyu512",
+				"updated": "20260617123133"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "场景"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "模板"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "大于 100 的个数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .values (gt . 100))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "大于 0 的占比"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (gt . 0))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "等于 0 的占比"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (eq . 0))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "高于平均值的个数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .values (gt . .avg))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不及格率（小于 60 占比）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{div (len (filter .values (lt . 60))) (len .values)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "以「待办」开头的行数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .strings (hasPrefix . \"待办\"))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "包含某关键词的行数"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (filter .strings (contains . \"紧急\"))}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不重复选项数（多选列）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{len (uniq .strings)}}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "Шаблон",
+  "calcResultTemplate": "Шаблон",
+  "rollupTemplateTip": "Приклад: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "Цей сеанс зайнято в іншому екземплярі",
   "agentMirrorStreaming": "Інший екземпляр веде чат...",
   "rollbackCompleted": "Відкат завершено",

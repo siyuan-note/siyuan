@@ -1,4 +1,7 @@
 {
+  "calcOperatorTemplate": "Modelo",
+  "calcResultTemplate": "Modelo",
+  "rollupTemplateTip": "Exemplo: .action{div (len (filter .values (gt . 0))) (len .values)}",
   "agentChatBusy": "Esta sessão está ocupada em outra instância",
   "agentMirrorStreaming": "Outra instância está conversando...",
   "rollbackCompleted": "Restauração concluída",

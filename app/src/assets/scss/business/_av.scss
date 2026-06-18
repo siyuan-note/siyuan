@@ -921,6 +921,14 @@
         opacity: 1;
       }
 
+      .b3-menu__action[data-type="removeFilter"]:hover {
+        color: var(--b3-theme-error);
+      }
+
+      .av__filter-group-header:hover .av__group-actions {
+        opacity: 1;
+      }
+
       &__item[data-type="nobg"] {
         cursor: auto;
       }

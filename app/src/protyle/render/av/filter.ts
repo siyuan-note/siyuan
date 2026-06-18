@@ -25,7 +25,10 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
 // getEditableFilters 返回可直接增删改的叶子/分组数组。
 // spec 5 后顶层为单个根组，编辑对象是其 filters；兼容旧扁平数据时直接返回顶层数组。
 export const getEditableFilters = (data: IAV): IAVFilter[] => {
-    if (data.view.filters.length === 1 && data.view.filters[0].filters) {
+    if (data.view.filters.length === 1 && (data.view.filters[0].filters || data.view.filters[0].combination)) {
+        if (!data.view.filters[0].filters) {
+            data.view.filters[0].filters = [];
+        }
         return data.view.filters[0].filters;
     }
     return data.view.filters;
@@ -264,8 +267,9 @@ export const getFiltersHTML = (data: IAV) => {
         return `<div class="b3-menu__item av__filter-row" data-path="${path}" data-column="${node.column}" style="align-items:center;">${genAndOrSelect(groupPath, groupCombination)}<div class="fn__flex-1" style="display:flex;flex-wrap:nowrap;align-items:center;min-height:28px;gap:4px;">${iconHTML}${fieldSelect}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg></div>`;
     };
 
-    const root = (data.view.filters.length === 1 && data.view.filters[0].filters) ? data.view.filters[0] : {filters: data.view.filters} as IAVFilter;
-    const rootCombination = (data.view.filters.length === 1 && data.view.filters[0].filters)
+    const isRootGroup = data.view.filters.length === 1 && (data.view.filters[0].filters || data.view.filters[0].combination);
+    const root = isRootGroup ? data.view.filters[0] : {filters: data.view.filters} as IAVFilter;
+    const rootCombination = isRootGroup
         ? (data.view.filters[0].combination === "or" ? "or" : "and")
         : "and";
     html = genNodeHTML(root, "", 0, "", rootCombination);

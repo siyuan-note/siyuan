@@ -251,7 +251,7 @@ export const openMenuPanel = (options: {
             const path = select.dataset.path;
             const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
             const node = "" === path
-                ? (data.view.filters[0] && data.view.filters[0].filters ? data.view.filters[0] : undefined)
+                ? (data.view.filters[0] && (data.view.filters[0].filters || data.view.filters[0].combination) ? data.view.filters[0] : undefined)
                 : getFilterByPath(getEditableFilters(data), path);
             if (node) {
                 node.combination = (select as HTMLSelectElement).value === "or" ? "or" : "and";

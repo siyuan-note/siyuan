@@ -110,10 +110,14 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 
 ## 5. Project-specific rules
 
-1. **i18n:** New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`)
-2. **Domains:** `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
-3. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
-4. **Frontend verification:** Do not use `npx webpack` to verify changes
+1. **i18n:**
+   - New keys go at the **top** of each `langs/*.json` object; add to every language file (reference `en.json`)
+   - Each language must be properly translated — do NOT copy the same text across all language files
+   - Domains: `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
+   - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
+2. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
+3. **Frontend verification:** Do not use `npx webpack` to verify changes
+4. **Lint:** After frontend changes, run `cd app && pnpm run lint` to check code style
 
 ---
 
@@ -122,6 +126,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 1. **Comments:** Wrap code comments at 120 characters
 2. **Comments:** Describe what the code does, not what it replaced — don't reference the old implementation in comments
 3. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
+4. **TypeScript/JavaScript:** Semicolons required, use double quotes
 
 ---
 

@@ -537,7 +537,7 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
 <span class="fn__ellipsis" style="min-width:0;">${escapeHtml(option.name)}</span>
 </span>`;
     }).join("");
-    const dropdown = `<div data-type="selectDropdown" data-path="${path}" data-single="${isSingle ? "true" : "false"}" style="display:none;position:fixed;z-index:9999;width:240px;max-height:240px;overflow-x:hidden;overflow-y:auto;padding:4px;box-shadow:var(--b3-dialog-shadow);border-radius:var(--b3-border-radius);background-color:var(--b3-menu-background);">
+    const dropdown = `<div data-type="selectDropdown" data-path="${path}" data-single="${isSingle ? "true" : "false"}" style="display:none;position:fixed;z-index:9999;width:fit-content;min-width:120px;max-height:240px;overflow-x:hidden;overflow-y:auto;padding:4px;box-shadow:var(--b3-dialog-shadow);border-radius:var(--b3-border-radius);background-color:var(--b3-menu-background);">
 ${searchInput}<div data-type="selectOptions" data-path="${path}" style="display:flex;flex-direction:column;width:100%;overflow:hidden;">${chips}</div>
 </div>`;
     return {trigger, dropdown};
@@ -653,7 +653,7 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
     transaction(protyle, [{
         action: "setAttrViewFilters",
         avID,
-        data: data.view.filters,
+        data: JSON.parse(JSON.stringify(data.view.filters)),
         blockID
     }], [{
         action: "setAttrViewFilters",
@@ -807,7 +807,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                     // 展开时用 fixed 定位到 trigger 下方（避免被 overflow:auto 裁剪）
                     const rect = trigger.getBoundingClientRect();
                     dropdown.style.left = rect.left + "px";
-                    dropdown.style.width = Math.max(rect.width, 200) + "px";
+                    dropdown.style.width = Math.max(rect.width, 120) + "px";
                     // 先临时显示以测量真实高度，再决定向上还是向下展开
                     dropdown.style.visibility = "hidden";
                     dropdown.style.display = "block";
@@ -825,7 +825,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                     dropdown.style.display = "none";
                 }
             }
-            event.stopPropagation();
+            event.stopImmediatePropagation();
             return;
         }
         // 再处理 selectOption chip 点击（切换选中态）
@@ -871,6 +871,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             triggerEl.innerHTML = contentHTML;
         }
         saveRow(row, path, false);
+        event.stopImmediatePropagation();
     });
 
     // 点击面板空白处收起所有 select 下拉

@@ -260,7 +260,7 @@ export const openMenuPanel = (options: {
             transaction(options.protyle, [{
                 action: "setAttrViewFilters",
                 avID,
-                data: data.view.filters,
+                data: JSON.parse(JSON.stringify(data.view.filters)),
                 blockID
             }], [{
                 action: "setAttrViewFilters",
@@ -476,7 +476,7 @@ export const openMenuPanel = (options: {
                     }], [{
                         action: "setAttrViewFilters",
                         avID,
-                        data: data.view.filters,
+                        data: JSON.parse(JSON.stringify(data.view.filters)),
                         blockID
                     }]);
                     data.view.filters = [];
@@ -581,7 +581,7 @@ export const openMenuPanel = (options: {
                             transaction(options.protyle, [{
                                 action: "setAttrViewFilters",
                                 avID,
-                                data: data.view.filters,
+                                data: JSON.parse(JSON.stringify(data.view.filters)),
                                 blockID
                             }], [{
                                 action: "setAttrViewFilters",
@@ -650,7 +650,7 @@ export const openMenuPanel = (options: {
                                 transaction(options.protyle, [{
                                     action: "setAttrViewFilters",
                                     avID,
-                                    data: data.view.filters,
+                                    data: JSON.parse(JSON.stringify(data.view.filters)),
                                     blockID
                                 }], [{
                                     action: "setAttrViewFilters",
@@ -672,7 +672,7 @@ export const openMenuPanel = (options: {
                             transaction(options.protyle, [{
                                 action: "setAttrViewFilters",
                                 avID,
-                                data: data.view.filters,
+                                data: JSON.parse(JSON.stringify(data.view.filters)),
                                 blockID
                             }], [{
                                 action: "setAttrViewFilters",
@@ -688,7 +688,7 @@ export const openMenuPanel = (options: {
                             transaction(options.protyle, [{
                                 action: "setAttrViewFilters",
                                 avID,
-                                data: data.view.filters,
+                                data: JSON.parse(JSON.stringify(data.view.filters)),
                                 blockID
                             }], [{
                                 action: "setAttrViewFilters",
@@ -704,7 +704,7 @@ export const openMenuPanel = (options: {
                             transaction(options.protyle, [{
                                 action: "setAttrViewFilters",
                                 avID,
-                                data: data.view.filters,
+                                data: JSON.parse(JSON.stringify(data.view.filters)),
                                 blockID
                             }], [{
                                 action: "setAttrViewFilters",
@@ -977,7 +977,7 @@ export const openMenuPanel = (options: {
                                 transaction(options.protyle, [{
                                     action: "setAttrViewFilters",
                                     avID: data.id,
-                                    data: data.view.filters,
+                                    data: JSON.parse(JSON.stringify(data.view.filters)),
                                     blockID
                                 }], [{
                                     action: "setAttrViewFilters",

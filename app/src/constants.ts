@@ -82,17 +82,17 @@ export abstract class Constants {
     public static readonly SIZE_ZOOM = [
         {
             zoom: 0.67,
-            position: {x: 0, y: 2}
+            position: {x: 5, y: 2}
         },
         {
             zoom: 0.75,
-            position: {x: 1, y: 4}
+            position: {x: 5, y: 4}
         }, {
             zoom: 0.8,
-            position: {x: 2, y: 4}
+            position: {x: 6, y: 4}
         }, {
             zoom: 0.9,
-            position: {x: 5, y: 6}
+            position: {x: 7, y: 6}
         }, {
             zoom: 1,
             position: {x: 8, y: 8}

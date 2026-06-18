@@ -97,7 +97,7 @@ export const objEquals = (a: any, b: any): boolean => {
     return keys.every(k => objEquals(a[k], b[k]));
 };
 
-export const duplicateNameAddOne = (name:string) => {
+export const duplicateNameAddOne = (name: string) => {
     if (!name) {
         return "";
     }
@@ -119,12 +119,12 @@ export const setToolbarLeftMac = (zoom: number) => {
         return;
     }
     // 全屏下红绿灯隐藏，清除内联补偿让 body--fullscreen 的 5px 生效
-    if (zoom >= 1 || document.body.classList.contains("body--fullscreen")) {
+    if (zoom >= .9 || document.body.classList.contains("body--fullscreen")) {
         document.body.style.removeProperty("--b3-toolbar-left-mac");
         return;
     }
     // 从 :root 读取主题基础值（默认 74px，兼容第三方主题），除以 zoom 让缩放后恢复到基础原生像素
     const base = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--b3-toolbar-left-mac")) || 74;
-    document.body.style.setProperty("--b3-toolbar-left-mac", (base / zoom) + "px");
+    document.body.style.setProperty("--b3-toolbar-left-mac", (base / zoom * .9) + "px");
 };
 /// #endif

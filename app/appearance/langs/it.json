@@ -1819,7 +1819,7 @@
     "212": "Ci sono alcuni difetti nella versione attuale della sincronizzazione dei dati cloud, si prega di aggiornare all'ultima versione. Ci scusiamo per l'inconveniente",
     "213": "Verifica cloud fallita, si prega di provare ad aggiornare all'ultima versione e accedere nuovamente prima di sincronizzare",
     "214": "Questa funzione richiede l'accesso all'account e l'acquisto di <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[funzionalità]</a> o <a target='_blank' href='${accountServer}/subscribe/siyuan'>[abbonamento annuale]</a> per essere utilizzata",
-    "215": "",
+    "215": "Impossibile aprire la vista del database creata con una versione più recente. Aggiornare all'ultima versione e riprovare",
     "216": "Ripristino dell'indice dei dati di contenuto degli asset, attendere...",
     "217": "[%d/%d] Creato indice dei dati di contenuto degli asset",
     "218": "Sono stati rilevati troppi snapshot del repository dati, il che rallenta l'avvio del programma e la sincronizzazione dei dati. Si prega di considerare l'esecuzione di [Impostazioni - Informazioni - Purgare repository dati]",

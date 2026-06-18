@@ -1819,7 +1819,7 @@
     "212": "Há alguns defeitos na versão atual da sincronização de dados na nuvem, por favor atualize para a versão mais recente. Pedimos desculpas pelo inconveniente",
     "213": "Falha na verificação na nuvem, por favor tente atualizar para a versão mais recente e faça login novamente antes de sincronizar",
     "214": "Este recurso requer login na conta e compra de <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[Recursos PRO]</a> ou <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Assinatura Anual]</a> para usar",
-    "215": "",
+    "215": "Não é possível abrir a visualização do banco de dados criada por uma versão mais recente. Atualize para a versão mais recente e tente novamente",
     "216": "Reconstruindo índice de dados de conteúdo de ativos, por favor aguarde...",
     "217": "[%d/%d] Criado índice de dados de conteúdo de ativos",
     "218": "Muitos snapshots do repositório de dados foram detectados, o que retarda a inicialização do programa e a sincronização de dados. Por favor, considere executar [Configurações - Sobre - Purga do repositório de dados]",

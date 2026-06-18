@@ -583,6 +583,9 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 			return
 		}
 	}
+	if nil == err {
+		err = CheckSpec(ret)
+	}
 	return
 }
 
@@ -894,6 +897,7 @@ var (
 	ErrViewNotFound          = errors.New("view not found")
 	ErrKeyNotFound           = errors.New("key not found")
 	ErrWrongLayoutType       = errors.New("wrong layout type")
+	ErrSpecTooNew            = errors.New("attribute view spec is too new")
 )
 
 const (

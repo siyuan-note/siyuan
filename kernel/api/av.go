@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -944,7 +945,11 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows)
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		if errors.Is(err, av.ErrSpecTooNew) {
+			ret.Msg = model.Conf.Language(215)
+		} else {
+			ret.Msg = err.Error()
+		}
 		return
 	}
 

@@ -38,6 +38,15 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec5(av)
 }
 
+func CheckSpec(av *AttributeView) (err error) {
+	if CurrentSpec < av.Spec {
+		logging.LogErrorf("attribute view spec [%d] is newer than current [%d]", av.Spec, CurrentSpec)
+		err = ErrSpecTooNew
+		return
+	}
+	return
+}
+
 // upgradeSpec5 将旧的扁平过滤规则数组包装为单个隐式 AND 根组，支持递归嵌套分组。
 // 原有叶子条件一条不丢，整体作为根组的子节点保留。
 func upgradeSpec5(av *AttributeView) {

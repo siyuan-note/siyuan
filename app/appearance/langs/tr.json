@@ -1819,7 +1819,7 @@
     "212": "Mevcut sürümde bulut senkronizasyon hataları var, lütfen en son sürüme güncelle. Verdiğimiz rahatsızlık için özür dileriz",
     "213": "Bulut doğrulaması başarısız, lütfen en son sürüme güncelle ve tekrar giriş yaparak senkron dene",
     "214": "Bu özelliği kullanmak için hesabına giriş yapmalı ve <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[PRO Özellikleri]</a> veya <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Yıllık Abonelik]</a> satın almalısın",
-    "215": "",
+    "215": "Daha yeni bir sürümde oluşturulmuş veritabanı görünümü açılamıyor. En son sürüme yükseltin ve tekrar deneyin",
     "216": "Varlık içerik veri indeksi yeniden oluşturuluyor, lütfen bekle...",
     "217": "[%d/%d] Varlık içerik veri indeksi oluşturuldu",
     "218": "Çok fazla veri deposu anlık görüntüsü tespit edildi, bu durum program açılışını ve senkronizasyonu yavaşlatıyor. Lütfen [Ayarlar - Hakkında - Veri deposunu temizle] işlemini yapmayı düşün",

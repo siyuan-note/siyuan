@@ -21,16 +21,24 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
     }
-    if (!range || !protyle.wysiwyg.element.contains(range.startContainer)) {
-        range = protyle.toolbar.range;
-    }
-    if (range && protyle.wysiwyg.element.contains(range.startContainer)) {
-        const blockElement = hasClosestBlock(range.startContainer);
-        if (blockElement) {
-            const position = getSelectionOffset(blockElement, undefined, range);
-            attr.focusId = blockElement.getAttribute("data-node-id");
-            attr.focusStart = position.start;
-            attr.focusEnd = position.end;
+    // 光标位于文档标题时用文档 id 作为焦点标识 https://github.com/siyuan-note/siyuan/issues/17456
+    if (range && protyle.title?.editElement?.contains(range.startContainer)) {
+        const position = getSelectionOffset(protyle.title.editElement, undefined, range);
+        attr.focusId = protyle.block.rootID;
+        attr.focusStart = position.start;
+        attr.focusEnd = position.end;
+    } else {
+        if (!range || !protyle.wysiwyg.element.contains(range.startContainer)) {
+            range = protyle.toolbar.range;
+        }
+        if (range && protyle.wysiwyg.element.contains(range.startContainer)) {
+            const blockElement = hasClosestBlock(range.startContainer);
+            if (blockElement) {
+                const position = getSelectionOffset(blockElement, undefined, range);
+                attr.focusId = blockElement.getAttribute("data-node-id");
+                attr.focusStart = position.start;
+                attr.focusEnd = position.end;
+            }
         }
     }
 

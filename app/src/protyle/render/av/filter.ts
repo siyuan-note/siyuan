@@ -534,9 +534,10 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
             const isNotEmpty = !!dateStr1;
             let content2 = 0;
             let isNotEmpty2 = false;
+            let dateStr2 = "";
             if (operator === "Is between") {
                 const absDate2 = rowElement.querySelector('[data-type="absDate2"]') as HTMLInputElement;
-                const dateStr2 = absDate2?.value || "";
+                dateStr2 = absDate2?.value || "";
                 content2 = dateStr2 ? new Date(dateStr2 + " 00:00").getTime() : 0;
                 isNotEmpty2 = !!dateStr2;
             }

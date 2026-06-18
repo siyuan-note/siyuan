@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -407,6 +408,91 @@ var blockMoveCmd = &cobra.Command{
 	},
 }
 
+var blockBatchGetCmd = &cobra.Command{
+	Use:   "batch-get --ids id1,id2,...",
+	Short: "Batch get block info",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		idsStr, _ := cmd.Flags().GetString("ids")
+		if idsStr == "" {
+			return fmt.Errorf("--ids is required")
+		}
+		ids := splitIDs(idsStr)
+		if len(ids) == 0 {
+			return fmt.Errorf("no valid IDs provided")
+		}
+		infos := model.GetDocsInfo(ids, false, false)
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(infos, "", "  ")
+			fmt.Println(string(data))
+		default:
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+			fmt.Fprintln(w, "ID\tNAME\tROOTID\tREFCOUNT")
+			for _, info := range infos {
+				fmt.Fprintf(w, "%s\t%s\t%s\t%d\n", info.ID, info.Name, info.RootID, info.RefCount)
+			}
+			for _, id := range ids {
+				found := false
+				for _, info := range infos {
+					if info.ID == id {
+						found = true
+						break
+					}
+				}
+				if !found {
+					fmt.Fprintf(w, "%s\tnot found\t\t\n", id)
+				}
+			}
+			w.Flush()
+		}
+		return nil
+	},
+}
+
+var blockBatchKramdownCmd = &cobra.Command{
+	Use:   "batch-kramdown --ids id1,id2,...",
+	Short: "Batch get block kramdown",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		idsStr, _ := cmd.Flags().GetString("ids")
+		if idsStr == "" {
+			return fmt.Errorf("--ids is required")
+		}
+		ids := splitIDs(idsStr)
+		if len(ids) == 0 {
+			return fmt.Errorf("no valid IDs provided")
+		}
+		kramdowns := model.GetBlockKramdowns(ids, "md")
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(kramdowns, "", "  ")
+			fmt.Println(string(data))
+		default:
+			var sb strings.Builder
+			for _, id := range ids {
+				if kd, ok := kramdowns[id]; ok {
+					sb.WriteString(fmt.Sprintf("--- %s ---\n%s\n\n", id, kd))
+				} else {
+					sb.WriteString(fmt.Sprintf("--- %s ---\n(not found)\n\n", id))
+				}
+			}
+			fmt.Print(sb.String())
+		}
+		return nil
+	},
+}
+
+func splitIDs(s string) []string {
+	parts := strings.Split(s, ",")
+	var ids []string
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			ids = append(ids, p)
+		}
+	}
+	return ids
+}
+
 func resolveData(cmd *cobra.Command) (string, error) {
 	data, _ := cmd.Flags().GetString("data")
 	if data != "" {
@@ -478,6 +564,9 @@ func init() {
 	blockMoveCmd.Flags().String("parent", "", "target parent block ID")
 	blockMoveCmd.Flags().String("previous", "", "target previous sibling block ID")
 
+	blockBatchGetCmd.Flags().String("ids", "", "comma-separated block IDs")
+	blockBatchKramdownCmd.Flags().String("ids", "", "comma-separated block IDs")
+
 	rootCmd.AddCommand(blockCmd)
 	blockCmd.AddCommand(blockGetCmd)
 	blockCmd.AddCommand(blockChildrenCmd)
@@ -491,4 +580,6 @@ func init() {
 	blockCmd.AddCommand(blockUpdateCmd)
 	blockCmd.AddCommand(blockDeleteCmd)
 	blockCmd.AddCommand(blockMoveCmd)
+	blockCmd.AddCommand(blockBatchGetCmd)
+	blockCmd.AddCommand(blockBatchKramdownCmd)
 }

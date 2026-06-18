@@ -296,6 +296,37 @@ func resolvePath(boxID, userPath, hpath string) string {
 	return "/"
 }
 
+var documentSearchCmd = &cobra.Command{
+	Use:   "search <keyword>",
+	Short: "Search documents by keyword",
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		keyword := args[0]
+		if keyword == "" {
+			return fmt.Errorf("keyword is required")
+		}
+		docs := model.SearchDocs(keyword, false, nil)
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(docs, "", "  ")
+			fmt.Println(string(data))
+		default:
+			if len(docs) == 0 {
+				fmt.Println("No documents found.")
+				return nil
+			}
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+			fmt.Fprintln(w, "NAME\tID\tHPATH")
+			for _, d := range docs {
+				fmt.Fprintf(w, "%s\t%s\t%s\n", d["name"], d["id"], d["hPath"])
+			}
+			w.Flush()
+			fmt.Printf("\n%d document(s)\n", len(docs))
+		}
+		return nil
+	},
+}
+
 func printDocumentTable(files []*model.File) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tPATH\tSIZE\tCOUNT\tMTIME")
@@ -337,6 +368,7 @@ func init() {
 	documentCmd.AddCommand(documentMoveCmd)
 	documentCmd.AddCommand(documentDuplicateCmd)
 	documentCmd.AddCommand(documentInfoCmd)
+	documentCmd.AddCommand(documentSearchCmd)
 }
 
 

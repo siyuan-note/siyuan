@@ -973,8 +973,8 @@
       .b3-menu__item[data-type="addFilterCondition"]:hover,
       .av__filter-group-actions .block__icon[data-type="addFilterCondition"]:hover,
       .av__filter-group-actions .block__icon[data-type="addFilter"]:hover {
-        background-color: transparent;
-        color: var(--b3-theme-on-background);
+        background-color: transparent !important;
+        color: var(--b3-theme-on-surface) !important;
       }
     }
   }

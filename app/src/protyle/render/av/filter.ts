@@ -287,10 +287,10 @@ export const getFiltersHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 ${html}
-<button class="b3-menu__item" data-type="addFilterCondition" data-path="" data-depth="0" style="display:inline-flex;align-items:center;gap:2px;">
-    <svg style="width:10px;height:10px;"><use xlink:href="#iconAdd"></use></svg>
-    <span>${window.siyuan.languages.addFilterCondition}</span>
-    <svg style="width:10px;height:10px;flex-shrink:0;"><use xlink:href="#iconDown"></use></svg>
+<button class="b3-menu__item" data-type="addFilterCondition" data-path="" data-depth="0">
+    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.addFilterCondition}</span>
+    <svg class="b3-menu__icon" style="width:10px;height:10px;"><use xlink:href="#iconDown"></use></svg>
 </button>
 <button class="b3-menu__item b3-menu__item--warning${leafCount > 0 ? "" : " fn__none"}" data-type="removeFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>

@@ -213,10 +213,10 @@ export const getFiltersHTML = (data: IAV) => {
         `<select class="b3-select" data-type="toggleCombination" data-path="${groupPath}" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterCombinationAnd}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterCombinationOr}</option></select>`;
 
     const genWhenLabel = () =>
-        `<span style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;padding:0 20px 0 6px;display:inline-flex;align-items:center;color:var(--b3-theme-on-surface);box-sizing:border-box;">${window.siyuan.languages.filterWhen}</span>`;
+        `<span style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;padding:0 20px 0 6px;display:inline-flex;align-items:center;color:var(--b3-theme-on-surface);box-sizing:border-box;border:1px solid transparent;">${window.siyuan.languages.filterWhen}</span>`;
 
     const genAndOrLabel = (combination: string) =>
-        `<span style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;padding:0 20px 0 6px;display:inline-flex;align-items:center;color:var(--b3-theme-on-surface);box-sizing:border-box;">${combination === "or" ? window.siyuan.languages.filterCombinationOr : window.siyuan.languages.filterCombinationAnd}</span>`;
+        `<span style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;padding:0 20px 0 6px;display:inline-flex;align-items:center;color:var(--b3-theme-on-surface);box-sizing:border-box;border:1px solid transparent;">${combination === "or" ? window.siyuan.languages.filterCombinationOr : window.siyuan.languages.filterCombinationAnd}</span>`;
 
     const genNodeHTML = (node: IAVFilter, path: string, depth: number, groupPath: string, groupCombination: string, index: number = 0): string => {
         if (!node) {

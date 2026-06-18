@@ -25,8 +25,7 @@ import {
     getFiltersHTML,
     hasFilterForColumn,
     removeFilterByPath,
-    removeFiltersByColumn,
-    resetFoldedFilterPaths
+    removeFiltersByColumn
 } from "./filter";
 import {genCellValue, updateCellsValue} from "./cell";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
@@ -124,7 +123,6 @@ export const openMenuPanel = (options: {
         } else if (options.type === "switcher") {
             html = getSwitcherHTML(data.views, data.viewID);
         } else if (options.type === "filters") {
-            resetFoldedFilterPaths();
             html = getFiltersHTML(data);
         } else if (options.type === "select") {
             html = getSelectHTML(fields, options.cellElements, true, options.blockElement);
@@ -502,69 +500,6 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "addFilterGroup") {
-                    const path = target.closest("[data-path]")?.getAttribute("data-path") || "";
-                    // 记录目标分组在添加前的子节点数，用于事务后计算新分组的 path 并滚动定位
-                    let targetFilters: IAVFilter[];
-                    if ("" === path) {
-                        targetFilters = getEditableFilters(data);
-                    } else {
-                        const node = getFilterByPath(getEditableFilters(data), path);
-                        targetFilters = node && node.filters ? node.filters : getEditableFilters(data);
-                    }
-                    const newGroupIndex = targetFilters.length;
-                    const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                    addFilterGroup(data, path);
-                    transaction(options.protyle, [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: data.view.filters,
-                        blockID
-                    }], [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: oldFilters,
-                        blockID
-                    }]);
-                    menuElement.innerHTML = getFiltersHTML(data);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                    // 滚动到新分组，引导用户继续往里添加条件
-                    const newGroupPath = path ? `${path},${newGroupIndex}` : `${newGroupIndex}`;
-                    const newGroupRow = menuElement.querySelector(`.av__filter-group-item[data-path="${newGroupPath}"]`) as HTMLElement;
-                    newGroupRow?.scrollIntoView({behavior: "smooth", block: "nearest"});
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "removeFilter") {
-                    window.siyuan.menus.menu.remove();
-                    const path = target.getAttribute("data-path") || target.closest("[data-path]")?.getAttribute("data-path") || "";
-                    const node = getFilterByPath(getEditableFilters(data), path);
-                    // 删除非空分组（含子条件）需二次确认，避免误删整组；单条件直接删
-                    const doRemove = () => {
-                        const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                        removeFilterByPath(getEditableFilters(data), path);
-                        transaction(options.protyle, [{
-                            action: "setAttrViewFilters",
-                            avID,
-                            data: data.view.filters,
-                            blockID
-                        }], [{
-                            action: "setAttrViewFilters",
-                            avID,
-                            data: oldFilters,
-                            blockID
-                        }]);
-                        menuElement.innerHTML = getFiltersHTML(data);
-                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                    };
-                    if (node && node.filters && node.filters.length > 0) {
-                        confirmDialog(window.siyuan.languages.removeFilters, window.siyuan.languages.confirmDeleteFilterGroupTip, doRemove);
-                    } else {
-                        doRemove();
-                    }
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
                 } else if (type === "addFilterCondition") {
                     const path = target.dataset.path || target.closest("[data-path]")?.getAttribute("data-path") || "";
                     const depth = parseInt(target.dataset.depth || target.closest("[data-depth]")?.getAttribute("data-depth") || "0", 10);
@@ -666,7 +601,7 @@ export const openMenuPanel = (options: {
                     const isGroup = node && node.filters;
                     const popup = document.createElement("div");
                     popup.className = "b3-menu";
-                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:140px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${Math.max(0, event.clientX - 120)}px;`;
+                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${Math.max(0, event.clientX - 120)}px;`;
                     const items: {type: string; label: string; icon: string; cls?: string}[] = [
                         {type: "duplicateFilter", label: window.siyuan.languages.duplicate, icon: "iconAdd"},
                     ];

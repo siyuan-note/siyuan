@@ -924,7 +924,7 @@
       .av__filter-group-item {
         padding-left: 8px;
 
-        &:hover .b3-menu__action {
+        &:hover > .b3-menu__action {
           opacity: 1;
         }
       }
@@ -936,7 +936,6 @@
         gap: 2px;
         min-height: 28px;
         padding-right: 4px;
-        align-self: center;
       }
 
       .av__filter-group-children {

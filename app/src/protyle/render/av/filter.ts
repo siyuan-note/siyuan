@@ -10,18 +10,6 @@ import {fetchPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
 
-// 记录当前筛选面板中已折叠的分组路径。面板关闭时由 openMenuPanel 调用 resetFoldedFilterPaths 清空。
-// 渲染时据此给容器加 fn__none、箭头设为 iconRight，使重渲染后折叠状态得以保持。
-const foldedFilterPaths = new Set<string>();
-export const resetFoldedFilterPaths = () => foldedFilterPaths.clear();
-export const toggleFoldedFilterPath = (path: string) => {
-    if (foldedFilterPaths.has(path)) {
-        foldedFilterPaths.delete(path);
-    } else {
-        foldedFilterPaths.add(path);
-    }
-};
-
 export const getDefaultOperatorByType = (type: TAVCol) => {
     if (["select", "number", "date", "created", "updated"].includes(type)) {
         return "=";
@@ -233,9 +221,6 @@ export const getFiltersHTML = (data: IAV) => {
                 const childPath = path ? `${path},${index}` : `${index}`;
                 childrenHTML += genNodeHTML(child, childPath, depth + 1, path, combination);
             });
-            if (0 === node.filters.length) {
-                childrenHTML = `<div class="b3-menu__item" data-path="${path}" data-empty-group="${path}"><span class="b3-menu__labels" style="padding-left: 8px;">${window.siyuan.languages.emptyFilterGroup}</span></div>`;
-            }
 
             if (isRoot) {
                 return childrenHTML;

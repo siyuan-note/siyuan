@@ -532,3 +532,20 @@ func addBlockIALNodes(tree *parse.Tree, removeUpdated bool) {
 		block.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(block.KramdownIAL)})
 	}
 }
+
+// CreateTemplate 在 <data>/templates/ 下创建模板文件。name 不含扩展名，content 为 markdown 文本。
+// overwrite=false 且文件已存在时返回 code=1（与 DocSaveAsTemplate 一致）。
+func CreateTemplate(name, content string, overwrite bool) (code int, err error) {
+	name = util.FilterFileName(name) + ".md"
+	name = util.TruncateLenFileName(name)
+	savePath := filepath.Join(util.DataDir, "templates", name)
+	if filelock.IsExist(savePath) {
+		if !overwrite {
+			code = 1
+			return
+		}
+	}
+
+	err = filelock.WriteFile(savePath, []byte(content))
+	return
+}

@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -102,24 +103,32 @@ func defaultEmbedding() *Embedding {
 	return &Embedding{Timeout: 30}
 }
 
+func defaultAgent() *Agent {
+	return &Agent{
+		SessionTimeout:      600,
+		ConfirmTimeout:      120,
+		MaxRetries:          3,
+		Temperature:         1.0,
+		MaxCompletionTokens: 0,
+		MaxToolCallRounds:   64,
+	}
+}
+
+func defaultEditing() *Editing {
+	return &Editing{
+		MaxHistoryMessages:  7,
+		Temperature:         1.0,
+		MaxCompletionTokens: 0,
+	}
+}
+
 func NewAI() *AI {
 	ai := &AI{
 		Providers: []*Provider{},
 		MCP:       &MCP{Servers: []MCPServer{}},
 		Embedding: defaultEmbedding(),
-		Agent: &Agent{
-			SessionTimeout:      600,
-			ConfirmTimeout:      120,
-			MaxRetries:          3,
-			Temperature:         1.0,
-			MaxCompletionTokens: 0,
-			MaxToolCallRounds:   64,
-		},
-		Editing: &Editing{
-			MaxHistoryMessages:  7,
-			Temperature:         1.0,
-			MaxCompletionTokens: 0,
-		},
+		Agent:     defaultAgent(),
+		Editing:   defaultEditing(),
 	}
 
 	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
@@ -286,25 +295,64 @@ func (ai *AI) Normalize() {
 	} else if ai.MCP.Servers == nil {
 		ai.MCP.Servers = []MCPServer{}
 	}
+	if ai.Agent == nil {
+		ai.Agent = defaultAgent()
+	}
+	if ai.Editing == nil {
+		ai.Editing = defaultEditing()
+	} else {
+		if 0 > ai.Editing.MaxCompletionTokens {
+			ai.Editing.MaxCompletionTokens = 0
+		}
+		if 0 > ai.Editing.Temperature {
+			ai.Editing.Temperature = 0
+		} else if 2 < ai.Editing.Temperature {
+			ai.Editing.Temperature = 2
+		}
+		if 1 > ai.Editing.MaxHistoryMessages {
+			ai.Editing.MaxHistoryMessages = 1
+		} else if 64 < ai.Editing.MaxHistoryMessages {
+			ai.Editing.MaxHistoryMessages = 64
+		}
+	}
+	providers := make([]*Provider, 0, len(ai.Providers))
 	for _, p := range ai.Providers {
 		if p == nil {
 			continue
 		}
-		if p.Models == nil {
-			p.Models = []*Model{}
+		p.BaseURL = strings.TrimSpace(p.BaseURL)
+		if "" == p.BaseURL {
+			p.BaseURL = "https://api.openai.com/v1"
+		}
+		p.DisplayName = strings.TrimSpace(p.DisplayName)
+		p.APIKey = strings.TrimSpace(p.APIKey)
+		if 1 > p.RequestTimeout {
+			p.RequestTimeout = 30
+		} else if 600 < p.RequestTimeout {
+			p.RequestTimeout = 600
 		}
 		if !ast.IsNodeIDPattern(p.ID) {
 			p.ID = ast.NewNodeID()
 		}
+		models := make([]*Model, 0, len(p.Models))
 		for _, m := range p.Models {
 			if m == nil {
 				continue
 			}
+			m.Name = strings.TrimSpace(m.Name)
+			if "" == m.Name {
+				m.Name = "model"
+			}
+			m.DisplayName = strings.TrimSpace(m.DisplayName)
 			if !ast.IsNodeIDPattern(m.ID) {
 				m.ID = ast.NewNodeID()
 			}
+			models = append(models, m)
 		}
+		p.Models = models
+		providers = append(providers, p)
 	}
+	ai.Providers = providers
 	if ai.Embedding == nil {
 		ai.Embedding = defaultEmbedding()
 	}

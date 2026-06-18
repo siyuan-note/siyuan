@@ -591,40 +591,7 @@ func InitConf() {
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
 	}
-	if nil == Conf.AI.Agent {
-		Conf.AI.Agent = &conf.Agent{
-			SessionTimeout:      600,
-			ConfirmTimeout:      120,
-			MaxRetries:          3,
-			Temperature:         1.0,
-			MaxCompletionTokens: 0,
-			MaxToolCallRounds:   64,
-		}
-	}
-	if nil == Conf.AI.Editing {
-		Conf.AI.Editing = &conf.Editing{
-			MaxHistoryMessages:  7,
-			Temperature:         1.0,
-			MaxCompletionTokens: 0,
-		}
-	}
-	for _, p := range Conf.AI.Providers {
-		if nil == p {
-			continue
-		}
-		if 1 > p.RequestTimeout {
-			p.RequestTimeout = 30
-		}
-	}
-	if 0 > Conf.AI.Editing.MaxCompletionTokens {
-		Conf.AI.Editing.MaxCompletionTokens = 0
-	}
-	if 0 > Conf.AI.Editing.Temperature || 2 < Conf.AI.Editing.Temperature {
-		Conf.AI.Editing.Temperature = 1.0
-	}
-	if 1 > Conf.AI.Editing.MaxHistoryMessages || 64 < Conf.AI.Editing.MaxHistoryMessages {
-		Conf.AI.Editing.MaxHistoryMessages = 7
-	}
+	Conf.AI.Normalize()
 
 	for _, p := range Conf.AI.Providers {
 		if p == nil || len(p.APIKey) == 0 {
@@ -657,8 +624,6 @@ func InitConf() {
 			Conf.AI.Embedding.BaseURL,
 			Conf.AI.Embedding.Name)
 	}
-
-	Conf.AI.Normalize()
 
 	Conf.ReadOnly = util.ReadOnly
 

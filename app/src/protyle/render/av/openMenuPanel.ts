@@ -505,7 +505,7 @@ export const openMenuPanel = (options: {
                     const depth = parseInt(target.dataset.depth || target.closest("[data-depth]")?.getAttribute("data-depth") || "0", 10);
                     const popup = document.createElement("div");
                     popup.className = "b3-menu";
-                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${event.clientX}px;`;
+                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${event.clientX}px;border:1px solid var(--b3-theme-surface-lighter);box-shadow:var(--b3-dialog-shadow);`;
                     popup.innerHTML = `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="addFilter" data-path="${path}">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
@@ -601,7 +601,7 @@ export const openMenuPanel = (options: {
                     const isGroup = node && node.filters;
                     const popup = document.createElement("div");
                     popup.className = "b3-menu";
-                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${Math.max(0, event.clientX - 120)}px;`;
+                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${Math.max(0, event.clientX - 120)}px;border:1px solid var(--b3-theme-surface-lighter);box-shadow:var(--b3-dialog-shadow);`;
                     const items: {type: string; label: string; icon: string; cls?: string}[] = [
                         {type: "duplicateFilter", label: window.siyuan.languages.duplicate, icon: "iconAdd"},
                     ];

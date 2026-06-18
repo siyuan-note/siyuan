@@ -1,7 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {processSync} from "../../dialog/processSystem";
 import {
-    debugMountPanel,
     onSetaccount,
     updateAccountSwitchesVisibility,
 } from "./accountUi";
@@ -23,7 +22,6 @@ export const mountSyncTabExtras = (root: HTMLElement) => {
     syncTabElement = root;
     refreshSyncTabPanels(root);
     updateAccountSwitchesVisibility(root);
-    debugMountPanel();
 };
 
 /** 切换同步提供商等场景：刷新云空间相关区块并重置云目录列表 */

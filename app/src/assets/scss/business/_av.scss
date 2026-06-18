@@ -917,12 +917,8 @@
         opacity: 1;
       }
 
-      .b3-menu__action[data-type="moreFilter"]:hover {
-        color: var(--b3-theme-on-surface);
-      }
-
       .av__filter-group-item {
-        padding-left: 8px;
+        padding: 0 8px;
 
         &:hover > .b3-menu__action {
           opacity: 1;
@@ -933,7 +929,7 @@
         flex-shrink: 0;
         display: flex;
         align-items: center;
-        gap: 2px;
+        gap: 4px;
         min-height: 28px;
         padding-right: 4px;
       }
@@ -941,21 +937,9 @@
       .av__filter-group-children {
         flex: 1;
         min-width: 0;
-        padding: 2px 6px;
+        padding: 6px 10px;
         border-radius: var(--b3-border-radius);
         border: 1px solid var(--b3-theme-surface-lighter);
-
-        &--depth1 {
-          background-color: color-mix(in srgb, var(--b3-theme-on-background) 1.5%, transparent);
-        }
-
-        &--depth2 {
-          background-color: color-mix(in srgb, var(--b3-theme-on-background) 3%, transparent);
-        }
-
-        &--depth3 {
-          background-color: color-mix(in srgb, var(--b3-theme-on-background) 5%, transparent);
-        }
       }
 
       .av__filter-group-children .b3-menu__item {
@@ -966,7 +950,7 @@
         display: flex;
         justify-content: flex-start;
         gap: 4px;
-        padding: 2px 0;
+        padding: 6px 0 2px;
       }
 
       &__item[data-type="nobg"] {
@@ -976,6 +960,21 @@
       &__item:not([data-type="nobg"]):hover,
       &__item--current:not([data-type="nobg"]) {
         background-color: var(--b3-list-hover);
+      }
+
+      .b3-menu__item.av__filter-row {
+        margin: 2px 0;
+      }
+
+      .b3-menu__item.av__filter-row:hover {
+        background-color: transparent;
+      }
+
+      .b3-menu__item[data-type="addFilterCondition"]:hover,
+      .av__filter-group-actions .block__icon[data-type="addFilterCondition"]:hover,
+      .av__filter-group-actions .block__icon[data-type="addFilter"]:hover {
+        background-color: transparent;
+        color: var(--b3-theme-on-background);
       }
     }
   }

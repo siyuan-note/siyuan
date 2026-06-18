@@ -3546,6 +3546,11 @@ func SetAttrViewFilters(avID, blockID string, data []any) (err error) {
 		view.Filters = []*av.ViewFilter{{Combination: av.FilterCombinationAnd, Filters: view.Filters}}
 	}
 
+	// 限制筛选嵌套深度，防止异常数据创建过深的嵌套分组。
+	if err = av.ValidateFilterDepth(view.Filters); nil != err {
+		return
+	}
+
 	err = av.SaveAttributeView(attrView)
 	return
 }

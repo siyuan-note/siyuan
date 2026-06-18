@@ -898,6 +898,7 @@ var (
 	ErrKeyNotFound           = errors.New("key not found")
 	ErrWrongLayoutType       = errors.New("wrong layout type")
 	ErrSpecTooNew            = errors.New("attribute view spec is too new")
+	ErrFilterTooDeep         = errors.New("filter nesting depth exceeds the maximum allowed")
 )
 
 const (

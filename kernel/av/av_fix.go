@@ -26,6 +26,8 @@ import (
 
 const CurrentSpec = 5
 
+const MaxFilterNestingDepth = 3
+
 func UpgradeSpec(av *AttributeView) {
 	if CurrentSpec <= av.Spec {
 		return

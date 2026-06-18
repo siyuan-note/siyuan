@@ -117,7 +117,8 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
    - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
 2. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
 3. **Frontend verification:** Do not use `npx webpack` to verify changes
-4. **Lint:** After frontend changes, run `cd app && pnpm run lint` to check code style
+4. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
+5. **Lint:** After frontend changes, run `cd app && pnpm run lint` to check code style
 
 ---
 

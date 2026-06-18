@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Dodaj warunek filtru",
+  "convertToFilterGroup": "Konwertuj na grupę warunków",
   "filterCombinationAnd": "I",
   "filterCombinationOr": "Lub",
   "addFilterGroup": "Dodaj grupę warunków filtru",

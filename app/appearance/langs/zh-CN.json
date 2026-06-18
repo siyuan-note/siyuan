@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "添加筛选条件",
+  "convertToFilterGroup": "转换为条件组",
   "filterCombinationAnd": "且",
   "filterCombinationOr": "或",
   "addFilterGroup": "添加筛选条件分组",

@@ -28,7 +28,7 @@ export class Undo {
 
     // renderLocal 仅在发起窗口本地应用操作（isUndo=true），不 POST 到 kernel
     // （kernel 的 undo/redo 接口已执行事务并广播）。保留光标恢复/折叠/zoom/lastHTMLs 行为。
-    public renderLocal(protyle: IProtyle, operations: IOperation[], isRedo: boolean) {
+    public renderLocal(protyle: IProtyle, operations: IOperation[], _isRedo: boolean) {
         hideElements(["hint", "gutter"], protyle);
         protyle.wysiwyg.lastHTMLs = {};
         for (let i = operations.length - 1; i >= 0; i--) {

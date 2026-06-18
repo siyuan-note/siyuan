@@ -95,6 +95,10 @@ export const removeFilterByPath = (nodes: IAVFilter[], path: string): boolean =>
         return false;
     }
     parent.splice(index, 1);
+    if (parent.length === 0 && path.includes(",")) {
+        const groupPath = path.substring(0, path.lastIndexOf(","));
+        removeFilterByPath(nodes, groupPath);
+    }
     return true;
 };
 
@@ -214,41 +218,46 @@ export const addFilter = (options: {
 export const getFiltersHTML = (data: IAV) => {
     let html = "";
     const fields = getFieldsByData(data);
-    // 递归渲染过滤节点树。叶子沿用 genFilterItem 的 chip；分组渲染 AND/OR 切换 + 可折叠容器 + 缩进子节点。
-    const genNodeHTML = (node: IAVFilter, path: string, depth: number): string => {
+    const genAndOrSelect = (groupPath: string, combination: string) =>
+        `<select class="b3-select" data-type="toggleCombination" data-path="${groupPath}" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:0;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 10 10%22><path fill=%22%23888%22 d=%22M2 4l3 3 3-3z%22/></svg>') no-repeat right 6px center;padding-right:20px;"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterCombinationAnd}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterCombinationOr}</option></select>`;
+
+    const genNodeHTML = (node: IAVFilter, path: string, depth: number, groupPath: string, groupCombination: string): string => {
         if (!node) {
-            return ""; // 防御：数据含 undefined/nil 子节点时跳过，避免整个面板崩溃
+            return "";
         }
         if (node.filters) {
-            // 分组节点
             const isRoot = 0 === depth;
             const combination = node.combination === "or" ? "or" : "and";
             let childrenHTML = "";
             node.filters.forEach((child, index) => {
-                // 路径编码：根组子节点为 "0"/"1"；嵌套组子节点为 "2,0"/"2,1"（逗号分隔，与 getFilterByPath/getParentByPath 解析一致）
                 const childPath = path ? `${path},${index}` : `${index}`;
-                childrenHTML += genNodeHTML(child, childPath, depth + 1);
+                childrenHTML += genNodeHTML(child, childPath, depth + 1, path, combination);
             });
             if (0 === node.filters.length) {
-                // 空分组占位行：作为拖放目标（draggable+data-path），让条件可拖入空分组
-                childrenHTML = `<div class="b3-menu__item" draggable="true" data-path="${path}" data-empty-group="${path}"><span class="b3-menu__labels" style="padding-left: 8px;">${window.siyuan.languages.emptyFilterGroup}</span></div>`;
+                childrenHTML = `<div class="b3-menu__item" data-path="${path}" data-empty-group="${path}"><span class="b3-menu__labels" style="padding-left: 8px;">${window.siyuan.languages.emptyFilterGroup}</span></div>`;
             }
-            const folded = !isRoot && foldedFilterPaths.has(path);
-            // 图标 class 直接放在 svg 上，与叶子行保持一致尺寸；去掉 inline padding 让 _av.scss 默认尺寸生效
-            const foldIcon = isRoot
-                ? `<svg class="b3-menu__icon" style="margin-right:0;" data-type="" data-path="${path}"><use xlink:href="#iconFilter"></use></svg>`
-                : `<svg class="b3-menu__icon fn__grab ariaLabel" style="margin-right:0;" data-position="4west" data-type="toggleFold" data-path="${path}" aria-label="${folded ? window.siyuan.languages.expand : window.siyuan.languages.collapse}"><use xlink:href="#${folded ? "iconRight" : "iconDown"}"></use></svg>`;
-            // select 保留可点击视觉提示；高度与 b3-menu__item 行高(28px)一致，padding 对称保证文字垂直居中
-            const combinationSelect = `<select class="b3-select" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 10 10%22><path fill=%22%23888%22 d=%22M2 4l3 3 3-3z%22/></svg>') no-repeat right 6px center;padding-right:20px;" data-type="toggleCombination" data-path="${path}"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterMatchAll}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterMatchAny}</option></select>`;
-            const groupHeader = `<button class="b3-menu__item av__filter-group-header" data-type="nobg" style="align-items:center;margin:4px 0;" onmouseenter="this.querySelector('.av__group-actions').style.opacity='1'" onmouseleave="this.querySelector('.av__group-actions').style.opacity='0'">${foldIcon}${combinationSelect}<span class="fn__flex-1"></span><span class="av__group-actions" style="display:inline-flex;align-items:center;opacity:0;transition:opacity .15s;"><span class="block__icon ariaLabel" data-position="4west" data-type="addFilter" data-path="${path}" aria-label="${window.siyuan.languages.addFilter}"><svg><use xlink:href="#iconAdd"></use></svg></span><span class="fn__space"></span><span class="block__icon ariaLabel" data-position="4west" data-type="addFilterGroup" data-path="${path}" aria-label="${window.siyuan.languages.addFilterGroup}"><svg><use xlink:href="#iconlistFilterPlus"></use></svg></span>${isRoot ? "" : `<span class="fn__space"></span><svg class="b3-menu__action b3-menu__action--show ariaLabel" data-position="4west" data-type="removeFilter" data-path="${path}" aria-label="${window.siyuan.languages.removeFilters}"><use xlink:href="#iconTrashcan"></use></svg>`}</span></button>`;
-            // 子节点容器：层级缩进完全由 margin-left 表达（每层 16px），padding-left=0 避免与 item padding 叠加；
-            // border-left 对齐到父分组头 foldIcon 下方，体现从属关系
-            const containerStyle = isRoot ? "" : `margin-left: 16px;border-left: 1px solid var(--b3-theme-background-light);`;
-            const containerClass = folded ? "fn__none" : "";
-            return groupHeader + (childrenHTML ? `<div data-children="${path}" class="${containerClass}" style="${containerStyle}">${childrenHTML}</div>` : "");
+
+            if (isRoot) {
+                return childrenHTML;
+            }
+
+            const depthClass = `av__filter-group-children--depth${Math.min(depth, 3)}`;
+            const addConditionBtn = depth >= 3
+                ? `<span class="block__icon ariaLabel" data-position="4north" data-type="addFilter" data-path="${path}" aria-label="${window.siyuan.languages.addFilterCondition}" style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;padding:2px 0;"><svg style="width:10px;height:10px;"><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}</span>`
+                : `<span class="block__icon ariaLabel" data-position="4north" data-type="addFilterCondition" data-path="${path}" data-depth="${depth}" aria-label="${window.siyuan.languages.addFilterCondition}" style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;padding:2px 0;"><svg style="width:10px;height:10px;"><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}<svg style="width:10px;height:10px;flex-shrink:0;"><use xlink:href="#iconDown"></use></svg></span>`;
+
+            return `<div class="av__filter-group-item" data-path="${path}" style="display:flex;align-items:center;">
+    <span class="av__filter-group-left">
+        ${genAndOrSelect(groupPath, groupCombination)}
+    </span>
+    <div class="av__filter-group-children ${depthClass}" data-children="${path}">
+        ${childrenHTML}
+        <div class="av__filter-group-actions">${addConditionBtn}</div>
+    </div>
+    <svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}" style="flex-shrink:0;align-self:center;"><use xlink:href="#iconMore"></use></svg>
+</div>`;
         }
 
-        // 叶子节点：内联可编辑控件（operator select + 值控件）
         let colData: IAVColumn;
         fields.find((column: IAVColumn) => {
             if (column.id === node.column) {
@@ -257,26 +266,25 @@ export const getFiltersHTML = (data: IAV) => {
             }
         });
         if (!colData) {
-            return ""; // 列已被删除，不渲染
+            return "";
         }
-        // 字段图标统一约束为 16×16；emoji 生成 img/svg，内联 style 强制尺寸避免被原始图撑大
         const iconHTML = colData.icon
             ? unicode2Emoji(colData.icon, "b3-menu__icon", true).replace(/<(img|span)/, '<$1 style="height:16px;width:16px;margin-right:0;"')
             : `<svg class="b3-menu__icon" style="margin-right:0;"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`;
-        // 字段选择：无框 select，切换字段时整体重渲染（操作符和值控件都随之改变）
         const fieldOptions = fields.filter((f: IAVColumn) => f.type !== "lineNumber").map((f: IAVColumn) =>
             `<option value="${f.id}" ${f.id === node.column ? "selected" : ""}>${escapeHtml(f.name)}</option>`
         ).join("");
         const fieldSelect = `<select class="b3-select" data-type="fieldSelect" data-path="${path}" style="margin:0;flex-shrink:0;max-width:120px;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:0;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 10 10%22><path fill=%22%23888%22 d=%22M2 4l3 3 3-3z%22/></svg>') no-repeat right 6px center;padding-right:20px;" title="${escapeAttr(colData.name)}">${fieldOptions}</select>`;
         const inlineHTML = genInlineFilterHTML(node, colData, path);
-        return `<div class="b3-menu__item av__filter-row" draggable="true" data-path="${path}" data-column="${node.column}" style="align-items:center;"><svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg><div class="fn__flex-1" style="display:flex;flex-wrap:nowrap;align-items:center;min-height:28px;gap:4px;">${iconHTML}${fieldSelect}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="removeFilter" data-path="${path}" aria-label="${window.siyuan.languages.removeFilters}"><use xlink:href="#iconTrashcan"></use></svg></div>`;
+        return `<div class="b3-menu__item av__filter-row" data-path="${path}" data-column="${node.column}" style="align-items:center;">${genAndOrSelect(groupPath, groupCombination)}<div class="fn__flex-1" style="display:flex;flex-wrap:nowrap;align-items:center;min-height:28px;gap:4px;">${iconHTML}${fieldSelect}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg></div>`;
     };
 
-    // view.filters 顶层应为单个根组（spec 5）。兼容旧扁平数据：无根组时视为隐式 AND 根组。
     const root = (data.view.filters.length === 1 && data.view.filters[0].filters) ? data.view.filters[0] : {filters: data.view.filters} as IAVFilter;
-    html = genNodeHTML(root, "", 0);
+    const rootCombination = (data.view.filters.length === 1 && data.view.filters[0].filters)
+        ? (data.view.filters[0].combination === "or" ? "or" : "and")
+        : "and";
+    html = genNodeHTML(root, "", 0, "", rootCombination);
 
-    // 统计叶子数，用于判断是否所有列都已参与过滤（控制「添加筛选条件」按钮显隐）
     const countLeaves = (nodes: IAVFilter[]): number => nodes.reduce((sum, n) => sum + (n.filters ? countLeaves(n.filters) : 1), 0);
     const leafCount = countLeaves(root.filters || []);
 
@@ -289,15 +297,43 @@ export const getFiltersHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 ${html}
-<button class="b3-menu__item${leafCount >= fields.length ? " fn__none" : ""}" data-type="addFilter" data-path="">
+<button class="b3-menu__item" data-type="addFilterCondition" data-path="" data-depth="0">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.addFilterCondition}</span>
+    <svg style="width:10px;height:10px;margin-left:4px;flex-shrink:0;align-self:center;"><use xlink:href="#iconDown"></use></svg>
 </button>
 <button class="b3-menu__item b3-menu__item--warning${leafCount > 0 ? "" : " fn__none"}" data-type="removeFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.removeFilters}</span>
 </button>
 </div>`;
+};
+
+export const duplicateFilterByPath = (nodes: IAVFilter[], path: string): boolean => {
+    const {parent, index} = getParentByPath(nodes, path);
+    if (!parent || index < 0 || index >= parent.length) {
+        return false;
+    }
+    const clone = JSON.parse(JSON.stringify(parent[index]));
+    parent.splice(index + 1, 0, clone);
+    return true;
+};
+
+export const convertFilterToGroup = (nodes: IAVFilter[], path: string): boolean => {
+    const {parent, index} = getParentByPath(nodes, path);
+    if (!parent || index < 0 || index >= parent.length) {
+        return false;
+    }
+    const node = parent[index];
+    if (node.filters) {
+        return false;
+    }
+    const group: IAVFilter = {
+        combination: "and",
+        filters: [node],
+    };
+    parent.splice(index, 1, group);
+    return true;
 };
 
 // ============ 内联化筛选编辑（替代 setFilter 弹层） ============
@@ -357,7 +393,7 @@ const resolveFilterValueType = (filter: IAVFilter, colData: IAVColumn): { type: 
     }
     // rollup：根据汇总配置或目标 AV 解析底层类型
     let resolvedType: TAVCol = valueType;
-    let resolvedColData = colData;
+    const resolvedColData = colData;
     const rollup = filter.value?.rollup;
     if (colData.rollup?.calc && colData.rollup.calc.operator !== "") {
         // 有汇总计算算子时，按算子映射类型
@@ -827,7 +863,6 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
         // 更新触发器显示（重建 chip 列表，与表格单元格样式一致）
         const triggerEl = menuElement.querySelector(`[data-type="selectTrigger"][data-path="${path}"]`) as HTMLElement;
         if (triggerEl && dropdown) {
-            const colData = findColData(path);
             const isSingleSel = dropdown.dataset.single === "true";
             const placeholderStr = isSingleSel ? window.siyuan.languages.select : window.siyuan.languages.multiSelect;
             const selectedChips: string[] = [];

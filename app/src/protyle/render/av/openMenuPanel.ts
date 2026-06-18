@@ -11,22 +11,24 @@ import {
     removeCol
 } from "./col";
 import {setPosition} from "../../../util/setPosition";
-import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestByClassName} from "../../util/hasClosest";
 import {addColOptionOrCell, bindSelectEvent, getSelectHTML, removeCellOption, setColOption} from "./select";
 import {
     addFilter,
     addFilterGroup,
     bindInlineFilterEvents,
+    convertFilterToGroup,
+    duplicateFilterByPath,
+    getDefaultOperatorByType,
     getEditableFilters,
     getFilterByPath,
     getFiltersHTML,
-    getParentByPath,
     hasFilterForColumn,
     removeFilterByPath,
     removeFiltersByColumn,
-    resetFoldedFilterPaths,
-    toggleFoldedFilterPath
+    resetFoldedFilterPaths
 } from "./filter";
+import {genCellValue, updateCellsValue} from "./cell";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML} from "./date";
 import {formatNumber} from "./number";
@@ -53,7 +55,6 @@ import {focusBlock} from "../../util/selection";
 import {getFieldIdByCellElement, setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
-import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
@@ -66,7 +67,6 @@ import {
     getGroupsHTML,
     getGroupsMethodHTML,
     getGroupsNumberHTML,
-    getLanguageByIndex,
     getPageSize,
     goGroupsDate,
     goGroupsSort,
@@ -232,7 +232,7 @@ export const openMenuPanel = (options: {
             if (options.type === "sorts") {
                 bindSortsEvent(options.protyle, menuElement, data, blockID);
             } else if (options.type === "filters") {
-                bindInlineFilterEvents(avPanelElement, data, options.protyle, blockID, avID);
+                bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
             } else if (options.type === "edit") {
                 bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
             } else if (options.type === "config") {
@@ -244,396 +244,6 @@ export const openMenuPanel = (options: {
         if (options.cb) {
             options.cb(avPanelElement);
         }
-        avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
-            const target = event.target as HTMLElement;
-            // 空分组占位行仅作拖放目标，不可作为拖拽源
-            if (target.dataset.emptyGroup) {
-                event.preventDefault();
-                return;
-            }
-            window.siyuan.dragElement = target;
-            window.siyuan.dragElement.style.opacity = ".38";
-            return;
-        });
-        avPanelElement.addEventListener("drop", (event) => {
-            counter = 0;
-            if (!window.siyuan.dragElement) {
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            window.siyuan.dragElement.style.opacity = "";
-            const sourceElement = window.siyuan.dragElement;
-            window.siyuan.dragElement = undefined;
-            if (options.protyle && options.protyle.disabled) {
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            if (!options.protyle && window.siyuan.config.readonly) {
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
-            const targetElement = avPanelElement.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
-            if (!targetElement) {
-                return;
-            }
-            const isTop = targetElement.classList.contains("dragover__top");
-            const sourceId = sourceElement.dataset.id;
-            const targetId = targetElement.dataset.id;
-            if (targetElement.querySelector('[data-type="removeSort"]')) {
-                const changeData = data.view.sorts;
-                const oldData = Object.assign([], changeData);
-                let sortFilter: IAVSort;
-                changeData.find((sort, index: number) => {
-                    if (sort.column === sourceId) {
-                        sortFilter = changeData.splice(index, 1)[0];
-                        return true;
-                    }
-                });
-                changeData.find((sort, index: number) => {
-                    if (sort.column === targetId) {
-                        if (isTop) {
-                            changeData.splice(index, 0, sortFilter);
-                        } else {
-                            changeData.splice(index + 1, 0, sortFilter);
-                        }
-                        return true;
-                    }
-                });
-
-                transaction(options.protyle, [{
-                    action: "setAttrViewSorts",
-                    avID,
-                    data: changeData,
-                    blockID
-                }], [{
-                    action: "setAttrViewSorts",
-                    avID,
-                    data: oldData,
-                    blockID
-                }]);
-                menuElement.innerHTML = getSortsHTML(fields, data.view.sorts);
-                bindSortsEvent(options.protyle, menuElement, data, blockID);
-                return;
-            }
-            if (targetElement.querySelector('[data-type="removeFilter"]') || targetElement.dataset.emptyGroup) {
-                // 过滤节点拖拽：基于 data-path 在节点树内移动（支持同层重排与跨分组移动）
-                const sourcePath = sourceElement.dataset.path;
-                const targetPath = targetElement.dataset.path;
-                if (sourcePath && targetPath && sourcePath !== targetPath) {
-                    const editable = getEditableFilters(data);
-                    const src = getParentByPath(editable, sourcePath);
-                    const oldData = JSON.parse(JSON.stringify(data.view.filters));
-                    let moved: IAVFilter;
-                    let targetParent: IAVFilter[];
-                    let insertIndex: number;
-
-                    if (targetElement.dataset.emptyGroup) {
-                        // 拖入空分组：目标父数组是该分组的 filters，插入到末尾（空数组即首位）
-                        const groupNode = getFilterByPath(editable, targetPath);
-                        if (!groupNode) {
-                            return;
-                        }
-                        targetParent = groupNode.filters || (groupNode.filters = []);
-                        // 从源父数组移除被拖节点
-                        if (!src.parent || src.index < 0 || src.index >= src.parent.length) {
-                            return;
-                        }
-                        [moved] = src.parent.splice(src.index, 1);
-                        insertIndex = 0; // 空分组只有一个位置
-                    } else {
-                        // 拖到已有节点上：目标父数组是该节点的同级数组
-                        const tgt = getParentByPath(editable, targetPath);
-                        if (!src.parent || !tgt.parent || src.index < 0 || src.index >= src.parent.length || tgt.index < 0 || tgt.index >= tgt.parent.length) {
-                            return;
-                        }
-                        const sameParent = src.parent === tgt.parent;
-                        [moved] = src.parent.splice(src.index, 1);
-                        if (!moved) {
-                            data.view.filters = oldData;
-                            return;
-                        }
-                        targetParent = tgt.parent;
-                        insertIndex = sameParent
-                            ? (src.index < tgt.index ? tgt.index - 1 : tgt.index)
-                            : tgt.index;
-                    }
-
-                    if (!moved) {
-                        data.view.filters = oldData;
-                        return;
-                    }
-                    targetParent.splice(isTop ? insertIndex : insertIndex + 1, 0, moved);
-                    transaction(options.protyle, [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: data.view.filters,
-                        blockID
-                    }], [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: oldData,
-                        blockID
-                    }]);
-                    menuElement.innerHTML = getFiltersHTML(data);
-                }
-                return;
-            }
-            if (targetElement.querySelector('[data-type="av-view-edit"]')) {
-                transaction(options.protyle, [{
-                    action: "sortAttrViewView",
-                    avID,
-                    blockID,
-                    id: sourceId,
-                    previousID: isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")
-                }], [{
-                    action: "sortAttrViewView",
-                    avID,
-                    blockID,
-                    id: sourceId,
-                    previousID: sourceElement.previousElementSibling?.getAttribute("data-id")
-                }]);
-                if (isTop) {
-                    targetElement.before(sourceElement);
-                    targetElement.classList.remove("dragover__top");
-                } else {
-                    targetElement.after(sourceElement);
-                    targetElement.classList.remove("dragover__bottom");
-                }
-                return;
-            }
-            if (targetElement.querySelector('[data-type="editAssetItem"]')) {
-                if (isTop) {
-                    targetElement.before(sourceElement);
-                } else {
-                    targetElement.after(sourceElement);
-                }
-                const replaceValue: IAVCellAssetValue[] = [];
-                Array.from(targetElement.parentElement.children).forEach((item: HTMLElement) => {
-                    if (["image", "file"].includes(item.dataset.type)) {
-                        replaceValue.push({
-                            content: item.dataset.content,
-                            name: item.dataset.name,
-                            type: item.dataset.type as "image" | "file",
-                        });
-                    }
-                });
-                updateAssetCell({
-                    protyle: options.protyle,
-                    cellElements: options.cellElements,
-                    replaceValue,
-                    blockElement: options.blockElement
-                });
-                return;
-            }
-            if (targetElement.querySelector('[data-type="setColOption"]')) {
-                const colId = options.cellElements ? getColId(options.cellElements[0], data.viewType) : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-                const changeData = fields.find((column) => column.id === colId).options;
-                const oldData = Object.assign([], changeData);
-                let targetOption: { name: string, color: string };
-                changeData.find((option, index: number) => {
-                    if (option.name === sourceElement.dataset.name) {
-                        targetOption = changeData.splice(index, 1)[0];
-                        return true;
-                    }
-                });
-                changeData.find((option, index: number) => {
-                    if (option.name === targetElement.dataset.name) {
-                        if (isTop) {
-                            changeData.splice(index, 0, targetOption);
-                        } else {
-                            changeData.splice(index + 1, 0, targetOption);
-                        }
-                        return true;
-                    }
-                });
-                transaction(options.protyle, [{
-                    action: "updateAttrViewColOptions",
-                    id: colId,
-                    avID,
-                    data: changeData,
-                }], [{
-                    action: "updateAttrViewColOptions",
-                    id: colId,
-                    avID,
-                    data: oldData,
-                }]);
-                const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
-                if (options.cellElements) {
-                    menuElement.innerHTML = getSelectHTML(fields, options.cellElements, false, options.blockElement);
-                    bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
-                } else {
-                    menuElement.innerHTML = getEditHTML({
-                        protyle: options.protyle,
-                        data,
-                        colId,
-                        isCustomAttr
-                    });
-                    bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
-                }
-                menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll;
-                return;
-            }
-            if (targetElement.getAttribute("data-type") === "setRelationCell") {
-                if (isTop) {
-                    targetElement.before(sourceElement);
-                } else {
-                    targetElement.after(sourceElement);
-                }
-                targetElement.classList.remove("dragover__bottom", "dragover__top");
-                const blockIDs: string[] = [];
-                const contents: IAVCellValue[] = [];
-                targetElement.parentElement.querySelectorAll(".fn__grab").forEach(item => {
-                    const dateElement = item.nextElementSibling as HTMLElement;
-                    blockIDs.push(dateElement.parentElement.dataset.rowId);
-                    contents.push({
-                        isDetached: !dateElement.style.color,
-                        type: "block",
-                        block: {
-                            content: dateElement.textContent,
-                            id: dateElement.dataset.id
-                        }
-                    });
-                });
-                updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
-                    blockIDs,
-                    contents,
-                }, options.cellElements);
-                return;
-            }
-            if (targetElement.getAttribute("data-type") === "editCol") {
-                const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
-                const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
-                if (previousID !== undoPreviousID && previousID !== sourceId) {
-                    transaction(options.protyle, [{
-                        action: "sortAttrViewCol",
-                        avID,
-                        previousID,
-                        id: sourceId,
-                        blockID,
-                    }], [{
-                        action: "sortAttrViewCol",
-                        avID,
-                        previousID: undoPreviousID,
-                        id: sourceId,
-                        blockID
-                    }]);
-                    let column: IAVColumn;
-                    fields.find((item, index: number) => {
-                        if (item.id === sourceId) {
-                            column = fields.splice(index, 1)[0];
-                            return true;
-                        }
-                    });
-                    fields.find((item, index: number) => {
-                        if (item.id === targetId) {
-                            if (isTop) {
-                                fields.splice(index, 0, column);
-                            } else {
-                                fields.splice(index + 1, 0, column);
-                            }
-                            return true;
-                        }
-                    });
-                }
-                menuElement.innerHTML = getPropertiesHTML(fields);
-                return;
-            }
-            if (targetElement.querySelector('[data-type="hideGroup"]')) {
-                const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
-                const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
-                if (previousID !== undoPreviousID && previousID !== sourceId) {
-                    transaction(options.protyle, [{
-                        action: "sortAttrViewGroup",
-                        avID,
-                        blockID,
-                        previousID,
-                        id: sourceId,
-                    }], [{
-                        action: "sortAttrViewGroup",
-                        avID,
-                        blockID,
-                        previousID: undoPreviousID,
-                        id: sourceId,
-                    }]);
-                    menuElement.querySelector('[data-type="goGroupsSort"] .b3-menu__accelerator').textContent = getLanguageByIndex(2, "sort");
-                    data.view.group.order = 2;
-                    data.view.groups.find((group, index) => {
-                        if (group.id === sourceId) {
-                            const groupData = data.view.groups.splice(index, 1)[0];
-                            data.view.groups.find((item, index: number) => {
-                                if (item.id === targetId) {
-                                    if (isTop) {
-                                        data.view.groups.splice(index, 0, groupData);
-                                    } else {
-                                        data.view.groups.splice(index + 1, 0, groupData);
-                                    }
-                                    return true;
-                                }
-                            });
-                            return true;
-                        }
-                    });
-                    if (isTop) {
-                        targetElement.before(sourceElement);
-                    } else {
-                        targetElement.after(sourceElement);
-                    }
-                }
-                targetElement.classList.remove("dragover__top", "dragover__bottom");
-                return;
-            }
-        });
-        let dragoverElement: HTMLElement;
-        avPanelElement.addEventListener("dragover", (event: DragEvent) => {
-            if (event.dataTransfer.types.includes("Files")) {
-                event.preventDefault();
-                return;
-            }
-            const target = event.target as HTMLElement;
-            let targetElement = hasClosestByAttribute(target, "draggable", "true");
-            if (!targetElement) {
-                targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true");
-            }
-            if (!targetElement || targetElement === window.siyuan.dragElement) {
-                return;
-            }
-            event.preventDefault();
-            if (dragoverElement && targetElement === dragoverElement) {
-                const nodeRect = targetElement.getBoundingClientRect();
-                avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__bottom", "dragover__top");
-                });
-                if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                    targetElement.classList.add("dragover__bottom");
-                } else {
-                    targetElement.classList.add("dragover__top");
-                }
-                return;
-            }
-            dragoverElement = targetElement;
-        });
-        let counter = 0;
-        avPanelElement.addEventListener("dragleave", () => {
-            counter--;
-            if (counter === 0) {
-                avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__bottom", "dragover__top");
-                });
-            }
-        });
-        avPanelElement.addEventListener("dragenter", (event) => {
-            event.preventDefault();
-            counter++;
-        });
-        avPanelElement.addEventListener("dragend", () => {
-            if (window.siyuan.dragElement) {
-                window.siyuan.dragElement.style.opacity = "";
-                window.siyuan.dragElement = undefined;
-            }
-        });
         // 过滤分组 AND/OR 切换（select 的 change 事件，不走 click 分发）
         avPanelElement.addEventListener("change", (event: Event) => {
             const select = event.target as HTMLElement;
@@ -642,7 +252,6 @@ export const openMenuPanel = (options: {
             }
             const path = select.dataset.path;
             const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-            // path 为空表示切换根组（data.view.filters[0]）；否则切换嵌套分组节点
             const node = "" === path
                 ? (data.view.filters[0] && data.view.filters[0].filters ? data.view.filters[0] : undefined)
                 : getFilterByPath(getEditableFilters(data), path);
@@ -660,6 +269,11 @@ export const openMenuPanel = (options: {
                 data: oldFilters,
                 blockID
             }]);
+            menuElement.querySelectorAll(`[data-type="toggleCombination"][data-path="${path}"]`).forEach((sel: HTMLSelectElement) => {
+                if (sel !== select) {
+                    sel.value = (select as HTMLSelectElement).value;
+                }
+            });
             event.stopPropagation();
         });
         // 多选排序
@@ -724,6 +338,7 @@ export const openMenuPanel = (options: {
                 updateCellsValue(options.protyle, options.blockElement as HTMLElement, newValue, options.cellElements);
             };
         });
+        let filterPopup: HTMLElement | null = null;
         avPanelElement.addEventListener("click", async (event: MouseEvent) => {
             let type: string;
             let target = event.target as HTMLElement;
@@ -872,14 +487,6 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "toggleFold") {
-                    // 折叠/展开嵌套分组：记忆到模块状态，重渲染后保持
-                    const path = target.getAttribute("data-path") || target.closest("[data-path]")?.getAttribute("data-path") || "";
-                    toggleFoldedFilterPath(path);
-                    menuElement.innerHTML = getFiltersHTML(data);
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
                 } else if (type === "addFilter") {
                     const path = target.closest("[data-path]")?.getAttribute("data-path") || "";
                     addFilter({
@@ -923,8 +530,7 @@ export const openMenuPanel = (options: {
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     // 滚动到新分组，引导用户继续往里添加条件
                     const newGroupPath = path ? `${path},${newGroupIndex}` : `${newGroupIndex}`;
-                    const newGroupToggle = menuElement.querySelector(`[data-type="toggleFold"][data-path="${newGroupPath}"]`) as HTMLElement;
-                    const newGroupRow = newGroupToggle?.closest(".b3-menu__item") as HTMLElement;
+                    const newGroupRow = menuElement.querySelector(`.av__filter-group-item[data-path="${newGroupPath}"]`) as HTMLElement;
                     newGroupRow?.scrollIntoView({behavior: "smooth", block: "nearest"});
                     event.preventDefault();
                     event.stopPropagation();
@@ -956,6 +562,206 @@ export const openMenuPanel = (options: {
                     } else {
                         doRemove();
                     }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "addFilterCondition") {
+                    const path = target.dataset.path || target.closest("[data-path]")?.getAttribute("data-path") || "";
+                    const depth = parseInt(target.dataset.depth || target.closest("[data-depth]")?.getAttribute("data-depth") || "0", 10);
+                    const popup = document.createElement("div");
+                    popup.className = "b3-menu";
+                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${event.clientX}px;`;
+                    popup.innerHTML = `<div class="b3-menu__items">
+<button class="b3-menu__item" data-type="addFilter" data-path="${path}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
+</button>
+<button class="b3-menu__item${depth >= 3 ? " fn__none" : ""}" data-type="addFilterGroup" data-path="${path}">
+    <svg class="b3-menu__icon"><use xlink:href="#iconListFilterPlus"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.addFilterGroup}</span>
+</button>
+</div>`;
+                    if (filterPopup) {
+                        filterPopup.remove();
+                        filterPopup = null;
+                    }
+                    document.body.appendChild(popup);
+                    filterPopup = popup;
+                    const closePopup = () => {
+                        popup.remove();
+                        document.removeEventListener("click", closePopup);
+                        window.siyuan.zIndex--;
+                        filterPopup = null;
+                    };
+                    document.addEventListener("click", closePopup);
+                    popup.addEventListener("click", (e: MouseEvent) => {
+                        e.stopPropagation();
+                        const btn = (e.target as HTMLElement).closest(".b3-menu__item") as HTMLElement;
+                        if (!btn) {
+                            closePopup();
+                            return;
+                        }
+                        const btnType = btn.dataset.type;
+                        const btnPath = btn.dataset.path;
+                        const clickX = e.clientX;
+                        const clickY = e.clientY;
+                        closePopup();
+                        if (btnType === "addFilter") {
+                            addFilter({
+                                data,
+                                rect: {left: clickX, bottom: clickY, height: 28} as DOMRect,
+                                menuElement,
+                                tabRect,
+                                avId: avID,
+                                protyle: options.protyle,
+                                blockElement: options.blockElement,
+                                parentPath: btnPath
+                            });
+                        } else if (btnType === "addFilterGroup") {
+                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                            addFilterGroup(data, btnPath);
+                            const fields = getFieldsByData(data);
+                            const blockField = fields.find(f => f.type === "block") || fields.find(f => f.type !== "lineNumber");
+                            if (blockField) {
+                                let target: IAVFilter[];
+                                if ("" === btnPath) {
+                                    target = getEditableFilters(data);
+                                } else {
+                                    const n = getFilterByPath(getEditableFilters(data), btnPath);
+                                    target = n?.filters || getEditableFilters(data);
+                                    if (!target) {
+                                        target = getEditableFilters(data);
+                                    }
+                                }
+                                const newGroup = target[target.length - 1];
+                                if (newGroup?.filters) {
+                                    newGroup.filters.push({
+                                        column: blockField.id,
+                                        operator: getDefaultOperatorByType(blockField.type),
+                                        value: genCellValue(blockField.type, ""),
+                                    });
+                                }
+                            }
+                            transaction(options.protyle, [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: data.view.filters,
+                                blockID
+                            }], [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: oldFilters,
+                                blockID
+                            }]);
+                            menuElement.innerHTML = getFiltersHTML(data);
+                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                        }
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "moreFilter") {
+                    const path = target.getAttribute("data-path") || target.closest("[data-path]")?.getAttribute("data-path") || "";
+                    const node = getFilterByPath(getEditableFilters(data), path);
+                    const isGroup = node && node.filters;
+                    const popup = document.createElement("div");
+                    popup.className = "b3-menu";
+                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:140px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${Math.max(0, event.clientX - 120)}px;`;
+                    const items: {type: string; label: string; icon: string; cls?: string}[] = [
+                        {type: "duplicateFilter", label: window.siyuan.languages.duplicate, icon: "iconAdd"},
+                    ];
+                    if (!isGroup) {
+                        items.push({type: "convertToGroup", label: window.siyuan.languages.convertToFilterGroup, icon: "iconListFilterPlus"});
+                    }
+                    items.push({type: "removeFilter", label: window.siyuan.languages.removeFilters, icon: "iconTrashcan", cls: "b3-menu__item--warning"});
+                    popup.innerHTML = `<div class="b3-menu__items">${items.map(item =>
+                        `<button class="b3-menu__item${item.cls ? " " + item.cls : ""}" data-type="${item.type}" data-path="${path}">
+                            ${item.icon ? `<svg class="b3-menu__icon"><use xlink:href="#${item.icon}"></use></svg>` : ""}
+                            <span class="b3-menu__label">${item.label}</span>
+                        </button>`
+                    ).join("")}</div>`;
+                    if (filterPopup) {
+                        filterPopup.remove();
+                        filterPopup = null;
+                    }
+                    document.body.appendChild(popup);
+                    filterPopup = popup;
+                    const closePopup = () => {
+                        popup.remove();
+                        document.removeEventListener("click", closePopup);
+                        window.siyuan.zIndex--;
+                        filterPopup = null;
+                    };
+                    document.addEventListener("click", closePopup);
+                    popup.addEventListener("click", (e: MouseEvent) => {
+                        e.stopPropagation();
+                        const btn = (e.target as HTMLElement).closest(".b3-menu__item") as HTMLElement;
+                        if (!btn) {
+                            closePopup();
+                            return;
+                        }
+                        const btnType = btn.dataset.type;
+                        const btnPath = btn.dataset.path;
+                        closePopup();
+                        if (btnType === "removeFilter") {
+                            window.siyuan.menus.menu.remove();
+                            const rmNode = getFilterByPath(getEditableFilters(data), btnPath);
+                            const doRemove = () => {
+                                const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                                removeFilterByPath(getEditableFilters(data), btnPath);
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: data.view.filters,
+                                    blockID
+                                }], [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: oldFilters,
+                                    blockID
+                                }]);
+                                menuElement.innerHTML = getFiltersHTML(data);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                            };
+                            if (rmNode && rmNode.filters && rmNode.filters.length > 0) {
+                                confirmDialog(window.siyuan.languages.removeFilters, window.siyuan.languages.confirmDeleteFilterGroupTip, doRemove);
+                            } else {
+                                doRemove();
+                            }
+                        } else if (btnType === "duplicateFilter") {
+                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                            duplicateFilterByPath(getEditableFilters(data), btnPath);
+                            transaction(options.protyle, [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: data.view.filters,
+                                blockID
+                            }], [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: oldFilters,
+                                blockID
+                            }]);
+                            menuElement.innerHTML = getFiltersHTML(data);
+                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                        } else if (btnType === "convertToGroup") {
+                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                            convertFilterToGroup(getEditableFilters(data), btnPath);
+                            transaction(options.protyle, [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: data.view.filters,
+                                blockID
+                            }], [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: oldFilters,
+                                blockID
+                            }]);
+                            menuElement.innerHTML = getFiltersHTML(data);
+                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                        }
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

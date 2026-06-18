@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Filtervoorwaarde toevoegen",
+  "convertToFilterGroup": "Converteren naar voorwaardegroep",
   "filterCombinationAnd": "En",
   "filterCombinationOr": "Of",
   "addFilterGroup": "Filtervoorwaardengroep toevoegen",

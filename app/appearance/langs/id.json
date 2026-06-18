@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Tambah kondisi filter",
+  "convertToFilterGroup": "Konversi ke grup kondisi",
   "filterCombinationAnd": "Dan",
   "filterCombinationOr": "Atau",
   "addFilterGroup": "Tambah grup kondisi filter",

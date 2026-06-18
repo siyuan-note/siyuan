@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Додати умову фільтра",
+  "convertToFilterGroup": "Перетворити на групу умов",
   "filterCombinationAnd": "І",
   "filterCombinationOr": "Або",
   "addFilterGroup": "Додати групу умов фільтра",

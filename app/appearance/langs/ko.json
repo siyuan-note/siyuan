@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "필터 조건 추가",
+  "convertToFilterGroup": "조건 그룹으로 변환",
   "filterCombinationAnd": "그리고",
   "filterCombinationOr": "또는",
   "addFilterGroup": "필터 조건 그룹 추가",

@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Pridať podmienku filtra",
+  "convertToFilterGroup": "Previesť na skupinu podmienok",
   "filterCombinationAnd": "A",
   "filterCombinationOr": "Alebo",
   "addFilterGroup": "Pridať skupinu podmienok filtra",

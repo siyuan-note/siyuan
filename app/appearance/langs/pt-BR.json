@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Adicionar condição de filtro",
+  "convertToFilterGroup": "Converter para grupo de condições",
   "filterCombinationAnd": "E",
   "filterCombinationOr": "Ou",
   "addFilterGroup": "Adicionar grupo de condições de filtro",

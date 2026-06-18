@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "เพิ่มเงื่อนไขตัวกรอง",
+  "convertToFilterGroup": "แปลงเป็นกลุ่มเงื่อนไข",
   "filterCombinationAnd": "และ",
   "filterCombinationOr": "หรือ",
   "addFilterGroup": "เพิ่มกลุ่มเงื่อนไขการกรอง",

@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Add filter condition",
+  "convertToFilterGroup": "Convert to filter group",
   "filterCombinationAnd": "And",
   "filterCombinationOr": "Or",
   "addFilterGroup": "Add filter group",

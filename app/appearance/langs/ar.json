@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "إضافة شرط تصفية",
+  "convertToFilterGroup": "تحويل إلى مجموعة شروط",
   "filterCombinationAnd": "و",
   "filterCombinationOr": "أو",
   "addFilterGroup": "إضافة مجموعة شروط التصفية",

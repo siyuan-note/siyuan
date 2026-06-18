@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "Filtre koşulu ekle",
+  "convertToFilterGroup": "Koşul grubuna dönüştür",
   "filterCombinationAnd": "Ve",
   "filterCombinationOr": "Veya",
   "addFilterGroup": "Filtre koşul grubu ekle",

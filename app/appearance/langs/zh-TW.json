@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "添加篩選條件",
+  "convertToFilterGroup": "轉換為條件組",
   "filterCombinationAnd": "且",
   "filterCombinationOr": "或",
   "addFilterGroup": "新增篩選條件群組",

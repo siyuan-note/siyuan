@@ -1,4 +1,6 @@
 {
+  "addFilterCondition": "フィルター条件を追加",
+  "convertToFilterGroup": "条件グループに変換",
   "filterCombinationAnd": "かつ",
   "filterCombinationOr": "または",
   "addFilterGroup": "フィルター条件グループを追加",

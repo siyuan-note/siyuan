@@ -6,16 +6,16 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20260612192331"
+		"updated": "20260618124055"
 	},
 	"Children": [
 		{
-			"ID": "20260612192257-qvqfssw",
+			"ID": "20260618124055-zbur9oi",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-qvqfssw",
-				"updated": "20260612192257"
+				"id": "20260618124055-zbur9oi",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -25,25 +25,25 @@
 			]
 		},
 		{
-			"ID": "20260612192257-n3qbtgb",
+			"ID": "20260618124055-7xuwk04",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-n3qbtgb",
-				"updated": "20260612192257"
+				"id": "20260618124055-7xuwk04",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan has a built-in CLI (Command Line Interface) that provides direct access to workspace data without starting the kernel server. It is suitable for scripting, batch management, and collaborating with AI agents to read and write note data."
+					"Data": "SiYuan ships with a built-in CLI (Command Line Interface) that accesses workspace data directly, with no need to start the kernel server. It is well suited for scripting, batch management, and read/write operations on notes in conjunction with AI agents."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-c2cw097",
+			"ID": "20260618124055-b5vmv3w",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-c2cw097",
-				"updated": "20260612192257"
+				"id": "20260618124055-b5vmv3w",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -53,7 +53,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan [global flags] \u0026lt;command\u0026gt; [parameters]"
+					"TextMarkTextContent": "siyuan [global flags] \u0026lt;command\u0026gt; [arguments]"
 				},
 				{
 					"Type": "NodeText",
@@ -62,12 +62,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-vugmlr4",
+			"ID": "20260618124055-rle3i8e",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-vugmlr4",
-				"updated": "20260612192257"
+				"id": "20260618124055-rle3i8e",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -77,25 +77,25 @@
 			]
 		},
 		{
-			"ID": "20260612192257-kf195pu",
+			"ID": "20260618124055-ca51lll",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-kf195pu",
-				"updated": "20260612192257"
+				"id": "20260618124055-ca51lll",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The CLI executable is located at "
+					"Data": "The CLI binary is "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;install_dir\u0026gt;/resources/kernel/SiYuan-Kernel"
+					"TextMarkTextContent": "\u0026lt;install-dir\u0026gt;/resources/kernel/SiYuan-Kernel"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ and can be invoked using the "
+					"Data": "​, invoked via the "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -109,32 +109,32 @@
 			]
 		},
 		{
-			"ID": "20260612192257-95wn88r",
+			"ID": "20260618124055-ksybbk0",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612192257-95wn88r",
-				"updated": "20260612192257"
+				"id": "20260618124055-ksybbk0",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
-					"ID": "20260612192257-eg3pyuw",
+					"ID": "20260618124055-fh52ukj",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-eg3pyuw",
-						"updated": "20260612192257"
+						"id": "20260618124055-fh52ukj",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-zemm0fl",
+							"ID": "20260618124055-mo52pph",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-zemm0fl",
-								"updated": "20260612192257"
+								"id": "20260618124055-mo52pph",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -144,7 +144,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": The installer automatically adds the kernel directory to "
+									"Data": ": the installer automatically adds the kernel directory to "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -162,30 +162,30 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ can be used directly"
+									"Data": "​ works out of the box"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192257-corco5t",
+					"ID": "20260618124055-jnzcmnb",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-corco5t",
-						"updated": "20260612192257"
+						"id": "20260618124055-jnzcmnb",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-51u2urj",
+							"ID": "20260618124055-6a06v4p",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-51u2urj",
-								"updated": "20260612192257"
+								"id": "20260618124055-6a06v4p",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -195,17 +195,17 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Create a symlink after installation"
+									"Data": ": create a symlink after installing"
 								}
 							]
 						},
 						{
-							"ID": "20260612192257-l0xx7c6",
+							"ID": "20260618124055-imxvuf8",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612192257-l0xx7c6",
-								"updated": "20260612192257"
+								"id": "20260618124055-imxvuf8",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -229,23 +229,23 @@
 					]
 				},
 				{
-					"ID": "20260612192257-zkm2l4k",
+					"ID": "20260618124055-6ezu4j5",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-zkm2l4k",
-						"updated": "20260612192257"
+						"id": "20260618124055-6ezu4j5",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-28zspux",
+							"ID": "20260618124055-dzowbv1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-28zspux",
-								"updated": "20260612192257"
+								"id": "20260618124055-dzowbv1",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -255,17 +255,17 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Create a symlink after installation"
+									"Data": ": create a symlink after installing"
 								}
 							]
 						},
 						{
-							"ID": "20260612192257-yr8l8c9",
+							"ID": "20260618124055-umsn3ad",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612192257-yr8l8c9",
-								"updated": "20260612192257"
+								"id": "20260618124055-umsn3ad",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -278,7 +278,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "ln -s \u003cinstall_dir\u003e/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan\n"
+									"Data": "ln -s \u003cinstall-dir\u003e/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -291,12 +291,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-v3s1xz4",
+			"ID": "20260618124055-jh5iqpd",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-v3s1xz4",
-				"updated": "20260612192257"
+				"id": "20260618124055-jh5iqpd",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -306,7 +306,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-qbgtnhm",
+			"ID": "20260618124055-ynt2ojn",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -316,8 +316,8 @@
 			],
 			"Properties": {
 				"colgroup": "|||",
-				"id": "20260612192257-qbgtnhm",
-				"updated": "20260612192257"
+				"id": "20260618124055-ynt2ojn",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -420,7 +420,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Environment variable "
+									"Data": "env var "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -448,7 +448,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Specifies the workspace directory"
+									"Data": "Specify the workspace directory"
 								}
 							]
 						}
@@ -597,7 +597,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Dry-run mode: validates parameters without making changes"
+									"Data": "Dry-run mode: validate arguments without making changes"
 								}
 							]
 						}
@@ -606,11 +606,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-ff9n9y8",
+			"ID": "20260618124055-swngu6n",
 			"Type": "NodeBlockquote",
 			"Properties": {
-				"id": "20260612192257-ff9n9y8",
-				"updated": "20260612192257"
+				"id": "20260618124055-swngu6n",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -618,11 +618,11 @@
 					"Data": "\u003e"
 				},
 				{
-					"ID": "20260612192257-fn9633t",
+					"ID": "20260618124055-0ha7g1k",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20260612192257-fn9633t",
-						"updated": "20260612192257"
+						"id": "20260618124055-0ha7g1k",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
@@ -636,7 +636,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ is suitable for scripting; "
+							"Data": "​ is ideal for scripting; "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -645,7 +645,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ applies to all modifying operations and outputs "
+							"Data": "​ applies to all mutating operations and prints a "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -654,59 +654,59 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ prompts."
+							"Data": "​ notice."
 						}
 					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-uhp8k9k",
+			"ID": "20260618124055-t91bvr3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-uhp8k9k",
-				"updated": "20260612192257"
+				"id": "20260618124055-t91bvr3",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Parameter Conventions"
+					"Data": "Argument Conventions"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-6fxd0pn",
+			"ID": "20260618124055-vn8bqmr",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612192257-6fxd0pn",
-				"updated": "20260612192257"
+				"id": "20260618124055-vn8bqmr",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
-					"ID": "20260612192257-5y8edvr",
+					"ID": "20260618124055-wybrlzm",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-5y8edvr",
-						"updated": "20260612192257"
+						"id": "20260618124055-wybrlzm",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-h2juk20",
+							"ID": "20260618124055-uto20ot",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-h2juk20",
-								"updated": "20260612192257"
+								"id": "20260618124055-uto20ot",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Parameters start with "
+									"Data": "Arguments start with "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -731,28 +731,28 @@
 					]
 				},
 				{
-					"ID": "20260612192257-8ok9u4r",
+					"ID": "20260618124055-p4gnz1l",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-8ok9u4r",
-						"updated": "20260612192257"
+						"id": "20260618124055-p4gnz1l",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-sh2fqxp",
+							"ID": "20260618124055-drp63wj",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-sh2fqxp",
-								"updated": "20260612192257"
+								"id": "20260618124055-drp63wj",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Parameters with short forms can use the shorthand. Example: "
+									"Data": "Arguments that have a short form can use it. Example: "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -777,28 +777,28 @@
 					]
 				},
 				{
-					"ID": "20260612192257-tk4ucdw",
+					"ID": "20260618124055-qqwp6o4",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-tk4ucdw",
-						"updated": "20260612192257"
+						"id": "20260618124055-qqwp6o4",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-9w32ryx",
+							"ID": "20260618124055-t9lqs1k",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-9w32ryx",
-								"updated": "20260612192257"
+								"id": "20260618124055-t9lqs1k",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Parameters inside "
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -807,35 +807,35 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ are optional"
+									"Data": "​ denotes optional arguments"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192257-m7wh3e7",
+					"ID": "20260618124055-nshcbgg",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-m7wh3e7",
-						"updated": "20260612192257"
+						"id": "20260618124055-nshcbgg",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-5dbreu8",
+							"ID": "20260618124055-hlb5a0p",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-5dbreu8",
-								"updated": "20260612192257"
+								"id": "20260618124055-hlb5a0p",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Boolean flags are used without a value. Example: "
+									"Data": "Value-less flags are used as-is. Example: "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -851,28 +851,28 @@
 					]
 				},
 				{
-					"ID": "20260612192257-pfcv0im",
+					"ID": "20260618124055-v6925xk",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-pfcv0im",
-						"updated": "20260612192257"
+						"id": "20260618124055-v6925xk",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-ulsuhzm",
+							"ID": "20260618124055-3jvc8n9",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-ulsuhzm",
-								"updated": "20260612192257"
+								"id": "20260618124055-3jvc8n9",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Some parameters can be repeated multiple times. Example: "
+									"Data": "Some arguments can be repeated. Example: "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -890,47 +890,47 @@
 			]
 		},
 		{
-			"ID": "20260612192257-vk16bcz",
+			"ID": "20260618124055-s7a9roy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-vk16bcz",
-				"updated": "20260612192257"
+				"id": "20260618124055-s7a9roy",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Targeting"
+					"Data": "Locating Targets"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-csbu3as",
+			"ID": "20260618124055-xghhxqv",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612192257-csbu3as",
-				"updated": "20260612192257"
+				"id": "20260618124055-xghhxqv",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
-					"ID": "20260612192257-l078ww2",
+					"ID": "20260618124055-1ampk87",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-l078ww2",
-						"updated": "20260612192257"
+						"id": "20260618124055-1ampk87",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-o31m3n3",
+							"ID": "20260618124055-4vds00s",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-o31m3n3",
-								"updated": "20260612192257"
+								"id": "20260618124055-4vds00s",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -944,7 +944,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Precisely targets by block ID, applicable to most commands such as "
+									"Data": "​: precise location by block ID, applies to most commands such as "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -953,7 +953,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ and "
+									"Data": "​, "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -969,23 +969,23 @@
 					]
 				},
 				{
-					"ID": "20260612192257-qydj06p",
+					"ID": "20260618124055-ubedr84",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-qydj06p",
-						"updated": "20260612192257"
+						"id": "20260618124055-ubedr84",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-81j7gfp",
+							"ID": "20260618124055-scjqtk3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-81j7gfp",
-								"updated": "20260612192257"
+								"id": "20260618124055-scjqtk3",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -999,16 +999,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Targets by human-readable path (e.g. "
+									"Data": "​: location by human-readable path (e.g. "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "/folder/document title"
+									"TextMarkTextContent": "/folder/doc-name"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​), applicable to "
+									"Data": "​), applies to "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1033,23 +1033,23 @@
 					]
 				},
 				{
-					"ID": "20260612192257-24mbuxs",
+					"ID": "20260618124055-0d5xk2y",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192257-24mbuxs",
-						"updated": "20260612192257"
+						"id": "20260618124055-0d5xk2y",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-ixintpf",
+							"ID": "20260618124055-ov8dbnx",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-ixintpf",
-								"updated": "20260612192257"
+								"id": "20260618124055-ov8dbnx",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
@@ -1063,7 +1063,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Targets the insert or append position by parent block ID, applicable to "
+									"Data": "​: location of an insertion or append point by parent block ID, applies to "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1081,46 +1081,46 @@
 			]
 		},
 		{
-			"ID": "20260612192257-uos5pas",
+			"ID": "20260618124055-203hgdc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-uos5pas",
-				"updated": "20260612192257"
+				"id": "20260618124055-203hgdc",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Common Use Cases"
+					"Data": "Common Scenarios"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-zxq3pz1",
+			"ID": "20260618124055-0mkve1p",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-zxq3pz1",
-				"updated": "20260612192257"
+				"id": "20260618124055-0mkve1p",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Scripted Batch Queries"
+					"Data": "Scripted batch queries"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-bm6n4au",
+			"ID": "20260618124055-e5v5ouu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-bm6n4au",
-				"updated": "20260612192257"
+				"id": "20260618124055-e5v5ouu",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use "
+					"Data": "Output JSON with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1129,7 +1129,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ to output JSON for script parsing. All query commands, including "
+					"Data": "​ for scripts to parse. All query commands such as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1147,36 +1147,36 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, support JSON output."
+					"Data": "​ support JSON output."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-gun9fco",
+			"ID": "20260618124055-5zxo4nb",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-gun9fco",
-				"updated": "20260612192257"
+				"id": "20260618124055-5zxo4nb",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Safety Verification"
+					"Data": "Safe validation"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-t0w1c1j",
+			"ID": "20260618124055-g27mzcs",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-t0w1c1j",
-				"updated": "20260612192257"
+				"id": "20260618124055-g27mzcs",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "For modifying or deleting operations, first verify parameters with "
+					"Data": "For mutating or deleting operations, validate arguments with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1185,7 +1185,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​. Once the output shows the expected "
+					"Data": "​ first. Once the output matches the expected "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1194,36 +1194,36 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, remove the flag to execute the actual operation."
+					"Data": "​, drop the flag and run for real."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-25rgz67",
+			"ID": "20260618124055-jihpcoy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-25rgz67",
-				"updated": "20260612192257"
+				"id": "20260618124055-jihpcoy",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Batch Note Management"
+					"Data": "Batch note management"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-qwwknuf",
+			"ID": "20260618124055-ei4t12w",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-qwwknuf",
-				"updated": "20260612192257"
+				"id": "20260618124055-ei4t12w",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Use "
+					"Data": "Batch-write daily-note entries with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1241,7 +1241,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ to write journal entries in batch; use "
+					"Data": "​; batch-set document icons and tags with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1250,31 +1250,31 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ to batch-set document icons and tags."
+					"Data": "​."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-elydgwg",
+			"ID": "20260618124055-9r4ddp9",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-elydgwg",
-				"updated": "20260612192257"
+				"id": "20260618124055-9r4ddp9",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SQL Data Analysis"
+					"Data": "SQL data analysis"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-d16eatj",
+			"ID": "20260618124055-x94m4co",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-d16eatj",
-				"updated": "20260612192257"
+				"id": "20260618124055-x94m4co",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1288,45 +1288,36 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ command supports read-only SQL queries against system tables such as "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "blocks"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​, useful for statistical analysis like block type distribution or recently modified documents."
+					"Data": "​ command runs read-only SQL queries against system tables such as blocks, useful for statistics like block-type distribution or recently updated documents."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-r9jnv6k",
+			"ID": "20260618124055-2gzzo96",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-r9jnv6k",
-				"updated": "20260612192257"
+				"id": "20260618124055-2gzzo96",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Data Backup"
+					"Data": "Data backup"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-tb5kved",
+			"ID": "20260618124055-1xtluul",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-tb5kved",
-				"updated": "20260612192257"
+				"id": "20260618124055-1xtluul",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "Create a snapshot as a checkpoint with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1335,7 +1326,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ creates snapshots as checkpoints; "
+					"Data": "​; export a full workspace backup with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1344,17 +1335,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ exports a full workspace backup."
+					"Data": "​."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-vtykmxn",
+			"ID": "20260618124055-izg7yz7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-vtykmxn",
-				"updated": "20260612192331"
+				"id": "20260618124055-izg7yz7",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1369,18 +1360,18 @@
 			]
 		},
 		{
-			"ID": "20260612192257-9u32r4i",
+			"ID": "20260618124055-zn7ms1e",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20260612192257-9u32r4i",
-				"updated": "20260612192257"
+				"id": "20260618124055-zn7ms1e",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
-					"ID": "20260612192257-fdc1md5",
+					"ID": "20260618124055-mdfeiu7",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1389,21 +1380,21 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20260612192257-fdc1md5",
-						"updated": "20260612192257"
+						"id": "20260618124055-mdfeiu7",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-4u27ui6",
+							"ID": "20260618124055-jq7uror",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-4u27ui6",
-								"updated": "20260612192257"
+								"id": "20260618124055-jq7uror",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Before modifying or deleting, verify parameters with "
+									"Data": "For mutating or deleting operations, it is recommended to validate arguments with "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1419,7 +1410,7 @@
 					]
 				},
 				{
-					"ID": "20260612192257-81islkb",
+					"ID": "20260618124055-fusmp6p",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1428,21 +1419,21 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20260612192257-81islkb",
-						"updated": "20260612192257"
+						"id": "20260618124055-fusmp6p",
+						"updated": "20260618124055"
 					},
 					"Children": [
 						{
-							"ID": "20260612192257-h1klpn7",
+							"ID": "20260618124055-8w2nx75",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192257-h1klpn7",
-								"updated": "20260612192257"
+								"id": "20260618124055-8w2nx75",
+								"updated": "20260618124055"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Before batch operations, consider creating a snapshot or exporting a backup for easy rollback"
+									"Data": "Before batch operations, create a snapshot or export a backup to make rollback easier"
 								}
 							]
 						}
@@ -1451,12 +1442,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-2pj84aa",
+			"ID": "20260618124055-5xyayt6",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192257-2pj84aa",
-				"updated": "20260612192257"
+				"id": "20260618124055-5xyayt6",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1466,12 +1457,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-8l6877u",
+			"ID": "20260618124055-t743b2w",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-8l6877u",
-				"updated": "20260612192257"
+				"id": "20260618124055-t743b2w",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1481,12 +1472,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-a32ixh2",
+			"ID": "20260618124055-0ismt95",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-a32ixh2",
-				"updated": "20260612192257"
+				"id": "20260618124055-0ismt95",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1499,7 +1490,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan --help           # List all available commands\nsiyuan block --help     # Show parameter descriptions for the block subcommand\n"
+					"Data": "siyuan --help           # List all available commands\nsiyuan block --help     # Show arguments for the block subcommand\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1508,12 +1499,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-b56bjan",
+			"ID": "20260618124055-7q8are7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-b56bjan",
-				"updated": "20260612192257"
+				"id": "20260618124055-7q8are7",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1523,11 +1514,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-uqro5h5",
+			"ID": "20260618124055-03m5m7j",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-uqro5h5",
-				"updated": "20260612192257"
+				"id": "20260618124055-03m5m7j",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1537,7 +1528,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-8yk3s0p",
+			"ID": "20260618124055-pc4r2st",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1546,8 +1537,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-8yk3s0p",
-				"updated": "20260612192257"
+				"id": "20260618124055-pc4r2st",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1574,7 +1565,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -1673,12 +1664,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-nj1hs91",
+			"ID": "20260618124055-dne26o4",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-nj1hs91",
-				"updated": "20260612192257"
+				"id": "20260618124055-dne26o4",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1700,12 +1691,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-yb8hzb2",
+			"ID": "20260618124055-g4hrg8z",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-yb8hzb2",
-				"updated": "20260612192257"
+				"id": "20260618124055-g4hrg8z",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1715,21 +1706,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-jbj5g62",
+			"ID": "20260618124055-7g1y9a0",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-jbj5g62",
-				"updated": "20260612192257"
+				"id": "20260618124055-7g1y9a0",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Manage notebook creation, renaming, opening, and closing."
+					"Data": "Manage creation, renaming, opening, and closing of notebooks."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-cob9ic2",
+			"ID": "20260618124055-1hhqqsj",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1738,8 +1729,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-cob9ic2",
-				"updated": "20260612192257"
+				"id": "20260618124055-1hhqqsj",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -1766,7 +1757,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -2096,12 +2087,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-m0kftke",
+			"ID": "20260618124055-v57htmt",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-m0kftke",
-				"updated": "20260612192257"
+				"id": "20260618124055-v57htmt",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -2123,12 +2114,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-hc047b2",
+			"ID": "20260618124055-800rg2b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-hc047b2",
-				"updated": "20260612192257"
+				"id": "20260618124055-800rg2b",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -2138,21 +2129,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-oo9ddsv",
+			"ID": "20260618124055-09frnln",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-oo9ddsv",
-				"updated": "20260612192257"
+				"id": "20260618124055-09frnln",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Manage document creation, querying, moving, and deletion."
+					"Data": "Manage creation, lookup, moving, and deletion of documents."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-15836vq",
+			"ID": "20260618124055-821ldk5",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2161,8 +2152,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-15836vq",
-				"updated": "20260612192257"
+				"id": "20260618124055-821ldk5",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -2189,7 +2180,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -2674,16 +2665,70 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "document search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;keyword\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Search documents by keyword"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-xp2x81u",
+			"ID": "20260618124055-qdy1jdv",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-xp2x81u",
-				"updated": "20260612192257"
+				"id": "20260618124055-qdy1jdv",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -2696,7 +2741,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/folder\"\n\nsiyuan document create --notebook notebook-id --title \"New Document\"\nsiyuan document create --notebook notebook-id --title \"New Document\" --hpath \"/folder\"\nsiyuan document create --notebook notebook-id --title \"New Document\" --markdown \"# Title\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"New Title\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/target-folder\"\n"
+					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/folder\"\n\nsiyuan document create --notebook notebook-id --title \"New Doc\"\nsiyuan document create --notebook notebook-id --title \"New Doc\" --hpath \"/folder\"\nsiyuan document create --notebook notebook-id --title \"New Doc\" --markdown \"# Title\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"New Title\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\nsiyuan document search \"keyword\"\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/target-folder\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -2705,12 +2750,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-wf5amen",
+			"ID": "20260618124055-o0i15h9",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-wf5amen",
-				"updated": "20260612192257"
+				"id": "20260618124055-o0i15h9",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -2720,16 +2765,16 @@
 			]
 		},
 		{
-			"ID": "20260612192257-nous8kw",
+			"ID": "20260618124055-f4pf02t",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-nous8kw",
-				"updated": "20260612192257"
+				"id": "20260618124055-f4pf02t",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Query, insert, update, delete, and move blocks within documents. Content can be written directly via "
+					"Data": "Query, insert, update, delete, and move blocks within a document. Content can be supplied directly via "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2752,7 +2797,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-trnw5hh",
+			"ID": "20260618124055-439om86",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2761,8 +2806,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-trnw5hh",
-				"updated": "20260612192257"
+				"id": "20260618124055-439om86",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -2789,7 +2834,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -2855,7 +2900,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Get block information"
+									"Data": "Get block info"
 								}
 							]
 						}
@@ -2909,7 +2954,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Get child block list"
+									"Data": "List child blocks"
 								}
 							]
 						}
@@ -2963,7 +3008,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Get breadcrumb path"
+									"Data": "Get the breadcrumb path"
 								}
 							]
 						}
@@ -3017,7 +3062,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Get block DOM tree"
+									"Data": "Get the block DOM tree"
 								}
 							]
 						}
@@ -3080,7 +3125,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Get block kramdown"
+									"Data": "Get the block kramdown"
 								}
 							]
 						}
@@ -3593,16 +3638,124 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Batch get block info"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-kramdown"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Batch get block kramdown"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-drra1uj",
+			"ID": "20260618124055-y8gn5g3",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-drra1uj",
-				"updated": "20260612192257"
+				"id": "20260618124055-y8gn5g3",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -3615,7 +3768,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# New Heading\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"Paragraph\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- List item\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e Quote\"\n\nsiyuan block update --id block-id --data \"Updated content\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# New Heading\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"paragraph\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- list item\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e quote\"\n\nsiyuan block update --id block-id --data \"updated content\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -3624,45 +3777,46 @@
 			]
 		},
 		{
-			"ID": "20260612192257-utoyzqf",
+			"ID": "20260618124055-zimbean",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-utoyzqf",
-				"updated": "20260612192257"
+				"id": "20260618124055-zimbean",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Search"
+					"Data": "Outline"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-rbiovg0",
+			"ID": "20260618124055-zqe0rpb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-rbiovg0",
-				"updated": "20260612192257"
+				"id": "20260618124055-zqe0rpb",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Full-text search with filtering by notebook, path, and block type, plus multiple search methods and sorting options."
+					"Data": "Get the document heading outline tree."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-au0886l",
+			"ID": "20260618124055-0pvpvho",
 			"Type": "NodeTable",
 			"TableAligns": [
+				0,
 				0,
 				0
 			],
 			"Properties": {
-				"colgroup": "|",
-				"id": "20260612192257-au0886l",
-				"updated": "20260612192257"
+				"colgroup": "||",
+				"id": "20260618124055-0pvpvho",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -3679,7 +3833,174 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameter"
+											"Data": "Command"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Arguments"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Description"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "outline get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Get the document heading outline"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-mvp28p7",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618124055-mvp28p7",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan outline get --id doc-id\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-ddm1efp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618124055-ddm1efp",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Search"
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-9c1b0v9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618124055-9c1b0v9",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Full-text search with filters by notebook, path, and block type, plus multiple search methods and sort orders."
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-jh2j81m",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "|",
+				"id": "20260618124055-jh2j81m",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -3726,7 +4047,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Search keywords (required)"
+									"Data": "Search keyword (required)"
 								}
 							]
 						}
@@ -3831,7 +4152,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Filter by block type (document/heading/paragraph/list etc.), repeatable"
+									"Data": "Filter by block type (document/heading/paragraph/list, etc.), repeatable"
 								}
 							]
 						}
@@ -3981,7 +4302,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Sort order: "
+									"Data": "Sort: "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4123,7 +4444,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Items per page"
+									"Data": "Page size"
 								}
 							]
 						}
@@ -4158,7 +4479,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Grouping: "
+									"Data": "Group: "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4185,12 +4506,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-ca2uj49",
+			"ID": "20260618124055-4eyeyfx",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-ca2uj49",
-				"updated": "20260612192257"
+				"id": "20260618124055-4eyeyfx",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4203,7 +4524,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan search \"keyword\"\nsiyuan search \"keyword\" --notebook box1 --notebook box2\nsiyuan search \"keyword\" --path \"/directory\"\nsiyuan search \"keyword\" --type document --type heading\nsiyuan search \"keyword\" --subtype o --subtype u\nsiyuan search \"keyword\" --method 2\nsiyuan search \"keyword\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"keyword\" --group-by 1\n"
+					"Data": "siyuan search \"keyword\"\nsiyuan search \"keyword\" --notebook box1 --notebook box2\nsiyuan search \"keyword\" --path \"/folder\"\nsiyuan search \"keyword\" --type document --type heading\nsiyuan search \"keyword\" --subtype o --subtype u\nsiyuan search \"keyword\" --method 2\nsiyuan search \"keyword\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"keyword\" --group-by 1\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -4212,12 +4533,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-dnuuo95",
+			"ID": "20260618124055-f1m7l4b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-dnuuo95",
-				"updated": "20260612192257"
+				"id": "20260618124055-f1m7l4b",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4227,21 +4548,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-p4f9t99",
+			"ID": "20260618124055-5hm03n8",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-p4f9t99",
-				"updated": "20260612192257"
+				"id": "20260618124055-5hm03n8",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Execute read-only SQL queries against system tables for data analysis."
+					"Data": "Run read-only SQL queries against system tables for statistical analysis."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-bkyt2u2",
+			"ID": "20260618124055-pjpseom",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4249,8 +4570,8 @@
 			],
 			"Properties": {
 				"colgroup": "|",
-				"id": "20260612192257-bkyt2u2",
-				"updated": "20260612192257"
+				"id": "20260618124055-pjpseom",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4267,7 +4588,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameter"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -4314,7 +4635,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SQL SELECT statement (required)"
+									"Data": "A SQL SELECT statement (required)"
 								}
 							]
 						}
@@ -4349,7 +4670,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Maximum rows returned, default 100"
+									"Data": "Maximum rows to return, default 100"
 								}
 							]
 						}
@@ -4358,12 +4679,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-j9vs5a1",
+			"ID": "20260618124055-6xgtd7k",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-j9vs5a1",
-				"updated": "20260612192257"
+				"id": "20260618124055-6xgtd7k",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4385,12 +4706,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-04vmv4s",
+			"ID": "20260618124055-4jpnmem",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-04vmv4s",
-				"updated": "20260612192257"
+				"id": "20260618124055-4jpnmem",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4400,11 +4721,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-lh7blzq",
+			"ID": "20260618124055-mcgflo9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-lh7blzq",
-				"updated": "20260612192257"
+				"id": "20260618124055-mcgflo9",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4414,7 +4735,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-px6w2ae",
+			"ID": "20260618124055-7guokwv",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4423,8 +4744,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-px6w2ae",
-				"updated": "20260612192257"
+				"id": "20260618124055-7guokwv",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4451,7 +4772,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -4502,7 +4823,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Upload to cloud"
+									"Data": "Upload to the cloud"
 								}
 							]
 						}
@@ -4541,7 +4862,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Download from cloud"
+									"Data": "Download from the cloud"
 								}
 							]
 						}
@@ -4580,7 +4901,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "View sync status"
+									"Data": "Show sync status"
 								}
 							]
 						}
@@ -4589,12 +4910,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-kb05qwt",
+			"ID": "20260618124055-jekbnpf",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-kb05qwt",
-				"updated": "20260612192257"
+				"id": "20260618124055-jekbnpf",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4616,12 +4937,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-c3spf1r",
+			"ID": "20260618124055-4cmyqw3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-c3spf1r",
-				"updated": "20260612192257"
+				"id": "20260618124055-4cmyqw3",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4631,16 +4952,16 @@
 			]
 		},
 		{
-			"ID": "20260612192257-6ux81o7",
+			"ID": "20260618124055-m331mvc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-6ux81o7",
-				"updated": "20260612192257"
+				"id": "20260618124055-m331mvc",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Export documents in various formats. "
+					"Data": "Export documents to various formats. "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4654,7 +4975,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-pd2osky",
+			"ID": "20260618124055-rsogdq4",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4663,8 +4984,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-pd2osky",
-				"updated": "20260612192257"
+				"id": "20260618124055-rsogdq4",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -4691,7 +5012,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -4766,7 +5087,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export as Markdown"
+									"Data": "Export Markdown"
 								}
 							]
 						}
@@ -4829,7 +5150,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export as HTML"
+									"Data": "Export HTML"
 								}
 							]
 						}
@@ -4892,7 +5213,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export as preview HTML"
+									"Data": "Export preview HTML"
 								}
 							]
 						}
@@ -4946,7 +5267,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export as Word ("
+									"Data": "Export Word ("
 								},
 								{
 									"Type": "NodeTextMark",
@@ -5018,7 +5339,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export as .sy.zip"
+									"Data": "Export .sy.zip"
 								}
 							]
 						}
@@ -5081,7 +5402,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export as Markdown zip"
+									"Data": "Export Markdown zip"
 								}
 							]
 						}
@@ -5135,7 +5456,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export full data backup"
+									"Data": "Export a full data backup"
 								}
 							]
 						}
@@ -5144,12 +5465,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-jqpfsxn",
+			"ID": "20260618124055-noya7z6",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-jqpfsxn",
-				"updated": "20260612192257"
+				"id": "20260618124055-noya7z6",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5171,12 +5492,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-5dh4o91",
+			"ID": "20260618124055-id9ovtn",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-5dh4o91",
-				"updated": "20260612192257"
+				"id": "20260618124055-id9ovtn",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5186,11 +5507,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-chw75jo",
+			"ID": "20260618124055-yq2i69f",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-chw75jo",
-				"updated": "20260612192257"
+				"id": "20260618124055-yq2i69f",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5200,7 +5521,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-mvtv79d",
+			"ID": "20260618124055-vmjfim8",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5209,8 +5530,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-mvtv79d",
-				"updated": "20260612192257"
+				"id": "20260618124055-vmjfim8",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5237,7 +5558,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -5312,7 +5633,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Import Markdown file or directory"
+									"Data": "Import Markdown files or directories"
 								}
 							]
 						}
@@ -5429,7 +5750,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Import full data backup"
+									"Data": "Import a full data backup"
 								}
 							]
 						}
@@ -5438,12 +5759,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-fznoxjb",
+			"ID": "20260618124055-tvha4js",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-fznoxjb",
-				"updated": "20260612192257"
+				"id": "20260618124055-tvha4js",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5465,12 +5786,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-mf95kil",
+			"ID": "20260618124055-zg1h26k",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-mf95kil",
-				"updated": "20260612192257"
+				"id": "20260618124055-zg1h26k",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5480,11 +5801,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-0m7cpcy",
+			"ID": "20260618124055-xtddoyu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-0m7cpcy",
-				"updated": "20260612192257"
+				"id": "20260618124055-xtddoyu",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5494,7 +5815,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-dvv1tgu",
+			"ID": "20260618124055-xktxvms",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5503,8 +5824,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-dvv1tgu",
-				"updated": "20260612192257"
+				"id": "20260618124055-xktxvms",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5531,7 +5852,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -5768,7 +6089,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Get historical version content"
+									"Data": "Get a history version's content"
 								}
 							]
 						}
@@ -5822,7 +6143,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Rollback to a historical version"
+									"Data": "Roll back to a history version"
 								}
 							]
 						}
@@ -5870,11 +6191,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-04hl1i4",
+			"ID": "20260618124055-1qrxq9b",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-04hl1i4",
-				"updated": "20260612192257"
+				"id": "20260618124055-1qrxq9b",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5920,11 +6241,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-3lbgpv1",
+			"ID": "20260618124055-9927crc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-3lbgpv1",
-				"updated": "20260612192257"
+				"id": "20260618124055-9927crc",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -5965,7 +6286,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ by asset file | "
+					"Data": "​ by asset | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5988,12 +6309,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-at6evgb",
+			"ID": "20260618124055-maqovuk",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-at6evgb",
-				"updated": "20260612192257"
+				"id": "20260618124055-maqovuk",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -6015,12 +6336,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-j50fvma",
+			"ID": "20260618124055-rwjs5xr",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-j50fvma",
-				"updated": "20260612192257"
+				"id": "20260618124055-rwjs5xr",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -6030,21 +6351,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-vsr31uv",
+			"ID": "20260618124055-w21h7uq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-vsr31uv",
-				"updated": "20260612192257"
+				"id": "20260618124055-w21h7uq",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Create and manage workspace snapshots with support for rollback and file-level recovery."
+					"Data": "Create and manage workspace snapshots, supporting rollback and file-level recovery."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-lx9lu7m",
+			"ID": "20260618124055-wiumuhn",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6053,8 +6374,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-lx9lu7m",
-				"updated": "20260612192257"
+				"id": "20260618124055-wiumuhn",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -6081,7 +6402,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -6372,7 +6693,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Rollback to a snapshot"
+									"Data": "Roll back to a snapshot"
 								}
 							]
 						}
@@ -6489,7 +6810,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Search files in snapshots"
+									"Data": "Search files within snapshots"
 								}
 							]
 						}
@@ -6636,7 +6957,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Rollback a single file from a snapshot"
+									"Data": "Roll back a single file from a snapshot"
 								}
 							]
 						}
@@ -6753,12 +7074,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-jg27sn7",
+			"ID": "20260618124055-fznfttx",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-jg27sn7",
-				"updated": "20260612192257"
+				"id": "20260618124055-fznfttx",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -6771,7 +7092,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan repo list\nsiyuan repo list --tag --page 1\nsiyuan repo create --memo \"Pre-upgrade backup\"\nsiyuan repo tag --id snapshot-id --name \"v1.0\"\nsiyuan repo untag --name \"v1.0\"\nsiyuan repo checkout --id snapshot-id\nsiyuan repo diff --left id1 --right id2\nsiyuan repo search \"keyword\"\nsiyuan repo purge\nsiyuan repo file get --id file-id\nsiyuan repo file rollback --id file-id\nsiyuan repo file open --id file-id\nsiyuan repo file export --id file-id\n"
+					"Data": "siyuan repo list\nsiyuan repo list --tag --page 1\nsiyuan repo create --memo \"backup before upgrade\"\nsiyuan repo tag --id snapshot-id --name \"v1.0\"\nsiyuan repo untag --name \"v1.0\"\nsiyuan repo checkout --id snapshot-id\nsiyuan repo diff --left id1 --right id2\nsiyuan repo search \"keyword\"\nsiyuan repo purge\nsiyuan repo file get --id file-id\nsiyuan repo file rollback --id file-id\nsiyuan repo file open --id file-id\nsiyuan repo file export --id file-id\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -6780,12 +7101,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-tffut0p",
+			"ID": "20260618124055-eyy7hxk",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-tffut0p",
-				"updated": "20260612192257"
+				"id": "20260618124055-eyy7hxk",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -6795,21 +7116,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-k5ejpg7",
+			"ID": "20260618124055-2mkndim",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-k5ejpg7",
-				"updated": "20260612192257"
+				"id": "20260618124055-2mkndim",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "View backlinks and mentions for a block, and refresh backlink indexes."
+					"Data": "View a block's backlinks and mentions, and refresh the backlink index."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-h1fz54n",
+			"ID": "20260618124055-dyjf4r0",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6818,8 +7139,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-h1fz54n",
-				"updated": "20260612192257"
+				"id": "20260618124055-dyjf4r0",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -6846,7 +7167,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -7056,7 +7377,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Refresh backlink index"
+									"Data": "Refresh the backlink index"
 								}
 							]
 						}
@@ -7065,11 +7386,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-2xtlw7h",
+			"ID": "20260618124055-fs5kpdz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-2xtlw7h",
-				"updated": "20260612192257"
+				"id": "20260618124055-fs5kpdz",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7160,12 +7481,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-ktgz4ts",
+			"ID": "20260618124055-yhvwyyp",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-ktgz4ts",
-				"updated": "20260612192257"
+				"id": "20260618124055-yhvwyyp",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7187,12 +7508,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-2xkupil",
+			"ID": "20260618124055-cpno70b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-2xkupil",
-				"updated": "20260612192257"
+				"id": "20260618124055-cpno70b",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7202,21 +7523,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-209v76p",
+			"ID": "20260618124055-f31s1pa",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-209v76p",
-				"updated": "20260612192257"
+				"id": "20260618124055-f31s1pa",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Manage tag viewing, renaming, and deletion."
+					"Data": "Manage viewing, renaming, and deleting tags."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-szq1gyj",
+			"ID": "20260618124055-77hm531",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7225,8 +7546,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-szq1gyj",
-				"updated": "20260612192257"
+				"id": "20260618124055-77hm531",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7253,7 +7574,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -7436,12 +7757,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-zaliuzo",
+			"ID": "20260618124055-0clvqpr",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-zaliuzo",
-				"updated": "20260612192257"
+				"id": "20260618124055-0clvqpr",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7463,12 +7784,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-u7o2xv9",
+			"ID": "20260618124055-86twxy7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-u7o2xv9",
-				"updated": "20260612192257"
+				"id": "20260618124055-86twxy7",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7478,21 +7799,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-67cheg7",
+			"ID": "20260618124055-ppudavp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-67cheg7",
-				"updated": "20260612192257"
+				"id": "20260618124055-ppudavp",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Get and set custom attributes on blocks."
+					"Data": "Get and set a block's custom attributes."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-qtanij6",
+			"ID": "20260618124055-ax1bjpy",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7501,8 +7822,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-qtanij6",
-				"updated": "20260612192257"
+				"id": "20260618124055-ax1bjpy",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7529,7 +7850,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -7658,7 +7979,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is repeatable)"
+									"Data": "​ repeatable)"
 								}
 							]
 						}
@@ -7721,12 +8042,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-gut9cs2",
+			"ID": "20260618124055-5qy5u97",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-gut9cs2",
-				"updated": "20260612192257"
+				"id": "20260618124055-5qy5u97",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7748,12 +8069,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-no53esc",
+			"ID": "20260618124055-g30k0np",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-no53esc",
-				"updated": "20260612192257"
+				"id": "20260618124055-g30k0np",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7763,21 +8084,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-yabxppw",
+			"ID": "20260618124055-6xje8qe",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-yabxppw",
-				"updated": "20260612192257"
+				"id": "20260618124055-6xje8qe",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Manage asset files in documents."
+					"Data": "Manage asset files within documents."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-kcvy56m",
+			"ID": "20260618124055-x7s9fjn",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7786,8 +8107,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-kcvy56m",
-				"updated": "20260612192257"
+				"id": "20260618124055-x7s9fjn",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -7814,7 +8135,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -7889,7 +8210,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ is repeatable)"
+									"Data": "​ repeatable)"
 								}
 							]
 						}
@@ -7987,16 +8308,70 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "asset stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Show asset file info"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-17fc4ud",
+			"ID": "20260618124055-pg70c62",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-17fc4ud",
-				"updated": "20260612192257"
+				"id": "20260618124055-pg70c62",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -8009,7 +8384,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\n"
+					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\nsiyuan asset stat --path \"assets/image/xxx.png\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -8018,12 +8393,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-y42rop3",
+			"ID": "20260618124055-tg9eg8o",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-y42rop3",
-				"updated": "20260612192257"
+				"id": "20260618124055-tg9eg8o",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -8033,21 +8408,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-de9ebio",
+			"ID": "20260618124055-1wi99hz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-de9ebio",
-				"updated": "20260612192257"
+				"id": "20260618124055-1wi99hz",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Manage bookmark viewing, renaming, and deletion."
+					"Data": "Manage viewing, renaming, and deleting bookmarks."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-qifdk48",
+			"ID": "20260618124055-gngr22n",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8056,8 +8431,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-qifdk48",
-				"updated": "20260612192257"
+				"id": "20260618124055-gngr22n",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -8084,7 +8459,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -8291,12 +8666,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-bnuyjb0",
+			"ID": "20260618124055-t0pj2ar",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-bnuyjb0",
-				"updated": "20260612192257"
+				"id": "20260618124055-t0pj2ar",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -8309,7 +8684,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan bookmark list\nsiyuan bookmark labels\nsiyuan bookmark remove --label \"my-bookmark\"\nsiyuan bookmark rename --old \"old\" --new \"new\"\n"
+					"Data": "siyuan bookmark list\nsiyuan bookmark labels\nsiyuan bookmark remove --label \"bookmark-name\"\nsiyuan bookmark rename --old \"old\" --new \"new\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -8318,12 +8693,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-m1evbqu",
+			"ID": "20260618124055-680zq7t",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-m1evbqu",
-				"updated": "20260612192257"
+				"id": "20260618124055-680zq7t",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -8333,11 +8708,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-enh468l",
+			"ID": "20260618124055-9hxeo1k",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-enh468l",
-				"updated": "20260612192257"
+				"id": "20260618124055-9hxeo1k",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -8347,7 +8722,7 @@
 			]
 		},
 		{
-			"ID": "20260612192257-ooipb9m",
+			"ID": "20260618124055-5ktzc0c",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8356,8 +8731,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-ooipb9m",
-				"updated": "20260612192257"
+				"id": "20260618124055-5ktzc0c",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -8384,7 +8759,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -8594,7 +8969,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Render database table"
+									"Data": "Render the database table"
 								}
 							]
 						}
@@ -9101,11 +9476,11 @@
 			]
 		},
 		{
-			"ID": "20260612192257-00540f0",
+			"ID": "20260618124055-uk15vje",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-00540f0",
-				"updated": "20260612192257"
+				"id": "20260618124055-uk15vje",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -9277,12 +9652,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-27clow2",
+			"ID": "20260618124055-td0hy84",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-27clow2",
-				"updated": "20260612192257"
+				"id": "20260618124055-td0hy84",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -9295,7 +9670,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan database search \"keyword\"\nsiyuan database get --id db-id\nsiyuan database render --id db-id --view view-id --query \"filter\" --page 1 --page-size 50\nsiyuan database keys --id db-id\n\nsiyuan database key add --id db-id --name \"Status\" --type select\nsiyuan database key add --id db-id --name \"Amount\" --type number --icon 1f4b0\nsiyuan database key add --id db-id --name \"Note\" --type text --prev previous-key-id\nsiyuan database key remove --id db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --id db-id\n\nsiyuan database item add --id db-id\nsiyuan database item add --id db-id --block block-id --content \"Text\"\nsiyuan database item add --id db-id --view view-id --previous prev-id\nsiyuan database item remove --id db-id --items \"item1,item2\"\nsiyuan database item update --id db-id --key key-id --item item-id --value '{\"content\": \"new value\"}'\n"
+					"Data": "siyuan database search \"keyword\"\nsiyuan database get --id db-id\nsiyuan database render --id db-id --view view-id --query \"filter\" --page 1 --page-size 50\nsiyuan database keys --id db-id\n\nsiyuan database key add --id db-id --name \"status\" --type select\nsiyuan database key add --id db-id --name \"amount\" --type number --icon 1f4b0\nsiyuan database key add --id db-id --name \"note\" --type text --prev previous-key-id\nsiyuan database key remove --id db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --id db-id\n\nsiyuan database item add --id db-id\nsiyuan database item add --id db-id --block block-id --content \"text\"\nsiyuan database item add --id db-id --view view-id --previous prev-id\nsiyuan database item remove --id db-id --items \"item1,item2\"\nsiyuan database item update --id db-id --key key-id --item item-id --value '{\"content\": \"new value\"}'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9304,12 +9679,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-ph29zju",
+			"ID": "20260618124055-st5d5xf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-ph29zju",
-				"updated": "20260612192257"
+				"id": "20260618124055-st5d5xf",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -9319,21 +9694,21 @@
 			]
 		},
 		{
-			"ID": "20260612192257-9mc3h18",
+			"ID": "20260618124055-qethcuv",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-9mc3h18",
-				"updated": "20260612192257"
+				"id": "20260618124055-qethcuv",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Manage daily note creation and content appending."
+					"Data": "Manage creation and content appending for daily notes."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-w6tkvzx",
+			"ID": "20260618124055-j0ba1rv",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9342,8 +9717,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-w6tkvzx",
-				"updated": "20260612192257"
+				"id": "20260618124055-j0ba1rv",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -9370,7 +9745,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -9609,12 +9984,12 @@
 			]
 		},
 		{
-			"ID": "20260612192257-9p26pnw",
+			"ID": "20260618124055-i8m2de9",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-9p26pnw",
-				"updated": "20260612192257"
+				"id": "20260618124055-i8m2de9",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -9627,7 +10002,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan dailynote create --notebook notebook-id\nsiyuan dailynote append --notebook notebook-id --data \"- [ ] Todo\"\nsiyuan dailynote append --notebook notebook-id --file ./content.md\nsiyuan dailynote prepend --notebook notebook-id --data \"## Today's Highlights\"\n"
+					"Data": "siyuan dailynote create --notebook notebook-id\nsiyuan dailynote append --notebook notebook-id --data \"- [ ] todo\"\nsiyuan dailynote append --notebook notebook-id --file ./content.md\nsiyuan dailynote prepend --notebook notebook-id --data \"## Today's focus\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9636,36 +10011,45 @@
 			]
 		},
 		{
-			"ID": "20260612192257-46ezvgq",
+			"ID": "20260618124055-krii2n8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192257-46ezvgq",
-				"updated": "20260612192257"
+				"id": "20260618124055-krii2n8",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Workspace File Operations"
+					"Data": "Template"
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-pgblid9",
+			"ID": "20260618124055-vxsofc8",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192257-pgblid9",
-				"updated": "20260612192257"
+				"id": "20260618124055-vxsofc8",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Operate on files within the workspace; all paths are relative to the workspace root."
+					"Data": "Manage template files: search, create, render, and save documents as templates. Template paths are relative to "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-phjxrim",
+			"ID": "20260618124055-eqpsnny",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9674,8 +10058,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192257-phjxrim",
-				"updated": "20260612192257"
+				"id": "20260618124055-eqpsnny",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -9702,7 +10086,491 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "Parameters"
+											"Data": "Arguments"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Description"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[keyword]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Search templates; lists all when keyword is empty"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Read template content"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template create"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeBackslash",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "|"
+										}
+									]
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--file"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a template from Markdown content"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template render"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path --id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Preview-render the template against a block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template save-as"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id --name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Save a document as a template"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template remove"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Remove a template"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-2mql8ng",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618124055-2mql8ng",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan template search\nsiyuan template search \"meeting\"\nsiyuan template get --path templates/weekly.md\nsiyuan template create --name \"weekly\" --data \"# Weekly\"\nsiyuan template create --name \"weekly\" --file ./weekly.md\nsiyuan template create --name \"weekly\" --data \"# Weekly\" --overwrite\nsiyuan template render --path templates/weekly.md --id doc-id\nsiyuan template save-as --id doc-id --name \"meeting-notes\"\nsiyuan template save-as --id doc-id --name \"meeting-notes\" --overwrite\nsiyuan template remove --path templates/weekly.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-abun8dx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618124055-abun8dx",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Workspace File Operations"
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-26klr3g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618124055-26klr3g",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Operate on files within the workspace. All paths are relative to the workspace."
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-uf1hi7m",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618124055-uf1hi7m",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Command"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Arguments"
 										}
 									]
 								},
@@ -9876,7 +10744,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Write to a file"
+									"Data": "Write a file"
 								}
 							]
 						}
@@ -10043,16 +10911,223 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file grep"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--pattern --path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--context"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Search file contents with regex"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file find"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Find files by glob"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Show file or directory info"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192257-ywckshk",
+			"ID": "20260618124055-ays7sox",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192257-ywckshk",
-				"updated": "20260612192257"
+				"id": "20260618124055-ays7sox",
+				"updated": "20260618124055"
 			},
 			"Children": [
 				{
@@ -10065,7 +11140,160 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\n"
+					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\nsiyuan file grep --pattern \"TODO\" --path /temp\nsiyuan file grep --pattern \"func \" --path /temp --include \"*.go\" --context 2\nsiyuan file find /temp --include \"*.md\"\nsiyuan file stat /temp/readme.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-rbgsjp0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618124055-rbgsjp0",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "System"
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-8v7500x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618124055-8v7500x",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Show system information."
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-muwiopg",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618124055-muwiopg",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Command"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Arguments"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "Description"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "system current-time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Show the current server time"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618124055-lg5dt5n",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618124055-lg5dt5n",
+				"updated": "20260618124055"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan system current-time\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

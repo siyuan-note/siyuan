@@ -6,16 +6,16 @@
 		"id": "20260612191136-feqbi1x",
 		"title": "命令行接口",
 		"type": "doc",
-		"updated": "20260612192459"
+		"updated": "20260618123536"
 	},
 	"Children": [
 		{
-			"ID": "20260612191143-r4wmkq8",
+			"ID": "20260618123536-p3y6znx",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-r4wmkq8",
-				"updated": "20260612191143"
+				"id": "20260618123536-p3y6znx",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -25,11 +25,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-09p9ro0",
+			"ID": "20260618123536-evj0luf",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-09p9ro0",
-				"updated": "20260612191143"
+				"id": "20260618123536-evj0luf",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -39,11 +39,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-n0tfuft",
+			"ID": "20260618123536-s970vp9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-n0tfuft",
-				"updated": "20260612191143"
+				"id": "20260618123536-s970vp9",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -62,12 +62,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-c3fuv3j",
+			"ID": "20260618123536-f5newid",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-c3fuv3j",
-				"updated": "20260612191143"
+				"id": "20260618123536-f5newid",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -77,11 +77,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-xzmkns2",
+			"ID": "20260618123536-f37k0mm",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-xzmkns2",
-				"updated": "20260612191143"
+				"id": "20260618123536-f37k0mm",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -109,32 +109,32 @@
 			]
 		},
 		{
-			"ID": "20260612191143-871q1u1",
+			"ID": "20260618123536-fdlw82f",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612191143-871q1u1",
-				"updated": "20260612191143"
+				"id": "20260618123536-fdlw82f",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
-					"ID": "20260612191143-hpkwebe",
+					"ID": "20260618123536-lkzcvp0",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-hpkwebe",
-						"updated": "20260612191143"
+						"id": "20260618123536-lkzcvp0",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-se1id3u",
+							"ID": "20260618123536-n29x52o",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-se1id3u",
-								"updated": "20260612191143"
+								"id": "20260618123536-n29x52o",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -169,23 +169,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-etyased",
+					"ID": "20260618123536-urf65ut",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-etyased",
-						"updated": "20260612191143"
+						"id": "20260618123536-urf65ut",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-d09sleu",
+							"ID": "20260618123536-0dbxbt6",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-d09sleu",
-								"updated": "20260612191143"
+								"id": "20260618123536-0dbxbt6",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -200,12 +200,12 @@
 							]
 						},
 						{
-							"ID": "20260612191143-x22jlxu",
+							"ID": "20260618123536-7funewf",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612191143-x22jlxu",
-								"updated": "20260612191143"
+								"id": "20260618123536-7funewf",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -229,23 +229,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-em7l8ab",
+					"ID": "20260618123536-ldi1q6u",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-em7l8ab",
-						"updated": "20260612191143"
+						"id": "20260618123536-ldi1q6u",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-kaysqj6",
+							"ID": "20260618123536-k9f933z",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-kaysqj6",
-								"updated": "20260612191143"
+								"id": "20260618123536-k9f933z",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -260,12 +260,12 @@
 							]
 						},
 						{
-							"ID": "20260612191143-5b66scj",
+							"ID": "20260618123536-hd1mmm4",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612191143-5b66scj",
-								"updated": "20260612191143"
+								"id": "20260618123536-hd1mmm4",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -291,12 +291,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-wocrwks",
+			"ID": "20260618123536-hiq4p1p",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-wocrwks",
-				"updated": "20260612191143"
+				"id": "20260618123536-hiq4p1p",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -306,7 +306,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-kerpdea",
+			"ID": "20260618123536-45t5vzs",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -316,8 +316,8 @@
 			],
 			"Properties": {
 				"colgroup": "|||",
-				"id": "20260612191143-kerpdea",
-				"updated": "20260612191143"
+				"id": "20260618123536-45t5vzs",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -606,11 +606,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-0bri9wh",
+			"ID": "20260618123536-39f67uc",
 			"Type": "NodeBlockquote",
 			"Properties": {
-				"id": "20260612191143-0bri9wh",
-				"updated": "20260612191143"
+				"id": "20260618123536-39f67uc",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -618,11 +618,11 @@
 					"Data": "\u003e"
 				},
 				{
-					"ID": "20260612191143-cb3pcmy",
+					"ID": "20260618123536-4th77fq",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20260612191143-cb3pcmy",
-						"updated": "20260612191143"
+						"id": "20260618123536-4th77fq",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
@@ -661,12 +661,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-dgaetfi",
+			"ID": "20260618123536-exkxuwi",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-dgaetfi",
-				"updated": "20260612191143"
+				"id": "20260618123536-exkxuwi",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -676,32 +676,32 @@
 			]
 		},
 		{
-			"ID": "20260612191143-7vxmuxb",
+			"ID": "20260618123536-1ee2du1",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612191143-7vxmuxb",
-				"updated": "20260612191143"
+				"id": "20260618123536-1ee2du1",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
-					"ID": "20260612191143-gobyh76",
+					"ID": "20260618123536-kvo7j71",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-gobyh76",
-						"updated": "20260612191143"
+						"id": "20260618123536-kvo7j71",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-63s4mpz",
+							"ID": "20260618123536-sd51mbt",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-63s4mpz",
-								"updated": "20260612191143"
+								"id": "20260618123536-sd51mbt",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -731,23 +731,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-n90sf0u",
+					"ID": "20260618123536-bppp2wf",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-n90sf0u",
-						"updated": "20260612191143"
+						"id": "20260618123536-bppp2wf",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-04xknsm",
+							"ID": "20260618123536-b0gc7id",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-04xknsm",
-								"updated": "20260612191143"
+								"id": "20260618123536-b0gc7id",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -777,23 +777,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-xfii5f3",
+					"ID": "20260618123536-rm06w60",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-xfii5f3",
-						"updated": "20260612191143"
+						"id": "20260618123536-rm06w60",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-m01zz4q",
+							"ID": "20260618123536-woj681a",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-m01zz4q",
-								"updated": "20260612191143"
+								"id": "20260618123536-woj681a",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -814,23 +814,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-9cxkcdv",
+					"ID": "20260618123536-mgk90im",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-9cxkcdv",
-						"updated": "20260612191143"
+						"id": "20260618123536-mgk90im",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-ce3ux3c",
+							"ID": "20260618123536-znbz2vz",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-ce3ux3c",
-								"updated": "20260612191143"
+								"id": "20260618123536-znbz2vz",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -851,23 +851,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-4jnknhd",
+					"ID": "20260618123536-bgq3nv2",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-4jnknhd",
-						"updated": "20260612191143"
+						"id": "20260618123536-bgq3nv2",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-wo25typ",
+							"ID": "20260618123536-qqo7z72",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-wo25typ",
-								"updated": "20260612191143"
+								"id": "20260618123536-qqo7z72",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -890,12 +890,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-7df71dv",
+			"ID": "20260618123536-jpvbcyj",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-7df71dv",
-				"updated": "20260612191143"
+				"id": "20260618123536-jpvbcyj",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -905,32 +905,32 @@
 			]
 		},
 		{
-			"ID": "20260612191143-l0daucu",
+			"ID": "20260618123536-wjpedge",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612191143-l0daucu",
-				"updated": "20260612191143"
+				"id": "20260618123536-wjpedge",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
-					"ID": "20260612191143-d78yk8y",
+					"ID": "20260618123536-ulxjdf6",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-d78yk8y",
-						"updated": "20260612191143"
+						"id": "20260618123536-ulxjdf6",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-tkgtook",
+							"ID": "20260618123536-eoefpem",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-tkgtook",
-								"updated": "20260612191143"
+								"id": "20260618123536-eoefpem",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -969,23 +969,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-9tceh4q",
+					"ID": "20260618123536-ihk0rzt",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-9tceh4q",
-						"updated": "20260612191143"
+						"id": "20260618123536-ihk0rzt",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-7zmd9p2",
+							"ID": "20260618123536-w7eednd",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-7zmd9p2",
-								"updated": "20260612191143"
+								"id": "20260618123536-w7eednd",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -1033,23 +1033,23 @@
 					]
 				},
 				{
-					"ID": "20260612191143-zv86rt2",
+					"ID": "20260618123536-kmu8i31",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191143-zv86rt2",
-						"updated": "20260612191143"
+						"id": "20260618123536-kmu8i31",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-8sqhx7f",
+							"ID": "20260618123536-mdtnhh1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-8sqhx7f",
-								"updated": "20260612191143"
+								"id": "20260618123536-mdtnhh1",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -1081,12 +1081,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-u3tuj1h",
+			"ID": "20260618123536-hegvyn4",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-u3tuj1h",
-				"updated": "20260612191143"
+				"id": "20260618123536-hegvyn4",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1096,12 +1096,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-lzckm0i",
+			"ID": "20260618123536-a4ts254",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-lzckm0i",
-				"updated": "20260612191143"
+				"id": "20260618123536-a4ts254",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1111,11 +1111,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-z2ax58t",
+			"ID": "20260618123536-vxyqksh",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-z2ax58t",
-				"updated": "20260612191143"
+				"id": "20260618123536-vxyqksh",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1152,12 +1152,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-jec2xi4",
+			"ID": "20260618123536-7bc80h1",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-jec2xi4",
-				"updated": "20260612191143"
+				"id": "20260618123536-7bc80h1",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1167,11 +1167,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-iparwi6",
+			"ID": "20260618123536-h04nahk",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-iparwi6",
-				"updated": "20260612191143"
+				"id": "20260618123536-h04nahk",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1199,12 +1199,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-njeaay6",
+			"ID": "20260618123536-43pt8gz",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-njeaay6",
-				"updated": "20260612191143"
+				"id": "20260618123536-43pt8gz",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1214,11 +1214,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-la5bwrv",
+			"ID": "20260618123536-qj2ps0i",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-la5bwrv",
-				"updated": "20260612191143"
+				"id": "20260618123536-qj2ps0i",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1255,12 +1255,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-8ked5fi",
+			"ID": "20260618123536-mtu8cea",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-8ked5fi",
-				"updated": "20260612191143"
+				"id": "20260618123536-mtu8cea",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1270,11 +1270,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-ovouvrr",
+			"ID": "20260618123536-mntbdfv",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-ovouvrr",
-				"updated": "20260612191143"
+				"id": "20260618123536-mntbdfv",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1293,12 +1293,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-xn2x650",
+			"ID": "20260618123536-pyqsgb5",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-xn2x650",
-				"updated": "20260612191143"
+				"id": "20260618123536-pyqsgb5",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1308,11 +1308,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-oro3tm3",
+			"ID": "20260618123536-x8mq0iq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-oro3tm3",
-				"updated": "20260612191143"
+				"id": "20260618123536-x8mq0iq",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1340,12 +1340,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-v5g9t78",
+			"ID": "20260618123536-nmbxuga",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-v5g9t78",
-				"updated": "20260612192459"
+				"id": "20260618123536-nmbxuga",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1360,18 +1360,18 @@
 			]
 		},
 		{
-			"ID": "20260612191143-y8r5da4",
+			"ID": "20260618123536-xfjp9yn",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20260612191143-y8r5da4",
-				"updated": "20260612191143"
+				"id": "20260618123536-xfjp9yn",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
-					"ID": "20260612191143-8r8qxht",
+					"ID": "20260618123536-8ezc6wr",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1380,16 +1380,16 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20260612191143-8r8qxht",
-						"updated": "20260612191143"
+						"id": "20260618123536-8ezc6wr",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-59egooa",
+							"ID": "20260618123536-5k35eyd",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-59egooa",
-								"updated": "20260612191143"
+								"id": "20260618123536-5k35eyd",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -1410,7 +1410,7 @@
 					]
 				},
 				{
-					"ID": "20260612191143-sleyfgx",
+					"ID": "20260618123536-bwvut78",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1419,16 +1419,16 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20260612191143-sleyfgx",
-						"updated": "20260612191143"
+						"id": "20260618123536-bwvut78",
+						"updated": "20260618123536"
 					},
 					"Children": [
 						{
-							"ID": "20260612191143-u2ikppg",
+							"ID": "20260618123536-4chtuuh",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191143-u2ikppg",
-								"updated": "20260612191143"
+								"id": "20260618123536-4chtuuh",
+								"updated": "20260618123536"
 							},
 							"Children": [
 								{
@@ -1442,12 +1442,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-ch9jb34",
+			"ID": "20260618123536-56wxe3i",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191143-ch9jb34",
-				"updated": "20260612191143"
+				"id": "20260618123536-56wxe3i",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1457,12 +1457,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-8t2ip6b",
+			"ID": "20260618123536-m81sgx0",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-8t2ip6b",
-				"updated": "20260612191143"
+				"id": "20260618123536-m81sgx0",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1472,12 +1472,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-9oefrz7",
+			"ID": "20260618123536-1o54hhl",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-9oefrz7",
-				"updated": "20260612191143"
+				"id": "20260618123536-1o54hhl",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1499,12 +1499,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-2vr4qu7",
+			"ID": "20260618123536-kkvx936",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-2vr4qu7",
-				"updated": "20260612191143"
+				"id": "20260618123536-kkvx936",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1514,11 +1514,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-d5kmjcm",
+			"ID": "20260618123536-kia0ioy",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-d5kmjcm",
-				"updated": "20260612191143"
+				"id": "20260618123536-kia0ioy",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1528,7 +1528,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-3mo0n0t",
+			"ID": "20260618123536-4umjlmm",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1537,8 +1537,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-3mo0n0t",
-				"updated": "20260612191143"
+				"id": "20260618123536-4umjlmm",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1664,12 +1664,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-r2gapqd",
+			"ID": "20260618123536-zn6ig8h",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-r2gapqd",
-				"updated": "20260612191143"
+				"id": "20260618123536-zn6ig8h",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1691,12 +1691,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-w9xayih",
+			"ID": "20260618123536-zqxmelk",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-w9xayih",
-				"updated": "20260612191143"
+				"id": "20260618123536-zqxmelk",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1706,11 +1706,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-l1wgmep",
+			"ID": "20260618123536-1x64lgm",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-l1wgmep",
-				"updated": "20260612191143"
+				"id": "20260618123536-1x64lgm",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -1720,7 +1720,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-i7pko23",
+			"ID": "20260618123536-n0nz5yg",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1729,8 +1729,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-i7pko23",
-				"updated": "20260612191143"
+				"id": "20260618123536-n0nz5yg",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2087,12 +2087,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-23k3ymr",
+			"ID": "20260618123536-t26z30k",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-23k3ymr",
-				"updated": "20260612191143"
+				"id": "20260618123536-t26z30k",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2114,12 +2114,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-3oiwkxv",
+			"ID": "20260618123536-vllx285",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-3oiwkxv",
-				"updated": "20260612191143"
+				"id": "20260618123536-vllx285",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2129,11 +2129,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-yugx190",
+			"ID": "20260618123536-reoawxi",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-yugx190",
-				"updated": "20260612191143"
+				"id": "20260618123536-reoawxi",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2143,7 +2143,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-9xizdjc",
+			"ID": "20260618123536-fofrsyu",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2152,8 +2152,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-9xizdjc",
-				"updated": "20260612191143"
+				"id": "20260618123536-fofrsyu",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2665,16 +2665,70 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "document search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;keyword\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按关键词搜索文档"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612191143-mid77u8",
+			"ID": "20260618123536-hbx45tm",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-mid77u8",
-				"updated": "20260612191143"
+				"id": "20260618123536-hbx45tm",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2687,7 +2741,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/文件夹\"\n\nsiyuan document create --notebook notebook-id --title \"新文档\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --hpath \"/文件夹\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --markdown \"# 标题\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新标题\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/目标文件夹\"\n"
+					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/文件夹\"\n\nsiyuan document create --notebook notebook-id --title \"新文档\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --hpath \"/文件夹\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --markdown \"# 标题\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新标题\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\nsiyuan document search \"关键词\"\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/目标文件夹\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -2696,12 +2750,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-t4j8p7u",
+			"ID": "20260618123536-dqkkd2b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-t4j8p7u",
-				"updated": "20260612191143"
+				"id": "20260618123536-dqkkd2b",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2711,11 +2765,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-v7qb5vw",
+			"ID": "20260618123536-gy6d6pd",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-v7qb5vw",
-				"updated": "20260612191143"
+				"id": "20260618123536-gy6d6pd",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -2743,7 +2797,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-yk78qfe",
+			"ID": "20260618123536-2s00uhu",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2752,8 +2806,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-yk78qfe",
-				"updated": "20260612191143"
+				"id": "20260618123536-2s00uhu",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -3584,16 +3638,124 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "批量获取块信息"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-kramdown"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "批量获取块 kramdown"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612191143-r0s9t5w",
+			"ID": "20260618123536-qjkychl",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-r0s9t5w",
-				"updated": "20260612191143"
+				"id": "20260618123536-qjkychl",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -3606,7 +3768,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新标题\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表项\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e 引用\"\n\nsiyuan block update --id block-id --data \"修改后内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新标题\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表项\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e 引用\"\n\nsiyuan block update --id block-id --data \"修改后内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -3615,12 +3777,180 @@
 			]
 		},
 		{
-			"ID": "20260612191143-c7fwzil",
+			"ID": "20260618123536-7ev1xlt",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-c7fwzil",
-				"updated": "20260612191143"
+				"id": "20260618123536-7ev1xlt",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "大纲"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-j30hp16",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123536-j30hp16",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "获取文档的标题大纲树。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-pwd8jr4",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123536-pwd8jr4",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "命令"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "参数"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "说明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "outline get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "获取文档标题大纲"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-ptc5rwr",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123536-ptc5rwr",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan outline get --id doc-id\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-erb905s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123536-erb905s",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -3630,11 +3960,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-w8xupn5",
+			"ID": "20260618123536-e9wu5ih",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-w8xupn5",
-				"updated": "20260612191143"
+				"id": "20260618123536-e9wu5ih",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -3644,7 +3974,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-238enpf",
+			"ID": "20260618123536-qrjmvmd",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -3652,8 +3982,8 @@
 			],
 			"Properties": {
 				"colgroup": "|",
-				"id": "20260612191143-238enpf",
-				"updated": "20260612191143"
+				"id": "20260618123536-qrjmvmd",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4176,12 +4506,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-6hh28xz",
+			"ID": "20260618123536-obikelg",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-6hh28xz",
-				"updated": "20260612191143"
+				"id": "20260618123536-obikelg",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4203,12 +4533,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-dk1nthc",
+			"ID": "20260618123536-w9wrzh2",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-dk1nthc",
-				"updated": "20260612191143"
+				"id": "20260618123536-w9wrzh2",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4218,11 +4548,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-obe68hg",
+			"ID": "20260618123536-2i0u98j",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-obe68hg",
-				"updated": "20260612191143"
+				"id": "20260618123536-2i0u98j",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4232,7 +4562,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-653j8cn",
+			"ID": "20260618123536-riuk94x",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4240,8 +4570,8 @@
 			],
 			"Properties": {
 				"colgroup": "|",
-				"id": "20260612191143-653j8cn",
-				"updated": "20260612191143"
+				"id": "20260618123536-riuk94x",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4349,12 +4679,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-tcm6fo5",
+			"ID": "20260618123536-38mamb9",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-tcm6fo5",
-				"updated": "20260612191143"
+				"id": "20260618123536-38mamb9",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4376,12 +4706,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-vvhyq52",
+			"ID": "20260618123536-sbfnjf8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-vvhyq52",
-				"updated": "20260612191143"
+				"id": "20260618123536-sbfnjf8",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4391,11 +4721,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-l0jx887",
+			"ID": "20260618123536-sk5cc6z",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-l0jx887",
-				"updated": "20260612191143"
+				"id": "20260618123536-sk5cc6z",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4405,7 +4735,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-eag0h3r",
+			"ID": "20260618123536-x5mo02q",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4414,8 +4744,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-eag0h3r",
-				"updated": "20260612191143"
+				"id": "20260618123536-x5mo02q",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4580,12 +4910,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-2sdjjza",
+			"ID": "20260618123536-rmcosj5",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-2sdjjza",
-				"updated": "20260612191143"
+				"id": "20260618123536-rmcosj5",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4607,12 +4937,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-z6yf9j2",
+			"ID": "20260618123536-j2jjfdn",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-z6yf9j2",
-				"updated": "20260612191143"
+				"id": "20260618123536-j2jjfdn",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4622,11 +4952,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-dcneeb3",
+			"ID": "20260618123536-4s61zaa",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-dcneeb3",
-				"updated": "20260612191143"
+				"id": "20260618123536-4s61zaa",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -4645,7 +4975,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-vf1dnce",
+			"ID": "20260618123536-w0ad7f0",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4654,8 +4984,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-vf1dnce",
-				"updated": "20260612191143"
+				"id": "20260618123536-w0ad7f0",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5135,12 +5465,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-6fch6z2",
+			"ID": "20260618123536-klaumvt",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-6fch6z2",
-				"updated": "20260612191143"
+				"id": "20260618123536-klaumvt",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5162,12 +5492,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-2nmfuat",
+			"ID": "20260618123536-8wfiac6",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-2nmfuat",
-				"updated": "20260612191143"
+				"id": "20260618123536-8wfiac6",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5177,11 +5507,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-nw3b7am",
+			"ID": "20260618123536-weyx08c",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-nw3b7am",
-				"updated": "20260612191143"
+				"id": "20260618123536-weyx08c",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5191,7 +5521,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-s0hjaik",
+			"ID": "20260618123536-m2ed8fp",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5200,8 +5530,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-s0hjaik",
-				"updated": "20260612191143"
+				"id": "20260618123536-m2ed8fp",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5429,12 +5759,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-8dw78sd",
+			"ID": "20260618123536-938zqkt",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-8dw78sd",
-				"updated": "20260612191143"
+				"id": "20260618123536-938zqkt",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5456,12 +5786,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-r6kyz33",
+			"ID": "20260618123536-liadhp6",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-r6kyz33",
-				"updated": "20260612191143"
+				"id": "20260618123536-liadhp6",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5471,11 +5801,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-rdpclwd",
+			"ID": "20260618123536-u5n2k1f",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-rdpclwd",
-				"updated": "20260612191143"
+				"id": "20260618123536-u5n2k1f",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5485,7 +5815,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-olczzxp",
+			"ID": "20260618123536-3kcv4d3",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5494,8 +5824,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-olczzxp",
-				"updated": "20260612191143"
+				"id": "20260618123536-3kcv4d3",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5861,11 +6191,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-0sur9ci",
+			"ID": "20260618123536-oxpn040",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-0sur9ci",
-				"updated": "20260612191143"
+				"id": "20260618123536-oxpn040",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5911,11 +6241,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-yups6sb",
+			"ID": "20260618123536-forzk1i",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-yups6sb",
-				"updated": "20260612191143"
+				"id": "20260618123536-forzk1i",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -5979,12 +6309,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-r7z6dy3",
+			"ID": "20260618123536-h5po93q",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-r7z6dy3",
-				"updated": "20260612191143"
+				"id": "20260618123536-h5po93q",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -6006,12 +6336,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-tuqrnws",
+			"ID": "20260618123536-rsxrvmn",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-tuqrnws",
-				"updated": "20260612191143"
+				"id": "20260618123536-rsxrvmn",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -6021,11 +6351,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-rpu5pv8",
+			"ID": "20260618123536-6ozq7my",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-rpu5pv8",
-				"updated": "20260612191143"
+				"id": "20260618123536-6ozq7my",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -6035,7 +6365,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-k7hllgj",
+			"ID": "20260618123536-rijia31",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6044,8 +6374,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-k7hllgj",
-				"updated": "20260612191143"
+				"id": "20260618123536-rijia31",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -6744,12 +7074,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-38aexp9",
+			"ID": "20260618123536-xrhq5cg",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-38aexp9",
-				"updated": "20260612191143"
+				"id": "20260618123536-xrhq5cg",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -6771,12 +7101,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-feem6l4",
+			"ID": "20260618123536-h4h7b4m",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-feem6l4",
-				"updated": "20260612191143"
+				"id": "20260618123536-h4h7b4m",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -6786,11 +7116,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-v4pwrgg",
+			"ID": "20260618123536-ypedipe",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-v4pwrgg",
-				"updated": "20260612191143"
+				"id": "20260618123536-ypedipe",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -6800,7 +7130,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-pizr2t7",
+			"ID": "20260618123536-7bzq1xl",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6809,8 +7139,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-pizr2t7",
-				"updated": "20260612191143"
+				"id": "20260618123536-7bzq1xl",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7056,11 +7386,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-pft4d65",
+			"ID": "20260618123536-j3wrasp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-pft4d65",
-				"updated": "20260612191143"
+				"id": "20260618123536-j3wrasp",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7151,12 +7481,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-e7oa7k8",
+			"ID": "20260618123536-9ulova1",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-e7oa7k8",
-				"updated": "20260612191143"
+				"id": "20260618123536-9ulova1",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7178,12 +7508,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-h3fx23w",
+			"ID": "20260618123536-dbt2gvc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-h3fx23w",
-				"updated": "20260612191143"
+				"id": "20260618123536-dbt2gvc",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7193,11 +7523,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-7k8euyr",
+			"ID": "20260618123536-60d2mm9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-7k8euyr",
-				"updated": "20260612191143"
+				"id": "20260618123536-60d2mm9",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7207,7 +7537,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-h2az9pj",
+			"ID": "20260618123536-zjyvrz8",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7216,8 +7546,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-h2az9pj",
-				"updated": "20260612191143"
+				"id": "20260618123536-zjyvrz8",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7427,12 +7757,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-9wceawy",
+			"ID": "20260618123536-u1wqjvv",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-9wceawy",
-				"updated": "20260612191143"
+				"id": "20260618123536-u1wqjvv",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7454,12 +7784,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-uwej712",
+			"ID": "20260618123536-aynb0nj",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-uwej712",
-				"updated": "20260612191143"
+				"id": "20260618123536-aynb0nj",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7469,11 +7799,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-pn07t6c",
+			"ID": "20260618123536-kb939kb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-pn07t6c",
-				"updated": "20260612191143"
+				"id": "20260618123536-kb939kb",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7483,7 +7813,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-i7szbmg",
+			"ID": "20260618123536-0nxdbr6",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7492,8 +7822,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-i7szbmg",
-				"updated": "20260612191143"
+				"id": "20260618123536-0nxdbr6",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7712,12 +8042,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-ut2599s",
+			"ID": "20260618123536-pgamjid",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-ut2599s",
-				"updated": "20260612191143"
+				"id": "20260618123536-pgamjid",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7739,12 +8069,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-wft3j7n",
+			"ID": "20260618123536-an258qy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-wft3j7n",
-				"updated": "20260612191143"
+				"id": "20260618123536-an258qy",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7754,11 +8084,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-sl841un",
+			"ID": "20260618123536-3k3zyb9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-sl841un",
-				"updated": "20260612191143"
+				"id": "20260618123536-3k3zyb9",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7768,7 +8098,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-xu9e5v7",
+			"ID": "20260618123536-63e6e8c",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7777,8 +8107,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-xu9e5v7",
-				"updated": "20260612191143"
+				"id": "20260618123536-63e6e8c",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -7978,16 +8308,70 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "asset stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "查看资源文件信息"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612191143-2xafibj",
+			"ID": "20260618123536-nt1fed7",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-2xafibj",
-				"updated": "20260612191143"
+				"id": "20260618123536-nt1fed7",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -8000,7 +8384,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\n"
+					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\nsiyuan asset stat --path \"assets/image/xxx.png\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -8009,12 +8393,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-o7g3535",
+			"ID": "20260618123536-cwj02rc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-o7g3535",
-				"updated": "20260612191143"
+				"id": "20260618123536-cwj02rc",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -8024,11 +8408,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-reqhtje",
+			"ID": "20260618123536-rdck4dj",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-reqhtje",
-				"updated": "20260612191143"
+				"id": "20260618123536-rdck4dj",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -8038,7 +8422,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-yah3h3h",
+			"ID": "20260618123536-krb1uil",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8047,8 +8431,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-yah3h3h",
-				"updated": "20260612191143"
+				"id": "20260618123536-krb1uil",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -8282,12 +8666,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-or7yaxg",
+			"ID": "20260618123536-b45z2l9",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-or7yaxg",
-				"updated": "20260612191143"
+				"id": "20260618123536-b45z2l9",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -8309,12 +8693,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-cayvhyl",
+			"ID": "20260618123536-nyu2mbp",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-cayvhyl",
-				"updated": "20260612191143"
+				"id": "20260618123536-nyu2mbp",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -8324,11 +8708,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-9jac0vd",
+			"ID": "20260618123536-6qc9ry1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-9jac0vd",
-				"updated": "20260612191143"
+				"id": "20260618123536-6qc9ry1",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -8338,7 +8722,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-vzq5vnk",
+			"ID": "20260618123536-7ua1hat",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8347,8 +8731,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-vzq5vnk",
-				"updated": "20260612191143"
+				"id": "20260618123536-7ua1hat",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9092,11 +9476,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-p5onfpv",
+			"ID": "20260618123536-g5phsr2",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-p5onfpv",
-				"updated": "20260612191143"
+				"id": "20260618123536-g5phsr2",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9268,12 +9652,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-2ayed0y",
+			"ID": "20260618123536-1ry9zo5",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-2ayed0y",
-				"updated": "20260612191143"
+				"id": "20260618123536-1ry9zo5",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9295,12 +9679,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-qpqz1y1",
+			"ID": "20260618123536-hc1ig16",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-qpqz1y1",
-				"updated": "20260612191143"
+				"id": "20260618123536-hc1ig16",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9310,11 +9694,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-9ik7nw9",
+			"ID": "20260618123536-54iyubu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-9ik7nw9",
-				"updated": "20260612191143"
+				"id": "20260618123536-54iyubu",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9324,7 +9708,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-sddwl4u",
+			"ID": "20260618123536-ple1m7r",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9333,8 +9717,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-sddwl4u",
-				"updated": "20260612191143"
+				"id": "20260618123536-ple1m7r",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9600,12 +9984,12 @@
 			]
 		},
 		{
-			"ID": "20260612191143-momg1hd",
+			"ID": "20260618123536-yf0myji",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-momg1hd",
-				"updated": "20260612191143"
+				"id": "20260618123536-yf0myji",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9627,12 +10011,505 @@
 			]
 		},
 		{
-			"ID": "20260612191143-vh0iuaz",
+			"ID": "20260618123536-cso9051",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191143-vh0iuaz",
-				"updated": "20260612191143"
+				"id": "20260618123536-cso9051",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模板"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-dfb0you",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123536-dfb0you",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理模板文件，支持搜索、创建、渲染和将文档另存为模板。模板路径为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 下的相对路径。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-xstbjyi",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123536-xstbjyi",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "命令"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "参数"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "说明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[keyword]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "搜索模板，关键词为空时列出全部"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "读取模板内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template create"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeBackslash",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "|"
+										}
+									]
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--file"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "从 Markdown 内容创建模板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template render"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path --id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "以指定块为上下文预览渲染模板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template save-as"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id --name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "将文档另存为模板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template remove"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "删除模板"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-3or08xu",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123536-3or08xu",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan template search\nsiyuan template search \"会议\"\nsiyuan template get --path templates/周报.md\nsiyuan template create --name \"周报\" --data \"# 周报\"\nsiyuan template create --name \"周报\" --file ./weekly.md\nsiyuan template create --name \"周报\" --data \"# 周报\" --overwrite\nsiyuan template render --path templates/周报.md --id doc-id\nsiyuan template save-as --id doc-id --name \"会议纪要\"\nsiyuan template save-as --id doc-id --name \"会议纪要\" --overwrite\nsiyuan template remove --path templates/周报.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-j9uixg4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123536-j9uixg4",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9642,11 +10519,11 @@
 			]
 		},
 		{
-			"ID": "20260612191143-imdgh1j",
+			"ID": "20260618123536-za3emdh",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191143-imdgh1j",
-				"updated": "20260612191143"
+				"id": "20260618123536-za3emdh",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -9656,7 +10533,7 @@
 			]
 		},
 		{
-			"ID": "20260612191143-9w7nz7z",
+			"ID": "20260618123536-ij7dzwp",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9665,8 +10542,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191143-9w7nz7z",
-				"updated": "20260612191143"
+				"id": "20260618123536-ij7dzwp",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -10034,16 +10911,223 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file grep"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--pattern --path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--context"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按正则搜索文件内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file find"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按通配符查找文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "查看文件或目录信息"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612191143-c3p5ze6",
+			"ID": "20260618123536-t5jb7t9",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191143-c3p5ze6",
-				"updated": "20260612191143"
+				"id": "20260618123536-t5jb7t9",
+				"updated": "20260618123536"
 			},
 			"Children": [
 				{
@@ -10056,7 +11140,160 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\n"
+					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\nsiyuan file grep --pattern \"TODO\" --path /temp\nsiyuan file grep --pattern \"func \" --path /temp --include \"*.go\" --context 2\nsiyuan file find /temp --include \"*.md\"\nsiyuan file stat /temp/readme.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-xipka6g",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123536-xipka6g",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "系统"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-ae90ntz",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123536-ae90ntz",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查看系统信息。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-be0rqub",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123536-be0rqub",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "命令"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "参数"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "说明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "system current-time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "显示当前服务端时间"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123536-b3k1r4p",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123536-b3k1r4p",
+				"updated": "20260618123536"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan system current-time\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

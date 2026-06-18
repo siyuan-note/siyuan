@@ -963,7 +963,7 @@
         display: flex;
         justify-content: flex-start;
         gap: 4px;
-        padding: 4px 0;
+        padding: 4px 0 0;
       }
 
       &__item[data-type="nobg"] {
@@ -993,6 +993,12 @@
       .av__field-wrapper .b3-select {
         border: 0;
         background-color: transparent !important;
+      }
+
+      .av__filter-group-left .b3-select {
+        background-color: var(--b3-menu-background) !important;
+        border: 1px solid var(--b3-theme-surface-lighter);
+        border-radius: var(--b3-border-radius);
       }
 
       .b3-menu__item.av__filter-row:hover {

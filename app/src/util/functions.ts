@@ -110,3 +110,21 @@ export const duplicateNameAddOne = (name:string) => {
     }
     return name;
 };
+
+/// #if !BROWSER
+// 红绿灯为原生控件不随缩放变化，缩小时按 zoom 补偿 --b3-toolbar-left-mac 避免与工具栏内容重叠 https://github.com/siyuan-note/siyuan/issues/9521
+export const setToolbarLeftMac = (zoom: number) => {
+    // 非桌面端、非 macOS 不补偿（让 body--win32 的 class 规则生效）
+    if (!window.siyuan.config || getBackend() !== "darwin") {
+        return;
+    }
+    // 全屏下红绿灯隐藏，清除内联补偿让 body--fullscreen 的 5px 生效
+    if (zoom >= 1 || document.body.classList.contains("body--fullscreen")) {
+        document.body.style.removeProperty("--b3-toolbar-left-mac");
+        return;
+    }
+    // 从 :root 读取主题基础值（默认 74px，兼容第三方主题），除以 zoom 让缩放后恢复到基础原生像素
+    const base = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--b3-toolbar-left-mac")) || 74;
+    document.body.style.setProperty("--b3-toolbar-left-mac", (base / zoom) + "px");
+};
+/// #endif

@@ -16,7 +16,7 @@ import {App} from "../index";
 import {ipcRenderer, webFrame} from "electron";
 /// #endif
 import {Constants} from "../constants";
-import {isBrowser, isWindow} from "../util/functions";
+import {isBrowser, isWindow, setToolbarLeftMac} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {needSubscribe} from "../util/needSubscribe";
 import * as dayjs from "dayjs";
@@ -290,6 +290,7 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
     }
 
     webFrame.setZoomFactor(zoom);
+    setToolbarLeftMac(zoom);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === zoom).position;
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setTrafficLightPosition",

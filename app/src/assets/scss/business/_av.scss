@@ -943,6 +943,7 @@
         flex: 1;
         min-width: 0;
         padding: 2px 6px;
+        border-radius: var(--b3-border-radius);
 
         &--depth1 {
           background-color: color-mix(in srgb, var(--b3-theme-on-background) 1.5%, transparent);

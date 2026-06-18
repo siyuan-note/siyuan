@@ -941,6 +941,18 @@
         padding: 6px 10px;
         border-radius: var(--b3-border-radius);
         border: 1px solid var(--b3-theme-surface-lighter);
+
+        &--depth1 {
+          background-color: color-mix(in srgb, var(--b3-theme-on-background) 1.5%, transparent);
+        }
+
+        &--depth2 {
+          background-color: color-mix(in srgb, var(--b3-theme-on-background) 3%, transparent);
+        }
+
+        &--depth3 {
+          background-color: color-mix(in srgb, var(--b3-theme-on-background) 5%, transparent);
+        }
       }
 
       .av__filter-group-children .b3-menu__item {

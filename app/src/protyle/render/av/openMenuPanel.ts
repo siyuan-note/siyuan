@@ -645,17 +645,18 @@ export const openMenuPanel = (options: {
                             window.siyuan.menus.menu.remove();
                             const rmNode = getFilterByPath(getEditableFilters(data), btnPath);
                             const doRemove = () => {
-                                const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                                const cloneBefore = JSON.parse(JSON.stringify(data.view.filters));
                                 removeFilterByPath(getEditableFilters(data), btnPath);
+                                const cloneAfter = JSON.parse(JSON.stringify(data.view.filters));
                                 transaction(options.protyle, [{
                                     action: "setAttrViewFilters",
                                     avID,
-                                    data: JSON.parse(JSON.stringify(data.view.filters)),
+                                    data: cloneAfter,
                                     blockID
                                 }], [{
                                     action: "setAttrViewFilters",
                                     avID,
-                                    data: oldFilters,
+                                    data: cloneBefore,
                                     blockID
                                 }]);
                                 menuElement.innerHTML = getFiltersHTML(data);

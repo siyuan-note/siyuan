@@ -185,7 +185,7 @@ export const addFilter = (options: {
                     transaction(options.protyle, [{
                         action: "setAttrViewFilters",
                         avID: options.avId,
-                        data: options.data.view.filters,
+                        data: JSON.parse(JSON.stringify(options.data.view.filters)),
                         blockID
                     }], [{
                         action: "setAttrViewFilters",

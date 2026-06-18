@@ -15,7 +15,7 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
         return "=";
     }
     if (["checkbox"].includes(type)) {
-        return "Is false";
+        return "=";
     }
     if (["rollup", "relation", "mAsset", "text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
         return "Contains";
@@ -210,9 +210,15 @@ export const getFiltersHTML = (data: IAV) => {
     let html = "";
     const fields = getFieldsByData(data);
     const genAndOrSelect = (groupPath: string, combination: string) =>
-        `<select class="b3-select" data-type="toggleCombination" data-path="${groupPath}" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background)) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterCombinationAnd}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterCombinationOr}</option></select>`;
+        `<select class="b3-select" data-type="toggleCombination" data-path="${groupPath}" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterCombinationAnd}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterCombinationOr}</option></select>`;
 
-    const genNodeHTML = (node: IAVFilter, path: string, depth: number, groupPath: string, groupCombination: string): string => {
+    const genWhenLabel = () =>
+        `<span style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;padding:0 20px 0 6px;display:inline-flex;align-items:center;color:var(--b3-theme-on-surface);box-sizing:border-box;">${window.siyuan.languages.filterWhen}</span>`;
+
+    const genAndOrLabel = (combination: string) =>
+        `<span style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;padding:0 20px 0 6px;display:inline-flex;align-items:center;color:var(--b3-theme-on-surface);box-sizing:border-box;">${combination === "or" ? window.siyuan.languages.filterCombinationOr : window.siyuan.languages.filterCombinationAnd}</span>`;
+
+    const genNodeHTML = (node: IAVFilter, path: string, depth: number, groupPath: string, groupCombination: string, index: number = 0): string => {
         if (!node) {
             return "";
         }
@@ -222,7 +228,7 @@ export const getFiltersHTML = (data: IAV) => {
             let childrenHTML = "";
             node.filters.forEach((child, index) => {
                 const childPath = path ? `${path},${index}` : `${index}`;
-                childrenHTML += genNodeHTML(child, childPath, depth + 1, path, combination);
+                childrenHTML += genNodeHTML(child, childPath, depth + 1, path, combination, index);
             });
 
             if (isRoot) {
@@ -234,9 +240,10 @@ export const getFiltersHTML = (data: IAV) => {
                 ? `<span class="block__icon ariaLabel" data-position="4north" data-type="addFilter" data-path="${path}" aria-label="${window.siyuan.languages.addFilterCondition}" style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;padding:2px 0;"><svg style="width:10px;height:10px;"><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}</span>`
                 : `<span class="block__icon ariaLabel" data-position="4north" data-type="addFilterCondition" data-path="${path}" data-depth="${depth}" aria-label="${window.siyuan.languages.addFilterCondition}" style="font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:2px;padding:2px 0;"><svg style="width:10px;height:10px;"><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}<svg style="width:10px;height:10px;flex-shrink:0;"><use xlink:href="#iconDown"></use></svg></span>`;
 
+            const andOrHTML = 0 === index ? genWhenLabel() : 1 === index ? genAndOrSelect(groupPath, groupCombination) : genAndOrLabel(groupCombination);
             return `<div class="av__filter-group-item" data-path="${path}" style="display:flex;align-items:center;">
     <span class="av__filter-group-left">
-        ${genAndOrSelect(groupPath, groupCombination)}
+        ${andOrHTML}
     </span>
     <div class="av__filter-group-children ${depthClass}" data-children="${path}">
         ${childrenHTML}
@@ -263,9 +270,10 @@ export const getFiltersHTML = (data: IAV) => {
             `<option value="${f.id}" ${f.id === node.column ? "selected" : ""}>${escapeHtml(f.name)}</option>`
         ).join("");
         const fieldSelect = `<select class="b3-select" data-type="fieldSelect" data-path="${path}" style="margin:0;flex-shrink:0;max-width:120px;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:0;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;">${fieldOptions}</select>`;
-        const fieldWrapper = `<span class="ariaLabel" data-position="4west" aria-label="${escapeAttr(colData.name)}" style="display:flex;align-items:center;flex-shrink:0;height:28px;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background));border-radius:var(--b3-border-radius);padding:0 4px 0 6px;gap:2px;">${iconHTML}${fieldSelect}</span>`;
+        const fieldWrapper = `<span class="av__field-wrapper ariaLabel" data-position="4west" aria-label="${escapeAttr(colData.name)}" style="display:flex;align-items:center;flex-shrink:0;height:28px;background:transparent;border:1px solid var(--b3-theme-surface-lighter);border-radius:var(--b3-border-radius);padding:0 4px 0 6px;gap:2px;">${iconHTML}${fieldSelect}</span>`;
         const inlineHTML = genInlineFilterHTML(node, colData, path);
-        return `<div class="b3-menu__item av__filter-row" data-path="${path}" data-column="${node.column}" style="align-items:center;">${genAndOrSelect(groupPath, groupCombination)}<div class="fn__flex-1" style="display:flex;flex-wrap:nowrap;align-items:center;min-height:28px;gap:4px;margin-left:4px;">${fieldWrapper}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg></div>`;
+        const leafAndOrHTML = 0 === index ? genWhenLabel() : 1 === index ? genAndOrSelect(groupPath, groupCombination) : genAndOrLabel(groupCombination);
+        return `<div class="b3-menu__item av__filter-row" data-path="${path}" data-column="${node.column}" style="align-items:center;">${leafAndOrHTML}<div class="fn__flex-1" style="display:flex;flex-wrap:nowrap;align-items:center;min-height:28px;gap:4px;margin-left:4px;">${fieldWrapper}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg></div>`;
     };
 
     const isRootGroup = data.view.filters.length === 1 && (data.view.filters[0].filters || data.view.filters[0].combination);
@@ -326,6 +334,19 @@ export const convertFilterToGroup = (nodes: IAVFilter[], path: string): boolean 
     return true;
 };
 
+export const convertGroupToFilter = (nodes: IAVFilter[], path: string): boolean => {
+    const {parent, index} = getParentByPath(nodes, path);
+    if (!parent || index < 0 || index >= parent.length) {
+        return false;
+    }
+    const node = parent[index];
+    if (!node.filters || 1 !== node.filters.length) {
+        return false;
+    }
+    parent.splice(index, 1, node.filters[0]);
+    return true;
+};
+
 // ============ 内联化筛选编辑（替代 setFilter 弹层） ============
 
 // getOperatorSelectByType 按值类型生成操作符 <select> 的 option HTML，标记当前 operator 为 selected。
@@ -333,7 +354,7 @@ const getOperatorSelectByType = (type: TAVCol, currentOperator: string): string 
     const opt = (value: string, label: string) => `<option ${value === currentOperator ? "selected" : ""} value="${value}">${label}</option>`;
     switch (type) {
         case "checkbox":
-            return opt("Is true", window.siyuan.languages.checked) + opt("Is false", window.siyuan.languages.unchecked);
+            return opt("=", window.siyuan.languages.filterOperatorIs) + opt("!=", window.siyuan.languages.filterOperatorIsNot);
         case "block":
         case "mAsset":
         case "text":
@@ -415,12 +436,12 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     const isEmptyOp = operator === "Is empty" || operator === "Is not empty";
     const valueHidden = isEmptyOp ? " fn__none" : "";
 
-    // 操作符 select（checkbox 不需要，方框即操作）
-    const operatorSelect = valueType === "checkbox" ? "" : `<select class="b3-select" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background)) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator)}</select>`;
+    // 操作符 select
+    const operatorSelect = `<select class="b3-select" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator)}</select>`;
 
     // 量化器 select（rollup/mAsset 才有）
     const quantifierSelect = (isRollup || valueType === "mAsset")
-        ? `<select class="b3-select" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background)) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;" data-type="quantifier" data-path="${path}">
+        ? `<select class="b3-select" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;" data-type="quantifier" data-path="${path}">
 <option ${(!filter.quantifier || filter.quantifier === "Any") ? "selected" : ""} value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
 <option ${filter.quantifier === "All" ? "selected" : ""} value="All">${window.siyuan.languages.filterQuantifierAll}</option>
 <option ${filter.quantifier === "None" ? "selected" : ""} value="None">${window.siyuan.languages.filterQuantifierNone}</option>
@@ -433,17 +454,16 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     const filterValue = filter.value;
     if (["text", "url", "block", "email", "phone", "template"].includes(valueType)) {
         const content = filterValue?.[valueType as "text"]?.content || "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background));flex:1;min-width:60px;height:28px;font-size:12px;" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:transparent;flex:1;min-width:60px;height:28px;font-size:12px;" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "mAsset") {
         const content = filterValue?.mAsset?.[0]?.content || "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background));flex:1;min-width:60px;height:28px;font-size:12px;" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:transparent;flex:1;min-width:60px;height:28px;font-size:12px;" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "number") {
         const content = filterValue?.number?.isNotEmpty ? filterValue.number.content : "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background));flex:1;min-width:50px;height:28px;font-size:12px;" value="${content}" data-type="filterValue" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:transparent;flex:1;min-width:50px;height:28px;font-size:12px;" value="${content}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "checkbox") {
-        // checkbox：单个可点击的勾选方框，点击在 true/false 间切换（与表格单元格图标一致）
-        const isChecked = filter.operator === "Is true";
-        valueHTML = `<svg class="av__checkbox" data-type="checkboxToggle" data-path="${path}" style="cursor:pointer;"><use xlink:href="#icon${isChecked ? "Check" : "Uncheck"}"></use></svg>`;
+        const isChecked = filterValue?.checkbox?.checked;
+        valueHTML = `<select class="b3-select" data-type="filterValue" data-path="${path}" style="margin:0;flex-shrink:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;"><option value="true" ${isChecked ? "selected" : ""}>${window.siyuan.languages.checked}</option><option value="false" ${!isChecked ? "selected" : ""}>${window.siyuan.languages.unchecked}</option></select>`;
     } else if (["date", "created", "updated"].includes(valueType)) {
         valueHTML = genInlineDateHTML(filter, valueType, path);
     } else if (valueType === "select" || valueType === "mSelect") {
@@ -452,10 +472,10 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         extraHTML = dropdown; // 下拉面板放 valueContainer 外，fixed 定位不影响行宽
     } else if (valueType === "relation") {
         const content = filterValue?.relation?.blockIDs?.[0] || "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background));flex:1;min-width:60px;height:28px;font-size:12px;" value="${escapeHtml(content)}" data-type="filterValue" data-type-rel="relation" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text" style="margin:0;box-shadow:none;background:transparent;flex:1;min-width:60px;height:28px;font-size:12px;" value="${escapeHtml(content)}" data-type="filterValue" data-type-rel="relation" data-path="${path}">`;
     }
 
-    return `${quantifierSelect}${operatorSelect}<span class="av__filter-value${valueHidden}" data-type="valueContainer" data-path="${path}" style="display:inline-flex;align-items:center;flex:1;min-width:60px;margin-left:4px;">${valueHTML}</span>${extraHTML}`;
+    return `${quantifierSelect}${operatorSelect}<span class="av__filter-value${valueHidden}" data-type="valueContainer" data-path="${path}" style="display:inline-flex;align-items:center;flex:1;min-width:60px;">${valueHTML}</span>${extraHTML}`;
 };
 
 // genInlineDateHTML 生成日期类型的内联控件（绝对/相对切换 + Is between 结束日期）。
@@ -466,18 +486,18 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
     const isBetween = filter.operator === "Is between";
 
     const dateBlock = (suffix: "" | "2", relativeDate: IAVRelativeDate, dateVal: any, showToday: boolean): string => {
-        const borderlessSelect = "margin:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background)) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;";
+        const borderlessSelect = "margin:0;height:28px;line-height:20px;font-size:12px;box-shadow:none;padding-left:6px;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;padding-right:20px;";
         const dateTypeSel = `<select class="b3-select" data-type="dateType${suffix}" data-path="${path}" style="${borderlessSelect}">
 <option value="time"${!relativeDate ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
 <option value="custom"${relativeDate ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
 </select>`;
-        const absDate = `<input value="${(dateVal && (dateVal.isNotEmpty || (suffix === "2" ? dateVal.isNotEmpty2 : valueType !== "date"))) ? dayjs(suffix === "2" ? dateVal.content2 : dateVal.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="margin:0;box-shadow:none;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background));height:28px;line-height:20px;font-size:12px;${relativeDate ? "display:none;" : ""}">`;
+        const absDate = `<input value="${(dateVal && (dateVal.isNotEmpty || (suffix === "2" ? dateVal.isNotEmpty2 : valueType !== "date"))) ? dayjs(suffix === "2" ? dateVal.content2 : dateVal.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="margin:0;box-shadow:none;background:transparent;height:28px;line-height:20px;font-size:12px;${relativeDate ? "display:none;" : ""}">`;
         const relDir = `<select class="b3-select" data-type="dataDirection${suffix}" data-path="${path}" style="${borderlessSelect}${!relativeDate ? "display:none;" : ""}">
 <option value="-1"${relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
 <option value="1"${relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
 <option value="0"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
 </select>`;
-        const relCount = `<input type="number" min="1" step="1" value="${relativeDate?.count || 1}" class="b3-text-field b3-text-field--text" data-type="relCount${suffix}" data-path="${path}" style="margin:0;box-shadow:none;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background));height:28px;line-height:20px;font-size:12px;width:50px;${(!relativeDate || showToday) ? "display:none;" : ""}">`;
+        const relCount = `<input type="number" min="1" step="1" value="${relativeDate?.count || 1}" class="b3-text-field b3-text-field--text" data-type="relCount${suffix}" data-path="${path}" style="margin:0;box-shadow:none;background:transparent;height:28px;line-height:20px;font-size:12px;width:50px;${(!relativeDate || showToday) ? "display:none;" : ""}">`;
         const relUnit = `<select class="b3-select" data-type="relUnit${suffix}" data-path="${path}" style="${borderlessSelect}${(!relativeDate || showToday) ? "display:none;" : ""}">
 <option value="0"${relativeDate?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
 <option value="1"${(!relativeDate || relativeDate?.unit === 1) ? " selected" : ""}>${window.siyuan.languages.week}</option>
@@ -504,7 +524,7 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         return `<span class="b3-chip b3-chip--middle" style="margin:1px 2px;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
     }).join("");
     const triggerContent = selectedChips || `<span class="ft__on-surface fn__ellipsis" style="font-size:12px;">${placeholder}</span>`;
-    const trigger = `<span data-type="selectTrigger" data-path="${path}" style="display:inline-flex;align-items:center;flex:1;min-width:60px;cursor:pointer;overflow:hidden;padding-right:20px;background:color-mix(in srgb, var(--b3-theme-on-background) 3%, var(--b3-menu-background)) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;">${triggerContent}</span>`;
+    const trigger = `<span data-type="selectTrigger" data-path="${path}" style="display:inline-flex;align-items:center;flex:1;min-width:60px;cursor:pointer;overflow:hidden;padding-right:20px;background:transparent url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2210%22 height=%2210%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%221.7%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22m6 9 6 6 6-6%22/></svg>') no-repeat right 6px center;">${triggerContent}</span>`;
 
     // 下拉面板
     const searchInput = options.length > 5
@@ -536,7 +556,9 @@ const readInlineValue = (rowElement: HTMLElement, valueType: TAVCol, operator: s
         relativeDate = undefined;
         relativeDate2 = undefined;
     } else if (valueType === "checkbox") {
-        newValue = genCellValue("checkbox", {checked: operator === "Is true"});
+        const select = rowElement.querySelector('[data-type="filterValue"]') as HTMLSelectElement;
+        const isChecked = select?.value !== "false";
+        newValue = genCellValue("checkbox", {checked: isChecked});
     } else if (["text", "url", "block", "email", "phone", "template", "mAsset", "number", "relation"].includes(valueType)) {
         const input = rowElement.querySelector('[data-type="filterValue"]') as HTMLInputElement;
         const val = input?.value || "";
@@ -770,25 +792,6 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
     // select 下拉触发：点击展开/收起选项面板
     panelElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
-        // checkbox 切换：点击 chip 在 Is true/Is false 间切换
-        const checkboxChip = target.closest('[data-type="checkboxToggle"]') as HTMLElement;
-        if (checkboxChip) {
-            const path = checkboxChip.dataset.path;
-            const row = getRow(checkboxChip);
-            if (path && row) {
-                const filter = getFilterByPath(getEditableFilters(data), path);
-                if (filter) {
-                    const newOp = filter.operator === "Is true" ? "Is false" : "Is true";
-                    commitFilter(data, path, {
-                        column: filter.column,
-                        operator: newOp as TAVFilterOperator,
-                        value: genCellValue("checkbox", {checked: newOp === "Is true"}),
-                    } as IAVFilter, protyle, blockID, avID, menuElement, true);
-                }
-            }
-            event.stopPropagation();
-            return;
-        }
         // 先处理 selectTrigger（展开/收起下拉）
         const trigger = target.closest('[data-type="selectTrigger"]') as HTMLElement;
         if (trigger) {

@@ -18,6 +18,7 @@ import {
     addFilterGroup,
     bindInlineFilterEvents,
     convertFilterToGroup,
+    convertGroupToFilter,
     duplicateFilterByPath,
     getDefaultOperatorByType,
     getEditableFilters,
@@ -607,8 +608,10 @@ export const openMenuPanel = (options: {
                     ];
                     if (!isGroup) {
                         items.push({type: "convertToGroup", label: window.siyuan.languages.convertToFilterGroup, icon: "iconListFilterPlus"});
+                    } else if (node && node.filters && 1 === node.filters.length) {
+                        items.push({type: "convertToFilter", label: window.siyuan.languages.convertGroupToFilter, icon: "iconListFilterPlus"});
                     }
-                    items.push({type: "removeFilter", label: window.siyuan.languages.removeFilters, icon: "iconTrashcan", cls: "b3-menu__item--warning"});
+                    items.push({type: "removeFilter", label: window.siyuan.languages.delete, icon: "iconTrashcan", cls: "b3-menu__item--warning"});
                     popup.innerHTML = `<div class="b3-menu__items">${items.map(item =>
                         `<button class="b3-menu__item${item.cls ? " " + item.cls : ""}" data-type="${item.type}" data-path="${path}">
                             ${item.icon ? `<svg class="b3-menu__icon"><use xlink:href="#${item.icon}"></use></svg>` : ""}
@@ -682,6 +685,22 @@ export const openMenuPanel = (options: {
                         } else if (btnType === "convertToGroup") {
                             const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
                             convertFilterToGroup(getEditableFilters(data), btnPath);
+                            transaction(options.protyle, [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: data.view.filters,
+                                blockID
+                            }], [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: oldFilters,
+                                blockID
+                            }]);
+                            menuElement.innerHTML = getFiltersHTML(data);
+                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                        } else if (btnType === "convertToFilter") {
+                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                            convertGroupToFilter(getEditableFilters(data), btnPath);
                             transaction(options.protyle, [{
                                 action: "setAttrViewFilters",
                                 avID,

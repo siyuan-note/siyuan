@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "המר לתנאי",
+  "filterWhen": "כאשר",
   "addFilterCondition": "הוסף תנאי סינון",
   "convertToFilterGroup": "המר לקבוצת תנאים",
   "filterCombinationAnd": "וגם",

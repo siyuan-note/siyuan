@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "Konversi ke kondisi",
+  "filterWhen": "Saat",
   "addFilterCondition": "Tambah kondisi filter",
   "convertToFilterGroup": "Konversi ke grup kondisi",
   "filterCombinationAnd": "Dan",

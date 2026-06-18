@@ -1007,9 +1007,17 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	case KeyTypeCheckbox:
 		if nil != value.Checkbox {
 			switch operator {
-			case FilterOperatorIsTrue:
+			case FilterOperatorIsTrue, FilterOperatorIsEqual:
+				if nil != other && nil != other.Checkbox {
+					return value.Checkbox.Checked == other.Checkbox.Checked
+				}
 				return value.Checkbox.Checked
 			case FilterOperatorIsFalse:
+				return !value.Checkbox.Checked
+			case FilterOperatorIsNotEqual:
+				if nil != other && nil != other.Checkbox {
+					return value.Checkbox.Checked != other.Checkbox.Checked
+				}
 				return !value.Checkbox.Checked
 			}
 		}

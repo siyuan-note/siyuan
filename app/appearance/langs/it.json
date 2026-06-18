@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "Converti in condizione",
+  "filterWhen": "Quando",
   "addFilterCondition": "Aggiungi condizione filtro",
   "convertToFilterGroup": "Converti in gruppo di condizioni",
   "filterCombinationAnd": "E",

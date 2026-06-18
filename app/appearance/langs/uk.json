@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "Перетворити на умову",
+  "filterWhen": "Коли",
   "addFilterCondition": "Додати умову фільтра",
   "convertToFilterGroup": "Перетворити на групу умов",
   "filterCombinationAnd": "І",

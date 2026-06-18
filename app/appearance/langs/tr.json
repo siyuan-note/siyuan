@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "Koşula dönüştür",
+  "filterWhen": "İken",
   "addFilterCondition": "Filtre koşulu ekle",
   "convertToFilterGroup": "Koşul grubuna dönüştür",
   "filterCombinationAnd": "Ve",

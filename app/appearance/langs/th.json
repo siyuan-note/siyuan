@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "แปลงเป็นเงื่อนไข",
+  "filterWhen": "เมื่อ",
   "addFilterCondition": "เพิ่มเงื่อนไขตัวกรอง",
   "convertToFilterGroup": "แปลงเป็นกลุ่มเงื่อนไข",
   "filterCombinationAnd": "และ",

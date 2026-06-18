@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "轉換為條件",
+  "filterWhen": "當",
   "addFilterCondition": "添加篩選條件",
   "convertToFilterGroup": "轉換為條件組",
   "filterCombinationAnd": "且",

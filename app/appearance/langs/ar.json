@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "تحويل إلى شرط",
+  "filterWhen": "عند",
   "addFilterCondition": "إضافة شرط تصفية",
   "convertToFilterGroup": "تحويل إلى مجموعة شروط",
   "filterCombinationAnd": "و",

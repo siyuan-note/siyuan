@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "Konwertuj na warunek",
+  "filterWhen": "Gdy",
   "addFilterCondition": "Dodaj warunek filtru",
   "convertToFilterGroup": "Konwertuj na grupę warunków",
   "filterCombinationAnd": "I",

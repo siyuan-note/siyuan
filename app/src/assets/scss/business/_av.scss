@@ -919,6 +919,7 @@
 
       .av__filter-group-item {
         padding: 0 8px;
+        margin: 4px 0;
 
         &:hover > .b3-menu__action {
           opacity: 1;
@@ -964,6 +965,16 @@
 
       .b3-menu__item.av__filter-row {
         margin: 2px 0;
+      }
+
+      .av__filter-row .b3-select,
+      .av__filter-row .b3-text-field--text {
+        border: 1px solid var(--b3-theme-surface-lighter);
+        border-radius: var(--b3-border-radius);
+      }
+
+      .av__field-wrapper .b3-select {
+        border: 0;
       }
 
       .b3-menu__item.av__filter-row:hover {

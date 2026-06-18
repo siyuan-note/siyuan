@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "Converteren naar voorwaarde",
+  "filterWhen": "Wanneer",
   "addFilterCondition": "Filtervoorwaarde toevoegen",
   "convertToFilterGroup": "Converteren naar voorwaardegroep",
   "filterCombinationAnd": "En",

@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "शर्त में बदलें",
+  "filterWhen": "जब",
   "addFilterCondition": "फ़िल्टर शर्त जोड़ें",
   "convertToFilterGroup": "शर्त समूह में बदलें",
   "filterCombinationAnd": "और",

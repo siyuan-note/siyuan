@@ -1,4 +1,6 @@
 {
+  "convertGroupToFilter": "条件に変換",
+  "filterWhen": "条件",
   "addFilterCondition": "フィルター条件を追加",
   "convertToFilterGroup": "条件グループに変換",
   "filterCombinationAnd": "かつ",

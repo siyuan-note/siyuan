@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "그리고",
+  "filterCombinationOr": "또는",
+  "addFilterGroup": "필터 조건 그룹 추가",
+  "filterMatchAll": "모두 일치",
+  "filterMatchAny": "하나라도 일치",
+  "emptyFilterGroup": "빈 그룹",
+  "confirmDeleteFilterGroupTip": "이 그룹을 삭제하면 그 안의 모든 필터 조건이 제거됩니다. 계속하시겠습니까?",
   "undoCrossDocConfirm": "이 실행 취소는 다음 문서에 영향을 미칩니다. 계속하시겠습니까?",
   "calcOperatorTemplate": "템플릿",
   "calcResultTemplate": "템플릿",

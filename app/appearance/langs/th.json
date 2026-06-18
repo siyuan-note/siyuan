@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "และ",
+  "filterCombinationOr": "หรือ",
+  "addFilterGroup": "เพิ่มกลุ่มเงื่อนไขการกรอง",
+  "filterMatchAll": "ตรงทั้งหมด",
+  "filterMatchAny": "ตรงอย่างใดอย่างหนึ่ง",
+  "emptyFilterGroup": "กลุ่มว่าง",
+  "confirmDeleteFilterGroupTip": "การลบกลุ่มนี้จะลบเงื่อนไขการกรองทั้งหมดภายใน ดำเนินการต่อหรือไม่",
   "undoCrossDocConfirm": "การยกเลิกนี้จะมีผลต่อเอกสารต่อไปนี้ ดำเนินการต่อหรือไม่",
   "calcOperatorTemplate": "เทมเพลต",
   "calcResultTemplate": "เทมเพลต",

@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "Ve",
+  "filterCombinationOr": "Veya",
+  "addFilterGroup": "Filtre koşul grubu ekle",
+  "filterMatchAll": "Tümünü eşleştir",
+  "filterMatchAny": "Herhangi birini eşleştir",
+  "emptyFilterGroup": "Boş grup",
+  "confirmDeleteFilterGroupTip": "Bu grubu silmek, içindeki tüm filtre koşullarını kaldıracaktır. Devam edilsin mi?",
   "undoCrossDocConfirm": "Bu geri alma aşağıdaki belgeleri etkileyecek. Devam edilsin mi?",
   "calcOperatorTemplate": "Şablon",
   "calcResultTemplate": "Şablon",

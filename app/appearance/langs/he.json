@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "וגם",
+  "filterCombinationOr": "או",
+  "addFilterGroup": "הוסף קבוצת תנאי סינון",
+  "filterMatchAll": "התאם הכל",
+  "filterMatchAny": "התאם כל אחד",
+  "emptyFilterGroup": "קבוצה ריקה",
+  "confirmDeleteFilterGroupTip": "מחיקת קבוצה זו תסיר את כל תנאי הסינון שבתוכה. להמשיך?",
   "undoCrossDocConfirm": "ביטול זה ישפיע על המסמכים הבאים. להמשיך?",
   "calcOperatorTemplate": "תבנית",
   "calcResultTemplate": "תבנית",

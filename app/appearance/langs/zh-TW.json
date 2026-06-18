@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "且",
+  "filterCombinationOr": "或",
+  "addFilterGroup": "新增篩選條件群組",
+  "filterMatchAll": "全部滿足",
+  "filterMatchAny": "任一滿足",
+  "emptyFilterGroup": "空群組",
+  "confirmDeleteFilterGroupTip": "刪除該群組將移除其中的所有篩選條件，是否繼續？",
   "undoCrossDocConfirm": "本次撤銷將影響以下文件，是否繼續？",
   "calcOperatorTemplate": "範本",
   "calcResultTemplate": "範本",

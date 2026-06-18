@@ -330,7 +330,7 @@ func NewTableView() *View {
 	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("table"),
-		Filters:    []*ViewFilter{},
+		Filters:    []*ViewFilter{{Combination: FilterCombinationAnd}},
 		Sorts:      []*ViewSort{},
 		PageSize:   ViewDefaultPageSize,
 		LayoutType: LayoutTypeTable,
@@ -343,7 +343,7 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 	view = &View{
 		ID:         ast.NewNodeID(),
 		Name:       name,
-		Filters:    []*ViewFilter{},
+		Filters:    []*ViewFilter{{Combination: FilterCombinationAnd}},
 		Sorts:      []*ViewSort{},
 		LayoutType: LayoutTypeTable,
 		Table:      NewLayoutTable(),
@@ -361,7 +361,7 @@ func NewGalleryView() (ret *View) {
 	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("gallery"),
-		Filters:    []*ViewFilter{},
+		Filters:    []*ViewFilter{{Combination: FilterCombinationAnd}},
 		Sorts:      []*ViewSort{},
 		PageSize:   ViewDefaultPageSize,
 		LayoutType: LayoutTypeGallery,
@@ -373,7 +373,7 @@ func NewKanbanView() (ret *View) {
 	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("kanban"),
-		Filters:    []*ViewFilter{},
+		Filters:    []*ViewFilter{{Combination: FilterCombinationAnd}},
 		Sorts:      []*ViewSort{},
 		PageSize:   ViewDefaultPageSize,
 		LayoutType: LayoutTypeKanban,
@@ -835,9 +835,7 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 	for _, view := range ret.Views {
 		view.ID = ast.NewNodeID()
 
-		for _, f := range view.Filters {
-			f.Column = keyIDMap[f.Column]
-		}
+		remapFilterColumns(view.Filters, keyIDMap)
 		for _, s := range view.Sorts {
 			s.Column = keyIDMap[s.Column]
 		}

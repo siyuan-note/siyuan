@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "Et",
+  "filterCombinationOr": "Ou",
+  "addFilterGroup": "Ajouter un groupe de filtres",
+  "filterMatchAll": "Tout correspondre",
+  "filterMatchAny": "Au moins une correspond",
+  "emptyFilterGroup": "Groupe vide",
+  "confirmDeleteFilterGroupTip": "Supprimer ce groupe supprimera toutes les conditions de filtre qu'il contient. Continuer ?",
   "undoCrossDocConfirm": "Cette annulation affectera les documents suivants. Continuer ?",
   "calcOperatorTemplate": "Modèle",
   "calcResultTemplate": "Modèle",

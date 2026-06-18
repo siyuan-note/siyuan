@@ -227,6 +227,54 @@ func setAttrViewGroup(c *gin.Context) {
 	c.JSON(http.StatusOK, ret)
 }
 
+func setAttrViewFilters(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	avID := arg["avID"].(string)
+	blockID := arg["blockID"].(string)
+	data := arg["data"].([]any)
+
+	err := model.SetAttrViewFilters(avID, blockID, data)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	model.ReloadAttrView(avID)
+	c.JSON(http.StatusOK, ret)
+}
+
+func setAttrViewSorts(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	avID := arg["avID"].(string)
+	blockID := arg["blockID"].(string)
+	data := arg["data"].([]any)
+
+	err := model.SetAttrViewSorts(avID, blockID, data)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	model.ReloadAttrView(avID)
+	c.JSON(http.StatusOK, ret)
+}
+
 func changeAttrViewLayout(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	arg, ok := util.JsonArg(c, ret)

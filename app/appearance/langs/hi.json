@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "और",
+  "filterCombinationOr": "या",
+  "addFilterGroup": "फ़िल्टर शर्त समूह जोड़ें",
+  "filterMatchAll": "सभी मिलान करें",
+  "filterMatchAny": "कोई भी मिलान करें",
+  "emptyFilterGroup": "खाली समूह",
+  "confirmDeleteFilterGroupTip": "इस समूह को हटाने से इसके अंदर की सभी फ़िल्टर शर्तें हट जाएंगी। जारी रखें?",
   "undoCrossDocConfirm": "यह पूर्ववत निम्नलिखित दस्तावेज़ों को प्रभावित करेगा। जारी रखें?",
   "calcOperatorTemplate": "टेम्पलेट",
   "calcResultTemplate": "टेम्पलेट",

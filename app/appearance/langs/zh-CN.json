@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "且",
+  "filterCombinationOr": "或",
+  "addFilterGroup": "添加筛选条件分组",
+  "filterMatchAll": "全部满足",
+  "filterMatchAny": "任一满足",
+  "emptyFilterGroup": "空分组",
+  "confirmDeleteFilterGroupTip": "删除该分组将移除其中的所有筛选条件，是否继续？",
   "undoCrossDocConfirm": "本次撤销将影响以下文档，是否继续？",
   "calcOperatorTemplate": "模板",
   "calcResultTemplate": "模板",

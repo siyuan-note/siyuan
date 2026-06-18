@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "و",
+  "filterCombinationOr": "أو",
+  "addFilterGroup": "إضافة مجموعة شروط التصفية",
+  "filterMatchAll": "مطابقة الكل",
+  "filterMatchAny": "مطابقة أي",
+  "emptyFilterGroup": "مجموعة فارغة",
+  "confirmDeleteFilterGroupTip": "سيؤدي حذف هذه المجموعة إلى إزالة جميع شروط التصفية بداخلها. هل تريد المتابعة؟",
   "undoCrossDocConfirm": "سيؤثر هذا التراجع على المستندات التالية. هل تريد المتابعة؟",
   "calcOperatorTemplate": "قالب",
   "calcResultTemplate": "قالب",

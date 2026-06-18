@@ -13,7 +13,20 @@ import {
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {addColOptionOrCell, bindSelectEvent, getSelectHTML, removeCellOption, setColOption} from "./select";
-import {addFilter, getFiltersHTML, setFilter} from "./filter";
+import {
+    addFilter,
+    addFilterGroup,
+    bindInlineFilterEvents,
+    getEditableFilters,
+    getFilterByPath,
+    getFiltersHTML,
+    getParentByPath,
+    hasFilterForColumn,
+    removeFilterByPath,
+    removeFiltersByColumn,
+    resetFoldedFilterPaths,
+    toggleFoldedFilterPath
+} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML} from "./date";
 import {formatNumber} from "./number";
@@ -44,6 +57,7 @@ import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
+import {confirmDialog} from "../../../dialog/confirmDialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 import {
@@ -110,6 +124,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "switcher") {
             html = getSwitcherHTML(data.views, data.viewID);
         } else if (options.type === "filters") {
+            resetFoldedFilterPaths();
             html = getFiltersHTML(data);
         } else if (options.type === "select") {
             html = getSelectHTML(fields, options.cellElements, true, options.blockElement);
@@ -155,7 +170,7 @@ export const openMenuPanel = (options: {
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
+    <div class="b3-menu" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : (options.type === "filters" ? 'style="min-width: 340px;max-width: 80vw;width: fit-content;"' : "")}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         let closeCB: () => void;
@@ -216,6 +231,8 @@ export const openMenuPanel = (options: {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
             if (options.type === "sorts") {
                 bindSortsEvent(options.protyle, menuElement, data, blockID);
+            } else if (options.type === "filters") {
+                bindInlineFilterEvents(avPanelElement, data, options.protyle, blockID, avID);
             } else if (options.type === "edit") {
                 bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
             } else if (options.type === "config") {
@@ -228,7 +245,13 @@ export const openMenuPanel = (options: {
             options.cb(avPanelElement);
         }
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
-            window.siyuan.dragElement = event.target as HTMLElement;
+            const target = event.target as HTMLElement;
+            // 空分组占位行仅作拖放目标，不可作为拖拽源
+            if (target.dataset.emptyGroup) {
+                event.preventDefault();
+                return;
+            }
+            window.siyuan.dragElement = target;
             window.siyuan.dragElement.style.opacity = ".38";
             return;
         });
@@ -295,39 +318,67 @@ export const openMenuPanel = (options: {
                 bindSortsEvent(options.protyle, menuElement, data, blockID);
                 return;
             }
-            if (targetElement.querySelector('[data-type="removeFilter"]')) {
-                const changeData = data.view.filters;
-                const oldData = Object.assign([], changeData);
-                let targetFilter: IAVFilter;
-                changeData.find((filter, index: number) => {
-                    if (filter.column === sourceId) {
-                        targetFilter = changeData.splice(index, 1)[0];
-                        return true;
-                    }
-                });
-                changeData.find((filter, index: number) => {
-                    if (filter.column === targetId) {
-                        if (isTop) {
-                            changeData.splice(index, 0, targetFilter);
-                        } else {
-                            changeData.splice(index + 1, 0, targetFilter);
-                        }
-                        return true;
-                    }
-                });
+            if (targetElement.querySelector('[data-type="removeFilter"]') || targetElement.dataset.emptyGroup) {
+                // 过滤节点拖拽：基于 data-path 在节点树内移动（支持同层重排与跨分组移动）
+                const sourcePath = sourceElement.dataset.path;
+                const targetPath = targetElement.dataset.path;
+                if (sourcePath && targetPath && sourcePath !== targetPath) {
+                    const editable = getEditableFilters(data);
+                    const src = getParentByPath(editable, sourcePath);
+                    const oldData = JSON.parse(JSON.stringify(data.view.filters));
+                    let moved: IAVFilter;
+                    let targetParent: IAVFilter[];
+                    let insertIndex: number;
 
-                transaction(options.protyle, [{
-                    action: "setAttrViewFilters",
-                    avID,
-                    data: changeData,
-                    blockID
-                }], [{
-                    action: "setAttrViewFilters",
-                    avID,
-                    data: oldData,
-                    blockID
-                }]);
-                menuElement.innerHTML = getFiltersHTML(data);
+                    if (targetElement.dataset.emptyGroup) {
+                        // 拖入空分组：目标父数组是该分组的 filters，插入到末尾（空数组即首位）
+                        const groupNode = getFilterByPath(editable, targetPath);
+                        if (!groupNode) {
+                            return;
+                        }
+                        targetParent = groupNode.filters || (groupNode.filters = []);
+                        // 从源父数组移除被拖节点
+                        if (!src.parent || src.index < 0 || src.index >= src.parent.length) {
+                            return;
+                        }
+                        [moved] = src.parent.splice(src.index, 1);
+                        insertIndex = 0; // 空分组只有一个位置
+                    } else {
+                        // 拖到已有节点上：目标父数组是该节点的同级数组
+                        const tgt = getParentByPath(editable, targetPath);
+                        if (!src.parent || !tgt.parent || src.index < 0 || src.index >= src.parent.length || tgt.index < 0 || tgt.index >= tgt.parent.length) {
+                            return;
+                        }
+                        const sameParent = src.parent === tgt.parent;
+                        [moved] = src.parent.splice(src.index, 1);
+                        if (!moved) {
+                            data.view.filters = oldData;
+                            return;
+                        }
+                        targetParent = tgt.parent;
+                        insertIndex = sameParent
+                            ? (src.index < tgt.index ? tgt.index - 1 : tgt.index)
+                            : tgt.index;
+                    }
+
+                    if (!moved) {
+                        data.view.filters = oldData;
+                        return;
+                    }
+                    targetParent.splice(isTop ? insertIndex : insertIndex + 1, 0, moved);
+                    transaction(options.protyle, [{
+                        action: "setAttrViewFilters",
+                        avID,
+                        data: data.view.filters,
+                        blockID
+                    }], [{
+                        action: "setAttrViewFilters",
+                        avID,
+                        data: oldData,
+                        blockID
+                    }]);
+                    menuElement.innerHTML = getFiltersHTML(data);
+                }
                 return;
             }
             if (targetElement.querySelector('[data-type="av-view-edit"]')) {
@@ -583,6 +634,34 @@ export const openMenuPanel = (options: {
                 window.siyuan.dragElement = undefined;
             }
         });
+        // 过滤分组 AND/OR 切换（select 的 change 事件，不走 click 分发）
+        avPanelElement.addEventListener("change", (event: Event) => {
+            const select = event.target as HTMLElement;
+            if (select.dataset.type !== "toggleCombination") {
+                return;
+            }
+            const path = select.dataset.path;
+            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+            // path 为空表示切换根组（data.view.filters[0]）；否则切换嵌套分组节点
+            const node = "" === path
+                ? (data.view.filters[0] && data.view.filters[0].filters ? data.view.filters[0] : undefined)
+                : getFilterByPath(getEditableFilters(data), path);
+            if (node) {
+                node.combination = (select as HTMLSelectElement).value === "or" ? "or" : "and";
+            }
+            transaction(options.protyle, [{
+                action: "setAttrViewFilters",
+                avID,
+                data: data.view.filters,
+                blockID
+            }], [{
+                action: "setAttrViewFilters",
+                avID,
+                data: oldFilters,
+                blockID
+            }]);
+            event.stopPropagation();
+        });
         // 多选排序
         avPanelElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
             if (event.button === 1 && !hasClosestByClassName(event.target, "b3-menu")) {
@@ -656,6 +735,10 @@ export const openMenuPanel = (options: {
             }
             while (target && target !== avPanelElement || type) {
                 type = target?.dataset.type || type;
+                // toggleCombination 由 change 事件处理，click 直接跳过避免空跑
+                if (type === "toggleCombination") {
+                    break;
+                }
                 if (type === "close") {
                     if (!options.protyle.toolbar.subElement.classList.contains("fn__none")) {
                         // 优先关闭资源文件搜索
@@ -789,7 +872,16 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "toggleFold") {
+                    // 折叠/展开嵌套分组：记忆到模块状态，重渲染后保持
+                    const path = target.getAttribute("data-path") || target.closest("[data-path]")?.getAttribute("data-path") || "";
+                    toggleFoldedFilterPath(path);
+                    menuElement.innerHTML = getFiltersHTML(data);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "addFilter") {
+                    const path = target.closest("[data-path]")?.getAttribute("data-path") || "";
                     addFilter({
                         data,
                         rect: target.getBoundingClientRect(),
@@ -797,20 +889,25 @@ export const openMenuPanel = (options: {
                         tabRect,
                         avId: avID,
                         protyle: options.protyle,
-                        blockElement: options.blockElement
+                        blockElement: options.blockElement,
+                        parentPath: path
                     });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "removeFilter") {
-                    window.siyuan.menus.menu.remove();
-                    const oldFilters = Object.assign([], data.view.filters);
-                    data.view.filters.find((item: IAVFilter, index: number) => {
-                        if (item.column === target.parentElement.dataset.id && item.value.type === target.parentElement.dataset.filterType) {
-                            data.view.filters.splice(index, 1);
-                            return true;
-                        }
-                    });
+                } else if (type === "addFilterGroup") {
+                    const path = target.closest("[data-path]")?.getAttribute("data-path") || "";
+                    // 记录目标分组在添加前的子节点数，用于事务后计算新分组的 path 并滚动定位
+                    let targetFilters: IAVFilter[];
+                    if ("" === path) {
+                        targetFilters = getEditableFilters(data);
+                    } else {
+                        const node = getFilterByPath(getEditableFilters(data), path);
+                        targetFilters = node && node.filters ? node.filters : getEditableFilters(data);
+                    }
+                    const newGroupIndex = targetFilters.length;
+                    const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                    addFilterGroup(data, path);
                     transaction(options.protyle, [{
                         action: "setAttrViewFilters",
                         avID,
@@ -824,23 +921,41 @@ export const openMenuPanel = (options: {
                     }]);
                     menuElement.innerHTML = getFiltersHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    // 滚动到新分组，引导用户继续往里添加条件
+                    const newGroupPath = path ? `${path},${newGroupIndex}` : `${newGroupIndex}`;
+                    const newGroupToggle = menuElement.querySelector(`[data-type="toggleFold"][data-path="${newGroupPath}"]`) as HTMLElement;
+                    const newGroupRow = newGroupToggle?.closest(".b3-menu__item") as HTMLElement;
+                    newGroupRow?.scrollIntoView({behavior: "smooth", block: "nearest"});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "setFilter") {
-                    data.view.filters.find((item: IAVFilter) => {
-                        if (item.column === target.parentElement.parentElement.dataset.id && item.value.type === target.parentElement.parentElement.dataset.filterType) {
-                            setFilter({
-                                empty: false,
-                                filter: item,
-                                protyle: options.protyle,
-                                data,
-                                target,
-                                blockElement: options.blockElement
-                            });
-                            return true;
-                        }
-                    });
+                } else if (type === "removeFilter") {
+                    window.siyuan.menus.menu.remove();
+                    const path = target.getAttribute("data-path") || target.closest("[data-path]")?.getAttribute("data-path") || "";
+                    const node = getFilterByPath(getEditableFilters(data), path);
+                    // 删除非空分组（含子条件）需二次确认，避免误删整组；单条件直接删
+                    const doRemove = () => {
+                        const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                        removeFilterByPath(getEditableFilters(data), path);
+                        transaction(options.protyle, [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: data.view.filters,
+                            blockID
+                        }], [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: oldFilters,
+                            blockID
+                        }]);
+                        menuElement.innerHTML = getFiltersHTML(data);
+                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    };
+                    if (node && node.filters && node.filters.length > 0) {
+                        confirmDialog(window.siyuan.languages.removeFilters, window.siyuan.languages.confirmDeleteFilterGroupTip, doRemove);
+                    } else {
+                        doRemove();
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1087,15 +1202,22 @@ export const openMenuPanel = (options: {
                                 }]);
                             }
 
-                            const filterExist = data.view.filters.find((filter) => filter.column === colId);
+                            const filterExist = hasFilterForColumn(data.view.filters, colId);
                             if (filterExist) {
                                 const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                                const newFilters = data.view.filters.filter((filter) => filter.column !== colId);
+                                // 递归移除引用该列的叶子并裁剪空分组。spec 5 下顶层为根组，操作其子节点；
+                                // 兜底旧扁平数据（无根组）时直接处理顶层。
+                                const root = data.view.filters[0] && data.view.filters[0].filters ? data.view.filters[0] : null;
+                                if (root) {
+                                    root.filters = removeFiltersByColumn(root.filters, colId);
+                                } else {
+                                    data.view.filters = removeFiltersByColumn(data.view.filters, colId);
+                                }
 
                                 transaction(options.protyle, [{
                                     action: "setAttrViewFilters",
                                     avID: data.id,
-                                    data: newFilters,
+                                    data: data.view.filters,
                                     blockID
                                 }], [{
                                     action: "setAttrViewFilters",

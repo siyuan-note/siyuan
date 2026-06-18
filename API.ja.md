@@ -51,7 +51,8 @@
     * [レイアウトを切り替え](#レイアウトを切り替え)
     * [グループ化を設定](#グループ化を設定)
     * [フィルターとソートを取得](#フィルターとソートを取得)
-    * [フィルターとソートを設定](#フィルターとソートを設定)
+    * [フィルターを設定](#フィルターを設定)
+    * [ソートを設定](#ソートを設定)
     * [フィールドを追加](#フィールドを追加)
     * [フィールドを削除](#フィールドを削除)
     * [グローバルのフィールドソートを設定](#グローバルのフィールドソートを設定)
@@ -2187,11 +2188,13 @@
   }
   ```
 
-    * `data.filters`: `ViewFilter` の配列
-    * `data.filters[].column`: フィルターが適用されるフィールド（列）ID
-    * `data.filters[].operator`: フィルター演算子（下記の演算子表を参照）
-    * `data.filters[].value`: フィルター値。`Value` オブジェクト（形状は [セル値を設定](#セル値を設定) を参照）
-    * `data.filters[].relativeDate`: 任意。日付フィルターが使用する相対日時記述子（`{ "count": 7, "unit": 0, "direction": -1 }`、`unit`：`0` 日、`1` 週、`2` 月、`3` 年、`direction`：`-1` 前、`0` 今期、`1` 後）
+    * `data.filters`: `ViewFilter` の配列。最上位は単一のルートグループノード `{ "combination": "and"|"or", "filters": [...] }` で、配列要素はリーフフィルターまたはネストされたグループノードのいずれかで、再帰的な AND/OR 組み合わせをサポートします
+    * `data.filters[].column`: フィルターが適用されるフィールド（列）ID（リーフノードのみ）
+    * `data.filters[].operator`: フィルター演算子（下記の演算子表を参照；リーフノードのみ）
+    * `data.filters[].value`: フィルター値。`Value` オブジェクト（形状は [セル値を設定](#セル値を設定) を参照；リーフノードのみ）
+    * `data.filters[].relativeDate`: 任意。日付フィルターが使用する相対日時記述子（`{ "count": 7, "unit": 0, "direction": -1 }`、`unit`：`0` 日、`1` 週、`2` 月、`3` 年、`direction`：`-1` 前、`0` 今期、`1` 後；リーフノードのみ）
+    * `data.filters[].combination`: グループの組み合わせ方法、`"and"` または `"or"`（グループノードのみ）
+    * `data.filters[].filters`: 子フィルターノード、再帰的な `ViewFilter`（グループノードのみ）
     * `data.sorts`: `ViewSort` の配列
     * `data.sorts[].column`: ソートが適用されるフィールド（列）ID
     * `data.sorts[].order`: `ASC` または `DESC`
@@ -2216,95 +2219,73 @@
   | `Is true`            | 真（チェックボックス） |
   | `Is false`           | 偽（チェックボックス） |
 
-### フィルターとソートを設定
+### フィルターを設定
 
-フィルターとソートは、変更がアンドゥ可能な編集トランザクションの一部であるため、トランザクションエンドポイント `/api/transactions`（複数形）を通じて永続化します。各ルール変更を `doOperations` エントリに包み、`action` を `setAttrViewFilters` または `setAttrViewSorts` とし、`data` フィールドに完全な新しい配列を指定します（ビューの既存ルールを完全に置き換えます）。
-
-* `/api/transactions`
+* `/api/av/setAttrViewFilters`
 * パラメータ
 
   ```json
   {
-    "reqId": 1781610129661,
-    "app": "",
-    "session": "",
-    "transactions": [
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "data": [
       {
-        "doOperations": [
-          {
-            "action": "setAttrViewFilters",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118203822-io6ofxb",
-                "operator": "=",
-                "value": {
-                  "type": "select",
-                  "mSelect": [
-                    { "content": "完了", "color": "1" }
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "action": "setAttrViewSorts",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118120204-w6cggab",
-                "order": "DESC"
-              }
-            ]
-          }
-        ]
+        "column": "20240118203822-io6ofxb",
+        "operator": "=",
+        "value": {
+          "type": "select",
+          "mSelect": [
+            { "content": "完了", "color": "1" }
+          ]
+        }
       }
     ]
   }
   ```
 
-    * `reqId`: 必須。クライアントが生成したタイムスタンプ/ノンス（数値）。アンドゥ/リドゥ用にトランザクションをタグ付けします
-    * `app` / `session`: 任意。結果の WebSocket プッシュをスコープし、他のクライアント/セッションがリフレッシュできるようにします
-    * `transactions[].doOperations[]`: 置換するルールセットごとに1つの操作
-    * `doOperations[].action`: `setAttrViewFilters` でフィルターを置換、`setAttrViewSorts` でソートを置換
-    * `doOperations[].avID`: データベース ID
-    * `doOperations[].blockID`: このビューを所有するデータベースブロック
-    * `doOperations[].data`: 完全な新しい `ViewFilter` または `ViewSort` の配列（形状は [フィルターとソートを取得](#フィルターとソートを取得) を参照）。`[]` を渡してクリア
-* 戻り値（実際のレスポンス、送信した操作をエコーし、サーバー割り当ての `timestamp` を付加）：
+    * `avID`: データベース ID
+    * `blockID`: このビューを所有するデータベースブロック
+    * `data`: 完全な新しい `ViewFilter` の配列。ビューの既存フィルターを**完全に置換**します（形状は [フィルターとソートを取得](#フィルターとソートを取得) を参照）。`[]` を渡して全フィルターをクリア。最上位は単一のルートグループノード `{ "combination": "and"|"or", "filters": [...] }` で、配列要素はリーフフィルターまたはネストされたグループノードのいずれかで、再帰的な AND/OR 組み合わせをサポートします
+* 戻り値
 
   ```json
   {
     "code": 0,
     "msg": "",
+    "data": null
+  }
+  ```
+
+### ソートを設定
+
+* `/api/av/setAttrViewSorts`
+* パラメータ
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
     "data": [
       {
-        "timestamp": 1781610129661,
-        "doOperations": [
-          {
-            "action": "setAttrViewFilters",
-            "id": "",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118203822-io6ofxb",
-                "operator": "=",
-                "value": {
-                  "type": "select",
-                  "mSelect": [{ "content": "完了", "color": "1" }]
-                }
-              }
-            ]
-          }
-        ]
+        "column": "20240118120204-w6cggab",
+        "order": "DESC"
       }
     ]
   }
   ```
 
-    * 呼び出し成功後、[フィルターとソートを取得](#フィルターとソートを取得) で永続化されたか確認できます
+    * `avID`: データベース ID
+    * `blockID`: このビューを所有するデータベースブロック
+    * `data`: 完全な新しい `ViewSort` の配列。ビューの既存ソートを**完全に置換**します（形状は [フィルターとソートを取得](#フィルターとソートを取得) を参照）。`[]` を渡して全ソートをクリア
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
 
 ### フィールドを追加
 

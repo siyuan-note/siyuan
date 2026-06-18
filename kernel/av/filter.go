@@ -26,13 +26,30 @@ import (
 )
 
 // ViewFilter 描述了视图过滤规则的结构。
+// 叶子节点：Column/Operator/Value 等字段有效，Filters 为空。
+// 分组节点：Combination 指明子节点的组合方式，Filters 为子节点列表（递归）。
 type ViewFilter struct {
-	Column        string           `json:"column"`                  // 字段（列）ID
-	Qualifier     FilterQuantifier `json:"quantifier,omitempty"`    // 量词
-	Operator      FilterOperator   `json:"operator"`                // 操作符
-	Value         *Value           `json:"value"`                   // 过滤值
-	RelativeDate  *RelativeDate    `json:"relativeDate,omitempty"`  // 相对时间
-	RelativeDate2 *RelativeDate    `json:"relativeDate2,omitempty"` // 第二个相对时间，用于某些操作符，比如 FilterOperatorIsBetween
+	Column        string             `json:"column"`                  // 字段（列）ID，叶子节点有效
+	Qualifier     FilterQuantifier   `json:"quantifier,omitempty"`    // 量词，叶子节点有效
+	Operator      FilterOperator     `json:"operator"`                // 操作符，叶子节点有效
+	Value         *Value             `json:"value"`                   // 过滤值，叶子节点有效
+	RelativeDate  *RelativeDate      `json:"relativeDate,omitempty"`  // 相对时间，叶子节点有效
+	RelativeDate2 *RelativeDate      `json:"relativeDate2,omitempty"` // 第二个相对时间，叶子节点有效
+	Combination   FilterCombination  `json:"combination,omitempty"`   // 组合方式，分组节点有效
+	Filters       []*ViewFilter      `json:"filters,omitempty"`       // 子节点，分组节点有效（递归）
+}
+
+// FilterCombination 描述了分组节点中子过滤条件的组合方式。
+type FilterCombination string
+
+const (
+	FilterCombinationAnd FilterCombination = "and" // 全部满足
+	FilterCombinationOr  FilterCombination = "or"  // 任一满足
+)
+
+// IsGroup 判断该过滤节点是否为分组节点：设置了组合方式或带有子节点即为分组。
+func (filter *ViewFilter) IsGroup() bool {
+	return nil != filter && ("" != filter.Combination || 0 < len(filter.Filters))
 }
 
 type RelativeDateUnit int
@@ -94,47 +111,283 @@ func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections
 		return
 	}
 
-	var colIndexes []int
-	for _, f := range filters {
-		for i, c := range collection.GetFields() {
-			if c.GetID() == f.Column {
-				colIndexes = append(colIndexes, i)
-				break
-			}
-		}
+	// 归一化为单一根组：spec 5 起顶层应为一个根组；旧数据/异常数据为扁平叶子数组时，
+	// 在内存里包成隐式 AND 根组参与求值，不修改原数据、不崩溃。
+	root := normalizeFiltersAsRoot(filters)
+	if nil == root {
+		return
 	}
+
+	// 递归收集所有叶子引用的列 ID 在 values 中的下标，避免每行重复查找。
+	fields := collection.GetFields()
+	colIndexByColumn := map[string]int{}
+	collectLeafColumnIndexes([]*ViewFilter{root}, fields, colIndexByColumn)
 
 	var items []Item
 	for _, item := range collection.GetItems() {
-		pass := true
 		values := item.GetValues()
-		for j, index := range colIndexes {
-			operator := filters[j].Operator
-
-			if nil == values[index] {
-				if FilterOperatorIsNotEmpty == operator {
-					pass = false
-				} else if FilterOperatorIsEmpty == operator {
-					pass = true
-					break
-				}
-
-				if KeyTypeText != values[index].Type {
-					pass = false
-				}
-				break
-			}
-
-			if !values[index].Filter(filters[j], attrView, item.GetID(), rollupFurtherCollections, cachedAttrViews) {
-				pass = false
-				break
-			}
-		}
-		if pass {
+		if evalNode(root, values, colIndexByColumn, attrView, item.GetID(), rollupFurtherCollections, cachedAttrViews) {
 			items = append(items, item)
 		}
 	}
 	collection.SetItems(items)
+}
+
+// normalizeFiltersAsRoot 将 view.Filters 归一化为一个根组并返回。
+// 正常情况（spec 5）下 filters 为 [根组]，直接返回 filters[0]。
+// 若 filters 为扁平叶子数组（旧数据或异常），构造一个隐式 AND 根组返回（不写回原 slice）。
+func normalizeFiltersAsRoot(filters []*ViewFilter) *ViewFilter {
+	if 1 > len(filters) {
+		return nil
+	}
+	if 1 == len(filters) && filters[0].IsGroup() {
+		return filters[0]
+	}
+	return &ViewFilter{Combination: FilterCombinationAnd, Filters: filters}
+}
+
+// collectLeafColumnIndexes 递归收集所有叶子节点引用的列 ID 在 fields 中的下标。
+func collectLeafColumnIndexes(nodes []*ViewFilter, fields []Field, colIndexByColumn map[string]int) {
+	for _, node := range nodes {
+		if nil == node {
+			continue
+		}
+		if node.IsGroup() {
+			collectLeafColumnIndexes(node.Filters, fields, colIndexByColumn)
+			continue
+		}
+		if "" == node.Column {
+			continue
+		}
+		if _, ok := colIndexByColumn[node.Column]; ok {
+			continue
+		}
+		for i, f := range fields {
+			if f.GetID() == node.Column {
+				colIndexByColumn[node.Column] = i
+				break
+			}
+		}
+	}
+}
+
+// evalNode 递归求值：分组按 Combination 聚合子节点，叶子调用原单元格求值逻辑。
+// 空分组：AND 恒真、OR 恒假。叶子节点的空值/未配置语义由 evalLeaf → value.Filter 保留原扁平行为。
+func evalNode(node *ViewFilter, values []*Value, colIndexByColumn map[string]int, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+	if nil == node {
+		return false
+	}
+
+	if node.IsGroup() {
+		if 1 > len(node.Filters) {
+			// 空分组：AND 视为全部满足（恒真，不阻断）；OR 视为任一满足（空集恒假）。
+			return FilterCombinationOr != node.Combination
+		}
+		switch node.Combination {
+		case FilterCombinationOr:
+			for _, child := range node.Filters {
+				if evalNode(child, values, colIndexByColumn, attrView, itemID, rollupFurtherCollections, cachedAttrViews) {
+					return true // OR 短路：任一子节点通过即通过
+				}
+			}
+			return false
+		default: // FilterCombinationAnd 及空值兜底为 AND
+			for _, child := range node.Filters {
+				if !evalNode(child, values, colIndexByColumn, attrView, itemID, rollupFurtherCollections, cachedAttrViews) {
+					return false // AND 短路：任一子节点不通过即不通过
+				}
+			}
+			return true
+		}
+	}
+
+	// 叶子节点：列不存在（字段被删）则不过；其余交由 evalLeaf → value.Filter 判定。
+	// 注意：未配置的叶子（Value/RelativeDate 均为 nil）由 value.Filter 返回 true（视为通过），
+	// 保留扁平时代的原语义，避免对已存在但未填值的过滤条件产生回归。
+	index, ok := colIndexByColumn[node.Column]
+	if !ok {
+		return false // 列不存在（字段被删）则不过
+	}
+
+	return evalLeaf(node, values, index, attrView, itemID, rollupFurtherCollections, cachedAttrViews)
+}
+
+// evalLeaf 对叶子过滤节点做单元格级判定，保留扁平时代 Filter() 的空值特判与 text 豁免语义。
+func evalLeaf(filter *ViewFilter, values []*Value, index int, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
+	if 0 > index || index >= len(values) {
+		return false
+	}
+
+	operator := filter.Operator
+	if nil == values[index] {
+		// 单元格无值：Is not empty 不过、Is empty 过、其余操作符一律不过
+		if FilterOperatorIsNotEmpty == operator {
+			return false
+		} else if FilterOperatorIsEmpty == operator {
+			return true
+		}
+		return false
+	}
+
+	return values[index].Filter(filter, attrView, itemID, rollupFurtherCollections, cachedAttrViews)
+}
+
+// remapFilterColumns 递归将过滤节点树中所有叶子引用的列 ID 映射为新 ID（用于复制视图）。
+func remapFilterColumns(nodes []*ViewFilter, keyIDMap map[string]string) []*ViewFilter {
+	for _, node := range nodes {
+		if nil == node {
+			continue
+		}
+		if node.IsGroup() {
+			remapFilterColumns(node.Filters, keyIDMap)
+			continue
+		}
+		node.Column = keyIDMap[node.Column]
+	}
+	return nodes
+}
+
+// CloneFilters 递归深拷贝过滤节点树，叶子与分组结构均完整复制（含新 Combination/Filters 字段）。
+func CloneFilters(filters []*ViewFilter) (ret []*ViewFilter) {
+	for _, f := range filters {
+		if nil == f {
+			continue
+		}
+		cloned := &ViewFilter{
+			Column:        f.Column,
+			Qualifier:     f.Qualifier,
+			Operator:      f.Operator,
+			Value:         f.Value,
+			RelativeDate:  f.RelativeDate,
+			RelativeDate2: f.RelativeDate2,
+			Combination:   f.Combination,
+		}
+		if 0 < len(f.Filters) {
+			cloned.Filters = CloneFilters(f.Filters)
+		}
+		ret = append(ret, cloned)
+	}
+	return
+}
+
+// RemoveFiltersByColumn 递归移除所有引用指定列的叶子节点，并裁剪变空的分组节点。
+// 返回处理后的节点列表（原列表不被修改，返回新列表）。
+func RemoveFiltersByColumn(filters []*ViewFilter, column string) (ret []*ViewFilter) {
+	for _, f := range filters {
+		if nil == f {
+			continue
+		}
+		if f.IsGroup() {
+			children := RemoveFiltersByColumn(f.Filters, column)
+			// 子节点全部被移除时丢弃空分组
+			if 0 < len(children) {
+				f.Filters = children
+				ret = append(ret, f)
+			}
+			continue
+		}
+		if f.Column == column {
+			continue
+		}
+		ret = append(ret, f)
+	}
+	return
+}
+
+// RemoveSelectOptionFromFilters 递归从引用指定列的 select/mSelect 叶子中移除给定选项值。
+// 若叶子移除后选项为空（且非 Is empty/Is not empty 操作符），则整体移除该叶子；并裁剪变空的分组。
+// 返回处理后的节点列表。
+func RemoveSelectOptionFromFilters(filters []*ViewFilter, column, optionContent string) (ret []*ViewFilter) {
+	for _, f := range filters {
+		if nil == f {
+			continue
+		}
+		if f.IsGroup() {
+			children := RemoveSelectOptionFromFilters(f.Filters, column, optionContent)
+			if 0 < len(children) {
+				f.Filters = children
+				ret = append(ret, f)
+			}
+			continue
+		}
+		if f.Column != column {
+			ret = append(ret, f)
+			continue
+		}
+		if nil == f.Value || (KeyTypeSelect != f.Value.Type && KeyTypeMSelect != f.Value.Type) {
+			ret = append(ret, f)
+			continue
+		}
+		if FilterOperatorIsEmpty == f.Operator || FilterOperatorIsNotEmpty == f.Operator {
+			ret = append(ret, f)
+			continue
+		}
+		for i, opt := range f.Value.MSelect {
+			if optionContent == opt.Content {
+				f.Value.MSelect = append(f.Value.MSelect[:i], f.Value.MSelect[i+1:]...)
+				break
+			}
+		}
+		if 1 > len(f.Value.MSelect) {
+			continue // 选项删空则移除该过滤条件
+		}
+		ret = append(ret, f)
+	}
+	return
+}
+
+// RenameSelectOptionInFilters 递归将引用指定列的 select/mSelect 叶子中的旧选项名改为新名与新颜色。
+func RenameSelectOptionInFilters(filters []*ViewFilter, column, oldContent, newContent, newColor string) {
+	for _, f := range filters {
+		if nil == f {
+			continue
+		}
+		if f.IsGroup() {
+			RenameSelectOptionInFilters(f.Filters, column, oldContent, newContent, newColor)
+			continue
+		}
+		if f.Column != column || nil == f.Value {
+			continue
+		}
+		if KeyTypeSelect != f.Value.Type && KeyTypeMSelect != f.Value.Type {
+			continue
+		}
+		for _, opt := range f.Value.MSelect {
+			if oldContent == opt.Content {
+				opt.Content = newContent
+				opt.Color = newColor
+			}
+		}
+	}
+}
+
+// PruneInvalidColumnFilters 递归移除引用了不存在列的叶子节点，并裁剪变空的分组节点。
+// validColumns 为当前仍存在的列 ID 集合。返回处理后的节点列表及是否有改动。
+func PruneInvalidColumnFilters(filters []*ViewFilter, validColumns map[string]bool) (ret []*ViewFilter, changed bool) {
+	for _, f := range filters {
+		if nil == f {
+			continue
+		}
+		if f.IsGroup() {
+			children, childChanged := PruneInvalidColumnFilters(f.Filters, validColumns)
+			if 0 < len(children) {
+				f.Filters = children
+				ret = append(ret, f)
+			} else {
+				changed = true // 分组变为空被丢弃
+			}
+			if childChanged {
+				changed = true
+			}
+			continue
+		}
+		if validColumns[f.Column] {
+			ret = append(ret, f)
+		} else {
+			changed = true
+		}
+	}
+	return
 }
 
 func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
@@ -1023,6 +1276,8 @@ func calcRelativeTimeRegion(count int, unit RelativeDateUnit, direction Relative
 	return
 }
 
+// IsValid 判断叶子过滤节点是否可参与「新增行默认值」计算。仅对叶子节点调用；
+// 分组节点 filter.Value 为 nil 会返回 false（视为不可参与），调用方应先递归到叶子。
 func (filter *ViewFilter) IsValid() bool {
 	if nil == filter || nil == filter.Value {
 		return false

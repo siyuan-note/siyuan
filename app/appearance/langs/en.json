@@ -1,4 +1,11 @@
 {
+  "filterCombinationAnd": "And",
+  "filterCombinationOr": "Or",
+  "addFilterGroup": "Add filter group",
+  "filterMatchAll": "Match all",
+  "filterMatchAny": "Match any",
+  "emptyFilterGroup": "Empty group",
+  "confirmDeleteFilterGroupTip": "Deleting this group will remove all filter conditions within it. Continue?",
   "undoCrossDocConfirm": "This undo will affect the following documents. Continue?",
   "calcOperatorTemplate": "Template",
   "calcResultTemplate": "Template",

@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "转换为标题",
+  "dragTipRef": "插入引用",
+  "dragTipMoveChild": "移动为 ${x} 子文档",
+  "dragTipMoveBefore": "移动到 ${x} 上方",
+  "dragTipMoveAfter": "移动到 ${x} 下方",
+  "dragTip2DocChild": "转换为文档作为 ${x} 子文档",
+  "dragTip2DocBefore": "转换为文档并移动到 ${x} 上方",
+  "dragTip2DocAfter": "转换为文档并移动到 ${x} 下方",
   "workspace": "工作空间",
   "addAiProvider": "添加提供商",
   "addAiModel": "添加模型",

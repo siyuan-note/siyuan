@@ -1375,8 +1375,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             showDragTip(window.siyuan.dragTitle || "",
                 event.altKey ? window.siyuan.languages.dragTip2Heading : window.siyuan.languages.dragTipRef,
                 event.clientX, event.clientY);
-        } else if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeHeading${Constants.ZWSP}`.toLowerCase())) {
-            // 标题块拖入编辑器（含编辑器内重排）：Alt=插入引用，Shift=嵌入块，默认=移动
+        } else if (gutterType && !gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}`.toLowerCase())) {
+            // 普通块（段落/标题/列表/引用等，排除 AV）拖入编辑器（含编辑器内重排）：Alt=插入引用，Shift=嵌入块，默认=移动
             let action: string;
             if (event.altKey) {
                 action = window.siyuan.languages.dragTipRef;

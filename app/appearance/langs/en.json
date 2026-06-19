@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "Convert to heading",
+  "dragTipRef": "Insert reference",
+  "dragTipMoveChild": "Move into ${x}",
+  "dragTipMoveBefore": "Move above ${x}",
+  "dragTipMoveAfter": "Move below ${x}",
+  "dragTip2DocChild": "Convert to document as sub-doc of ${x}",
+  "dragTip2DocBefore": "Convert to document and move above ${x}",
+  "dragTip2DocAfter": "Convert to document and move below ${x}",
   "workspace": "Workspace",
   "addAiProvider": "Add provider",
   "addAiModel": "Add model",

@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "เปลี่ยนเป็นส่วนหัว",
+  "dragTipRef": "แทรกการอ้างอิง",
+  "dragTipMoveChild": "ย้ายไปยัง ${x}",
+  "dragTipMoveBefore": "ย้ายไปด้านบน ${x}",
+  "dragTipMoveAfter": "ย้ายไปด้านล่าง ${x}",
+  "dragTip2DocChild": "แปลงเป็นเอกสารเป็นเอกสารย่อยของ ${x}",
+  "dragTip2DocBefore": "แปลงเป็นเอกสารและย้ายไปด้านบน ${x}",
+  "dragTip2DocAfter": "แปลงเป็นเอกสารและย้ายไปด้านล่าง ${x}",
   "workspace": "พื้นที่ทำงาน",
   "addAiProvider": "เพิ่มผู้ให้บริการ",
   "addAiModel": "เพิ่มโมเดล",

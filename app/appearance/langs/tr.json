@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "Başlığa dönüştür",
+  "dragTipRef": "Referans ekle",
+  "dragTipMoveChild": "${x} içine taşı",
+  "dragTipMoveBefore": "${x} üzerine taşı",
+  "dragTipMoveAfter": "${x} altına taşı",
+  "dragTip2DocChild": "${x} alt belgesi olarak belgeye dönüştür",
+  "dragTip2DocBefore": "Belgeye dönüştür ve ${x} üzerine taşı",
+  "dragTip2DocAfter": "Belgeye dönüştür ve ${x} altına taşı",
   "workspace": "Çalışma alanı",
   "addAiProvider": "Sağlayıcı ekle",
   "addAiModel": "Model ekle",

@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "Перетворити на заголовок",
+  "dragTipRef": "Вставити посилання",
+  "dragTipMoveChild": "Перемістити в ${x}",
+  "dragTipMoveBefore": "Перемістити вище ${x}",
+  "dragTipMoveAfter": "Перемістити нижче ${x}",
+  "dragTip2DocChild": "Перетворити на документ як піддокумент ${x}",
+  "dragTip2DocBefore": "Перетворити на документ і перемістити вище ${x}",
+  "dragTip2DocAfter": "Перетворити на документ і перемістити нижче ${x}",
   "workspace": "Робочий простір",
   "addAiProvider": "Додати постачальника",
   "addAiModel": "Додати модель",

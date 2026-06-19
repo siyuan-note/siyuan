@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "In Überschrift umwandeln",
+  "dragTipRef": "Referenz einfügen",
+  "dragTipMoveChild": "In ${x} verschieben",
+  "dragTipMoveBefore": "Über ${x} verschieben",
+  "dragTipMoveAfter": "Unter ${x} verschieben",
+  "dragTip2DocChild": "Als Unterdokument von ${x} in Dokument umwandeln",
+  "dragTip2DocBefore": "In Dokument umwandeln und über ${x} verschieben",
+  "dragTip2DocAfter": "In Dokument umwandeln und unter ${x} verschieben",
   "workspace": "Arbeitsbereich",
   "addAiProvider": "Anbieter hinzufügen",
   "addAiModel": "Modell hinzufügen",

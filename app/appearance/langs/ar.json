@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "تحويل إلى عنوان",
+  "dragTipRef": "إدراج مرجع",
+  "dragTipMoveChild": "النقل إلى ${x}",
+  "dragTipMoveBefore": "النقل فوق ${x}",
+  "dragTipMoveAfter": "النقل تحت ${x}",
+  "dragTip2DocChild": "تحويل إلى مستند كمستند فرعي لـ ${x}",
+  "dragTip2DocBefore": "تحويل إلى مستند والنقل فوق ${x}",
+  "dragTip2DocAfter": "تحويل إلى مستند والنقل تحت ${x}",
   "workspace": "مساحة العمل",
   "addAiProvider": "إضافة مزود",
   "addAiModel": "إضافة نموذج",

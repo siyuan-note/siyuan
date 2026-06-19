@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "Zmień w nagłówek",
+  "dragTipRef": "Wstaw odnośnik",
+  "dragTipMoveChild": "Przenieś do ${x}",
+  "dragTipMoveBefore": "Przenieś powyżej ${x}",
+  "dragTipMoveAfter": "Przenieś poniżej ${x}",
+  "dragTip2DocChild": "Przekształć w dokument jako dokument podrzędny ${x}",
+  "dragTip2DocBefore": "Przekształć w dokument i przenieś powyżej ${x}",
+  "dragTip2DocAfter": "Przekształć w dokument i przenieś poniżej ${x}",
   "workspace": "Obszar roboczy",
   "addAiProvider": "Dodaj dostawcę",
   "addAiModel": "Dodaj model",

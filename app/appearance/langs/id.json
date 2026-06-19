@@ -1,4 +1,12 @@
 {
+  "dragTip2Heading": "Ubah menjadi judul",
+  "dragTipRef": "Sisipkan referensi",
+  "dragTipMoveChild": "Pindahkan ke ${x}",
+  "dragTipMoveBefore": "Pindahkan ke atas ${x}",
+  "dragTipMoveAfter": "Pindahkan ke bawah ${x}",
+  "dragTip2DocChild": "Ubah menjadi dokumen sebagai sub-dokumen ${x}",
+  "dragTip2DocBefore": "Ubah menjadi dokumen dan pindahkan ke atas ${x}",
+  "dragTip2DocAfter": "Ubah menjadi dokumen dan pindahkan ke bawah ${x}",
   "workspace": "Ruang Kerja",
   "addAiProvider": "Tambah penyedia",
   "addAiModel": "Tambah model",

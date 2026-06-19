@@ -93,7 +93,7 @@ export const newDailyNote = (app: App) => {
 };
 
 export const mountHelp = () => {
-    const notebookId = Constants.HELP_PATH[window.siyuan.config.appearance.lang as "zh-CN" | "en"];
+    const notebookId = Constants.HELP_PATH[window.siyuan.config.appearance.lang];
     fetchPost("/api/notebook/removeNotebook", {notebook: notebookId}, () => {
         fetchPost("/api/notebook/openNotebook", {
             notebook: notebookId,

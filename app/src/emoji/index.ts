@@ -266,7 +266,8 @@ export const openEmojiPanel = (
         if (!dynamicCurrentObj.color.startsWith("#")) {
             dynamicCurrentObj.color = "#" + dynamicCurrentObj.color;
         }
-        dynamicCurrentObj.lang = dynamicCurrentUrl.get("lang") || "";
+        const lang = dynamicCurrentUrl.get("lang") || "";
+        dynamicCurrentObj.lang = ({zh_CN: "zh-CN", zh_CHT: "zh-TW", en_US: "en"} as IObject)[lang] || lang;
         dynamicCurrentObj.date = dynamicCurrentUrl.get("date") || "";
         dynamicCurrentObj.weekdayType = dynamicCurrentUrl.get("weekdayType") || "1";
         dynamicCurrentObj.type = dynamicCurrentUrl.get("type") || "1";

@@ -171,41 +171,48 @@ func InitConf() {
 			Conf.Lang = util.Lang
 			logging.LogInfof("initialized the specified language [%s]", util.Lang)
 		}
-	} else {
-		if "" == Conf.Lang {
-			// 未指定外观语言时使用系统语言
-
-			if userLang, err := locale.Detect(); err == nil {
-				var supportLangs []language.Tag
-				langStrByTag := make(map[language.Tag]string)
-				for lang := range util.Langs {
-					if tag, err := language.Parse(lang); err == nil {
-						supportLangs = append(supportLangs, tag)
-						langStrByTag[tag] = lang
-					} else {
-						logging.LogErrorf("load language [%s] failed: %s", lang, err)
-					}
+	} else if "" == Conf.Lang {
+		// 未指定外观语言时使用系统语言
+		// DetectAll 返回按优先级排序的系统语言 Tag 列表（如 en-US、en）
+		deviceLangTags, detectErr := locale.DetectAll()
+		if detectErr != nil {
+			logging.LogDebugf("check device locale failed [%s], using default language [en]", detectErr)
+			util.Lang = "en"
+		} else if len(deviceLangTags) == 0 {
+			logging.LogDebugf("device locale list is empty, using default language [en]")
+			util.Lang = "en"
+		} else {
+			// siYuanLangNames 与 bcp47Tags 按相同顺序排列，Match 返回的 matchIndex 即对应 siYuanLangNames 中的语言名
+			siYuanLangNames := make([]string, 0, len(util.Langs))
+			bcp47Tags := make([]language.Tag, 0, len(util.Langs))
+			for langName := range util.Langs {
+				bcp47Tag, err := language.Parse(langName)
+				if err != nil {
+					logging.LogErrorf("load language [%s] failed: %s", langName, err)
+					continue
 				}
-				matcher := language.NewMatcher(supportLangs)
-				matchedTag, _, _ := matcher.Match(userLang)
-				if langStr, ok := langStrByTag[matchedTag]; ok {
-					util.Lang = langStr
-				} else {
-					util.Lang = "en"
-				}
-				Conf.Lang = util.Lang
-				logging.LogInfof("initialized language [%s] based on device locale", Conf.Lang)
-			} else {
-				logging.LogDebugf("check device locale failed [%s], using default language [en]", err)
-				util.Lang = "en"
-				Conf.Lang = util.Lang
+				siYuanLangNames = append(siYuanLangNames, langName)
+				bcp47Tags = append(bcp47Tags, bcp47Tag)
 			}
+			util.Lang = "en"
+			if len(bcp47Tags) > 0 {
+				matcher := language.NewMatcher(bcp47Tags)
+				_, matchIndex, confidence := matcher.Match(deviceLangTags...)
+				// 系统语言与 SiYuan 支持列表不存在有效匹配时 confidence 为 No，保持默认 en
+				if confidence != language.No {
+					util.Lang = siYuanLangNames[matchIndex]
+				}
+			}
+			logging.LogInfof("initialized language [%s] based on device locale", util.Lang)
 		}
+		Conf.Lang = util.Lang
+	} else {
+		// conf.json 已保存外观语言
 		util.Lang = Conf.Lang
 	}
 
 	// 历史下划线语言代码迁移为 BCP 47 新值（zh_CN → zh-CN 等）
-	if migrated := util.MigrateLang(Conf.Lang); migrated != Conf.Lang {
+	if migrated := util.LangToBCP47(Conf.Lang); migrated != Conf.Lang {
 		logging.LogInfof("migrate legacy lang [%s] → [%s]", Conf.Lang, migrated)
 		Conf.Lang = migrated
 		util.Lang = migrated
@@ -229,14 +236,19 @@ func InitConf() {
 	Conf.Appearance.Lang = Conf.Lang
 
 	// 历史下划线命名的 i18n 文件（zh_CN.json 等）已重命名为 BCP 47（zh-CN.json 等），
-	// 清理 ConfDir/appearance/langs/ 下的旧名残留，避免僵尸文件。详见 kernel/util/lang.go
+	// 清理 ConfDir/appearance/langs/ 下的旧名残留，避免僵尸文件。
 	if langsDir := filepath.Join(util.AppearancePath, "langs"); gulu.File.IsDir(langsDir) {
-		for _, stem := range []string{"zh_CN", "zh_CHT", "en_US", "de_DE", "fr_FR", "es_ES", "pt_BR",
-			"it_IT", "ja_JP", "ko_KR", "ru_RU", "uk_UA", "pl_PL", "nl_NL", "ar_SA", "he_IL",
-			"hi_IN", "id_ID", "th_TH", "tr_TR", "sk_SK"} {
-			oldPath := filepath.Join(langsDir, stem+".json")
-			if gulu.File.IsExist(oldPath) {
-				os.RemoveAll(oldPath)
+		if entries, err := os.ReadDir(langsDir); err == nil {
+			for _, entry := range entries {
+				name := entry.Name()
+				if entry.IsDir() || !strings.HasSuffix(name, ".json") {
+					continue
+				}
+				stem := strings.TrimSuffix(name, ".json")
+				if _, ok := util.LangLegacyToBCP47[stem]; !ok {
+					continue
+				}
+				os.RemoveAll(filepath.Join(langsDir, name))
 			}
 		}
 	}

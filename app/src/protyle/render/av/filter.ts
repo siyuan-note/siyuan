@@ -679,6 +679,11 @@ export const commitFilter = (data: IAV, path: string, newFilter: IAVFilter, prot
 
 // bindInlineFilterEvents 绑定内联筛选编辑的事件（事件委托到面板）。即时保存。
 export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, protyle: IProtyle, blockID: string, avID: string) => {
+    // 防重复绑定：事件委托绑在 panelElement 上，同一面板实例只需绑一次
+    if (panelElement.dataset.filterEventsBound === "true") {
+        return;
+    }
+    panelElement.dataset.filterEventsBound = "true";
     const menuElement = panelElement.querySelector(".b3-menu") as HTMLElement;
     const fields = getFieldsByData(data);
 

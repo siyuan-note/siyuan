@@ -475,6 +475,8 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goFilters") {
                     menuElement.innerHTML = getFiltersHTML(data);
+                    menuElement.setAttribute("style", "min-width: 340px;max-width: 80vw;width: fit-content;");
+                    bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();

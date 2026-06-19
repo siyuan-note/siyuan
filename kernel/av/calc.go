@@ -1988,7 +1988,11 @@ func calcFieldRollup(collection Collection, field Field, fieldIndex int) {
 			return
 		}
 		ctx := buildRollupTemplateContext(nums, strs, raw)
-		rendered, asNumber, isNumber := evalRollupTemplate(calc.Template, ctx)
+		rendered, asNumber, isNumber, err := evalRollupTemplate(calc.Template, ctx)
+		if nil != err {
+			pushRollupTemplateErr(err)
+			return
+		}
 		if isNumber {
 			calc.Result = &Value{Number: NewFormattedValueNumber(asNumber, field.GetNumberFormat())}
 		} else if "" != rendered {

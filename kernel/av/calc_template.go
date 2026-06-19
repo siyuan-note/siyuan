@@ -18,6 +18,7 @@ package av
 
 import (
 	"bytes"
+	"fmt"
 	"math"
 	"sort"
 	"strconv"
@@ -25,7 +26,6 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -80,22 +80,22 @@ func buildRollupTemplateContext(values []float64, strs []string, raw []*Value) m
 
 // evalRollupTemplate 使用 text/template + sprig 渲染自定义模板统计内容。
 // 返回渲染后的字符串；若该字符串可解析为数字则 isNumber 为 true 且 asNumber 为该数值。
-// 解析或执行失败时记日志并返回空结果（isNumber 为 false）。
-func evalRollupTemplate(templateContent string, ctx map[string]any) (rendered string, asNumber float64, isNumber bool) {
+// 解析或执行失败时返回 err，由调用方决定如何提示用户。
+func evalRollupTemplate(templateContent string, ctx map[string]any) (rendered string, asNumber float64, isNumber bool, err error) {
 	if "" == templateContent {
 		return
 	}
 
 	goTpl := template.New("").Delims(".action{", "}").Funcs(templateFuncMap())
-	tpl, err := goTpl.Parse(templateContent)
-	if nil != err {
-		logging.LogWarnf("parse rollup template [%s] failed: %s", templateContent, err)
+	tpl, parseErr := goTpl.Parse(templateContent)
+	if nil != parseErr {
+		err = fmt.Errorf("parse template [%s] failed: %s", templateContent, parseErr)
 		return
 	}
 
 	buf := &bytes.Buffer{}
-	if err = tpl.Execute(buf, ctx); nil != err {
-		logging.LogWarnf("execute rollup template [%s] failed: %s", templateContent, err)
+	if execErr := tpl.Execute(buf, ctx); nil != execErr {
+		err = fmt.Errorf("execute template [%s] failed: %s", templateContent, execErr)
 		return
 	}
 
@@ -161,12 +161,22 @@ func calcFieldByTemplate(collection Collection, field Field, fieldIndex int) {
 	}
 	calc := field.GetCalc()
 	ctx := buildRollupTemplateContext(nums, strs, raw)
-	rendered, asNumber, isNumber := evalRollupTemplate(calc.Template, ctx)
+	rendered, asNumber, isNumber, err := evalRollupTemplate(calc.Template, ctx)
+	if nil != err {
+		pushRollupTemplateErr(err)
+		return
+	}
 	if isNumber {
 		calc.Result = &Value{Number: NewFormattedValueNumber(asNumber, field.GetNumberFormat())}
 	} else if "" != rendered {
 		calc.Result = &Value{Type: KeyTypeText, Text: &ValueText{Content: rendered}}
 	}
+}
+
+// pushRollupTemplateErr 将模板统计的解析/执行错误以 toast 形式推送给前端，
+// 复用模板字段解析失败时的本地化提示文案（util.Langs[util.Lang][44]）。
+func pushRollupTemplateErr(err error) {
+	util.PushErrMsg(fmt.Sprintf(util.Langs[util.Lang][44], util.EscapeHTML(err.Error())), 30000)
 }
 
 // templateFuncMap 在 sprig 函数集基础上，补充表格计算专用的条件计数函数 countif。

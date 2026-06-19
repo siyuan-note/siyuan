@@ -1,4 +1,13 @@
 {
+  "dragTip2Heading": "Zmeniť na nadpis",
+  "dragTipRef": "Vložiť odkaz",
+  "dragTipEmbed": "Vložiť vložený blok",
+  "dragTipMoveChild": "Presunúť do ${x}",
+  "dragTipMoveBefore": "Presunúť nad ${x}",
+  "dragTipMoveAfter": "Presunúť pod ${x}",
+  "dragTip2DocChild": "Previesť na dokument ako poddokument ${x}",
+  "dragTip2DocBefore": "Previesť na dokument a presunúť nad ${x}",
+  "dragTip2DocAfter": "Previesť na dokument a presunúť pod ${x}",
   "workspace": "Pracovný priestor",
   "addAiProvider": "Pridať poskytovateľa",
   "addAiModel": "Pridať model",

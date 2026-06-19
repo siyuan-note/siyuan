@@ -577,6 +577,7 @@ interface ISiyuan {
         }[]
     },
     dragElement?: HTMLElement,
+    dragTitle?: string,
     currentDragOverTabHeadersElement?: HTMLElement
     touchDragActive?: boolean,
     touchDragGhost?: HTMLElement | null,

@@ -1,4 +1,13 @@
 {
+  "dragTip2Heading": "Преобразовать в заголовок",
+  "dragTipRef": "Вставить ссылку",
+  "dragTipEmbed": "Вставить встроенный блок",
+  "dragTipMoveChild": "Переместить в ${x}",
+  "dragTipMoveBefore": "Переместить выше ${x}",
+  "dragTipMoveAfter": "Переместить ниже ${x}",
+  "dragTip2DocChild": "Преобразовать в документ как под-документ ${x}",
+  "dragTip2DocBefore": "Преобразовать в документ и переместить выше ${x}",
+  "dragTip2DocAfter": "Преобразовать в документ и переместить ниже ${x}",
   "workspace": "Рабочее пространство",
   "addAiProvider": "Добавить поставщика",
   "addAiModel": "Добавить модель",

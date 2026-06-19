@@ -102,6 +102,8 @@ export const initWindowEvent = (app: App) => {
     });
     window.addEventListener("dragend", () => {
         stopScrollAnimation();
+        document.querySelector(".drag-tip")?.remove();
+        window.siyuan.dragTitle = "";
     });
     window.addEventListener("dragleave", () => {
         stopScrollAnimation();

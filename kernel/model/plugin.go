@@ -264,34 +264,52 @@ func loadCode(petal *Petal) {
 		langJSONs, readErr := os.ReadDir(i18nDir)
 		if nil != readErr {
 			logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, readErr)
-		} else if 0 < len(langJSONs) {
-			// 优先：BCP 47 新名（zh-CN.json），次选：历史下划线旧名（zh_CN.json），再回退 en/en_US/zh-CN/zh_CN/首个
-			preferredLang := Conf.Lang + ".json"
-			legacyLang := util.LangToFile(Conf.Lang) + ".json"
-			candidates := []string{preferredLang, legacyLang, "en.json", "en_US.json", "zh-CN.json", "zh_CN.json"}
+		} else {
+			var langFiles []string
 			found := make(map[string]bool)
 			for _, langJSON := range langJSONs {
-				found[langJSON.Name()] = true
-			}
-			preferredLang = ""
-			for _, c := range candidates {
-				if found[c] {
-					preferredLang = c
-					break
+				name := langJSON.Name()
+				if langJSON.IsDir() || !strings.HasSuffix(name, ".json") {
+					continue
 				}
+				langFiles = append(langFiles, name)
+				found[name] = true
 			}
-			if "" == preferredLang {
-				preferredLang = langJSONs[0].Name()
-			}
+			if 0 < len(langFiles) {
+				// 按 Conf.Lang、en、zh-CN 及其历史下划线文件名依次回退，最后取首个可用文件
+				candidates := make([]string, 0, 6)
+				candidateSeen := make(map[string]bool, 6)
+				for _, lang := range []string{Conf.Lang, "en", "zh-CN"} {
+					for _, name := range []string{lang, util.LangToLegacy(lang)} {
+						fileName := name + ".json"
+						if candidateSeen[fileName] {
+							continue
+						}
+						candidateSeen[fileName] = true
+						candidates = append(candidates, fileName)
+					}
+				}
+				preferredLang := ""
+				for _, c := range candidates {
+					if found[c] {
+						preferredLang = c
+						break
+					}
+				}
+				if "" == preferredLang {
+					preferredLang = langFiles[0]
+				}
 
-			if langFilePath := filepath.Join(i18nDir, preferredLang); gulu.File.IsExist(langFilePath) {
-				data, err = filelock.ReadFile(langFilePath)
-				if err != nil {
-					logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
-				} else {
-					petal.I18n = map[string]any{}
-					if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); err != nil {
-						logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
+				langFilePath := filepath.Join(i18nDir, preferredLang)
+				if gulu.File.IsExist(langFilePath) {
+					data, err = filelock.ReadFile(langFilePath)
+					if err != nil {
+						logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
+					} else {
+						petal.I18n = map[string]any{}
+						if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); err != nil {
+							logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
+						}
 					}
 				}
 			}

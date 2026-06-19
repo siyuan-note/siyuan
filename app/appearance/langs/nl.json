@@ -1,4 +1,13 @@
 {
+  "dragTip2Heading": "Omzetten naar kop",
+  "dragTipRef": "Referentie invoegen",
+  "dragTipEmbed": "Ingesloten blok invoegen",
+  "dragTipMoveChild": "Verplaats naar ${x}",
+  "dragTipMoveBefore": "Verplaats boven ${x}",
+  "dragTipMoveAfter": "Verplaats onder ${x}",
+  "dragTip2DocChild": "Converteren naar document als subdoc van ${x}",
+  "dragTip2DocBefore": "Converteren naar document en verplaats boven ${x}",
+  "dragTip2DocAfter": "Converteren naar document en verplaats onder ${x}",
   "workspace": "Werkruimte",
   "addAiProvider": "Provider toevoegen",
   "addAiModel": "Model toevoegen",

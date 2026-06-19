@@ -565,7 +565,7 @@ func setAppearance(c *gin.Context) {
 
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
-	model.Conf.Lang = util.MigrateLang(appearance.Lang) // 兼容历史下划线值，如 zh_CN → zh-CN
+	model.Conf.Lang = util.LangToBCP47(appearance.Lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()
 	model.InitAppearance()

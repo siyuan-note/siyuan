@@ -1,4 +1,13 @@
 {
+  "dragTip2Heading": "제목으로 변환",
+  "dragTipRef": "참조 삽입",
+  "dragTipEmbed": "임베드 블록 삽입",
+  "dragTipMoveChild": "${x}의 하위 문서로 이동",
+  "dragTipMoveBefore": "${x} 위로 이동",
+  "dragTipMoveAfter": "${x} 아래로 이동",
+  "dragTip2DocChild": "${x}의 하위 문서로 문서로 변환",
+  "dragTip2DocBefore": "문서로 변환하고 ${x} 위로 이동",
+  "dragTip2DocAfter": "문서로 변환하고 ${x} 아래로 이동",
   "workspace": "작업 공간",
   "addAiProvider": "제공자 추가",
   "addAiModel": "모델 추가",

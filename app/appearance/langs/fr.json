@@ -1,4 +1,13 @@
 {
+  "dragTip2Heading": "Convertir en titre",
+  "dragTipRef": "Insérer une référence",
+  "dragTipEmbed": "Insérer un bloc intégré",
+  "dragTipMoveChild": "Déplacer dans ${x}",
+  "dragTipMoveBefore": "Déplacer au-dessus de ${x}",
+  "dragTipMoveAfter": "Déplacer en dessous de ${x}",
+  "dragTip2DocChild": "Convertir en document comme sous-doc de ${x}",
+  "dragTip2DocBefore": "Convertir en document et déplacer au-dessus de ${x}",
+  "dragTip2DocAfter": "Convertir en document et déplacer en dessous de ${x}",
   "workspace": "Espace de travail",
   "addAiProvider": "Ajouter un fournisseur",
   "addAiModel": "Ajouter un modèle",

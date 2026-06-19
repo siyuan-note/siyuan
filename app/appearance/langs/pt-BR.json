@@ -1,4 +1,13 @@
 {
+  "dragTip2Heading": "Converter em título",
+  "dragTipRef": "Inserir referência",
+  "dragTipEmbed": "Inserir bloco incorporado",
+  "dragTipMoveChild": "Mover para ${x}",
+  "dragTipMoveBefore": "Mover acima de ${x}",
+  "dragTipMoveAfter": "Mover abaixo de ${x}",
+  "dragTip2DocChild": "Converter em documento como subdoc de ${x}",
+  "dragTip2DocBefore": "Converter em documento e mover acima de ${x}",
+  "dragTip2DocAfter": "Converter em documento e mover abaixo de ${x}",
   "workspace": "Espaço de Trabalho",
   "addAiProvider": "Adicionar provedor",
   "addAiModel": "Adicionar modelo",

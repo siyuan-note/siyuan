@@ -174,13 +174,27 @@ export class Gutter {
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
-            event.dataTransfer.setDragImage(ghostElement, 0, 0);
-            if (window.siyuan.touchDragActive) {
-                window.siyuan.touchDragGhost = ghostElement;
-            } else {
+            // 普通块（段落/标题/列表块/引用块等）拖拽时隐藏原生 ghost 并改用自定义双区跟随框；AV 行保留原生 ghost
+            const isBlockDrag = !buttonElement.dataset.rowId;
+            if (isBlockDrag && !window.siyuan.touchDragActive) {
+                const transparentImg = new Image();
+                transparentImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+                event.dataTransfer.setDragImage(transparentImg, 0, 0);
                 setTimeout(() => {
                     ghostElement.remove();
                 });
+            } else {
+                event.dataTransfer.setDragImage(ghostElement, 0, 0);
+                if (window.siyuan.touchDragActive) {
+                    window.siyuan.touchDragGhost = ghostElement;
+                } else {
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
+            }
+            if (isBlockDrag) {
+                window.siyuan.dragTitle = getContenteditableElement(selectElements[0] as HTMLElement)?.textContent?.trim() || "";
             }
             buttonElement.style.opacity = "0.38";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
@@ -192,6 +206,7 @@ export class Gutter {
                 item.style.opacity = "";
             });
             window.siyuan.dragElement = undefined;
+            window.siyuan.dragTitle = "";
         });
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");

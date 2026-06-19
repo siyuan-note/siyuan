@@ -1,4 +1,13 @@
 {
+  "dragTip2Heading": "शीर्षक में बदलें",
+  "dragTipRef": "संदर्भ डालें",
+  "dragTipEmbed": "एम्बेड ब्लॉक डालें",
+  "dragTipMoveChild": "${x} में ले जाएँ",
+  "dragTipMoveBefore": "${x} के ऊपर ले जाएँ",
+  "dragTipMoveAfter": "${x} के नीचे ले जाएँ",
+  "dragTip2DocChild": "${x} के उप-दस्तावेज़ के रूप में दस्तावेज़ में बदलें",
+  "dragTip2DocBefore": "दस्तावेज़ में बदलें और ${x} के ऊपर ले जाएँ",
+  "dragTip2DocAfter": "दस्तावेज़ में बदलें और ${x} के नीचे ले जाएँ",
   "workspace": "कार्यक्षेत्र",
   "addAiProvider": "प्रदाता जोड़ें",
   "addAiModel": "मॉडल जोड़ें",

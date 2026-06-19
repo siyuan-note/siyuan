@@ -1064,12 +1064,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     editorElement.querySelectorAll(".protyle-wysiwyg--empty").forEach(item => {
                         item.classList.remove("protyle-wysiwyg--empty");
                     });
-
-                    // 需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
-                    protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach(item => {
-                        item.removeAttribute("data-render");
-                        blockRender(protyle, item);
-                    });
                 }
                 dragoverElement = undefined;
             }

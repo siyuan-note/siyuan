@@ -69,6 +69,8 @@ const promiseTransaction = (options: {
     skipSync: boolean
 }) => {
     const protyle = options.protyle;
+    // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
+    const pendingEmbedElements: Element[] = [];
     /// #if MOBILE
     if (((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
             (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
@@ -141,9 +143,8 @@ const promiseTransaction = (options: {
                 }
                 // 更新嵌入块
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
-                        item.removeAttribute("data-render");
-                        blockRender(protyle, item);
+                    if (item.querySelector(`[data-node-id="${operation.id}"]`) && !pendingEmbedElements.includes(item)) {
+                        pendingEmbedElements.push(item);
                     }
                 });
                 hideElements(["gutter"], protyle);
@@ -195,9 +196,8 @@ const promiseTransaction = (options: {
                 }
                 // 更新嵌入块
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
-                        item.removeAttribute("data-render");
-                        blockRender(protyle, item);
+                    if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`) && !pendingEmbedElements.includes(item)) {
+                        pendingEmbedElements.push(item);
                     }
                 });
                 // 移动块（含撤销移动）后刷新相关超级块的拖拽手柄，避免手柄残留/缺失
@@ -278,9 +278,8 @@ const promiseTransaction = (options: {
                 }
                 // 仅在 alt+click 箭头折叠时才会触发
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
-                        item.removeAttribute("data-render");
-                        blockRender(protyle, item);
+                    if (item.querySelector(`[data-node-id="${operation.id}"]`) && !pendingEmbedElements.includes(item)) {
+                        pendingEmbedElements.push(item);
                     }
                 });
             }
@@ -323,6 +322,13 @@ const promiseTransaction = (options: {
                 }
             });
         }
+        // 事务提交后再渲染嵌入块，避免其查询请求早于写入到达内核而拿到旧数据
+        pendingEmbedElements.forEach(item => {
+            if (item.isConnected) {
+                item.removeAttribute("data-render");
+                blockRender(protyle, item);
+            }
+        });
     });
 };
 
@@ -810,15 +816,13 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     focusByWbr(protyle.wysiwyg.element, range);
                 }
             }
-            // 更新 ws 嵌入块，undo 会在 transaction 中更新
-            if (!isUndo) {
-                protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
-                        item.removeAttribute("data-render");
-                        blockRender(protyle, item);
-                    }
-                });
-            }
+            // 更新嵌入块。undo 已由 kernel 执行事务后广播，查询能拿到最新数据，无竞态。
+            protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+                if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
+                    item.removeAttribute("data-render");
+                    blockRender(protyle, item);
+                }
+            });
             // 移动块（含重做/同步）后刷新相关超级块的拖拽手柄
             [operation.id, operation.parentID, operation.previousID].forEach(blockId => {
                 if (blockId) {

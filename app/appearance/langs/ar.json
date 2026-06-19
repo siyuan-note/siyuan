@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "تحويل إلى عنوان",
   "dragTipRef": "إدراج مرجع",
+  "dragTipEmbed": "إدراج كتلة مضمنة",
   "dragTipMoveChild": "النقل إلى ${x}",
   "dragTipMoveBefore": "النقل فوق ${x}",
   "dragTipMoveAfter": "النقل تحت ${x}",

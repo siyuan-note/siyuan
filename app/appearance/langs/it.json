@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Converti in intestazione",
   "dragTipRef": "Inserisci riferimento",
+  "dragTipEmbed": "Inserisci blocco incorporato",
   "dragTipMoveChild": "Sposta in ${x}",
   "dragTipMoveBefore": "Sposta sopra ${x}",
   "dragTipMoveAfter": "Sposta sotto ${x}",

@@ -1370,25 +1370,27 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // 操作提示：上半=操作对象名称，下半=操作文案
+        const isAvTarget = hasClosestByClassName(event.target, "av__row") ||
+            hasClosestByClassName(event.target, "av__row--util") ||
+            hasClosestByClassName(event.target, "av__gallery-item") ||
+            hasClosestByClassName(event.target, "av__gallery-add");
         if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
-            // 文档面板拖拽文档到编辑器（Alt = 转换为标题，默认 = 插入引用）
+            // 文档面板拖拽文档到编辑器
             showDragTip(window.siyuan.dragTitle || "",
-                event.altKey ? window.siyuan.languages.dragTip2Heading : window.siyuan.languages.dragTipRef,
+                isAvTarget ? window.siyuan.languages.addToDatabase :
+                    (event.altKey ? window.siyuan.languages.dragTip2Heading : window.siyuan.languages.dragTipRef),
                 event.clientX, event.clientY);
         } else if (gutterType && !gutterType.includes(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView`.toLowerCase())) {
             // 普通块（段落/标题/列表/引用等，排除 AV 行/列/视图/卡片）拖入编辑器
             let action: string;
-            if (hasClosestByClassName(event.target, "av__row") ||
-                hasClosestByClassName(event.target, "av__row--util") ||
-                hasClosestByClassName(event.target, "av__gallery-item") ||
-                hasClosestByClassName(event.target, "av__gallery-add")) {
+            if (isAvTarget) {
                 // 拖到数据库视图：绑定为记录
                 action = window.siyuan.languages.addToDatabase;
             } else if (event.altKey) {
                 // 编辑器内重排：Alt=插入引用，Shift=嵌入块，默认=移动
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
-                action = window.siyuan.languages.blockEmbed;
+                action = window.siyuan.languages.dragTipEmbed;
             } else {
                 action = window.siyuan.languages.move;
             }

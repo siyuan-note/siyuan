@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "見出しに変換",
   "dragTipRef": "参照を挿入",
+  "dragTipEmbed": "埋め込みブロックを挿入",
   "dragTipMoveChild": "${x} のサブドキュメントに移動",
   "dragTipMoveBefore": "${x} の上に移動",
   "dragTipMoveAfter": "${x} の下に移動",

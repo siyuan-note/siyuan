@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Convert to heading",
   "dragTipRef": "Insert reference",
+  "dragTipEmbed": "Insert embed block",
   "dragTipMoveChild": "Move into ${x}",
   "dragTipMoveBefore": "Move above ${x}",
   "dragTipMoveAfter": "Move below ${x}",

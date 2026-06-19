@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Zmień w nagłówek",
   "dragTipRef": "Wstaw odnośnik",
+  "dragTipEmbed": "Wstaw osadzony blok",
   "dragTipMoveChild": "Przenieś do ${x}",
   "dragTipMoveBefore": "Przenieś powyżej ${x}",
   "dragTipMoveAfter": "Przenieś poniżej ${x}",

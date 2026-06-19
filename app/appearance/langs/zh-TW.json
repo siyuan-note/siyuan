@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "轉換為標題",
   "dragTipRef": "插入引用",
+  "dragTipEmbed": "插入嵌入塊",
   "dragTipMoveChild": "移動為 ${x} 子文件",
   "dragTipMoveBefore": "移動到 ${x} 上方",
   "dragTipMoveAfter": "移動到 ${x} 下方",

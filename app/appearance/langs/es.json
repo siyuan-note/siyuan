@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Convertir en encabezado",
   "dragTipRef": "Insertar referencia",
+  "dragTipEmbed": "Insertar bloque incrustado",
   "dragTipMoveChild": "Mover dentro de ${x}",
   "dragTipMoveBefore": "Mover por encima de ${x}",
   "dragTipMoveAfter": "Mover por debajo de ${x}",

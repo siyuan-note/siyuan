@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Ubah menjadi judul",
   "dragTipRef": "Sisipkan referensi",
+  "dragTipEmbed": "Sisipkan blok tersemat",
   "dragTipMoveChild": "Pindahkan ke ${x}",
   "dragTipMoveBefore": "Pindahkan ke atas ${x}",
   "dragTipMoveAfter": "Pindahkan ke bawah ${x}",

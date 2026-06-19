@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Converter em título",
   "dragTipRef": "Inserir referência",
+  "dragTipEmbed": "Inserir bloco incorporado",
   "dragTipMoveChild": "Mover para ${x}",
   "dragTipMoveBefore": "Mover acima de ${x}",
   "dragTipMoveAfter": "Mover abaixo de ${x}",

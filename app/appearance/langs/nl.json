@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Omzetten naar kop",
   "dragTipRef": "Referentie invoegen",
+  "dragTipEmbed": "Ingesloten blok invoegen",
   "dragTipMoveChild": "Verplaats naar ${x}",
   "dragTipMoveBefore": "Verplaats boven ${x}",
   "dragTipMoveAfter": "Verplaats onder ${x}",

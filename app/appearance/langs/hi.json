@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "शीर्षक में बदलें",
   "dragTipRef": "संदर्भ डालें",
+  "dragTipEmbed": "एम्बेड ब्लॉक डालें",
   "dragTipMoveChild": "${x} में ले जाएँ",
   "dragTipMoveBefore": "${x} के ऊपर ले जाएँ",
   "dragTipMoveAfter": "${x} के नीचे ले जाएँ",

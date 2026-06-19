@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "In Überschrift umwandeln",
   "dragTipRef": "Referenz einfügen",
+  "dragTipEmbed": "Eingebetteten Block einfügen",
   "dragTipMoveChild": "In ${x} verschieben",
   "dragTipMoveBefore": "Über ${x} verschieben",
   "dragTipMoveAfter": "Unter ${x} verschieben",

@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Преобразовать в заголовок",
   "dragTipRef": "Вставить ссылку",
+  "dragTipEmbed": "Вставить встроенный блок",
   "dragTipMoveChild": "Переместить в ${x}",
   "dragTipMoveBefore": "Переместить выше ${x}",
   "dragTipMoveAfter": "Переместить ниже ${x}",

@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Başlığa dönüştür",
   "dragTipRef": "Referans ekle",
+  "dragTipEmbed": "Gömülü blok ekle",
   "dragTipMoveChild": "${x} içine taşı",
   "dragTipMoveBefore": "${x} üzerine taşı",
   "dragTipMoveAfter": "${x} altına taşı",

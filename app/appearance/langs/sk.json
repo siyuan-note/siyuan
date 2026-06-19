@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "Zmeniť na nadpis",
   "dragTipRef": "Vložiť odkaz",
+  "dragTipEmbed": "Vložiť vložený blok",
   "dragTipMoveChild": "Presunúť do ${x}",
   "dragTipMoveBefore": "Presunúť nad ${x}",
   "dragTipMoveAfter": "Presunúť pod ${x}",

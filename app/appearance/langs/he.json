@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "הפוך לכותרת",
   "dragTipRef": "הוסף הפניה",
+  "dragTipEmbed": "הוסף בלוק מוטמע",
   "dragTipMoveChild": "העבר אל ${x}",
   "dragTipMoveBefore": "העבר מעל ${x}",
   "dragTipMoveAfter": "העבר מתחת ל-${x}",

@@ -1,6 +1,7 @@
 {
   "dragTip2Heading": "เปลี่ยนเป็นส่วนหัว",
   "dragTipRef": "แทรกการอ้างอิง",
+  "dragTipEmbed": "แทรกบล็อกฝังตัว",
   "dragTipMoveChild": "ย้ายไปยัง ${x}",
   "dragTipMoveBefore": "ย้ายไปด้านบน ${x}",
   "dragTipMoveAfter": "ย้ายไปด้านล่าง ${x}",

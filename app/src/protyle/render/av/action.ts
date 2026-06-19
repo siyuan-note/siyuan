@@ -569,15 +569,17 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 });
                 writeText(text);
             }
-        }, {
-            id: "duplicate",
-            iconHTML: "",
-            label: window.siyuan.languages.duplicate,
-            click: () => {
-                duplicateRows(blockElement, protyle, rowElements);
-            }
         });
     }
+
+    copyMenu.push({
+        id: "duplicate",
+        iconHTML: "",
+        label: window.siyuan.languages.duplicate,
+        click: () => {
+            duplicateRows(blockElement, protyle, rowElements);
+        }
+    });
 
     menu.addItem({
         id: "copy",

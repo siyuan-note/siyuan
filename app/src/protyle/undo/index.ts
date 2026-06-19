@@ -2,7 +2,6 @@ import {onTransaction} from "../wysiwyg/transaction";
 import {preventScroll} from "../scroll/preventScroll";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
-import {scrollCenter} from "../../util/highlightById";
 import {matchHotKey} from "../util/hotKey";
 import {ipcRenderer} from "electron";
 import {markMirror, refreshUndoButtons, requestRedo, requestUndo} from "./globalUndo";
@@ -45,7 +44,6 @@ export class Undo {
         onTransaction(protyle, operations, true);
         document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);
-        scrollCenter(protyle);
     }
 
     // add 降级为：不压栈（kernel 已在 commit 后 Record），仅置位本地镜像 + 刷新按钮态。

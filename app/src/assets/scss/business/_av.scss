@@ -941,7 +941,7 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
-        padding: 0;
+        padding: 4px 0;
         border-radius: var(--b3-border-radius);
         border: 1px solid var(--b3-theme-surface-lighter);
 
@@ -966,6 +966,7 @@
         display: flex;
         justify-content: flex-start;
         gap: 4px;
+        padding-left: 8px;
       }
 
       &__item[data-type="nobg"] {
@@ -1014,7 +1015,10 @@
         background-color: transparent;
       }
 
-      .b3-menu__item[data-type="addFilterCondition"]:hover,
+      .b3-menu__item[data-type="addFilterCondition"]:hover {
+        background-color: transparent !important;
+      }
+
       .av__filter-group-actions .block__icon[data-type="addFilterCondition"]:hover,
       .av__filter-group-actions .block__icon[data-type="addFilter"]:hover {
         background-color: transparent !important;

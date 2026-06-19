@@ -161,12 +161,22 @@ func calcFieldByTemplate(collection Collection, field Field, fieldIndex int) {
 	}
 	calc := field.GetCalc()
 	ctx := buildRollupTemplateContext(nums, strs, raw)
-	rendered, asNumber, isNumber := evalRollupTemplate(calc.Template, ctx)
+	rendered, asNumber, isNumber, err := evalRollupTemplate(calc.Template, ctx)
+	if nil != err {
+		pushRollupTemplateErr(err)
+		return
+	}
 	if isNumber {
 		calc.Result = &Value{Number: NewFormattedValueNumber(asNumber, field.GetNumberFormat())}
 	} else if "" != rendered {
 		calc.Result = &Value{Type: KeyTypeText, Text: &ValueText{Content: rendered}}
 	}
+}
+
+// pushRollupTemplateErr 将模板统计的解析/执行错误以 toast 形式推送给前端，
+// 复用模板字段解析失败时的本地化提示文案（util.Langs[util.Lang][44]）。
+func pushRollupTemplateErr(err error) {
+	util.PushErrMsg(fmt.Sprintf(util.Langs[util.Lang][44], util.EscapeHTML(err.Error())), 30000)
 }
 
 // templateFuncMap 在 sprig 函数集基础上，补充表格计算专用的条件计数函数 countif。

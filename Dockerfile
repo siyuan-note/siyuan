@@ -17,6 +17,7 @@ ADD app/ .
 RUN <<EORUN
 #!/bin/bash -e
 pnpm run build
+node scripts/afterPack.js
 mkdir /artifacts
 mv appearance stage guide changelogs /artifacts/
 EORUN

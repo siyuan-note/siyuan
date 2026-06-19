@@ -222,9 +222,22 @@ export const openMenuPanel = (options: {
                 const inputElement = menuElement.querySelector("input");
                 if (inputElement) {
                     inputElement.select();
-                    inputElement.focus();
+                    inputElement.focus({preventScroll: true});
                 }
+                // 限制弹窗高度为单元格下方的可用空间，避免被 setPosition 推到顶部
+                const belowHeight = window.innerHeight - cellRect.bottom - 4;
+                const maxHeight = Math.min(Math.max(belowHeight, 100), window.innerHeight - 32);
+                menuElement.style.maxHeight = maxHeight + "px";
                 setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+                // 重置滚动位置到顶部
+                const itemsElement = menuElement.lastElementChild as HTMLElement;
+                if (itemsElement) {
+                    itemsElement.scrollTop = 0;
+                    const listElement = itemsElement.lastElementChild as HTMLElement;
+                    if (listElement) {
+                        listElement.scrollTop = 0;
+                    }
+                }
             }
         } else {
             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);

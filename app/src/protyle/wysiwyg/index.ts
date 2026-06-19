@@ -664,7 +664,9 @@ export class WYSIWYG {
                                         hasJump = true;
                                     }
                                 } else {
-                                    selectElements.push(currentElement);
+                                    if (!currentElement.classList.contains("sb__resize")) {
+                                        selectElements.push(currentElement);
+                                    }
                                     currentElement = currentElement.nextElementSibling as HTMLElement;
                                 }
                             } else if (currentElement.parentElement.classList.contains("sb")) {
@@ -1424,7 +1426,8 @@ export class WYSIWYG {
                                 }
                             } else {
                                 if (!currentElement.classList.contains("protyle-breadcrumb__bar") &&
-                                    !currentElement.classList.contains("protyle-breadcrumb__item")) {
+                                    !currentElement.classList.contains("protyle-breadcrumb__item") &&
+                                    !currentElement.classList.contains("sb__resize")) {
                                     selectElements.push(currentElement);
                                 }
                                 if (!currentElement.nextElementSibling && currentElement.parentElement.classList.contains("callout-content")) {

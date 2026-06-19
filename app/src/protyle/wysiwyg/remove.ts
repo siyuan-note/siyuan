@@ -9,14 +9,14 @@ import {
     getContenteditableElement,
     getLastBlock,
     getNextBlock, getParentBlock,
-    getPreviousBlock,
+    getPreviousBlock, getPreviousBlockSibling, getSbChildBlockCount,
     getTopAloneElement,
     getTopEmptyElement,
     hasNextSibling,
     hasPreviousSibling
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
-import {cancelSB, genEmptyElement, getSbChildCount} from "../../block/util";
+import {cancelSB, genEmptyElement, refreshSbResize} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
 import {zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
@@ -109,16 +109,17 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     }
                 });
                 foldTransaction.data.undoOperations.reverse();
-                if (topElement.previousElementSibling &&
-                    topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-                    topElement.previousElementSibling.getAttribute("fold") === "1") {
-                    const foldId = topElement.previousElementSibling.getAttribute("data-node-id");
+                const foldPreviousBlockElement = getPreviousBlockSibling(topElement);
+                if (foldPreviousBlockElement &&
+                    foldPreviousBlockElement.getAttribute("data-type") === "NodeHeading" &&
+                    foldPreviousBlockElement.getAttribute("fold") === "1") {
+                    const foldId = foldPreviousBlockElement.getAttribute("data-node-id");
                     if (!unfoldData[foldId]) {
                         const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
                             id: foldId,
                         });
                         unfoldData[foldId] = {
-                            element: topElement.previousElementSibling,
+                            element: foldPreviousBlockElement,
                             previousID: foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id
                         };
                     }
@@ -132,17 +133,18 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 if (topElement.classList.contains("render-node") || topElement.querySelector("div.render-node")) {
                     data = protyle.lute.SpinBlockDOM(topElement.outerHTML);  // 防止图表撤销问题
                 }
-                let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
-                if (topElement.previousElementSibling &&
-                    topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-                    topElement.previousElementSibling.getAttribute("fold") === "1") {
-                    const foldId = topElement.previousElementSibling.getAttribute("data-node-id");
+                const previousBlockElement = getPreviousBlockSibling(topElement);
+                let previousID = previousBlockElement ? previousBlockElement.getAttribute("data-node-id") : "";
+                if (previousBlockElement &&
+                    previousBlockElement.getAttribute("data-type") === "NodeHeading" &&
+                    previousBlockElement.getAttribute("fold") === "1") {
+                    const foldId = previousBlockElement.getAttribute("data-node-id");
                     if (!unfoldData[foldId]) {
                         const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
                             id: foldId,
                         });
                         unfoldData[foldId] = {
-                            element: topElement.previousElementSibling,
+                            element: previousBlockElement,
                             previousID: foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id
                         };
                     }
@@ -226,10 +228,14 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             }
         }
         if (deletes.length > 0) {
-            if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(topParentElement) === 1) {
+            if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(topParentElement) === 1) {
                 const sbData = await cancelSB(protyle, topParentElement, range);
                 transaction(protyle, deletes.concat(sbData.doOperations), sbData.undoOperations.concat(inserts.reverse()));
             } else {
+                // 超级块删除子块后剩余多个子块时，刷新拖拽手柄（被删块两侧手柄需移除/重建）
+                if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock") {
+                    refreshSbResize(topParentElement);
+                }
                 transaction(protyle, deletes, inserts.reverse());
             }
         }
@@ -438,7 +444,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             action: "insert",
             data: previousLastElement.outerHTML,
             id: previousLastElement.getAttribute("data-node-id"),
-            previousID: previousLastElement.previousElementSibling?.getAttribute("data-node-id"),
+            previousID: getPreviousBlockSibling(previousLastElement)?.getAttribute("data-node-id"),
             parentID: getParentBlock(previousLastElement).getAttribute("data-node-id")
         }]);
         previousLastElement.remove();
@@ -464,12 +470,12 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     action: "insert",
                     data: blockElement.outerHTML,
                     id: id,
-                    previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
+                    previousID: getPreviousBlockSibling(blockElement)?.getAttribute("data-node-id"),
                     parentID: getParentBlock(blockElement).getAttribute("data-node-id")
                 }];
                 blockElement.remove();
                 // 取消超级块
-                if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(parentElement) === 1) {
+                if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(parentElement) === 1) {
                     const sbData = await cancelSB(protyle, parentElement);
                     transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
                 } else {
@@ -500,8 +506,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         action: "insert",
         data: removeElement.outerHTML,
         id: removeId,
-        // 不能使用 previousLastElement，否则在超级块下的元素前删除撤销错误
-        previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
+        previousID: getPreviousBlockSibling(blockElement)?.getAttribute("data-node-id"),
         parentID: parentElement ? parentElement.getAttribute("data-node-id") : protyle.block.parentID
     }];
     const doOperations: IOperation[] = [{
@@ -588,10 +593,13 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             id: previousId,
         });
     }
-    if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(parentElement) === 1) {
+    if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(parentElement) === 1) {
         const sbData = await cancelSB(protyle, parentElement);
         transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
     } else {
+        if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock") {
+            refreshSbResize(parentElement);
+        }
         transaction(protyle, doOperations, undoOperations);
     }
     focusByWbr(protyle.wysiwyg.element, range);

@@ -1,6 +1,5 @@
 import {hasClosestBlock, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
-import {getSbChildCount} from "../../block/util";
 
 export const getParentBlock = (element: Element) => {
     if (element.parentElement.classList.contains("callout-content") ||
@@ -18,8 +17,12 @@ export const getCalloutInfo = (element: Element) => {
 export const getPreviousBlock = (element: Element) => {
     let parentElement = element;
     while (parentElement) {
-        if (parentElement.previousElementSibling && parentElement.previousElementSibling.getAttribute("data-node-id")) {
-            return parentElement.previousElementSibling;
+        let previous = parentElement.previousElementSibling;
+        while (previous && !previous.getAttribute("data-node-id")) {
+            previous = previous.previousElementSibling;
+        }
+        if (previous) {
+            return previous;
         }
         const pElement = hasClosestBlock(parentElement.parentElement);
         if (pElement) {
@@ -28,6 +31,17 @@ export const getPreviousBlock = (element: Element) => {
             return false;
         }
     }
+};
+
+export const getSbChildBlockCount = (sbElement: Element) =>
+    sbElement.querySelectorAll(":scope > [data-node-id]").length;
+
+export const getPreviousBlockSibling = (element: Element): Element => {
+    let previous = element.previousElementSibling;
+    while (previous && !previous.getAttribute("data-node-id")) {
+        previous = previous.previousElementSibling;
+    }
+    return previous;
 };
 
 export const getLastBlock = (element: Element) => {
@@ -55,8 +69,12 @@ export const getFirstBlock = (element: Element) => {
 export const getNextBlock = (element: Element) => {
     let parentElement = element;
     while (parentElement) {
-        if (parentElement.nextElementSibling && !parentElement.nextElementSibling.classList.contains("protyle-attr")) {
-            return parentElement.nextElementSibling as HTMLElement;
+        let next = parentElement.nextElementSibling;
+        while (next && !next.getAttribute("data-node-id")) {
+            next = next.nextElementSibling;
+        }
+        if (next) {
+            return next as HTMLElement;
         }
         const pElement = hasClosestBlock(parentElement.parentElement);
         if (pElement) {
@@ -181,9 +199,9 @@ export const getTopAloneElement = (topSourceElement: Element) => {
                 break;
             }
         }
-    } else if ("NodeSuperBlock" === topSourceElement.parentElement.getAttribute("data-type") && getSbChildCount(topSourceElement.parentElement) === 1) {
+    } else if ("NodeSuperBlock" === topSourceElement.parentElement.getAttribute("data-type") && getSbChildBlockCount(topSourceElement.parentElement) === 1) {
         while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
-            if (topSourceElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildCount(topSourceElement.parentElement) === 1) {
+            if (topSourceElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(topSourceElement.parentElement) === 1) {
                 topSourceElement = topSourceElement.parentElement;
             } else {
                 topSourceElement = getTopAloneElement(topSourceElement);

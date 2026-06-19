@@ -919,8 +919,8 @@
 
       .av__filter-group-item {
         padding: 0 8px;
-        margin: 4px 0;
-        gap: 4px;
+        margin: 6px 0;
+        gap: 6px;
 
         &:hover > .b3-menu__action {
           opacity: 1;
@@ -940,8 +940,8 @@
         min-width: 0;
         display: flex;
         flex-direction: column;
-        gap: 4px;
-        padding: 4px 0;
+        gap: 6px;
+        padding: 6px 0;
         border-radius: var(--b3-border-radius);
         border: 1px solid var(--b3-theme-surface-lighter);
 
@@ -979,8 +979,8 @@
       }
 
       .b3-menu__item.av__filter-row {
-        margin: 4px 0;
-        gap: 4px;
+        margin: 6px 0;
+        gap: 6px;
       }
 
       .av__filter-group-children .b3-menu__item.av__filter-row,

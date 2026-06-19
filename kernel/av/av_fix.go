@@ -24,7 +24,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const CurrentSpec = 4
+const CurrentSpec = 5
+
+const MaxFilterNestingDepth = 3
 
 func UpgradeSpec(av *AttributeView) {
 	if CurrentSpec <= av.Spec {
@@ -35,6 +37,41 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec2(av)
 	upgradeSpec3(av)
 	upgradeSpec4(av)
+	upgradeSpec5(av)
+}
+
+func CheckSpec(av *AttributeView) (err error) {
+	if CurrentSpec < av.Spec {
+		logging.LogErrorf("attribute view spec [%d] is newer than current [%d]", av.Spec, CurrentSpec)
+		err = ErrSpecTooNew
+		return
+	}
+	return
+}
+
+// upgradeSpec5 将旧的扁平过滤规则数组包装为单个隐式 AND 根组，支持递归嵌套分组。
+// 原有叶子条件一条不丢，整体作为根组的子节点保留。
+func upgradeSpec5(av *AttributeView) {
+	if 5 <= av.Spec {
+		return
+	}
+
+	for _, view := range av.Views {
+		if 1 == len(view.Filters) && nil != view.Filters[0] && view.Filters[0].IsGroup() {
+			continue // 已经是根组形式，无需包装
+		}
+		// 收集非 nil 的原有条件
+		var children []*ViewFilter
+		for _, f := range view.Filters {
+			if nil != f {
+				children = append(children, f)
+			}
+		}
+		// 包装成 AND 根组，原条件作为子节点（空时即为空根组）
+		view.Filters = []*ViewFilter{{Combination: FilterCombinationAnd, Filters: children}}
+	}
+
+	av.Spec = 5
 }
 
 func upgradeSpec4(av *AttributeView) {

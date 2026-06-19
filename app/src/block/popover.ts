@@ -207,11 +207,11 @@ export const initBlockPopover = (app: App) => {
             }
         } else if (!aElement) {
             const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
-            if (!tipElement || (
-                tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
-            )) {
+            if (!tipElement) {
                 hideTooltip();
             }
+            // 鼠标仍在 #tooltip 上时不主动隐藏，避免 showTooltip ↔ hideTooltip 循环闪烁；
+            // 待鼠标移到非 tooltip 处再由上面的分支隐藏
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {
             clearTimeout(timeoutHide);

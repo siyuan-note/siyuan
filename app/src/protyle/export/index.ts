@@ -478,9 +478,15 @@ ${getIconScript(servePath)}
             method: "POST",
             body: JSON.stringify(data)
         }).then((response) => {
+            if (!response.ok) {
+                cb({ code: -response.status, msg: response.statusText, data: null });
+                return;
+            }
             return response.json();
         }).then((response) => {
-            cb(response);
+            if (response) {
+                cb(response);
+            }
         })
     }
     const renderPreview = (data) => {
@@ -510,7 +516,7 @@ ${getIconScript(servePath)}
         keepFold: ${localData.keepFold},
         merge: ${localData.mergeSubdocs},
     }, response => {
-        if (response.code === 1) {
+        if (response.code !== 0) {
             alert(response.msg)
             return;
         }
@@ -570,7 +576,7 @@ ${getIconScript(servePath)}
                 keepFold: keepFoldElement.checked,
                 merge: mergeSubdocsElement.checked,
             }, response2 => {
-                if (response2.code === 1) {
+                if (response2.code !== 0) {
                     alert(response2.msg)
                     return;
                 }

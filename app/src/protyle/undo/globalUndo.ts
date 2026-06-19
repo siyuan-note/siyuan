@@ -122,12 +122,12 @@ const resolveRootNames = async (rootIDs: string[]): Promise<string[]> => {
 const focusRootIDs = (rootIDs: string[], focusBlockId?: string) => {
     // 只滚动发起窗口的焦点 protyle 到变更块；其它文档不强制重开（撤销物理结果在发起文档）
     const protyle = getActiveProtyle();
-    if (protyle && rootIDs.includes(protyle.block?.rootID)) {
-        // 优先滚动到指定的变更块；未指定时滚到文档首块（兜底）
-        const targetId = focusBlockId || protyle.wysiwyg.element.querySelector("[data-node-id]")?.getAttribute("data-node-id");
-        if (targetId) {
-            const target = protyle.wysiwyg.element.querySelector(`[data-node-id="${targetId}"]`);
-            if (target) {
+    if (protyle && rootIDs.includes(protyle.block?.rootID) && focusBlockId) {
+        const target = protyle.wysiwyg.element.querySelector(`[data-node-id="${focusBlockId}"]`);
+        if (target) {
+            const rect = target.getBoundingClientRect();
+            // 仅在变更块不在视口内时才滚动，避免打断用户当前的滚动位置
+            if (rect.bottom < 0 || rect.top > window.innerHeight) {
                 target.scrollIntoView({behavior: "smooth", block: "center"});
             }
         }
@@ -221,7 +221,7 @@ export const requestUndo = async (protyle: IProtyle) => {
             // 单文档撤销：发起窗口本地乐观应用 doOperations（kernel 实际执行的操作，如 insert 恢复块）
             protyle.undo.renderLocal(protyle, data.doOperations, false);
             refreshUndoButtons(protyle);
-            const focusBlockId = data.doOperations?.find((op: IOperation) => op.action === "insert")?.id;
+            const focusBlockId = data.doOperations?.find((op: IOperation) => op.id)?.id;
             focusRootIDs(mutatedRootIDs, focusBlockId);
         }
     });
@@ -273,7 +273,7 @@ export const requestRedo = async (protyle: IProtyle) => {
         } else {
             protyle.undo.renderLocal(protyle, data.doOperations, true);
             refreshUndoButtons(protyle);
-            const focusBlockId = data.doOperations?.find((op: IOperation) => op.action === "insert")?.id;
+            const focusBlockId = data.doOperations?.find((op: IOperation) => op.id)?.id;
             focusRootIDs(mutatedRootIDs, focusBlockId);
         }
     });

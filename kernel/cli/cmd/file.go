@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -265,8 +266,193 @@ func copyFile(src, dst string) error {
 	return err
 }
 
+var fileGrepCmd = &cobra.Command{
+	Use:   "grep --pattern <regex> --path <path>",
+	Short: "Search file contents with regex",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		pattern, _ := cmd.Flags().GetString("pattern")
+		if pattern == "" {
+			return fmt.Errorf("--pattern is required")
+		}
+		relPath, _ := cmd.Flags().GetString("path")
+		if relPath == "" {
+			return fmt.Errorf("--path is required")
+		}
+		abs, err := absPath(relPath)
+		if err != nil {
+			return err
+		}
+		include, _ := cmd.Flags().GetString("include")
+		ctx, _ := cmd.Flags().GetInt("context")
+		max, _ := cmd.Flags().GetInt("limit")
+		if max <= 0 {
+			max = 200
+		}
+		results, err := gulu.File.Grep(abs, include, pattern, ctx, max)
+		if err != nil {
+			return err
+		}
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(results, "", "  ")
+			fmt.Println(string(data))
+		default:
+			fmt.Printf("Found %d lines:\n\n", len(results))
+			for _, r := range results {
+				rel, relErr := filepath.Rel(util.WorkspaceDir, r.File)
+				if relErr != nil {
+					rel = r.File
+				}
+				sep := ":"
+				if r.Context {
+					sep = "-:"
+				}
+				fmt.Printf("%s:%d%s %s\n", rel, r.Line, sep, r.Text)
+			}
+		}
+		return nil
+	},
+}
+
+var fileFindCmd = &cobra.Command{
+	Use:   "find <path>",
+	Short: "Find files under a path",
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		abs, err := absPath(args[0])
+		if err != nil {
+			return err
+		}
+		include, _ := cmd.Flags().GetString("include")
+		max, _ := cmd.Flags().GetInt("limit")
+		if max <= 0 {
+			max = 200
+		}
+		var results []string
+		total := 0
+		err = filepath.WalkDir(abs, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return nil
+			}
+			if d.IsDir() {
+				name := d.Name()
+				if name == ".git" || name == ".svn" || name == ".hg" || strings.HasPrefix(name, ".") {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+			if !d.Type().IsRegular() {
+				return nil
+			}
+			if include != "" && !matchGlob(d.Name(), include) {
+				return nil
+			}
+			total++
+			if len(results) < max {
+				rel, relErr := filepath.Rel(util.WorkspaceDir, path)
+				if relErr != nil {
+					rel = path
+				}
+				results = append(results, rel)
+			}
+			if total >= max {
+				return filepath.SkipAll
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(results, "", "  ")
+			fmt.Println(string(data))
+		default:
+			if max < total {
+				fmt.Printf("Found %d files (showing first %d):\n\n", total, max)
+			} else {
+				fmt.Printf("Found %d files:\n\n", len(results))
+			}
+			for _, r := range results {
+				fmt.Println(r)
+			}
+		}
+		return nil
+	},
+}
+
+var fileStatCmd = &cobra.Command{
+	Use:   "stat <path>",
+	Short: "Show file or directory info",
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		abs, err := absPath(args[0])
+		if err != nil {
+			return err
+		}
+		info, err := os.Stat(abs)
+		if err != nil {
+			return err
+		}
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(map[string]any{
+				"path":    args[0],
+				"size":    info.Size(),
+				"isDir":   info.IsDir(),
+				"modTime": info.ModTime().Format("2006-01-02 15:04:05"),
+			}, "", "  ")
+			fmt.Println(string(data))
+		default:
+			fmt.Printf("Path:    %s\n", args[0])
+			fmt.Printf("Size:    %d\n", info.Size())
+			fmt.Printf("IsDir:   %v\n", info.IsDir())
+			fmt.Printf("ModTime: %s\n", info.ModTime().Format("2006-01-02 15:04:05"))
+		}
+		return nil
+	},
+}
+
+func matchGlob(filename, pattern string) bool {
+	for _, p := range expandGlobBrace(pattern) {
+		if matched, _ := filepath.Match(p, filename); matched {
+			return true
+		}
+	}
+	return false
+}
+
+func expandGlobBrace(pattern string) []string {
+	i := strings.Index(pattern, "{")
+	if i < 0 {
+		return []string{pattern}
+	}
+	j := strings.Index(pattern[i:], "}")
+	if j < 0 {
+		return []string{pattern}
+	}
+	j += i
+	prefix := pattern[:i]
+	body := pattern[i+1 : j]
+	suffix := pattern[j+1:]
+	var result []string
+	for _, opt := range strings.Split(body, ",") {
+		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
+	}
+	return result
+}
+
 func init() {
 	fileWriteCmd.Flags().String("file", "", "source file path (default: stdin)")
+
+	fileGrepCmd.Flags().String("pattern", "", "regex pattern")
+	fileGrepCmd.Flags().String("path", "", "relative path within workspace")
+	fileGrepCmd.Flags().String("include", "", "file glob filter, e.g. *.go or *.{ts,tsx}")
+	fileGrepCmd.Flags().Int("context", 0, "context lines before and after each match")
+	fileGrepCmd.Flags().Int("limit", 200, "maximum matches (0 or negative for unlimited)")
+
+	fileFindCmd.Flags().String("include", "", "file glob filter, e.g. *.go or *.{ts,tsx}")
+	fileFindCmd.Flags().Int("limit", 200, "maximum files (0 or negative for unlimited)")
 
 	rootCmd.AddCommand(fileCmd)
 	fileCmd.AddCommand(fileListCmd)
@@ -275,4 +461,7 @@ func init() {
 	fileCmd.AddCommand(fileDeleteCmd)
 	fileCmd.AddCommand(fileRenameCmd)
 	fileCmd.AddCommand(fileCopyCmd)
+	fileCmd.AddCommand(fileGrepCmd)
+	fileCmd.AddCommand(fileFindCmd)
+	fileCmd.AddCommand(fileStatCmd)
 }

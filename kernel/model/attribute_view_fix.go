@@ -31,14 +31,17 @@ import (
 
 func checkAttrView(attrView *av.AttributeView, view *av.View) {
 	// 字段删除以后需要删除设置的过滤和排序
-	tmpFilters := []*av.ViewFilter{}
-	for _, f := range view.Filters {
-		if k, _ := attrView.GetKey(f.Column); nil != k {
-			tmpFilters = append(tmpFilters, f)
-		}
+	validColumns := map[string]bool{}
+	for _, kv := range attrView.KeyValues {
+		validColumns[kv.Key.ID] = true
 	}
-	changed := len(tmpFilters) != len(view.Filters)
-	view.Filters = tmpFilters
+	newFilters, filterChanged := av.PruneInvalidColumnFilters(view.Filters, validColumns)
+	if 0 == len(newFilters) {
+		// 保持 spec 5 根组不变量：根组被裁空后补一个空 AND 根组
+		newFilters = []*av.ViewFilter{{Combination: av.FilterCombinationAnd}}
+	}
+	view.Filters = newFilters
+	changed := filterChanged
 
 	tmpSorts := []*av.ViewSort{}
 	for _, s := range view.Sorts {

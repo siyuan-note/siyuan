@@ -505,6 +505,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/searchAttributeViewNonRelationKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deprecated) // TODO 请勿使用，该端点将于 2026 年 12 月 1 日后删除
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRollupDestKeys", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAttributeViewRollupDestKeys)
 	ginServer.Handle("POST", "/api/av/getAttributeViewFilterSort", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewFilterSort)
+	ginServer.Handle("POST", "/api/av/setAttrViewFilters", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAttrViewFilters)
+	ginServer.Handle("POST", "/api/av/setAttrViewSorts", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAttrViewSorts)
 	ginServer.Handle("POST", "/api/av/addAttributeViewKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addAttributeViewKey)
 	ginServer.Handle("POST", "/api/av/removeAttributeViewKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeAttributeViewKey)
 	ginServer.Handle("POST", "/api/av/sortAttributeViewViewKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, sortAttributeViewViewKey)

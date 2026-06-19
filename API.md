@@ -51,7 +51,8 @@
     * [Change layout](#Change-layout)
     * [Set grouping](#Set-grouping)
     * [Get filter and sort](#Get-filter-and-sort)
-    * [Set filter and sort](#Set-filter-and-sort)
+    * [Set filter](#Set-filter)
+    * [Set sort](#Set-sort)
     * [Add a field](#Add-a-field)
     * [Remove a field](#Remove-a-field)
     * [Set global field sort](#Set-global-field-sort)
@@ -2198,11 +2199,13 @@ Returns the current filter and sort rules of the view bound to a database block.
   }
   ```
 
-    * `data.filters`: Array of `ViewFilter`
-    * `data.filters[].column`: Field (column) ID the filter applies to
-    * `data.filters[].operator`: Filter operator (see the operator table below)
-    * `data.filters[].value`: Filter value, a `Value` object (see [Set a cell value](#Set-a-cell-value) for the value shapes)
-    * `data.filters[].relativeDate`: Optional relative-date descriptor used by date filters (`{ "count": 7, "unit": 0, "direction": -1 }`; `unit`: `0` day, `1` week, `2` month, `3` year; `direction`: `-1` before, `0` this, `1` after)
+    * `data.filters`: Array of `ViewFilter`. The top level holds a single root group node `{ "combination": "and"|"or", "filters": [...] }`; the array elements are either leaf filters or nested group nodes, enabling recursive AND/OR combinations.
+    * `data.filters[].column`: Field (column) ID the filter applies to (leaf node only)
+    * `data.filters[].operator`: Filter operator (see the operator table below; leaf node only)
+    * `data.filters[].value`: Filter value, a `Value` object (see [Set a cell value](#Set-a-cell-value) for the value shapes; leaf node only)
+    * `data.filters[].relativeDate`: Optional relative-date descriptor used by date filters (`{ "count": 7, "unit": 0, "direction": -1 }`; `unit`: `0` day, `1` week, `2` month, `3` year; `direction`: `-1` before, `0` this, `1` after; leaf node only)
+    * `data.filters[].combination`: Group combinator, `"and"` or `"or"` (group node only)
+    * `data.filters[].filters`: Child filter nodes, recursively `ViewFilter` (group node only)
     * `data.sorts`: Array of `ViewSort`
     * `data.sorts[].column`: Field (column) ID the sort applies to
     * `data.sorts[].order`: `ASC` or `DESC`
@@ -2227,91 +2230,71 @@ Returns the current filter and sort rules of the view bound to a database block.
   | `Is true`            | Is true (checkbox)   |
   | `Is false`           | Is false (checkbox)  |
 
-### Set filter and sort
+### Set filter
 
-Filters and sorts are persisted through the transaction endpoint `/api/transactions` (plural), because changing them is part of an undoable editing transaction. Wrap each rule change in a `doOperations` entry whose `action` is `setAttrViewFilters` or `setAttrViewSorts`; the `data` field is the full new array (it replaces the view's existing rules entirely).
-
-* `/api/transactions`
+* `/api/av/setAttrViewFilters`
 * Parameters
 
   ```json
   {
-    "reqId": 1781610129661,
-    "app": "",
-    "session": "",
-    "transactions": [
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "data": [
       {
-        "doOperations": [
-          {
-            "action": "setAttrViewFilters",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118203822-io6ofxb",
-                "operator": "=",
-                "value": {
-                  "type": "select",
-                  "mSelect": [
-                    { "content": "Done", "color": "1" }
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "action": "setAttrViewSorts",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118120204-w6cggab",
-                "order": "DESC"
-              }
-            ]
-          }
-        ]
+        "column": "20240118203822-io6ofxb",
+        "operator": "=",
+        "value": {
+          "type": "select",
+          "mSelect": [
+            { "content": "Done", "color": "1" }
+          ]
+        }
       }
     ]
   }
   ```
 
-    * `reqId`: Required. A client-generated timestamp/nonce (number); tags the transaction for undo/redo
-    * `app` / `session`: Optional. Used to scope the resulting WebSocket push so other clients/sessions can refresh
-    * `transactions[].doOperations[]`: One operation per rule set to replace
-    * `doOperations[].action`: `setAttrViewFilters` to replace filters, or `setAttrViewSorts` to replace sorts
-    * `doOperations[].avID`: Database ID
-    * `doOperations[].blockID`: The database block that owns the view
-    * `doOperations[].data`: Full new array of `ViewFilter` or `ViewSort` objects (see [Get filter and sort](#Get-filter-and-sort)). Pass `[]` to clear
-* Return value (real response, echoes the submitted operations with a server-assigned `timestamp`):
+    * `avID`: Database ID
+    * `blockID`: The database block that owns the view
+    * `data`: Full new array of `ViewFilter` objects that **replaces** the view's existing filters entirely (see [Get filter and sort](#Get-filter-and-sort)). Pass `[]` to clear all filters. The top level holds a single root group node `{ "combination": "and"|"or", "filters": [...] }`; the array elements are either leaf filters or nested group nodes, enabling recursive AND/OR combinations
+* Return value
 
   ```json
   {
     "code": 0,
     "msg": "",
+    "data": null
+  }
+  ```
+
+### Set sort
+
+* `/api/av/setAttrViewSorts`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
     "data": [
       {
-        "timestamp": 1781610129661,
-        "doOperations": [
-          {
-            "action": "setAttrViewFilters",
-            "id": "",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118203822-io6ofxb",
-                "operator": "=",
-                "value": {
-                  "type": "select",
-                  "mSelect": [{ "content": "Done", "color": "1" }]
-                }
-              }
-            ]
-          }
-        ]
+        "column": "20240118120204-w6cggab",
+        "order": "DESC"
       }
     ]
+  }
+  ```
+
+    * `avID`: Database ID
+    * `blockID`: The database block that owns the view
+    * `data`: Full new array of `ViewSort` objects that **replaces** the view's existing sorts entirely (see [Get filter and sort](#Get-filter-and-sort)). Pass `[]` to clear all sorts
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
   }
   ```
 

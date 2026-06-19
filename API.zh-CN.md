@@ -51,7 +51,8 @@
     * [切换布局](#切换布局)
     * [设置分组](#设置分组)
     * [获取过滤与排序](#获取过滤与排序)
-    * [设置过滤与排序](#设置过滤与排序)
+    * [设置过滤](#设置过滤)
+    * [设置排序](#设置排序)
     * [添加字段](#添加字段)
     * [移除字段](#移除字段)
     * [设置全局字段排序](#设置全局字段排序)
@@ -2187,11 +2188,13 @@
   }
   ```
 
-    * `data.filters`: `ViewFilter` 数组
-    * `data.filters[].column`: 过滤规则作用的字段（列）ID
-    * `data.filters[].operator`: 过滤操作符（见下方操作符表）
-    * `data.filters[].value`: 过滤值，一个 `Value` 对象（结构见 [设置单元格值](#设置单元格值)）
-    * `data.filters[].relativeDate`: 可选，日期过滤使用的相对时间描述（`{ "count": 7, "unit": 0, "direction": -1 }`；`unit`：`0` 天、`1` 周、`2` 月、`3` 年；`direction`：`-1` 前、`0` 当前、`1` 后）
+    * `data.filters`: `ViewFilter` 数组。顶层为单个根组节点 `{ "combination": "and"|"or", "filters": [...] }`，数组元素既可以是叶子过滤条件，也可以是嵌套的分组节点，支持递归的且/或组合
+    * `data.filters[].column`: 过滤规则作用的字段（列）ID（仅叶子节点）
+    * `data.filters[].operator`: 过滤操作符（见下方操作符表；仅叶子节点）
+    * `data.filters[].value`: 过滤值，一个 `Value` 对象（结构见 [设置单元格值](#设置单元格值)；仅叶子节点）
+    * `data.filters[].relativeDate`: 可选，日期过滤使用的相对时间描述（`{ "count": 7, "unit": 0, "direction": -1 }`；`unit`：`0` 天、`1` 周、`2` 月、`3` 年；`direction`：`-1` 前、`0` 当前、`1` 后；仅叶子节点）
+    * `data.filters[].combination`: 分组组合方式，`"and"` 或 `"or"`（仅分组节点）
+    * `data.filters[].filters`: 子过滤节点，递归的 `ViewFilter`（仅分组节点）
     * `data.sorts`: `ViewSort` 数组
     * `data.sorts[].column`: 排序规则作用的字段（列）ID
     * `data.sorts[].order`: `ASC` 或 `DESC`
@@ -2216,95 +2219,73 @@
   | `Is true`           | 为真（复选框） |
   | `Is false`          | 为假（复选框） |
 
-### 设置过滤与排序
+### 设置过滤
 
-过滤和排序通过事务接口 `/api/transactions`（注意是复数）持久化，因为修改它们属于可撤销的编辑事务。把每条规则变更包进一个 `doOperations` 条目，`action` 取 `setAttrViewFilters` 或 `setAttrViewSorts`，`data` 字段是完整的新数组（将整体替换视图现有规则）。
-
-* `/api/transactions`
+* `/api/av/setAttrViewFilters`
 * 参数
 
   ```json
   {
-    "reqId": 1781610129661,
-    "app": "",
-    "session": "",
-    "transactions": [
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "data": [
       {
-        "doOperations": [
-          {
-            "action": "setAttrViewFilters",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118203822-io6ofxb",
-                "operator": "=",
-                "value": {
-                  "type": "select",
-                  "mSelect": [
-                    { "content": "已完成", "color": "1" }
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "action": "setAttrViewSorts",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118120204-w6cggab",
-                "order": "DESC"
-              }
-            ]
-          }
-        ]
+        "column": "20240118203822-io6ofxb",
+        "operator": "=",
+        "value": {
+          "type": "select",
+          "mSelect": [
+            { "content": "已完成", "color": "1" }
+          ]
+        }
       }
     ]
   }
   ```
 
-    * `reqId`: 必填。客户端生成的时间戳/随机数（数字），用于标记事务以支持撤销/重做
-    * `app` / `session`: 可选。用于限定产生的 WebSocket 推送，使其它客户端/会话能刷新
-    * `transactions[].doOperations[]`: 每个要替换的规则集对应一个操作
-    * `doOperations[].action`: `setAttrViewFilters` 替换过滤规则，`setAttrViewSorts` 替换排序规则
-    * `doOperations[].avID`: 数据库 ID
-    * `doOperations[].blockID`: 拥有该视图的数据库块
-    * `doOperations[].data`: 完整的 `ViewFilter` 或 `ViewSort` 新数组（结构见 [获取过滤与排序](#获取过滤与排序)）。传 `[]` 可清空
-* 返回值（真实响应，回显提交的操作，并附带服务端分配的 `timestamp`）：
+    * `avID`: 数据库 ID
+    * `blockID`: 拥有该视图的数据库块
+    * `data`: 完整的 `ViewFilter` 新数组，将**整体替换**视图现有过滤规则（结构见 [获取过滤与排序](#获取过滤与排序)）。传 `[]` 可清空全部过滤规则。顶层为单个根组节点 `{ "combination": "and"|"or", "filters": [...] }`，数组元素既可以是叶子过滤条件，也可以是嵌套的分组节点，支持递归的且/或组合
+* 返回值
 
   ```json
   {
     "code": 0,
     "msg": "",
+    "data": null
+  }
+  ```
+
+### 设置排序
+
+* `/api/av/setAttrViewSorts`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
     "data": [
       {
-        "timestamp": 1781610129661,
-        "doOperations": [
-          {
-            "action": "setAttrViewFilters",
-            "id": "",
-            "avID": "20240118120204-kwyzf77",
-            "blockID": "20240118120201-kldj15t",
-            "data": [
-              {
-                "column": "20240118203822-io6ofxb",
-                "operator": "=",
-                "value": {
-                  "type": "select",
-                  "mSelect": [{ "content": "已完成", "color": "1" }]
-                }
-              }
-            ]
-          }
-        ]
+        "column": "20240118120204-w6cggab",
+        "order": "DESC"
       }
     ]
   }
   ```
 
-    * 调用成功后，可通过 [获取过滤与排序](#获取过滤与排序) 验证是否已持久化
+    * `avID`: 数据库 ID
+    * `blockID`: 拥有该视图的数据库块
+    * `data`: 完整的 `ViewSort` 新数组，将**整体替换**视图现有排序规则（结构见 [获取过滤与排序](#获取过滤与排序)）。传 `[]` 可清空全部排序规则
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
 
 ### 添加字段
 

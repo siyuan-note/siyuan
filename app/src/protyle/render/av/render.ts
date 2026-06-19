@@ -57,14 +57,22 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     let tabHTML = "";
     let viewData: IAVView;
     let hasFilter = false;
-    getFieldsByData(data).forEach((item) => {
-        if (!hasFilter) {
-            data.view.filters.find(filterItem => {
-                if (filterItem.value.type === item.type && item.id === filterItem.column) {
-                    hasFilter = true;
+    // 递归在过滤树中查找是否存在引用了现有字段的叶子
+    const findLeafFilter = (nodes: IAVFilter[], columnId: string, columnType: string): boolean => {
+        for (const n of nodes) {
+            if (n.filters) {
+                if (findLeafFilter(n.filters, columnId, columnType)) {
                     return true;
                 }
-            });
+            } else if (n.value && n.value.type === columnType && n.column === columnId) {
+                return true;
+            }
+        }
+        return false;
+    };
+    getFieldsByData(data).forEach((item) => {
+        if (!hasFilter && findLeafFilter(data.view.filters, item.id, item.type)) {
+            hasFilter = true;
         }
     });
     data.views.forEach((item: IAVView) => {
@@ -410,11 +418,15 @@ const afterRenderTable = (options: ITableOptions) => {
         if (event.isComposing) {
             return;
         }
-        if (!searchInputElement.textContent) {
+        if (!searchInputElement.textContent.trim()) {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.marginRight = "0";
+            searchInputElement.style.setProperty("margin-right", "0", "important");
+            const clearElement = searchInputElement.nextElementSibling;
+            if (clearElement) {
+                clearElement.classList.add("fn__none");
+            }
         }
     });
     addClearButton({
@@ -426,7 +438,7 @@ const afterRenderTable = (options: ITableOptions) => {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.marginRight = "0";
+            searchInputElement.style.setProperty("margin-right", "0", "important");
             focusBlock(options.blockElement);
             updateSearch(options.blockElement, options.protyle);
             /// #if MOBILE

@@ -1,7 +1,7 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
-import {getDefaultOperatorByType, setFilter} from "./filter";
+import {getDefaultOperatorByType, getEditableFilters} from "./filter";
 import {genCellValue} from "./cell";
 import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
@@ -848,29 +848,44 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 }, (response) => {
                     const avData = response.data as IAV;
                     let filter: IAVFilter;
-                    avData.view.filters.find((item) => {
-                        if (item.column === colId && item.value.type === type) {
-                            filter = item;
-                            return true;
+                    // 递归在过滤树中查找该列已存在的叶子
+                    const findFilter = (nodes: IAVFilter[]): IAVFilter => {
+                        for (const n of nodes) {
+                            if (n.filters) {
+                                const found = findFilter(n.filters);
+                                if (found) return found;
+                            } else if (n.column === colId && n.value.type === type) {
+                                return n;
+                            }
                         }
-                    });
-                    let empty = false;
+                        return undefined;
+                    };
+                    filter = findFilter(getEditableFilters(avData));
                     if (!filter) {
-                        empty = true;
+                        // 新建占位条件并保存，随后打开筛选面板 inline 编辑
                         filter = {
                             column: colId,
                             operator: getDefaultOperatorByType(type),
                             value: genCellValue(type, ""),
                         };
-                        avData.view.filters.push(filter);
+                        getEditableFilters(avData).push(filter);
+                        transaction(protyle, [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: avData.view.filters,
+                            blockID: blockElement.getAttribute("data-node-id")
+                        }], [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: [], // undo 时移除新增条件（简化处理）
+                            blockID: blockElement.getAttribute("data-node-id")
+                        }]);
                     }
-                    setFilter({
-                        empty,
-                        filter,
+                    // 打开筛选面板，用户在内联控件中编辑（替代原 setFilter 弹层）
+                    openMenuPanel({
                         protyle,
-                        data: avData,
-                        blockElement: blockElement,
-                        target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
+                        blockElement,
+                        type: "filters",
                     });
                 });
             }

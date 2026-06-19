@@ -428,8 +428,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         if (operation.action === "unfoldHeading") {
             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
                 item.removeAttribute("fold");
-                // undo 会走 transaction
                 if (isUndo) {
+                    // kernel 权威撤销：retData 已由 doUnfoldHeading 填充，需要插入子块 HTML 恢复折叠的内容
+                    if (operation.retData) {
+                        removeUnfoldRepeatBlock(operation.retData, protyle);
+                        item.insertAdjacentHTML("afterend", operation.retData);
+                    }
                     return;
                 }
                 const embedElement = isInEmbedBlock(item);
@@ -438,7 +442,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     blockRender(protyle, embedElement);
                     return;
                 }
-                if (operation.retData) { // undo 的时候没有 retData
+                if (operation.retData) {
                     removeUnfoldRepeatBlock(operation.retData, protyle);
                     item.insertAdjacentHTML("afterend", operation.retData);
                 }

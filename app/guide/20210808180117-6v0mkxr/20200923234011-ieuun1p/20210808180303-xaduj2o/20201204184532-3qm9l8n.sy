@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20250828155251"
+		"updated": "20260619110501"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20250828155251"
+				"updated": "20260619110501"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20250828155251"
+				"updated": "20260619110501"
 			},
 			"Children": [
 				{
@@ -249,15 +249,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Use this variable to insert the current document name. For example, if the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "template"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " content is "
+									"Data": "​: Use this variable to insert the current document name. For example, if the template content is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -451,15 +443,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "database"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", and the return value is a list of blocks"
+									"Data": "​: This function is used to query the database, and the return value is a list of blocks"
 								}
 							]
 						},
@@ -524,15 +508,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "database"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " based on the block ID, and the return value is block"
+									"Data": "​: This function is used to query the database based on the block ID, and the return value is block"
 								}
 							]
 						},
@@ -596,15 +572,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "database"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ", and the return value is a list of spans"
+									"Data": "​: This function is used to query the database, and the return value is a list of spans"
 								}
 							]
 						},
@@ -669,15 +637,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "database"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " and the return value is a result set"
+									"Data": "​: This function is used to query the database and the return value is a result set"
 								}
 							]
 						},
@@ -1596,6 +1556,97 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ converts a Markdown-formatted field value into content text (preserves code, formulas, etc., inserts line breaks between blocks)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260619110501-lne9tlj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260619110501-lne9tlj",
+						"updated": "20260619110501"
+					},
+					"Children": [
+						{
+							"ID": "20260619110501-arxyui9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260619110501-arxyui9",
+								"updated": "20260619110501"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ counts the number of elements in a numeric list that satisfy a specified comparison condition. The first argument is the numeric list, the second is the comparison operator ("
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "gt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "lt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eq"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ge"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "le"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​), and the third is the threshold. For example: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif .values \"gt\" 0"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

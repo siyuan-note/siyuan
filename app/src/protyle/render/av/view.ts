@@ -8,6 +8,22 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 
+// countFilterLeaves 递归统计过滤节点树中的叶子数量（分组不计入）。
+const countFilterLeaves = (filters: IAVFilter[]): number => {
+    let count = 0;
+    const walk = (nodes: IAVFilter[]) => {
+        nodes.forEach(n => {
+            if (n.filters) {
+                walk(n.filters);
+            } else {
+                count++;
+            }
+        });
+    };
+    walk(filters);
+    return count;
+};
+
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     if (options.protyle.disabled) {
         return;
@@ -204,7 +220,7 @@ export const getViewHTML = (data: IAV) => {
 <button class="b3-menu__item" data-type="goFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
-    <span class="b3-menu__accelerator">${view.filters.length}</span>
+    <span class="b3-menu__accelerator">${countFilterLeaves(view.filters)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item" data-type="goSorts">

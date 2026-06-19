@@ -253,7 +253,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
+					"Data": ">"
 				},
 				{
 					"ID": "20260617123957-5ddn11u",
@@ -701,7 +701,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
+					"Data": ">"
 				},
 				{
 					"ID": "20260617123957-cl8rwey",
@@ -895,7 +895,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{len (filter .values (gt . 100))}}"
+									"TextMarkTextContent": ".action{countif .values \"gt\" 100}"
 								},
 								{
 									"Type": "NodeText",
@@ -930,7 +930,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{div (len (filter .values (gt . 0))) (len .values)}}"
+									"TextMarkTextContent": ".action{divf (countif .values \"gt\" 0) (len .values)}"
 								},
 								{
 									"Type": "NodeText",
@@ -965,7 +965,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{div (len (filter .values (eq . 0))) (len .values)}}"
+									"TextMarkTextContent": ".action{divf (countif .values \"eq\" 0) (len .values)}"
 								},
 								{
 									"Type": "NodeText",
@@ -1000,7 +1000,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{len (filter .values (gt . .avg))}}"
+									"TextMarkTextContent": ".action{countif .values \"gt\" .avg}"
 								},
 								{
 									"Type": "NodeText",
@@ -1035,77 +1035,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{div (len (filter .values (lt . 60))) (len .values)}}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "「タスク」で始まる行数"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{len (filter .strings (hasPrefix . \"タスク\"))}}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "キーワードを含む行数"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{len (filter .strings (contains . \"緊急\"))}}"
+									"TextMarkTextContent": ".action{divf (countif .values \"lt\" 60) (len .values)}"
 								},
 								{
 									"Type": "NodeText",

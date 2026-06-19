@@ -6,44 +6,44 @@
 		"id": "20260612191214-ymtlxn2",
 		"title": "命令列",
 		"type": "doc",
-		"updated": "20260612192326"
+		"updated": "20260618123823"
 	},
 	"Children": [
 		{
-			"ID": "20260612191752-pb0zi2k",
+			"ID": "20260618123823-6cnphzi",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-pb0zi2k",
-				"updated": "20260612191752"
+				"id": "20260618123823-6cnphzi",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "概述"
+					"Data": "概覽"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-ijlfsmh",
+			"ID": "20260618123823-0gqs5zq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-ijlfsmh",
-				"updated": "20260612191752"
+				"id": "20260618123823-0gqs5zq",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源筆記內建 CLI（Command Line Interface），可直接存取工作空間資料，無需啟動核心服務。適合指令碼處理、批次管理，以及配合 AI 智慧型代理對筆記資料進行讀寫操作。"
+					"Data": "思源筆記內建 CLI（Command Line Interface），可直接存取工作空間資料，無需啟動核心服務。適合腳本化處理、批次管理，以及搭配 AI 智能體對筆記資料進行讀寫操作。"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-ztrnh7i",
+			"ID": "20260618123823-w8et9d4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-ztrnh7i",
-				"updated": "20260612191752"
+				"id": "20260618123823-w8et9d4",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -62,12 +62,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-hzo2lf1",
+			"ID": "20260618123823-9n2h06a",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-hzo2lf1",
-				"updated": "20260612191752"
+				"id": "20260618123823-9n2h06a",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -77,11 +77,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-tc4g7ji",
+			"ID": "20260618123823-xfqgr7h",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-tc4g7ji",
-				"updated": "20260612191752"
+				"id": "20260618123823-xfqgr7h",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -109,32 +109,32 @@
 			]
 		},
 		{
-			"ID": "20260612191752-0crk3tq",
+			"ID": "20260618123823-gwobglg",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612191752-0crk3tq",
-				"updated": "20260612191752"
+				"id": "20260618123823-gwobglg",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
-					"ID": "20260612191752-vv9jpw0",
+					"ID": "20260618123823-pg296go",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-vv9jpw0",
-						"updated": "20260612191752"
+						"id": "20260618123823-pg296go",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-m6gz86j",
+							"ID": "20260618123823-dsraz6n",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-m6gz86j",
-								"updated": "20260612191752"
+								"id": "20260618123823-dsraz6n",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -169,23 +169,23 @@
 					]
 				},
 				{
-					"ID": "20260612191752-thcg7z7",
+					"ID": "20260618123823-i351hjd",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-thcg7z7",
-						"updated": "20260612191752"
+						"id": "20260618123823-i351hjd",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-cgg54mc",
+							"ID": "20260618123823-m5qnfjw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-cgg54mc",
-								"updated": "20260612191752"
+								"id": "20260618123823-m5qnfjw",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -195,17 +195,17 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：安裝後建立符號連結"
+									"Data": "：安裝後建立軟連結"
 								}
 							]
 						},
 						{
-							"ID": "20260612191752-lbdwdvq",
+							"ID": "20260618123823-061vzzq",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612191752-lbdwdvq",
-								"updated": "20260612191752"
+								"id": "20260618123823-061vzzq",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -229,23 +229,23 @@
 					]
 				},
 				{
-					"ID": "20260612191752-3xco74t",
+					"ID": "20260618123823-dzkzf53",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-3xco74t",
-						"updated": "20260612191752"
+						"id": "20260618123823-dzkzf53",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-nv1dv9n",
+							"ID": "20260618123823-2z4aip4",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-nv1dv9n",
-								"updated": "20260612191752"
+								"id": "20260618123823-2z4aip4",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -255,17 +255,17 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：安裝後建立符號連結"
+									"Data": "：安裝後建立軟連結"
 								}
 							]
 						},
 						{
-							"ID": "20260612191752-jiczn2b",
+							"ID": "20260618123823-09zb9sr",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612191752-jiczn2b",
-								"updated": "20260612191752"
+								"id": "20260618123823-09zb9sr",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -291,12 +291,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-gwa0jqe",
+			"ID": "20260618123823-m29cezj",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-gwa0jqe",
-				"updated": "20260612191752"
+				"id": "20260618123823-m29cezj",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -306,7 +306,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-fvpsijf",
+			"ID": "20260618123823-p711ybl",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -316,8 +316,8 @@
 			],
 			"Properties": {
 				"colgroup": "|||",
-				"id": "20260612191752-fvpsijf",
-				"updated": "20260612191752"
+				"id": "20260618123823-p711ybl",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -606,11 +606,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-zv3q8oe",
+			"ID": "20260618123823-xb6h9pu",
 			"Type": "NodeBlockquote",
 			"Properties": {
-				"id": "20260612191752-zv3q8oe",
-				"updated": "20260612191752"
+				"id": "20260618123823-xb6h9pu",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -618,11 +618,11 @@
 					"Data": "\u003e"
 				},
 				{
-					"ID": "20260612191752-emjspm0",
+					"ID": "20260618123823-3okl7bw",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20260612191752-emjspm0",
-						"updated": "20260612191752"
+						"id": "20260618123823-3okl7bw",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
@@ -636,7 +636,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ 適合指令碼處理；"
+							"Data": "​ 適合腳本化處理；"
 						},
 						{
 							"Type": "NodeTextMark",
@@ -661,12 +661,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-du7bup8",
+			"ID": "20260618123823-pib09j8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-du7bup8",
-				"updated": "20260612191752"
+				"id": "20260618123823-pib09j8",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -676,32 +676,32 @@
 			]
 		},
 		{
-			"ID": "20260612191752-ili6k0q",
+			"ID": "20260618123823-oe9t559",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612191752-ili6k0q",
-				"updated": "20260612191752"
+				"id": "20260618123823-oe9t559",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
-					"ID": "20260612191752-om9jo0j",
+					"ID": "20260618123823-zieek2c",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-om9jo0j",
-						"updated": "20260612191752"
+						"id": "20260618123823-zieek2c",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-fk0q2dc",
+							"ID": "20260618123823-n25zvci",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-fk0q2dc",
-								"updated": "20260612191752"
+								"id": "20260618123823-n25zvci",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -715,7 +715,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 開頭，後接值，以空格分隔。如 "
+									"Data": "​ 開頭，後跟值，以空格分隔。如 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -731,28 +731,28 @@
 					]
 				},
 				{
-					"ID": "20260612191752-gqmmp82",
+					"ID": "20260618123823-e9jvcqf",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-gqmmp82",
-						"updated": "20260612191752"
+						"id": "20260618123823-e9jvcqf",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-6xc5i69",
+							"ID": "20260618123823-sbg2r5y",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-6xc5i69",
-								"updated": "20260612191752"
+								"id": "20260618123823-sbg2r5y",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "具有簡寫的參數可用簡寫形式。如 "
+									"Data": "帶簡寫的參數可用簡寫形式。如 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -777,23 +777,23 @@
 					]
 				},
 				{
-					"ID": "20260612191752-ntgbfw2",
+					"ID": "20260618123823-v1dcr6z",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-ntgbfw2",
-						"updated": "20260612191752"
+						"id": "20260618123823-v1dcr6z",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-02g83u1",
+							"ID": "20260618123823-ymdg67c",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-02g83u1",
-								"updated": "20260612191752"
+								"id": "20260618123823-ymdg67c",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -807,30 +807,30 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 內的參數為可選"
+									"Data": "​ 內的參數可選"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612191752-zs2mpfx",
+					"ID": "20260618123823-d7u8ek5",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-zs2mpfx",
-						"updated": "20260612191752"
+						"id": "20260618123823-d7u8ek5",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-vryhrm4",
+							"ID": "20260618123823-nnz79nq",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-vryhrm4",
-								"updated": "20260612191752"
+								"id": "20260618123823-nnz79nq",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -851,23 +851,23 @@
 					]
 				},
 				{
-					"ID": "20260612191752-te1gr20",
+					"ID": "20260618123823-w7bu3ym",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-te1gr20",
-						"updated": "20260612191752"
+						"id": "20260618123823-w7bu3ym",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-gzl5kkl",
+							"ID": "20260618123823-dfvvk9z",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-gzl5kkl",
-								"updated": "20260612191752"
+								"id": "20260618123823-dfvvk9z",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -890,12 +890,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-eala8mz",
+			"ID": "20260618123823-qgabyqk",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-eala8mz",
-				"updated": "20260612191752"
+				"id": "20260618123823-qgabyqk",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -905,32 +905,32 @@
 			]
 		},
 		{
-			"ID": "20260612191752-68j0vg4",
+			"ID": "20260618123823-c2hpats",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612191752-68j0vg4",
-				"updated": "20260612191752"
+				"id": "20260618123823-c2hpats",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
-					"ID": "20260612191752-44ud65b",
+					"ID": "20260618123823-1b5c0o3",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-44ud65b",
-						"updated": "20260612191752"
+						"id": "20260618123823-1b5c0o3",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-5878qrz",
+							"ID": "20260618123823-jfvmxrb",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-5878qrz",
-								"updated": "20260612191752"
+								"id": "20260618123823-jfvmxrb",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -969,23 +969,23 @@
 					]
 				},
 				{
-					"ID": "20260612191752-vkx22pi",
+					"ID": "20260618123823-pc6rik2",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-vkx22pi",
-						"updated": "20260612191752"
+						"id": "20260618123823-pc6rik2",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-ikqsfbj",
+							"ID": "20260618123823-txolzt3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-ikqsfbj",
-								"updated": "20260612191752"
+								"id": "20260618123823-txolzt3",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -1004,7 +1004,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "/資料夾/文件標題"
+									"TextMarkTextContent": "/資料夾/文件名"
 								},
 								{
 									"Type": "NodeText",
@@ -1033,23 +1033,23 @@
 					]
 				},
 				{
-					"ID": "20260612191752-4p235dx",
+					"ID": "20260618123823-dbteqne",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612191752-4p235dx",
-						"updated": "20260612191752"
+						"id": "20260618123823-dbteqne",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-ffqzrg3",
+							"ID": "20260618123823-8kjtmh1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-ffqzrg3",
-								"updated": "20260612191752"
+								"id": "20260618123823-8kjtmh1",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -1063,7 +1063,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：透過父區塊 ID 定位插入或追加位置，適用於 "
+									"Data": "​：透過父區塊 ID 定位插入或附加位置，適用於 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1081,41 +1081,41 @@
 			]
 		},
 		{
-			"ID": "20260612191752-tlix0lc",
+			"ID": "20260618123823-n8l9nsl",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-tlix0lc",
-				"updated": "20260612191752"
+				"id": "20260618123823-n8l9nsl",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "常見使用場景"
+					"Data": "常見使用情境"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-351lsfv",
+			"ID": "20260618123823-mfpgqq7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-351lsfv",
-				"updated": "20260612191752"
+				"id": "20260618123823-mfpgqq7",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "指令碼批次查詢"
+					"Data": "腳本化批次查詢"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-ifcakf0",
+			"ID": "20260618123823-1nk5pvb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-ifcakf0",
-				"updated": "20260612191752"
+				"id": "20260618123823-1nk5pvb",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1129,7 +1129,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 輸出 JSON，供指令碼解析處理。"
+					"Data": "​ 輸出 JSON，供腳本解析處理。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1152,12 +1152,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-8rwuok2",
+			"ID": "20260618123823-fkmsb4g",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-8rwuok2",
-				"updated": "20260612191752"
+				"id": "20260618123823-fkmsb4g",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1167,11 +1167,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-uqz5qdb",
+			"ID": "20260618123823-i31v69y",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-uqz5qdb",
-				"updated": "20260612191752"
+				"id": "20260618123823-i31v69y",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1199,12 +1199,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-yql41ml",
+			"ID": "20260618123823-iorcjen",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-yql41ml",
-				"updated": "20260612191752"
+				"id": "20260618123823-iorcjen",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1214,11 +1214,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-1log5m6",
+			"ID": "20260618123823-c66cr7k",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-1log5m6",
-				"updated": "20260612191752"
+				"id": "20260618123823-c66cr7k",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1255,12 +1255,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-wws400w",
+			"ID": "20260618123823-84sdkh8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-wws400w",
-				"updated": "20260612191752"
+				"id": "20260618123823-84sdkh8",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1270,11 +1270,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-rgdqe7v",
+			"ID": "20260618123823-g356pt4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-rgdqe7v",
-				"updated": "20260612191752"
+				"id": "20260618123823-g356pt4",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1288,17 +1288,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 命令支援對 blocks 等系統表執行唯讀 SQL 查詢，用於統計分析區塊類型分佈、最近修改文件等。"
+					"Data": "​ 命令支援對 blocks 等系統表執行唯讀 SQL 查詢，用於統計分析區塊類型分布、最近修改文件等。"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-prd1kaw",
+			"ID": "20260618123823-fe82ndy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-prd1kaw",
-				"updated": "20260612191752"
+				"id": "20260618123823-fe82ndy",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1308,11 +1308,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-pig3zfs",
+			"ID": "20260618123823-18qolcy",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-pig3zfs",
-				"updated": "20260612191752"
+				"id": "20260618123823-18qolcy",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1340,12 +1340,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-tdnhhb1",
+			"ID": "20260618123823-6bt9dt0",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-tdnhhb1",
-				"updated": "20260612192326"
+				"id": "20260618123823-6bt9dt0",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1360,18 +1360,18 @@
 			]
 		},
 		{
-			"ID": "20260612191752-f88jfxq",
+			"ID": "20260618123823-mm2gj6c",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20260612191752-f88jfxq",
-				"updated": "20260612191752"
+				"id": "20260618123823-mm2gj6c",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
-					"ID": "20260612191752-o6qm44s",
+					"ID": "20260618123823-rsbcpt6",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1380,16 +1380,16 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20260612191752-o6qm44s",
-						"updated": "20260612191752"
+						"id": "20260618123823-rsbcpt6",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-1t4r3rv",
+							"ID": "20260618123823-o0s9ivx",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-1t4r3rv",
-								"updated": "20260612191752"
+								"id": "20260618123823-o0s9ivx",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
@@ -1410,7 +1410,7 @@
 					]
 				},
 				{
-					"ID": "20260612191752-5qjb4uh",
+					"ID": "20260618123823-fs13kb9",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1419,21 +1419,21 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20260612191752-5qjb4uh",
-						"updated": "20260612191752"
+						"id": "20260618123823-fs13kb9",
+						"updated": "20260618123823"
 					},
 					"Children": [
 						{
-							"ID": "20260612191752-u9oyfuc",
+							"ID": "20260618123823-xkn2teh",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612191752-u9oyfuc",
-								"updated": "20260612191752"
+								"id": "20260618123823-xkn2teh",
+								"updated": "20260618123823"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "批次操作前建議先建立快照或匯出備份，便於回溯"
+									"Data": "批次操作前建議先建立快照或匯出備份，便於回滾"
 								}
 							]
 						}
@@ -1442,12 +1442,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-3nhbodb",
+			"ID": "20260618123823-higd400",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612191752-3nhbodb",
-				"updated": "20260612191752"
+				"id": "20260618123823-higd400",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1457,12 +1457,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-rw5457r",
+			"ID": "20260618123823-7kfhqkb",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-rw5457r",
-				"updated": "20260612191752"
+				"id": "20260618123823-7kfhqkb",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1472,12 +1472,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-h16fs9s",
+			"ID": "20260618123823-k899ye0",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-h16fs9s",
-				"updated": "20260612191752"
+				"id": "20260618123823-k899ye0",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1499,12 +1499,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-orh1xr6",
+			"ID": "20260618123823-lxvuc99",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-orh1xr6",
-				"updated": "20260612191752"
+				"id": "20260618123823-lxvuc99",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1514,11 +1514,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-x6uxd2p",
+			"ID": "20260618123823-ccj5h1g",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-x6uxd2p",
-				"updated": "20260612191752"
+				"id": "20260618123823-ccj5h1g",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1528,7 +1528,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-r9dtv44",
+			"ID": "20260618123823-jwvzp97",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1537,8 +1537,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-r9dtv44",
-				"updated": "20260612191752"
+				"id": "20260618123823-jwvzp97",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1664,12 +1664,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-ml3629n",
+			"ID": "20260618123823-k65iaqe",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-ml3629n",
-				"updated": "20260612191752"
+				"id": "20260618123823-k65iaqe",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1691,12 +1691,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-secf5ox",
+			"ID": "20260618123823-czs3p6f",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-secf5ox",
-				"updated": "20260612191752"
+				"id": "20260618123823-czs3p6f",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1706,11 +1706,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-05jexpq",
+			"ID": "20260618123823-ma2t9vz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-05jexpq",
-				"updated": "20260612191752"
+				"id": "20260618123823-ma2t9vz",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -1720,7 +1720,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-eqwcbng",
+			"ID": "20260618123823-8ny5p85",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1729,8 +1729,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-eqwcbng",
-				"updated": "20260612191752"
+				"id": "20260618123823-8ny5p85",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2087,12 +2087,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-ygzrmh1",
+			"ID": "20260618123823-e3ex8v5",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-ygzrmh1",
-				"updated": "20260612191752"
+				"id": "20260618123823-e3ex8v5",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2114,12 +2114,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-essafgx",
+			"ID": "20260618123823-jv2jg2e",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-essafgx",
-				"updated": "20260612191752"
+				"id": "20260618123823-jv2jg2e",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2129,11 +2129,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-z3ik66t",
+			"ID": "20260618123823-ux1u46q",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-z3ik66t",
-				"updated": "20260612191752"
+				"id": "20260618123823-ux1u46q",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2143,7 +2143,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-z8iwo4r",
+			"ID": "20260618123823-vngki1k",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2152,8 +2152,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-z8iwo4r",
-				"updated": "20260612191752"
+				"id": "20260618123823-vngki1k",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2660,7 +2660,61 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "取得文件中繼資料"
+									"Data": "取得文件元資訊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "document search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;keyword\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "依關鍵字搜尋文件"
 								}
 							]
 						}
@@ -2669,12 +2723,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-mt7zps9",
+			"ID": "20260618123823-br60f89",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-mt7zps9",
-				"updated": "20260612191752"
+				"id": "20260618123823-br60f89",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2687,7 +2741,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/資料夾\"\n\nsiyuan document create --notebook notebook-id --title \"新文件\"\nsiyuan document create --notebook notebook-id --title \"新文件\" --hpath \"/資料夾\"\nsiyuan document create --notebook notebook-id --title \"新文件\" --markdown \"# 標題\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新標題\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/目標資料夾\"\n"
+					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/資料夾\"\n\nsiyuan document create --notebook notebook-id --title \"新文件\"\nsiyuan document create --notebook notebook-id --title \"新文件\" --hpath \"/資料夾\"\nsiyuan document create --notebook notebook-id --title \"新文件\" --markdown \"# 標題\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新標題\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\nsiyuan document search \"關鍵字\"\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/目標資料夾\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -2696,12 +2750,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-kldsooq",
+			"ID": "20260618123823-c380p94",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-kldsooq",
-				"updated": "20260612191752"
+				"id": "20260618123823-c380p94",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2711,11 +2765,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-5oowu9q",
+			"ID": "20260618123823-4ehpfpb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-5oowu9q",
-				"updated": "20260612191752"
+				"id": "20260618123823-4ehpfpb",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2743,7 +2797,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-c9ojuou",
+			"ID": "20260618123823-hmq307w",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2752,8 +2806,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-c9ojuou",
-				"updated": "20260612191752"
+				"id": "20260618123823-hmq307w",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -2954,7 +3008,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "取得導覽路徑"
+									"Data": "取得麵包屑路徑"
 								}
 							]
 						}
@@ -3298,7 +3352,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "追加子區塊"
+									"Data": "附加子區塊"
 								}
 							]
 						}
@@ -3584,16 +3638,124 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "批次取得區塊資訊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-kramdown"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "批次取得區塊 kramdown"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-xbmjuzx",
+			"ID": "20260618123823-v6z94wh",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-xbmjuzx",
-				"updated": "20260612191752"
+				"id": "20260618123823-v6z94wh",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -3606,7 +3768,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新標題\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表項目\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e 引用\"\n\nsiyuan block update --id block-id --data \"修改後內容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新標題\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表項\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e 引用\"\n\nsiyuan block update --id block-id --data \"修改後內容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -3615,12 +3777,180 @@
 			]
 		},
 		{
-			"ID": "20260612191752-9o75te0",
+			"ID": "20260618123823-pyzz7jy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-9o75te0",
-				"updated": "20260612191752"
+				"id": "20260618123823-pyzz7jy",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "大綱"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-usfsb2r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123823-usfsb2r",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "取得文件的標題大綱樹。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-j3j9rxs",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123823-j3j9rxs",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "命令"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "參數"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "說明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "outline get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "取得文件標題大綱"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-221p72s",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123823-221p72s",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan outline get --id doc-id\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-5n9vh1d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123823-5n9vh1d",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -3630,11 +3960,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-uc2q0c0",
+			"ID": "20260618123823-cqzt3wt",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-uc2q0c0",
-				"updated": "20260612191752"
+				"id": "20260618123823-cqzt3wt",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -3644,7 +3974,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-mdfciqn",
+			"ID": "20260618123823-i6ptxqr",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -3652,8 +3982,8 @@
 			],
 			"Properties": {
 				"colgroup": "|",
-				"id": "20260612191752-mdfciqn",
-				"updated": "20260612191752"
+				"id": "20260618123823-i6ptxqr",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -3717,7 +4047,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "搜尋關鍵詞（必填）"
+									"Data": "搜尋關鍵字（必填）"
 								}
 							]
 						}
@@ -3857,7 +4187,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "按子類型過濾（o=有序列表/u=無序列表/t=待辦列表），可重複"
+									"Data": "按子類型過濾（o=有序列表/u=無序列表/t=任務列表），可重複"
 								}
 							]
 						}
@@ -3901,7 +4231,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 關鍵詞 "
+									"Data": "​ 關鍵字 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3990,7 +4320,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 建立時間升序 "
+									"Data": "​ 建立升序 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3999,7 +4329,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 建立時間降序 "
+									"Data": "​ 建立降序 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4008,7 +4338,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 更新時間升序 "
+									"Data": "​ 更新升序 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4017,7 +4347,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 更新時間降序 "
+									"Data": "​ 更新降序 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4176,12 +4506,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-9h4eft2",
+			"ID": "20260618123823-1depvwg",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-9h4eft2",
-				"updated": "20260612191752"
+				"id": "20260618123823-1depvwg",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4194,7 +4524,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan search \"關鍵詞\"\nsiyuan search \"關鍵詞\" --notebook box1 --notebook box2\nsiyuan search \"關鍵詞\" --path \"/目錄\"\nsiyuan search \"關鍵詞\" --type document --type heading\nsiyuan search \"關鍵詞\" --subtype o --subtype u\nsiyuan search \"關鍵詞\" --method 2\nsiyuan search \"關鍵詞\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"關鍵詞\" --group-by 1\n"
+					"Data": "siyuan search \"關鍵字\"\nsiyuan search \"關鍵字\" --notebook box1 --notebook box2\nsiyuan search \"關鍵字\" --path \"/目錄\"\nsiyuan search \"關鍵字\" --type document --type heading\nsiyuan search \"關鍵字\" --subtype o --subtype u\nsiyuan search \"關鍵字\" --method 2\nsiyuan search \"關鍵字\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"關鍵字\" --group-by 1\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -4203,12 +4533,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-ih29btx",
+			"ID": "20260618123823-62idd5q",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-ih29btx",
-				"updated": "20260612191752"
+				"id": "20260618123823-62idd5q",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4218,11 +4548,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-6s944nk",
+			"ID": "20260618123823-saj6mu1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-6s944nk",
-				"updated": "20260612191752"
+				"id": "20260618123823-saj6mu1",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4232,7 +4562,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-ud22xnn",
+			"ID": "20260618123823-vsko68e",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4240,8 +4570,8 @@
 			],
 			"Properties": {
 				"colgroup": "|",
-				"id": "20260612191752-ud22xnn",
-				"updated": "20260612191752"
+				"id": "20260618123823-vsko68e",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4305,7 +4635,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SQL SELECT 陳述式（必填）"
+									"Data": "SQL SELECT 語句（必填）"
 								}
 							]
 						}
@@ -4340,7 +4670,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最大回傳行數，預設 100"
+									"Data": "最大傳回行數，預設 100"
 								}
 							]
 						}
@@ -4349,12 +4679,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-12j2afn",
+			"ID": "20260618123823-zpdcanq",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-12j2afn",
-				"updated": "20260612191752"
+				"id": "20260618123823-zpdcanq",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4376,12 +4706,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-5k17unw",
+			"ID": "20260618123823-0jo0f52",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-5k17unw",
-				"updated": "20260612191752"
+				"id": "20260618123823-0jo0f52",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4391,11 +4721,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-a2pp3i4",
+			"ID": "20260618123823-sbdg9wt",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-a2pp3i4",
-				"updated": "20260612191752"
+				"id": "20260618123823-sbdg9wt",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4405,7 +4735,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-nf3x9oh",
+			"ID": "20260618123823-6judwjn",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4414,8 +4744,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-nf3x9oh",
-				"updated": "20260612191752"
+				"id": "20260618123823-6judwjn",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4580,12 +4910,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-2jszoor",
+			"ID": "20260618123823-mt0xowe",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-2jszoor",
-				"updated": "20260612191752"
+				"id": "20260618123823-mt0xowe",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4607,12 +4937,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-v58r7jk",
+			"ID": "20260618123823-fcc5zu8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-v58r7jk",
-				"updated": "20260612191752"
+				"id": "20260618123823-fcc5zu8",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4622,11 +4952,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-9mqfrgj",
+			"ID": "20260618123823-6okdop9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-9mqfrgj",
-				"updated": "20260612191752"
+				"id": "20260618123823-6okdop9",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -4645,7 +4975,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-85rc34p",
+			"ID": "20260618123823-8zd0exu",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4654,8 +4984,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-85rc34p",
-				"updated": "20260612191752"
+				"id": "20260618123823-8zd0exu",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5135,12 +5465,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-57au8l8",
+			"ID": "20260618123823-ekx7mlj",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-57au8l8",
-				"updated": "20260612191752"
+				"id": "20260618123823-ekx7mlj",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5162,12 +5492,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-mq3wp40",
+			"ID": "20260618123823-sl7sdvi",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-mq3wp40",
-				"updated": "20260612191752"
+				"id": "20260618123823-sl7sdvi",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5177,11 +5507,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-1pul82o",
+			"ID": "20260618123823-32nrzns",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-1pul82o",
-				"updated": "20260612191752"
+				"id": "20260618123823-32nrzns",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5191,7 +5521,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-a6jxrrz",
+			"ID": "20260618123823-4tp2iwy",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5200,8 +5530,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-a6jxrrz",
-				"updated": "20260612191752"
+				"id": "20260618123823-4tp2iwy",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5429,12 +5759,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-2g66lpm",
+			"ID": "20260618123823-mgbd9us",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-2g66lpm",
-				"updated": "20260612191752"
+				"id": "20260618123823-mgbd9us",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5456,12 +5786,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-4qt7pf2",
+			"ID": "20260618123823-j69nhj0",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-4qt7pf2",
-				"updated": "20260612191752"
+				"id": "20260618123823-j69nhj0",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5471,11 +5801,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-voyku16",
+			"ID": "20260618123823-c2pnemp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-voyku16",
-				"updated": "20260612191752"
+				"id": "20260618123823-c2pnemp",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5485,7 +5815,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-9u1jg45",
+			"ID": "20260618123823-x2d8ih1",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5494,8 +5824,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-9u1jg45",
-				"updated": "20260612191752"
+				"id": "20260618123823-x2d8ih1",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5813,7 +6143,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "回溯到歷史版本"
+									"Data": "回滾到歷史版本"
 								}
 							]
 						}
@@ -5861,11 +6191,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-53rwv2m",
+			"ID": "20260618123823-sx3s5se",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-53rwv2m",
-				"updated": "20260612191752"
+				"id": "20260618123823-sx3s5se",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5911,11 +6241,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-78oxkmm",
+			"ID": "20260618123823-6aix4ad",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-78oxkmm",
-				"updated": "20260612191752"
+				"id": "20260618123823-6aix4ad",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5979,12 +6309,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-8aeudz5",
+			"ID": "20260618123823-1u425cq",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-8aeudz5",
-				"updated": "20260612191752"
+				"id": "20260618123823-1u425cq",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -5997,7 +6327,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan history list\nsiyuan history list --notebook notebook-id --op delete --type 0 --page 1\nsiyuan history search \"關鍵詞\" --notebook notebook-id --op update\nsiyuan history get --path \"history/...\"\nsiyuan history rollback --path \"history/...\"\nsiyuan history clear\n"
+					"Data": "siyuan history list\nsiyuan history list --notebook notebook-id --op delete --type 0 --page 1\nsiyuan history search \"關鍵字\" --notebook notebook-id --op update\nsiyuan history get --path \"history/...\"\nsiyuan history rollback --path \"history/...\"\nsiyuan history clear\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -6006,12 +6336,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-trbytix",
+			"ID": "20260618123823-u9bugi8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-trbytix",
-				"updated": "20260612191752"
+				"id": "20260618123823-u9bugi8",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -6021,21 +6351,21 @@
 			]
 		},
 		{
-			"ID": "20260612191752-jzardux",
+			"ID": "20260618123823-yxoummw",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-jzardux",
-				"updated": "20260612191752"
+				"id": "20260618123823-yxoummw",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "建立和管理工作空間快照，支援回溯和檔案級回復。"
+					"Data": "建立和管理工作空間快照，支援回滾和檔案級復原。"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-hj6b6cf",
+			"ID": "20260618123823-cy6qhym",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6044,8 +6374,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-hj6b6cf",
-				"updated": "20260612191752"
+				"id": "20260618123823-cy6qhym",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -6363,7 +6693,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "回溯到快照"
+									"Data": "回滾到快照"
 								}
 							]
 						}
@@ -6627,7 +6957,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "從快照回復單個檔案"
+									"Data": "從快照回滾單個檔案"
 								}
 							]
 						}
@@ -6744,12 +7074,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-si8y36y",
+			"ID": "20260618123823-s0mu58w",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-si8y36y",
-				"updated": "20260612191752"
+				"id": "20260618123823-s0mu58w",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -6762,7 +7092,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan repo list\nsiyuan repo list --tag --page 1\nsiyuan repo create --memo \"升級前備份\"\nsiyuan repo tag --id snapshot-id --name \"v1.0\"\nsiyuan repo untag --name \"v1.0\"\nsiyuan repo checkout --id snapshot-id\nsiyuan repo diff --left id1 --right id2\nsiyuan repo search \"關鍵詞\"\nsiyuan repo purge\nsiyuan repo file get --id file-id\nsiyuan repo file rollback --id file-id\nsiyuan repo file open --id file-id\nsiyuan repo file export --id file-id\n"
+					"Data": "siyuan repo list\nsiyuan repo list --tag --page 1\nsiyuan repo create --memo \"升級前備份\"\nsiyuan repo tag --id snapshot-id --name \"v1.0\"\nsiyuan repo untag --name \"v1.0\"\nsiyuan repo checkout --id snapshot-id\nsiyuan repo diff --left id1 --right id2\nsiyuan repo search \"關鍵字\"\nsiyuan repo purge\nsiyuan repo file get --id file-id\nsiyuan repo file rollback --id file-id\nsiyuan repo file open --id file-id\nsiyuan repo file export --id file-id\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -6771,12 +7101,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-9nd1voj",
+			"ID": "20260618123823-2db6bge",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-9nd1voj",
-				"updated": "20260612191752"
+				"id": "20260618123823-2db6bge",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -6786,11 +7116,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-v219b9a",
+			"ID": "20260618123823-63wfzg3",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-v219b9a",
-				"updated": "20260612191752"
+				"id": "20260618123823-63wfzg3",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -6800,7 +7130,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-6thxgp0",
+			"ID": "20260618123823-agxnwhj",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6809,8 +7139,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-6thxgp0",
-				"updated": "20260612191752"
+				"id": "20260618123823-agxnwhj",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7056,11 +7386,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-mkd87g8",
+			"ID": "20260618123823-x4aspn9",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-mkd87g8",
-				"updated": "20260612191752"
+				"id": "20260618123823-x4aspn9",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7151,12 +7481,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-6gr065v",
+			"ID": "20260618123823-2xorv0j",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-6gr065v",
-				"updated": "20260612191752"
+				"id": "20260618123823-2xorv0j",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7178,12 +7508,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-b4z8iyy",
+			"ID": "20260618123823-mlzvrcc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-b4z8iyy",
-				"updated": "20260612191752"
+				"id": "20260618123823-mlzvrcc",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7193,11 +7523,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-7th5wgd",
+			"ID": "20260618123823-4kcuyyg",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-7th5wgd",
-				"updated": "20260612191752"
+				"id": "20260618123823-4kcuyyg",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7207,7 +7537,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-c0ygytv",
+			"ID": "20260618123823-0uii6rx",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7216,8 +7546,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-c0ygytv",
-				"updated": "20260612191752"
+				"id": "20260618123823-0uii6rx",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7427,12 +7757,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-suu8goj",
+			"ID": "20260618123823-2mcknvl",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-suu8goj",
-				"updated": "20260612191752"
+				"id": "20260618123823-2mcknvl",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7454,12 +7784,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-3k6kdzt",
+			"ID": "20260618123823-hday5ze",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-3k6kdzt",
-				"updated": "20260612191752"
+				"id": "20260618123823-hday5ze",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7469,11 +7799,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-4byi6vk",
+			"ID": "20260618123823-yiw4r0l",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-4byi6vk",
-				"updated": "20260612191752"
+				"id": "20260618123823-yiw4r0l",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7483,7 +7813,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-zfgsxze",
+			"ID": "20260618123823-mtm7gk4",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7492,8 +7822,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-zfgsxze",
-				"updated": "20260612191752"
+				"id": "20260618123823-mtm7gk4",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7712,12 +8042,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-itvlvzd",
+			"ID": "20260618123823-6rdjb0m",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-itvlvzd",
-				"updated": "20260612191752"
+				"id": "20260618123823-6rdjb0m",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7739,12 +8069,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-9xadt5k",
+			"ID": "20260618123823-7nss21w",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-9xadt5k",
-				"updated": "20260612191752"
+				"id": "20260618123823-7nss21w",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7754,11 +8084,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-93h1ked",
+			"ID": "20260618123823-8bnmwxu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-93h1ked",
-				"updated": "20260612191752"
+				"id": "20260618123823-8bnmwxu",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7768,7 +8098,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-0rwm4p4",
+			"ID": "20260618123823-28lnoxk",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7777,8 +8107,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-0rwm4p4",
-				"updated": "20260612191752"
+				"id": "20260618123823-28lnoxk",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -7978,16 +8308,70 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "asset stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "檢視資源檔案資訊"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-pphv4mt",
+			"ID": "20260618123823-lihar6e",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-pphv4mt",
-				"updated": "20260612191752"
+				"id": "20260618123823-lihar6e",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -8000,7 +8384,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\n"
+					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\nsiyuan asset stat --path \"assets/image/xxx.png\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -8009,12 +8393,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-gfcyl8x",
+			"ID": "20260618123823-vve0o4s",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-gfcyl8x",
-				"updated": "20260612191752"
+				"id": "20260618123823-vve0o4s",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -8024,11 +8408,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-1in1te3",
+			"ID": "20260618123823-2u5o0q8",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-1in1te3",
-				"updated": "20260612191752"
+				"id": "20260618123823-2u5o0q8",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -8038,7 +8422,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-c5ok4zg",
+			"ID": "20260618123823-yi8coc8",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8047,8 +8431,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-c5ok4zg",
-				"updated": "20260612191752"
+				"id": "20260618123823-yi8coc8",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -8282,12 +8666,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-0x9gtdi",
+			"ID": "20260618123823-1ghd1o8",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-0x9gtdi",
-				"updated": "20260612191752"
+				"id": "20260618123823-1ghd1o8",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -8300,7 +8684,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan bookmark list\nsiyuan bookmark labels\nsiyuan bookmark remove --label \"書籤名稱\"\nsiyuan bookmark rename --old \"舊\" --new \"新\"\n"
+					"Data": "siyuan bookmark list\nsiyuan bookmark labels\nsiyuan bookmark remove --label \"書籤名\"\nsiyuan bookmark rename --old \"舊\" --new \"新\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -8309,12 +8693,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-snesw5p",
+			"ID": "20260618123823-68rq10j",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-snesw5p",
-				"updated": "20260612191752"
+				"id": "20260618123823-68rq10j",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -8324,21 +8708,21 @@
 			]
 		},
 		{
-			"ID": "20260612191752-qr7ml0b",
+			"ID": "20260618123823-i7mnve2",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-qr7ml0b",
-				"updated": "20260612191752"
+				"id": "20260618123823-i7mnve2",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "管理資料庫的欄位、行和視圖。"
+					"Data": "管理資料庫的欄位、列和檢視。"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-gsiomyl",
+			"ID": "20260618123823-019fi5p",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8347,8 +8731,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-gsiomyl",
-				"updated": "20260612191752"
+				"id": "20260618123823-019fi5p",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -8975,7 +9359,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "新增行"
+									"Data": "新增列"
 								}
 							]
 						}
@@ -9029,7 +9413,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "刪除行"
+									"Data": "刪除列"
 								}
 							]
 						}
@@ -9092,11 +9476,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-xjtz99u",
+			"ID": "20260618123823-w37cz3v",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-xjtz99u",
-				"updated": "20260612191752"
+				"id": "20260618123823-w37cz3v",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -9268,12 +9652,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-p7t2g2x",
+			"ID": "20260618123823-p3o5n9t",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-p7t2g2x",
-				"updated": "20260612191752"
+				"id": "20260618123823-p3o5n9t",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -9286,7 +9670,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan database search \"關鍵詞\"\nsiyuan database get --id db-id\nsiyuan database render --id db-id --view view-id --query \"篩選\" --page 1 --page-size 50\nsiyuan database keys --id db-id\n\nsiyuan database key add --id db-id --name \"狀態\" --type select\nsiyuan database key add --id db-id --name \"金額\" --type number --icon 1f4b0\nsiyuan database key add --id db-id --name \"備註\" --type text --prev previous-key-id\nsiyuan database key remove --id db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --id db-id\n\nsiyuan database item add --id db-id\nsiyuan database item add --id db-id --block block-id --content \"文字\"\nsiyuan database item add --id db-id --view view-id --previous prev-id\nsiyuan database item remove --id db-id --items \"item1,item2\"\nsiyuan database item update --id db-id --key key-id --item item-id --value '{\"content\": \"新值\"}'\n"
+					"Data": "siyuan database search \"關鍵字\"\nsiyuan database get --id db-id\nsiyuan database render --id db-id --view view-id --query \"篩選\" --page 1 --page-size 50\nsiyuan database keys --id db-id\n\nsiyuan database key add --id db-id --name \"狀態\" --type select\nsiyuan database key add --id db-id --name \"金額\" --type number --icon 1f4b0\nsiyuan database key add --id db-id --name \"備註\" --type text --prev previous-key-id\nsiyuan database key remove --id db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --id db-id\n\nsiyuan database item add --id db-id\nsiyuan database item add --id db-id --block block-id --content \"文字\"\nsiyuan database item add --id db-id --view view-id --previous prev-id\nsiyuan database item remove --id db-id --items \"item1,item2\"\nsiyuan database item update --id db-id --key key-id --item item-id --value '{\"content\": \"新值\"}'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9295,12 +9679,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-nq8chnl",
+			"ID": "20260618123823-15eexa2",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-nq8chnl",
-				"updated": "20260612191752"
+				"id": "20260618123823-15eexa2",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -9310,21 +9694,21 @@
 			]
 		},
 		{
-			"ID": "20260612191752-z1g09vf",
+			"ID": "20260618123823-fpllsi2",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-z1g09vf",
-				"updated": "20260612191752"
+				"id": "20260618123823-fpllsi2",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "管理每日筆記的建立和內容追加。"
+					"Data": "管理每日筆記的建立和內容附加。"
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-dbxjcgd",
+			"ID": "20260618123823-1o4xd27",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9333,8 +9717,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-dbxjcgd",
-				"updated": "20260612191752"
+				"id": "20260618123823-1o4xd27",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -9509,7 +9893,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "向今日日記追加內容"
+									"Data": "向今日日記附加內容"
 								}
 							]
 						}
@@ -9600,12 +9984,12 @@
 			]
 		},
 		{
-			"ID": "20260612191752-ydo0m14",
+			"ID": "20260618123823-zl15mv1",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-ydo0m14",
-				"updated": "20260612191752"
+				"id": "20260618123823-zl15mv1",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -9627,12 +10011,505 @@
 			]
 		},
 		{
-			"ID": "20260612191752-dj5qgyd",
+			"ID": "20260618123823-chsmlf1",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612191752-dj5qgyd",
-				"updated": "20260612191752"
+				"id": "20260618123823-chsmlf1",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "範本"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-q8mkkv7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123823-q8mkkv7",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "管理範本檔案，支援搜尋、建立、演算和將文件另存為範本。範本路徑為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 下的相對路徑。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-qdst9v5",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123823-qdst9v5",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "命令"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "參數"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "說明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[keyword]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "搜尋範本，關鍵字為空時列出全部"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "讀取範本內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template create"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeBackslash",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "|"
+										}
+									]
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--file"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "從 Markdown 內容建立範本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template render"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path --id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "以指定區塊為上下文預覽演算範本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template save-as"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id --name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "將文件另存為範本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template remove"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "刪除範本"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-k21hsi1",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123823-k21hsi1",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan template search\nsiyuan template search \"會議\"\nsiyuan template get --path templates/週報.md\nsiyuan template create --name \"週報\" --data \"# 週報\"\nsiyuan template create --name \"週報\" --file ./weekly.md\nsiyuan template create --name \"週報\" --data \"# 週報\" --overwrite\nsiyuan template render --path templates/週報.md --id doc-id\nsiyuan template save-as --id doc-id --name \"會議紀錄\"\nsiyuan template save-as --id doc-id --name \"會議紀錄\" --overwrite\nsiyuan template remove --path templates/週報.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-oez8c91",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123823-oez8c91",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -9642,11 +10519,11 @@
 			]
 		},
 		{
-			"ID": "20260612191752-srlg10m",
+			"ID": "20260618123823-zg85ys6",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612191752-srlg10m",
-				"updated": "20260612191752"
+				"id": "20260618123823-zg85ys6",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -9656,7 +10533,7 @@
 			]
 		},
 		{
-			"ID": "20260612191752-ob2xyya",
+			"ID": "20260618123823-dcsyty0",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9665,8 +10542,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612191752-ob2xyya",
-				"updated": "20260612191752"
+				"id": "20260618123823-dcsyty0",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -10034,16 +10911,223 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file grep"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--pattern --path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--context"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "以正規表示式搜尋檔案內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file find"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "以萬用字元尋找檔案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "檢視檔案或目錄資訊"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612191752-t1t3imq",
+			"ID": "20260618123823-eyo6hhp",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612191752-t1t3imq",
-				"updated": "20260612191752"
+				"id": "20260618123823-eyo6hhp",
+				"updated": "20260618123823"
 			},
 			"Children": [
 				{
@@ -10056,7 +11140,160 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\n"
+					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\nsiyuan file grep --pattern \"TODO\" --path /temp\nsiyuan file grep --pattern \"func \" --path /temp --include \"*.go\" --context 2\nsiyuan file find /temp --include \"*.md\"\nsiyuan file stat /temp/readme.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-1ba1bii",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123823-1ba1bii",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "系統"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-o2rl8rr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123823-o2rl8rr",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "檢視系統資訊。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-icxcji9",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123823-icxcji9",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "命令"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "參數"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "說明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "system current-time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "顯示目前伺服器時間"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123823-89ckitk",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123823-89ckitk",
+				"updated": "20260618123823"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan system current-time\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

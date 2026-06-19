@@ -2,7 +2,6 @@ import {onTransaction} from "../wysiwyg/transaction";
 import {preventScroll} from "../scroll/preventScroll";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
-import {scrollCenter} from "../../util/highlightById";
 import {matchHotKey} from "../util/hotKey";
 import {ipcRenderer} from "electron";
 import {markMirror, refreshUndoButtons, requestRedo, requestUndo} from "./globalUndo";
@@ -28,7 +27,7 @@ export class Undo {
 
     // renderLocal 仅在发起窗口本地应用操作（isUndo=true），不 POST 到 kernel
     // （kernel 的 undo/redo 接口已执行事务并广播）。保留光标恢复/折叠/zoom/lastHTMLs 行为。
-    public renderLocal(protyle: IProtyle, operations: IOperation[], isRedo: boolean) {
+    public renderLocal(protyle: IProtyle, operations: IOperation[], _isRedo: boolean) {
         hideElements(["hint", "gutter"], protyle);
         protyle.wysiwyg.lastHTMLs = {};
         for (let i = operations.length - 1; i >= 0; i--) {
@@ -45,7 +44,6 @@ export class Undo {
         onTransaction(protyle, operations, true);
         document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);
-        scrollCenter(protyle);
     }
 
     // add 降级为：不压栈（kernel 已在 commit 后 Record），仅置位本地镜像 + 刷新按钮态。

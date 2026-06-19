@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -224,6 +225,54 @@ func setAttrViewGroup(c *gin.Context) {
 		retDataMap["view"] = model.FilterViewByPublishAccess(c, publishAccess, retDataMap["view"].(av.Viewable))
 	}
 
+	c.JSON(http.StatusOK, ret)
+}
+
+func setAttrViewFilters(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	avID := arg["avID"].(string)
+	blockID := arg["blockID"].(string)
+	data := arg["data"].([]any)
+
+	err := model.SetAttrViewFilters(avID, blockID, data)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	model.ReloadAttrView(avID)
+	c.JSON(http.StatusOK, ret)
+}
+
+func setAttrViewSorts(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	avID := arg["avID"].(string)
+	blockID := arg["blockID"].(string)
+	data := arg["data"].([]any)
+
+	err := model.SetAttrViewSorts(avID, blockID, data)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	model.ReloadAttrView(avID)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -896,7 +945,11 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize, groupPaging, createIfNotExist, ignoreRows)
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		if errors.Is(err, av.ErrSpecTooNew) {
+			ret.Msg = model.Conf.Language(215)
+		} else {
+			ret.Msg = err.Error()
+		}
 		return
 	}
 

@@ -798,7 +798,7 @@ export const insertRows = (options: {
     options.blockElement.setAttribute("updated", newUpdated);
 };
 
-export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowElements: HTMLElement[]) => {
+export const duplicateRows = (blockElement: HTMLElement, protyle: IProtyle, rowElements: NodeListOf<Element>) => {
     const avID = blockElement.getAttribute("data-av-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];

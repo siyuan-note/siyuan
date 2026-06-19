@@ -24,6 +24,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
 )
@@ -140,14 +141,48 @@ var assetCleanCmd = &cobra.Command{
 	},
 }
 
+var assetStatCmd = &cobra.Command{
+	Use:   "stat --path <path>",
+	Short: "Show asset file info",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		p, _ := cmd.Flags().GetString("path")
+		if p == "" {
+			return fmt.Errorf("--path is required")
+		}
+		abs := filepath.Join(util.DataDir, p)
+		info, err := os.Stat(abs)
+		if err != nil {
+			return err
+		}
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(map[string]any{
+				"path":    p,
+				"size":    info.Size(),
+				"isDir":   info.IsDir(),
+				"modTime": info.ModTime().Format("2006-01-02 15:04:05"),
+			}, "", "  ")
+			fmt.Println(string(data))
+		default:
+			fmt.Printf("Path:    %s\n", p)
+			fmt.Printf("Size:    %d\n", info.Size())
+			fmt.Printf("IsDir:   %v\n", info.IsDir())
+			fmt.Printf("ModTime: %s\n", info.ModTime().Format("2006-01-02 15:04:05"))
+		}
+		return nil
+	},
+}
+
 func init() {
 	assetUploadCmd.Flags().String("id", "", "target document block ID")
 	assetUploadCmd.Flags().StringArray("file", nil, "local file path (repeatable)")
 
 	assetCleanCmd.Flags().String("path", "", "single unused asset path to remove")
+	assetStatCmd.Flags().String("path", "", "asset path relative to data dir, e.g. assets/image/xxx.png")
 
 	rootCmd.AddCommand(assetCmd)
 	assetCmd.AddCommand(assetUploadCmd)
 	assetCmd.AddCommand(assetUnusedCmd)
 	assetCmd.AddCommand(assetCleanCmd)
+	assetCmd.AddCommand(assetStatCmd)
 }

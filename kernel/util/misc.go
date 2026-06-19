@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -228,6 +229,68 @@ func Convert2Float(s string) (float64, bool) {
 		return 0, false
 	}
 	return ret, true
+}
+
+// CountIf 统计数字列表中满足指定比较条件的元素个数。
+// op 为比较操作符："gt"/"lt"/"eq"/"ge"/"le"，threshold 为比较阈值。
+// 例如 CountIf(values, "gt", 0) 统计大于 0 的个数。非数字元素按 0 处理。
+func CountIf(list any, op string, threshold any) int {
+	thresholdF, ok := ToFloat64(threshold)
+	if !ok {
+		return 0
+	}
+	count := 0
+	v := reflect.ValueOf(list)
+	if v.Kind() != reflect.Slice && v.Kind() != reflect.Array {
+		return 0
+	}
+	for i := 0; i < v.Len(); i++ {
+		elem, ok := ToFloat64(v.Index(i).Interface())
+		if !ok {
+			continue
+		}
+		switch op {
+		case "gt":
+			if elem > thresholdF {
+				count++
+			}
+		case "lt":
+			if elem < thresholdF {
+				count++
+			}
+		case "eq":
+			if elem == thresholdF {
+				count++
+			}
+		case "ge":
+			if elem >= thresholdF {
+				count++
+			}
+		case "le":
+			if elem <= thresholdF {
+				count++
+			}
+		}
+	}
+	return count
+}
+
+// ToFloat64 将常用数值/字符串类型转换为 float64。
+func ToFloat64(v any) (float64, bool) {
+	switch x := v.(type) {
+	case float64:
+		return x, true
+	case float32:
+		return float64(x), true
+	case int:
+		return float64(x), true
+	case int64:
+		return float64(x), true
+	case string:
+		f, err := strconv.ParseFloat(strings.TrimSpace(x), 64)
+		return f, err == nil
+	}
+	return 0, false
 }
 
 func ContainsSubStr(s string, subStrs []string) bool {

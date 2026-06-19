@@ -1009,12 +1009,14 @@ interface IAVKanban extends IAVView {
 }
 
 interface IAVFilter {
-    column: string,
-    operator: TAVFilterOperator,
-    quantifier?: string,
-    value: IAVCellValue,
-    relativeDate?: IAVRelativeDate
-    relativeDate2?: IAVRelativeDate
+    column?: string,                                  // 叶子节点：字段（列）ID
+    operator?: TAVFilterOperator,                     // 叶子节点：操作符
+    quantifier?: string,                              // 叶子节点：量词
+    value?: IAVCellValue,                             // 叶子节点：过滤值
+    relativeDate?: IAVRelativeDate,                   // 叶子节点：相对时间
+    relativeDate2?: IAVRelativeDate,                  // 叶子节点：第二个相对时间
+    combination?: "and" | "or",                       // 分组节点：子条件组合方式
+    filters?: IAVFilter[],                            // 分组节点：子节点（递归）
 }
 
 interface IAVRelativeDate {

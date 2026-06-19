@@ -6,16 +6,16 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20260612192602"
+		"updated": "20260618123956"
 	},
 	"Children": [
 		{
-			"ID": "20260612192523-nr5r08r",
+			"ID": "20260618123956-nh1e7k5",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-nr5r08r",
-				"updated": "20260612192523"
+				"id": "20260618123956-nh1e7k5",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -25,25 +25,25 @@
 			]
 		},
 		{
-			"ID": "20260612192523-528ntsn",
+			"ID": "20260618123956-x0lujvb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-528ntsn",
-				"updated": "20260612192523"
+				"id": "20260618123956-x0lujvb",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan には CLI（Command Line Interface）が組み込まれており、カーネルサーバーを起動せずにワークスペースデータに直接アクセスできます。スクリプト処理、バッチ管理、AI エージェントとの連携によるノートデータの読み書きに適しています。"
+					"Data": "SiYuan には CLI（Command Line Interface）が内蔵されており、カーネルサービスを起動せずにワークスペースデータへ直接アクセスできます。スクリプト処理、一括管理、AI エージェントと連携したノートデータの読み書きに適しています。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-7qowk8b",
+			"ID": "20260618123956-r4st7wc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-7qowk8b",
-				"updated": "20260612192523"
+				"id": "20260618123956-r4st7wc",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -62,12 +62,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-nx8ui4k",
+			"ID": "20260618123956-rq5ibw3",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-nx8ui4k",
-				"updated": "20260612192523"
+				"id": "20260618123956-rq5ibw3",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -77,16 +77,16 @@
 			]
 		},
 		{
-			"ID": "20260612192523-um1dhox",
+			"ID": "20260618123956-pd10a68",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-um1dhox",
-				"updated": "20260612192523"
+				"id": "20260618123956-pd10a68",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "CLI 実行可能ファイルは "
+					"Data": "CLI の実行ファイルは "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -95,7 +95,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ にあり、"
+					"Data": "​ で、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -109,32 +109,32 @@
 			]
 		},
 		{
-			"ID": "20260612192523-1uvotyv",
+			"ID": "20260618123956-6xjq4tq",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612192523-1uvotyv",
-				"updated": "20260612192523"
+				"id": "20260618123956-6xjq4tq",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
-					"ID": "20260612192523-z8v4h4w",
+					"ID": "20260618123956-69ywnmy",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-z8v4h4w",
-						"updated": "20260612192523"
+						"id": "20260618123956-69ywnmy",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-0ejujmm",
+							"ID": "20260618123956-8m4ikg3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-0ejujmm",
-								"updated": "20260612192523"
+								"id": "20260618123956-8m4ikg3",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -153,7 +153,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ に追加するため、"
+									"Data": "​ に追加するため、そのまま "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -162,30 +162,30 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を直接使用できます"
+									"Data": "​ を使用できます"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192523-toipaqc",
+					"ID": "20260618123956-dty33i3",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-toipaqc",
-						"updated": "20260612192523"
+						"id": "20260618123956-dty33i3",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-860diwd",
+							"ID": "20260618123956-gbja6t3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-860diwd",
-								"updated": "20260612192523"
+								"id": "20260618123956-gbja6t3",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -195,17 +195,17 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：インストール後にシンボリックリンクを作成します"
+									"Data": "：インストール後にシンボリックリンクを作成"
 								}
 							]
 						},
 						{
-							"ID": "20260612192523-l646c85",
+							"ID": "20260618123956-zwk8ces",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612192523-l646c85",
-								"updated": "20260612192523"
+								"id": "20260618123956-zwk8ces",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -229,23 +229,23 @@
 					]
 				},
 				{
-					"ID": "20260612192523-40d494g",
+					"ID": "20260618123956-sfsumca",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-40d494g",
-						"updated": "20260612192523"
+						"id": "20260618123956-sfsumca",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-yiqd16u",
+							"ID": "20260618123956-ms7mqer",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-yiqd16u",
-								"updated": "20260612192523"
+								"id": "20260618123956-ms7mqer",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -255,17 +255,17 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：インストール後にシンボリックリンクを作成します"
+									"Data": "：インストール後にシンボリックリンクを作成"
 								}
 							]
 						},
 						{
-							"ID": "20260612192523-hmea15z",
+							"ID": "20260618123956-6ofr61k",
 							"Type": "NodeCodeBlock",
 							"IsFencedCodeBlock": true,
 							"Properties": {
-								"id": "20260612192523-hmea15z",
-								"updated": "20260612192523"
+								"id": "20260618123956-6ofr61k",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -291,12 +291,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-a6se0v0",
+			"ID": "20260618123956-eth7jbg",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-a6se0v0",
-				"updated": "20260612192523"
+				"id": "20260618123956-eth7jbg",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -306,7 +306,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-rd7kd9n",
+			"ID": "20260618123956-gr100ax",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -316,8 +316,8 @@
 			],
 			"Properties": {
 				"colgroup": "|||",
-				"id": "20260612192523-rd7kd9n",
-				"updated": "20260612192523"
+				"id": "20260618123956-gr100ax",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -344,7 +344,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "短縮形"
+											"Data": "短縮"
 										}
 									]
 								},
@@ -597,7 +597,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ドライランモード：パラメータを検証するのみで実際の変更は行わない"
+									"Data": "ドライランモード、パラメータを検証するだけで実行しない"
 								}
 							]
 						}
@@ -606,11 +606,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-hb45kit",
+			"ID": "20260618123956-9jxhu0w",
 			"Type": "NodeBlockquote",
 			"Properties": {
-				"id": "20260612192523-hb45kit",
-				"updated": "20260612192523"
+				"id": "20260618123956-9jxhu0w",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -618,11 +618,11 @@
 					"Data": "\u003e"
 				},
 				{
-					"ID": "20260612192523-b340xj5",
+					"ID": "20260618123956-7gd9h1c",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20260612192523-b340xj5",
-						"updated": "20260612192523"
+						"id": "20260618123956-7gd9h1c",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
@@ -636,7 +636,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ はスクリプト処理に適しています；"
+							"Data": "​ はスクリプト処理に適しています。"
 						},
 						{
 							"Type": "NodeTextMark",
@@ -645,7 +645,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ はすべての変更操作に適用され、"
+							"Data": "​ はすべての変更系操作に適用でき、"
 						},
 						{
 							"Type": "NodeTextMark",
@@ -654,54 +654,54 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": "​ プロンプトが出力されます。"
+							"Data": "​ という出力を返します。"
 						}
 					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-det7gqx",
+			"ID": "20260618123956-lw2tljt",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-det7gqx",
-				"updated": "20260612192523"
+				"id": "20260618123956-lw2tljt",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "パラメータの規則"
+					"Data": "パラメータ規約"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-2heecnl",
+			"ID": "20260618123956-texyg35",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612192523-2heecnl",
-				"updated": "20260612192523"
+				"id": "20260618123956-texyg35",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
-					"ID": "20260612192523-npnlgnc",
+					"ID": "20260618123956-9wlsdw2",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-npnlgnc",
-						"updated": "20260612192523"
+						"id": "20260618123956-9wlsdw2",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-kcjqeuh",
+							"ID": "20260618123956-95h1ir6",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-kcjqeuh",
-								"updated": "20260612192523"
+								"id": "20260618123956-95h1ir6",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -715,7 +715,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で始まり、値はスペースで区切ります。例："
+									"Data": "​ で始まり、値が続きます。スペースで区切ります。例："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -731,28 +731,28 @@
 					]
 				},
 				{
-					"ID": "20260612192523-aa4kiv2",
+					"ID": "20260618123956-dkww4hn",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-aa4kiv2",
-						"updated": "20260612192523"
+						"id": "20260618123956-dkww4hn",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-4cql4o9",
+							"ID": "20260618123956-v2360q1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-4cql4o9",
-								"updated": "20260612192523"
+								"id": "20260618123956-v2360q1",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "短縮形を持つパラメータは短縮形を使用できます。例："
+									"Data": "短縮形のあるパラメータは短縮形を使用できます。例："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -770,30 +770,30 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ の代わり"
+									"Data": "​ を代替"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192523-6ootdhb",
+					"ID": "20260618123956-c9rj2bq",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-6ootdhb",
-						"updated": "20260612192523"
+						"id": "20260618123956-c9rj2bq",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-c2x4gju",
+							"ID": "20260618123956-hoybi1r",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-c2x4gju",
-								"updated": "20260612192523"
+								"id": "20260618123956-hoybi1r",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -807,35 +807,35 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 内のパラメータは省略可能です"
+									"Data": "​ 内のパラメータは省略可能"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192523-ttl1fqy",
+					"ID": "20260618123956-a87mi7w",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-ttl1fqy",
-						"updated": "20260612192523"
+						"id": "20260618123956-a87mi7w",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-8uu0cb0",
+							"ID": "20260618123956-jwvy4uk",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-8uu0cb0",
-								"updated": "20260612192523"
+								"id": "20260618123956-jwvy4uk",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブール型フラグは値なしで使用します。例："
+									"Data": "値のないフラグはそのまま指定します。例："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -851,28 +851,28 @@
 					]
 				},
 				{
-					"ID": "20260612192523-f1i9o56",
+					"ID": "20260618123956-2kjgd2i",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-f1i9o56",
-						"updated": "20260612192523"
+						"id": "20260618123956-2kjgd2i",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-5biwvdn",
+							"ID": "20260618123956-lq5zbhx",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-5biwvdn",
-								"updated": "20260612192523"
+								"id": "20260618123956-lq5zbhx",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "一部のパラメータは複数回繰り返し使用できます。例："
+									"Data": "一部のパラメータは複数回指定できます。例："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -890,47 +890,47 @@
 			]
 		},
 		{
-			"ID": "20260612192523-gk56o28",
+			"ID": "20260618123956-18oim6k",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-gk56o28",
-				"updated": "20260612192523"
+				"id": "20260618123956-18oim6k",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ターゲットの指定"
+					"Data": "ターゲットの特定"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-xfglng1",
+			"ID": "20260618123956-er1uysn",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20260612192523-xfglng1",
-				"updated": "20260612192523"
+				"id": "20260618123956-er1uysn",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
-					"ID": "20260612192523-3ljqssq",
+					"ID": "20260618123956-wn3vqx0",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-3ljqssq",
-						"updated": "20260612192523"
+						"id": "20260618123956-wn3vqx0",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-e1rpj73",
+							"ID": "20260618123956-m1v8np8",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-e1rpj73",
-								"updated": "20260612192523"
+								"id": "20260618123956-m1v8np8",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -944,7 +944,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：ブロック ID で正確に指定します。"
+									"Data": "​：ブロック ID で正確に特定。"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -962,30 +962,30 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ などのほとんどのコマンドで使用します"
+									"Data": "​ など大部分のコマンドに適用"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192523-cu2zwtc",
+					"ID": "20260618123956-yhlb0xt",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-cu2zwtc",
-						"updated": "20260612192523"
+						"id": "20260618123956-yhlb0xt",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-b2f2z9x",
+							"ID": "20260618123956-oul41q1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-b2f2z9x",
-								"updated": "20260612192523"
+								"id": "20260618123956-oul41q1",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -999,7 +999,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：人間が読めるパスで指定します（例："
+									"Data": "​：人間が読めるパスで特定（例："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1017,7 +1017,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ および "
+									"Data": "​ と "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1026,30 +1026,30 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で使用します"
+									"Data": "​ に適用"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192523-iw27fs3",
+					"ID": "20260618123956-n7mwm6e",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20260612192523-iw27fs3",
-						"updated": "20260612192523"
+						"id": "20260618123956-n7mwm6e",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-bsxkc1f",
+							"ID": "20260618123956-8tbw507",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-bsxkc1f",
-								"updated": "20260612192523"
+								"id": "20260618123956-8tbw507",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
@@ -1063,7 +1063,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：親ブロック ID で挿入または追加位置を指定します。"
+									"Data": "​：親ブロック ID で挿入または追加位置を特定。"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1072,7 +1072,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で使用します"
+									"Data": "​ に適用"
 								}
 							]
 						}
@@ -1081,41 +1081,41 @@
 			]
 		},
 		{
-			"ID": "20260612192523-qoo1lwu",
+			"ID": "20260618123956-4czjzvh",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-qoo1lwu",
-				"updated": "20260612192523"
+				"id": "20260618123956-4czjzvh",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "一般的なユースケース"
+					"Data": "よくあるユースケース"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-s7xmjc7",
+			"ID": "20260618123956-2wg604m",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-s7xmjc7",
-				"updated": "20260612192523"
+				"id": "20260618123956-2wg604m",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "スクリプトによるバッチクエリ"
+					"Data": "スクリプト化した一括検索"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-jri0ry6",
+			"ID": "20260618123956-fgx29ux",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-jri0ry6",
-				"updated": "20260612192523"
+				"id": "20260618123956-fgx29ux",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1147,36 +1147,36 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ などすべてのクエリコマンドが JSON 出力をサポートしています。"
+					"Data": "​ などすべての検索コマンドが JSON 出力に対応しています。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-ms52sdk",
+			"ID": "20260618123956-zvhpvbw",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-ms52sdk",
-				"updated": "20260612192523"
+				"id": "20260618123956-zvhpvbw",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "安全性の検証"
+					"Data": "安全な検証"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-fwbburs",
+			"ID": "20260618123956-x2ausv7",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-fwbburs",
-				"updated": "20260612192523"
+				"id": "20260618123956-x2ausv7",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "変更・削除操作は、まず "
+					"Data": "変更・削除操作では、まず "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1185,7 +1185,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ でパラメータを検証します。出力が期待する "
+					"Data": "​ でパラメータを検証し、期待通りに "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1194,31 +1194,31 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ と表示されたら、フラグを外して実際の操作を実行します。"
+					"Data": "​ と出力されることを確認してから、このフラグを外して実際に実行します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-0p8afhy",
+			"ID": "20260618123956-33z9dul",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-0p8afhy",
-				"updated": "20260612192523"
+				"id": "20260618123956-33z9dul",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "バッチノート管理"
+					"Data": "ノートの一括管理"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-7nlndx4",
+			"ID": "20260618123956-q44lfqc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-7nlndx4",
-				"updated": "20260612192523"
+				"id": "20260618123956-q44lfqc",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1241,7 +1241,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で日記エントリを一括書き込み、"
+					"Data": "​ で日記レコードを一括書き込み。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1250,17 +1250,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ でドキュメントアイコンやタグを一括設定します。"
+					"Data": "​ でドキュメントのアイコンやタグを一括設定します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-jpfenor",
+			"ID": "20260618123956-42ie373",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-jpfenor",
-				"updated": "20260612192523"
+				"id": "20260618123956-42ie373",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1270,11 +1270,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-7c3n8ya",
+			"ID": "20260618123956-68bk8xe",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-7c3n8ya",
-				"updated": "20260612192523"
+				"id": "20260618123956-68bk8xe",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1288,26 +1288,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ コマンドは "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "blocks"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ などのシステムテーブルに対する読み取り専用 SQL クエリをサポートし、ブロックタイプの分布や最近変更されたドキュメントの統計分析に使用できます。"
+					"Data": "​ コマンドは blocks などのシステムテーブルに対して読み取り専用の SQL クエリを実行でき、ブロックタイプの分布や最近更新されたドキュメントなどの統計分析に使用します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-pb1tsll",
+			"ID": "20260618123956-ilbecsf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-pb1tsll",
-				"updated": "20260612192523"
+				"id": "20260618123956-ilbecsf",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1317,11 +1308,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-46s44u7",
+			"ID": "20260618123956-p16ty8p",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-46s44u7",
-				"updated": "20260612192523"
+				"id": "20260618123956-p16ty8p",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1335,7 +1326,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ でチェックポイントとしてスナップショットを作成、"
+					"Data": "​ でチェックポイントとしてスナップショットを作成。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1344,17 +1335,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で完全なワークスペースバックアップをエクスポートします。"
+					"Data": "​ でワークスペース全体のバックアップをエクスポートします。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-7bz8z9o",
+			"ID": "20260618123956-ik70oxc",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-7bz8z9o",
-				"updated": "20260612192530"
+				"id": "20260618123956-ik70oxc",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1369,18 +1360,18 @@
 			]
 		},
 		{
-			"ID": "20260612192523-qltjfb4",
+			"ID": "20260618123956-prj5zdo",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20260612192523-qltjfb4",
-				"updated": "20260612192523"
+				"id": "20260618123956-prj5zdo",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
-					"ID": "20260612192523-u1bnlto",
+					"ID": "20260618123956-axfx9zn",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1389,21 +1380,21 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20260612192523-u1bnlto",
-						"updated": "20260612192523"
+						"id": "20260618123956-axfx9zn",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-otadg7j",
+							"ID": "20260618123956-pxr4ts8",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-otadg7j",
-								"updated": "20260612192523"
+								"id": "20260618123956-pxr4ts8",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "変更・削除操作の前に、まず "
+									"Data": "変更・削除系の操作では、まず "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1412,14 +1403,14 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ でパラメータの正確性を検証してください"
+									"Data": "​ でパラメータの正当性を検証することを推奨します"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20260612192523-mvdhwzk",
+					"ID": "20260618123956-mqssm0m",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -1428,21 +1419,21 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20260612192523-mvdhwzk",
-						"updated": "20260612192523"
+						"id": "20260618123956-mqssm0m",
+						"updated": "20260618123956"
 					},
 					"Children": [
 						{
-							"ID": "20260612192523-g239n3n",
+							"ID": "20260618123956-udu0ju5",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20260612192523-g239n3n",
-								"updated": "20260612192523"
+								"id": "20260618123956-udu0ju5",
+								"updated": "20260618123956"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "バッチ操作の前に、ロールバックに備えてスナップショットの作成またはバックアップのエクスポートを推奨します"
+									"Data": "一括操作の前には、スナップショットを作成するかバックアップをエクスポートしておき、ロールバックしやすくすることを推奨します"
 								}
 							]
 						}
@@ -1451,12 +1442,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-r2thezr",
+			"ID": "20260618123956-poyqeb5",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20260612192523-r2thezr",
-				"updated": "20260612192523"
+				"id": "20260618123956-poyqeb5",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1466,12 +1457,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-wdqhg4l",
+			"ID": "20260618123956-36n3vym",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-wdqhg4l",
-				"updated": "20260612192523"
+				"id": "20260618123956-36n3vym",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1481,12 +1472,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-axtx5mh",
+			"ID": "20260618123956-xqydfky",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-axtx5mh",
-				"updated": "20260612192523"
+				"id": "20260618123956-xqydfky",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1499,7 +1490,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan --help           # 利用可能なすべてのコマンドを一覧表示\nsiyuan block --help     # block サブコマンドのパラメータ説明を表示\n"
+					"Data": "siyuan --help           # 利用可能なすべてのコマンドを一覧\nsiyuan block --help     # block サブコマンドのパラメータを確認\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1508,12 +1499,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-j41hurd",
+			"ID": "20260618123956-wnmv41o",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-j41hurd",
-				"updated": "20260612192523"
+				"id": "20260618123956-wnmv41o",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1523,11 +1514,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-xevf0fh",
+			"ID": "20260618123956-01ylpm3",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-xevf0fh",
-				"updated": "20260612192523"
+				"id": "20260618123956-01ylpm3",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1537,7 +1528,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-95yudm0",
+			"ID": "20260618123956-uqr5qjg",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1546,8 +1537,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-95yudm0",
-				"updated": "20260612192523"
+				"id": "20260618123956-uqr5qjg",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1625,7 +1616,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "登録済みのすべてのワークスペースを一覧表示"
+									"Data": "登録済みのすべてのワークスペースを一覧"
 								}
 							]
 						}
@@ -1673,12 +1664,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-h0u6top",
+			"ID": "20260618123956-0alopmx",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-h0u6top",
-				"updated": "20260612192523"
+				"id": "20260618123956-0alopmx",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1700,12 +1691,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-s6wg934",
+			"ID": "20260618123956-ds7m4ei",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-s6wg934",
-				"updated": "20260612192523"
+				"id": "20260618123956-ds7m4ei",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1715,21 +1706,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-ek75prk",
+			"ID": "20260618123956-ca8xtjt",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-ek75prk",
-				"updated": "20260612192523"
+				"id": "20260618123956-ca8xtjt",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ノートブックの作成、名前変更、開閉を管理します。"
+					"Data": "ノートブックの作成、名前変更、オープン、クローズを管理します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-acrbmt7",
+			"ID": "20260618123956-8534sh4",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -1738,8 +1729,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-acrbmt7",
-				"updated": "20260612192523"
+				"id": "20260618123956-8534sh4",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -1817,7 +1808,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "すべてのノートブックを一覧表示"
+									"Data": "すべてのノートブックを一覧"
 								}
 							]
 						}
@@ -2096,12 +2087,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-q8sdd11",
+			"ID": "20260618123956-pplsqm5",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-q8sdd11",
-				"updated": "20260612192523"
+				"id": "20260618123956-pplsqm5",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -2123,12 +2114,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-l9turs4",
+			"ID": "20260618123956-ky3i2wm",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-l9turs4",
-				"updated": "20260612192523"
+				"id": "20260618123956-ky3i2wm",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -2138,21 +2129,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-7dr2t8q",
+			"ID": "20260618123956-zrw94q4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-7dr2t8q",
-				"updated": "20260612192523"
+				"id": "20260618123956-zrw94q4",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメントの作成、クエリ、移動、削除を管理します。"
+					"Data": "ドキュメントの作成、検索、移動、削除を管理します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-6x571nc",
+			"ID": "20260618123956-yz0y98l",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2161,8 +2152,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-6x571nc",
-				"updated": "20260612192523"
+				"id": "20260618123956-yz0y98l",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -2264,7 +2255,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ノートブック内のドキュメントを一覧表示"
+									"Data": "ノートブック内のドキュメントを一覧"
 								}
 							]
 						}
@@ -2674,16 +2665,70 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "document search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;keyword\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "キーワードでドキュメントを検索"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-tc6371b",
+			"ID": "20260618123956-lh09rz0",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-tc6371b",
-				"updated": "20260612192523"
+				"id": "20260618123956-lh09rz0",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -2696,7 +2741,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/フォルダ\"\n\nsiyuan document create --notebook notebook-id --title \"新しいドキュメント\"\nsiyuan document create --notebook notebook-id --title \"新しいドキュメント\" --hpath \"/フォルダ\"\nsiyuan document create --notebook notebook-id --title \"新しいドキュメント\" --markdown \"# タイトル\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新しいタイトル\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/ターゲットフォルダ\"\n"
+					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/フォルダ\"\n\nsiyuan document create --notebook notebook-id --title \"新規ドキュメント\"\nsiyuan document create --notebook notebook-id --title \"新規ドキュメント\" --hpath \"/フォルダ\"\nsiyuan document create --notebook notebook-id --title \"新規ドキュメント\" --markdown \"# タイトル\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新しいタイトル\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\nsiyuan document search \"キーワード\"\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/移動先フォルダ\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -2705,12 +2750,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-sww61wa",
+			"ID": "20260618123956-5p7zdwt",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-sww61wa",
-				"updated": "20260612192523"
+				"id": "20260618123956-5p7zdwt",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -2720,16 +2765,16 @@
 			]
 		},
 		{
-			"ID": "20260612192523-v5wakra",
+			"ID": "20260618123956-8kqwpje",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-v5wakra",
-				"updated": "20260612192523"
+				"id": "20260618123956-8kqwpje",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメント内のブロックに対してクエリ、挿入、更新、削除、移動を行います。内容は "
+					"Data": "ドキュメント内のブロックに対する検索、挿入、更新、削除、移動を行います。内容は "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2738,7 +2783,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で直接書き込むか、"
+					"Data": "​ で直接入力、または "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2747,12 +2792,12 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ でファイルから読み取ります。"
+					"Data": "​ でファイルから読み込めます。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-7lnixny",
+			"ID": "20260618123956-i974wri",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -2761,8 +2806,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-7lnixny",
-				"updated": "20260612192523"
+				"id": "20260618123956-i974wri",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -2963,7 +3008,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "パンくずパスを取得"
+									"Data": "パンくずリストを取得"
 								}
 							]
 						}
@@ -3017,7 +3062,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロック DOM ツリーを取得"
+									"Data": "ブロックの DOM ツリーを取得"
 								}
 							]
 						}
@@ -3080,7 +3125,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロック kramdown を取得"
+									"Data": "ブロックの kramdown を取得"
 								}
 							]
 						}
@@ -3134,7 +3179,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ドキュメント統計情報を取得"
+									"Data": "ドキュメントの統計情報を取得"
 								}
 							]
 						}
@@ -3307,7 +3352,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "子ブロックを末尾に追加"
+									"Data": "子ブロックを追加"
 								}
 							]
 						}
@@ -3389,7 +3434,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "子ブロックを先頭に追加"
+									"Data": "子ブロックを先頭に挿入"
 								}
 							]
 						}
@@ -3471,7 +3516,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロック内容を更新"
+									"Data": "ブロックの内容を更新"
 								}
 							]
 						}
@@ -3593,16 +3638,124 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロック情報を一括取得"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "block batch-kramdown"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロックの kramdown を一括取得"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-iv7lcfv",
+			"ID": "20260618123956-dhw18eg",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-iv7lcfv",
-				"updated": "20260612192523"
+				"id": "20260618123956-dhw18eg",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -3615,7 +3768,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新しい見出し\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- リスト項目\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e 引用\"\n\nsiyuan block update --id block-id --data \"更新された内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新しい見出し\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- リスト項目\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e 引用\"\n\nsiyuan block update --id block-id --data \"変更後の内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -3624,12 +3777,180 @@
 			]
 		},
 		{
-			"ID": "20260612192523-w8i7gdr",
+			"ID": "20260618123956-ksokxgt",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-w8i7gdr",
-				"updated": "20260612192523"
+				"id": "20260618123956-ksokxgt",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アウトライン"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-6fjjq7r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123956-6fjjq7r",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントの見出しアウトラインツリーを取得します。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-r0eouvf",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123956-r0eouvf",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "コマンド"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "パラメータ"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "説明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "outline get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントの見出しアウトラインを取得"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-m5p3yt4",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123956-m5p3yt4",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan outline get --id doc-id\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-qya0v4w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123956-qya0v4w",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -3639,21 +3960,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-hbq2v1e",
+			"ID": "20260618123956-jonqu2i",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-hbq2v1e",
-				"updated": "20260612192523"
+				"id": "20260618123956-jonqu2i",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "全文検索。ノートブック、パス、ブロックタイプによるフィルタリング、複数の検索方法とソートオプションをサポートします。"
+					"Data": "全文検索です。ノートブック、パス、ブロックタイプによる絞り込み、複数の検索方法やソート方式に対応します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-a1av7t5",
+			"ID": "20260618123956-ioyvoyu",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -3661,8 +3982,8 @@
 			],
 			"Properties": {
 				"colgroup": "|",
-				"id": "20260612192523-a1av7t5",
-				"updated": "20260612192523"
+				"id": "20260618123956-ioyvoyu",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -3761,7 +4082,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ノートブックでフィルタ、繰り返し可能"
+									"Data": "ノートブックで絞り込み、繰り返し指定可能"
 								}
 							]
 						}
@@ -3796,7 +4117,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "パスでフィルタ、繰り返し可能"
+									"Data": "パスで絞り込み、繰り返し指定可能"
 								}
 							]
 						}
@@ -3831,7 +4152,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロックタイプでフィルタ（document/heading/paragraph/list など）、繰り返し可能"
+									"Data": "ブロックタイプで絞り込み（document/heading/paragraph/list など）、繰り返し指定可能"
 								}
 							]
 						}
@@ -3866,7 +4187,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "サブタイプでフィルタ（o=順序付きリスト/u=順序なしリスト/t=タスクリスト）、繰り返し可能"
+									"Data": "サブタイプで絞り込み（o=順序付きリスト/u=順序なしリスト/t=タスクリスト）、繰り返し指定可能"
 								}
 							]
 						}
@@ -3946,7 +4267,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ あいまい"
+									"Data": "​ フジー"
 								}
 							]
 						}
@@ -3981,7 +4302,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ソート順："
+									"Data": "ソート："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -3999,7 +4320,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 作成日昇順 "
+									"Data": "​ 作成昇順 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4008,7 +4329,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 作成日降順 "
+									"Data": "​ 作成降順 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4017,7 +4338,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 更新日昇順 "
+									"Data": "​ 更新昇順 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4026,7 +4347,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 更新日降順 "
+									"Data": "​ 更新降順 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4035,7 +4356,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 内容順 "
+									"Data": "​ コンテンツ順 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4044,7 +4365,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 関連性昇順 "
+									"Data": "​ 関連度昇順 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -4053,7 +4374,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 関連性降順"
+									"Data": "​ 関連度降順"
 								}
 							]
 						}
@@ -4123,7 +4444,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "1 ページあたりの件数"
+									"Data": "ページあたりの件数"
 								}
 							]
 						}
@@ -4176,7 +4497,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ドキュメントごと"
+									"Data": "​ ドキュメント別"
 								}
 							]
 						}
@@ -4185,12 +4506,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-l2znn9e",
+			"ID": "20260618123956-wsc0r3z",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-l2znn9e",
-				"updated": "20260612192523"
+				"id": "20260618123956-wsc0r3z",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4212,12 +4533,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-pzpctvw",
+			"ID": "20260618123956-md7yb9b",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-pzpctvw",
-				"updated": "20260612192523"
+				"id": "20260618123956-md7yb9b",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4227,21 +4548,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-p3nxbhu",
+			"ID": "20260618123956-0ciuir1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-p3nxbhu",
-				"updated": "20260612192523"
+				"id": "20260618123956-0ciuir1",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "システムテーブルに対して読み取り専用 SQL クエリを実行し、データ分析を行います。"
+					"Data": "システムテーブルに対する読み取り専用 SQL クエリを実行し、データの統計分析に使用します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-9yfqky3",
+			"ID": "20260618123956-k3k1qsl",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4249,8 +4570,8 @@
 			],
 			"Properties": {
 				"colgroup": "|",
-				"id": "20260612192523-9yfqky3",
-				"updated": "20260612192523"
+				"id": "20260618123956-k3k1qsl",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4349,7 +4670,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最大返却行数、デフォルト 100"
+									"Data": "最大取得行数、デフォルト 100"
 								}
 							]
 						}
@@ -4358,12 +4679,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-k9lxkwf",
+			"ID": "20260618123956-g01gynb",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-k9lxkwf",
-				"updated": "20260612192523"
+				"id": "20260618123956-g01gynb",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4385,12 +4706,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-rtroo2m",
+			"ID": "20260618123956-8pc77b2",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-rtroo2m",
-				"updated": "20260612192523"
+				"id": "20260618123956-8pc77b2",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4400,11 +4721,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-6msnszj",
+			"ID": "20260618123956-u1kt2vz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-6msnszj",
-				"updated": "20260612192523"
+				"id": "20260618123956-u1kt2vz",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4414,7 +4735,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-y6pbm2q",
+			"ID": "20260618123956-g54xt7i",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4423,8 +4744,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-y6pbm2q",
-				"updated": "20260612192523"
+				"id": "20260618123956-g54xt7i",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4580,7 +4901,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "同期状態を表示"
+									"Data": "同期状態を確認"
 								}
 							]
 						}
@@ -4589,12 +4910,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-2jm882i",
+			"ID": "20260618123956-gz9w6sf",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-2jm882i",
-				"updated": "20260612192523"
+				"id": "20260618123956-gz9w6sf",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4616,12 +4937,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-kzmpaol",
+			"ID": "20260618123956-46i820c",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-kzmpaol",
-				"updated": "20260612192523"
+				"id": "20260618123956-46i820c",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4631,16 +4952,16 @@
 			]
 		},
 		{
-			"ID": "20260612192523-f7k4at0",
+			"ID": "20260618123956-71b6fd3",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-f7k4at0",
-				"updated": "20260612192523"
+				"id": "20260618123956-71b6fd3",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメントをさまざまな形式でエクスポートします。"
+					"Data": "ドキュメントを各種形式でエクスポートします。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -4649,12 +4970,12 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ で出力ファイルパスを指定します。"
+					"Data": "​ で出力ファイルのパスを指定します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-86goeeg",
+			"ID": "20260618123956-npz2gkj",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -4663,8 +4984,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-86goeeg",
-				"updated": "20260612192523"
+				"id": "20260618123956-npz2gkj",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -4766,7 +5087,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Markdown としてエクスポート"
+									"Data": "Markdown をエクスポート"
 								}
 							]
 						}
@@ -4829,7 +5150,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "HTML としてエクスポート"
+									"Data": "HTML をエクスポート"
 								}
 							]
 						}
@@ -4892,7 +5213,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "プレビュー HTML としてエクスポート"
+									"Data": "プレビュー HTML をエクスポート"
 								}
 							]
 						}
@@ -4946,7 +5267,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Word としてエクスポート（"
+									"Data": "Word をエクスポート（"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -5018,7 +5339,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": ".sy.zip としてエクスポート"
+									"Data": ".sy.zip をエクスポート"
 								}
 							]
 						}
@@ -5081,7 +5402,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Markdown zip としてエクスポート"
+									"Data": "Markdown zip をエクスポート"
 								}
 							]
 						}
@@ -5135,7 +5456,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "完全なデータバックアップをエクスポート"
+									"Data": "完全データバックアップをエクスポート"
 								}
 							]
 						}
@@ -5144,12 +5465,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-yizx7v7",
+			"ID": "20260618123956-k0ys8wj",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-yizx7v7",
-				"updated": "20260612192523"
+				"id": "20260618123956-k0ys8wj",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5171,12 +5492,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-hlntrmi",
+			"ID": "20260618123956-z9ut5gs",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-hlntrmi",
-				"updated": "20260612192523"
+				"id": "20260618123956-z9ut5gs",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5186,21 +5507,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-k5wqhu3",
+			"ID": "20260618123956-u8erurj",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-k5wqhu3",
-				"updated": "20260612192523"
+				"id": "20260618123956-u8erurj",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "外部ファイルを指定したノートブックにインポートします。"
+					"Data": "外部ファイルを指定のノートブックにインポートします。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-f0gtlda",
+			"ID": "20260618123956-acqpzkl",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5209,8 +5530,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-f0gtlda",
-				"updated": "20260612192523"
+				"id": "20260618123956-acqpzkl",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5429,7 +5750,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "完全なデータバックアップをインポート"
+									"Data": "完全データバックアップをインポート"
 								}
 							]
 						}
@@ -5438,12 +5759,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-p1y4kcz",
+			"ID": "20260618123956-1q1kit4",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-p1y4kcz",
-				"updated": "20260612192523"
+				"id": "20260618123956-1q1kit4",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5456,7 +5777,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan import md --file ./notes --notebook notebook-id\nsiyuan import md --file ./doc.md --notebook notebook-id --hpath \"/インポートフォルダ\"\nsiyuan import sy --file ./backup.sy.zip --notebook notebook-id\nsiyuan import data --file ./full-backup.zip\n"
+					"Data": "siyuan import md --file ./notes --notebook notebook-id\nsiyuan import md --file ./doc.md --notebook notebook-id --hpath \"/インポートディレクトリ\"\nsiyuan import sy --file ./backup.sy.zip --notebook notebook-id\nsiyuan import data --file ./full-backup.zip\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -5465,12 +5786,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-hjsfb2b",
+			"ID": "20260618123956-j0br2aq",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-hjsfb2b",
-				"updated": "20260612192523"
+				"id": "20260618123956-j0br2aq",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5480,21 +5801,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-5jchys8",
+			"ID": "20260618123956-xb145wo",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-5jchys8",
-				"updated": "20260612192523"
+				"id": "20260618123956-xb145wo",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメントの履歴バージョンを表示および管理します。"
+					"Data": "ドキュメントの履歴バージョンの表示と管理を行います。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-jbyvf7o",
+			"ID": "20260618123956-sfzflp3",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -5503,8 +5824,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-jbyvf7o",
-				"updated": "20260612192523"
+				"id": "20260618123956-sfzflp3",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5624,7 +5945,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "履歴レコードを一覧表示"
+									"Data": "履歴記録を一覧"
 								}
 							]
 						}
@@ -5861,7 +6182,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "すべての履歴を消去"
+									"Data": "すべての履歴をクリア"
 								}
 							]
 						}
@@ -5870,11 +6191,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-kit0oky",
+			"ID": "20260618123956-5dw7mvc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-kit0oky",
-				"updated": "20260612192523"
+				"id": "20260618123956-5dw7mvc",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5920,11 +6241,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-11ikal3",
+			"ID": "20260618123956-vtm0bgp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-11ikal3",
-				"updated": "20260612192523"
+				"id": "20260618123956-vtm0bgp",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -5947,7 +6268,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ ドキュメント名で検索 | "
+					"Data": "​ ドキュメント名 | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5956,7 +6277,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 内容で検索 | "
+					"Data": "​ 内容 | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5965,7 +6286,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ アセットファイルで検索 | "
+					"Data": "​ アセット | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5974,7 +6295,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ ドキュメント ID で検索 | "
+					"Data": "​ ドキュメント ID | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -5983,17 +6304,17 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ データベースで検索"
+					"Data": "​ データベース"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-9a3aygi",
+			"ID": "20260618123956-4tk71x8",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-9a3aygi",
-				"updated": "20260612192523"
+				"id": "20260618123956-4tk71x8",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -6015,12 +6336,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-th1kqki",
+			"ID": "20260618123956-hwmoois",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-th1kqki",
-				"updated": "20260612192523"
+				"id": "20260618123956-hwmoois",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -6030,21 +6351,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-rkvz3h0",
+			"ID": "20260618123956-aue2jvz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-rkvz3h0",
-				"updated": "20260612192523"
+				"id": "20260618123956-aue2jvz",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ワークスペースのスナップショットを作成・管理し、ロールバックとファイルレベルの復元をサポートします。"
+					"Data": "ワークスペースのスナップショットの作成と管理を行い、ロールバックやファイル単位の復元に対応します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-s6i46l8",
+			"ID": "20260618123956-tg6fdxm",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6053,8 +6374,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-s6i46l8",
-				"updated": "20260612192523"
+				"id": "20260618123956-tg6fdxm",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -6156,7 +6477,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "スナップショットを一覧表示"
+									"Data": "スナップショットを一覧"
 								}
 							]
 						}
@@ -6264,7 +6585,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "スナップショットにタグを付与"
+									"Data": "スナップショットにタグ付け"
 								}
 							]
 						}
@@ -6426,7 +6747,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "2 つのスナップショットを比較"
+									"Data": "2つのスナップショットを比較"
 								}
 							]
 						}
@@ -6528,7 +6849,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "古いスナップショットを削除"
+									"Data": "古いスナップショットをクリア"
 								}
 							]
 						}
@@ -6582,7 +6903,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "スナップショットからファイル内容を取得"
+									"Data": "スナップショット内のファイル内容を取得"
 								}
 							]
 						}
@@ -6753,12 +7074,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-odglddz",
+			"ID": "20260618123956-ngdxixn",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-odglddz",
-				"updated": "20260612192523"
+				"id": "20260618123956-ngdxixn",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -6780,12 +7101,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-ibg7ht1",
+			"ID": "20260618123956-bwjupbj",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-ibg7ht1",
-				"updated": "20260612192523"
+				"id": "20260618123956-bwjupbj",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -6795,11 +7116,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-n3cicz8",
+			"ID": "20260618123956-32oju88",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-n3cicz8",
-				"updated": "20260612192523"
+				"id": "20260618123956-32oju88",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -6809,7 +7130,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-wd0u573",
+			"ID": "20260618123956-thn4z4y",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -6818,8 +7139,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-wd0u573",
-				"updated": "20260612192523"
+				"id": "20260618123956-thn4z4y",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7065,11 +7386,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-wguakf8",
+			"ID": "20260618123956-5mhlixg",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-wguakf8",
-				"updated": "20260612192523"
+				"id": "20260618123956-5mhlixg",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7092,7 +7413,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 更新日降順 | "
+					"Data": "​ 更新降順 | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -7101,7 +7422,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 更新日昇順 | "
+					"Data": "​ 更新昇順 | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -7110,7 +7431,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 作成日降順 | "
+					"Data": "​ 作成降順 | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -7119,7 +7440,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 作成日昇順 | "
+					"Data": "​ 作成昇順 | "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -7160,12 +7481,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-opp1i6z",
+			"ID": "20260618123956-knm2beq",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-opp1i6z",
-				"updated": "20260612192523"
+				"id": "20260618123956-knm2beq",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7178,7 +7499,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan ref backlinks --id block-id\nsiyuan ref backlinks --id block-id --keyword \"フィルタ\" --sort 4\nsiyuan ref mentions --id block-id\nsiyuan ref refresh --id block-id\n"
+					"Data": "siyuan ref backlinks --id block-id\nsiyuan ref backlinks --id block-id --keyword \"絞り込み語\" --sort 4\nsiyuan ref mentions --id block-id\nsiyuan ref refresh --id block-id\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -7187,12 +7508,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-p03j232",
+			"ID": "20260618123956-nz9azuf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-p03j232",
-				"updated": "20260612192523"
+				"id": "20260618123956-nz9azuf",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7202,11 +7523,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-0m3mp7n",
+			"ID": "20260618123956-qeqq9yd",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-0m3mp7n",
-				"updated": "20260612192523"
+				"id": "20260618123956-qeqq9yd",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7216,7 +7537,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-5ptj34i",
+			"ID": "20260618123956-kzpdtv0",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7225,8 +7546,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-5ptj34i",
-				"updated": "20260612192523"
+				"id": "20260618123956-kzpdtv0",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7319,7 +7640,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "タグを一覧表示または検索"
+									"Data": "タグを一覧または検索"
 								}
 							]
 						}
@@ -7436,12 +7757,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-wlalpnd",
+			"ID": "20260618123956-ptwca8f",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-wlalpnd",
-				"updated": "20260612192523"
+				"id": "20260618123956-ptwca8f",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7454,7 +7775,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan tag list\nsiyuan tag list --keyword \"プロジェクト\"\nsiyuan tag remove --label \"todo\"\nsiyuan tag rename --old \"古い\" --new \"新しい\"\n"
+					"Data": "siyuan tag list\nsiyuan tag list --keyword \"プロジェクト\"\nsiyuan tag remove --label \"未処理\"\nsiyuan tag rename --old \"旧\" --new \"新\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -7463,12 +7784,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-rksfze0",
+			"ID": "20260618123956-ypzy86p",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-rksfze0",
-				"updated": "20260612192523"
+				"id": "20260618123956-ypzy86p",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7478,21 +7799,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-ches75y",
+			"ID": "20260618123956-tltmmpd",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-ches75y",
-				"updated": "20260612192523"
+				"id": "20260618123956-tltmmpd",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ブロックのカスタム属性を取得および設定します。"
+					"Data": "ブロックのカスタム属性の取得と設定を行います。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-tzxrb1d",
+			"ID": "20260618123956-65m268h",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7501,8 +7822,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-tzxrb1d",
-				"updated": "20260612192523"
+				"id": "20260618123956-65m268h",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7658,7 +7979,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ は繰り返し可能）"
+									"Data": "​ は繰り返し指定可能）"
 								}
 							]
 						}
@@ -7712,7 +8033,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "属性をバッチ取得"
+									"Data": "属性を一括取得"
 								}
 							]
 						}
@@ -7721,12 +8042,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-q72gzkw",
+			"ID": "20260618123956-yw7khuw",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-q72gzkw",
-				"updated": "20260612192523"
+				"id": "20260618123956-yw7khuw",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7748,12 +8069,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-fwud15z",
+			"ID": "20260618123956-y28leh9",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-fwud15z",
-				"updated": "20260612192523"
+				"id": "20260618123956-y28leh9",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7763,11 +8084,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-muhrbj2",
+			"ID": "20260618123956-f1bqscj",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-muhrbj2",
-				"updated": "20260612192523"
+				"id": "20260618123956-f1bqscj",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7777,7 +8098,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-x82g4c3",
+			"ID": "20260618123956-r49k3ks",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -7786,8 +8107,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-x82g4c3",
-				"updated": "20260612192523"
+				"id": "20260618123956-r49k3ks",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -7889,7 +8210,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ は繰り返し可能）"
+									"Data": "​ は繰り返し指定可能）"
 								}
 							]
 						}
@@ -7928,7 +8249,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "未使用のアセットを一覧表示"
+									"Data": "未使用のアセットを一覧"
 								}
 							]
 						}
@@ -7982,7 +8303,61 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "未使用のアセットをクリーンアップ"
+									"Data": "未使用のアセットをクリア"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "asset stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アセットファイルの情報を表示"
 								}
 							]
 						}
@@ -7991,12 +8366,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-kf4yq8x",
+			"ID": "20260618123956-iyvcx1b",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-kf4yq8x",
-				"updated": "20260612192523"
+				"id": "20260618123956-iyvcx1b",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8009,7 +8384,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\n"
+					"Data": "siyuan asset upload --id doc-id --file ./image.png --file ./doc.pdf\nsiyuan asset unused\nsiyuan asset clean\nsiyuan asset clean --path \"assets/xxx.png\"\nsiyuan asset stat --path \"assets/image/xxx.png\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -8018,12 +8393,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-ffd7hpd",
+			"ID": "20260618123956-z04nf9l",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-ffd7hpd",
-				"updated": "20260612192523"
+				"id": "20260618123956-z04nf9l",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8033,11 +8408,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-hi6v6no",
+			"ID": "20260618123956-c4g0g62",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-hi6v6no",
-				"updated": "20260612192523"
+				"id": "20260618123956-c4g0g62",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8047,7 +8422,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-lh2idmx",
+			"ID": "20260618123956-mety0g4",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8056,8 +8431,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-lh2idmx",
-				"updated": "20260612192523"
+				"id": "20260618123956-mety0g4",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8135,7 +8510,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブックマークを一覧表示"
+									"Data": "ブックマークを一覧"
 								}
 							]
 						}
@@ -8174,7 +8549,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブックマークラベルを一覧表示"
+									"Data": "ブックマークラベルを一覧"
 								}
 							]
 						}
@@ -8291,12 +8666,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-jycl1kq",
+			"ID": "20260618123956-3wfrzxm",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-jycl1kq",
-				"updated": "20260612192523"
+				"id": "20260618123956-3wfrzxm",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8309,7 +8684,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan bookmark list\nsiyuan bookmark labels\nsiyuan bookmark remove --label \"マイブックマーク\"\nsiyuan bookmark rename --old \"古い\" --new \"新しい\"\n"
+					"Data": "siyuan bookmark list\nsiyuan bookmark labels\nsiyuan bookmark remove --label \"ブックマーク名\"\nsiyuan bookmark rename --old \"旧\" --new \"新\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -8318,12 +8693,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-6rcpdq4",
+			"ID": "20260618123956-8fytpqd",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-6rcpdq4",
-				"updated": "20260612192523"
+				"id": "20260618123956-8fytpqd",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8333,11 +8708,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-2imbvpv",
+			"ID": "20260618123956-uhdnhhw",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-2imbvpv",
-				"updated": "20260612192523"
+				"id": "20260618123956-uhdnhhw",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8347,7 +8722,7 @@
 			]
 		},
 		{
-			"ID": "20260612192523-ndsqyxe",
+			"ID": "20260618123956-3qx3eus",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -8356,8 +8731,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-ndsqyxe",
-				"updated": "20260612192523"
+				"id": "20260618123956-3qx3eus",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -8594,7 +8969,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "データベーステーブルをレンダリング"
+									"Data": "データベーステーブルを描画"
 								}
 							]
 						}
@@ -8648,7 +9023,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "すべてのフィールドを一覧表示"
+									"Data": "すべてのフィールドを一覧"
 								}
 							]
 						}
@@ -8687,7 +9062,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "未使用のデータベースを一覧表示"
+									"Data": "未使用のデータベースを一覧"
 								}
 							]
 						}
@@ -8741,7 +9116,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "未使用のデータベースをクリーンアップ"
+									"Data": "未使用のデータベースをクリア"
 								}
 							]
 						}
@@ -9101,11 +9476,11 @@
 			]
 		},
 		{
-			"ID": "20260612192523-mb8f45p",
+			"ID": "20260618123956-a0hdkdu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-mb8f45p",
-				"updated": "20260612192523"
+				"id": "20260618123956-a0hdkdu",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -9277,12 +9652,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-5sly4eh",
+			"ID": "20260618123956-u1098ql",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-5sly4eh",
-				"updated": "20260612192523"
+				"id": "20260618123956-u1098ql",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -9295,7 +9670,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan database search \"キーワード\"\nsiyuan database get --id db-id\nsiyuan database render --id db-id --view view-id --query \"フィルタ\" --page 1 --page-size 50\nsiyuan database keys --id db-id\n\nsiyuan database key add --id db-id --name \"ステータス\" --type select\nsiyuan database key add --id db-id --name \"金額\" --type number --icon 1f4b0\nsiyuan database key add --id db-id --name \"備考\" --type text --prev previous-key-id\nsiyuan database key remove --id db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --id db-id\n\nsiyuan database item add --id db-id\nsiyuan database item add --id db-id --block block-id --content \"テキスト\"\nsiyuan database item add --id db-id --view view-id --previous prev-id\nsiyuan database item remove --id db-id --items \"item1,item2\"\nsiyuan database item update --id db-id --key key-id --item item-id --value '{\"content\": \"新しい値\"}'\n"
+					"Data": "siyuan database search \"キーワード\"\nsiyuan database get --id db-id\nsiyuan database render --id db-id --view view-id --query \"絞り込み\" --page 1 --page-size 50\nsiyuan database keys --id db-id\n\nsiyuan database key add --id db-id --name \"ステータス\" --type select\nsiyuan database key add --id db-id --name \"金額\" --type number --icon 1f4b0\nsiyuan database key add --id db-id --name \"メモ\" --type text --prev previous-key-id\nsiyuan database key remove --id db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --id db-id\n\nsiyuan database item add --id db-id\nsiyuan database item add --id db-id --block block-id --content \"テキスト\"\nsiyuan database item add --id db-id --view view-id --previous prev-id\nsiyuan database item remove --id db-id --items \"item1,item2\"\nsiyuan database item update --id db-id --key key-id --item item-id --value '{\"content\": \"新しい値\"}'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9304,12 +9679,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-fduu7zq",
+			"ID": "20260618123956-3dnpn3h",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-fduu7zq",
-				"updated": "20260612192523"
+				"id": "20260618123956-3dnpn3h",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -9319,21 +9694,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-x2gr3j6",
+			"ID": "20260618123956-snpt48d",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-x2gr3j6",
-				"updated": "20260612192523"
+				"id": "20260618123956-snpt48d",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "デイリーノートの作成と内容の追加を管理します。"
+					"Data": "毎日のノートの作成と内容の追加を管理します。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-3i3soqt",
+			"ID": "20260618123956-iv4i3pc",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9342,8 +9717,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-3i3soqt",
-				"updated": "20260612192523"
+				"id": "20260618123956-iv4i3pc",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -9436,7 +9811,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "今日のデイリーノートを作成"
+									"Data": "今日の日記を作成"
 								}
 							]
 						}
@@ -9518,7 +9893,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "今日のデイリーノートに内容を末尾に追加"
+									"Data": "今日の日記に内容を追加"
 								}
 							]
 						}
@@ -9600,7 +9975,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "今日のデイリーノートに内容を先頭に追加"
+									"Data": "今日の日記の先頭に内容を挿入"
 								}
 							]
 						}
@@ -9609,12 +9984,12 @@
 			]
 		},
 		{
-			"ID": "20260612192523-sdwi5s7",
+			"ID": "20260618123956-fkf5yz1",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-sdwi5s7",
-				"updated": "20260612192523"
+				"id": "20260618123956-fkf5yz1",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -9627,7 +10002,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan dailynote create --notebook notebook-id\nsiyuan dailynote append --notebook notebook-id --data \"- [ ] Todo\"\nsiyuan dailynote append --notebook notebook-id --file ./content.md\nsiyuan dailynote prepend --notebook notebook-id --data \"## 今日のハイライト\"\n"
+					"Data": "siyuan dailynote create --notebook notebook-id\nsiyuan dailynote append --notebook notebook-id --data \"- [ ] タスク\"\nsiyuan dailynote append --notebook notebook-id --file ./content.md\nsiyuan dailynote prepend --notebook notebook-id --data \"## 今日の重点\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9636,12 +10011,505 @@
 			]
 		},
 		{
-			"ID": "20260612192523-a4qvwqq",
+			"ID": "20260618123956-aiwr7s6",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20260612192523-a4qvwqq",
-				"updated": "20260612192523"
+				"id": "20260618123956-aiwr7s6",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレート"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-haozf57",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123956-haozf57",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テンプレートファイルを管理します。検索、作成、レンダリング、ドキュメントのテンプレート保存に対応します。テンプレートパスは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "data/templates"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ からの相対パスです。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-mng5lvw",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123956-mng5lvw",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "コマンド"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "パラメータ"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "説明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template search"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[keyword]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テンプレートを検索。キーワード省略時は全件表示"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template get"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テンプレートの内容を読み取り"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template create"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeBackslash",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "|"
+										}
+									]
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--file"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Markdown 内容からテンプレートを作成"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template render"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path --id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "指定ブロックをコンテキストにテンプレートをプレビュー描画"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template save-as"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id --name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--overwrite"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントをテンプレートとして保存"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "template remove"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テンプレートを削除"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-vjbk7c4",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123956-vjbk7c4",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan template search\nsiyuan template search \"会議\"\nsiyuan template get --path templates/週報.md\nsiyuan template create --name \"週報\" --data \"# 週報\"\nsiyuan template create --name \"週報\" --file ./weekly.md\nsiyuan template create --name \"週報\" --data \"# 週報\" --overwrite\nsiyuan template render --path templates/週報.md --id doc-id\nsiyuan template save-as --id doc-id --name \"議事録\"\nsiyuan template save-as --id doc-id --name \"議事録\" --overwrite\nsiyuan template remove --path templates/週報.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-89poc65",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123956-89poc65",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -9651,21 +10519,21 @@
 			]
 		},
 		{
-			"ID": "20260612192523-cpckv2q",
+			"ID": "20260618123956-bpnt0mp",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20260612192523-cpckv2q",
-				"updated": "20260612192523"
+				"id": "20260618123956-bpnt0mp",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ワークスペース内のファイルを操作します。すべてのパスはワークスペースルートからの相対パスです。"
+					"Data": "ワークスペース内のファイルを操作します。すべてのパスはワークスペースからの相対パスです。"
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-shbrgfv",
+			"ID": "20260618123956-exzsoxc",
 			"Type": "NodeTable",
 			"TableAligns": [
 				0,
@@ -9674,8 +10542,8 @@
 			],
 			"Properties": {
 				"colgroup": "||",
-				"id": "20260612192523-shbrgfv",
-				"updated": "20260612192523"
+				"id": "20260618123956-exzsoxc",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -9768,7 +10636,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ディレクトリの内容を一覧表示"
+									"Data": "ディレクトリの内容を一覧"
 								}
 							]
 						}
@@ -10043,16 +10911,223 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file grep"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--pattern --path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--context"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "正規表現でファイル内容を検索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file find"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--include"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​] ["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--limit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ワイルドカードでファイルを検索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file stat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ファイルまたはディレクトリの情報を表示"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
 		{
-			"ID": "20260612192523-kbt58z4",
+			"ID": "20260618123956-l11msnd",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
 			"Properties": {
-				"id": "20260612192523-kbt58z4",
-				"updated": "20260612192523"
+				"id": "20260618123956-l11msnd",
+				"updated": "20260618123956"
 			},
 			"Children": [
 				{
@@ -10065,7 +11140,160 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\n"
+					"Data": "siyuan file list /temp\nsiyuan file read /temp/readme.md\nsiyuan file write /temp/new.txt --file ./localfile.txt\nsiyuan file delete /temp/temp\nsiyuan file rename /temp/old /temp/new\nsiyuan file copy /temp/src /temp/dst\nsiyuan file grep --pattern \"TODO\" --path /temp\nsiyuan file grep --pattern \"func \" --path /temp --include \"*.go\" --context 2\nsiyuan file find /temp --include \"*.md\"\nsiyuan file stat /temp/readme.md\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-srtpcy3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260618123956-srtpcy3",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "システム"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-9r03w2k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260618123956-9r03w2k",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "システム情報を表示します。"
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-ex4wycq",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20260618123956-ex4wycq",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "コマンド"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "パラメータ"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "説明"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "system current-time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "現在のサーバー時刻を表示"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260618123956-qtioony",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260618123956-qtioony",
+				"updated": "20260618123956"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan system current-time\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

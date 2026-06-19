@@ -11,6 +11,7 @@
   background-color: var(--b3-tooltips-background);
   border-radius: var(--b3-border-radius);
   line-height: 17px;
+  width: max-content;
   max-width: 320px;
   animation-name: zoomIn;
   animation-duration: 150ms;

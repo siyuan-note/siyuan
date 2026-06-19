@@ -1000,6 +1000,13 @@ export const zoomOut = (options: {
             data: getResponse,
             protyle: options.protyle,
             action,
+            scrollAttr: options.focusId ? {
+                rootId: options.id,
+                focusId: options.focusId,
+                // 使用失焦前保存的滚动位置，避免 innerHTML 重载后 scrollTop 归零
+                // https://github.com/siyuan-note/siyuan/issues/17886
+                scrollTop: (options.protyle as any).scrollTopBeforeBlur ?? options.protyle.contentElement.scrollTop
+            } : undefined,
             afterCB: options.callback,
         });
         // https://github.com/siyuan-note/siyuan/issues/4874
@@ -1023,12 +1030,43 @@ export const zoomOut = (options: {
                     showElement = getFirstBlock(showElement);
                 }
                 focusBlock(showElement);
+                // 加强定位，使用 AbortController 监听用户手势，一旦用户主动滚动即停止强制定位，
+                // 否则数据库等异步渲染块撑高内容时会反复重置滚动位置
+                // https://github.com/siyuan-note/siyuan/issues/17886
+                const userScrollAbort = new AbortController();
+                const onUserScroll = () => userScrollAbort.abort();
+                // 程序化滚动标志，避免 ResizeObserver 自身的 scrollCenter 触发 scroll 事件后误中止
+                let observerScrollProgrammatic = false;
+                options.protyle.contentElement.addEventListener("wheel", onUserScroll,
+                    {capture: true, signal: userScrollAbort.signal});
+                options.protyle.contentElement.addEventListener("touchstart", onUserScroll,
+                    {capture: true, signal: userScrollAbort.signal});
+                options.protyle.contentElement.addEventListener("touchmove", onUserScroll,
+                    {capture: true, signal: userScrollAbort.signal});
+                options.protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                    if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {
+                        userScrollAbort.abort();
+                    }
+                }, {capture: true, signal: userScrollAbort.signal});
+                options.protyle.contentElement.addEventListener("scroll", () => {
+                    if (observerScrollProgrammatic) {
+                        return;
+                    }
+                    userScrollAbort.abort();
+                }, {capture: true, signal: userScrollAbort.signal});
                 const resizeObserver = new ResizeObserver(() => {
+                    if (userScrollAbort.signal.aborted) {
+                        resizeObserver.disconnect();
+                        return;
+                    }
+                    observerScrollProgrammatic = true;
                     scrollCenter(options.protyle, focusElement, "start");
+                    observerScrollProgrammatic = false;
                 });
                 resizeObserver.observe(options.protyle.wysiwyg.element);
                 setTimeout(() => {
                     resizeObserver.disconnect();
+                    userScrollAbort.abort();
                 }, 1000 * 3);
             } else if (!options.focusId) {
                 fetchPost("/api/filetree/getDoc", {

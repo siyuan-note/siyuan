@@ -204,6 +204,12 @@ const setHTML = (options: {
         }
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
+        // 设置 innerHTML 会导致浏览器将 scrollTop 重置为 0，此处立即恢复以避免页面跳转到开头
+        // https://github.com/siyuan-note/siyuan/issues/17886
+        if (options.scrollAttr && typeof options.scrollAttr.scrollTop === "number") {
+            protyle.contentElement.scrollTop = options.scrollAttr.scrollTop;
+            protyle.scroll.lastScrollTop = options.scrollAttr.scrollTop;
+        }
     }
 
     /// #if MOBILE

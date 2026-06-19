@@ -166,7 +166,7 @@ func GetPreferredLocaleString(m LocaleStrings, fallback string) string {
 		return v
 	}
 	// 兼容集市 JSON 数据中历史下划线 key（zh_CN、en_US 等）
-	if v := strings.TrimSpace(m[util.LangToFile(util.Lang)]); "" != v {
+	if v := strings.TrimSpace(m[util.LangToLegacy(util.Lang)]); "" != v {
 		return v
 	}
 	if v := strings.TrimSpace(m["default"]); "" != v {

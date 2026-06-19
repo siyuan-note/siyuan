@@ -125,6 +125,7 @@ func getDynamicIcon(c *gin.Context) {
 	if "" == lang {
 		lang = util.Lang
 	}
+	lang = util.LangToBCP47(lang)
 	weekdayType := c.Query("weekdayType") // 设置星期几的格式，zh-CN {1：周日，2：周天， 3：星期日，4：星期天，}, en {1: Mon, 2: MON，3: Monday, 4. MONDAY,}
 	if "" == weekdayType {
 		weekdayType = "1"

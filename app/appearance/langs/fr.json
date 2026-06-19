@@ -1,4 +1,5 @@
 {
+  "workspace": "Espace de travail",
   "addAiProvider": "Ajouter un fournisseur",
   "addAiModel": "Ajouter un modèle",
   "aiProviderSettings": "Paramètres du fournisseur",

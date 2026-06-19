@@ -1,4 +1,5 @@
 {
+  "workspace": "工作空间",
   "addAiProvider": "添加提供商",
   "addAiModel": "添加模型",
   "aiProviderSettings": "提供商设置",

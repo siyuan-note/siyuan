@@ -1,4 +1,5 @@
 {
+  "workspace": "Workspace",
   "addAiProvider": "Add provider",
   "addAiModel": "Add model",
   "aiProviderSettings": "Provider settings",

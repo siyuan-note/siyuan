@@ -9,7 +9,14 @@ import {
 } from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
-import {cancelSB, genEmptyElement, genSBElement, getSbChildCount, insertEmptyBlock, refreshSbResize} from "../../block/util";
+import {
+    cancelSB,
+    genEmptyElement,
+    genSBElement,
+    getSbChildCount,
+    insertEmptyBlock,
+    refreshSbResize
+} from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
 import {getParentBlock, getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
@@ -64,7 +71,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     // 关键：对于文档顶层块，getParentBlock 返回 .protyle-wysiwyg 容器（无 data-node-id），
     // 不能用目标 protyle 的 rootID（跨文档拖拽时这是错误的文档），必须用源 DOM 所属文档 rootID。
     const sourcePositions = new Map<string, { previousID: string, parentID: string }>();
-    sourceElements.forEach(item => {
+    for (const item of sourceElements) {
         const id = item.getAttribute("data-node-id");
         if (id) {
             const parentBlock = getParentBlock(item);
@@ -74,11 +81,13 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 // 通过 getAllEditor 反查 item 所属的源 protyle，取其 block.rootID。
                 const sourceEditor = getAllEditor().find(editor =>
                     editor.protyle.wysiwyg.element === parentBlock);
-                srcParentID = sourceEditor?.protyle?.block?.rootID || "";
-                if (!srcParentID) {
-                    // 兜底：找不到源编辑器时用目标 protyle 的 rootID（单文档场景正确，
-                    // 跨文档场景下虽不精确但优于空值导致 loadTree 失败）
-                    srcParentID = protyle.block.rootID;
+                if (sourceEditor?.protyle?.block?.rootID) {
+                    srcParentID = sourceEditor.protyle.block.rootID;
+                } else {
+                    // 跨窗口拖拽时 getAllEditor 找不到源编辑器，用 kernel API 反查块的真实 rootID。
+                    // 不能 fallback 到目标 protyle 的 rootID（会导致撤销把块移到错误文档）。
+                    const response = await fetchSyncPost("/api/block/getBlockInfo", {id});
+                    srcParentID = response?.data?.rootID || "";
                 }
             }
             sourcePositions.set(id, {
@@ -86,7 +95,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 parentID: srcParentID || "",
             });
         }
-    });
+    }
     for (let index = sourceElements.length - 1; index >= 0; index--) {
         const item = sourceElements[index];
         const id = item.getAttribute("data-node-id");

@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20250828154937"
+		"updated": "20260619110354"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20250828154937"
+				"updated": "20260619110354"
 			},
 			"Children": [
 				{
@@ -237,7 +237,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20250828154937"
+				"updated": "20260619110354"
 			},
 			"Children": [
 				{
@@ -271,15 +271,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该变量用于插入当前文档名。比如"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "模板"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "内容为 "
+									"Data": "​：该变量用于插入当前文档名。比如模板内容为 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -473,19 +465,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据库"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值为 blocks "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "列表"
+									"Data": "​：该函数用于查询数据库，返回值为 blocks 列表"
 								}
 							]
 						},
@@ -550,15 +530,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于根据块 ID 查询"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据库"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值为 block"
+									"Data": "​：该函数用于根据块 ID 查询数据库，返回值为 block"
 								}
 							]
 						},
@@ -622,19 +594,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据库"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值为 spans "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "列表"
+									"Data": "​：该函数用于查询数据库，返回值为 spans 列表"
 								}
 							]
 						},
@@ -699,15 +659,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据库"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值为结果集"
+									"Data": "​：该函数用于查询数据库，返回值为结果集"
 								}
 							]
 						},
@@ -1385,15 +1337,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于返回指定周几的"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "日期"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
+									"Data": "​：该函数用于返回指定周几的日期 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1402,15 +1346,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，例如返回本周四的"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "日期"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
+									"Data": "​，例如返回本周四的日期 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1642,6 +1578,97 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ 将 Markdown 格式的字段值转为内容文本（保留代码、公式等，块级节点间插入换行）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260619110353-4mrvct5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260619110353-4mrvct5",
+						"updated": "20260619110354"
+					},
+					"Children": [
+						{
+							"ID": "20260619110353-824wvha",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260619110353-824wvha",
+								"updated": "20260619110354"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 统计数字列表中满足指定比较条件的元素个数，第一个参数为数字列表，第二个参数为比较操作符（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "gt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "lt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eq"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ge"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "le"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​），第三个参数为比较阈值。例如："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif .values \"gt\" 0"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

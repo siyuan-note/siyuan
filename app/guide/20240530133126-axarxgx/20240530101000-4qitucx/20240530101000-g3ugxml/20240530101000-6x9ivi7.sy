@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20250828155138"
+		"updated": "20260619110446"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20250828155138"
+				"updated": "20260619110446"
 			},
 			"Children": [
 				{
@@ -226,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20250828155138"
+				"updated": "20260619110446"
 			},
 			"Children": [
 				{
@@ -260,15 +260,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この変数は現在のドキュメント名を挿入します。たとえば、"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "テンプレート"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "の内容が "
+									"Data": "​: この変数は現在のドキュメント名を挿入します。たとえば、テンプレートの内容が "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -277,15 +269,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ の場合、呼び出し後にレベル "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "1"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " の見出しとしてドキュメント名が挿入されます"
+									"Data": "​ の場合、呼び出し後にレベル 1 の見出しとしてドキュメント名が挿入されます"
 								}
 							]
 						}
@@ -470,15 +454,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "データベース"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "をクエリしてブロックのリストを返します"
+									"Data": "​: この関数はデータベースをクエリしてブロックのリストを返します"
 								}
 							]
 						},
@@ -543,15 +519,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数はブロックIDに基づいて"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "データベース"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "を照会するために使用され、戻り値はブロックです"
+									"Data": "​: この関数はブロックIDに基づいてデータベースを照会するために使用され、戻り値はブロックです"
 								}
 							]
 						},
@@ -615,15 +583,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "データベース"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "をクエリしてスパンのリストを返します"
+									"Data": "​: この関数はデータベースをクエリしてスパンのリストを返します"
 								}
 							]
 						},
@@ -688,15 +648,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "データベース"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "へのクエリに使用され、戻り値は結果セットです"
+									"Data": "​: この関数はデータベースへのクエリに使用され、戻り値は結果セットです"
 								}
 							]
 						},
@@ -1615,6 +1567,97 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ は Markdown 形式のフィールド値をコンテンツテキストに変換します（コードや数式などは保持され、ブロック間には改行が挿入されます）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260619110445-064hnmb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260619110445-064hnmb",
+						"updated": "20260619110446"
+					},
+					"Children": [
+						{
+							"ID": "20260619110445-ivdgrj6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260619110445-ivdgrj6",
+								"updated": "20260619110446"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ は数値リスト内の指定した比較条件を満たす要素数をカウントします。第 1 引数は数値リスト、第 2 引数は比較演算子（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "gt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "lt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eq"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ge"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "le"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​）、第 3 引数は比較の閾値です。例："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif .values \"gt\" 0"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

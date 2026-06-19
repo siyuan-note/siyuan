@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20250828155154"
+		"updated": "20260619110430"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-eyagqur",
-				"updated": "20250828155154"
+				"updated": "20260619110430"
 			},
 			"Children": [
 				{
@@ -208,7 +208,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20250828155154"
+				"updated": "20260619110430"
 			},
 			"Children": [
 				{
@@ -436,19 +436,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料庫"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值為 blocks "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "列表"
+									"Data": "​：該函數用於查詢資料庫，返回值為 blocks 列表"
 								}
 							]
 						},
@@ -513,15 +501,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：函數用於根據塊 ID 查詢"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料庫"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，傳回值為 block"
+									"Data": "​：函數用於根據塊 ID 查詢資料庫，傳回值為 block"
 								}
 							]
 						},
@@ -585,19 +565,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料庫"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，返回值為 spans "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "列表"
+									"Data": "​：該函數用於查詢資料庫，返回值為 spans 列表"
 								}
 							]
 						},
@@ -662,15 +630,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：函數用於查詢"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料庫"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，傳回值為結果集"
+									"Data": "​：函數用於查詢資料庫，傳回值為結果集"
 								}
 							]
 						},
@@ -1348,15 +1308,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於傳回指定週幾的"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "日期"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
+									"Data": "​：此函數用於傳回指定週幾的日期 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1365,15 +1317,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，例如傳回本週四的"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "日期"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
+									"Data": "​，例如傳回本週四的日期 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1605,6 +1549,97 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ 將 Markdown 格式的欄位值轉為內容文字（保留程式碼、公式等，塊級節點間插入換行）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260619110430-74fvgix",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260619110430-74fvgix",
+						"updated": "20260619110430"
+					},
+					"Children": [
+						{
+							"ID": "20260619110430-gcgcbkm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260619110430-gcgcbkm",
+								"updated": "20260619110430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 統計數字列表中滿足指定比較條件的元素個數，第一個參數為數字列表，第二個參數為比較運算子（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "gt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "lt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "eq"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ge"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​/"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "le"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​），第三個參數為比較閾值。例如："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "countif .values \"gt\" 0"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

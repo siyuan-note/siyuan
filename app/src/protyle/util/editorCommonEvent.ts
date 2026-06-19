@@ -1,4 +1,5 @@
 import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
+import {getContenteditableElement, getParentBlock, getSbChildBlockCount, getTopAloneElement} from "../wysiwyg/getBlock";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -11,7 +12,6 @@ import {Constants} from "../../constants";
 import {paste} from "./paste";
 import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock, refreshSbResize} from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
-import {getParentBlock, getSbChildBlockCount, getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
@@ -40,6 +40,86 @@ import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
+
+// 拖拽时跟随鼠标的自定义双区提示框：上半=操作对象名称，下半=操作文案
+// 通过 .drag-tip 类做全局单例，避免编辑器与文档树两处 dragover 互相残留
+const dragTipState = {
+    rafId: 0, title: "", action: "", x: 0, y: 0,
+    element: null as HTMLElement, titleElement: null as HTMLElement, actionElement: null as HTMLElement,
+    lastTitle: "", lastAction: ""
+};
+
+const renderDragTip = () => {
+    dragTipState.rafId = 0;
+    if (!dragTipState.element || !dragTipState.element.isConnected) {
+        // 优先复用已有的 .drag-tip（跨编辑器/文档树区域时避免重复创建）
+        dragTipState.element = (document.querySelector(".drag-tip") as HTMLElement) || null;
+        if (!dragTipState.element) {
+            dragTipState.element = document.createElement("div");
+            dragTipState.element.className = "tooltip drag-tip";
+            // 拖拽提示需即时显示，覆盖 .tooltip 默认的 300ms 出现动画
+            dragTipState.element.style.animation = "none";
+            dragTipState.element.style.pointerEvents = "none";
+            dragTipState.element.style.zIndex = "1000000";
+            dragTipState.element.style.fontSize = "14px";
+            dragTipState.element.style.lineHeight = "20px";
+            // 锚定到视口原点，再由 transform 定位（transform 走 GPU 合成，不触发 layout）
+            dragTipState.element.style.top = "0";
+            dragTipState.element.style.left = "0";
+            dragTipState.titleElement = document.createElement("div");
+            dragTipState.titleElement.className = "drag-tip__title";
+            dragTipState.titleElement.style.cssText = "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--b3-theme-on-background);";
+            dragTipState.actionElement = document.createElement("div");
+            dragTipState.actionElement.className = "drag-tip__action";
+            dragTipState.actionElement.style.cssText = "color:var(--b3-tooltips-second-color);font-size:12px;";
+            dragTipState.element.append(dragTipState.titleElement, dragTipState.actionElement);
+            document.body.append(dragTipState.element);
+        } else {
+            dragTipState.titleElement = dragTipState.element.querySelector(".drag-tip__title");
+            dragTipState.actionElement = dragTipState.element.querySelector(".drag-tip__action");
+        }
+        dragTipState.lastTitle = "";
+        dragTipState.lastAction = "";
+    }
+    // 名称/文案变化才写 textContent，减少 DOM 写入
+    if (dragTipState.lastTitle !== dragTipState.title) {
+        dragTipState.titleElement.textContent = dragTipState.title;
+        dragTipState.lastTitle = dragTipState.title;
+        // 名称为空时隐藏上半行
+        dragTipState.titleElement.style.display = dragTipState.title ? "" : "none";
+    }
+    if (dragTipState.lastAction !== dragTipState.action) {
+        dragTipState.actionElement.textContent = dragTipState.action;
+        dragTipState.lastAction = dragTipState.action;
+    }
+    // 固定偏移到光标右下方，不读取 offsetHeight 以免触发同步布局造成卡顿
+    dragTipState.element.style.transform = `translate(${dragTipState.x + 16}px, ${dragTipState.y + 16}px)`;
+};
+
+const showDragTip = (title: string, action: string, x: number, y: number) => {
+    dragTipState.title = title;
+    dragTipState.action = action;
+    dragTipState.x = x;
+    dragTipState.y = y;
+    // 合并到下一帧渲染，避免高频 dragover 下逐次写 DOM 造成卡顿
+    if (!dragTipState.rafId) {
+        dragTipState.rafId = requestAnimationFrame(renderDragTip);
+    }
+};
+
+const hideDragTip = () => {
+    if (dragTipState.rafId) {
+        cancelAnimationFrame(dragTipState.rafId);
+        dragTipState.rafId = 0;
+    }
+    dragTipState.element?.remove();
+    dragTipState.element = null;
+    dragTipState.titleElement = null;
+    dragTipState.actionElement = null;
+    dragTipState.lastTitle = "";
+    dragTipState.lastAction = "";
+};
+
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
                       isSameDoc: boolean, position: InsertPosition, isCopy: boolean) => {
     const doOperations: IOperation[] = [];
@@ -620,14 +700,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 ghostElement.append(cloneElement);
                 ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${target.parentElement.clientWidth}px;padding:0;`);
                 document.body.append(ghostElement);
-                event.dataTransfer.setDragImage(ghostElement, 0, 0);
                 if (window.siyuan.touchDragActive) {
+                    // 触屏保留 DOM ghost 供 touchDragBridge 跟随手指
+                    event.dataTransfer.setDragImage(ghostElement, 0, 0);
                     window.siyuan.touchDragGhost = ghostElement;
                 } else {
+                    // 桌面端隐藏原生 ghost，改用自定义双区跟随框
+                    const transparentImg = new Image();
+                    transparentImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+                    event.dataTransfer.setDragImage(transparentImg, 0, 0);
                     setTimeout(() => {
                         ghostElement.remove();
                     });
                 }
+                window.siyuan.dragTitle = getContenteditableElement(target.parentElement)?.textContent?.trim() || "";
 
                 window.siyuan.dragElement = protyle.wysiwyg.element;
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
@@ -723,6 +809,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     });
     editorElement.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
         counter = 0;
+        hideDragTip();
+        window.siyuan.dragTitle = "";
         if (protyle.disabled || event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
             // 只读模式/编辑器内选中文字拖拽
             event.preventDefault();
@@ -1267,6 +1355,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             event.stopPropagation();
             event.dataTransfer.dropEffect = "none";
+            hideDragTip();
             return;
         }
         let gutterType = "";
@@ -1279,6 +1368,26 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             dragoverTab(event);
             event.preventDefault();
             return;
+        }
+        // 操作提示：上半=操作对象名称，下半=操作文案
+        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
+            // 文档面板拖拽文档到编辑器（Alt = 转换为标题，默认 = 插入引用）
+            showDragTip(window.siyuan.dragTitle || "",
+                event.altKey ? window.siyuan.languages.dragTip2Heading : window.siyuan.languages.dragTipRef,
+                event.clientX, event.clientY);
+        } else if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeHeading${Constants.ZWSP}`.toLowerCase())) {
+            // 标题块拖入编辑器（含编辑器内重排）：Alt=插入引用，Shift=嵌入块，默认=移动
+            let action: string;
+            if (event.altKey) {
+                action = window.siyuan.languages.dragTipRef;
+            } else if (event.shiftKey) {
+                action = window.siyuan.languages.blockEmbed;
+            } else {
+                action = window.siyuan.languages.move;
+            }
+            showDragTip(window.siyuan.dragTitle || "", action, event.clientX, event.clientY);
+        } else {
+            hideDragTip();
         }
         let targetElement: HTMLElement | false;
         // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
@@ -1687,6 +1796,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
             document.onmousemove = null;
         }
+        hideDragTip();
+        window.siyuan.dragTitle = "";
     });
 };
 

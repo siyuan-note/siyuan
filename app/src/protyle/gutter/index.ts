@@ -174,13 +174,27 @@ export class Gutter {
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
-            event.dataTransfer.setDragImage(ghostElement, 0, 0);
-            if (window.siyuan.touchDragActive) {
-                window.siyuan.touchDragGhost = ghostElement;
-            } else {
+            // 仅标题块拖拽时隐藏原生 ghost 并改用自定义双区跟随框；其余块类型（段落/AV 行等）保留原生 ghost
+            const isHeadingDrag = buttonElement.getAttribute("data-type") === "NodeHeading";
+            if (isHeadingDrag && !window.siyuan.touchDragActive) {
+                const transparentImg = new Image();
+                transparentImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+                event.dataTransfer.setDragImage(transparentImg, 0, 0);
                 setTimeout(() => {
                     ghostElement.remove();
                 });
+            } else {
+                event.dataTransfer.setDragImage(ghostElement, 0, 0);
+                if (window.siyuan.touchDragActive) {
+                    window.siyuan.touchDragGhost = ghostElement;
+                } else {
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
+            }
+            if (isHeadingDrag) {
+                window.siyuan.dragTitle = getContenteditableElement(selectElements[0] as HTMLElement)?.textContent?.trim() || "";
             }
             buttonElement.style.opacity = "0.38";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
@@ -192,6 +206,7 @@ export class Gutter {
                 item.style.opacity = "";
             });
             window.siyuan.dragElement = undefined;
+            window.siyuan.dragTitle = "";
         });
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");

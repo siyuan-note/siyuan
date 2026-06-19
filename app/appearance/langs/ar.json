@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "سيؤثر هذا التراجع على المستندات التالية. هل تريد المتابعة؟",
   "calcOperatorTemplate": "قالب",
   "calcResultTemplate": "قالب",
-  "rollupTemplateTip": "مثال: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "مثال: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "هذه الجلسة مشغولة في نسخة أخرى",
   "agentMirrorStreaming": "نسخة أخرى تجري محادثة...",
   "rollbackCompleted": "تمت الاستعادة",

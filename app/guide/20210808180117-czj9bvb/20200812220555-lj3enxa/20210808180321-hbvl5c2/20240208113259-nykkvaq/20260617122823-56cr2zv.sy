@@ -930,7 +930,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{div (len (filter .values (gt . 0))) (len .values)}}"
+									"TextMarkTextContent": ".action{divf (countif .values "gt" 0) (len .values)}}"
 								},
 								{
 									"Type": "NodeText",

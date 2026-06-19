@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "To cofnięcie wpłynie na następujące dokumenty. Kontynuować?",
   "calcOperatorTemplate": "Szablon",
   "calcResultTemplate": "Szablon",
-  "rollupTemplateTip": "Przykład: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "Przykład: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "Ta sesja jest zajęta w innej instancji",
   "agentMirrorStreaming": "Inna instancja prowadzi rozmowę...",
   "rollbackCompleted": "Przywracanie zakończone",

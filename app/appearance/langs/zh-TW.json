@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "本次撤銷將影響以下文件，是否繼續？",
   "calcOperatorTemplate": "範本",
   "calcResultTemplate": "範本",
-  "rollupTemplateTip": "範例：.action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "範例：.action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "該會話正在其他實例對話中",
   "agentMirrorStreaming": "其他實例正在對話中…",
   "rollbackCompleted": "已完成回滾",

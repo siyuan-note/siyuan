@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "การยกเลิกนี้จะมีผลต่อเอกสารต่อไปนี้ ดำเนินการต่อหรือไม่",
   "calcOperatorTemplate": "เทมเพลต",
   "calcResultTemplate": "เทมเพลต",
-  "rollupTemplateTip": "ตัวอย่าง: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "ตัวอย่าง: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "เซสชันนี้ไม่ว่างในอินสแตนซ์อื่น",
   "agentMirrorStreaming": "อินสแตนซ์อื่นกำลังแชท...",
   "rollbackCompleted": "การย้อนกลับเสร็จสิ้น",

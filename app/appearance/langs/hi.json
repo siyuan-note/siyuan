@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "यह पूर्ववत निम्नलिखित दस्तावेज़ों को प्रभावित करेगा। जारी रखें?",
   "calcOperatorTemplate": "टेम्पलेट",
   "calcResultTemplate": "टेम्पलेट",
-  "rollupTemplateTip": "उदाहरण: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "उदाहरण: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "यह सत्र किसी अन्य इंस्टेंस में व्यस्त है",
   "agentMirrorStreaming": "कोई अन्य इंस्टेंस चैट कर रहा है...",
   "rollbackCompleted": "रोलबैक पूर्ण",

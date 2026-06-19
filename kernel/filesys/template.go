@@ -59,6 +59,7 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["wordCount"] = wordCount
 	ret["markdown2text"] = markdown2text
 	ret["markdown2content"] = markdown2content
+	ret["countif"] = util.CountIf
 	return
 }
 

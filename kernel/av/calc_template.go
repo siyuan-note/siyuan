@@ -86,7 +86,7 @@ func evalRollupTemplate(templateContent string, ctx map[string]any) (rendered st
 		return
 	}
 
-	goTpl := template.New("").Delims(".action{", "}").Funcs(sprig.TxtFuncMap())
+	goTpl := template.New("").Delims(".action{", "}").Funcs(templateFuncMap())
 	tpl, err := goTpl.Parse(templateContent)
 	if nil != err {
 		logging.LogWarnf("parse rollup template [%s] failed: %s", templateContent, err)
@@ -167,4 +167,11 @@ func calcFieldByTemplate(collection Collection, field Field, fieldIndex int) {
 	} else if "" != rendered {
 		calc.Result = &Value{Type: KeyTypeText, Text: &ValueText{Content: rendered}}
 	}
+}
+
+// templateFuncMap 在 sprig 函数集基础上，补充表格计算专用的条件计数函数 countif。
+func templateFuncMap() template.FuncMap {
+	tplFuncs := sprig.TxtFuncMap()
+	tplFuncs["countif"] = util.CountIf
+	return tplFuncs
 }

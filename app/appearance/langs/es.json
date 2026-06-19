@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "Este deshacer afectará a los siguientes documentos. ¿Continuar?",
   "calcOperatorTemplate": "Plantilla",
   "calcResultTemplate": "Plantilla",
-  "rollupTemplateTip": "Ejemplo: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "Ejemplo: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "Esta sesión está ocupada en otra instancia",
   "agentMirrorStreaming": "Otra instancia está conversando...",
   "rollbackCompleted": "Restauración completada",

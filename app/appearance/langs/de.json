@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "Dieser Rückgängig-Vorgang wirkt sich auf die folgenden Dokumente aus. Fortfahren?",
   "calcOperatorTemplate": "Vorlage",
   "calcResultTemplate": "Vorlage",
-  "rollupTemplateTip": "Beispiel: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "Beispiel: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "Diese Sitzung ist in einer anderen Instanz belegt",
   "agentMirrorStreaming": "Eine andere Instanz schreibt...",
   "rollbackCompleted": "Rollback abgeschlossen",

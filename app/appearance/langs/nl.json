@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "Deze ongedaanmakerking beïnvloedt de volgende documenten. Doorgaan?",
   "calcOperatorTemplate": "Sjabloon",
   "calcResultTemplate": "Sjabloon",
-  "rollupTemplateTip": "Voorbeeld: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "Voorbeeld: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "Deze sessie is bezet in een andere instantie",
   "agentMirrorStreaming": "Een andere instantie is aan het chatten...",
   "rollbackCompleted": "Terugdraaien voltooid",

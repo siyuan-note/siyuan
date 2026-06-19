@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "ביטול זה ישפיע על המסמכים הבאים. להמשיך?",
   "calcOperatorTemplate": "תבנית",
   "calcResultTemplate": "תבנית",
-  "rollupTemplateTip": "דוגמה: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "דוגמה: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "מופע זה עסוק במופע אחר",
   "agentMirrorStreaming": "מופע אחר בצ'אט...",
   "rollbackCompleted": "השחזור הושלם",

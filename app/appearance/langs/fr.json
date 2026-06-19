@@ -44,7 +44,7 @@
   "undoCrossDocConfirm": "Cette annulation affectera les documents suivants. Continuer ?",
   "calcOperatorTemplate": "Modèle",
   "calcResultTemplate": "Modèle",
-  "rollupTemplateTip": "Exemple: .action{div (len (filter .values (gt . 0))) (len .values)}",
+  "rollupTemplateTip": "Exemple: .action{divf (countif .values \"gt\" 0) (len .values)}",
   "agentChatBusy": "Cette session est occupée dans une autre instance",
   "agentMirrorStreaming": "Une autre instance discute...",
   "rollbackCompleted": "Restauration terminée",

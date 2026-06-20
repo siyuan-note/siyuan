@@ -33,7 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func createDocsByHPath(boxID, hPath, content, parentID, id string) (retID string, err error) {
+func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bool) (retID string, err error) {
 	if "" == id {
 		id = ast.NewNodeID()
 	}
@@ -50,7 +50,7 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string) (retID string
 		if nil != preferredParent && preferredParent.RootID == parentID {
 			// 如果父文档存在且 ID 一致，则直接在父文档下创建
 			p := strings.TrimSuffix(preferredParent.Path, ".sy") + "/" + id + ".sy"
-			if _, err = createDoc(boxID, p, name, content); err != nil {
+			if _, err = createDoc(boxID, p, name, content, titleEmpty); err != nil {
 				logging.LogErrorf("create doc [%s] failed: %s", p, err)
 			}
 			return
@@ -102,11 +102,11 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string) (retID string
 			pathBuilder.WriteString(rootID)
 			docP := pathBuilder.String() + ".sy"
 			if isNotLast {
-				if _, err = createDoc(boxID, docP, part, ""); err != nil {
+				if _, err = createDoc(boxID, docP, part, "", false); err != nil {
 					return
 				}
 			} else {
-				if _, err = createDoc(boxID, docP, part, content); err != nil {
+				if _, err = createDoc(boxID, docP, part, content, titleEmpty); err != nil {
 					return
 				}
 			}

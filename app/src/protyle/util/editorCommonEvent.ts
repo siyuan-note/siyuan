@@ -1549,11 +1549,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
-        // Redirect to the .li ancestor so same-target check uses consistent element
-        if (targetElement.getAttribute("data-type") !== "NodeListItem" &&
-            targetElement.parentElement?.getAttribute("data-type") === "NodeListItem") {
-            targetElement = targetElement.parentElement as HTMLElement;
-        }
+        // For list items, resolve to the .li ancestor (but keep targetElement for validation)
+        const liTarget = targetElement.getAttribute("data-type") === "NodeListItem"
+            ? targetElement : targetElement.parentElement?.getAttribute("data-type") === "NodeListItem"
+                ? targetElement.parentElement : null;
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
@@ -1584,15 +1583,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             // 忘记为什么要限定文档树的拖拽了，先放开 https://github.com/siyuan-note/siyuan/pull/13284#issuecomment-2503853135
-            if (targetElement.getAttribute("data-type") === "NodeListItem") {
-                const htmlTarget = targetElement as HTMLElement;
+            if (targetElement.getAttribute("data-type") === "NodeListItem" && liTarget) {
+                const htmlTarget = liTarget as HTMLElement;
                 const nodeId = htmlTarget.getAttribute("data-node-id");
                 // Cache expensive computations per target element (never changes while hovering same element)
                 if (!dragCache || dragCache.nodeId !== nodeId) {
-                    const contentBlock = Array.from(targetElement.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
+                    const contentBlock = Array.from(liTarget.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
                     const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
-                    const depth = getListDepth(targetElement);
-                    const computedColor = getComputedStyle(targetElement).getPropertyValue("--b3-theme-primary-lighter").trim();
+                    const depth = getListDepth(liTarget);
+                    const computedColor = getComputedStyle(liTarget).getPropertyValue("--b3-theme-primary-lighter").trim();
                     const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
                     let siblingGuides = "";
                     for (let n = 1; n <= depth; n++) {
@@ -1611,10 +1610,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const {indent, rgb, siblingGuides, childGuides} = dragCache;
 
-                const isRTL = getComputedStyle(targetElement).direction === "rtl";
-                const offsetX = isRTL ? (nodeRect.right - event.clientX) : (event.clientX - nodeRect.left);
+                const liRect = htmlTarget.getBoundingClientRect();
+                const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
+                const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
                 const isChild = offsetX >= indent * 0.5;
-                const position = event.clientY > nodeRect.top + nodeRect.height / 2 ? "bottom" : "top";
+                const position = event.clientY > liRect.top + liRect.height / 2 ? "bottom" : "top";
                 const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
 
                 htmlTarget.classList.add(className);

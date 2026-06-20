@@ -1,6 +1,10 @@
+/// #if MOBILE
+import {saveScroll} from "../../protyle/scroll/saveScroll";
+/// #else
 import {adjustDockPadding} from "../../layout/dock/util";
 import {exportLayout} from "../../layout/util";
 import {syncHideToolbarLayout, updateBarModeIcon} from "../../layout/topBar";
+/// #endif
 import {fetchPost} from "../../util/fetch";
 import {loadAssets} from "../../util/assets";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
@@ -19,14 +23,27 @@ export const saveThemeMode = (value: number) => {
     });
 };
 
+/// #if MOBILE
+const reloadUI = async () => {
+    if (window.siyuan.mobile.editor) {
+        await saveScroll(window.siyuan.mobile.editor.protyle);
+    }
+    window.location.reload();
+};
+/// #endif
+
 const applyAppearanceConfig = async (data: Config.IAppearance) => {
     if (data.lang !== window.siyuan.config.appearance.lang) {
+        /// #if MOBILE
+        void reloadUI();
+        /// #else
         void exportLayout({
             cb() {
                 window.location.reload();
             },
             errorExit: false,
         });
+        /// #endif
         return;
     }
 
@@ -46,12 +63,16 @@ const applyAppearanceConfig = async (data: Config.IAppearance) => {
                     console.error("destroyTheme error: " + e);
                 }
             } else {
+                /// #if MOBILE
+                void reloadUI();
+                /// #else
                 void exportLayout({
                     errorExit: false,
                     cb() {
                         window.location.reload();
                     },
                 });
+                /// #endif
                 return;
             }
         }
@@ -60,17 +81,18 @@ const applyAppearanceConfig = async (data: Config.IAppearance) => {
     const prevAppearance = window.siyuan.config.appearance;
     window.siyuan.config.appearance = data;
 
+    document.getElementById("status")?.classList.toggle("fn__none", data.hideStatusBar);
+    /// #if !MOBILE
     if (data.hideStatusBar !== prevAppearance.hideStatusBar) {
-        document.getElementById("status").classList.toggle("fn__none", data.hideStatusBar);
         adjustDockPadding();
     }
-
     if (data.hideToolbar !== prevAppearance.hideToolbar) {
         syncHideToolbarLayout();
     }
+    updateBarModeIcon();
+    /// #endif
 
     loadAssets(data);
-    updateBarModeIcon();
 };
 
 /** 外观 Tab 命名空间：设置面板注册项 save */

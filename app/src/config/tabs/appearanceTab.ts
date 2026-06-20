@@ -3,7 +3,9 @@ import * as path from "path";
 /// #endif
 import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
+/// #if !MOBILE
 import {resetLayout} from "../../layout/util";
+/// #endif
 import {desktopModeCookie} from "../../util/cookie";
 import {isBrowser, isMobile, objEquals} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
@@ -362,24 +364,24 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             });
         },
     });
-    if (!isMobile()) {
-        group.button({
-            id: "resetLayout",
-            title: window.siyuan.languages.resetLayout,
-            desc: window.siyuan.languages.appearance6,
-            label: window.siyuan.languages.reset,
-            icon: "iconUndo",
-            afterMount: (root) => {
-                root.querySelector("#resetLayout")?.addEventListener("click", () => {
-                    confirmDialog(
-                        "⚠️ " + window.siyuan.languages.reset,
-                        window.siyuan.languages.appearance6,
-                        resetLayout
-                    );
-                });
-            },
-        });
-    }
+    /// #if !MOBILE
+    group.button({
+        id: "resetLayout",
+        title: window.siyuan.languages.resetLayout,
+        desc: window.siyuan.languages.appearance6,
+        label: window.siyuan.languages.reset,
+        icon: "iconUndo",
+        afterMount: (root) => {
+            root.querySelector("#resetLayout")?.addEventListener("click", () => {
+                confirmDialog(
+                    "⚠️ " + window.siyuan.languages.reset,
+                    window.siyuan.languages.appearance6,
+                    resetLayout
+                );
+            });
+        },
+    });
+    /// #endif
 };
 
 const bindFloatWindowModeVisibility = (root: HTMLElement) => {

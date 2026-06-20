@@ -5,7 +5,9 @@ import * as path from "path";
 import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
+/// #if !MOBILE
 import {exportLayout} from "../../layout/util";
+/// #endif
 import {exitSiYuan} from "../../dialog/processSystem";
 import {showMessage} from "../../dialog/message";
 import {isBrowser} from "../../util/functions";
@@ -163,10 +165,14 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
                         return;
                     }
                     showMessage(window.siyuan.languages.imported);
+                    /// #if MOBILE
+                    void exitSiYuan();
+                    /// #else
                     void exportLayout({
                         errorExit: true,
                         cb: exitSiYuan,
                     });
+                    /// #endif
                 });
             });
         },

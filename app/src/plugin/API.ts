@@ -22,12 +22,12 @@ import {Model} from "../layout/Model";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
 import {getAllModels, getAllTabs} from "../layout/getAll";
+import {exportLayout} from "../layout/util";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
 import {openSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
-import {exportLayout} from "../layout/util";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Files} from "../layout/dock/Files";

@@ -1,4 +1,4 @@
-import {Protyle} from "../protyle";
+import type {Protyle} from "../protyle";
 /// #if !MOBILE
 import {Layout} from "./index";
 import {Tab} from "./Tab";
@@ -24,8 +24,7 @@ export const getAllEditor = () => {
     if (window.siyuan.mobile.popEditor) {
         editors.push(window.siyuan.mobile.popEditor);
     }
-    /// #endif
-    /// #if !MOBILE
+    /// #else
     const models = getAllModels();
     models.editor.forEach(item => {
         editors.push(item.editor);

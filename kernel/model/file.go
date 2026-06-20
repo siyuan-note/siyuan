@@ -1064,7 +1064,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 
 	luteEngine := util.NewLute()
 	dom := luteEngine.Md2BlockDOM(md, false)
-	tree, err = createDoc(box.ID, p, title, dom)
+	tree, err = createDoc(box.ID, p, title, dom, false)
 	if err != nil {
 		return
 	}
@@ -1102,7 +1102,13 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		enableLuteInlineSyntax(luteEngine)
 	}
 	dom := luteEngine.Md2BlockDOM(md, false)
-	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
+	titleEmpty := false
+	if nil != arg {
+		if titleEmptyArg, ok := arg["titleEmpty"]; ok {
+			titleEmpty = titleEmptyArg.(bool)
+		}
+	}
+	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id, titleEmpty)
 
 	nameValues := map[string]string{}
 	tags = strings.TrimSpace(tags)
@@ -1181,7 +1187,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	id, err := createDocsByHPath(box.ID, hPath, "", "", "")
+	id, err := createDocsByHPath(box.ID, hPath, "", "", "", false)
 	if err != nil {
 		return
 	}
@@ -1783,7 +1789,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 	return
 }
 
-func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
+func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
 	title = normalizeDocTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
@@ -1791,9 +1797,12 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 		return
 	}
 	var isEmpty bool
-	if "" == title {
-		title = Conf.Language(16)
+	if titleEmpty {
 		isEmpty = true
+	}
+	if "" == title {
+		isEmpty = true
+		title = Conf.Language(16)
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))

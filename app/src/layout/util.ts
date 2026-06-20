@@ -93,6 +93,7 @@ const dockToJSON = (dock: Dock) => {
                 title: item.getAttribute("data-title"),
                 show: item.classList.contains("dock__item--active"),
                 icon: item.querySelector("use").getAttribute("xlink:href").substring(1),
+                hotkey: item.getAttribute("data-hotkey") || "",
                 hotkeyLangId: item.getAttribute("data-hotkeylangid") || ""
             });
         });

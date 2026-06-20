@@ -653,12 +653,6 @@ const setKeymapFromDom = (root: HTMLElement) => {
         const newHotkey = item.getAttribute("data-value");
         if (keys[0] === "general") {
             data[keys[0]][keys[1]].custom = newHotkey;
-            // 更新原生 dock 按钮 tooltip
-            document.querySelectorAll(`[data-hotkeylangid="${keys[1]}"]`).forEach(el => {
-                const title = el.getAttribute("data-title") || "";
-                const hotkeyTip = newHotkey ? updateHotkeyTip(newHotkey) : "";
-                el.setAttribute("aria-label", `<span style='white-space:pre'>${title} ${hotkeyTip}${window.siyuan.languages.dockTip}</span>`);
-            });
         } else if (keys[0] === "editor" && isEditorKeymapSegment(keys[1])) {
             data.editor[keys[1]][keys[2]].custom = newHotkey;
         } else if (keys[0] === "plugin") {
@@ -666,12 +660,6 @@ const setKeymapFromDom = (root: HTMLElement) => {
             const plugin = window.siyuan.ws.app.plugins.find((item) => item.name === keys[1]);
             const command = plugin?.commands.find((item) => item.langKey === keys[2]);
             if (!command) {
-                // 更新插件 dock 按钮 tooltip
-                document.querySelectorAll(`.dock__item[data-type="${keys[2]}"]`).forEach(el => {
-                    const title = el.getAttribute("data-title") || "";
-                    const hotkeyTip = newHotkey ? updateHotkeyTip(newHotkey) : "";
-                    el.setAttribute("aria-label", `<span style='white-space:pre'>${title} ${hotkeyTip}${window.siyuan.languages.dockTip}</span>`);
-                });
                 return;
             }
             /// #if !BROWSER

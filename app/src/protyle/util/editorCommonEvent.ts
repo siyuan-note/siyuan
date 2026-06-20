@@ -1605,6 +1605,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 htmlTarget.style.setProperty("--drag-base-bg",
                     isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)` : "transparent");
                 highlightByLevel(editorElement, htmlTarget);
+                // Update drag tip to show specific insertion position
+                const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
+                if (isChild) {
+                    showDragTip(window.siyuan.dragTitle || "",
+                        window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText),
+                        event.clientX, event.clientY);
+                } else {
+                    const key = position === "bottom" ? "dragTipListItemAfter" : "dragTipListItemBefore";
+                    showDragTip(window.siyuan.dragTitle || "",
+                        window.siyuan.languages[key].replace("${x}", targetText),
+                        event.clientX, event.clientY);
+                }
                 return;
             }
 

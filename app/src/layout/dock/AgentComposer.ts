@@ -212,6 +212,24 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
         editorProps: {
             attributes: {class: "agent-composer__pm"},
             handleKeyDown: function (_view, event) {
+                // 阻止撤销/重做快捷键冒泡到全局处理器，避免影响文档编辑器
+                if ((event.ctrlKey || event.metaKey) && !event.altKey) {
+                    if (!event.shiftKey && (event.key === "z" || event.key === "Z")) {
+                        // Ctrl+Z / Cmd+Z (undo)
+                        event.stopPropagation();
+                        return false;  // 让 TipTap History 扩展继续处理
+                    }
+                    if (event.shiftKey && (event.key === "z" || event.key === "Z")) {
+                        // Ctrl+Shift+Z / Cmd+Shift+Z (redo)
+                        event.stopPropagation();
+                        return false;
+                    }
+                    if (!event.shiftKey && (event.key === "y" || event.key === "Y")) {
+                        // Ctrl+Y / Cmd+Y (redo on Windows/Linux)
+                        event.stopPropagation();
+                        return false;
+                    }
+                }
                 if (suggestionMenu && slashActive) {
                     if (event.key === "ArrowDown") {
                         event.preventDefault();

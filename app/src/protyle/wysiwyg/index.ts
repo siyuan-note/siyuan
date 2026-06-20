@@ -790,48 +790,95 @@ export class WYSIWYG {
             const mostBottom = protyleRect.bottom;
             const y = event.clientY;
             const contentRect = protyle.contentElement.getBoundingClientRect();
-            // 超级块横向布局下拖拽调整子块宽度 https://github.com/siyuan-note/siyuan/issues/9521
+            // 超级块横向布局下拖拽调整子块宽度
             if (!protyle.disabled && target.classList.contains("sb__resize")) {
                 const sbElement = target.parentElement;
                 const previousElement = target.previousElementSibling as HTMLElement;
+                // 取手柄右侧的下一个块（跳过手柄等装饰元素）
+                let nextElement = target.nextElementSibling as HTMLElement;
+                while (nextElement && !nextElement.hasAttribute("data-node-id")) {
+                    nextElement = nextElement.nextElementSibling as HTMLElement;
+                }
                 if (!sbElement || !previousElement || !previousElement.hasAttribute("data-node-id") ||
-                    sbElement.getAttribute("data-sb-layout") !== "col") {
+                    !nextElement || sbElement.getAttribute("data-sb-layout") !== "col") {
                     return;
                 }
                 const x = event.clientX;
                 const sbWidth = sbElement.clientWidth;
-                const oldWidth = previousElement.clientWidth;
-                const oldHTML = previousElement.outerHTML;
+                // 使用 getBoundingClientRect 获取精确浮点宽度，避免 clientWidth（整数取整）作为
+                // 拖拽起始值带入累积误差
+                const oldLeftWidth = previousElement.getBoundingClientRect().width;
+                const oldRightWidth = nextElement.getBoundingClientRect().width;
+                // 读取手柄实际占用宽度（width + margin），这才是子块间的真实间距，用于 calc 补偿避免换行
+                const handleStyle = getComputedStyle(target);
+                const gapPx = target.offsetWidth + parseFloat(handleStyle.marginLeft) + parseFloat(handleStyle.marginRight);
+                const minWidth = 20;
                 target.classList.add("sb__resize--drag");
+                // 拖拽时禁止换行，避免最后一个子块因宽度溢出而换行
+                sbElement.style.flexWrap = "nowrap";
                 // @ts-ignore
                 previousElement.style.webkitUserModify = "read-only";
+                // @ts-ignore
+                nextElement.style.webkitUserModify = "read-only";
+                // 记录最终拖拽宽度，供 mouseup 精确计算百分比，避免从 clientWidth（整数取整）
+                // 反推导致每次拖拽累积误差
+                let finalLeft = oldLeftWidth;
+                let finalRight = oldRightWidth;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                    let newWidth = oldWidth + (moveEvent.clientX - x);
-                    // 最小宽度限制为超级块宽度的 10%
-                    const minWidth = sbWidth * 0.1;
-                    // 最大宽度限制为超级块宽度减去最小宽度（保证至少还有一个兄弟块的空间）
-                    const maxWidth = sbWidth * 0.9;
-                    newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
-                    // 用 style.width + flex:none，与 genWidths 菜单、图片缩放一致，菜单可自动回显/持久化
-                    previousElement.style.width = newWidth + "px";
+                    // 左右两块等量交换宽度，不影响其他子块
+                    const delta = moveEvent.clientX - x;
+                    let newLeftWidth = oldLeftWidth + delta;
+                    let newRightWidth = oldRightWidth - delta;
+                    // 限制最小宽度，避免塌陷
+                    if (newLeftWidth < minWidth) {
+                        newLeftWidth = minWidth;
+                        newRightWidth = oldLeftWidth + oldRightWidth - minWidth;
+                    }
+                    if (newRightWidth < minWidth) {
+                        newRightWidth = minWidth;
+                        newLeftWidth = oldLeftWidth + oldRightWidth - minWidth;
+                    }
+                    finalLeft = newLeftWidth;
+                    finalRight = newRightWidth;
+                    previousElement.style.width = newLeftWidth + "px";
                     previousElement.style.flex = "none";
+                    nextElement.style.width = newRightWidth + "px";
+                    nextElement.style.flex = "none";
                 };
                 documentSelf.onmouseup = () => {
                     target.classList.remove("sb__resize--drag");
+                    sbElement.style.flexWrap = "";
                     // @ts-ignore
                     previousElement.style.webkitUserModify = "";
+                    // @ts-ignore
+                    nextElement.style.webkitUserModify = "";
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    // 转为百分比写入 style.width + flex:none，复用既有 genWidths 菜单的回显与持久化
-                    const finalWidth = previousElement.clientWidth;
-                    const pct = Math.round(finalWidth / sbWidth * 1000) / 10;
-                    previousElement.style.width = pct + "%";
-                    previousElement.style.flex = "none";
-                    previousElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                    updateTransaction(protyle, previousElement, oldHTML);
+                    const sbChildren = Array.from(sbElement.querySelectorAll(":scope > [data-node-id]")) as HTMLElement[];
+                    const oldHTMLs = sbChildren.map(c => c.outerHTML);
+                    // 只调整左右两块（手柄两侧），其他子块不动，避免影响未拖拽的块
+                    // 使用 mousemove 记录的精确实时宽度（finalLeft/finalRight）反推百分比，
+                    // gapHalve 已含 +1px 余量防止亚像素换行，无需再用 *99 缩放（会造成累积收缩）
+                    const gapHalve = gapPx / 2 + 1;
+                    let leftPct = Math.round((finalLeft + gapHalve) / sbWidth * 1000) / 10;
+                    let rightPct = Math.round((finalRight + gapHalve) / sbWidth * 1000) / 10;
+                    // 防溢出：两块百分比之和超过 99.5% 时等比压缩到 99%，留 1% 缓冲防换行
+                    const sumPct = leftPct + rightPct;
+                    if (sumPct > 99.5) {
+                        const scale = 99 / sumPct;
+                        leftPct = Math.round(leftPct * scale * 10) / 10;
+                        rightPct = Math.round(rightPct * scale * 10) / 10;
+                    }
+                    const updated = dayjs().format("YYYYMMDDHHmmss");
+                    previousElement.style.width = `calc(${leftPct}% - ${gapHalve}px)`;
+                    nextElement.style.width = `calc(${rightPct}% - ${gapHalve}px)`;
+                    previousElement.setAttribute("updated", updated);
+                    nextElement.setAttribute("updated", updated);
+                    updateTransaction(protyle, previousElement, oldHTMLs[sbChildren.indexOf(previousElement)]);
+                    updateTransaction(protyle, nextElement, oldHTMLs[sbChildren.indexOf(nextElement)]);
                 };
                 this.preventClick = true;
                 event.preventDefault();

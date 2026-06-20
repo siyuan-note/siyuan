@@ -1,5 +1,11 @@
 import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
-import {getContenteditableElement, getParentBlock, getSbChildBlockCount, getTopAloneElement} from "../wysiwyg/getBlock";
+import {
+    getContenteditableElement,
+    getParentBlock,
+    getPreviousBlockSibling,
+    getSbChildBlockCount,
+    getTopAloneElement
+} from "../wysiwyg/getBlock";
 import {hideDragTip, showDragTip, transparentImgSrc} from "./dragTip";
 import {
     hasClosestBlock,
@@ -11,7 +17,14 @@ import {
 } from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
-import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock, refreshSbResize} from "../../block/util";
+import {
+    cancelSB,
+    genEmptyElement,
+    genSBElement,
+    insertEmptyBlock,
+    refreshSbAndPersistWidth,
+    refreshSbResize
+} from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -39,8 +52,6 @@ import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
-
-// position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
@@ -87,7 +98,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 }
             }
             sourcePositions.set(id, {
-                previousID: item.previousElementSibling?.getAttribute("data-node-id") || "",
+                previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id") || "",
                 parentID: srcParentID || "",
             });
         }
@@ -105,7 +116,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 action: "insert",
                 data: newListElement.outerHTML,
                 id: newListId,
-                previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : tempTargetElement.previousElementSibling?.getAttribute("data-node-id")),
+                previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(tempTargetElement)?.getAttribute("data-node-id")),
                 parentID: position === "afterbegin" ? targetId : (getParentBlock(tempTargetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
             });
             undoOperations.push({
@@ -168,7 +179,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "insert",
                     id: copyNewId,
                     data: copyElement.outerHTML,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(copyElement)?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(copyElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(copyElement);
@@ -191,7 +202,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 doOperations.push({
                     action: "move",
                     id,
-                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(item)?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(item)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(item);
@@ -369,6 +380,15 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean,
                       direct: "col" | "row", isCopy: boolean) => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
+    // 移动前记录源块所在的超级块，移动后刷新其手柄（移出后需重建）https://github.com/siyuan-note/siyuan/issues/9521
+    const originSbSet = new Set<Element>();
+    sourceElements.forEach(el => {
+        const sb = el.closest('[data-type="NodeSuperBlock"]');
+        if (sb && sb !== targetElement.closest('[data-type="NodeSuperBlock"]')) {
+            // 目标本身不在该超级块内（否则是 SB 内部重排，不必重建）
+            originSbSet.add(sb);
+        }
+    });
     // 把列表块中的唯一一个列表项块拖拽到列表块的左侧 https://github.com/siyuan-note/siyuan/issues/16315
     if (isSameDoc && sourceElements[0].classList.contains("li") && targetElement === sourceElements[0].parentElement &&
         targetElement.childElementCount === sourceElements.length + 1) {
@@ -388,7 +408,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             removeFold: "true"
         },
         id: targetElement.getAttribute("data-node-id"),
-        previousID: targetElement.previousElementSibling?.getAttribute("data-node-id"),
+        previousID: getPreviousBlockSibling(targetElement)?.getAttribute("data-node-id"),
         parentID: getParentBlock(targetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     };
     const sbElement = genSBElement(direct);
@@ -469,6 +489,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         undoOperations.splice(0, 0, ...foldOperations.undoOperations);
     });
     refreshSbResize(sbElement);
+    originSbSet.forEach(sb => {
+        refreshSbAndPersistWidth(sb, doOperations, undoOperations);
+    });
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {
@@ -486,6 +509,14 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     const isSameDoc = protyle.element.contains(sourceElements[0]);
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    // 移动前记录源块所在的超级块，移动后刷新其手柄（移出后需重建）
+    const originSbSet = new Set<Element>();
+    sourceElements.forEach(el => {
+        const sb = el.closest('[data-type="NodeSuperBlock"]');
+        if (sb) {
+            originSbSet.add(sb);
+        }
+    });
 
     const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameDoc, isBottom ? "afterend" : "beforebegin", isCopy);
     doOperations.push(...moveToResult.doOperations);
@@ -548,15 +579,17 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             return true;
         }
     });
-    // 移入/移出超级块后刷新拖拽手柄（如 A 拖到超级块内 B 前面，需在 A、B 间补手柄）
-    const dragSbSet = new Set<Element>();
+    // 移入/移出超级块后刷新拖拽手柄并重新分配宽度（如 A 拖到超级块内 B 前面，需在 A、B 间补手柄）
+    const dragSbSet = new Set<Element>(originSbSet);
     [newSourceParentElement[0], targetElement].forEach(el => {
         const sb = el?.closest('[data-type="NodeSuperBlock"]');
         if (sb) {
             dragSbSet.add(sb);
         }
     });
-    dragSbSet.forEach(sb => refreshSbResize(sb));
+    dragSbSet.forEach(sb => {
+        refreshSbAndPersistWidth(sb, doOperations, undoOperations);
+    });
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {

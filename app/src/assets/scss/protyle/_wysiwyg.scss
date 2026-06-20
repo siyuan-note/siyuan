@@ -278,7 +278,8 @@
       &[data-sb-layout="col"] {
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: space-between;
+        // flex-start 替代 space-between：拖拽后子块设 flex:none 时，多余空间留在末尾而非均匀分配到子块与手柄之间，避免手柄两侧出现随拖拽增大的空隙
+        justify-content: flex-start;
 
         & > div {
           flex: 1 0 10%;

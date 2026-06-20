@@ -2378,6 +2378,16 @@ export class Gutter {
     }
 
     private genWidths(nodeElements: Element[], protyle: IProtyle) {
+        let isInSb = false;
+        nodeElements.find((e: HTMLElement) => {
+            if (e.parentElement.classList.contains("sb")) {
+                isInSb = true;
+                return true;
+            }
+        });
+        if (isInSb) {
+            return;
+        }
         let rangeElement: HTMLInputElement;
         const firstElement = nodeElements[0] as HTMLElement;
         const styles: IMenu[] = [{

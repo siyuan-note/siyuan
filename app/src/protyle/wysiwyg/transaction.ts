@@ -162,6 +162,14 @@ const promiseTransaction = (options: {
                             }
                         }
                     });
+                    // 移动前记录源块所在的超级块，移动后刷新其拖拽手柄（移出后手柄需清理）
+                    const originSbs: Element[] = [];
+                    updateElements.forEach(item => {
+                        const sb = item.closest('[data-type="NodeSuperBlock"]');
+                        if (sb && !originSbs.includes(sb)) {
+                            originSbs.push(sb);
+                        }
+                    });
                     let hasFind = false;
                     if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
@@ -193,6 +201,8 @@ const promiseTransaction = (options: {
                             removeTopElement(item, protyle);
                         }
                     });
+                    // 块移出后刷新源超级块的手柄（originSb 在元素被移除前捕获）
+                    refreshSbs(...originSbs);
                 }
                 // 更新嵌入块
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
@@ -201,15 +211,10 @@ const promiseTransaction = (options: {
                     }
                 });
                 // 移动块（含撤销移动）后刷新相关超级块的拖拽手柄，避免手柄残留/缺失
-                [operation.id, operation.parentID, operation.previousID].forEach(blockId => {
-                    if (blockId) {
-                        const el = protyle.wysiwyg.element.querySelector(`[data-node-id="${blockId}"]`);
-                        const sbAncestor = el?.closest('[data-type="NodeSuperBlock"]');
-                        if (sbAncestor) {
-                            refreshSbResize(sbAncestor);
-                        }
-                    }
-                });
+                const moveEls = [operation.id, operation.parentID, operation.previousID]
+                    .map(id => id ? protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) : null)
+                    .filter(Boolean) as Element[];
+                refreshSbs(...moveEls);
                 return;
             }
             if (operation.action === "insert") {
@@ -265,10 +270,7 @@ const promiseTransaction = (options: {
                 });
                 // 插入块后刷新所在超级块的拖拽手柄（本地新块已在 DOM 跳过插入时也需刷新）
                 const insertedEl = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`);
-                const insertedSb = insertedEl?.closest('[data-type="NodeSuperBlock"]');
-                if (insertedSb) {
-                    refreshSbResize(insertedSb);
-                }
+                refreshSbs(insertedEl);
                 return;
             }
             if (operation.action === "setAttrs") {
@@ -332,6 +334,20 @@ const promiseTransaction = (options: {
     });
 };
 
+// 刷新一组块元素所在超级块的拖拽手柄（自动去重，跳过已脱离 DOM 的）
+const refreshSbs = (...elements: (Element | undefined | null)[]) => {
+    const sbs = new Set<Element>();
+    elements.forEach(el => {
+        if (el) {
+            const sb = el.closest('[data-type="NodeSuperBlock"]');
+            if (sb && sb.parentElement) {
+                sbs.add(sb);
+            }
+        }
+    });
+    sbs.forEach(sb => refreshSbResize(sb));
+};
+
 const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, isUndo: boolean) => {
     if (isUndo && updateElements[0]) {
         focusSideBlock(updateElements[0]);
@@ -361,12 +377,8 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
             blockRender(protyle, item);
         }
     });
-    // 删除块后刷新所在超级块的拖拽手柄（被删块两侧的手柄需移除/重建）
-    sbParents.forEach(sb => {
-        if (sb.parentElement && getSbChildBlockCount(sb) > 1) {
-            refreshSbResize(sb);
-        }
-    });
+    // 删除块后刷新所在超级块的拖拽手柄（被删块两侧的手柄需移除/重建，即使只剩 0/1 块也清残留）
+    refreshSbs(...sbParents);
 };
 
 const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
@@ -453,12 +465,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 avRender(protyle.wysiwyg.element, protyle);
                 blockRender(protyle, protyle.wysiwyg.element);
                 // 展开标题插入的块可能落在超级块内，刷新手柄避免与既有手柄重复/错位
-                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-                    const sbAncestor = item.closest('[data-type="NodeSuperBlock"]');
-                    if (sbAncestor) {
-                        refreshSbResize(sbAncestor);
-                    }
-                });
+                refreshSbs(...Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)));
             }
             return;
         }
@@ -490,12 +497,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     }
                 });
                 // 折叠移除子块后，刷新折叠标题所在超级块的拖拽手柄（子块数变化）
-                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-                    const sbAncestor = item.closest('[data-type="NodeSuperBlock"]');
-                    if (sbAncestor) {
-                        refreshSbResize(sbAncestor);
-                    }
-                });
+                refreshSbs(...Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)));
                 if (protyle.wysiwyg.element.childElementCount === 0) {
                     zoomOut({
                         protyle,
@@ -747,6 +749,15 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 }
             }
             let hasFind = false;
+            // 移动前记录源块所在的超级块，移动后刷新其拖拽手柄（移出后手柄需清理）
+            // https://github.com/siyuan-note/siyuan/issues/9521
+            const originSbs: Element[] = [];
+            updateElements.forEach(item => {
+                const sb = item.closest('[data-type="NodeSuperBlock"]');
+                if (sb && !originSbs.includes(sb)) {
+                    originSbs.push(sb);
+                }
+            });
             if (operation.previousID && updateElements.length > 0) {
                 const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);
                 if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
@@ -824,15 +835,13 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 }
             });
             // 移动块（含重做/同步）后刷新相关超级块的拖拽手柄
-            [operation.id, operation.parentID, operation.previousID].forEach(blockId => {
-                if (blockId) {
-                    const el = protyle.wysiwyg.element.querySelector(`[data-node-id="${blockId}"]`);
-                    const sbAncestor = el?.closest('[data-type="NodeSuperBlock"]');
-                    if (sbAncestor) {
-                        refreshSbResize(sbAncestor);
-                    }
-                }
-            });
+            const moveEls = [operation.id, operation.parentID, operation.previousID]
+                .map(id => id ? protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) : null)
+                .filter(Boolean) as Element[];
+            refreshSbs(...moveEls);
+            // 块移出后刷新源超级块的手柄（originSb 在元素被移除前捕获，仅含移出侧的超级块）
+            // https://github.com/siyuan-note/siyuan/issues/9521
+            refreshSbs(...originSbs);
             return;
         }
         if (operation.action === "insert") {
@@ -931,10 +940,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 avRender(item, protyle);
                 blockRender(protyle, item);
                 // 插入块后刷新所在超级块的拖拽手柄（撤销/重做/同步）
-                const insertSb = item.closest('[data-type="NodeSuperBlock"]');
-                if (insertSb) {
-                    refreshSbResize(insertSb);
-                }
+                refreshSbs(item);
                 const wbrElement = item.querySelector("wbr");
                 if (isUndo) {
                     if (operation.context?.setRange === "true") {
@@ -1116,13 +1122,13 @@ export const turnsIntoOneTransaction = async (options: {
     });
     // 子块移入完成后刷新超级块拖拽手柄
     if (parentElement.classList.contains("sb")) {
-        refreshSbResize(parentElement);
-    } else if (parentElement.parentElement && parentElement.parentElement.classList.contains("sb")) {
+        refreshSbs(parentElement);
+    } else if (parentElement.parentElement?.classList.contains("sb")) {
         // 引述/列表/标注嵌入超级块时刷新父超级块
-        refreshSbResize(parentElement.parentElement);
+        refreshSbs(parentElement.parentElement);
     }
     if ((["Blocks2Blockquote", "Blocks2Callout"].includes(options.type) || options.type.endsWith("Ls")) &&
-        parentElement.parentElement.classList.contains("sb") && getSbChildBlockCount(parentElement.parentElement) === 1) {
+        parentElement.parentElement?.classList.contains("sb") && getSbChildBlockCount(parentElement.parentElement) === 1) {
         const cancelOperations = await cancelSB(options.protyle, parentElement.parentElement);
         doOperations.push(...cancelOperations.doOperations);
         undoOperations.splice(0, 0, ...cancelOperations.undoOperations);
@@ -1498,12 +1504,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);
             // 展开标题插入的块可能落在超级块内，刷新手柄避免与既有手柄重复/错位
-            protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-                const sbAncestor = item.closest('[data-type="NodeSuperBlock"]');
-                if (sbAncestor) {
-                    refreshSbResize(sbAncestor);
-                }
-            });
+            refreshSbs(...Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)));
             if (operation.context?.focusId) {
                 const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.context.focusId}"]`);
                 focusBlock(focusElement);
@@ -1522,12 +1523,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             }
         });
         // 折叠移除子块后，刷新折叠标题所在超级块的拖拽手柄（子块数变化）
-        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-            const sbAncestor = item.closest('[data-type="NodeSuperBlock"]');
-            if (sbAncestor) {
-                refreshSbResize(sbAncestor);
-            }
-        });
+        refreshSbs(...Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)));
         // 折叠标题后未触发动态加载 https://github.com/siyuan-note/siyuan/issues/4168
         if (protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
             !protyle.scroll.element.classList.contains("fn__none") &&

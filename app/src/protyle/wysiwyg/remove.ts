@@ -16,7 +16,7 @@ import {
     hasPreviousSibling
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
-import {cancelSB, genEmptyElement, refreshSbResize} from "../../block/util";
+import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
 import {zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
@@ -44,7 +44,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         let sideElement: Element | boolean;
         let sideIsNext = false;
         if (type === "Backspace") {
-            sideElement = selectElements[0].previousElementSibling;
+            sideElement = getPreviousBlockSibling(selectElements[0]);
             if (!sideElement) {
                 sideIsNext = true;
                 sideElement = selectElements[selectElements.length - 1].nextElementSibling;
@@ -54,7 +54,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             sideIsNext = true;
             if (!sideElement) {
                 sideIsNext = false;
-                sideElement = selectElements[0].previousElementSibling;
+                sideElement = getPreviousBlockSibling(selectElements[0]);
             }
         }
         let listElement: Element;
@@ -235,6 +235,14 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 // 超级块删除子块后剩余多个子块时，刷新拖拽手柄（被删块两侧手柄需移除/重建）
                 if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock") {
                     refreshSbResize(topParentElement);
+                    const widthChanges = rebalanceSbWidth(topParentElement);
+                    widthChanges.forEach(change => {
+                        const targetEl = topParentElement.querySelector(`[data-node-id="${change.id}"]`);
+                        if (targetEl) {
+                            deletes.push({action: "update", id: change.id, data: targetEl.outerHTML});
+                            inserts.push({action: "update", id: change.id, data: change.oldHTML});
+                        }
+                    });
                 }
                 transaction(protyle, deletes, inserts.reverse());
             }
@@ -599,6 +607,15 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     } else {
         if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock") {
             refreshSbResize(parentElement);
+            // 删除子块后重新分配剩余块宽度并持久化
+            const widthChanges = rebalanceSbWidth(parentElement);
+            widthChanges.forEach(change => {
+                const targetEl = parentElement.querySelector(`[data-node-id="${change.id}"]`);
+                if (targetEl) {
+                    doOperations.push({action: "update", id: change.id, data: targetEl.outerHTML});
+                    undoOperations.push({action: "update", id: change.id, data: change.oldHTML});
+                }
+            });
         }
         transaction(protyle, doOperations, undoOperations);
     }

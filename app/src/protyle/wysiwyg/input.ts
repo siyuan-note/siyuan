@@ -184,8 +184,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
         }
         html = protyle.lute.SpinBlockDOM(html);
-        // 列表项内不允许 SpinBlockDOM 产生新的列表结构 https://github.com/siyuan-note/siyuan/issues/17890
-        if (blockElement.closest('[data-type="NodeListItem"]')) {
+        // 列表项内紧挨标记的第一个段落块不允许产生子列表 https://github.com/siyuan-note/siyuan/issues/17890
+        if (blockElement.closest('[data-type="NodeListItem"]') &&
+            blockElement.previousElementSibling?.classList.contains("protyle-action")) {
             const tempDiv = document.createElement("div");
             tempDiv.innerHTML = html;
             const firstChild = tempDiv.firstElementChild;

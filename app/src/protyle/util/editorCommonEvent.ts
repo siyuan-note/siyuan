@@ -1066,6 +1066,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const isBottom = targetClass.some((c: string) => c.indexOf("dragover__bottom") === 0);
 
                     if (isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                        // 拖拽整个列表块（NodeList）作为子项时，展开为其下的列表项，避免形成列表直接嵌套列表
+                        const expandedElements: Element[] = [];
+                        sourceElements.forEach(item => {
+                            if (item.getAttribute("data-type") === "NodeList") {
+                                Array.from(item.children).forEach((li) => {
+                                    if (li.classList.contains("li")) {
+                                        expandedElements.push(li);
+                                    }
+                                });
+                            } else {
+                                expandedElements.push(item);
+                            }
+                        });
+                        if (expandedElements.length > 0) {
+                            sourceElements.length = 0;
+                            sourceElements.push(...expandedElements);
+                        }
                         const nestedList = Array.from(targetElement.children).find(c => c.classList.contains("list"));
                         let nestedTarget: Element;
                         if (nestedList) {
@@ -1079,7 +1096,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (nestedTarget) {
                             dragSame(protyle, sourceElements, nestedTarget, isBottom, event.ctrlKey);
                         } else {
-                            dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
+                            // 目标列表项无嵌套子列表：定位其最后一个内容块，在其后插入，
+                            // moveTo 会自动创建嵌套列表包装源列表项，形成子项结构
+                            const contentBlocks = Array.from(targetElement.children).filter(
+                                c => c.hasAttribute("data-node-id") && !c.classList.contains("list"));
+                            const lastContentBlock = contentBlocks[contentBlocks.length - 1];
+                            if (lastContentBlock) {
+                                dragSame(protyle, sourceElements, lastContentBlock, isBottom, event.ctrlKey);
+                            } else {
+                                dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
+                            }
                         }
                     } else if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement.getAttribute("data-sb-layout") === "col") {

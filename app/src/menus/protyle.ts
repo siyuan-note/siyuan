@@ -35,6 +35,7 @@ import {paste, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
 import {openFileById, updateBacklinkGraph} from "../editor/util";
 import {openGlobalSearch} from "../search/util";
 import {openNewWindowById} from "../window/openNewWindow";
+import {openBacklink, openGraph} from "../layout/dock/util";
 /// #endif
 import {getSearch, isMobile} from "../util/functions";
 import * as dayjs from "dayjs";
@@ -49,7 +50,6 @@ import {checkFold, genTagList, renameTag} from "../util/noRelyPCFunction";
 import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
-import {openBacklink, openGraph} from "../layout/dock/util";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {upDownHint} from "../util/upDownHint";
 import {hintRenderAssets} from "../protyle/hint/extend";

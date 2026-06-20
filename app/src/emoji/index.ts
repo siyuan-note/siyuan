@@ -1,8 +1,8 @@
 import {getRandom, isMobile} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {Files} from "../layout/dock/Files";
 /// #if !MOBILE
+import {Files} from "../layout/dock/Files";
 import {getDockByType} from "../layout/tabUtil";
 /// #endif
 import {getAllEditor, getAllModels} from "../layout/getAll";

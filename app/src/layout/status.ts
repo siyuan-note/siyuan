@@ -1,5 +1,6 @@
 /// #if !MOBILE
 import {getDockByType} from "./tabUtil";
+import {toggleDockBar} from "./dock/util";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
@@ -9,7 +10,6 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
-import {toggleDockBar} from "./dock/util";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const initStatus = (isWindow = false) => {

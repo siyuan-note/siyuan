@@ -19,8 +19,8 @@ import {Protyle} from "../protyle";
 import {openMobileFileById} from "../mobile/editor";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
-import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
+import {getActiveTab, getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
@@ -30,7 +30,6 @@ import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
 
@@ -292,7 +291,7 @@ export const expandDocTree = async (options: {
     });
     let liElement: HTMLElement;
     let notebookId = options.id;
-    const file = getModelByDockType("file") as Files;
+    const file = getModelByDockType("file");
     if (typeof options.isSetCurrent === "undefined") {
         options.isSetCurrent = true;
     }

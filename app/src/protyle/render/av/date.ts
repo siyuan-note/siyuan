@@ -58,98 +58,77 @@ export const bindDateEvent = (options: {
 }) => {
     const inputElements: NodeListOf<HTMLInputElement> = options.menuElement.querySelectorAll("input");
 
-    // <input type="date"> 对非法日期（如 6-34）会清空 input.value，导致 year/month 信息也随之丢失。
-    // 这里在 focus 时记录编辑前的原值，keydown 时累积按键序列，提交时用于兜底重建 year/month。
+    // <input type="date"> 对非法日期会清空 input.value。原生 date input 不触发 beforeinput，用 keydown 区分删空与非法日输入。
     const lastNonEmptyValue: string[] = [inputElements[0].value, inputElements[1].value];
-    const typedDigits: string[] = ["", ""];
-    const bindTracking = (input: HTMLInputElement, index: number) => {
+    // 输入非法日导致浏览器清空 value 时为 true，提交时按当月最后一天截断重建。
+    const invalidEmpty: boolean[] = [false, false];
+    const bindTracking = (index: number) => {
+        const input = inputElements[index];
         input.addEventListener("focus", () => {
             lastNonEmptyValue[index] = input.value;
-            typedDigits[index] = "";
+            invalidEmpty[index] = false;
         });
         input.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey) {
                 return;
             }
-            if (/^\d$/.test(event.key)) {
-                typedDigits[index] += event.key;
+            const isDelete = event.key === "Backspace" || event.key === "Delete";
+            const isDigit = /^\d$/.test(event.key);
+            if (!isDelete && !isDigit) {
+                return;
             }
+            // date input 的 value 更新晚于 keydown，需推迟到下一个宏任务再读取
+            setTimeout(() => {
+                if (!input.value) {
+                    invalidEmpty[index] = !isDelete;
+                }
+            });
         });
         input.addEventListener("input", () => {
-            // 仅当 input.value 是合法完整日期时才更新原值记录。
-            // 这样改 month/year（合法值）后能同步，而删除过程中的部分残值（如 "2024-08-"）不会污染。
-            if (input.value && input.value.replace(/\D/g, "").length >= 8) {
-                lastNonEmptyValue[index] = input.value;
+            if (input.value) {
+                invalidEmpty[index] = false;
+                // 仅当 input.value 是合法完整日期时才更新
+                if (input.value.replace(/\D/g, "").length >= 8) {
+                    lastNonEmptyValue[index] = input.value;
+                }
             }
         });
     };
-    bindTracking(inputElements[0], 0);
-    bindTracking(inputElements[1], 1);
+    bindTracking(0);
+    bindTracking(1);
 
-    // 计算指定年月的天数（如 2024年2月=29，6月=30，12月=31）
-    const getMaxDay = (year: number, month: number) => new Date(year, month, 0).getDate();
-
-    // 用数字参数构造时间戳，Date 构造函数会自动进位（如 new Date(2024, 5, 34) → 2024-07-04）
-    const carryOverflow = (year: number, month: number, day: number): number => {
-        return new Date(year, month - 1, day).getTime();
-    };
-
-    // 构造用于保存的日期字符串。
-    // 浏览器对非法日有两种处理：截断（如 12月34→12-31）或清空（如 6月34→""）。
-    // 无论哪种，只要 typedDigits 末尾 2 位 > 当月最大天数，说明用户输入了非法 day，应进位而非截断。
-    const buildDateStr = (index: number): {dateStr: string, overflowTs: number} => {
-        const digits = typedDigits[index];
-        // 提取 year/month：优先用 lastNonEmptyValue（已随合法编辑更新），其次用 input.value，最后用按键序列前 6 位
-        let year = 0, month = 0;
+    const buildDateStr = (index: number): string => {
+        const inputVal = inputElements[index].value;
+        if (inputVal) {
+            return inputVal.length > 10 ? inputVal : inputVal + " 00:00";
+        }
+        if (!invalidEmpty[index]) {
+            return "";
+        }
+        // 如果输入超出日期范围的非法日导致 value 清空，则获取最后一次合法日期，并返回该月最后一天的日期
         const lastVal = lastNonEmptyValue[index];
-        const val = inputElements[index].value || lastVal;
-        if (val) {
-            const valDigits = val.replace(/\D/g, "");
-            if (valDigits.length >= 6) {
-                year = parseInt(valDigits.substring(0, 4), 10);
-                month = parseInt(valDigits.substring(4, 6), 10);
-            }
+        if (!lastVal) {
+            return "";
         }
-        if ((month < 1 || month > 12) && digits.length >= 6) {
-            year = parseInt(digits.substring(0, 4), 10);
-            month = parseInt(digits.substring(4, 6), 10);
+        const valDigits = lastVal.replace(/\D/g, "");
+        if (valDigits.length < 6) {
+            return "";
         }
-
-        // 检测是否有非法 day 输入（typedDigits 末尾 2 位 > 当月最大天数）
-        if (month >= 1 && month <= 12 && digits.length >= 2) {
-            const inputDay = parseInt(digits.slice(-2), 10);
-            const maxDay = getMaxDay(year, month);
-            if (inputDay > maxDay) {
-                // 用户输入了非法 day（被浏览器截断或清空），用进位还原真实意图
-                const ts = carryOverflow(year, month, inputDay);
-                if (!isNaN(ts)) {
-                    return {dateStr: "", overflowTs: ts};
-                }
-            }
+        const year = parseInt(valDigits.substring(0, 4), 10);
+        const month = parseInt(valDigits.substring(4, 6), 10);
+        if (month < 1 || month > 12) {
+            return "";
         }
-
-        // 无非法 day：正常用浏览器值
-        if (val) {
-            return {dateStr: val.length > 10 ? val : val + " 00:00", overflowTs: 0};
-        }
-        // 兜底：从按键序列构造（完整输入但无原值的场景）
-        if (month >= 1 && month <= 12) {
-            let day = getMaxDay(year, month);
-            if (digits.length >= 8) {
-                day = parseInt(digits.slice(-2), 10);
-            }
-            const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-            return {dateStr, overflowTs: 0};
-        }
-        return {dateStr: "", overflowTs: 0};
+        const monthStr = String(month).padStart(2, "0");
+        const maxDay = new Date(year, month, 0).getDate();
+        return `${year}-${monthStr}-${String(maxDay).padStart(2, "0")} 00:00`;
     };
 
     const submit = () => {
-        const result1 = buildDateStr(0);
-        const result2 = buildDateStr(1);
-        // 优先用进位后的时间戳（overflowTs），否则用 getFullYearTime 解析 dateStr
-        const content1 = result1.overflowTs || getFullYearTime(result1.dateStr) || 0;
-        const content2 = result2.overflowTs || getFullYearTime(result2.dateStr) || 0;
+        const dateStr1 = buildDateStr(0);
+        const dateStr2 = buildDateStr(1);
+        const content1 = getFullYearTime(dateStr1) || 0;
+        const content2 = getFullYearTime(dateStr2) || 0;
         updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
             content: content1,
             isNotEmpty: content1 !== 0,

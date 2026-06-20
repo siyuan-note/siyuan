@@ -69,12 +69,11 @@ export const setPanelFocus = (element: Element, isSaveLayout = true) => {
 export const getWndByLayout: (layout: Layout) => Wnd = (layout: Layout) => {
     const wndsTemp: Wnd[] = [];
     getAllWnds(layout, wndsTemp);
-    const sorted = wndsTemp.sort((a, b) => {
+    return wndsTemp.sort((a, b) => {
         if (a.element.querySelector(".fn__flex .item--focus")?.getAttribute("data-activetime") > b.element.querySelector(".fn__flex .item--focus")?.getAttribute("data-activetime")) {
             return -1;
         }
-    });
-    return (sorted[0] ?? null) as unknown as Wnd;
+    })[0];
 };
 
 const dockToJSON = (dock: Dock) => {

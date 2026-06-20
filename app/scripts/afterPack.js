@@ -1,5 +1,6 @@
 const fsPromises = require("fs").promises;
 const path = require("path");
+const { trimChangelogs } = require("./trimChangelogs");
 
 module.exports = async function afterPack(context) {
   const {appOutDir, electronPlatformName, packager} = context;
@@ -7,8 +8,7 @@ module.exports = async function afterPack(context) {
   await trimPackagedChangelogs(appOutDir, packager, electronPlatformName);
 };
 
-// 打包时裁剪 changelog，只保留顶层 changelogs/v{version}/。
-// 版本号须与 package.json、kernel/util/working.go 的 Ver 一致（内核按此路径读取）。
+// 打包时裁剪 changelog，只保留当前版本 changelogs/v{version}/，详见 trimChangelogs.js。
 async function trimPackagedChangelogs(appOutDir, packager, platform) {
   let changelogsDir;
   if (platform === "darwin") {
@@ -28,40 +28,6 @@ async function trimPackagedChangelogs(appOutDir, packager, platform) {
   } catch (error) {
     console.error("Failed to trim changelogs:", error.message);
   }
-}
-
-async function trimChangelogs(changelogsDir, version) {
-  try {
-    await fsPromises.access(changelogsDir);
-  } catch {
-    return {ok: false, reason: "directory not found"};
-  }
-
-  const verName = `v${version}`;
-  const destDir = path.join(changelogsDir, verName);
-  const entries = await fsPromises.readdir(changelogsDir, {withFileTypes: true});
-  let hasTarget = false;
-  const obsolete = [];
-
-  for (const entry of entries) {
-    if (!entry.isDirectory()) {
-      continue;
-    }
-    if (entry.name === verName) {
-      hasTarget = true;
-    } else {
-      obsolete.push(entry.name);
-    }
-  }
-
-  if (!hasTarget) {
-    return {ok: false, reason: `changelog directory not found: ${destDir}`};
-  }
-
-  await Promise.all(
-    obsolete.map((name) => fsPromises.rm(path.join(changelogsDir, name), {recursive: true, force: true}))
-  );
-  return {ok: true, path: destDir};
 }
 
 async function removeLanguagePacks(appOutDir, packager, platform) {
@@ -177,17 +143,3 @@ function formatBytes(bytes) {
   return `${formattedSize} ${sizes[i]}`;
 }
 
-// CLI：node scripts/afterPack.js（Docker 镜像构建用）
-if (require.main === module) {
-  const changelogsDir = path.resolve(process.cwd(), "changelogs");
-  const version = require(path.join(__dirname, "..", "package.json")).version;
-  trimChangelogs(changelogsDir, version).then((result) => {
-    if (!result.ok) {
-      console.error(`trimChangelogs: ${result.reason}`);
-      return;
-    }
-    console.log(`trimChangelogs: ${result.path}`);
-  }).catch((error) => {
-    console.error("trimChangelogs failed:", error.message);
-  });
-}

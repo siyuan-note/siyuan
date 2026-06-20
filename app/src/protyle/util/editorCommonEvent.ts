@@ -1291,17 +1291,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
         }
         // Clean up all drag indicators unconditionally after drop/cancel
-        document.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
-            item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
-            item.style.removeProperty("--drag-indent");
-            item.style.removeProperty("--drag-guides");
-            item.style.removeProperty("--drag-line-left");
-            item.style.removeProperty("--drag-base-bg");
-            item.style.backgroundColor = "";
-        });
+        cleanupDragIndicators(document);
     });
     let dragoverElement: Element;
-    let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, siblingGuides: string, childGuides: string };
+    let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, guides: string };
     let disabledPosition: string;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
@@ -1556,15 +1549,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
-            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
+            cleanupDragIndicators(editorElement);
+            editorElement.querySelectorAll("[select-start], [select-end]").forEach((item: HTMLElement) => {
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
-                item.style.removeProperty("--drag-indent");
-                item.style.removeProperty("--drag-guides");
-                item.style.removeProperty("--drag-line-left");
-                item.style.removeProperty("--drag-base-bg");
-                item.style.backgroundColor = "";
             });
             // 文档树拖拽限制
             if (fileTreeIds.indexOf("-") > -1 && isNotAvItem) {
@@ -1599,16 +1587,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const opacity = depth <= 1 ? 0.55 : 1 - (n - 1) / (depth - 1) * 0.65;
                         siblingGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
                     }
-                    let childGuides = "";
-                    const childDepth = depth + 1;
-                    for (let n = 1; n <= childDepth; n++) {
-                        if (childGuides) childGuides += ", ";
-                        const opacity = childDepth <= 1 ? 0.55 : 1 - (n - 1) / (childDepth - 1) * 0.65;
-                        childGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
-                    }
-                    dragCache = {nodeId, indent, rgb, siblingGuides: siblingGuides || "none", childGuides: childGuides || "none"};
+                    dragCache = {nodeId, indent, rgb, guides: siblingGuides || "none"};
                 }
-                const {indent, rgb, siblingGuides, childGuides} = dragCache;
+                const {indent, rgb, guides} = dragCache;
 
                 const liRect = htmlTarget.getBoundingClientRect();
                 const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
@@ -1620,7 +1601,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 htmlTarget.classList.add(className);
                 htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
                 htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
-                htmlTarget.style.setProperty("--drag-guides", isChild ? childGuides : siblingGuides);
+                htmlTarget.style.setProperty("--drag-guides", guides);
                 htmlTarget.style.setProperty("--drag-base-bg",
                     isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)` : "transparent");
                 highlightByLevel(editorElement, htmlTarget);
@@ -1699,8 +1680,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (fileTreeIds.indexOf("-") > -1) {
             if (fileTreeIds.split(",").includes(protyle.block.rootID) && isNotAvItem && event.altKey) {
                 dragoverElement = undefined;
-                editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
+                cleanupDragIndicators(editorElement);
+                editorElement.querySelectorAll("[select-start], [select-end]").forEach((item: HTMLElement) => {
                     item.removeAttribute("select-start");
                     item.removeAttribute("select-end");
                 });
@@ -1788,9 +1769,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         counter--;
         if (counter === 0) {
-            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
-            });
+            cleanupDragIndicators(editorElement);
             dragoverElement = undefined;
             hideDragTip();
         }
@@ -1806,28 +1785,26 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             document.onmousemove = null;
         }
         // Clean up all drag indicators on cancel
-        editorElement.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover").forEach((item: HTMLElement) => {
-            item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
-            item.style.removeProperty("--drag-indent");
-            item.style.removeProperty("--drag-guides");
-            item.style.removeProperty("--drag-line-left");
-            item.style.removeProperty("--drag-base-bg");
-            item.style.backgroundColor = "";
-        });
+        cleanupDragIndicators(editorElement);
         dragoverElement = undefined;
         hideDragTip();
         window.siyuan.dragTitle = "";
     });
     // Fallback: document-level cleanup in case dragend doesn't bubble
     document.addEventListener("dragend", () => {
-        document.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
-            item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
-            item.style.removeProperty("--drag-indent");
-            item.style.removeProperty("--drag-guides");
-            item.style.removeProperty("--drag-line-left");
-            item.style.removeProperty("--drag-base-bg");
-            item.style.backgroundColor = "";
-        });
+        cleanupDragIndicators(document);
+    }, {once: true});
+};
+
+const cleanupDragIndicators = (scope: ParentNode) => {
+    scope.querySelectorAll(".dragover__top, .dragover__bottom, .dragover__left, .dragover__right, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
+        item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover",
+            "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
+        item.style.removeProperty("--drag-indent");
+        item.style.removeProperty("--drag-guides");
+        item.style.removeProperty("--drag-line-left");
+        item.style.removeProperty("--drag-base-bg");
+        item.style.backgroundColor = "";
     });
 };
 

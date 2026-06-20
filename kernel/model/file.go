@@ -1797,12 +1797,11 @@ func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, 
 		return
 	}
 	var isEmpty bool
-	if titleEmpty {
-		isEmpty = true
-	}
 	if "" == title {
-		isEmpty = true
 		title = Conf.Language(16)
+		isEmpty = true
+	} else if titleEmpty {
+		isEmpty = true
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))

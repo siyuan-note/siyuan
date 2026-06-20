@@ -116,9 +116,9 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
    - Domains: `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
    - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
 2. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
-3. **Frontend verification:** Do not use `npx webpack` to verify changes
-4. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
-5. **Lint:** After frontend changes, run `cd app && pnpm run lint` to check code style
+3. **Frontend verification:** Do not use `npx webpack` or `pnpm dev` to verify changes; after changes, run `cd app && pnpm run lint` to check code style
+4. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
+5. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
 
 ---
 

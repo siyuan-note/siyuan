@@ -44,6 +44,11 @@ export class Undo {
         onTransaction(protyle, operations, true);
         document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);
+        // 同步 toolbar range，避免 undo/redo 替换 DOM 后 range 变为 detached，
+        // 导致后续异步操作（如 F3 创建子文档）读到无效 range 而报错 https://github.com/siyuan-note/siyuan/issues/17896
+        if (getSelection().rangeCount > 0) {
+            protyle.toolbar.range = getSelection().getRangeAt(0);
+        }
     }
 
     // add 降级为：不压栈（kernel 已在 commit 后 Record），仅置位本地镜像 + 刷新按钮态。

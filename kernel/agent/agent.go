@@ -43,6 +43,9 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 ## Domain Concepts
 - Block: the fundamental unit. Everything is a block with a unique ID, including documents (a document block, type NodeDocument, is the root). Content blocks (headings, paragraphs, lists, code, tables) form a tree under a document block.
+- Container blocks (can hold child blocks): document, blockquote, list, list-item, super-block, callout. Leaf blocks (cannot hold children): heading, paragraph, code-block, math-block, table, HTML-block, thematic-break, video, audio, widget, iframe, attribute-view, block-query-embed.
+- Heading hierarchy: headings (h1-h6) are leaf blocks. Blocks that appear "under" a heading in the UI are its *following siblings* in the AST, not its children. To place a block below a heading, pass the heading's ID (or the ID of the last block currently below it) as previousID, not as parentID.
+- Nested lists: a list-item cannot directly contain another list-item. To nest lists, create a list (NodeList) as a child of the outer list-item, then add list-items to that inner list. The parent of a list-item must always be a list (NodeList).
 - Notebook: a top-level container holding documents. Use notebook.list to enumerate; pass notebook ID when creating documents.
 - hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document.create/move/list refers to hPath, not the internal ID-based filesystem path. A rename changes hPath but not the ID.
 - Document vs block move: document.move relocates an entire document (and children) to a new hPath within a notebook — needs id, notebook (from document.get field "Box"), and path. block.move repositions a single content block under a new parent block.

@@ -460,6 +460,16 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     if (tempElement.content.firstChild.nodeType === 3 || (tempElement.content.firstChild.nodeType === 1 && tempElement.content.firstElementChild.tagName !== "DIV")) {
         tempElement.innerHTML = protyle.lute.SpinBlockDOM(tempElement.innerHTML);
     }
+    // 列表项内紧挨标记的第一个段落块不允许产生子列表 https://github.com/siyuan-note/siyuan/issues/17890
+    if (cursorLiElement &&
+        blockElement.previousElementSibling?.classList.contains("protyle-action")) {
+        const firstBlock = tempElement.content.firstElementChild;
+        if (firstBlock?.getAttribute("data-type") === "NodeList" ||
+            firstBlock?.getAttribute("data-type") === "NodeListItem") {
+            const p = firstBlock.querySelector('[data-type="NodeParagraph"]');
+            if (p) tempElement.innerHTML = p.outerHTML;
+        }
+    }
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         let addId = item.getAttribute("data-node-id");
         const hasParentHeading = item.getAttribute("parent-heading");

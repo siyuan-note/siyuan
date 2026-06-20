@@ -1241,6 +1241,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 ) {
                     selectAll(protyle, nodeElement, range);
                 }
+                // 同步 toolbar.range，避免 DOM 已被其他操作（undo/enter 等）替换后变为 detached，
+                // 导致后续异步回调中 setInlineMark 读到无效 range https://github.com/siyuan-note/siyuan/issues/17896
+                protyle.toolbar.range = range;
                 if (isNewNameFile) {
                     fetchPost("/api/filetree/getHPathByPath", {
                         notebook: protyle.notebookId,

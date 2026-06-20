@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
+	"fmt"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -377,6 +378,51 @@ func GetBlockTree(id string) (ret *BlockTree) {
 		return
 	}
 	return
+}
+
+// IsContainerType 按主类型缩写判断块是否为容器块（可合法接收子块）。
+// 入参 abbrType 对应 BlockTree.Type（如 "d"/"h"/"p"），由 TypeAbbr 写入。
+func IsContainerType(abbrType string) bool {
+	switch abbrType {
+	case "d", "b", "l", "i", "s", "callout":
+		return true
+	}
+	return false
+}
+
+// CheckContainerParent 校验 parentID 指向的块是否允许接收子块。
+// 仅在“通过 parentID 定位插入/移动目标”（即不依赖 previousID/nextID）的场景下调用，
+// 因为一旦带 previousID/nextID，事务层走的是兄弟级 InsertAfter/InsertBefore，天然合法。
+// 返回 nil 表示合法；返回 error 时调用方应拒绝本次操作。
+func CheckContainerParent(parentID string) error {
+	bt := GetBlockTree(parentID)
+	if nil == bt {
+		return fmt.Errorf("parent block not found: %s", parentID)
+	}
+	if IsContainerType(bt.Type) {
+		return nil
+	}
+	if "h" == bt.Type {
+		// 标题是叶子块，其“子内容”在数据结构上实为后续兄弟节点（由 HeadingChildren 按层级推算）。
+		// 把块挂成标题的 AST 子节点属于非法嵌套，应改用 previousID 定位。
+		return fmt.Errorf("heading [%s] is a leaf block and cannot have children; to place a block below this heading, pass previousID=<heading id> or previousID=<last block below the heading> instead of parentID", parentID)
+	}
+	return fmt.Errorf("block [%s] type %q is a leaf block and cannot have children; use previousID to place the block as its sibling instead", parentID, bt.Type)
+}
+
+// CheckListItemNesting 校验 parentID 和 childID 是否形成“列表项直含列表项”的非法嵌套。
+// 嵌套列表的正确结构是 ListItem > List > ListItem，列表项不能直接作为另一个列表项的子块。
+// 仅在 move 场景调用（源和目标类型均已知）。
+func CheckListItemNesting(parentID, childID string) error {
+	parentBt := GetBlockTree(parentID)
+	childBt := GetBlockTree(childID)
+	if nil == parentBt || nil == childBt {
+		return nil // 查不到就放行，不阻塞未知场景
+	}
+	if "i" == parentBt.Type && "i" == childBt.Type {
+		return fmt.Errorf("a list-item cannot directly contain another list-item; to nest, first create a list (NodeList) under the outer list-item, then add the inner list-items to that list")
+	}
+	return nil
 }
 
 func SetBlockTreePath(tree *parse.Tree) {

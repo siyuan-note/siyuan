@@ -64,6 +64,12 @@
       &__right::after {
         right: -4px;
       }
+
+      &.li,
+      &.list {
+        background-color: var(--b3-theme-primary-lightest);
+        border-radius: 4px;
+      }
     }
 
     &[custom-riff-decks] {
@@ -267,6 +273,74 @@
         right: 17px;
         left: auto;
       }
+
+      &.dragover__top--sibling::before,
+      &.dragover__bottom--sibling::before,
+      &.dragover__top--child::before,
+      &.dragover__bottom--child::before {
+        left: auto;
+        right: calc(var(--drag-indent) / 2);
+        transform: translateX(50%);
+      }
+
+      &.dragover__top--sibling::after,
+      &.dragover__bottom--sibling::after,
+      &.dragover__top--child::after,
+      &.dragover__bottom--child::after {
+        left: auto;
+        right: var(--drag-line-left);
+      }
+    }
+
+    &.dragover__top--sibling::before,
+    &.dragover__bottom--sibling::before,
+    &.dragover__top--child::before,
+    &.dragover__bottom--child::before {
+      content: '';
+      position: absolute;
+      left: calc(var(--drag-indent) / 2);
+      transform: translateX(-50%);
+      width: calc(var(--drag-indent) * 0.75);
+      height: max(3px, calc(var(--drag-indent) / 12));
+      border-radius: max(1px, calc(var(--drag-indent) / 30));
+      pointer-events: none;
+      border-left: none;
+      background: var(--drag-base-bg);
+      box-shadow: var(--drag-guides);
+    }
+
+    &.dragover__top--sibling::after,
+    &.dragover__bottom--sibling::after,
+    &.dragover__top--child::after,
+    &.dragover__bottom--child::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      height: 4px;
+      background-color: var(--b3-theme-primary-lighter);
+      pointer-events: none;
+      left: var(--drag-line-left);
+    }
+
+    &.dragover__top--sibling::before,
+    &.dragover__top--child::before {
+      top: -4px;
+    }
+
+    &.dragover__bottom--sibling::before,
+    &.dragover__bottom--child::before {
+      top: auto;
+      bottom: -4px;
+    }
+
+    &.dragover__top--sibling::after,
+    &.dragover__top--child::after {
+      top: -4px;
+    }
+
+    &.dragover__bottom--sibling::after,
+    &.dragover__bottom--child::after {
+      bottom: -4px;
     }
 
     &.sb {

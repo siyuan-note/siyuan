@@ -91,11 +91,7 @@ func QueryRootBlockByCondition(condition string, limit int) (ret []*Block) {
 }
 
 func (block *Block) IsContainerBlock() bool {
-	switch block.Type {
-	case "d", "b", "l", "i", "s":
-		return true
-	}
-	return false
+	return treenode.IsContainerType(block.Type)
 }
 
 func queryBlockChildrenIDs(id string) (ret []string) {

@@ -450,9 +450,10 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         const colData = getFieldsByData(avResponse.data).find((item) => item.id === colId);
         currentTemplate = colData?.calc?.template || "";
     }
-    // 提交模板统计：将底部计算切换为 Template 并写入模板内容
+    // 提交模板统计：将底部计算切换为 Template 并写入模板内容；模板为空时恢复为“无”
     const submitTemplate = (templateContent: string) => {
-        const doData: IAVCalc = {operator: "Template", template: templateContent};
+        const isEmpty = "" === templateContent.trim();
+        const doData: IAVCalc = isEmpty ? {operator: ""} : {operator: "Template", template: templateContent};
         const undoData: IAVCalc = {operator: oldOperator || ""};
         if (oldOperator === "Template" && currentTemplate) {
             undoData.template = currentTemplate;

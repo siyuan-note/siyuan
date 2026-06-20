@@ -24,10 +24,16 @@ export const getDiagramBlock = (element: HTMLElement) => {
  */
 export const previewDiagram = (diagramElement: HTMLElement) => {
     addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image").then(async () => {
-        const renderElement = diagramElement.querySelector('[contenteditable="false"]') || diagramElement;
+        const type = diagramElement.getAttribute("data-subtype");
+        let renderElement = diagramElement.querySelector('[contenteditable="false"] svg');
+        if (type === "plantuml") {
+            renderElement = diagramElement.querySelector("object");
+        } else if (type === "echarts") {
+            renderElement = diagramElement.querySelector("canvas");
+        }
         let blob: Blob;
         try {
-            blob = await window.htmlToImage.toBlob(renderElement);
+            blob = await window.htmlToImage.toBlob(renderElement, {backgroundColor: "#fff"});
         } catch (e) {
             return;
         }

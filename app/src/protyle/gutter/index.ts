@@ -195,7 +195,14 @@ export class Gutter {
                 }
             }
             if (isBlockDrag) {
-                window.siyuan.dragTitle = getContenteditableElement(selectElements[0] as HTMLElement)?.textContent?.trim() || "";
+                const text = getContenteditableElement(selectElements[0] as HTMLElement)?.textContent?.trim() || "";
+                // 数据库块若无标题，优先用当前视图名，最后兜底为"数据库"
+                let title = text;
+                if (!title && buttonElement.getAttribute("data-type") === "NodeAttributeView") {
+                    title = (selectElements[0] as HTMLElement)?.querySelector(".av__views .item--focus")?.textContent?.trim() ||
+                        window.siyuan.languages.database;
+                }
+                window.siyuan.dragTitle = title;
             }
             buttonElement.style.opacity = "0.38";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;

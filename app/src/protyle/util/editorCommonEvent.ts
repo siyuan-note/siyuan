@@ -769,11 +769,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
-        const targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top");
+        const targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover__bottom--sibling, .dragover__top--sibling, .dragover__bottom--child, .dragover__top--child");
         if (targetElement) {
             targetElement.classList.remove("dragover");
             targetElement.removeAttribute("select-start");
             targetElement.removeAttribute("select-end");
+            targetElement.style.backgroundColor = "";
         }
         if (gutterType) {
             // gutter 或反链面板拖拽
@@ -851,7 +852,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 hideElements(["gutter"], protyle);
 
                 const targetClass = targetElement.className.split(" ");
-                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
+                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right",
+                    "dragover__bottom--sibling", "dragover__top--sibling", "dragover__bottom--child", "dragover__top--child");
+                targetElement.style.removeProperty("--drag-indent");
+                targetElement.style.removeProperty("--drag-guides");
+                targetElement.style.removeProperty("--drag-line-left");
+                targetElement.style.removeProperty("--drag-base-bg");
+                targetElement.style.backgroundColor = "";
 
                 if (targetElement.classList.contains("av__cell")) {
                     const blockElement = hasClosestBlock(targetElement);
@@ -1055,19 +1062,38 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else if (sourceElements.length > 0) {
-                    if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
+                    const isChild = targetClass.some((c: string) => c.indexOf("--child") > -1);
+                    const isBottom = targetClass.some((c: string) => c.indexOf("dragover__bottom") === 0);
+
+                    if (isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                        const nestedList = Array.from(targetElement.children).find(c => c.classList.contains("list"));
+                        let nestedTarget: Element;
+                        if (nestedList) {
+                            const liChildren = Array.from(nestedList.children).filter(c => c.classList.contains("li"));
+                            if (isBottom) {
+                                nestedTarget = liChildren.length > 0 ? liChildren[liChildren.length - 1] : null;
+                            } else {
+                                nestedTarget = liChildren.length > 0 ? liChildren[0] : null;
+                            }
+                        }
+                        if (nestedTarget) {
+                            dragSame(protyle, sourceElements, nestedTarget, isBottom, event.ctrlKey);
+                        } else {
+                            dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
+                        }
+                    } else if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
                         if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
                             // Mac 上 ⌘ 无法进行拖拽
                             dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), event.ctrlKey);
                         } else {
-                            dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"), "row", event.ctrlKey);
+                            dragSb(protyle, sourceElements, targetElement, isBottom, "row", event.ctrlKey);
                         }
                     } else {
                         if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
                             dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), "col", event.ctrlKey);
                         } else {
-                            dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"), event.ctrlKey);
+                            dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
                         }
                     }
 
@@ -1264,8 +1290,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement.style.opacity = "";
             window.siyuan.dragElement = undefined;
         }
+        // Clean up all drag indicators unconditionally after drop/cancel
+        editorElement.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover").forEach((item: HTMLElement) => {
+            item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
+            item.style.removeProperty("--drag-indent");
+            item.style.removeProperty("--drag-guides");
+            item.style.removeProperty("--drag-line-left");
+            item.style.removeProperty("--drag-base-bg");
+            item.style.backgroundColor = "";
+        });
     });
     let dragoverElement: Element;
+    let dragIsChild = false;
     let disabledPosition: string;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
@@ -1513,13 +1549,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
+        // Redirect to the .li ancestor so same-target check uses consistent element
+        if (targetElement.getAttribute("data-type") !== "NodeListItem" &&
+            targetElement.parentElement?.getAttribute("data-type") === "NodeListItem") {
+            targetElement = targetElement.parentElement as HTMLElement;
+        }
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
-            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
+                item.style.removeProperty("--drag-indent");
+                item.style.removeProperty("--drag-guides");
+                item.style.removeProperty("--drag-line-left");
+                item.style.removeProperty("--drag-base-bg");
+                item.style.backgroundColor = "";
             });
             // 文档树拖拽限制
             if (fileTreeIds.indexOf("-") > -1 && isNotAvItem) {
@@ -1539,13 +1585,37 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 忘记为什么要限定文档树的拖拽了，先放开 https://github.com/siyuan-note/siyuan/pull/13284#issuecomment-2503853135
             if (targetElement.getAttribute("data-type") === "NodeListItem") {
-                if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                    targetElement.classList.add("dragover__bottom");
-                    addDragover(targetElement);
-                } else if (!targetElement.classList.contains("av__row--header")) {
-                    targetElement.classList.add("dragover__top");
-                    addDragover(targetElement);
+                const contentBlock = Array.from(targetElement.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
+                const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
+                const depth = getListDepth(targetElement);
+                const isRTL = getComputedStyle(targetElement).direction === "rtl";
+                const offsetX = isRTL ? (nodeRect.right - event.clientX) : (event.clientX - nodeRect.left);
+                // Hysteresis: avoid flickering at level boundary
+                const isChild = dragIsChild ? offsetX >= indent * 0.3 : offsetX >= indent * 0.7;
+                dragIsChild = isChild;
+                const position = event.clientY > nodeRect.top + nodeRect.height / 2 ? "bottom" : "top";
+                const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
+
+                targetElement.style.setProperty("--drag-indent", `${indent}px`);
+                targetElement.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
+
+                const computedColor = getComputedStyle(targetElement).getPropertyValue("--b3-theme-primary-lighter").trim();
+                const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
+
+                let guides = "";
+                for (let n = 1; n <= depth; n++) {
+                    if (guides) {
+                        guides += ", ";
+                    }
+                    const opacity = depth <= 1 ? 0.55 : 1 - (n - 1) / (depth - 1) * 0.65;
+                    guides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
                 }
+                targetElement.style.setProperty("--drag-guides", guides || "none");
+                targetElement.style.setProperty("--drag-base-bg",
+                    isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)` : "transparent");
+
+                targetElement.classList.add(className);
+                highlightByLevel(editorElement, targetElement);
                 return;
             }
 
@@ -1621,8 +1691,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (fileTreeIds.indexOf("-") > -1) {
             if (fileTreeIds.split(",").includes(protyle.block.rootID) && isNotAvItem && event.altKey) {
                 dragoverElement = undefined;
-                editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+                editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
                     item.removeAttribute("select-start");
                     item.removeAttribute("select-end");
                 });
@@ -1710,8 +1780,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         counter--;
         if (counter === 0) {
-            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
             });
             dragoverElement = undefined;
             hideDragTip();
@@ -1727,9 +1797,81 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
             document.onmousemove = null;
         }
+        // Clean up all drag indicators on cancel
+        editorElement.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover").forEach((item: HTMLElement) => {
+            item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
+            item.style.removeProperty("--drag-indent");
+            item.style.removeProperty("--drag-guides");
+            item.style.removeProperty("--drag-line-left");
+            item.style.removeProperty("--drag-base-bg");
+            item.style.backgroundColor = "";
+        });
+        dragoverElement = undefined;
         hideDragTip();
         window.siyuan.dragTitle = "";
     });
+    // Fallback: document-level cleanup in case dragend doesn't bubble
+    document.addEventListener("dragend", () => {
+        document.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover").forEach((item: HTMLElement) => {
+            item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
+            item.style.removeProperty("--drag-indent");
+            item.style.removeProperty("--drag-guides");
+            item.style.removeProperty("--drag-line-left");
+            item.style.removeProperty("--drag-base-bg");
+            item.style.backgroundColor = "";
+        });
+    });
+};
+
+const getListDepth = (liElement: Element): number => {
+    let depth = 0;
+    let list = liElement.parentElement;
+    while (list && list.classList.contains("list")) {
+        const parentLi = list.parentElement;
+        if (parentLi && parentLi.classList.contains("li")) {
+            depth++;
+            list = parentLi.parentElement;
+        } else {
+            break;
+        }
+    }
+    return depth;
+};
+
+const parseHexColor = (color: string): { r: number, g: number, b: number } | null => {
+    if (!color) return null;
+    const hexMatch = color.match(/^#([0-9a-f]{3,8})$/i);
+    if (hexMatch) {
+        let hex = hexMatch[1];
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        if (hex.length >= 6) {
+            return {
+                r: parseInt(hex.slice(0, 2), 16),
+                g: parseInt(hex.slice(2, 4), 16),
+                b: parseInt(hex.slice(4, 6), 16),
+            };
+        }
+    }
+    const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (rgbMatch) {
+        return {
+            r: parseInt(rgbMatch[1]),
+            g: parseInt(rgbMatch[2]),
+            b: parseInt(rgbMatch[3]),
+        };
+    }
+    return null;
+};
+
+const highlightByLevel = (editorElement: HTMLElement, liElement: HTMLElement) => {
+    editorElement.querySelectorAll(".dragover").forEach((item: HTMLElement) => {
+        item.classList.remove("dragover");
+        item.style.backgroundColor = "";
+    });
+    liElement.classList.add("dragover");
+    liElement.style.backgroundColor = "var(--b3-theme-primary-lightest)";
 };
 
 const addDragover = (element: HTMLElement) => {
@@ -1744,7 +1886,12 @@ const addDragover = (element: HTMLElement) => {
 // https://github.com/siyuan-note/siyuan/issues/12651
 const clearDragoverElement = (element: Element) => {
     if (element) {
-        element.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+        element.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
+        (element as HTMLElement).style.removeProperty("--drag-indent");
+        (element as HTMLElement).style.removeProperty("--drag-guides");
+        (element as HTMLElement).style.removeProperty("--drag-line-left");
+        (element as HTMLElement).style.removeProperty("--drag-base-bg");
+        (element as HTMLElement).style.backgroundColor = "";
         element = undefined;
     }
 };

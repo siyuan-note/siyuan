@@ -774,7 +774,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             targetElement.classList.remove("dragover");
             targetElement.removeAttribute("select-start");
             targetElement.removeAttribute("select-end");
-            targetElement.style.backgroundColor = "";
+            (targetElement as HTMLElement).style.backgroundColor = "";
         }
         if (gutterType) {
             // gutter 或反链面板拖拽
@@ -854,11 +854,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const targetClass = targetElement.className.split(" ");
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right",
                     "dragover__bottom--sibling", "dragover__top--sibling", "dragover__bottom--child", "dragover__top--child");
-                targetElement.style.removeProperty("--drag-indent");
-                targetElement.style.removeProperty("--drag-guides");
-                targetElement.style.removeProperty("--drag-line-left");
-                targetElement.style.removeProperty("--drag-base-bg");
-                targetElement.style.backgroundColor = "";
+                (targetElement as HTMLElement).style.removeProperty("--drag-indent");
+                (targetElement as HTMLElement).style.removeProperty("--drag-guides");
+                (targetElement as HTMLElement).style.removeProperty("--drag-line-left");
+                (targetElement as HTMLElement).style.removeProperty("--drag-base-bg");
+                (targetElement as HTMLElement).style.backgroundColor = "";
 
                 if (targetElement.classList.contains("av__cell")) {
                     const blockElement = hasClosestBlock(targetElement);
@@ -1291,7 +1291,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
         }
         // Clean up all drag indicators unconditionally after drop/cancel
-        editorElement.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover").forEach((item: HTMLElement) => {
+        document.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
             item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
             item.style.removeProperty("--drag-indent");
             item.style.removeProperty("--drag-guides");
@@ -1557,7 +1557,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
-            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child").forEach((item: HTMLElement) => {
+            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
@@ -1596,8 +1596,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const position = event.clientY > nodeRect.top + nodeRect.height / 2 ? "bottom" : "top";
                 const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
 
-                targetElement.style.setProperty("--drag-indent", `${indent}px`);
-                targetElement.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
+                const htmlTarget = targetElement as HTMLElement;
+                htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
+                htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
 
                 const computedColor = getComputedStyle(targetElement).getPropertyValue("--b3-theme-primary-lighter").trim();
                 const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
@@ -1610,12 +1611,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const opacity = depth <= 1 ? 0.55 : 1 - (n - 1) / (depth - 1) * 0.65;
                     guides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
                 }
-                targetElement.style.setProperty("--drag-guides", guides || "none");
-                targetElement.style.setProperty("--drag-base-bg",
+                htmlTarget.style.setProperty("--drag-guides", guides || "none");
+                htmlTarget.style.setProperty("--drag-base-bg",
                     isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)` : "transparent");
 
-                targetElement.classList.add(className);
-                highlightByLevel(editorElement, targetElement);
+                htmlTarget.classList.add(className);
+                highlightByLevel(editorElement, htmlTarget);
                 return;
             }
 
@@ -1691,7 +1692,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (fileTreeIds.indexOf("-") > -1) {
             if (fileTreeIds.split(",").includes(protyle.block.rootID) && isNotAvItem && event.altKey) {
                 dragoverElement = undefined;
-                editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child").forEach((item: HTMLElement) => {
+                editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
                     item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
                     item.removeAttribute("select-start");
                     item.removeAttribute("select-end");
@@ -1780,7 +1781,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         counter--;
         if (counter === 0) {
-            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child").forEach((item: HTMLElement) => {
+            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right", "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
             });
             dragoverElement = undefined;
@@ -1812,7 +1813,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     });
     // Fallback: document-level cleanup in case dragend doesn't bubble
     document.addEventListener("dragend", () => {
-        document.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover").forEach((item: HTMLElement) => {
+        document.querySelectorAll(".dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
             item.classList.remove("dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child", "dragover");
             item.style.removeProperty("--drag-indent");
             item.style.removeProperty("--drag-guides");
@@ -1868,10 +1869,8 @@ const parseHexColor = (color: string): { r: number, g: number, b: number } | nul
 const highlightByLevel = (editorElement: HTMLElement, liElement: HTMLElement) => {
     editorElement.querySelectorAll(".dragover").forEach((item: HTMLElement) => {
         item.classList.remove("dragover");
-        item.style.backgroundColor = "";
     });
     liElement.classList.add("dragover");
-    liElement.style.backgroundColor = "var(--b3-theme-primary-lightest)";
 };
 
 const addDragover = (element: HTMLElement) => {

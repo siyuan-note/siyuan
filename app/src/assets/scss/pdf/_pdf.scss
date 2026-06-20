@@ -137,7 +137,7 @@
 
 #sidebarContainer {
   position: absolute;
-  top: 30px;
+  top: 42px;
   bottom: 0;
   width: var(--sidebar-width);
   visibility: hidden;
@@ -175,7 +175,7 @@
 }
 
 #sidebarContent {
-  top: 30px;
+  top: 42px;
   bottom: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
@@ -188,7 +188,7 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   position: absolute;
-  top: 30px;
+  top: 42px;
   right: 0;
   bottom: 0;
   left: 0;
@@ -214,14 +214,15 @@
 #toolbarSidebar,
 #toolbarViewer {
   width: 100%;
-  height: 30px;
+  height: 42px;
   display: flex;
   padding-left: 8px;
   box-sizing: border-box;
+  align-items: center;
 }
 
 #toolbarViewer #numPages {
-  line-height: 30px;
+  line-height: 42px;
   padding-left: 4px;
 }
 
@@ -238,7 +239,6 @@
     content: "";
     width: 1px;
     height: 100%;
-    background-color: var(--b3-border-color);
     position: absolute;
     top: 0;
     left: 3px;
@@ -319,7 +319,7 @@
 .findbar {
   left: 40px;
   position: absolute;
-  top: 30px;
+  top: 42px;
   padding: 4px 8px;
   display: flex;
   align-items: center;
@@ -335,7 +335,7 @@
 .secondaryToolbar {
   right: 4px;
   position: absolute;
-  top: 30px;
+  top: 42px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   // 需高于 pdf 中的链接
@@ -372,10 +372,13 @@
   color: var(--b3-theme-on-surface);
   overflow: initial;
   align-self: center;
+  border-radius: var(--b3-border-radius);
+  transition: var(--b3-background-transition) var(--b3-color-transition);
 
-  &:hover,
-  &:focus {
+  &:hover:not([disabled]),
+  &:focus:not([disabled]) {
     color: var(--b3-theme-on-background);
+    background-color: var(--b3-list-icon-hover);
   }
 
   & > svg {
@@ -388,9 +391,12 @@
   }
 }
 
-.toolbarButton.toggled,
 .secondaryToolbarButton.toggled {
   color: var(--b3-theme-primary);
+}
+
+.toolbarButton.toggled {
+  background-color: var(--b3-list-icon-hover);
 }
 
 .secondaryToolbarButton {
@@ -407,13 +413,11 @@
 .dropdownToolbarButton {
   --scale-select-width: 140px;
   width: var(--scale-select-width);
-  margin: 2px 8px 2px 0;
+  margin-right: 8px;
+  align-self: center;
 
   select {
     width: inherit;
-    min-width: auto;
-    padding: 0 8px;
-    height: 26px;
   }
 }
 
@@ -440,8 +444,7 @@
   min-width: 16px;
   text-align: right;
   width: 48px;
-  padding: 1px 8px;
-  margin: 2px 0;
+  align-self: center;
 }
 
 .toolbarField.pageNumber::-webkit-inner-spin-button,
@@ -752,7 +755,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   background: none repeat scroll 0 0 rgba(255, 255, 255, 1);
   border: 1px solid rgba(102, 102, 102, 1);
   position: fixed;
-  top: 30px;
+  top: 42px;
   right: 0;
   bottom: 0;
   font-size: 10px;

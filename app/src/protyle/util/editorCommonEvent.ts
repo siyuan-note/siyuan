@@ -1583,7 +1583,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             // 忘记为什么要限定文档树的拖拽了，先放开 https://github.com/siyuan-note/siyuan/pull/13284#issuecomment-2503853135
-            if (targetElement.getAttribute("data-type") === "NodeListItem" && liTarget) {
+            if (liTarget) {
                 const htmlTarget = liTarget as HTMLElement;
                 const nodeId = htmlTarget.getAttribute("data-node-id");
                 // Cache expensive computations per target element (never changes while hovering same element)
@@ -1613,7 +1613,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const liRect = htmlTarget.getBoundingClientRect();
                 const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
                 const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
-                const isChild = offsetX >= indent * 0.5;
+                const isChild = offsetX >= indent;
                 const position = event.clientY > liRect.top + liRect.height / 2 ? "bottom" : "top";
                 const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
 

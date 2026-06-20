@@ -1301,7 +1301,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         });
     });
     let dragoverElement: Element;
-    let dragIsChild = false;
+    let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, siblingGuides: string, childGuides: string };
     let disabledPosition: string;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
@@ -1585,37 +1585,44 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 忘记为什么要限定文档树的拖拽了，先放开 https://github.com/siyuan-note/siyuan/pull/13284#issuecomment-2503853135
             if (targetElement.getAttribute("data-type") === "NodeListItem") {
-                const contentBlock = Array.from(targetElement.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
-                const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
-                const depth = getListDepth(targetElement);
+                const htmlTarget = targetElement as HTMLElement;
+                const nodeId = htmlTarget.getAttribute("data-node-id");
+                // Cache expensive computations per target element (never changes while hovering same element)
+                if (!dragCache || dragCache.nodeId !== nodeId) {
+                    const contentBlock = Array.from(targetElement.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
+                    const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
+                    const depth = getListDepth(targetElement);
+                    const computedColor = getComputedStyle(targetElement).getPropertyValue("--b3-theme-primary-lighter").trim();
+                    const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
+                    let siblingGuides = "";
+                    for (let n = 1; n <= depth; n++) {
+                        if (siblingGuides) siblingGuides += ", ";
+                        const opacity = depth <= 1 ? 0.55 : 1 - (n - 1) / (depth - 1) * 0.65;
+                        siblingGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
+                    }
+                    let childGuides = "";
+                    const childDepth = depth + 1;
+                    for (let n = 1; n <= childDepth; n++) {
+                        if (childGuides) childGuides += ", ";
+                        const opacity = childDepth <= 1 ? 0.55 : 1 - (n - 1) / (childDepth - 1) * 0.65;
+                        childGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
+                    }
+                    dragCache = {nodeId, indent, rgb, siblingGuides: siblingGuides || "none", childGuides: childGuides || "none"};
+                }
+                const {indent, rgb, siblingGuides, childGuides} = dragCache;
+
                 const isRTL = getComputedStyle(targetElement).direction === "rtl";
                 const offsetX = isRTL ? (nodeRect.right - event.clientX) : (event.clientX - nodeRect.left);
-                // Hysteresis: avoid flickering at level boundary
-                const isChild = dragIsChild ? offsetX >= indent * 0.3 : offsetX >= indent * 0.7;
-                dragIsChild = isChild;
+                const isChild = offsetX >= indent * 0.5;
                 const position = event.clientY > nodeRect.top + nodeRect.height / 2 ? "bottom" : "top";
                 const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
 
-                const htmlTarget = targetElement as HTMLElement;
+                htmlTarget.classList.add(className);
                 htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
                 htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
-
-                const computedColor = getComputedStyle(targetElement).getPropertyValue("--b3-theme-primary-lighter").trim();
-                const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
-
-                let guides = "";
-                for (let n = 1; n <= depth; n++) {
-                    if (guides) {
-                        guides += ", ";
-                    }
-                    const opacity = depth <= 1 ? 0.55 : 1 - (n - 1) / (depth - 1) * 0.65;
-                    guides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
-                }
-                htmlTarget.style.setProperty("--drag-guides", guides || "none");
+                htmlTarget.style.setProperty("--drag-guides", isChild ? childGuides : siblingGuides);
                 htmlTarget.style.setProperty("--drag-base-bg",
                     isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)` : "transparent");
-
-                htmlTarget.classList.add(className);
                 highlightByLevel(editorElement, htmlTarget);
                 return;
             }

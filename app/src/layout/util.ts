@@ -190,7 +190,6 @@ export const exportLayout = async (options: {
     }
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {
-        options.cb();
         return;
     }
     const layoutJSON: any = {

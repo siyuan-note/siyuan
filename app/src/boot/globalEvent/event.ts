@@ -67,6 +67,12 @@ export const initWindowEvent = (app: App) => {
         }
         const fileElement = hasClosestByClassName(event.target, "sy__file");
         const protyleElement = hasClosestByClassName(event.target, "protyle", true);
+        // 光标不在编辑器也不在文档树内时，隐藏拖拽提示（避免卡在无效区域）
+        if (!fileElement && !protyleElement) {
+            document.querySelector(".drag-tip")?.remove();
+            stopScrollAnimation();
+            return;
+        }
         if (!scrollTarget) {
             scrollTarget = fileElement || protyleElement;
         }

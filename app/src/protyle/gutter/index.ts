@@ -39,6 +39,7 @@ import {getContenteditableElement, getParentBlock, getTopAloneElement, isNotEdit
 import * as dayjs from "dayjs";
 import {fetchPost} from "../../util/fetch";
 import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
+import {transparentImgSrc} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -178,7 +179,7 @@ export class Gutter {
             const isBlockDrag = !buttonElement.dataset.rowId;
             if (isBlockDrag && !window.siyuan.touchDragActive) {
                 const transparentImg = new Image();
-                transparentImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+                transparentImg.src = transparentImgSrc;
                 event.dataTransfer.setDragImage(transparentImg, 0, 0);
                 setTimeout(() => {
                     ghostElement.remove();

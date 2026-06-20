@@ -184,6 +184,17 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
         }
         html = protyle.lute.SpinBlockDOM(html);
+        // 列表项内不允许 SpinBlockDOM 产生新的列表结构 https://github.com/siyuan-note/siyuan/issues/17890
+        if (blockElement.closest('[data-type="NodeListItem"]')) {
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = html;
+            const firstChild = tempDiv.firstElementChild;
+            if (firstChild?.getAttribute("data-type") === "NodeList" ||
+                firstChild?.getAttribute("data-type") === "NodeListItem") {
+                const p = firstChild.querySelector('[data-type="NodeParagraph"]');
+                if (p) html = p.outerHTML;
+            }
+        }
     }
     // 在数学公式输入框中撤销到最后一步，再继续撤销会撤销编辑器正文内容，从而出发 input 事件
     hideElements(["util"], protyle, true);

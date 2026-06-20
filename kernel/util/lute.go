@@ -85,6 +85,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetDataTask(true)
 	ret.SetArbitraryTaskListItemMarker(true)
 	ret.SetExportNormalizeTaskListMarker(false) // 只有导出 Markdown 的场景才将其设置为 true
+	ret.SetDisableListItemNestedList(true)      // 禁止列表项下直接嵌套子列表
 	return
 }
 

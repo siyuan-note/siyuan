@@ -99,6 +99,7 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 		GroupCalc:        view.GroupCalc,
 		GroupFolded:      view.GroupFolded,
 		GroupHidden:      view.GroupHidden,
+		PageSize:         view.PageSize,
 		ShowIcon:         showIcon,
 		WrapField:        wrapField,
 	}

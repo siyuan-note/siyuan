@@ -92,14 +92,14 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 		return
 	}
 
-	// 渲染分组视图
-	if !ignoreRows {
-		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging)
+	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
+	if !ignoreRows || len(view.Groups) > 0 {
+		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, ignoreRows)
 	}
 	return
 }
 
-func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]any) (err error) {
+func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]any, ignoreRows bool) (err error) {
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		if view.LayoutType == av.LayoutTypeKanban {
@@ -119,8 +119,9 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		}
 	}
 
-	// 当前日期可能会变，所以如果是按日期分组则需要重新生成分组
-	if isGroupByDate(view) {
+	// 当前日期可能会变，所以如果是按日期分组则需要重新生成分组。
+	// ignoreRows 时跳过重新生成（需要行数据），沿用已保存的分组。
+	if !ignoreRows && isGroupByDate(view) {
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != createdDate {
 			genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
@@ -131,8 +132,9 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		}
 	}
 
-	// 如果是按模板分组则需要重新生成分组
-	if isGroupByTemplate(attrView, view) {
+	// 如果是按模板分组则需要重新生成分组。
+	// ignoreRows 时跳过重新生成（需要行数据），沿用已保存的分组。
+	if !ignoreRows && isGroupByTemplate(attrView, view) {
 		genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
@@ -140,8 +142,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		}
 	}
 
-	// 渲染分组视图
+	// 渲染分组视图。ignoreRows 时若已存在分组则渲染元数据供面板使用，若无分组则返回（生成需要行数据）
 	if nil == view.Groups {
+		if ignoreRows {
+			return
+		}
 		genAttrViewGroups(view, attrView)
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
@@ -192,12 +197,14 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			}
 		}
 
-		err = renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, false)
+		err = renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, ignoreRows)
 		if nil != err {
 			return
 		}
 
-		hideEmptyGroupViews(view, groupViewable)
+		if !ignoreRows {
+			hideEmptyGroupViews(view, groupViewable)
+		}
 		groups = append(groups, groupViewable)
 
 		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）

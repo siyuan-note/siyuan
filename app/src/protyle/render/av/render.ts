@@ -418,15 +418,11 @@ const afterRenderTable = (options: ITableOptions) => {
         if (event.isComposing) {
             return;
         }
-        if (!searchInputElement.textContent.trim()) {
+        if (!searchInputElement.textContent) {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.setProperty("margin-right", "0", "important");
-            const clearElement = searchInputElement.nextElementSibling;
-            if (clearElement) {
-                clearElement.classList.add("fn__none");
-            }
+            searchInputElement.style.marginRight = "0";
         }
     });
     addClearButton({
@@ -438,7 +434,7 @@ const afterRenderTable = (options: ITableOptions) => {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.setProperty("margin-right", "0", "important");
+            searchInputElement.style.marginRight = "0";
             focusBlock(options.blockElement);
             updateSearch(options.blockElement, options.protyle);
             /// #if MOBILE

@@ -1,7 +1,7 @@
 const update = (inputElement: HTMLElement, clearElement: Element, right: number) => {
     let value = "";
     if (inputElement.tagName === "DIV") {
-        value = inputElement.textContent.trim();
+        value = inputElement.textContent;
     } else {
         value = (inputElement as HTMLInputElement).value;
     }
@@ -10,9 +10,6 @@ const update = (inputElement: HTMLElement, clearElement: Element, right: number)
         clearElement.classList.add("fn__none");
         if (typeof right === "number") {
             inputElement.style.paddingRight = inputElement.dataset.oldPaddingRight;
-            if (inputElement.getAttribute("contenteditable")) {
-                inputElement.style.removeProperty("margin-right");
-            }
         }
     } else {
         clearElement.classList.remove("fn__none");

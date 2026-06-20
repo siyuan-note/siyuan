@@ -512,6 +512,20 @@ func moveBlock(c *gin.Context) {
 		return
 	}
 
+	// 仅靠 parentID 定位目标时（无 previousID），目标必须是容器块，否则非法嵌套
+	if "" == previousID && "" != parentID {
+		if err := treenode.CheckListItemNesting(parentID, id); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if err := treenode.CheckContainerParent(parentID); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+
 	transactions := []*model.Transaction{
 		{
 			DoOperations: []*model.Operation{
@@ -547,6 +561,12 @@ func appendBlock(c *gin.Context) {
 	dataType := arg["dataType"].(string)
 	parentID := arg["parentID"].(string)
 	if util.InvalidIDPattern(parentID, ret) {
+		return
+	}
+	// append 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
+	if err := treenode.CheckContainerParent(parentID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
 		return
 	}
 	if "markdown" == dataType {
@@ -599,6 +619,12 @@ func batchAppendBlock(c *gin.Context) {
 		if util.InvalidIDPattern(parentID, ret) {
 			return
 		}
+		// append 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
+		if err := treenode.CheckContainerParent(parentID); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
 		if "markdown" == dataType {
 			var err error
 			data, err = dataBlockDOM(data, luteEngine)
@@ -640,6 +666,12 @@ func prependBlock(c *gin.Context) {
 	dataType := arg["dataType"].(string)
 	parentID := arg["parentID"].(string)
 	if util.InvalidIDPattern(parentID, ret) {
+		return
+	}
+	// prepend 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
+	if err := treenode.CheckContainerParent(parentID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
 		return
 	}
 	if "markdown" == dataType {
@@ -690,6 +722,12 @@ func batchPrependBlock(c *gin.Context) {
 		dataType := blockMap["dataType"].(string)
 		parentID := blockMap["parentID"].(string)
 		if util.InvalidIDPattern(parentID, ret) {
+			return
+		}
+		// prepend 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
+		if err := treenode.CheckContainerParent(parentID); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
 			return
 		}
 		if "markdown" == dataType {
@@ -747,6 +785,15 @@ func insertBlock(c *gin.Context) {
 	if nil != arg["nextID"] {
 		nextID = arg["nextID"].(string)
 		if "" != nextID && util.InvalidIDPattern(nextID, ret) {
+			return
+		}
+	}
+
+	// 仅靠 parentID 定位目标时（无 previousID/nextID），目标必须是容器块，否则非法嵌套
+	if "" != parentID && "" == previousID && "" == nextID {
+		if err := treenode.CheckContainerParent(parentID); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
 			return
 		}
 	}
@@ -916,6 +963,15 @@ func batchInsertBlock(c *gin.Context) {
 		if nil != blockMap["nextID"] {
 			nextID = blockMap["nextID"].(string)
 			if "" != nextID && util.InvalidIDPattern(nextID, ret) {
+				return
+			}
+		}
+
+		// 仅靠 parentID 定位目标时（无 previousID/nextID），目标必须是容器块，否则非法嵌套
+		if "" != parentID && "" == previousID && "" == nextID {
+			if err := treenode.CheckContainerParent(parentID); err != nil {
+				ret.Code = -1
+				ret.Msg = err.Error()
 				return
 			}
 		}

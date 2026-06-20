@@ -164,6 +164,13 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 		nextID = v
 	}
 
+	// 仅靠 parentID 定位目标时，目标必须是容器块，否则非法嵌套
+	if parentID != "" && previousID == "" && nextID == "" {
+		if err := treenode.CheckContainerParent(parentID); err != nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+		}
+	}
+
 	if dataType == "markdown" {
 		var err error
 		data, err = markdownToBlockDOM(data)
@@ -210,6 +217,10 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 	if parentID == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID is required"}}, IsError: true}, nil
 	}
+	// append 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
+	if err := treenode.CheckContainerParent(parentID); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 
 	if dataType == "markdown" {
 		var err error
@@ -244,6 +255,10 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 	parentID, _ := args["parentID"].(string)
 	if parentID == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID is required"}}, IsError: true}, nil
+	}
+	// prepend 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
+	if err := treenode.CheckContainerParent(parentID); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 	}
 
 	if dataType == "markdown" {
@@ -359,6 +374,16 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID is required"}}, IsError: true}, nil
 	}
 	previousID, _ := args["previousID"].(string)
+
+	// 仅靠 parentID 定位目标时（无 previousID），目标必须是容器块，否则 doMove parent-only 分支会形成非法嵌套
+	if previousID == "" {
+		if err := treenode.CheckListItemNesting(parentID, id); err != nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+		}
+		if err := treenode.CheckContainerParent(parentID); err != nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+		}
+	}
 
 	transactions := []*model.Transaction{{
 		DoOperations: []*model.Operation{{

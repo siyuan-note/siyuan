@@ -23,54 +23,54 @@
   [data-node-id] {
     position: relative;
 
-	    &.dragover {
-	      &__left::after,
-	      &__right::after,
-	      &__top::after,
-	      &__bottom::after {
-	        content: '';
-	        position: absolute;
-	        background-color: var(--b3-theme-primary-lighter);
-	        pointer-events: none;
-	      }
+    &.dragover {
+      &__left::after,
+      &__right::after,
+      &__top::after,
+      &__bottom::after {
+        content: '';
+        position: absolute;
+        background-color: var(--b3-theme-primary-lighter);
+        pointer-events: none;
+      }
 
-	      &__top::after,
-	      &__bottom::after {
-	        left: 0;
-	        right: 0;
-	        height: 4px;
-	      }
+      &__top::after,
+      &__bottom::after {
+        left: 0;
+        right: 0;
+        height: 4px;
+      }
 
-	      &__top::after {
-	        top: -4px;
-	      }
+      &__top::after {
+        top: -4px;
+      }
 
-	      &__bottom::after {
-	        bottom: -4px;
-	        top: auto;
-	      }
+      &__bottom::after {
+        bottom: -4px;
+        top: auto;
+      }
 
-	      &__left::after,
-	      &__right::after {
-	        top: 0;
-	        bottom: 0;
-	        width: 4px;
-	      }
+      &__left::after,
+      &__right::after {
+        top: 0;
+        bottom: 0;
+        width: 4px;
+      }
 
-	      &__left::after {
-	        left: -4px;
-	      }
+      &__left::after {
+        left: -4px;
+      }
 
-	      &__right::after {
-	        right: -4px;
-	      }
+      &__right::after {
+        right: -4px;
+      }
 
-	      &.li,
-	      &.list {
-	        background-color: var(--b3-theme-primary-lightest);
-	        border-radius: 4px;
-	      }
-	    }
+      &.li,
+      &.list {
+        background-color: var(--b3-theme-primary-lightest);
+        border-radius: 4px;
+      }
+    }
 
     &[custom-riff-decks] {
       box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;

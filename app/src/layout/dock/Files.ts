@@ -60,7 +60,7 @@ const renderDragTip = () => {
             dragTipState.element.style.left = "0";
             dragTipState.titleElement = document.createElement("div");
             dragTipState.titleElement.className = "drag-tip__title";
-            dragTipState.titleElement.style.cssText = "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--b3-theme-on-background);";
+            dragTipState.titleElement.style.cssText = "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--b3-tooltips-color);";
             dragTipState.actionElement = document.createElement("div");
             dragTipState.actionElement.className = "drag-tip__action";
             dragTipState.actionElement.style.cssText = "color:var(--b3-tooltips-second-color);font-size:12px;";

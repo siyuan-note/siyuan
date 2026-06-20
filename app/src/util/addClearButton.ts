@@ -10,6 +10,9 @@ const update = (inputElement: HTMLElement, clearElement: Element, right: number)
         clearElement.classList.add("fn__none");
         if (typeof right === "number") {
             inputElement.style.paddingRight = inputElement.dataset.oldPaddingRight;
+            if (inputElement.getAttribute("contenteditable")) {
+                inputElement.style.removeProperty("margin-right");
+            }
         }
     } else {
         clearElement.classList.remove("fn__none");
@@ -47,5 +50,14 @@ export const addClearButton = (options: {
     options.inputElement.addEventListener("input", () => {
         update(options.inputElement, clearElement, options.right);
     });
+    // contenteditable 剪切不会触发 input
+    if (options.inputElement.getAttribute("contenteditable")) {
+        options.inputElement.addEventListener("cut", () => {
+            // cut 事件在删除选中文本之前触发，需要延迟执行
+            setTimeout(() => {
+                update(options.inputElement, clearElement, options.right);
+            });
+        });
+    }
     update(options.inputElement, clearElement, options.right);
 };

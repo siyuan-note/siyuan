@@ -807,7 +807,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             targetElement.classList.remove("dragover");
             targetElement.removeAttribute("select-start");
             targetElement.removeAttribute("select-end");
-            (targetElement as HTMLElement).style.backgroundColor = "";
         }
         if (gutterType) {
             // gutter 或反链面板拖拽
@@ -891,7 +890,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 (targetElement as HTMLElement).style.removeProperty("--drag-guides");
                 (targetElement as HTMLElement).style.removeProperty("--drag-line-left");
                 (targetElement as HTMLElement).style.removeProperty("--drag-base-bg");
-                (targetElement as HTMLElement).style.backgroundColor = "";
+                (targetElement as HTMLElement).style.removeProperty("--drag-base-bg");
 
                 if (targetElement.classList.contains("av__cell")) {
                     const blockElement = hasClosestBlock(targetElement);
@@ -1943,7 +1942,6 @@ const cleanupDragIndicators = (scope: ParentNode) => {
         item.style.removeProperty("--drag-guides");
         item.style.removeProperty("--drag-line-left");
         item.style.removeProperty("--drag-base-bg");
-        item.style.backgroundColor = "";
     });
 };
 
@@ -2023,7 +2021,6 @@ const clearDragoverElement = (element: Element) => {
         (element as HTMLElement).style.removeProperty("--drag-guides");
         (element as HTMLElement).style.removeProperty("--drag-line-left");
         (element as HTMLElement).style.removeProperty("--drag-base-bg");
-        (element as HTMLElement).style.backgroundColor = "";
         element = undefined;
     }
 };

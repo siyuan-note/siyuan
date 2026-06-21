@@ -868,6 +868,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             operator: getDefaultOperatorByType(type),
                             value: genCellValue(type, ""),
                         };
+                        // 深拷贝旧值用于 undo，撤销时恢复完整筛选状态而非清空全部
+                        const oldFilters = JSON.parse(JSON.stringify(avData.view.filters));
                         getEditableFilters(avData).push(filter);
                         transaction(protyle, [{
                             action: "setAttrViewFilters",
@@ -877,7 +879,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         }], [{
                             action: "setAttrViewFilters",
                             avID,
-                            data: [], // undo 时移除新增条件（简化处理）
+                            data: oldFilters,
                             blockID: blockElement.getAttribute("data-node-id")
                         }]);
                     }

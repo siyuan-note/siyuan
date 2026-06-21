@@ -169,7 +169,7 @@ export const openMenuPanel = (options: {
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : (options.type === "filters" ? 'style="min-width: 340px;max-width: 80vw;width: fit-content;"' : "")}>${html}</div>
+    <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         let closeCB: () => void;
@@ -371,6 +371,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "go-config") {
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getViewHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
@@ -381,6 +382,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "go-properties") {
                     // 复制列后点击返回到属性面板，宽度不一致，需重新计算
                     tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getPropertiesHTML(fields);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
@@ -388,6 +390,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "go-layout") {
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getLayoutHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     bindLayoutEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
@@ -396,6 +399,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSorts") {
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getSortsHTML(fields, data.view.sorts);
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
@@ -462,7 +466,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goFilters") {
                     menuElement.innerHTML = getFiltersHTML(data);
-                    menuElement.setAttribute("style", "min-width: 340px;max-width: 80vw;width: fit-content;");
+                    menuElement.classList.add("av__filter-panel");
                     bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();

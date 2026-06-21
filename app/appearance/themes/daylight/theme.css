@@ -58,7 +58,7 @@
     --b3-list-icon-hover: rgba(33, 34, 36, .1);
 
     /* 菜单 */
-    --b3-menu-background: #f9f9fa;
+    --b3-menu-background: var(--b3-theme-background);
 
     /* 提示 */
     --b3-tooltips-background: #312f35;
@@ -121,8 +121,8 @@
     --b3-highlight-background: #ffff00;
     --b3-highlight-current-background: #ff9632;
 
-    /* 下拉菜单 */
-    --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(95, 99, 104, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
+    /* 下拉菜单：底色与菜单保持一致，避免 select 嵌入菜单时出现色块 */
+    --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(95, 99, 104, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-menu-background);
 
     /* switch */
     --b3-switch-background: #e1e3e1;

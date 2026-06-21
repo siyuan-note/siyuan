@@ -1027,13 +1027,6 @@
         margin-bottom: 0;
       }
 
-      // 筛选面板内的下拉/输入控件统一为菜单底色（与面板背景融合）
-      .av__filter-row .b3-select,
-      .av__filter-row .b3-text-field--text,
-      .av__filter-group-left .b3-select {
-        background-color: var(--b3-menu-background);
-      }
-
       .av__field-wrapper {
         display: flex;
         align-items: center;

@@ -929,6 +929,18 @@
         }
       }
 
+      // “当/且/或”只读标签，盒模型与 b3-select 对齐以保证垂直居中一致
+      .av__filter-label {
+        flex-shrink: 0;
+        height: 28px;
+        line-height: 20px;
+        padding: 4px 0;
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
       .av__filter-group-left {
         flex-shrink: 0;
         display: flex;

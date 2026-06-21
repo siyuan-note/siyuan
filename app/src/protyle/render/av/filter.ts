@@ -218,15 +218,16 @@ export const getFiltersHTML = (data: IAV) => {
         andOrTextWidth = Math.max(andOrTextWidth, measureEl.offsetWidth);
     });
     document.body.removeChild(measureEl);
-    const andOrControlWidth = andOrTextWidth + 28;
+    // 宽度需容纳文字 + b3-select 的左右 padding（8 + 26）+ 余量
+    const andOrControlWidth = andOrTextWidth + 36;
     const genAndOrSelect = (groupPath: string, combination: string) =>
         `<select class="b3-select" data-type="toggleCombination" data-path="${groupPath}" style="width:${andOrControlWidth}px;"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterCombinationAnd}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterCombinationOr}</option></select>`;
 
     const genWhenLabel = () =>
-        `<span class="ft__on-surface" style="width:${andOrControlWidth}px;height:28px;line-height:28px;display:inline-block;">${window.siyuan.languages.filterWhen}</span>`;
+        `<span class="av__filter-label ft__on-surface" style="width:${andOrControlWidth}px;">${window.siyuan.languages.filterWhen}</span>`;
 
     const genAndOrLabel = (combination: string) =>
-        `<span class="ft__on-surface" style="width:${andOrControlWidth}px;height:28px;line-height:28px;display:inline-block;">${combination === "or" ? window.siyuan.languages.filterCombinationOr : window.siyuan.languages.filterCombinationAnd}</span>`;
+        `<span class="av__filter-label ft__on-surface" style="width:${andOrControlWidth}px;">${combination === "or" ? window.siyuan.languages.filterCombinationOr : window.siyuan.languages.filterCombinationAnd}</span>`;
 
     const genNodeHTML = (node: IAVFilter, path: string, depth: number, groupPath: string, groupCombination: string, index: number = 0): string => {
         if (!node) {

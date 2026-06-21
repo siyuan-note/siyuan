@@ -65,11 +65,12 @@
         right: -4px;
       }
 
-      &.li,
-      &.list {
-        background-color: var(--b3-theme-primary-lightest);
-        border-radius: 4px;
-      }
+        &.li,
+        &.list,
+        &.sb {
+          background-color: var(--b3-theme-primary-lightest);
+          border-radius: 4px;
+        }
     }
 
     &[custom-riff-decks] {

@@ -1027,11 +1027,19 @@
         margin-bottom: 0;
       }
 
-      // 筛选面板内的下拉/输入控件统一为菜单底色（与面板背景融合）
+      // 筛选面板内的下拉/输入控件统一为描边卡片样式（与字段选择器一致）
       .av__filter-row .b3-select,
       .av__filter-row .b3-text-field--text,
       .av__filter-group-left .b3-select {
+        border: 1px solid var(--b3-theme-surface-lighter);
+        border-radius: var(--b3-border-radius);
         background-color: var(--b3-menu-background);
+        box-shadow: none;
+
+        &:hover,
+        &:focus {
+          box-shadow: none;
+        }
       }
 
       .av__field-wrapper {
@@ -1047,8 +1055,9 @@
         background-color: var(--b3-menu-background);
       }
 
-      // 字段选择器嵌入描边容器内，去掉自身细线避免双重描边
+      // 字段选择器嵌入描边容器内，去掉自身描边避免双重描边
       .av__field-wrapper .b3-select {
+        border: 0;
         box-shadow: none;
         background-color: transparent;
 
@@ -1060,16 +1069,6 @@
 
       .b3-menu__item.av__filter-row:hover {
         background-color: transparent;
-      }
-
-      .b3-menu__item[data-type="addFilterCondition"]:hover {
-        background-color: transparent !important;
-      }
-
-      .av__filter-group-actions .block__icon[data-type="addFilterCondition"]:hover,
-      .av__filter-group-actions .block__icon[data-type="addFilter"]:hover {
-        background-color: transparent !important;
-        color: var(--b3-theme-on-surface) !important;
       }
 
       .av__filter-value {
@@ -1105,15 +1104,22 @@
         min-width: 60px;
         cursor: pointer;
         overflow: hidden;
-        padding-right: 20px;
-        background: transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%23888" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>') no-repeat right 6px center;
+        gap: 4px;
+        color: var(--b3-theme-on-surface);
 
         .ft__on-surface {
           font-size: 14px;
         }
+
+        &-arrow {
+          flex-shrink: 0;
+          width: 10px;
+          height: 10px;
+        }
       }
 
       .av__select-dropdown {
+        position: fixed;
         width: fit-content;
         min-width: 120px;
         max-height: 240px;

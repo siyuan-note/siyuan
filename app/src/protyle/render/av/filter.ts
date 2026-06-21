@@ -248,8 +248,8 @@ export const getFiltersHTML = (data: IAV) => {
 
             const depthClass = `av__filter-group-children--depth${Math.min(depth, 3)}`;
             const addConditionBtn = depth >= 3
-                ? `<span class="block__icon ariaLabel" data-position="4north" data-type="addFilter" data-path="${path}" aria-label="${window.siyuan.languages.addFilterCondition}"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}</span>`
-                : `<span class="block__icon ariaLabel" data-position="4north" data-type="addFilterCondition" data-path="${path}" data-depth="${depth}" aria-label="${window.siyuan.languages.addFilterCondition}"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}<svg><use xlink:href="#iconDown"></use></svg></span>`;
+                ? `<span class="block__icon block__icon--text ariaLabel" data-position="4north" data-type="addFilter" data-path="${path}" aria-label="${window.siyuan.languages.addFilterCondition}"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}</span>`
+                : `<span class="block__icon block__icon--text ariaLabel" data-position="4north" data-type="addFilterCondition" data-path="${path}" data-depth="${depth}" aria-label="${window.siyuan.languages.addFilterCondition}"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addFilterCondition}<svg><use xlink:href="#iconDown"></use></svg></span>`;
 
             const andOrHTML = 0 === index ? genWhenLabel() : 1 === index ? genAndOrSelect(groupPath, groupCombination) : genAndOrLabel(groupCombination);
             return `<div class="av__filter-group-item" data-path="${path}">
@@ -534,7 +534,7 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         return `<span class="b3-chip b3-chip--middle" style="margin:1px 2px;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
     }).join("");
     const triggerContent = selectedChips || `<span class="ft__on-surface fn__ellipsis">${placeholder}</span>`;
-    const trigger = `<span class="av__select-trigger" data-type="selectTrigger" data-path="${path}">${triggerContent}</span>`;
+    const trigger = `<span class="av__select-trigger" data-type="selectTrigger" data-path="${path}">${triggerContent}<svg class="av__select-trigger-arrow"><use xlink:href="#iconDown"></use></svg></span>`;
 
     // 下拉面板
     const searchInput = options.length > 5
@@ -547,7 +547,7 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
 <span class="fn__ellipsis" style="min-width:0;">${escapeHtml(option.name)}</span>
 </span>`;
     }).join("");
-    const dropdown = `<div class="av__select-dropdown" data-type="selectDropdown" data-path="${path}" data-single="${isSingle ? "true" : "false"}" style="display:none;position:fixed;z-index:9999;">
+    const dropdown = `<div class="av__select-dropdown" data-type="selectDropdown" data-path="${path}" data-single="${isSingle ? "true" : "false"}" style="display:none;">
 ${searchInput}<div class="av__select-options" data-type="selectOptions" data-path="${path}">${chips}</div>
 </div>`;
     return {trigger, dropdown};
@@ -821,6 +821,7 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                 if (dropdown.style.display === "none") {
                     // 展开时用 fixed 定位到 trigger 下方（避免被 overflow:auto 裁剪）
                     const rect = trigger.getBoundingClientRect();
+                    dropdown.style.zIndex = (++window.siyuan.zIndex).toString();
                     dropdown.style.left = rect.left + "px";
                     dropdown.style.width = Math.max(rect.width, 120) + "px";
                     // 先临时显示以测量真实高度，再决定向上还是向下展开

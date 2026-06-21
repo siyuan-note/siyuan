@@ -318,7 +318,8 @@
       position: absolute;
       right: 0;
       height: 4px;
-      background-color: var(--b3-theme-primary-lighter);
+      // 横向插入线使用独立颜色变量，避免与 ::before 目标标记共用 --drag-base-bg 导致半透明叠加变深
+      background-color: var(--drag-line-bg);
       pointer-events: none;
       left: var(--drag-line-left);
     }

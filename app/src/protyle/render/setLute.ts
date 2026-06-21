@@ -80,6 +80,6 @@ const setLute = (options: ILuteOptions) => {
     lute.SetDataTask(true);
     lute.SetExportNormalizeTaskListMarker(true);
     lute.SetArbitraryTaskListItemMarker(true);
-    lute.SetDisableListItemNestedList(true); // 禁止列表项下直接嵌套子列表
+    lute.SetEnsureListItemParagraph(true); // 空列表项下创建子列表前补一个空段落
     return lute;
 };

@@ -292,8 +292,8 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
     <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.reEnterPassphrase}">
 </div>
 <div class="b3-dialog__action">
-    <label class="fn__flex" style="align-items: center;">
-        <input class="b3-switch" type="checkbox">
+    <label style="display: inline-flex; align-items: center; cursor: pointer;">
+        <input type="checkbox" id="confirmPassword">
         <span class="fn__space"></span>
         ${window.siyuan.languages.confirmPassword}
     </label>
@@ -311,7 +311,7 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
         dialog.destroy();
     });
     const genBtnElement = dialog.element.querySelector("#initKeyByPW");
-    dialog.element.querySelector(".b3-switch").addEventListener("change", function () {
+    dialog.element.querySelector("#confirmPassword").addEventListener("change", function () {
         if (this.checked) {
             genBtnElement.removeAttribute("disabled");
         } else {

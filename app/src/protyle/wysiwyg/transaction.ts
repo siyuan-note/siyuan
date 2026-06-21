@@ -218,6 +218,10 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "insert") {
+                // 块已被本地 DOM 操作插入时跳过，避免重复 https://github.com/siyuan-note/siyuan/issues/17890
+                if (protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`)) {
+                    return;
+                }
                 const cursorElements: Element[] = [];
                 if (operation.previousID) {
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {

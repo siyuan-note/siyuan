@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "ดาวน์โหลดมากสุด",
   "sortByDownloadsAsc": "ดาวน์โหลดน้อยสุด",
   "activationCode": "รหัสเปิดใช้",
-  "activationCodePlaceholder": "รหัสเปิดใช้การสมัครจากช่องทางเฉพาะ",
+  "activationCodePlaceholder": "รหัสเปิดใช้การสมัครจากช่องทางเฉพาะ ไม่จำเป็นสำหรับการซื้อจากเว็บไซต์ทางการ สิทธิ์ของบัญชีจะถูกเปิดใช้โดยอัตโนมัติ",
   "exportDataTip": "ส่งออกไฟล์ workspace/data/ เป็น zip",
   "importDataTip": "นำเข้า zip เขียนทับ workspace/data/ ตามพาธ",
   "includeChildDoc": "รวมเอกสารย่อย",

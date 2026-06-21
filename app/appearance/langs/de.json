@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "Absteigend nach Downloads",
   "sortByDownloadsAsc": "Aufsteigend nach Downloads",
   "activationCode": "Aktivierungscode",
-  "activationCodePlaceholder": "Aktivierungscode für das Abonnement aus einem bestimmten Vertriebskanal",
+  "activationCodePlaceholder": "Aktivierungscode für das Abonnement aus einem bestimmten Vertriebskanal. Bei Kauf über die offizielle Website nicht erforderlich; die Kontoberechtigungen werden automatisch aktiviert",
   "exportDataTip": "Alle Dateien im <code class='fn__code'>workspace/data/</code> Ordner als Zip-Archiv packen und exportieren",
   "importDataTip": "Das exportierte Zip-Archiv importieren und den <code class='fn__code'>workspace/data/</code> Ordner über den Pfad überschreiben",
   "includeChildDoc": "Unterdokumente einbeziehen",

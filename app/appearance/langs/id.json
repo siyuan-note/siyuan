@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "Menurun menurut unduhan",
   "sortByDownloadsAsc": "Meningkat menurut unduhan",
   "activationCode": "Kode aktivasi",
-  "activationCodePlaceholder": "Kode aktivasi langganan dari saluran tertentu",
+  "activationCodePlaceholder": "Kode aktivasi langganan dari saluran tertentu. Tidak diperlukan untuk pembelian dari situs web resmi; izin akun diaktifkan secara otomatis",
   "exportDataTip": "Kemas dan ekspor semua file di folder <code class='fn__code'>workspace/data/</code> sebagai arsip zip",
   "importDataTip": "Impor arsip zip yang diekspor, timpa folder <code class='fn__code'>workspace/data/</code> berdasarkan jalur",
   "includeChildDoc": "Sertakan dokumen anak",

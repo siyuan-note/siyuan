@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "Downloads aflopend",
   "sortByDownloadsAsc": "Downloads oplopend",
   "activationCode": "Activeringscode",
-  "activationCodePlaceholder": "Abonnementsactiveringscode van een specifiek kanaal",
+  "activationCodePlaceholder": "Abonnementsactiveringscode van een specifiek kanaal. Niet vereist bij aankoop via de officiële website; de accountmachtigingen worden automatisch geactiveerd",
   "exportDataTip": "Exporteer workspace/data/ als zip",
   "importDataTip": "Importeer zip en overschrijf workspace/data/",
   "includeChildDoc": "Onderliggende documenten",

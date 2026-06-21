@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "डाउनलोड द्वारा अवरोही",
   "sortByDownloadsAsc": "डाउनलोड द्वारा आरोही",
   "activationCode": "सक्रियण कोड",
-  "activationCodePlaceholder": "किसी विशिष्ट चैनल से सदस्यता सक्रियण कोड",
+  "activationCodePlaceholder": "किसी विशिष्ट चैनल से सदस्यता सक्रियण कोड। आधिकारिक वेबसाइट से खरीद के लिए आवश्यक नहीं; खाता अनुमतियाँ स्वचालित रूप से सक्रिय हो जाती हैं",
   "exportDataTip": "<code class='fn__code'>workspace/data/</code> फ़ोल्डर में सभी फ़ाइलों को zip संग्रह के रूप में पैकेज और निर्यात करें",
   "importDataTip": "निर्यात किए गए zip संग्रह को आयात करें, <code class='fn__code'>workspace/data/</code> फ़ोल्डर को पथ द्वारा अधिलेखित करें",
   "includeChildDoc": "बाल दस्तावेज़ शामिल करें",

@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "下載次數降序",
   "sortByDownloadsAsc": "下載次數升序",
   "activationCode": "啟動碼",
-  "activationCodePlaceholder": "來自特定渠道的訂閱啟動碼",
+  "activationCodePlaceholder": "來自特定渠道的訂閱啟動碼。官方網站購買無需填入，帳號權限會自動啟用",
   "exportDataTip": "將 <code class='fn__code'>工作空間/data/</code> 文件夾下的所有文件以 zip 壓縮檔方式打包導出",
   "importDataTip": "將導出的 zip 壓縮檔導入，按路徑覆蓋 <code class='fn__code'>工作空間/data/</code> 文件夾",
   "includeChildDoc": "包含子文檔",

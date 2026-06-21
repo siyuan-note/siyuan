@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "ダウンロード数 (降順)",
   "sortByDownloadsAsc": "ダウンロード数 (昇順)",
   "activationCode": "アクティベーションコード",
-  "activationCodePlaceholder": "特定チャネル向けのサブスクリプションのアクティベーションコード",
+  "activationCodePlaceholder": "特定チャネル向けのサブスクリプションのアクティベーションコード。公式サイトでの購入には不要です。アカウントの権限は自動的に有効化されます",
   "exportDataTip": "<code class='fn__code'>workspace/data/</code> フォルダ内のすべてのファイルを zip アーカイブとしてエクスポートします",
   "importDataTip": "エクスポートされた zip アーカイブをインポートして <code class='fn__code'>workspace/data/</code> フォルダを上書きします",
   "includeChildDoc": "子ドキュメントを含める",

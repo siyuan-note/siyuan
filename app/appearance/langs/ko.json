@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "다운로드 수 내림차순",
   "sortByDownloadsAsc": "다운로드 수 오름차순",
   "activationCode": "활성화 코드",
-  "activationCodePlaceholder": "특정 채널용 구독 활성화 코드",
+  "activationCodePlaceholder": "특정 채널용 구독 활성화 코드. 공식 웹사이트에서 구매 시 불필요합니다. 계정 권한이 자동으로 활성화됩니다",
   "exportDataTip": "<code class='fn__code'>workspace/data/</code> 폴더의 모든 파일을 zip 아카이브로 묶어 내보냅니다",
   "importDataTip": "내보낸 zip 아카이브를 가져와서 경로별로 <code class='fn__code'>workspace/data/</code> 폴더를 덮어씁니다",
   "includeChildDoc": "하위 문서 포함",

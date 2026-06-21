@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "下载次数降序",
   "sortByDownloadsAsc": "下载次数升序",
   "activationCode": "激活码",
-  "activationCodePlaceholder": "来自特定渠道的订阅激活码",
+  "activationCodePlaceholder": "来自特定渠道的订阅激活码。官网购买无需填入，账号权限会自动激活",
   "exportDataTip": "将 <code class='fn__code'>工作空间/data/</code> 文件夹下的所有文件以 zip 压缩包方式打包导出",
   "importDataTip": "将导出的 zip 压缩包导入，按路径覆盖 <code class='fn__code'>工作空间/data/</code> 文件夹",
   "includeChildDoc": "包含子文档",

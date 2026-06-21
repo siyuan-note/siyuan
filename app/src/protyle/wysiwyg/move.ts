@@ -60,7 +60,8 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         const orderIndex = parseInt(sourceParentElement.firstElementChild.getAttribute("data-marker"));
         sourceElements.reverse().forEach(item => {
             if (item.classList.contains("list")) {
-                previousElement.after(item.firstElementChild);
+                // 子列表需移动其全部直接子列表项
+                Array.from(item.querySelectorAll(":scope > .li")).reverse().forEach(li => previousElement.after(li));
             } else {
                 previousElement.after(item);
             }
@@ -164,7 +165,8 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         const sourceParentElement = sourceElements[0].classList.contains("list") ? sourceElements[0] : sourceElements[0].parentElement;
         sourceElements.forEach(item => {
             if (item.classList.contains("list")) {
-                nextElement.before(item.firstElementChild);
+                // 子列表需移动其全部直接子列表项
+                Array.from(item.querySelectorAll(":scope > .li")).forEach(li => nextElement.before(li));
             } else {
                 nextElement.before(item);
             }

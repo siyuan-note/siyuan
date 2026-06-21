@@ -7,6 +7,7 @@ import {syncHideToolbarLayout, updateBarModeIcon} from "../../layout/topBar";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {loadAssets} from "../../util/assets";
+import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
@@ -93,6 +94,7 @@ const applyAppearanceConfig = async (data: Config.IAppearance) => {
     /// #endif
 
     loadAssets(data);
+    void remountOpenSettingTab("appearance");
 };
 
 /** 外观 Tab 命名空间：设置面板注册项 save */

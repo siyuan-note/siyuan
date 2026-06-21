@@ -11,7 +11,7 @@ import {
     type SettingControl,
 } from "./control";
 import {registerSettingGroup} from "./group";
-import {registerSettingItem, type RegisterSettingItem} from "./item";
+import {registerSettingItem, type RegisterSettingItem, removeSettingTabItems} from "./item";
 import {scanSettingTabSearch} from "../search/scan";
 import {buildSearchIndex, normalizeSearchText} from "../search/normalize";
 import {applySettingTabSearchVisibility, mountSettingTab} from "./mount";
@@ -433,6 +433,7 @@ export type SettingTab = SettingTabShell & {
         root: HTMLElement,
         search?: Partial<SettingTabMountContext>,
         app?: App,
+        rebuild?: boolean,
     ) => Promise<void>;
     scanSearch: (keywords: string) => SettingTabSearchResult;
 };
@@ -455,10 +456,15 @@ export class SettingBuilder {
         };
         return {
             ...shell,
-            mount: async (root, {visibleItemIds, visibleGroupIds} = {}, app) => {
+            mount: async (root, search, app, rebuild) => {
+                const {visibleItemIds, visibleGroupIds} = search ?? {};
+                if (rebuild) {
+                    removeSettingTabItems(options.id);
+                    registered = false;
+                    root.innerHTML = "";
+                }
                 ensureRegistered();
-                const wasMounted = root.innerHTML !== "";
-                if (!wasMounted) {
+                if (!root.innerHTML) {
                     await mountSettingTab(options.id, root);
                     await afterMount?.(root, app);
                 }

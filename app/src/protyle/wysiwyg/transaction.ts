@@ -1021,6 +1021,15 @@ export const turnsIntoOneTransaction = async (options: {
     const id = Lute.NewNodeID();
     if (options.type === "BlocksMergeSuperBlock") {
         parentElement = genSBElement(options.level, id);
+        // 回车生成竖排超级块时，将横向超级块子块的宽度迁移到新超级块，并清除子块宽度
+        // https://github.com/siyuan-note/siyuan/issues/9521
+        const firstChild = options.selectsElement[0] as HTMLElement;
+        if (firstChild.style.width) {
+            (parentElement as HTMLElement).style.width = firstChild.style.width;
+            (parentElement as HTMLElement).style.flex = firstChild.style.flex;
+            firstChild.style.width = "";
+            firstChild.style.flex = "";
+        }
     } else if (options.type === "Blocks2Blockquote") {
         parentElement = document.createElement("div");
         parentElement.classList.add("bq");

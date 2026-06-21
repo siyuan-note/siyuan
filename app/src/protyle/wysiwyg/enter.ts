@@ -20,7 +20,7 @@ import {processRender} from "../util/processCode";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 
-export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
+export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
     if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed") && !blockElement.classList.contains("code-block")) {
         return;
     }
@@ -154,24 +154,30 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             topElement.after(blockElement);
             topElement.remove();
         }
-        transaction(protyle, [{
+        parentBlockElement = getParentBlock(blockElement);
+        const enterDoOperations: IOperation[] = [{
             action: "delete",
             id: topId
-        }, doInsert], [{
+        }, doInsert];
+        const enterUndoOperations: IOperation[] = [{
             action: "delete",
             id: blockId,
-        }, undoInsert]);
-        parentBlockElement = getParentBlock(blockElement);
+        }, undoInsert];
         if (topId === blockId && parentBlockElement.classList.contains("sb") &&
             parentBlockElement.getAttribute("data-sb-layout") === "col") {
-            turnsIntoOneTransaction({
+            // 合并到同一个 transaction，避免新块 id 在第二个 transaction 中找不到
+            const sbOperations = await turnsIntoOneTransaction({
                 protyle,
                 selectsElement: [blockElement.previousElementSibling, blockElement],
                 type: "BlocksMergeSuperBlock",
                 level: "row",
                 unfocus: true,
+                getOperations: true,
             });
+            enterDoOperations.push(...sbOperations.doOperations);
+            enterUndoOperations.splice(0, 0, ...sbOperations.undoOperations);
         }
+        transaction(protyle, enterDoOperations, enterUndoOperations);
         focusByWbr(blockElement, range);
         return true;
     }
@@ -362,17 +368,21 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             return true;
         }
     });
-    transaction(protyle, doOperation, undoOperation);
     if (parentElement.classList.contains("sb") &&
         parentElement.getAttribute("data-sb-layout") === "col") {
-        turnsIntoOneTransaction({
+        // 合并到同一个 transaction，避免新块 id 在第二个 transaction 中找不到
+        const sbOperations = await turnsIntoOneTransaction({
             protyle,
             selectsElement,
             type: "BlocksMergeSuperBlock",
             level: "row",
             unfocus: true,
+            getOperations: true,
         });
+        doOperation.push(...sbOperations.doOperations);
+        undoOperation.splice(0, 0, ...sbOperations.undoOperations);
     }
+    transaction(protyle, doOperation, undoOperation);
     focusByWbr(currentElement, range);
     scrollCenter(protyle);
     return true;

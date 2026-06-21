@@ -998,6 +998,20 @@
         }
       }
 
+      // 分组行尾“更多”按钮与底部下拉箭头统一尺寸
+      .av__filter-group-item > .b3-menu__action {
+        flex-shrink: 0;
+        align-self: center;
+      }
+
+      .av__filter-arrow {
+        width: 10px;
+        height: 10px;
+        flex-shrink: 0;
+        align-self: center;
+        margin-left: 4px;
+      }
+
       &__item[data-type="nobg"] {
         cursor: auto;
       }
@@ -1042,6 +1056,14 @@
         }
       }
 
+      .av__filter-field {
+        max-width: 120px;
+      }
+
+      .av__filter-num {
+        width: 50px;
+      }
+
       .av__field-wrapper {
         display: flex;
         align-items: center;
@@ -1065,6 +1087,12 @@
         &:focus {
           box-shadow: none;
         }
+      }
+
+      .av__field-wrapper .b3-menu__icon {
+        margin-right: 0;
+        width: 16px;
+        height: 16px;
       }
 
       .b3-menu__item.av__filter-row:hover {
@@ -1136,6 +1164,30 @@
         flex-direction: column;
         width: 100%;
         overflow: hidden;
+      }
+
+      // 触发器内已选 chip
+      .av__select-chip {
+        margin: 1px 2px;
+      }
+
+      // 下拉面板内的选项 chip
+      .av__select-option {
+        margin: 2px 0;
+        cursor: pointer;
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;
+
+        svg {
+          width: 12px;
+          height: 12px;
+          flex-shrink: 0;
+        }
+
+        .fn__ellipsis {
+          min-width: 0;
+        }
       }
 
       // 下拉内搜索框，复用 input 的外观但占满宽度

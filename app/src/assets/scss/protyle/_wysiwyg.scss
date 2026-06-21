@@ -351,14 +351,16 @@
 
       &[data-sb-layout="col"] {
         flex-direction: row;
-        flex-wrap: wrap;
-        // flex-start 替代 space-between：拖拽后子块设 flex:none 时，多余空间留在末尾而非均匀分配到子块与手柄之间，避免手柄两侧出现随拖拽增大的空隙
+        // nowrap：子块宽度用 calc(%) 计算，容器缩窄时通过 flex-shrink 等比收缩，而非换行掉落
+        flex-wrap: nowrap;
         justify-content: flex-start;
 
         & > div {
-          flex: 1 0 10%;
+          // 0 1 auto：以 width（calc 百分比）为基准，溢出时可收缩；不可伸长，保持拖拽比例
+          flex: 0 1 auto;
           box-sizing: border-box;
-          min-width: 1px;
+          min-width: 0;
+          max-width: 100%;
 
           &:nth-last-child(2),
           &:last-child {
@@ -368,6 +370,8 @@
 
         > .sb__resize {
           align-self: stretch;
+          // 手柄不参与收缩，保持拖拽热区宽度恒定
+          flex: 0 0 auto;
           width: 4px;
           border-radius: var(--b3-border-radius);
           cursor: col-resize;

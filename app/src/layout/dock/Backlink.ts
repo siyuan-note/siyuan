@@ -380,7 +380,9 @@ export class Backlink extends Model {
             } else {
                 window.siyuan.config.editor.backmentionSort = sortValue;
             }
-            fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+            fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
+                window.siyuan.config.editor = response.data;
+            });
             this.searchBacklinks();
         };
         window.siyuan.menus.menu.remove();

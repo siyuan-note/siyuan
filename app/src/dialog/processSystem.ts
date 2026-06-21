@@ -2,10 +2,10 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
-/// #endif
-import {getAllEditor} from "../layout/getAll";
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
+/// #endif
+import {getAllEditor} from "../layout/getAll";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif

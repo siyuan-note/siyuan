@@ -106,14 +106,18 @@ export const initUI = (protyle: IProtyle) => {
         showMessage(`${window.siyuan.languages.fontSize} ${window.siyuan.config.editor.fontSize}px<span class="fn__space"></span>
 <button class="b3-button b3-button--white">${window.siyuan.languages.reset} 16px</button>`, undefined, undefined, wheelId);
         wheelTimeout = window.setTimeout(() => {
-            fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+            fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
+                window.siyuan.config.editor = response.data;
+            });
             protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
                 lineNumberRender(block.parentElement);
             });
             document.querySelector(`#message [data-id="${wheelId}"] button`)?.addEventListener("click", () => {
                 window.siyuan.config.editor.fontSize = 16;
                 setInlineStyle();
-                fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+                fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
+                    window.siyuan.config.editor = response.data;
+                });
                 hideMessage(wheelId);
                 protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
                     lineNumberRender(block.parentElement);

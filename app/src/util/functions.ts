@@ -61,6 +61,9 @@ export const getSearch = (key: string, link = window.location.search) => {
     return urlSearchParams.get(key);
 };
 
+/**
+ * 判断是否是移动端或浏览器环境
+ */
 export const isBrowser = () => {
     /// #if BROWSER
     return true;

@@ -8,9 +8,11 @@ import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
 import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../util/escape";
+/// #if !MOBILE
 import {getInstanceById} from "../layout/util";
 import {Editor} from "../editor";
 import {Tab} from "../layout/Tab";
+/// #endif
 
 let popoverTargetElement: HTMLElement;
 // 异步获取信息后再显示 tooltip，鼠标已移走时需中断请求 https://github.com/siyuan-note/siyuan/issues/14823
@@ -139,6 +141,7 @@ export const initBlockPopover = (app: App) => {
                 }
             }
 
+            /// #if !MOBILE
             const tabElement = hasClosestByAttribute(event.target, "data-type", "tab-header");
             if (tabElement) {
                 const tab = getInstanceById(tabElement.getAttribute("data-id"));
@@ -173,6 +176,7 @@ export const initBlockPopover = (app: App) => {
                     }
                 }
             }
+            /// #endif
 
             const notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
             if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {

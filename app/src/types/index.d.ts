@@ -564,11 +564,31 @@ interface ISiyuan {
         userHomeBImgURL: string
         userIntro: string
         userNickname: string
-        userSiYuanOneTimePayStatus: number  // 0 未付费；1 已付费
-        userSiYuanProExpireTime: number // -1 终身会员；0 普通用户；> 0 过期时间
-        userSiYuanSubscriptionPlan: number // 0 年付订阅/终生；1 教育优惠；2 订阅试用
-        userSiYuanSubscriptionType: number // 0 年付；1 终生；2 月付
-        userSiYuanSubscriptionStatus: number // -1：未订阅，0：订阅可用，1：订阅封禁，2：订阅过期
+        /**
+         * 功能特性付费状态
+         * 0 未付费，1 已付费
+         */
+        userSiYuanOneTimePayStatus: number
+        /**
+         * 会员过期时间
+         * -1 终身会员；0 未订阅或订阅已过期；>0 订阅到期时间（时间戳，毫秒）
+         */
+        userSiYuanProExpireTime: number
+        /**
+         * 订阅计划类型
+         * 0 年付订阅/终生；1 教育优惠；2 订阅试用
+         */
+        userSiYuanSubscriptionPlan: number
+        /**
+         * 订阅类型
+         * 0 年付；1 终生；2 月付
+         */
+        userSiYuanSubscriptionType: number
+        /**
+         * 订阅状态
+         * -1 未订阅，0 订阅可用，1 订阅封禁，2 订阅过期（包括付费订阅过期和试用订阅过期）
+         */
+        userSiYuanSubscriptionStatus: number
         userToken: string
         userTitles: {
             name: string,

@@ -187,55 +187,12 @@
     line-height: 48px;
   }
 
-  .config-about__logo {
-    display: flex;
-    align-items: center;
-
-    img {
-      width: 36px;
-    }
+  .config-group {
+    margin: 24px 0;
   }
 
-  .config-account {
-    &__bg {
-      position: relative;
-      width: 100%;
-      flex: 1;
-    }
-
-    &__cover {
-      width: 100vw;
-      height: 50vh;
-      background-size: cover;
-      background-position: center center;
-    }
-
-    &__avatar {
-      position: absolute;
-      top: 50vh;
-      width: 128px;
-      height: 128px;
-      left: 50%;
-      margin: -160px 0 0 -64px;
-      background-repeat: no-repeat;
-      background-position: 50%;
-      background-size: cover;
-      border-radius: 90px;
-      background-color: rgba(255, 255, 255, .8);
-      box-shadow: var(--b3-point-shadow);
-      border: 1px solid var(--b3-theme-surface-lighter);
-    }
-
-    &__info {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 16px;
-    }
-
-    &__name {
-      width: 100%;
-      text-align: center;
-    }
+  .config-title {
+    margin: 24px 24px 16px 24px;
   }
 
   .config-assets {

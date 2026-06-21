@@ -16,8 +16,43 @@ import {escapeAttr, escapeHtml} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
+import {switchSettingPanelSubTab} from "./setting/mount";
 
-export const bazaar = {
+/** 集市 Tab 侧栏 / 全局搜索索引文案 */
+export const collectBazaarTabSearchStrings = (): string[] => [
+    window.siyuan.languages.bazaar,
+    window.siyuan.languages.downloaded,
+    window.siyuan.languages.plugin,
+    window.siyuan.languages.theme,
+    window.siyuan.languages.icon,
+    window.siyuan.languages.template,
+    window.siyuan.languages.widget,
+];
+
+/** 集市 Tab 挂载（面板页，不走注册表渲染） */
+export const mountBazaarTab = (root: HTMLElement, keywords?: string, app?: App) => {
+    if (root.innerHTML === "") {
+        bazaar.element = root;
+        root.innerHTML = bazaar.genHTML();
+        if (app) {
+            bazaar.bindEvent(app);
+        }
+    } else {
+        bazaar.element = root;
+    }
+    if (keywords) {
+        switchSettingPanelSubTab(root, keywords, [
+            {type: "downloaded", label: window.siyuan.languages.downloaded},
+            {type: "plugin", label: window.siyuan.languages.plugin},
+            {type: "theme", label: window.siyuan.languages.theme},
+            {type: "icon", label: window.siyuan.languages.icon},
+            {type: "template", label: window.siyuan.languages.template},
+            {type: "widget", label: window.siyuan.languages.widget},
+        ]);
+    }
+};
+
+const bazaar = {
     element: undefined as Element,
     genHTML() {
         if (!window.siyuan.config.bazaar.trust) {
@@ -68,7 +103,7 @@ export const bazaar = {
 </div>`;
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
-        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 80}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
+        const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
         return `<div class="fn__flex-column" style="height: 100%">
 <div class="layout-tab-bar fn__flex">
     <div data-type="downloaded" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.downloaded}</span><span class="fn__flex-1"></span></div>
@@ -608,10 +643,10 @@ type="checkbox">
         if (!window.siyuan.config.bazaar.trust) {
             bazaar.element.querySelector("button").addEventListener("click", () => {
                 fetchPost("/api/setting/setBazaar", {
+                    ...window.siyuan.config.bazaar,
                     trust: true,
-                    petalDisabled: window.siyuan.config.bazaar.petalDisabled
-                }, () => {
-                    window.siyuan.config.bazaar.trust = true;
+                }, (response) => {
+                    window.siyuan.config.bazaar = response.data;
                     bazaar.element.innerHTML = bazaar.genHTML();
                     bazaar.bindEvent(app);
                 });
@@ -826,9 +861,10 @@ type="checkbox">
                     const packageName = pkgItem.name;
                     const mode = pkgItem.modes?.toString() === "dark" ? 1 : 0;
                     if (pkgType === "icons") {
-                        fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
+                        fetchPost("/api/setting/setAppearance", {
+                            ...window.siyuan.config.appearance,
                             icon: packageName,
-                        }), (appearanceResponse) => {
+                        }, (appearanceResponse) => {
                             this._genMyHTML(pkgType, app, false);
                             fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
                                 response.data.appearance = appearanceResponse.data;
@@ -837,12 +873,13 @@ type="checkbox">
                             });
                         });
                     } else if (pkgType === "themes") {
-                        fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
+                        fetchPost("/api/setting/setAppearance", {
+                            ...window.siyuan.config.appearance,
                             mode,
                             modeOS: false,
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,
                             themeLight: mode === 0 ? packageName : window.siyuan.config.appearance.themeLight,
-                        }), (appearanceResponse) => {
+                        }, (appearanceResponse) => {
                             this._genMyHTML("themes", app, false);
                             fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
                                 response.data.appearance = appearanceResponse.data;

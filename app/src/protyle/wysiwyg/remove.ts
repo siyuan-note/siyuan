@@ -26,9 +26,11 @@ import {scrollCenter} from "../../util/highlightById";
 import {isMobile} from "../../util/functions";
 import {mathRender} from "../render/mathRender";
 import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
+/// #if !MOBILE
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {Backlink} from "../../layout/dock/Backlink";
+/// #endif
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {setFold} from "../util/blockFold";

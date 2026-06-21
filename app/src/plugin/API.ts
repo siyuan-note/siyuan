@@ -19,18 +19,19 @@ import {Protyle} from "../protyle";
 import {openMobileFileById} from "../mobile/editor";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
-import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
+import {getActiveTab, getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
+import {exportLayout} from "../layout/util";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
 import {openSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
-import {exportLayout} from "../layout/util";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {Files} from "../layout/dock/Files";
+import type {MobileFiles} from "../mobile/dock/MobileFiles";
+import type {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
 
@@ -292,7 +293,7 @@ export const expandDocTree = async (options: {
     });
     let liElement: HTMLElement;
     let notebookId = options.id;
-    const file = getModelByDockType("file") as Files;
+    const file = getModelByDockType("file") as MobileFiles | Files;
     if (typeof options.isSetCurrent === "undefined") {
         options.isSetCurrent = true;
     }

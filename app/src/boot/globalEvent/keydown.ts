@@ -67,7 +67,7 @@ import {zoomOut} from "../../menus/protyle";
 import {getPlainText} from "../../protyle/util/paste";
 import {commandPanel, execByCommand} from "./command/panel";
 import {filterHotkey} from "./commonHotkey";
-import {setReadOnly} from "../../config/util/setReadOnly";
+import {editorConfigApi} from "../../config/tabs/editorRuntime";
 import {copyPNGByLink} from "../../menus/util";
 import {globalCommand} from "./command/global";
 import {duplicateCompletely} from "../../protyle/render/av/action";
@@ -1343,7 +1343,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
     if (matchHotKey(window.siyuan.config.keymap.general.editReadonly.custom, event)) {
         event.preventDefault();
-        setReadOnly(!window.siyuan.config.editor.readOnly);
+        editorConfigApi.patch("editor.readOnly", !window.siyuan.config.editor.readOnly);
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {

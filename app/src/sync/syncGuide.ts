@@ -12,7 +12,7 @@ import {App} from "../index";
 import {Constants} from "../constants";
 import {getCloudURL} from "../config/util/about";
 
-export const addCloudName = (cloudPanelElement: Element) => {
+export const addCloudName = (cloudListElement: Element) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.cloudSyncDir,
         content: `<div class="b3-dialog__content">
@@ -37,38 +37,38 @@ export const addCloudName = (cloudPanelElement: Element) => {
         dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        cloudPanelElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+        cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
         fetchPost("/api/sync/createCloudSyncDir", {name: inputElement.value}, () => {
             dialog.destroy();
-            getSyncCloudList(cloudPanelElement, true);
+            renderSyncCloudList(cloudListElement, true);
         });
     });
 };
 
-export const bindSyncCloudListEvent = (cloudPanelElement: Element, cb?: () => void) => {
-    cloudPanelElement.addEventListener("click", (event) => {
+export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: () => void) => {
+    cloudListElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
-        while (target && !target.isEqualNode(cloudPanelElement)) {
+        while (target && !target.isEqualNode(cloudListElement)) {
             const type = target.getAttribute("data-type");
             if (type) {
                 switch (type) {
                     case "addCloud":
-                        addCloudName(cloudPanelElement);
+                        addCloudName(cloudListElement);
                         break;
                     case "removeCloud":
                         confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDeleteCloudDir} <i>${target.parentElement.getAttribute("data-name")}</i>`, () => {
-                            cloudPanelElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+                            cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
                             fetchPost("/api/sync/removeCloudSyncDir", {name: target.parentElement.getAttribute("data-name")}, (response) => {
                                 window.siyuan.config.sync.cloudName = response.data;
-                                getSyncCloudList(cloudPanelElement, true, cb);
+                                renderSyncCloudList(cloudListElement, true, cb);
                             });
                         }, undefined, true);
                         break;
                     case "selectCloud":
-                        cloudPanelElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+                        cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
                         fetchPost("/api/sync/setCloudSyncDir", {name: target.getAttribute("data-name")}, () => {
                             window.siyuan.config.sync.cloudName = target.getAttribute("data-name");
-                            getSyncCloudList(cloudPanelElement, true, cb);
+                            renderSyncCloudList(cloudListElement, true, cb);
                         });
                         break;
                 }
@@ -81,12 +81,13 @@ export const bindSyncCloudListEvent = (cloudPanelElement: Element, cb?: () => vo
     });
 };
 
-export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?: () => void) => {
-    if (!reload && cloudPanelElement.firstElementChild.tagName !== "IMG") {
+export const renderSyncCloudList = (cloudListElement: Element, reload = false, cb?: () => void) => {
+    if (!reload && cloudListElement.firstElementChild.tagName !== "IMG") {
         return;
     }
+    cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
     fetchPost("/api/sync/listCloudSyncDir", {}, (response) => {
-        let syncListHTML = `<ul><li style="padding: 0 16px" class="b3-list--empty">${window.siyuan.languages.emptyCloudSyncList}</li></ul>`;
+        let syncListHTML: string;
         if (response.code === 1) {
             syncListHTML = `<ul>
     <li class="b3-list--empty ft__error">
@@ -96,11 +97,11 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
         ${window.siyuan.languages.cloudConfigTip}
     </li>
 </ul>`;
-        } else if (response.code !== 1) {
-            syncListHTML = '<ul class="b3-list b3-list--background fn__flex-1" style="overflow: auto;">';
+        } else {
+            const syncListParts: string[] = ['<div class="fn__hr"></div><ul class="b3-list b3-list--background" style="overflow: auto;">'];
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
                 /// #if MOBILE
-                syncListHTML += `<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--two">
+                syncListParts.push(`<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--two">
     <div class="b3-list-item__first" data-name="${item.cloudName}">
         <input type="radio" name="cloudName"${item.cloudName === response.data.checkedSyncDir ? " checked" : ""}/>
         <span class="fn__space"></span>
@@ -111,13 +112,16 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
         </span>
     </div>
     <div class="b3-list-item__meta fn__flex">
+        <span class="fn__space"></span>
+        <span class="fn__space"></span>
+        <span class="fn__space"></span>
         <span>${item.hSize}</span>
-        <span class="fn__flex-1 fn__space"></span>
+        <span class="fn__space"></span>
         <span>${item.updated}</span>
     </div>
-</li>`;
+</li>`);
                 /// #else
-                syncListHTML += `<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+                syncListParts.push(`<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
 <input type="radio" name="cloudName"${item.cloudName === response.data.checkedSyncDir ? " checked" : ""}/>
 <span class="fn__space"></span>
 <span>${item.cloudName}</span>
@@ -127,20 +131,21 @@ export const getSyncCloudList = (cloudPanelElement: Element, reload = false, cb?
 <span class="fn__flex-1 fn__space"></span>
 <span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b3-list-item__action${(window.siyuan.config.sync.provider === 2 || window.siyuan.config.sync.provider === 3) ? " fn__none":""}" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
-</span></li>`;
+</span></li>`);
                 /// #endif
             });
-            syncListHTML += `</ul>
-<div class="fn__hr"></div>
+            syncListParts.push("</ul>");
+            if (![2, 3].includes(window.siyuan.config.sync.provider)) {
+                syncListParts.push(`<div class="fn__hr"></div>
 <div class="fn__flex">
+    <button class="b3-button b3-button--outline" data-type="addCloud"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
     <div class="fn__flex-1"></div>
-    <button class="b3-button b3-button--outline${(window.siyuan.config.sync.provider === 2 || window.siyuan.config.sync.provider === 3) ? " fn__none":""}" data-type="addCloud"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
-</div>`;
+</div>`);
+            }
+            syncListHTML = syncListParts.join("");
         }
-        cloudPanelElement.innerHTML = syncListHTML;
-        if (cb) {
-            cb();
-        }
+        cloudListElement.innerHTML = syncListHTML;
+        cb?.();
     });
 };
 
@@ -148,34 +153,22 @@ export const syncGuide = (app?: App) => {
     if (window.siyuan.config.readonly) {
         return;
     }
-    /// #if MOBILE
-    if (0 === window.siyuan.config.sync.provider) {
-        if (needSubscribe()) {
-            return;
+    if (app && document.querySelector("#barSync")?.classList.contains("toolbar__item--active")) {
+        return;
+    }
+    if (window.siyuan.config.sync.provider === 0 && needSubscribe()) {
+        if (app) {
+            openSetting(app, "sync");
         }
+        showMessage(window.siyuan.languages._kernel[29].replaceAll("${accountServer}", getCloudURL("")));
+        return;
     } else if (!isPaidUser()) {
-        showMessage(window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL("")));
-        return;
-    }
-    /// #else
-    if (document.querySelector("#barSync")?.classList.contains("toolbar__item--active")) {
-        return;
-    }
-    if (0 === window.siyuan.config.sync.provider && needSubscribe("") && app) {
-        const dialogSetting = openSetting(app);
-        if (window.siyuan.user) {
-            dialogSetting.element.querySelector('.config__side [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
-        } else {
-            dialogSetting.element.querySelector('.config__side [data-name="account"]').dispatchEvent(new CustomEvent("click"));
-            dialogSetting.element.querySelector('.config__tab-container[data-name="account"]').setAttribute("data-action", "go-repos");
+        if (app) {
+            openSetting(app, "sync");
         }
+        showMessage(window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL("")));
         return;
     }
-    if (0 !== window.siyuan.config.sync.provider && !isPaidUser() && app) {
-        showMessage(window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL("")));
-        return;
-    }
-    /// #endif
     if (!window.siyuan.config.repo.key) {
         setKey(true);
         return;
@@ -241,13 +234,12 @@ const setSync = (key?: string, dialog?: Dialog) => {
     if (!window.siyuan.config.sync.enabled) {
         const listHTML = `<div class="b3-dialog__content">
     <div class="ft__on-surface">${window.siyuan.languages.syncConfGuide3}</div>
-    <div class="fn__hr--b"></div>
     <div style="display: flex;flex-direction: column;height: 40vh;">
         <img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">
     </div>
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button" disabled="disabled">${window.siyuan.languages.openSyncTip1}</button>
+    <button class="b3-button" disabled>${window.siyuan.languages.openSyncTip1}</button>
 </div>`;
         if (dialog) {
             dialog.element.querySelector(".b3-dialog__header").innerHTML = "🗂️ " + window.siyuan.languages.cloudSyncDir;
@@ -261,21 +253,12 @@ const setSync = (key?: string, dialog?: Dialog) => {
         }
         dialog.element.setAttribute("data-key", Constants.DIALOG_SYNCCHOOSEDIR);
         const contentElement = dialog.element.querySelector(".b3-dialog__content").lastElementChild;
-        const btnElement = dialog.element.querySelector(".b3-button");
-        bindSyncCloudListEvent(contentElement, () => {
-            if (contentElement.querySelector("input[checked]")) {
-                btnElement.removeAttribute("disabled");
-            } else {
-                btnElement.setAttribute("disabled", "disabled");
-            }
-        });
-        getSyncCloudList(contentElement, false, () => {
-            if (contentElement.querySelector("input[checked]")) {
-                btnElement.removeAttribute("disabled");
-            } else {
-                btnElement.setAttribute("disabled", "disabled");
-            }
-        });
+        const btnElement = dialog.element.querySelector(".b3-button") as HTMLButtonElement;
+        const updateOpenSyncBtn = () => {
+            btnElement.disabled = !contentElement.querySelector("input[checked]");
+        };
+        bindSyncCloudListEvent(contentElement, updateOpenSyncBtn);
+        renderSyncCloudList(contentElement, false, updateOpenSyncBtn);
         btnElement.addEventListener("click", () => {
             dialog.destroy();
             fetchPost("/api/sync/setSyncEnable", {enabled: true}, () => {
@@ -310,7 +293,7 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
 </div>
 <div class="b3-dialog__action">
     <label class="fn__flex">
-        <input type="checkbox" class="b3-switch fn__flex-center">
+        <input type="checkbox">
         <span class="fn__space"></span>
         ${window.siyuan.languages.confirmPassword}
     </label>

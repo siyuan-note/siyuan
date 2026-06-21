@@ -15,7 +15,7 @@ import {addBaseURL, getIdFromSYProtocol, isSYProtocol, setNoteBook} from "../uti
 import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
-import {initAssets, loadAssets} from "../util/assets";
+import {initAssets} from "../util/assets";
 import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
@@ -39,6 +39,7 @@ import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
+import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -152,7 +153,7 @@ class App {
                     window.siyuan.menus = new Menus(this);
                     document.title = window.siyuan.languages.siyuanNote;
                     bootSync();
-                    loadAssets(confResponse.data.conf.appearance);
+                    appearanceConfigApi.apply(window.siyuan.config.appearance);
                     initMessage();
                     initAssets();
                     if (!isInMobileApp()) {

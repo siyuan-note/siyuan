@@ -8,6 +8,7 @@ import {getAllEditor, getAllModels} from "../layout/getAll";
 import {Tab} from "../layout/Tab";
 import {resizeTopBar, setPanelFocus} from "../layout/util";
 import {getDockByType, setTabPosition} from "../layout/tabUtil";
+import {clearOBG} from "../layout/dock/util";
 ///#else
 import {MobileCustom} from "../mobile/dock/MobileCustom";
 /// #endif
@@ -17,7 +18,7 @@ import {ipcRenderer} from "electron";
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
-import {clearOBG} from "../layout/dock/util";
+import {settingTabToMenuId} from "../config/setting/tabs";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
@@ -249,7 +250,7 @@ export class Plugin {
         }
         if (isMobile() && window.siyuan.storage) {
             if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
-                document.querySelector("#menuAbout")?.after(iconElement);
+                document.querySelector("#" + settingTabToMenuId("about"))?.after(iconElement);
             }
         } else if (!isWindow() && window.siyuan.storage) {
             if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {

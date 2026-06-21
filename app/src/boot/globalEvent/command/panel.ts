@@ -107,18 +107,6 @@ export const commandPanel = (app: App) => {
         });
     });
 
-    if (listElement.childElementCount === 0) {
-        const liElement = document.createElement("li");
-        liElement.classList.add("b3-list-item", "b3-list-item--focus");
-        liElement.innerHTML = `<span class="b3-list-item__text" style="-webkit-line-clamp: inherit;">${window.siyuan.languages._kernel[122]}</span>`;
-        liElement.addEventListener("click", () => {
-            dialog.destroy();
-        });
-        listElement.insertAdjacentElement("beforeend", liElement);
-    } else {
-        listElement.firstElementChild.classList.add("b3-list-item--focus");
-    }
-
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.focus();
     listElement.addEventListener("click", (event: KeyboardEvent) => {

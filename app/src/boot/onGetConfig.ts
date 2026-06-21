@@ -9,7 +9,7 @@ import {afterExport} from "../protyle/export/util";
 import {onWindowsMsg} from "../window/onWindowsMsg";
 /// #endif
 import {Constants} from "../constants";
-import {appearance} from "../config/appearance";
+import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
@@ -74,7 +74,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     /// #if !BROWSER
     initNativeDialogOverride();
     /// #endif
-    appearance.onSetAppearance(window.siyuan.config.appearance);
+    appearanceConfigApi.apply(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
     renderSnippet();

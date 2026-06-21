@@ -8,7 +8,7 @@ import {Files} from "./dock/Files";
 import {Outline} from "./dock/Outline";
 import {Bookmark} from "./dock/Bookmark";
 import {Tag} from "./dock/Tag";
-import {getAllModels, getAllTabs, getAllWnds} from "./getAll";
+import {getAllEditor, getAllModels, getAllTabs, getAllWnds} from "./getAll";
 import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
@@ -175,9 +175,9 @@ export const exportLayout = async (options: {
     cb: () => void,
     errorExit: boolean
 }) => {
-    const editors = getAllModels().editor;
+    const editors = getAllEditor();
     for (let i = 0; i < editors.length; i++) {
-        await saveScroll(editors[i].editor.protyle);
+        await saveScroll(editors[i].protyle);
     }
     if (isWindow()) {
         const layoutJSON: any = {

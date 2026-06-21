@@ -868,6 +868,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             operator: getDefaultOperatorByType(type),
                             value: genCellValue(type, ""),
                         };
+                        const oldFilters = JSON.parse(JSON.stringify(avData.view.filters));
                         getEditableFilters(avData).push(filter);
                         transaction(protyle, [{
                             action: "setAttrViewFilters",
@@ -877,7 +878,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         }], [{
                             action: "setAttrViewFilters",
                             avID,
-                            data: [], // undo 时移除新增条件（简化处理）
+                            data: oldFilters,
                             blockID: blockElement.getAttribute("data-node-id")
                         }]);
                     }

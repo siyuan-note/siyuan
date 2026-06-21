@@ -1653,25 +1653,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 忘记为什么要限定文档树的拖拽了，先放开 https://github.com/siyuan-note/siyuan/pull/13284#issuecomment-2503853135
             if (liTarget) {
-                let htmlTarget = liTarget as HTMLElement;
-                // 列表项上半部分映射到前一个同级列表项的下半语义（"在 X 前插入" = "在 X 的前一个兄弟后插入"），
-                // 避免 top--child 这类视觉位置与实际效果不一致的插入点
-                if (event.clientY <= liTarget.getBoundingClientRect().top + liTarget.getBoundingClientRect().height / 2) {
-                    const prevLi = htmlTarget.previousElementSibling;
-                    if (prevLi?.classList.contains("li")) {
-                        htmlTarget = prevLi as HTMLElement;
-                    } else {
-                        // 列表第一个项的上半：无前驱兄弟，不显示插入点
-                        return;
-                    }
-                }
+                const htmlTarget = liTarget as HTMLElement;
                 const nodeId = htmlTarget.getAttribute("data-node-id");
                 // Cache expensive computations per target element (never changes while hovering same element)
                 if (!dragCache || dragCache.nodeId !== nodeId) {
-                    const contentBlock = Array.from(htmlTarget.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
+                    const contentBlock = Array.from(liTarget.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
                     const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
-                    const depth = getListDepth(htmlTarget);
-                    const computedColor = getComputedStyle(htmlTarget).getPropertyValue("--b3-theme-primary-lighter").trim();
+                    const depth = getListDepth(liTarget);
+                    const computedColor = getComputedStyle(liTarget).getPropertyValue("--b3-theme-primary-lighter").trim();
                     const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
                     let siblingGuides = "";
                     for (let n = 1; n <= depth; n++) {
@@ -1686,8 +1675,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const liRect = htmlTarget.getBoundingClientRect();
                 const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
                 const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
-                const isChild = offsetX >= indent;
-                const className = `dragover__bottom--${isChild ? "child" : "sibling"}`;
+                const isBottom = event.clientY > liRect.top + liRect.height / 2;
+                // 列表项统一使用底部插入点；但列表首项的上半需保留顶部插入点，否则无法在列表最前面插入
+                const isFirstLi = !htmlTarget.previousElementSibling || !htmlTarget.previousElementSibling.classList.contains("li");
+                let position = "bottom";
+                if (isFirstLi && !isBottom) {
+                    position = "top";
+                }
+                const isChild = position === "bottom" && offsetX >= indent;
+                const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
 
                 htmlTarget.classList.add(className);
                 htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
@@ -1703,8 +1699,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText),
                         event.clientX, event.clientY);
                 } else {
+                    const key = position === "bottom" ? "dragTipListItemAfter" : "dragTipListItemBefore";
                     showDragTip(window.siyuan.dragTitle || "",
-                        window.siyuan.languages.dragTipListItemAfter.replace("${x}", targetText),
+                        window.siyuan.languages[key].replace("${x}", targetText),
                         event.clientX, event.clientY);
                 }
                 return;

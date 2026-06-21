@@ -269,11 +269,10 @@ export const openMenuPanel = (options: {
                 data: oldFilters,
                 blockID
             }]);
-            menuElement.querySelectorAll(`[data-type="toggleCombination"][data-path="${path}"]`).forEach((sel: HTMLSelectElement) => {
-                if (sel !== select) {
-                    sel.value = (select as HTMLSelectElement).value;
-                }
-            });
+            // 重渲染以同步所有只读且/或标签（index >= 2 的节点显示的是只读 span）
+            menuElement.innerHTML = getFiltersHTML(data);
+            bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
+            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
             event.stopPropagation();
         });
         // 多选排序

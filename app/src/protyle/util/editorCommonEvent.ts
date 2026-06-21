@@ -492,12 +492,8 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     originSbSet.forEach(sb => {
         refreshSbAndPersistWidth(sb, doOperations, undoOperations);
     });
-    if (isSameDoc || isCopy) {
-        transaction(protyle, doOperations, undoOperations);
-    } else {
-        // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
-        transaction(protyle, doOperations, undoOperations);
-    }
+    // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
+    transaction(protyle, doOperations, undoOperations);
     if (document.contains(sourceElements[0])) {
         focusBlock(sourceElements[0]);
     } else {
@@ -605,12 +601,8 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         doOperations.push(...mergeOperations.doOperations);
         undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
     }
-    if (isSameDoc || isCopy) {
-        transaction(protyle, doOperations, undoOperations);
-    } else {
-        // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
-        transaction(protyle, doOperations, undoOperations);
-    }
+    // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
+    transaction(protyle, doOperations, undoOperations);
     if (document.contains(sourceElements[0])) {
         focusBlock(sourceElements[0]);
     } else {

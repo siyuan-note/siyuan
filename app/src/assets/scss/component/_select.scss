@@ -27,7 +27,6 @@
   .body--win32 &, .body--win32-browser & {
     @supports (appearance: base-select) {
       appearance: base-select;
-      flex-shrink: 0;
       white-space: nowrap;
       field-sizing: content;
 

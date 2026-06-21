@@ -302,7 +302,7 @@ declare class Lute {
 
     public SetArbitraryTaskListItemMarker(marker: boolean): void;
 
-    public SetDisableListItemNestedList(disable: boolean): void;
+    public SetEnsureListItemParagraph(enable: boolean): void;
 }
 
 declare const webkitAudioContext: {

@@ -2786,13 +2786,41 @@ export class WYSIWYG {
             }
         });
 
-        this.element.addEventListener("dblclick", (event: MouseEvent & { target: HTMLElement }) => {
-            if (event.target.tagName === "IMG" && !event.target.classList.contains("emoji")) {
+        this.element.addEventListener("dblclick", (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            // 双击超级块拖拽手柄，均分所有列宽
+            if (target.classList.contains("sb__resize")) {
+                const doOperations: IOperation[] = [];
+                const undoOperations: IOperation[] = [];
+                Array.from(target.parentElement.children).forEach((item: HTMLElement) => {
+                    // 没有任何子块设过 width，无需重置
+                    if (!item.style.width && !item.style.flex) {
+                        return;
+                    }
+                    if (!item.style.width && !item.style.flex) {
+                        return;
+                    }
+                    const oldHTML = item.outerHTML;
+                    item.style.width = "";
+                    item.style.flex = "";
+                    const id = item.getAttribute("data-node-id");
+                    doOperations.push({action: "update", id, data: item.outerHTML});
+                    undoOperations.push({action: "update", id, data: oldHTML});
+                });
+
+                if (doOperations.length > 0) {
+                    transaction(protyle, doOperations, undoOperations);
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            if (target.tagName === "IMG" && !target.classList.contains("emoji")) {
                 previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
                 return;
             }
             // https://github.com/siyuan-note/siyuan/issues/12691
-            const diagramElement = getDiagramBlock(hasClosestBlock(event.target) as HTMLElement);
+            const diagramElement = getDiagramBlock(hasClosestBlock(target) as HTMLElement);
             if (diagramElement) {
                 previewDiagram(diagramElement);
                 event.stopPropagation();

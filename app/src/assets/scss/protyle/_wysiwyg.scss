@@ -65,12 +65,12 @@
         right: -4px;
       }
 
-        &.li,
-        &.list,
-        &.sb {
-          background-color: var(--b3-theme-primary-lightest);
-          border-radius: 4px;
-        }
+      &.li,
+      &.list,
+      &.sb {
+        background-color: var(--b3-theme-primary-lightest);
+        border-radius: 4px;
+      }
     }
 
     &[custom-riff-decks] {
@@ -379,14 +379,13 @@
           cursor: col-resize;
           touch-action: none;
           opacity: 0;
-          transition: var(--b3-color-transition);
           margin-right: 16px;
-          z-index: 5;
-        }
-
-        &:hover > .sb__resize {
-          opacity: 1;
           background-color: var(--b3-border-color);
+          z-index: 5;
+
+          &:hover {
+            opacity: 1;
+          }
         }
 
         .sb {

@@ -59,7 +59,6 @@ import {popSearch} from "../mobile/menu/search";
 import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
 import {hideTooltip} from "../dialog/tooltip";
-import {scrollCenter} from "../util/highlightById";
 import {base64ToURL} from "../util/image";
 import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
@@ -946,14 +945,6 @@ export const zoomOut = (options: {
     if (options.protyle.options.backlinkData) {
         return;
     }
-    // 退出聚焦可能连续触发多次 zoomOut（如列表圆点点击 + 面包屑退出聚焦），
-    // 前次 onGet 会把 scrollTop 重置为 0，因此用 protyle 实例保存首次的正确值供后续复用，
-    // 仅当 scrollTop > 0 时更新，避免被 onGet 重置的 0 覆盖；退出聚焦完成后清除
-    // https://github.com/siyuan-note/siyuan/issues/17902
-    if (options.protyle.contentElement.scrollTop > 0) {
-        (options.protyle as any)._zoomOutSavedScrollTop = options.protyle.contentElement.scrollTop;
-    }
-    const savedScrollTop = (options.protyle as any)._zoomOutSavedScrollTop ?? options.protyle.contentElement.scrollTop;
     if (typeof options.isPushBack === "undefined") {
         options.isPushBack = true;
     }
@@ -1010,17 +1001,10 @@ export const zoomOut = (options: {
             action,
             scrollAttr: options.focusId ? {
                 rootId: options.id,
-                focusId: options.focusId,
-                scrollTop: savedScrollTop
+                focusId: options.focusId
             } : undefined,
-            afterCB: () => {
-                if (options.focusId) {
-                    (options.protyle as any)._zoomOutSavedScrollTop = undefined;
-                }
-                if (options.callback) {
-                    options.callback();
-                }
-            },
+            scrollPosition: options.focusId ? "start" : undefined,
+            afterCB: options.callback,
         });
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
@@ -1043,44 +1027,6 @@ export const zoomOut = (options: {
                     showElement = getFirstBlock(showElement);
                 }
                 focusBlock(showElement);
-                // 加强定位，使用 AbortController 监听用户手势，一旦用户主动滚动即停止强制定位，
-                // 否则数据库等异步渲染块撑高内容时会反复重置滚动位置
-                // https://github.com/siyuan-note/siyuan/issues/17886
-                const userScrollAbort = new AbortController();
-                const onUserScroll = () => userScrollAbort.abort();
-                // 程序化滚动标志，避免 ResizeObserver 自身的 scrollCenter 触发 scroll 事件后误中止
-                let observerScrollProgrammatic = false;
-                options.protyle.contentElement.addEventListener("wheel", onUserScroll,
-                    {capture: true, signal: userScrollAbort.signal});
-                options.protyle.contentElement.addEventListener("touchstart", onUserScroll,
-                    {capture: true, signal: userScrollAbort.signal});
-                options.protyle.contentElement.addEventListener("touchmove", onUserScroll,
-                    {capture: true, signal: userScrollAbort.signal});
-                options.protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                    if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {
-                        userScrollAbort.abort();
-                    }
-                }, {capture: true, signal: userScrollAbort.signal});
-                options.protyle.contentElement.addEventListener("scroll", () => {
-                    if (observerScrollProgrammatic) {
-                        return;
-                    }
-                    userScrollAbort.abort();
-                }, {capture: true, signal: userScrollAbort.signal});
-                const resizeObserver = new ResizeObserver(() => {
-                    if (userScrollAbort.signal.aborted) {
-                        resizeObserver.disconnect();
-                        return;
-                    }
-                    observerScrollProgrammatic = true;
-                    scrollCenter(options.protyle, focusElement, "start");
-                    observerScrollProgrammatic = false;
-                });
-                resizeObserver.observe(options.protyle.wysiwyg.element);
-                setTimeout(() => {
-                    resizeObserver.disconnect();
-                    userScrollAbort.abort();
-                }, 1000 * 3);
             } else if (!options.focusId) {
                 fetchPost("/api/filetree/getDoc", {
                     id: options.protyle.block.rootID,
@@ -1105,8 +1051,7 @@ export const zoomOut = (options: {
                         action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
                         scrollAttr: {
                             rootId: options.id,
-                            focusId: options.focusId,
-                            scrollTop: savedScrollTop
+                            focusId: options.focusId
                         }
                     });
                 });

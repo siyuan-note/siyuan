@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "Podľa sťahovaní (zostupne)",
   "sortByDownloadsAsc": "Podľa sťahovaní (vzostupne)",
   "activationCode": "Aktivačný kód",
-  "activationCodePlaceholder": "Aktivačný kód predplatného z konkrétneho kanála",
+  "activationCodePlaceholder": "Aktivačný kód predplatného z konkrétneho kanála. Nie je potrebný pri nákupe na oficiálnej webovej stránke; oprávnenia účtu sa aktivujú automaticky",
   "exportDataTip": "Zabaliť priečinok workspace/data/ do archívu ZIP",
   "importDataTip": "Importovať ZIP archív a prepísať aktuálne dáta",
   "includeChildDoc": "Zahrnúť podradené dokumenty",

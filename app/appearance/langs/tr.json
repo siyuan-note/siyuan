@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "İndirme sayısına göre azalan",
   "sortByDownloadsAsc": "İndirme sayısına göre artan",
   "activationCode": "Aktivasyon kodu",
-  "activationCodePlaceholder": "Belirli bir kanaldan abonelik aktivasyon kodu",
+  "activationCodePlaceholder": "Belirli bir kanaldan abonelik aktivasyon kodu. Resmi web sitesinden yapılan satın almalar için gerekli değildir; hesap izinleri otomatik olarak etkinleştirilir",
   "exportDataTip": "<code class='fn__code'>workspace/data/</code> klasöründeki tüm dosyaları zip arşivi olarak dışa aktar",
   "importDataTip": "Dışa aktarılan zip arşivini içe aktar ve <code class='fn__code'>workspace/data/</code> klasörünün üzerine yaz",
   "includeChildDoc": "Alt belgeleri dahil et",

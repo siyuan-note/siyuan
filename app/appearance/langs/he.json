@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "יורד לפי הורדות",
   "sortByDownloadsAsc": "עולה לפי הורדות",
   "activationCode": "קוד הפעלה",
-  "activationCodePlaceholder": "קוד הפעלה למנוי מערוץ ספציפי",
+  "activationCodePlaceholder": "קוד הפעלה למנוי מערוץ ספציפי. אינו נדרש עבור רכישות מהאתר הרשמי; הרשאות החשבון מופעלות אוטומטית",
   "exportDataTip": "ארוז וייצא את כל הקבצים ב<code class='fn__code'>workspace/data/</code> לתיקיה דחוסה",
   "importDataTip": "ייבוא התיקיה הדחוסה המיוצאת, מפעילה את <code class='fn__code'>workspace/data/</code> לפי נתיב",
   "includeChildDoc": "כלול תתי מסמכים",

@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "تنازلياً بمرات التنزيل",
   "sortByDownloadsAsc": "تصاعدياً بمرات التنزيل",
   "activationCode": "رمز التفعيل",
-  "activationCodePlaceholder": "رمز تفعيل الاشتراك من قناة معينة",
+  "activationCodePlaceholder": "رمز تفعيل الاشتراك من قناة معينة. غير مطلوب للشراء من الموقع الرسمي؛ يتم تفعيل صلاحيات الحساب تلقائيًا",
   "exportDataTip": "‫رزم وتصدير جميع الملفات في مجلد ‪<code class='fn__code'>Workspace/data/</code>‬ كأرشيف zip‬",
   "importDataTip": "‫استيراد أرشيف zip المصدر، والكتابة فوق مجلد ‪<code class='fn__code'>Workspace/data/</code>‬ حسب المسار‬",
   "includeChildDoc": "إدراج مستندات الطفل",

@@ -881,7 +881,7 @@
   "sortByDownloadsDesc": "Decrescente por downloads",
   "sortByDownloadsAsc": "Crescente por downloads",
   "activationCode": "Código de ativação",
-  "activationCodePlaceholder": "Código de ativação de assinatura de um canal específico",
+  "activationCodePlaceholder": "Código de ativação de assinatura de um canal específico. Não é necessário para compras no site oficial; as permissões da conta são ativadas automaticamente",
   "exportDataTip": "Empacotar e exportar todos os arquivos na pasta <code class='fn__code'>workspace/data/</code> como um arquivo zip",
   "importDataTip": "Importar o arquivo zip exportado, sobrescrevendo a pasta <code class='fn__code'>workspace/data/</code> por caminho",
   "includeChildDoc": "Incluir subdocumentos",

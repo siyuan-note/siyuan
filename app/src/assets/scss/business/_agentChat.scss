@@ -892,27 +892,21 @@ pre:hover .agent-chat__copy-wrap {
     height: 18px;
 }
 
-.agent-chat__model-trigger {
-    display: flex; align-items: center; gap: 2px;
-    font-size: 13px; padding: 0 8px; height: 24px;
-    border-radius: var(--b3-border-radius);
+// 模型选择器：原生 select，复用 b3-select 基础样式，此处只补充尺寸约束。
+// height 与 line-height 一致以保证文字垂直居中（b3-select 默认 28/20，这里压到 24/24）。
+.agent-chat__model-select {
+    max-width: 160px;
+    font-size: 13px;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 22px 0 8px;
     cursor: pointer;
-    white-space: nowrap;
-    position: relative;
-    outline: none;
-
-    svg { width: 12px; height: 12px; flex-shrink: 0; }
-
-    &:hover, &:focus-visible { background: var(--b3-theme-surface-light); }
 }
 
-// 无可用模型时的占位态：灰色文案 + 隐藏下拉箭头，提示用户去设置配置。
-.agent-chat__model-trigger--empty {
+// 无可用模型时的占位态：灰色文案，提示用户去设置配置。
+.agent-chat__model-select--empty {
     color: var(--b3-theme-on-surface-light);
-
-    svg { display: none; }
-
-    &:hover { color: var(--b3-theme-primary); }
+    cursor: default;
 }
 
 // 无可用模型时禁用发送按钮：半透明 + 禁止光标，从源头阻止无效请求。
@@ -921,29 +915,6 @@ pre:hover .agent-chat__copy-wrap {
     opacity: .5;
     cursor: not-allowed;
     pointer-events: none;
-}
-
-.agent-chat__model-menu {
-    position: absolute; bottom: 100%; left: 0;
-    width: 180px;
-}
-
-.agent-chat__model-menu .b3-menu__item:hover,
-.agent-chat__model-menu .b3-menu__item--highlight {
-    background: var(--b3-list-hover);
-}
-
-.agent-chat__model-check {
-    display: none;
-    width: 14px; height: 14px;
-    margin-left: auto;
-    flex-shrink: 0;
-    align-self: center;
-    color: var(--b3-theme-on-surface-light);
-}
-
-.b3-menu__item--current .agent-chat__model-check {
-    display: block;
 }
 
 .agent-session-popup {

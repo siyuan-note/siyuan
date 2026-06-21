@@ -109,10 +109,8 @@ export class AgentChat extends Model {
     private pendingConfirms: SessionEntry[] = [];
     private renderedToolNames: Record<string, boolean> = {};
     private hasInterveningCard = false;
-    private modelTrigger: HTMLElement;
+    private modelSelect: HTMLSelectElement;
     private selectedModel: string;
-    private modelMenu: HTMLElement | null = null;
-    private modelMenuIndex = 0;
     private modelOptions: Array<{ id: string; name: string }> = [];
     private userScrolledUp = false;
     private programmaticScroll = false;
@@ -223,7 +221,7 @@ export class AgentChat extends Model {
         '<div class="agent-chat__input-area">' +
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
-            '<span class="agent-chat__model-trigger" tabindex="0"><span class="agent-chat__model-label"></span><svg><use xlink:href="#iconUp"></use></svg></span>' +
+            '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
             '<span class="agent-chat__tokens fn__none"></span>' +
             '<span class="fn__flex-1"></span>' +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconCirclePlay"></use></svg></button>' +
@@ -241,7 +239,7 @@ export class AgentChat extends Model {
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
-        this.modelTrigger = panel.querySelector(".agent-chat__model-trigger") as HTMLElement;
+        this.modelSelect = panel.querySelector(".agent-chat__model-select") as HTMLSelectElement;
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             if (this.programmaticScroll) { return; }
@@ -290,47 +288,9 @@ export class AgentChat extends Model {
 
     private initModelSelect() {
         this.refreshModelOptions();
-        this.modelTrigger.addEventListener("click", (e: MouseEvent) => {
-            e.stopPropagation();
-            // 无模型时不展开空菜单（仅作状态展示）。
-            if (this.modelOptions.length === 0) {
-                return;
-            }
-            if (this.modelMenu) {
-                this.closeModelMenu();
-            } else {
-                this.openModelMenu();
-            }
-        });
-        this.modelTrigger.addEventListener("keydown", (e: KeyboardEvent) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                if (this.modelOptions.length === 0) {
-                    return;
-                }
-                if (this.modelMenu) {
-                    const option = this.modelOptions[this.modelMenuIndex];
-                    if (option) {
-                        this.selectedModel = option.id;
-                        this.updateModelLabel();
-                    }
-                    this.closeModelMenu();
-                } else {
-                    this.openModelMenu();
-                }
-            } else if (e.key === "ArrowDown") {
-                e.preventDefault();
-                if (!this.modelMenu) { this.openModelMenu(); return; }
-                this.modelMenuIndex = (this.modelMenuIndex + 1) % this.modelOptions.length;
-                this.updateModelMenuHighlight();
-            } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                if (!this.modelMenu) { this.openModelMenu(); return; }
-                this.modelMenuIndex = (this.modelMenuIndex - 1 + this.modelOptions.length) % this.modelOptions.length;
-                this.updateModelMenuHighlight();
-            } else if (e.key === "Escape" && this.modelMenu) {
-                this.closeModelMenu();
-            }
+        // 选中模型变更：原生 select 的 change 事件，无需自定义菜单逻辑。
+        this.modelSelect.addEventListener("change", () => {
+            this.selectedModel = this.modelSelect.value;
         });
     }
 
@@ -366,74 +326,21 @@ export class AgentChat extends Model {
     }
 
     private updateModelLabel() {
-        const label = this.modelTrigger.querySelector(".agent-chat__model-label") as HTMLElement;
-        if (!label) { return; }
-        // 无可用模型：显示占位"未配置模型"并加空态样式。
+        // 重建 <option> 列表。无可用模型时插入一个禁用的占位项，保持 select 不为空。
+        let html = "";
         if (this.modelOptions.length === 0) {
-            label.textContent = window.siyuan.languages.noModelConfigured || "No model configured";
-            this.modelTrigger.classList.add("agent-chat__model-trigger--empty");
+            const placeholder = window.siyuan.languages.noModelConfigured || "No model configured";
+            html = '<option value="" disabled selected>' + escapeHtml(placeholder) + "</option>";
+            this.modelSelect.innerHTML = html;
+            this.modelSelect.classList.add("agent-chat__model-select--empty");
             return;
         }
-        this.modelTrigger.classList.remove("agent-chat__model-trigger--empty");
-        const option = this.modelOptions.find((o) => o.id === this.selectedModel);
-        if (option) { label.textContent = option.name; }
-    }
-
-    private openModelMenu() {
-        this.closeModelMenu();
-        this.modelMenuIndex = this.modelOptions.findIndex((o) => o.id === this.selectedModel);
-        if (this.modelMenuIndex < 0) { this.modelMenuIndex = 0; }
-        const menu = document.createElement("div");
-        menu.className = "agent-chat__model-menu b3-menu";
-        let html = '<div class="b3-menu__items">';
-        for (let i = 0; i < this.modelOptions.length; i++) {
-            const o = this.modelOptions[i];
-            const isSelected = o.id === this.selectedModel;
-            html += '<div class="agent-chat__model-item b3-menu__item' + (isSelected ? " b3-menu__item--current" : "") + '" data-i="' + i + '" data-id="' + o.id + '">' +
-                '<span class="b3-menu__label">' + escapeHtml(o.name) + "</span>" +
-                '<svg class="agent-chat__model-check"><use xlink:href="#iconSelect"></use></svg>' +
-            "</div>";
+        this.modelSelect.classList.remove("agent-chat__model-select--empty");
+        for (const o of this.modelOptions) {
+            html += '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.name) + "</option>";
         }
-        html += "</div>";
-        menu.innerHTML = html;
-        this.modelTrigger.appendChild(menu);
-        this.modelMenu = menu;
-        this.updateModelMenuHighlight();
-        menu.addEventListener("click", (e: MouseEvent) => {
-            e.stopPropagation();
-            const item = (e.target as HTMLElement).closest(".agent-chat__model-item") as HTMLElement;
-            if (item) {
-                this.selectedModel = item.getAttribute("data-id") || this.selectedModel;
-                this.updateModelLabel();
-                this.closeModelMenu();
-            }
-        });
-        setTimeout(() => {
-            document.addEventListener("click", this.closeModelMenuHandler);
-        }, 10);
-    }
-
-    private closeModelMenuHandler = () => {
-        this.closeModelMenu();
-        document.removeEventListener("click", this.closeModelMenuHandler);
-    };
-
-    private closeModelMenu() {
-        if (this.modelMenu) {
-            this.modelMenu.remove();
-            this.modelMenu = null;
-        }
-        document.removeEventListener("click", this.closeModelMenuHandler);
-    }
-
-    private updateModelMenuHighlight() {
-        if (!this.modelMenu) { return; }
-        const items = this.modelMenu.querySelectorAll(".agent-chat__model-item");
-        for (let i = 0; i < items.length; i++) {
-            items[i].classList.toggle("b3-menu__item--highlight", i === this.modelMenuIndex);
-        }
-        const current = items[this.modelMenuIndex] as HTMLElement;
-        if (current) { current.scrollIntoView({ block: "nearest" }); }
+        this.modelSelect.innerHTML = html;
+        this.modelSelect.value = this.selectedModel;
     }
 
     private getSelectedModel(): string {
@@ -615,7 +522,7 @@ export class AgentChat extends Model {
             if (t.closest(".agent-session-popup")) {
                 return;
             }
-            if (t.closest(".agent-chat__model-trigger") || t.closest(".agent-chat__model-menu")) {
+            if (t.closest(".agent-chat__model-select")) {
                 return;
             }
             if (this.composer) {

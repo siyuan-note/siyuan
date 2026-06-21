@@ -1628,10 +1628,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (point.className) {
+                // 超级块本身不显示插入点（实际插入到子块，不会创建超级块）
+                if (targetElement.classList.contains("sb")) {
+                    return;
+                }
                 targetElement.classList.add(point.className);
                 addDragover(targetElement);
-                // 默认移动（无修饰键、非 AV 目标、普通块源）时，更新下半为带目标名的位置文案
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget) {
+                // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
+                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
                     const isFront = point.className === "dragover__top" || point.className === "dragover__left";
                     const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
                     if ((isFront || isBack) && cachedTargetText) {
@@ -1737,27 +1741,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
 
+            // 超级块本身不显示插入点（实际插入到子块，不会创建超级块）
+            if (targetElement.classList.contains("sb")) {
+                return;
+            }
+
             // 减小两个列表之间左侧间距，以便拖拽到其中 https://github.com/siyuan-note/siyuan/issues/15672
             if (event.clientX < nodeRect.left + (targetElement.classList.contains("list") ? 8 : 32) &&
                 event.clientX >= nodeRect.left - 1 &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__left");
                 addDragover(targetElement);
-                // 默认移动时，更新下半为带目标名的位置文案
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget) {
-                    const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
-                    if (targetText) {
-                        showDragTip(window.siyuan.dragTitle || "",
-                            window.siyuan.languages.dragTipMoveTargetFront.replace("${x}", targetText),
-                            event.clientX, event.clientY);
-                    }
+                // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
+                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                    showDragTip(window.siyuan.dragTitle || "",
+                        window.siyuan.languages.dragTipMoveTargetFront.replace("${x}", cachedTargetText),
+                        event.clientX, event.clientY);
                 }
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__right");
                 addDragover(targetElement);
-                // 默认移动时，更新下半为带目标名的位置文案
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && cachedTargetText) {
+                // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
+                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                     showDragTip(window.siyuan.dragTitle || "",
                         window.siyuan.languages.dragTipMoveTargetBack.replace("${x}", cachedTargetText),
                         event.clientX, event.clientY);
@@ -1770,8 +1776,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
                     targetElement.classList.add("dragover__bottom");
                     addDragover(targetElement);
-                    // 默认移动时，更新下半为带目标名的位置文案
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && cachedTargetText) {
+                    // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
                             (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetBack : window.siyuan.languages.dragTipMoveTargetBelow).replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);
@@ -1779,8 +1785,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else if (disabledPosition !== "top") {
                     targetElement.classList.add("dragover__top");
                     addDragover(targetElement);
-                    // 默认移动时，更新下半为带目标名的位置文案
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && cachedTargetText) {
+                    // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
                             (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetAbove).replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);

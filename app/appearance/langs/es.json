@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Sin modelo configurado",
+  "agentNoModelTip": "Configure primero un proveedor y un modelo en Ajustes - IA antes de chatear con el agente.",
   "dragTip2Heading": "Convertir en encabezado",
   "dragTipRef": "Insertar referencia",
   "dragTipEmbed": "Insertar bloque incrustado",

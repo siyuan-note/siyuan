@@ -126,6 +126,34 @@
     border-color: var(--b3-theme-primary);
 }
 
+// 无模型提示块：引导用户去 设置 - 人工智能 配置。
+.agent-welcome__no-model {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 12px;
+    padding: 20px 16px;
+    background: var(--b3-theme-surface);
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    text-align: center;
+}
+
+.agent-welcome__no-model-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--b3-theme-on-surface);
+}
+
+.agent-welcome__no-model-tip {
+    font-size: 13px;
+    color: var(--b3-theme-on-surface-light);
+    line-height: 1.5;
+}
+
 .agent-chat__msg {
     display: flex;
     flex-direction: column;
@@ -588,7 +616,7 @@ pre:hover .agent-chat__copy-wrap {
 }
 
 .agent-chat__msg--error .agent-chat__body {
-    display: flex; align-items: flex-start; gap: 6px;
+    display: flex; align-items: center; gap: 6px;
     color: var(--b3-theme-error);
     background: var(--b3-theme-error-light);
     word-break: break-word;
@@ -876,6 +904,23 @@ pre:hover .agent-chat__copy-wrap {
     svg { width: 12px; height: 12px; flex-shrink: 0; }
 
     &:hover, &:focus-visible { background: var(--b3-theme-surface-light); }
+}
+
+// 无可用模型时的占位态：灰色文案 + 隐藏下拉箭头，提示用户去设置配置。
+.agent-chat__model-trigger--empty {
+    color: var(--b3-theme-on-surface-light);
+
+    svg { display: none; }
+
+    &:hover { color: var(--b3-theme-primary); }
+}
+
+// 无可用模型时禁用发送按钮：半透明 + 禁止光标，从源头阻止无效请求。
+.agent-chat__send--disabled,
+.agent-chat__send[disabled] {
+    opacity: .5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .agent-chat__model-menu {

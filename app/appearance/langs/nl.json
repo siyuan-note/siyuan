@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Geen model geconfigureerd",
+  "agentNoModelTip": "Configureer eerst een provider en model in Instellingen - AI en chat dan met de agent.",
   "dragTip2Heading": "Omzetten naar kop",
   "dragTipRef": "Referentie invoegen",
   "dragTipEmbed": "Ingesloten blok invoegen",

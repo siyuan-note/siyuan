@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "尚未配置 AI 模型",
+  "agentNoModelTip": "請先在 設定 - 人工智慧 中配置提供商與模型，然後再來和智能體對話。",
   "dragTip2Heading": "轉換為標題",
   "dragTipRef": "插入引用",
   "dragTipEmbed": "插入嵌入塊",

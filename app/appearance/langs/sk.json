@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Nie je nakonfigurovaný žiadny model",
+  "agentNoModelTip": "Najprv nakonfigurujte poskytovateľa a model v Nastavenia - AI a potom konverzujte s agentom.",
   "dragTip2Heading": "Zmeniť na nadpis",
   "dragTipRef": "Vložiť odkaz",
   "dragTipEmbed": "Vložiť vložený blok",

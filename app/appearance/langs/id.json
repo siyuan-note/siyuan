@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Tidak ada model yang dikonfigurasi",
+  "agentNoModelTip": "Silakan konfigurasikan penyedia dan model di Pengaturan - AI terlebih dahulu, lalu ngobrol dengan agen.",
   "dragTip2Heading": "Ubah menjadi judul",
   "dragTipRef": "Sisipkan referensi",
   "dragTipEmbed": "Sisipkan blok tersemat",

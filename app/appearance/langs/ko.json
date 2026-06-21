@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "모델이 구성되지 않음",
+  "agentNoModelTip": "먼저 설정 - 인공지능에서 제공자와 모델을 구성한 후 에이전트와 대화하세요.",
   "dragTip2Heading": "제목으로 변환",
   "dragTipRef": "참조 삽입",
   "dragTipEmbed": "임베드 블록 삽입",

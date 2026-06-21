@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Aucun modèle configuré",
+  "agentNoModelTip": "Veuillez d'abord configurer un fournisseur et un modèle dans Paramètres - IA, puis discutez avec l'agent.",
   "dragTip2Heading": "Convertir en titre",
   "dragTipRef": "Insérer une référence",
   "dragTipEmbed": "Insérer un bloc intégré",

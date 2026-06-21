@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "No model configured",
+  "agentNoModelTip": "Please configure a provider and model in Settings - AI first, then chat with the agent.",
   "dragTip2Heading": "Convert to heading",
   "dragTipRef": "Insert reference",
   "dragTipEmbed": "Insert embed block",

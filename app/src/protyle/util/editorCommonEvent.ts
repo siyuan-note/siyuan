@@ -1126,7 +1126,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                         }
                         if (nestedTarget) {
-                            dragSame(protyle, sourceElements, nestedTarget, isBottom, event.ctrlKey);
+                            // 拖拽自身子列表项到父项位置时，nestedTarget 可能就是源项自身，需跳过避免自己拖到自己
+                            if (!sourceElements.includes(nestedTarget)) {
+                                dragSame(protyle, sourceElements, nestedTarget, isBottom, event.ctrlKey);
+                            }
                         } else {
                             // 目标列表项无嵌套子列表：定位其最后一个内容块，在其后插入，
                             // moveTo 会自动创建嵌套列表包装源列表项，形成子项结构

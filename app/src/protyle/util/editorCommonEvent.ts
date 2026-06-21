@@ -1665,7 +1665,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     let siblingGuides = "";
                     for (let n = 1; n <= depth; n++) {
                         if (siblingGuides) siblingGuides += ", ";
-                        const opacity = depth <= 1 ? 0.55 : 1 - (n - 1) / (depth - 1) * 0.65;
+                        // guide 竖线透明度从 0.5（最近）渐变到 0.1（最远），均低于插入线（0.6）以突出目标位置
+                        const opacity = depth <= 1 ? 0.3 : 0.5 - (n - 1) / (depth - 1) * 0.4;
                         siblingGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
                     }
                     dragCache = {nodeId, indent, rgb, guides: siblingGuides || "none"};
@@ -1688,9 +1689,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 htmlTarget.classList.add(className);
                 htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
                 htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
-                htmlTarget.style.setProperty("--drag-guides", guides);
+                // 仅在成为子项时显示层级 guide 竖线；同级插入时清除，避免横线覆盖后短线残留导致颜色重叠
+                htmlTarget.style.setProperty("--drag-guides", isChild ? guides : "none");
+                // ::before 目标标记仅在成为子项时显示，sibling 时由横线独占该区域避免半透明叠加变深
                 htmlTarget.style.setProperty("--drag-base-bg",
-                    isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 1)` : "transparent");
+                    isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)` : "transparent");
+                // 横向插入线使用独立颜色，始终显示
+                htmlTarget.style.setProperty("--drag-line-bg",
+                    `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
                 highlightByLevel(editorElement, htmlTarget);
                 // Update drag tip to show specific insertion position
                 const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
@@ -1950,6 +1956,7 @@ const cleanupDragIndicators = (scope: ParentNode) => {
         item.style.removeProperty("--drag-guides");
         item.style.removeProperty("--drag-line-left");
         item.style.removeProperty("--drag-base-bg");
+        item.style.removeProperty("--drag-line-bg");
     });
 };
 

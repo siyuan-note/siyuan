@@ -111,7 +111,7 @@ const settingTabs = {
     }, registerAccessTab),
     app: setting.tab({
         id: "app",
-        icon: "iconSiYuan",
+        icon: "iconLayoutGrid",
         title: () => window.siyuan.languages.application,
     }, registerAppTab),
     about: setting.tab({

@@ -803,6 +803,10 @@ export class WYSIWYG {
                     !nextElement || sbElement.getAttribute("data-sb-layout") !== "col") {
                     return;
                 }
+                const oldHTMLs = {
+                    prev: previousElement.outerHTML,
+                    next: nextElement.outerHTML,
+                };
                 const x = event.clientX;
                 const sbWidth = sbElement.clientWidth;
                 // 使用 getBoundingClientRect 获取精确浮点宽度，避免 clientWidth（整数取整）作为
@@ -813,9 +817,6 @@ export class WYSIWYG {
                 const handleStyle = getComputedStyle(target);
                 const gapPx = target.offsetWidth + parseFloat(handleStyle.marginLeft) + parseFloat(handleStyle.marginRight);
                 const minWidth = 20;
-                target.classList.add("sb__resize--drag");
-                // 拖拽时禁止换行，避免最后一个子块因宽度溢出而换行
-                sbElement.style.flexWrap = "nowrap";
                 // @ts-ignore
                 previousElement.style.webkitUserModify = "read-only";
                 // @ts-ignore
@@ -845,9 +846,7 @@ export class WYSIWYG {
                     nextElement.style.width = newRightWidth + "px";
                     nextElement.style.flex = "none";
                 };
-                documentSelf.onmouseup = () => {
-                    target.classList.remove("sb__resize--drag");
-                    sbElement.style.flexWrap = "";
+                documentSelf.onmouseup = (mouseupEvent) => {
                     // @ts-ignore
                     previousElement.style.webkitUserModify = "";
                     // @ts-ignore
@@ -857,8 +856,10 @@ export class WYSIWYG {
                     documentSelf.ondragstart = null;
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
-                    const sbChildren = Array.from(sbElement.querySelectorAll(":scope > [data-node-id]")) as HTMLElement[];
-                    const oldHTMLs = sbChildren.map(c => c.outerHTML);
+                    // 仅点击未拖拽，不产生 transaction，避免无意义的更新
+                    if (Math.abs(x - mouseupEvent.clientX) <= 0) {
+                        return;
+                    }
                     // 只调整左右两块（手柄两侧），其他子块不动，避免影响未拖拽的块
                     // 使用 mousemove 记录的精确实时宽度（finalLeft/finalRight）反推百分比，
                     // gapHalve 已含 +1px 余量防止亚像素换行，无需再用 *99 缩放（会造成累积收缩）
@@ -877,8 +878,18 @@ export class WYSIWYG {
                     nextElement.style.width = `calc(${rightPct}% - ${gapHalve}px)`;
                     previousElement.setAttribute("updated", updated);
                     nextElement.setAttribute("updated", updated);
-                    updateTransaction(protyle, previousElement, oldHTMLs[sbChildren.indexOf(previousElement)]);
-                    updateTransaction(protyle, nextElement, oldHTMLs[sbChildren.indexOf(nextElement)]);
+                    // 合并为单个 transaction，确保撤销时两侧宽度同时恢复
+                    transaction(protyle, [
+                        {
+                            action: "update",
+                            id: previousElement.getAttribute("data-node-id"),
+                            data: previousElement.outerHTML
+                        },
+                        {action: "update", id: nextElement.getAttribute("data-node-id"), data: nextElement.outerHTML},
+                    ], [
+                        {action: "update", id: previousElement.getAttribute("data-node-id"), data: oldHTMLs.prev},
+                        {action: "update", id: nextElement.getAttribute("data-node-id"), data: oldHTMLs.next},
+                    ]);
                 };
                 this.preventClick = true;
                 event.preventDefault();

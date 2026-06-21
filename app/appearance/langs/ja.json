@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "モデルが設定されていません",
+  "agentNoModelTip": "先に 設定 - 人工知能 でプロバイダーとモデルを設定してから、エージェントと対話してください。",
   "dragTip2Heading": "見出しに変換",
   "dragTipRef": "参照を挿入",
   "dragTipEmbed": "埋め込みブロックを挿入",

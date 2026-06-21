@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Nessun modello configurato",
+  "agentNoModelTip": "Configura prima un provider e un modello in Impostazioni - IA, quindi conversa con l'agente.",
   "dragTip2Heading": "Converti in intestazione",
   "dragTipRef": "Inserisci riferimento",
   "dragTipEmbed": "Inserisci blocco incorporato",

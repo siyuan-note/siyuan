@@ -32,8 +32,18 @@ export const renderTodoList = (result: string): string => {
     return html;
 };
 
-export const renderWelcomeHTML = (): string => {
+// hasModel=false 时渲染"未配置模型"提示块替代示例，避免用户点击示例后卡死。
+export const renderWelcomeHTML = (hasModel = true): string => {
     const L = window.siyuan.languages;
+    if (!hasModel) {
+        return '<div class="agent-welcome">' +
+            '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
+            '<div class="agent-welcome__no-model">' +
+                '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
+                '<div class="agent-welcome__no-model-tip">' + (L.agentNoModelTip || "Please configure a provider and model in Settings - AI first.") + "</div>" +
+            "</div>" +
+        "</div>";
+    }
     return '<div class="agent-welcome">' +
         '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
         '<div class="agent-welcome__examples">' +

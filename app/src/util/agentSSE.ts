@@ -116,6 +116,21 @@ export async function fetchAgentSSE(
             return;
         }
 
+        // 后端在无 provider/无模型等前置错误时返回 HTTP 200 + JSON 包络 {code:-1, msg}（非 SSE 流），
+        // 此时 Content-Type 为 application/json 而非 text/event-stream。检测并转 onError，避免静默卡死。
+        const contentType = response.headers.get("Content-Type") || "";
+        if (contentType.indexOf("text/event-stream") === -1) {
+            try {
+                const text = await response.text();
+                const data = text ? JSON.parse(text) : null;
+                const errMsg = (data && (data.msg || data.message)) || window.siyuan.languages._kernel[28];
+                onError(new AgentHttpError(errMsg, response.status));
+            } catch (e) {
+                onError(new Error(window.siyuan.languages._kernel[28]));
+            }
+            return;
+        }
+
         const reader = response.body ? response.body.getReader() : null;
         if (!reader) {
             onError(new Error(window.siyuan.languages._kernel[28]));

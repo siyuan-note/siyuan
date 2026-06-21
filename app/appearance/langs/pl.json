@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Brak skonfigurowanego modelu",
+  "agentNoModelTip": "Najpierw skonfiguruj dostawcę i model w Ustawienia - AI, a następnie porozmawiaj z agentem.",
   "dragTip2Heading": "Zmień w nagłówek",
   "dragTipRef": "Wstaw odnośnik",
   "dragTipEmbed": "Wstaw osadzony blok",

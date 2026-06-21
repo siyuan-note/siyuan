@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Kein Modell konfiguriert",
+  "agentNoModelTip": "Bitte konfigurieren Sie zuerst einen Anbieter und ein Modell unter Einstellungen - KI, und chatten Sie dann mit dem Agenten.",
   "dragTip2Heading": "In Überschrift umwandeln",
   "dragTipRef": "Referenz einfügen",
   "dragTipEmbed": "Eingebetteten Block einfügen",

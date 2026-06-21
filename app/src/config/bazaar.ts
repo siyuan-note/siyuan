@@ -56,7 +56,7 @@ const bazaar = {
     element: undefined as Element,
     genHTML() {
         if (!window.siyuan.config.bazaar.trust) {
-            return `<div class="fn__flex-column">
+            return `<div class="fn__flex-column" style="margin: 0 48px;">
 <div class="fn__flex-1"></div>
 <div class="b3-label">
     <div>${window.siyuan.languages.bazaarTrust}</div>

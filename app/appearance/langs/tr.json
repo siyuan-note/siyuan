@@ -1,4 +1,6 @@
 {
+  "agentNoModel": "Model yapılandırılmamış",
+  "agentNoModelTip": "Önce Ayarlar - Yapay Zeka bölümünde bir sağlayıcı ve model yapılandırın, ardından ajanla sohbet edin.",
   "dragTip2Heading": "Başlığa dönüştür",
   "dragTipRef": "Referans ekle",
   "dragTipEmbed": "Gömülü blok ekle",

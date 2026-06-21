@@ -59,6 +59,7 @@ import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 import {confirmDialog} from "../../../dialog/confirmDialog";
+import {Menu} from "../../../plugin/Menu";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 import {
@@ -169,7 +170,7 @@ export const openMenuPanel = (options: {
 
         document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : (options.type === "filters" ? 'style="min-width: 340px;max-width: 80vw;width: fit-content;"' : "")}>${html}</div>
+    <div class="b3-menu${options.type === "filters" ? " av__filter-panel" : ""}" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="${["select", "asset", "relation"].includes(options.type) ? "max-height: calc(100vh - 32px);display: flex;flex-direction: column;" : ""}min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         let closeCB: () => void;
@@ -337,7 +338,6 @@ export const openMenuPanel = (options: {
                 updateCellsValue(options.protyle, options.blockElement as HTMLElement, newValue, options.cellElements);
             };
         });
-        let filterPopup: HTMLElement | null = null;
         avPanelElement.addEventListener("click", async (event: MouseEvent) => {
             let type: string;
             let target = event.target as HTMLElement;
@@ -371,6 +371,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "go-config") {
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getViewHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
@@ -381,6 +382,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "go-properties") {
                     // 复制列后点击返回到属性面板，宽度不一致，需重新计算
                     tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getPropertiesHTML(fields);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
@@ -388,6 +390,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "go-layout") {
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getLayoutHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     bindLayoutEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
@@ -396,6 +399,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSorts") {
+                    menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getSortsHTML(fields, data.view.sorts);
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
@@ -462,7 +466,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goFilters") {
                     menuElement.innerHTML = getFiltersHTML(data);
-                    menuElement.setAttribute("style", "min-width: 340px;max-width: 80vw;width: fit-content;");
+                    menuElement.classList.add("av__filter-panel");
                     bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
@@ -506,80 +510,83 @@ export const openMenuPanel = (options: {
                 } else if (type === "addFilterCondition") {
                     const path = target.dataset.path || target.closest("[data-path]")?.getAttribute("data-path") || "";
                     const depth = parseInt(target.dataset.depth || target.closest("[data-depth]")?.getAttribute("data-depth") || "0", 10);
-                    const popup = document.createElement("div");
-                    popup.className = "b3-menu";
-                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${event.clientX}px;border:1px solid var(--b3-theme-surface-lighter);box-shadow:var(--b3-dialog-shadow);`;
-                    popup.innerHTML = `<div class="b3-menu__items">
-<button class="b3-menu__item" data-type="addFilter" data-path="${path}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
-</button>
-<button class="b3-menu__item${depth >= 3 ? " fn__none" : ""}" data-type="addFilterGroup" data-path="${path}">
-    <svg class="b3-menu__icon"><use xlink:href="#iconListFilterPlus"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.addFilterGroup}</span>
-</button>
-</div>`;
-                    if (filterPopup) {
-                        filterPopup.remove();
-                        filterPopup = null;
-                    }
-                    document.body.appendChild(popup);
-                    filterPopup = popup;
-                    const closePopup = () => {
-                        popup.remove();
-                        document.removeEventListener("click", closePopup);
-                        window.siyuan.zIndex--;
-                        filterPopup = null;
-                    };
-                    document.addEventListener("click", closePopup);
-                    popup.addEventListener("click", (e: MouseEvent) => {
-                        e.stopPropagation();
-                        const btn = (e.target as HTMLElement).closest(".b3-menu__item") as HTMLElement;
-                        if (!btn) {
-                            closePopup();
-                            return;
-                        }
-                        const btnType = btn.dataset.type;
-                        const btnPath = btn.dataset.path;
-                        const clickX = e.clientX;
-                        const clickY = e.clientY;
-                        closePopup();
-                        if (btnType === "addFilter") {
+                    const menu = new Menu("addFilterCondition");
+                    menu.addItem({
+                        icon: "iconAdd",
+                        label: window.siyuan.languages.addFilter,
+                        click: () => {
                             addFilter({
                                 data,
-                                rect: {left: clickX, bottom: clickY, height: 28} as DOMRect,
+                                rect: {left: event.clientX, bottom: event.clientY, height: 28} as DOMRect,
                                 menuElement,
                                 tabRect,
                                 avId: avID,
                                 protyle: options.protyle,
                                 blockElement: options.blockElement,
-                                parentPath: btnPath
+                                parentPath: path
                             });
-                        } else if (btnType === "addFilterGroup") {
-                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                            addFilterGroup(data, btnPath);
-                            const fields = getFieldsByData(data);
-                            const blockField = fields.find(f => f.type === "block") || fields.find(f => f.type !== "lineNumber");
-                            if (blockField) {
-                                let target: IAVFilter[];
-                                if ("" === btnPath) {
-                                    target = getEditableFilters(data);
-                                } else {
-                                    const n = getFilterByPath(getEditableFilters(data), btnPath);
-                                    target = n?.filters || getEditableFilters(data);
-                                    if (!target) {
+                        }
+                    });
+                    if (depth < 3) {
+                        menu.addItem({
+                            icon: "iconListFilterPlus",
+                            label: window.siyuan.languages.addFilterGroup,
+                            click: () => {
+                                const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                                addFilterGroup(data, path);
+                                const fields = getFieldsByData(data);
+                                const blockField = fields.find(f => f.type === "block") || fields.find(f => f.type !== "lineNumber");
+                                if (blockField) {
+                                    let target: IAVFilter[];
+                                    if ("" === path) {
                                         target = getEditableFilters(data);
+                                    } else {
+                                        const n = getFilterByPath(getEditableFilters(data), path);
+                                        target = n?.filters || getEditableFilters(data);
+                                        if (!target) {
+                                            target = getEditableFilters(data);
+                                        }
+                                    }
+                                    const newGroup = target[target.length - 1];
+                                    if (newGroup?.filters) {
+                                        newGroup.filters.push({
+                                            column: blockField.id,
+                                            operator: getDefaultOperatorByType(blockField.type),
+                                            value: genCellValue(blockField.type, ""),
+                                        });
                                     }
                                 }
-                                const newGroup = target[target.length - 1];
-                                if (newGroup?.filters) {
-                                    newGroup.filters.push({
-                                        column: blockField.id,
-                                        operator: getDefaultOperatorByType(blockField.type),
-                                        value: genCellValue(blockField.type, ""),
-                                    });
-                                }
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: JSON.parse(JSON.stringify(data.view.filters)),
+                                    blockID
+                                }], [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: oldFilters,
+                                    blockID
+                                }]);
+                                menuElement.innerHTML = getFiltersHTML(data);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                             }
+                        });
+                    }
+                    menu.open({x: event.clientX, y: event.clientY, h: 28});
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "moreFilter") {
+                    const path = target.getAttribute("data-path") || target.closest("[data-path]")?.getAttribute("data-path") || "";
+                    const node = getFilterByPath(getEditableFilters(data), path);
+                    const isGroup = node && node.filters;
+                    const menu = new Menu("moreFilter");
+                    menu.addItem({
+                        icon: "iconAdd",
+                        label: window.siyuan.languages.duplicate,
+                        click: () => {
+                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                            duplicateFilterByPath(getEditableFilters(data), path);
                             transaction(options.protyle, [{
                                 action: "setAttrViewFilters",
                                 avID,
@@ -595,60 +602,59 @@ export const openMenuPanel = (options: {
                             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                         }
                     });
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "moreFilter") {
-                    const path = target.getAttribute("data-path") || target.closest("[data-path]")?.getAttribute("data-path") || "";
-                    const node = getFilterByPath(getEditableFilters(data), path);
-                    const isGroup = node && node.filters;
-                    const popup = document.createElement("div");
-                    popup.className = "b3-menu";
-                    popup.style.cssText = `position:fixed;z-index:${++window.siyuan.zIndex};min-width:160px;top:${event.clientY + 100 < window.innerHeight ? event.clientY + 4 : event.clientY - 64}px;left:${Math.max(0, event.clientX - 120)}px;border:1px solid var(--b3-theme-surface-lighter);box-shadow:var(--b3-dialog-shadow);`;
-                    const items: {type: string; label: string; icon: string; cls?: string}[] = [
-                        {type: "duplicateFilter", label: window.siyuan.languages.duplicate, icon: "iconAdd"},
-                    ];
                     if (!isGroup) {
-                        items.push({type: "convertToGroup", label: window.siyuan.languages.convertToFilterGroup, icon: "iconListFilterPlus"});
+                        menu.addItem({
+                            icon: "iconListFilterPlus",
+                            label: window.siyuan.languages.convertToFilterGroup,
+                            click: () => {
+                                const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                                convertFilterToGroup(getEditableFilters(data), path);
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: JSON.parse(JSON.stringify(data.view.filters)),
+                                    blockID
+                                }], [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: oldFilters,
+                                    blockID
+                                }]);
+                                menuElement.innerHTML = getFiltersHTML(data);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                            }
+                        });
                     } else if (node && node.filters && 1 === node.filters.length) {
-                        items.push({type: "convertToFilter", label: window.siyuan.languages.convertGroupToFilter, icon: "iconListFilterPlus"});
+                        menu.addItem({
+                            icon: "iconListFilterPlus",
+                            label: window.siyuan.languages.convertGroupToFilter,
+                            click: () => {
+                                const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
+                                convertGroupToFilter(getEditableFilters(data), path);
+                                transaction(options.protyle, [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: JSON.parse(JSON.stringify(data.view.filters)),
+                                    blockID
+                                }], [{
+                                    action: "setAttrViewFilters",
+                                    avID,
+                                    data: oldFilters,
+                                    blockID
+                                }]);
+                                menuElement.innerHTML = getFiltersHTML(data);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                            }
+                        });
                     }
-                    items.push({type: "removeFilter", label: window.siyuan.languages.delete, icon: "iconTrashcan", cls: "b3-menu__item--warning"});
-                    popup.innerHTML = `<div class="b3-menu__items">${items.map(item =>
-                        `<button class="b3-menu__item${item.cls ? " " + item.cls : ""}" data-type="${item.type}" data-path="${path}">
-                            ${item.icon ? `<svg class="b3-menu__icon"><use xlink:href="#${item.icon}"></use></svg>` : ""}
-                            <span class="b3-menu__label">${item.label}</span>
-                        </button>`
-                    ).join("")}</div>`;
-                    if (filterPopup) {
-                        filterPopup.remove();
-                        filterPopup = null;
-                    }
-                    document.body.appendChild(popup);
-                    filterPopup = popup;
-                    const closePopup = () => {
-                        popup.remove();
-                        document.removeEventListener("click", closePopup);
-                        window.siyuan.zIndex--;
-                        filterPopup = null;
-                    };
-                    document.addEventListener("click", closePopup);
-                    popup.addEventListener("click", (e: MouseEvent) => {
-                        e.stopPropagation();
-                        const btn = (e.target as HTMLElement).closest(".b3-menu__item") as HTMLElement;
-                        if (!btn) {
-                            closePopup();
-                            return;
-                        }
-                        const btnType = btn.dataset.type;
-                        const btnPath = btn.dataset.path;
-                        closePopup();
-                        if (btnType === "removeFilter") {
-                            window.siyuan.menus.menu.remove();
-                            const rmNode = getFilterByPath(getEditableFilters(data), btnPath);
+                    menu.addItem({
+                        icon: "iconTrashcan",
+                        label: window.siyuan.languages.delete,
+                        click: () => {
+                            const rmNode = getFilterByPath(getEditableFilters(data), path);
                             const doRemove = () => {
                                 const cloneBefore = JSON.parse(JSON.stringify(data.view.filters));
-                                removeFilterByPath(getEditableFilters(data), btnPath);
+                                removeFilterByPath(getEditableFilters(data), path);
                                 const cloneAfter = JSON.parse(JSON.stringify(data.view.filters));
                                 transaction(options.protyle, [{
                                     action: "setAttrViewFilters",
@@ -669,56 +675,9 @@ export const openMenuPanel = (options: {
                             } else {
                                 doRemove();
                             }
-                        } else if (btnType === "duplicateFilter") {
-                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                            duplicateFilterByPath(getEditableFilters(data), btnPath);
-                            transaction(options.protyle, [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: JSON.parse(JSON.stringify(data.view.filters)),
-                                blockID
-                            }], [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: oldFilters,
-                                blockID
-                            }]);
-                            menuElement.innerHTML = getFiltersHTML(data);
-                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                        } else if (btnType === "convertToGroup") {
-                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                            convertFilterToGroup(getEditableFilters(data), btnPath);
-                            transaction(options.protyle, [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: JSON.parse(JSON.stringify(data.view.filters)),
-                                blockID
-                            }], [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: oldFilters,
-                                blockID
-                            }]);
-                            menuElement.innerHTML = getFiltersHTML(data);
-                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                        } else if (btnType === "convertToFilter") {
-                            const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                            convertGroupToFilter(getEditableFilters(data), btnPath);
-                            transaction(options.protyle, [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: JSON.parse(JSON.stringify(data.view.filters)),
-                                blockID
-                            }], [{
-                                action: "setAttrViewFilters",
-                                avID,
-                                data: oldFilters,
-                                blockID
-                            }]);
-                            menuElement.innerHTML = getFiltersHTML(data);
-                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                         }
                     });
+                    menu.open({x: event.clientX, y: event.clientY, h: 28});
                     event.preventDefault();
                     event.stopPropagation();
                     break;

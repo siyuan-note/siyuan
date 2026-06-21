@@ -42,16 +42,6 @@ export const matchAuxiliaryHotKey = (hotKey: string, event: KeyboardEvent) => {
     return true;
 };
 
-const replaceDirect = (hotKey: string, keyCode: string) => {
-    const hotKeys = hotKey.replace(keyCode, Constants.ZWSP).split("");
-    hotKeys.forEach((item, index) => {
-        if (item === Constants.ZWSP) {
-            hotKeys[index] = keyCode;
-        }
-    });
-    return hotKeys;
-};
-
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     if (!hotKey) {
         return false;
@@ -77,25 +67,16 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         return false;
     }
 
-    let hotKeys = hotKey.split("");
-    if (hotKey.indexOf("F") > -1) {
-        hotKeys.forEach((item, index) => {
-            if (item === "F") {
-                // F1-F12
-                hotKeys[index] = "F" + hotKeys.splice(index + 1, 1);
-                if (hotKeys[index + 1]) {
-                    hotKeys[index + 1] += hotKeys.splice(index + 1, 1);
-                }
-            }
-        });
-    } else if (hotKey.indexOf("PageUp") > -1) {
-        hotKeys = replaceDirect(hotKey, "PageUp");
-    } else if (hotKey.indexOf("PageDown") > -1) {
-        hotKeys = replaceDirect(hotKey, "PageDown");
-    } else if (hotKey.indexOf("Home") > -1) {
-        hotKeys = replaceDirect(hotKey, "Home");
-    } else if (hotKey.indexOf("End") > -1) {
-        hotKeys = replaceDirect(hotKey, "End");
+    // 将快捷键字符串拆分为 多个修饰键 + 一个主键，例如 ⌥⇧F10 → ["⌥", "⇧", "F10"]
+    const hotKeys: string[] = [];
+    let hotKeyIndex = 0;
+    while (hotKeyIndex < hotKey.length && "⌃⌥⇧⌘".includes(hotKey[hotKeyIndex])) {
+        hotKeys.push(hotKey[hotKeyIndex]);
+        hotKeyIndex++;
+    }
+    const mainKey = hotKey.slice(hotKeyIndex);
+    if (mainKey) {
+        hotKeys.push(mainKey);
     }
 
     // 是否匹配 ⇧[]

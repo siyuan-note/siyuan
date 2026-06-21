@@ -1,15 +1,12 @@
-import {
-    focusBlock,
-    focusByRange,
-    focusByWbr,
-    getSelectionOffset,
-    setLastNodeRange
-} from "../util/selection";
+import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,
-    getNextBlock, getParentBlock,
-    getPreviousBlock, getPreviousBlockSibling, getSbChildBlockCount,
+    getNextBlock,
+    getParentBlock,
+    getPreviousBlock,
+    getPreviousBlockSibling,
+    getSbChildBlockCount,
     getTopAloneElement,
     getTopEmptyElement,
     hasNextSibling,
@@ -172,6 +169,30 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     };
                 }
                 topElement.remove();
+                // 删除列表项内容块后，若该列表项仅剩子列表而无内容块，需补一个空段落
+                // 避免"列表项下直接挂列表"的非法结构 https://github.com/siyuan-note/siyuan/issues/17892
+                const liChildren = Array.from(topParentElement.children);
+                const liSubList = liChildren.find(item => item.classList.contains("list"));
+                const liHasContent = liChildren.some(item => item.hasAttribute("data-node-id") &&
+                    !item.classList.contains("list") && !item.classList.contains("protyle-action") &&
+                    !item.classList.contains("protyle-attr"));
+                if (topParentElement.classList.contains("li") && liSubList && !liHasContent) {
+                    const emptyID = Lute.NewNodeID();
+                    const emptyElement = genEmptyElement(false, true, emptyID);
+                    // 空段落插到列表标记之后、子列表之前，与服务端 doInsert 通过 nextID 定位的位置一致
+                    liChildren.find(item => item.classList.contains("protyle-action"))?.after(emptyElement);
+                    deletes.push({
+                        action: "insert",
+                        id: emptyID,
+                        data: emptyElement.outerHTML,
+                        nextID: liSubList.getAttribute("data-node-id"),
+                        parentID: topParentElement.getAttribute("data-node-id"),
+                    });
+                    inserts.push({
+                        action: "delete",
+                        id: emptyID,
+                    });
+                }
             }
         }
         Object.keys(unfoldData).forEach(item => {

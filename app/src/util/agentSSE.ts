@@ -26,6 +26,7 @@ export type ISSEResult = {
     type: "usage";
     promptTokens: number;
     completionTokens: number;
+    lastPromptTokens: number;
 } | {
     type: "retry";
     attempt: number;
@@ -238,6 +239,7 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 type: "usage",
                 promptTokens: (data.promptTokens as number) || 0,
                 completionTokens: (data.completionTokens as number) || 0,
+                lastPromptTokens: (data.lastPromptTokens as number) || 0,
             };
         case "retry":
             return {

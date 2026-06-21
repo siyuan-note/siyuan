@@ -217,6 +217,7 @@ type AgentEvent struct {
 	Error            string
 	PromptTokens     int
 	CompletionTokens int
+	LastPromptTokens int
 	RetryAttempt     int
 	RetryMax         int
 	SnapshotID       string
@@ -323,7 +324,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		tools := convertMCPToolsToOpenAI()
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
-		var totalPrompt, totalCompletion int
+		var totalPrompt, totalCompletion, lastPromptTokens int
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
@@ -478,6 +479,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				if resp.Usage != nil {
 					totalPrompt += resp.Usage.PromptTokens
 					totalCompletion += resp.Usage.CompletionTokens
+					// 记录最后一次 stream 的 prompt tokens（= 当前上下文已用），供前端底部显示。
+					lastPromptTokens = resp.Usage.PromptTokens
 				}
 			}
 
@@ -719,12 +722,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				ReasoningContent: reasoningBuilder.String(),
 			})
 
-			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion})
+			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens})
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 			return
 		}
 
-		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion})
+		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 	}()

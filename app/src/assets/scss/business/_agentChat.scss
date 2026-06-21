@@ -207,15 +207,9 @@
     display: flex;
     gap: 4px;
     width: 100%;
+    justify-content: flex-end;
     opacity: 0;
     transition: var(--b3-transition);
-}
-
-.agent-chat__msg-stats {
-    flex-shrink: 0;
-    margin-right: auto;
-    margin-left: 4px;
-    opacity: 0.6;
 }
 
 .agent-chat__msg--ai:hover .agent-chat__msg-actions,

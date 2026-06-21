@@ -50,9 +50,6 @@ type SessionEntry =
     type: "assistant";
     content?: string;
     toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>;
-    promptTokens?: number;
-    completionTokens?: number;
-    duration?: number;
     timestamp?: number
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string })
@@ -81,11 +78,7 @@ export class AgentChat extends Model {
     private lute: Lute;
     private currentContent = "";
     private fullContent = "";
-    private sessionPromptTokens = 0;
-    private sessionCompletionTokens = 0;
-    private sessionTotalDuration = 0;
-    private responsePromptTokens = 0;
-    private responseCompletionTokens = 0;
+    private contextTokens = 0;
     private sessionCreatedAt = 0;
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
@@ -125,8 +118,6 @@ export class AgentChat extends Model {
     private mirrorPlaceholderEl: HTMLElement | null = null;
     // 思考计时器：流式进行时每 100ms 刷新未完成思考卡片的标题为「思考中... X.Xs」。
     private thinkingTimerId = 0;
-    // 输入框计时器：请求进行时每 1s 刷新底部「tokens · 累计耗时」显示。
-    private tokenTimerId = 0;
     // 上一个 thinking step 快照时 currentToolCalls 的长度基准，
     // 用于计算本轮新增的工具（避免 step.toolNames 累积重复历史工具）。
     private lastStepToolCount = 0;
@@ -222,8 +213,8 @@ export class AgentChat extends Model {
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
             '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
-            '<span class="agent-chat__tokens fn__none"></span>' +
             '<span class="fn__flex-1"></span>' +
+            '<span class="agent-chat__tokens fn__none"></span>' +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconCirclePlay"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconCircleStop"></use></svg></button>' +
             "</div>" +
@@ -380,7 +371,6 @@ export class AgentChat extends Model {
                     const requestSessionId = this.sessionId;
                     this.requestStartTime = Date.now();
                     this.currentThinkingDuration = 0;
-                    this.startTokenTimer();
                     fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
                         (event: ISSEResult) => {
                             if (this.sessionId !== requestSessionId) {
@@ -546,9 +536,7 @@ export class AgentChat extends Model {
                 this.sessionTitle = session.title;
                 this.entries = this.buildEntriesFromSession(session);
                 this.hasTitled = session.titled !== false;
-                this.sessionPromptTokens = session.promptTokens || 0;
-                this.sessionCompletionTokens = session.completionTokens || 0;
-                this.sessionTotalDuration = session.totalDuration || 0;
+                this.contextTokens = session.contextTokens ?? 0;
                 if (session.model) {
                     this.applySessionModelIfValid(session.model);
                 }
@@ -580,9 +568,7 @@ export class AgentChat extends Model {
             title: this.sessionTitle,
             titled: this.hasTitled,
             entries: this.entries.slice(),
-            promptTokens: this.sessionPromptTokens,
-            completionTokens: this.sessionCompletionTokens,
-            totalDuration: this.sessionTotalDuration,
+            contextTokens: this.contextTokens,
             createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
             messageHistory: this.composer?.getHistory() || [],
@@ -712,9 +698,7 @@ export class AgentChat extends Model {
         this.sessionTitle = session.title || this.defaultTitle;
         this.hasTitled = session.titled !== false;
         this.sessionCreatedAt = session.createdAt || this.sessionCreatedAt;
-        this.sessionPromptTokens = session.promptTokens || 0;
-        this.sessionCompletionTokens = session.completionTokens || 0;
-        this.sessionTotalDuration = session.totalDuration || 0;
+        this.contextTokens = session.contextTokens ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -782,10 +766,7 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
-        this.sessionPromptTokens = session.promptTokens || 0;
-        this.sessionCompletionTokens = session.completionTokens || 0;
-        this.sessionTotalDuration = session.totalDuration || 0;
-        this.stopTokenTimer();
+        this.contextTokens = session.contextTokens ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -803,7 +784,7 @@ export class AgentChat extends Model {
         }, {once: true});
     }
 
-    private appendPersistedAssistant(content: string, promptTokens?: number, completionTokens?: number, duration?: number, timestamp?: number, entryId?: string) {
+    private appendPersistedAssistant(content: string, timestamp?: number, entryId?: string) {
         if (!content || !content.trim()) {
             return;
         }
@@ -815,15 +796,14 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         postRender(el, this.app);
-        // entry.duration 存的是秒，addCopyButton 期望毫秒。
-        this.addCopyButton(el, content, promptTokens, completionTokens, duration ? duration * 1000 : undefined, timestamp);
+        this.addCopyButton(el, content, timestamp);
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{
         name: string;
         arguments: Record<string, unknown>;
         result?: string
-    }>, promptTokens?: number, completionTokens?: number, duration?: number, timestamp?: number, entryId?: string) {
+    }>, timestamp?: number, entryId?: string) {
         let hasRendered = false;
         for (let i = 0; i < toolCalls.length; i++) {
             const tc = toolCalls[i];
@@ -838,7 +818,7 @@ export class AgentChat extends Model {
             }
         }
         if (content && content.trim()) {
-            this.appendPersistedAssistant(content, promptTokens, completionTokens, duration, timestamp, entryId);
+            this.appendPersistedAssistant(content, timestamp, entryId);
             hasRendered = true;
         }
         if (!hasRendered) {
@@ -969,11 +949,11 @@ export class AgentChat extends Model {
                     }
                     break;
                 case "assistant": {
-                    const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; promptTokens?: number; completionTokens?: number; duration?: number; timestamp?: number };
+                    const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; timestamp?: number };
                     if (a.toolCalls && a.toolCalls.length > 0) {
-                        this.appendPersistedToolCalls(a.content, a.toolCalls, a.promptTokens, a.completionTokens, a.duration, a.timestamp, entryId);
+                        this.appendPersistedToolCalls(a.content, a.toolCalls, a.timestamp, entryId);
                     } else {
-                        this.appendPersistedAssistant(a.content, a.promptTokens, a.completionTokens, a.duration, a.timestamp, entryId);
+                        this.appendPersistedAssistant(a.content, a.timestamp, entryId);
                     }
                     break;
                 }
@@ -1057,16 +1037,11 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
-        this.sessionPromptTokens = 0;
-        this.sessionCompletionTokens = 0;
-        this.sessionTotalDuration = 0;
-        this.responsePromptTokens = 0;
-        this.responseCompletionTokens = 0;
+        this.contextTokens = 0;
         this.currentToolCalls = [];
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         this.hasInterveningCard = false;
-        this.stopTokenTimer();
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.classList.add("fn__none");
         }
@@ -1140,7 +1115,6 @@ export class AgentChat extends Model {
 
         this.requestStartTime = Date.now();
         this.currentThinkingDuration = 0;
-        this.startTokenTimer();
 
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
@@ -1177,7 +1151,6 @@ export class AgentChat extends Model {
 
     // 实例级互斥被拒（409）：回滚 sendMessage 已追加的 user 消息与磁盘保存，恢复到发送前状态。
     private async handleConflictReject(userEntryId: string) {
-        this.stopTokenTimer();
         this.requestStartTime = 0;
         this.setStreaming(false);
         // 回滚 entries 里的 user entry。
@@ -1364,11 +1337,10 @@ export class AgentChat extends Model {
                     await this.finishResponse();
                     break;
                 case "usage":
-                    this.appendUsage(event.promptTokens, event.completionTokens);
+                    this.appendUsage(event.lastPromptTokens);
                     break;
                 case "error":
                     this.flushTokenUpdate();
-                    this.stopTokenTimer();
                     this.requestStartTime = 0;
                     this.appendError(event.message);
                     this.setStreaming(false);
@@ -1397,7 +1369,6 @@ export class AgentChat extends Model {
         } catch (e) {
             console.error("agent SSE event handler error:", e, event);
             this.flushTokenUpdate();
-            this.stopTokenTimer();
             this.requestStartTime = 0;
             this.setStreaming(false);
         }
@@ -1405,7 +1376,6 @@ export class AgentChat extends Model {
 
     private async handleError(err: Error) {
         this.flushTokenUpdate();
-        this.stopTokenTimer();
         this.requestStartTime = 0;
         this.appendError(err.message);
         this.setStreaming(false);
@@ -1416,7 +1386,6 @@ export class AgentChat extends Model {
     // 否则回退到普通错误卡。userEntryId 用于在"未配置"时回滚刚追加的 user 消息（避免留下空对话）。
     private async handleConfigError(err: Error, userEntryId?: string) {
         this.flushTokenUpdate();
-        this.stopTokenTimer();
         this.requestStartTime = 0;
         const configMsg = window.siyuan.languages._kernel[193] || "";
         const isConfigError = !!configMsg && err.message === configMsg;
@@ -1750,7 +1719,7 @@ export class AgentChat extends Model {
         reasoningEl.textContent += token;
     }
 
-    private addCopyButton(el: HTMLElement, contentOverride?: string, promptTokens?: number, completionTokens?: number, durationMs?: number, timestamp?: number) {
+    private addCopyButton(el: HTMLElement, contentOverride?: string, timestamp?: number) {
         const content = contentOverride || this.fullContent || el.querySelector(".agent-chat__body")?.textContent || "";
         const L = window.siyuan.languages;
 
@@ -1762,25 +1731,6 @@ export class AgentChat extends Model {
             timeSpan.className = "agent-chat__msg-meta agent-chat__msg-time--ai";
             timeSpan.textContent = this.formatMessageTime(timestamp);
             actions.appendChild(timeSpan);
-        }
-
-        if (promptTokens !== undefined && completionTokens !== undefined && (promptTokens + completionTokens > 0 || (durationMs && durationMs > 0))) {
-            const total = promptTokens + completionTokens;
-            let text = "";
-            if (total > 0) {
-                text = total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString();
-            }
-            if (durationMs) {
-                let seconds = Math.floor(durationMs / 1000);
-                const minutes = Math.floor(seconds / 60);
-                seconds = seconds % 60;
-                if (text) { text += " \u00B7 "; }
-                text += (minutes > 0 ? minutes + "m" : "") + seconds + "s";
-            }
-            const stats = document.createElement("span");
-            stats.className = "agent-chat__msg-meta agent-chat__msg-stats";
-            stats.textContent = text;
-            actions.appendChild(stats);
         }
 
         const copyBtn = document.createElement("span");
@@ -1867,7 +1817,6 @@ export class AgentChat extends Model {
                 }
                 // 409：该会话正在其他实例对话中（实例级互斥），不进入流式。
                 if (err instanceof AgentHttpError && err.status === 409) {
-                    this.stopTokenTimer();
                     this.requestStartTime = 0;
                     this.setStreaming(false);
                     const L = window.siyuan.languages;
@@ -1888,9 +1837,6 @@ export class AgentChat extends Model {
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
         const ts = Date.now();
-        const dur = this.requestStartTime ? Date.now() - this.requestStartTime : 0;
-        const rPromptTokens = this.responsePromptTokens;
-        const rCompletionTokens = this.responseCompletionTokens;
         if (!this.currentAIElement && savedContent) {
             const thinkBody = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
             if (thinkBody) {
@@ -1909,7 +1855,7 @@ export class AgentChat extends Model {
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
-            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
+            this.addCopyButton(el, undefined, ts);
             this.scrollToBottom(true);
         }
         this.flushThinkingStep();
@@ -1925,10 +1871,6 @@ export class AgentChat extends Model {
                 type: "assistant",
                 content: this.currentContent,
                 toolCalls: this.currentToolCalls.length > 0 ? this.slimToolCallsForPersistence(this.currentToolCalls) : undefined,
-                promptTokens: rPromptTokens || undefined,
-                completionTokens: rCompletionTokens || undefined,
-                // duration 统一用秒（与 thinking entry 一致）；addCopyButton 仍传毫秒 dur。
-                duration: dur ? dur / 1000 : undefined,
                 timestamp: ts,
             });
         } else if (this.currentToolCalls.length > 0) {
@@ -1943,12 +1885,8 @@ export class AgentChat extends Model {
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {
-            this.stopTokenTimer();
-            this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
         }
-        this.responsePromptTokens = 0;
-        this.responseCompletionTokens = 0;
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
@@ -2105,9 +2043,6 @@ export class AgentChat extends Model {
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
         const ts = Date.now();
-        const dur = this.requestStartTime ? Date.now() - this.requestStartTime : 0;
-        const rPromptTokens = this.responsePromptTokens;
-        const rCompletionTokens = this.responseCompletionTokens;
         if (!this.currentAIElement && savedContent) {
             const thinkBody = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
             if (thinkBody) {
@@ -2126,7 +2061,7 @@ export class AgentChat extends Model {
             this.currentAIElement = el;
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
-            this.addCopyButton(el, undefined, rPromptTokens, rCompletionTokens, dur, ts);
+            this.addCopyButton(el, undefined, ts);
             this.scrollToBottom(true);
         }
         this.flushThinkingStep();
@@ -2136,10 +2071,6 @@ export class AgentChat extends Model {
                 type: "assistant",
                 content: this.currentContent,
                 toolCalls: this.currentToolCalls.length > 0 ? this.slimToolCallsForPersistence(this.currentToolCalls) : undefined,
-                promptTokens: rPromptTokens || undefined,
-                completionTokens: rCompletionTokens || undefined,
-                // duration 统一用秒（与 thinking entry 一致）；addCopyButton 仍传毫秒 dur。
-                duration: dur ? dur / 1000 : undefined,
                 timestamp: ts,
             });
         }
@@ -2152,12 +2083,8 @@ export class AgentChat extends Model {
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
         if (this.requestStartTime) {
-            this.stopTokenTimer();
-            this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
         }
-        this.responsePromptTokens = 0;
-        this.responseCompletionTokens = 0;
         this.updateTokenDisplay();
         this.setStreaming(false);
         await this.saveSession();
@@ -2467,34 +2394,24 @@ export class AgentChat extends Model {
         return L.agentThinking || "Thinking";
     }
 
-    private updateTokenDisplay(overrideDurationMs?: number) {
+    // 刷新底部「当前上下文 tokens」显示。无值时隐藏。
+    private updateTokenDisplay() {
         if (!this.tokenDisplayEl) {
             return;
         }
-        const total = this.sessionPromptTokens + this.sessionCompletionTokens;
-        const durationMs = overrideDurationMs !== undefined ? overrideDurationMs : this.sessionTotalDuration;
-        if (total === 0 && durationMs === 0) {
+        if (this.contextTokens === 0) {
             return;
         }
-        let text = total > 0
-            ? (total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString())
-            : "";
-        if (durationMs > 0) {
-            let seconds = Math.floor(durationMs / 1000);
-            const minutes = Math.floor(seconds / 60);
-            seconds = seconds % 60;
-            if (text) { text += " \u00B7 "; }
-            text += (minutes > 0 ? minutes + "m" : "") + seconds + "s";
-        }
+        const text = this.contextTokens >= 1000
+            ? (this.contextTokens / 1000).toFixed(1) + "k"
+            : this.contextTokens.toString();
         this.tokenDisplayEl.textContent = text;
         this.tokenDisplayEl.classList.remove("fn__none");
     }
 
-    private appendUsage(promptTokens: number, completionTokens: number) {
-        this.responsePromptTokens += promptTokens;
-        this.responseCompletionTokens += completionTokens;
-        this.sessionPromptTokens += promptTokens;
-        this.sessionCompletionTokens += completionTokens;
+    // 记录最近一轮的 prompt tokens（= 当前上下文已用），覆盖式更新而非累加。
+    private appendUsage(lastPromptTokens: number) {
+        this.contextTokens = lastPromptTokens;
         this.updateTokenDisplay();
     }
 
@@ -2533,28 +2450,6 @@ export class AgentChat extends Model {
         if (this.thinkingTimerId) {
             clearInterval(this.thinkingTimerId);
             this.thinkingTimerId = 0;
-        }
-    }
-
-    // 启动输入框计时器，每 1s 刷新底部「tokens · 累计耗时」为「会话历史耗时 + 当前请求已耗时」。
-    private startTokenTimer() {
-        this.stopTokenTimer();
-        if (!this.requestStartTime) {
-            return;
-        }
-        const tick = () => {
-            const liveMs = this.sessionTotalDuration + (Date.now() - this.requestStartTime);
-            this.updateTokenDisplay(liveMs);
-        };
-        tick();
-        this.tokenTimerId = window.setInterval(tick, 1000);
-    }
-
-    // 停止输入框计时器（请求结束/切换会话/停止生成时调用，避免泄漏）。
-    private stopTokenTimer() {
-        if (this.tokenTimerId) {
-            clearInterval(this.tokenTimerId);
-            this.tokenTimerId = 0;
         }
     }
 

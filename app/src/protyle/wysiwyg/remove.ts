@@ -178,7 +178,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     !item.classList.contains("protyle-attr"));
                 if (topParentElement.classList.contains("li") && liSubList && !liHasContent) {
                     const emptyID = Lute.NewNodeID();
-                    const emptyElement = genEmptyElement(false, true, emptyID);
+                    const emptyElement = genEmptyElement(false, false, emptyID);
                     // 空段落插到列表标记之后、子列表之前，与服务端 doInsert 通过 nextID 定位的位置一致
                     liChildren.find(item => item.classList.contains("protyle-action"))?.after(emptyElement);
                     deletes.push({

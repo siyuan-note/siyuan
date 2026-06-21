@@ -365,10 +365,10 @@ export const editAssetItem = (options: {
             submenu: openSubMenu
         }).element);
     }
-	if (linkAddress?.startsWith("assets/")) {
-		window.siyuan.menus.menu.append(new MenuItem(exportAsset(decodeURI(linkAddress))).element);
-		window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(decodeURI(linkAddress))).element);
-	}
+    if (linkAddress?.startsWith("assets/")) {
+        window.siyuan.menus.menu.append(new MenuItem(exportAsset(decodeURI(linkAddress))).element);
+        window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(decodeURI(linkAddress))).element);
+    }
     const rect = options.rect;
     /// #if MOBILE
     menu.fullscreen();

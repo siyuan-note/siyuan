@@ -218,15 +218,16 @@ export const getFiltersHTML = (data: IAV) => {
         andOrTextWidth = Math.max(andOrTextWidth, measureEl.offsetWidth);
     });
     document.body.removeChild(measureEl);
-    const andOrControlWidth = andOrTextWidth + 28;
+    // 宽度需容纳文字 + b3-select 的左右 padding（8 + 26）+ 余量
+    const andOrControlWidth = andOrTextWidth + 36;
     const genAndOrSelect = (groupPath: string, combination: string) =>
-        `<select class="b3-select av__filter-select" data-type="toggleCombination" data-path="${groupPath}" style="min-width:0;width:${andOrControlWidth}px;"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterCombinationAnd}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterCombinationOr}</option></select>`;
+        `<select class="b3-select" data-type="toggleCombination" data-path="${groupPath}" style="width:${andOrControlWidth}px;"><option value="and" ${combination === "and" ? "selected" : ""}>${window.siyuan.languages.filterCombinationAnd}</option><option value="or" ${combination === "or" ? "selected" : ""}>${window.siyuan.languages.filterCombinationOr}</option></select>`;
 
     const genWhenLabel = () =>
-        `<span class="av__filter-andor" style="width:${andOrControlWidth}px;">${window.siyuan.languages.filterWhen}</span>`;
+        `<span class="av__filter-label ft__on-surface" style="width:${andOrControlWidth}px;">${window.siyuan.languages.filterWhen}</span>`;
 
     const genAndOrLabel = (combination: string) =>
-        `<span class="av__filter-andor" style="width:${andOrControlWidth}px;">${combination === "or" ? window.siyuan.languages.filterCombinationOr : window.siyuan.languages.filterCombinationAnd}</span>`;
+        `<span class="av__filter-label ft__on-surface" style="width:${andOrControlWidth}px;">${combination === "or" ? window.siyuan.languages.filterCombinationOr : window.siyuan.languages.filterCombinationAnd}</span>`;
 
     const genNodeHTML = (node: IAVFilter, path: string, depth: number, groupPath: string, groupCombination: string, index: number = 0): string => {
         if (!node) {
@@ -279,7 +280,7 @@ export const getFiltersHTML = (data: IAV) => {
         const fieldOptions = fields.filter((f: IAVColumn) => f.type !== "lineNumber").map((f: IAVColumn) =>
             `<option value="${f.id}" ${f.id === node.column ? "selected" : ""}>${escapeHtml(f.name)}</option>`
         ).join("");
-        const fieldSelect = `<select class="b3-select av__filter-select" data-type="fieldSelect" data-path="${path}" style="min-width:80px;max-width:120px;padding-left:0;">${fieldOptions}</select>`;
+        const fieldSelect = `<select class="b3-select fn__flex-1" data-type="fieldSelect" data-path="${path}" style="max-width:120px;">${fieldOptions}</select>`;
         const fieldWrapper = `<span class="av__field-wrapper ariaLabel" data-position="4west" aria-label="${escapeAttr(colData.name)}">${iconHTML}${fieldSelect}</span>`;
         const inlineHTML = genInlineFilterHTML(node, colData, path);
         const leafAndOrHTML = 0 === index ? genWhenLabel() : 1 === index ? genAndOrSelect(groupPath, groupCombination) : genAndOrLabel(groupCombination);
@@ -447,11 +448,11 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     const valueHidden = isEmptyOp ? " fn__none" : "";
 
     // 操作符 select
-    const operatorSelect = `<select class="b3-select av__filter-select" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator)}</select>`;
+    const operatorSelect = `<select class="b3-select" data-type="operation" data-path="${path}">${getOperatorSelectByType(valueType, operator)}</select>`;
 
     // 量化器 select（rollup/mAsset 才有）
     const quantifierSelect = (isRollup || valueType === "mAsset")
-        ? `<select class="b3-select av__filter-select" data-type="quantifier" data-path="${path}">
+        ? `<select class="b3-select" data-type="quantifier" data-path="${path}">
 <option ${(!filter.quantifier || filter.quantifier === "Any") ? "selected" : ""} value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
 <option ${filter.quantifier === "All" ? "selected" : ""} value="All">${window.siyuan.languages.filterQuantifierAll}</option>
 <option ${filter.quantifier === "None" ? "selected" : ""} value="None">${window.siyuan.languages.filterQuantifierNone}</option>
@@ -464,16 +465,16 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     const filterValue = filter.value;
     if (["text", "url", "block", "email", "phone", "template"].includes(valueType)) {
         const content = filterValue?.[valueType as "text"]?.content || "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text av__filter-input" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "mAsset") {
         const content = filterValue?.mAsset?.[0]?.content || "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text av__filter-input" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeHtml(content)}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "number") {
         const content = filterValue?.number?.isNotEmpty ? filterValue.number.content : "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text av__filter-input" style="min-width:50px;" value="${content}" data-type="filterValue" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text" style="width:50px;" value="${content}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "checkbox") {
         const isChecked = filterValue?.checkbox?.checked;
-        valueHTML = `<select class="b3-select av__filter-select" data-type="filterValue" data-path="${path}"><option value="true" ${isChecked ? "selected" : ""}>${window.siyuan.languages.checked}</option><option value="false" ${!isChecked ? "selected" : ""}>${window.siyuan.languages.unchecked}</option></select>`;
+        valueHTML = `<select class="b3-select" data-type="filterValue" data-path="${path}"><option value="true" ${isChecked ? "selected" : ""}>${window.siyuan.languages.checked}</option><option value="false" ${!isChecked ? "selected" : ""}>${window.siyuan.languages.unchecked}</option></select>`;
     } else if (["date", "created", "updated"].includes(valueType)) {
         valueHTML = genInlineDateHTML(filter, valueType, path);
     } else if (valueType === "select" || valueType === "mSelect") {
@@ -482,7 +483,7 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
         extraHTML = dropdown; // 下拉面板放 valueContainer 外，fixed 定位不影响行宽
     } else if (valueType === "relation") {
         const content = filterValue?.relation?.blockIDs?.[0] || "";
-        valueHTML = `<input class="b3-text-field b3-text-field--text av__filter-input" value="${escapeHtml(content)}" data-type="filterValue" data-type-rel="relation" data-path="${path}">`;
+        valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeHtml(content)}" data-type="filterValue" data-type-rel="relation" data-path="${path}">`;
     }
 
     return `${quantifierSelect}${operatorSelect}<span class="av__filter-value${valueHidden}" data-type="valueContainer" data-path="${path}">${valueHTML}</span>${extraHTML}`;
@@ -496,18 +497,18 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
     const isBetween = filter.operator === "Is between";
 
     const dateBlock = (suffix: "" | "2", relativeDate: IAVRelativeDate, dateVal: any, showToday: boolean): string => {
-        const dateTypeSel = `<select class="b3-select av__filter-select" data-type="dateType${suffix}" data-path="${path}">
+        const dateTypeSel = `<select class="b3-select" data-type="dateType${suffix}" data-path="${path}">
 <option value="time"${!relativeDate ? " selected" : ""}>${window.siyuan.languages.includeTime}</option>
 <option value="custom"${relativeDate ? " selected" : ""}>${window.siyuan.languages.relativeToToday}</option>
 </select>`;
-        const absDate = `<input value="${(dateVal && (dateVal.isNotEmpty || (suffix === "2" ? dateVal.isNotEmpty2 : valueType !== "date"))) ? dayjs(suffix === "2" ? dateVal.content2 : dateVal.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field b3-text-field--text av__filter-date-input" data-type="absDate${suffix}" data-path="${path}" style="${relativeDate ? "display:none;" : ""}">`;
-        const relDir = `<select class="b3-select av__filter-select" data-type="dataDirection${suffix}" data-path="${path}" style="${!relativeDate ? "display:none;" : ""}">
+        const absDate = `<input value="${(dateVal && (dateVal.isNotEmpty || (suffix === "2" ? dateVal.isNotEmpty2 : valueType !== "date"))) ? dayjs(suffix === "2" ? dateVal.content2 : dateVal.content).format("YYYY-MM-DD") : ""}" type="date" max="9999-12-31" class="b3-text-field b3-text-field--text" data-type="absDate${suffix}" data-path="${path}" style="${relativeDate ? "display:none;" : ""}">`;
+        const relDir = `<select class="b3-select" data-type="dataDirection${suffix}" data-path="${path}" style="${!relativeDate ? "display:none;" : ""}">
 <option value="-1"${relativeDate?.direction === -1 ? " selected" : ""}>${window.siyuan.languages.pastDate}</option>
 <option value="1"${relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
 <option value="0"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
 </select>`;
-        const relCount = `<input type="number" min="1" step="1" value="${relativeDate?.count || 1}" class="b3-text-field b3-text-field--text av__filter-date-input" data-type="relCount${suffix}" data-path="${path}" style="width:50px;${(!relativeDate || showToday) ? "display:none;" : ""}">`;
-        const relUnit = `<select class="b3-select av__filter-select" data-type="relUnit${suffix}" data-path="${path}" style="${(!relativeDate || showToday) ? "display:none;" : ""}">
+        const relCount = `<input type="number" min="1" step="1" value="${relativeDate?.count || 1}" class="b3-text-field b3-text-field--text" data-type="relCount${suffix}" data-path="${path}" style="width:50px;${(!relativeDate || showToday) ? "display:none;" : ""}">`;
+        const relUnit = `<select class="b3-select" data-type="relUnit${suffix}" data-path="${path}" style="${(!relativeDate || showToday) ? "display:none;" : ""}">
 <option value="0"${relativeDate?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
 <option value="1"${(!relativeDate || relativeDate?.unit === 1) ? " selected" : ""}>${window.siyuan.languages.week}</option>
 <option value="2"${relativeDate?.unit === 2 ? " selected" : ""}>${window.siyuan.languages.month}</option>

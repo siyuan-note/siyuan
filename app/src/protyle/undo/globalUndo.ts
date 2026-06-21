@@ -219,7 +219,7 @@ export const requestUndo = async (protyle: IProtyle) => {
             // 广播会到达当前窗口（/undo 对跨文档用 PushModeBroadcast），触发 onTransaction 刷新 DOM
         } else {
             // 单文档撤销：发起窗口本地乐观应用 doOperations（kernel 实际执行的操作，如 insert 恢复块）
-            protyle.undo.renderLocal(protyle, data.doOperations, false);
+            protyle.undo.renderLocal(protyle, data.doOperations);
             refreshUndoButtons(protyle);
             const focusBlockId = data.doOperations?.find((op: IOperation) => op.id)?.id;
             focusRootIDs(mutatedRootIDs, focusBlockId);
@@ -271,7 +271,7 @@ export const requestRedo = async (protyle: IProtyle) => {
             // 跨文档重做：锚点分散在多个文档，靠 kernel 广播（含发起方）刷新
             refreshUndoButtons(protyle);
         } else {
-            protyle.undo.renderLocal(protyle, data.doOperations, true);
+            protyle.undo.renderLocal(protyle, data.doOperations);
             refreshUndoButtons(protyle);
             const focusBlockId = data.doOperations?.find((op: IOperation) => op.id)?.id;
             focusRootIDs(mutatedRootIDs, focusBlockId);

@@ -1355,6 +1355,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let dragoverElement: Element;
     let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, guides: string };
     let disabledPosition: string;
+    // 缓存当前目标的文本和列布局判断，避免优化路径每次 dragover 重复计算
+    let cachedTargetText = "";
+    let cachedIsCol = false;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
             event.preventDefault();
@@ -1629,15 +1632,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 addDragover(targetElement);
                 // 默认移动（无修饰键、非 AV 目标、普通块源）时，更新下半为带目标名的位置文案
                 if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget) {
-                    const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
                     const isFront = point.className === "dragover__top" || point.className === "dragover__left";
                     const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
-                    if (targetText && (isFront || isBack)) {
-                        const isCol = hasClosestByAttribute(targetElement as HTMLElement, "data-sb-layout", "col");
-                        const key = isCol
+                    if ((isFront || isBack) && cachedTargetText) {
+                        const key = cachedIsCol
                             ? (isFront ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetBack)
                             : (isFront ? window.siyuan.languages.dragTipMoveTargetAbove : window.siyuan.languages.dragTipMoveTargetBelow);
-                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", targetText),
+                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);
                     }
                 }
@@ -1756,13 +1757,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement.classList.add("dragover__right");
                 addDragover(targetElement);
                 // 默认移动时，更新下半为带目标名的位置文案
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget) {
-                    const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
-                    if (targetText) {
-                        showDragTip(window.siyuan.dragTitle || "",
-                            window.siyuan.languages.dragTipMoveTargetBack.replace("${x}", targetText),
-                            event.clientX, event.clientY);
-                    }
+                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && cachedTargetText) {
+                    showDragTip(window.siyuan.dragTitle || "",
+                        window.siyuan.languages.dragTipMoveTargetBack.replace("${x}", cachedTargetText),
+                        event.clientX, event.clientY);
                 }
             } else if (targetElement.classList.contains("av__row--header")) {
                 targetElement.classList.add("dragover__bottom");
@@ -1773,27 +1771,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement.classList.add("dragover__bottom");
                     addDragover(targetElement);
                     // 默认移动时，更新下半为带目标名的位置文案
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget) {
-                        const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
-                        if (targetText) {
-                            const isCol = hasClosestByAttribute(targetElement as HTMLElement, "data-sb-layout", "col");
-                            showDragTip(window.siyuan.dragTitle || "",
-                                (isCol ? window.siyuan.languages.dragTipMoveTargetBack : window.siyuan.languages.dragTipMoveTargetBelow).replace("${x}", targetText),
-                                event.clientX, event.clientY);
-                        }
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && cachedTargetText) {
+                        showDragTip(window.siyuan.dragTitle || "",
+                            (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetBack : window.siyuan.languages.dragTipMoveTargetBelow).replace("${x}", cachedTargetText),
+                            event.clientX, event.clientY);
                     }
                 } else if (disabledPosition !== "top") {
                     targetElement.classList.add("dragover__top");
                     addDragover(targetElement);
                     // 默认移动时，更新下半为带目标名的位置文案
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget) {
-                        const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
-                        if (targetText) {
-                            const isCol = hasClosestByAttribute(targetElement as HTMLElement, "data-sb-layout", "col");
-                            showDragTip(window.siyuan.dragTitle || "",
-                                (isCol ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetAbove).replace("${x}", targetText),
-                                event.clientX, event.clientY);
-                        }
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && cachedTargetText) {
+                        showDragTip(window.siyuan.dragTitle || "",
+                            (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetAbove).replace("${x}", cachedTargetText),
+                            event.clientX, event.clientY);
                     }
                 }
             }
@@ -1881,6 +1871,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 disabledPosition = "top";
             }
             dragoverElement = targetElement;
+            // 目标变化时更新缓存
+            cachedTargetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
+            cachedIsCol = !!hasClosestByAttribute(targetElement as HTMLElement, "data-sb-layout", "col");
             highlightColColumn(targetElement as HTMLElement);
         }
         // 默认移动（无修饰键、非 AV 目标、普通块源）时，更新下半为带目标名的位置文案
@@ -2008,7 +2001,6 @@ const highlightColColumn = (element: HTMLElement) => {
     // col 布局中点亮所在列（列级 sb），方便区分左右列
     const colSb = element.closest('[data-sb-layout="col"]');
     if (colSb) {
-        // colSb 即为当前光标所在的列，直接高亮
         colSb.classList.add("dragover");
     }
 };

@@ -27,12 +27,15 @@ import {fetchPost} from "../util/fetch";
 import {isWindow} from "../util/functions";
 import {Wnd} from "./Wnd";
 
-export const setTabPosition = (onlyPadding = false) => {
+export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
     const isWindowMode = isWindow();
     const wndsTemp: Wnd[] = [];
     if (isWindowMode) {
         getAllWnds(window.siyuan.layout.layout, wndsTemp);
-    } else if (window.siyuan.layout?.centerLayout) {
+    } else if (window.siyuan.config.appearance.hideToolbar || onlyClear) {
+        if (!window.siyuan.layout.centerLayout) {
+            return;
+        }
         getAllWnds(window.siyuan.layout.centerLayout, wndsTemp);
     }
 

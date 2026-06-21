@@ -44,12 +44,14 @@ const sendTrafficLightPosition = (zoom: number) => {
 export const syncHideToolbarLayout = () => {
     document.body.classList.toggle("body--toolbar-hide", window.siyuan.config.appearance.hideToolbar);
     resizeTopBar();
-    setTabPosition();
     /// #if !BROWSER
     if (!isWindow()) {
         sendTrafficLightPosition(window.siyuan.storage[Constants.LOCAL_ZOOM]);
+    } else {
+        return;
     }
     /// #endif
+    setTabPosition(false, true);
 };
 
 export const updateBarModeIcon = () => {

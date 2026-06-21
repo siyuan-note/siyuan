@@ -352,16 +352,13 @@
 
       &[data-sb-layout="col"] {
         flex-direction: row;
-        // nowrap：子块宽度用 calc(%) 计算，容器缩窄时通过 flex-shrink 等比收缩，而非换行掉落
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
         justify-content: flex-start;
 
         & > div {
-          // 0 1 auto：以 width（calc 百分比）为基准，溢出时可收缩；不可伸长，保持拖拽比例
-          flex: 0 1 auto;
+          flex: 1 0 10%;
           box-sizing: border-box;
-          min-width: 0;
-          max-width: 100%;
+          min-width: 1px;
 
           &:nth-last-child(2),
           &:last-child {
@@ -371,8 +368,6 @@
 
         > .sb__resize {
           align-self: stretch;
-          // 手柄不参与收缩，保持拖拽热区宽度恒定
-          flex: 0 0 auto;
           width: 4px;
           border-radius: var(--b3-border-radius);
           cursor: col-resize;

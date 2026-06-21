@@ -465,7 +465,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
  * @param isDelete
  * @param deleteElement 末尾反向删除时才会传入
  */
-export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement?: Element) => {
+export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement?: Element) => {
     liItemElements.forEach(item => {
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");
@@ -640,17 +640,21 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 data: movedHTML,
             });
         }
-        transaction(protyle, topDoOperations, topUndoOperations);
         if (liElement.childElementCount !== 1 && parentLiItemElement.classList.contains("sb") &&
             parentLiItemElement.getAttribute("data-sb-layout") === "col") {
-            turnsIntoOneTransaction({
+            // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
+            const mergeOperations = await turnsIntoOneTransaction({
                 protyle,
                 selectsElement: [liElement, liElement.nextElementSibling],
                 type: "BlocksMergeSuperBlock",
                 level: "row",
                 unfocus: true,
+                getOperations: true,
             });
+            topDoOperations.push(...mergeOperations.doOperations);
+            topUndoOperations.splice(0, 0, ...mergeOperations.undoOperations);
         }
+        transaction(protyle, topDoOperations, topUndoOperations);
         focusByWbr(parentLiItemElement, range);
         return;
     }

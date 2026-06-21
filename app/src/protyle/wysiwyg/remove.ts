@@ -683,7 +683,7 @@ export const removeImage = (imgSelectElement: Element, nodeElement: HTMLElement,
     }
 };
 
-const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
+const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
         listOutdent(protyle, [blockElement.parentElement], range, isDelete, blockElement);
         return;
@@ -768,7 +768,6 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
             data: listHTML,
             id: listElement.getAttribute("data-node-id"),
         });
-        transaction(protyle, doOperations, undoOperations);
         if (listElement.parentElement.classList.contains("sb") &&
             listElement.parentElement.getAttribute("data-sb-layout") === "col") {
             const selectsElement: Element[] = [];
@@ -780,14 +779,19 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
                 }
                 previousElement = previousElement.previousElementSibling;
             }
-            turnsIntoOneTransaction({
+            // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
+            const mergeOperations = await turnsIntoOneTransaction({
                 protyle,
                 selectsElement: selectsElement.reverse(),
                 type: "BlocksMergeSuperBlock",
                 level: "row",
                 unfocus: true,
+                getOperations: true,
             });
+            doOperations.push(...mergeOperations.doOperations);
+            undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
         }
+        transaction(protyle, doOperations, undoOperations);
         focusByWbr(protyle.wysiwyg.element, range);
         return;
     }

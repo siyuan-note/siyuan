@@ -590,22 +590,26 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     dragSbSet.forEach(sb => {
         refreshSbAndPersistWidth(sb, doOperations, undoOperations);
     });
-    if (isSameDoc || isCopy) {
-        transaction(protyle, doOperations, undoOperations);
-    } else {
-        // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
-        transaction(protyle, doOperations, undoOperations);
-    }
     if ((newSourceParentElement.length > 1 || hasFoldHeading) &&
         newSourceParentElement[0].parentElement.classList.contains("sb") &&
         newSourceParentElement[0].parentElement.getAttribute("data-sb-layout") === "col") {
-        turnsIntoOneTransaction({
+        // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
+        const mergeOperations = await turnsIntoOneTransaction({
             protyle,
             selectsElement: newSourceParentElement.reverse(),
             type: "BlocksMergeSuperBlock",
             level: "row",
             unfocus: true,
+            getOperations: true
         });
+        doOperations.push(...mergeOperations.doOperations);
+        undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+    }
+    if (isSameDoc || isCopy) {
+        transaction(protyle, doOperations, undoOperations);
+    } else {
+        // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
+        transaction(protyle, doOperations, undoOperations);
     }
     if (document.contains(sourceElements[0])) {
         focusBlock(sourceElements[0]);

@@ -195,7 +195,7 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
     });
 };
 
-export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id?: string) => {
+export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPosition, id?: string) => {
     const range = getEditorRange(protyle.wysiwyg.element);
     let blockElement: Element;
     if (id) {
@@ -263,20 +263,25 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
                 previousID: blockElement.getAttribute("data-node-id"),
             }];
         }
-        transaction(protyle, doOperations, [{
+        const undoOperations: IOperation[] = [{
             action: "delete",
             id: newId,
-        }]);
-    }
-    if (blockElement.parentElement.classList.contains("sb") &&
-        blockElement.parentElement.getAttribute("data-sb-layout") === "col") {
-        turnsIntoOneTransaction({
-            protyle,
-            selectsElement: position === "afterend" ? [blockElement, blockElement.nextElementSibling] : [blockElement.previousElementSibling, blockElement],
-            type: "BlocksMergeSuperBlock",
-            level: "row",
-            unfocus: true,
-        });
+        }];
+        if (blockElement.parentElement.classList.contains("sb") &&
+            blockElement.parentElement.getAttribute("data-sb-layout") === "col") {
+            // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
+            const mergeOperations = await turnsIntoOneTransaction({
+                protyle,
+                selectsElement: position === "afterend" ? [blockElement, blockElement.nextElementSibling] : [blockElement.previousElementSibling, blockElement],
+                type: "BlocksMergeSuperBlock",
+                level: "row",
+                unfocus: true,
+                getOperations: true,
+            });
+            doOperations.push(...mergeOperations.doOperations);
+            undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+        }
+        transaction(protyle, doOperations, undoOperations);
     }
     focusByWbr(protyle.wysiwyg.element, range);
     scrollCenter(protyle);

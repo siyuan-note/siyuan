@@ -8,9 +8,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {getRowHTML, stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
-import {addClearButton} from "../../../util/addClearButton";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
-import {electronUndo} from "../../undo";
 import {isInMobileApp} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
@@ -19,10 +17,8 @@ import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
 import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
-/// #if MOBILE
-import {activeBlur} from "../../../mobile/util/keyboardToolbar";
-/// #endif
 import {renderKanban} from "./kanban/render";
+import {bindAvSearch} from "./search";
 import {initVirtualScroll} from "./virtualScroll";
 
 interface IIds {
@@ -384,67 +380,11 @@ const afterRenderTable = (options: ITableOptions) => {
     if (!options.renderAll) {
         return;
     }
-    const viewsElement = options.blockElement.querySelector(".av__views") as HTMLElement;
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLElement;
-    searchInputElement.textContent = options.resetData.query || "";
-    if (options.resetData.isSearching) {
-        searchInputElement.focus();
-    }
-    searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
-        event.stopPropagation();
-    });
-    searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        electronUndo(event);
-    });
-    searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
-        event.stopPropagation();
-        if (event.isComposing) {
-            return;
-        }
-        if (searchInputElement.textContent || document.activeElement === searchInputElement) {
-            viewsElement.classList.add("av__views--show");
-        } else {
-            viewsElement.classList.remove("av__views--show");
-        }
-        updateSearch(options.blockElement, options.protyle);
-    });
-    searchInputElement.addEventListener("compositionend", () => {
-        updateSearch(options.blockElement, options.protyle);
-    });
-    searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        if (!searchInputElement.textContent.trim()) {
-            viewsElement.classList.remove("av__views--show");
-            searchInputElement.style.width = "0";
-            searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.setProperty("margin-right", "0", "important");
-            const clearElement = searchInputElement.nextElementSibling;
-            if (clearElement) {
-                clearElement.classList.add("fn__none");
-            }
-        }
-    });
-    addClearButton({
-        inputElement: searchInputElement,
-        right: 0,
-        width: "1em",
-        height: searchInputElement.clientHeight,
-        clearCB() {
-            viewsElement.classList.remove("av__views--show");
-            searchInputElement.style.width = "0";
-            searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.setProperty("margin-right", "0", "important");
-            focusBlock(options.blockElement);
-            updateSearch(options.blockElement, options.protyle);
-            /// #if MOBILE
-            activeBlur();
-            /// #endif
-        }
+    bindAvSearch({
+        blockElement: options.blockElement,
+        query: options.resetData.query,
+        isSearching: options.resetData.isSearching,
+        onChange: () => updateSearch(options.blockElement, options.protyle),
     });
     initVirtualScroll(options);
 };

@@ -2,14 +2,10 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {focusBlock} from "../../../util/selection";
-import {electronUndo} from "../../../undo";
-import {addClearButton} from "../../../../util/addClearButton";
 import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
+import {bindAvSearch} from "../search";
 import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
-/// #if MOBILE
-import {activeBlur} from "../../../../mobile/util/keyboardToolbar";
-/// #endif
 import {renderKanban} from "../kanban/render";
 import {initVirtualScroll} from "../virtualScroll";
 import {getRowHTML} from "../row";
@@ -155,67 +151,11 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (!options.renderAll) {
         return;
     }
-    const viewsElement = options.blockElement.querySelector(".av__views") as HTMLElement;
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLElement;
-    searchInputElement.textContent = options.resetData.query || "";
-    if (options.resetData.isSearching) {
-        searchInputElement.focus();
-    }
-    searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
-        event.stopPropagation();
-    });
-    searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        electronUndo(event);
-    });
-    searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
-        event.stopPropagation();
-        if (event.isComposing) {
-            return;
-        }
-        if (searchInputElement.textContent || document.activeElement === searchInputElement) {
-            viewsElement.classList.add("av__views--show");
-        } else {
-            viewsElement.classList.remove("av__views--show");
-        }
-        updateSearch(options.blockElement, options.protyle);
-    });
-    searchInputElement.addEventListener("compositionend", () => {
-        updateSearch(options.blockElement, options.protyle);
-    });
-    searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        if (!searchInputElement.textContent.trim()) {
-            viewsElement.classList.remove("av__views--show");
-            searchInputElement.style.width = "0";
-            searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.setProperty("margin-right", "0", "important");
-            const clearElement = searchInputElement.nextElementSibling;
-            if (clearElement) {
-                clearElement.classList.add("fn__none");
-            }
-        }
-    });
-    addClearButton({
-        inputElement: searchInputElement,
-        right: 0,
-        width: "1em",
-        height: searchInputElement.clientHeight,
-        clearCB() {
-            viewsElement.classList.remove("av__views--show");
-            searchInputElement.style.width = "0";
-            searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.setProperty("margin-right", "0", "important");
-            focusBlock(options.blockElement);
-            updateSearch(options.blockElement, options.protyle);
-            /// #if MOBILE
-            activeBlur();
-            /// #endif
-        }
+    bindAvSearch({
+        blockElement: options.blockElement,
+        query: options.resetData.query,
+        isSearching: options.resetData.isSearching,
+        onChange: () => updateSearch(options.blockElement, options.protyle),
     });
     initVirtualScroll(options);
 };

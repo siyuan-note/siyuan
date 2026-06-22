@@ -382,11 +382,33 @@
           opacity: 0;
           margin-right: 16px;
           background-color: var(--b3-border-color);
+          // 透明覆盖层扩展点击热区，让 4px 的细手柄也能轻松点中
+          position: relative;
           z-index: 5;
+
+          &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -8px;
+            right: -8px;
+            z-index: -1;
+          }
 
           &:hover {
             opacity: 1;
           }
+        }
+
+        // 拖拽中的百分比提示（复用 protyle-icon 样式，仅添加定位）
+        > [data-node-id] .sb__resize-tip {
+          position: absolute;
+          top: 0;
+          right: 0;
+          z-index: 10;
+          pointer-events: none;
+          user-select: none;
         }
 
         .sb {

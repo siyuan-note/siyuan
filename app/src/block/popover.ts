@@ -1,7 +1,7 @@
 import {BlockPanel} from "./Panel";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {hideTooltip, showTooltip} from "../dialog/tooltip";
+import {hideTooltip, showTooltip, tooltipTargetElement} from "../dialog/tooltip";
 import {getIdFromSYProtocol, isLocalPath} from "../util/pathName";
 import {App} from "../index";
 import {Constants} from "../constants";
@@ -213,9 +213,11 @@ export const initBlockPopover = (app: App) => {
             const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
             if (!tipElement) {
                 hideTooltip();
+            } else if (tooltipTargetElement && !tooltipTargetElement.contains(event.target)) {
+                // 鼠标在 #tooltip 上但已离开触发元素范围，正常隐藏
+                // 仍在触发元素范围内时不隐藏，避免 showTooltip ↔ hideTooltip 循环闪烁
+                hideTooltip();
             }
-            // 鼠标仍在 #tooltip 上时不主动隐藏，避免 showTooltip ↔ hideTooltip 循环闪烁；
-            // 待鼠标移到非 tooltip 处再由上面的分支隐藏
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {
             clearTimeout(timeoutHide);

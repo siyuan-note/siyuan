@@ -89,3 +89,13 @@ export const registerSettingItem = (item: RegisterSettingItem) => {
 };
 
 export const getSettingItem = (id: string) => settingItemsById.get(id);
+
+/** 从注册表移除 Tab 条目，供 rebuild 时重新 register 以读取最新 config */
+export const removeSettingTabItems = (tabId: string) => {
+    for (const [id, item] of settingItemsById) {
+        if (item.tabId === tabId) {
+            settingItemsById.delete(id);
+        }
+    }
+    itemsByGroupCache.delete(tabId);
+};

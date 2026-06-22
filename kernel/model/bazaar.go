@@ -445,8 +445,10 @@ func UninstallPackage(pkgType, packageName string) error {
 	case "themes":
 		InitAppearance()
 		WatchThemes()
+		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	case "icons":
 		InitAppearance()
+		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	}
 
 	return nil

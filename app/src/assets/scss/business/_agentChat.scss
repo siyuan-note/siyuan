@@ -24,10 +24,10 @@
         height: 18px;
     }
 
-    // 圆环轨道（背景灰圈）。
+    // 圆环轨道（背景灰圈）。用比 hover 背景更深的灰，避免悬浮时轨道被吃掉。
     .agent-chat__tokens-track {
         fill: none;
-        stroke: var(--b3-border-color);
+        stroke: var(--b3-scroll-color);
     }
 
     // 圆环弧度（按占用率描边），rotate -90 让起点在顶部。
@@ -933,6 +933,8 @@ pre:hover .agent-chat__copy-wrap {
 .agent-chat__stop svg {
     width: 18px;
     height: 18px;
+    // 抵消 .b3-button svg 的 margin-right: 4px，让图标在 24×24 正方形背景中真正居中。
+    margin-right: 0;
 }
 
 // 发送/停止按钮：与上下文用量圆环保持一致的 24×24 正方形背景，hover 同色。

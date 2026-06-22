@@ -225,8 +225,8 @@ export class AgentChat extends Model {
             '<span class="fn__flex-1"></span>' +
             '<span class="agent-chat__tokens fn__none" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
                 '<svg viewBox="0 0 24 24">' +
-                    '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="2.5"></circle>' +
-                    '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="2.5" stroke-dasharray="0 56.55"></circle>' +
+                    '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="3"></circle>' +
+                    '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
                 "</svg>" +
             "</span>" +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
@@ -1857,6 +1857,8 @@ export class AgentChat extends Model {
         this.setStreaming(true);
         this.mirrorLocked = false;
         this.removeMirrorPlaceholder();
+        this.requestStartTime = Date.now();
+        this.currentThinkingDuration = 0;
         const lastUserEntry = this.entries[this.entries.length - 1];
         const lastUserText = lastUserEntry.type === "user" ? lastUserEntry.content : "";
         this.abortController = new AbortController();
@@ -2621,11 +2623,15 @@ export class AgentChat extends Model {
             if (tokens <= 0) {
                 continue;
             }
+            // 占比保留 1 位小数；四舍五入为 0 的类（占比极小）跳过不显示，避免无意义的 0%。
+            const rounded = this.contextTokens > 0
+                ? Math.round(tokens / this.contextTokens * 1000) / 10
+                : 0;
+            if (rounded <= 0) {
+                continue;
+            }
             const label = (L as Record<string, string>)[item.labelKey] || item.key;
-            const percent = this.contextTokens > 0
-                ? Math.round(tokens / this.contextTokens * 100) + "%"
-                : "-";
-            result.push({label, percent});
+            result.push({label, percent: rounded + "%"});
         }
         return result;
     }

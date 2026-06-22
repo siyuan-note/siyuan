@@ -670,7 +670,7 @@ export const openMenuPanel = (options: {
                                 setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                             };
                             if (rmNode && rmNode.filters && rmNode.filters.length > 0) {
-                                confirmDialog(window.siyuan.languages.removeFilters, window.siyuan.languages.confirmDeleteFilterGroupTip, doRemove);
+                                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDeleteFilterGroupTip, doRemove);
                             } else {
                                 doRemove();
                             }

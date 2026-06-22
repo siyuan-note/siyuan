@@ -603,5 +603,41 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
         return;
     }
+    // 粘贴到空列表项后删除空列表项 https://github.com/siyuan-note/siyuan/issues/17890
+    if (cursorLiElement) {
+        const editEl = getContenteditableElement(cursorLiElement);
+        if (editEl && editEl.textContent.replace(Constants.ZWSP, "").trim() === "") {
+            // 把空列表项的子列表移到粘贴的最后一项下面
+            const subList = cursorLiElement.querySelector(":scope > [data-type='NodeList']");
+            if (subList && lastElement && lastElement.classList.contains("li")) {
+                const movedList = subList.cloneNode(true) as HTMLElement;
+                const existSubList = lastElement.querySelector(":scope > [data-type='NodeList']");
+                if (existSubList) {
+                    // 最后一项已有子列表，合并子列表项
+                    Array.from(movedList.querySelectorAll(":scope > .li")).forEach(li => {
+                        existSubList.appendChild(li);
+                    });
+                } else {
+                    lastElement.appendChild(movedList);
+                }
+                // 更新最后一项的 update 操作 data
+                const lastUpdateOp = doOperation.find(op => op.action === "insert" && op.id === lastElement.getAttribute("data-node-id"));
+                if (lastUpdateOp) {
+                    lastUpdateOp.data = lastElement.outerHTML;
+                }
+            }
+            const liId = cursorLiElement.getAttribute("data-node-id");
+            const liHTML = cursorLiElement.outerHTML;
+            doOperation.push({action: "delete", id: liId});
+            undoOperation.push({
+                action: "insert",
+                data: liHTML,
+                id: liId,
+                previousID: cursorLiElement.previousElementSibling?.getAttribute("data-node-id"),
+                parentID: cursorLiElement.parentElement?.getAttribute("data-node-id")
+            });
+            cursorLiElement.remove();
+        }
+    }
     transaction(protyle, doOperation, undoOperation);
 };

@@ -27,7 +27,11 @@ interface ComposerHandle {
     restoreHistory: (h: string[]) => void;
 }
 
-export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHandle {
+// 内容变化回调（含用户输入、IME、程序化 clearContent 等所有 doc 变更）。
+// 用于发送按钮启用/禁用等需要感知输入框内容的外部逻辑。
+type OnChangeCallback = () => void;
+
+export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: OnChangeCallback): ComposerHandle {
     const L = window.siyuan.languages;
 
     let suggestionMenu: HTMLElement | null = null;
@@ -311,6 +315,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
     });
 
     editor.on("update", function () {
+        // 通知外部内容已变更（无论是否涉及 slash 命令处理）。
+        if (onChange) { onChange(); }
         if (suggestionMenu && !slashActive) { return; }
         const {$from} = editor.state.selection;
         const textBefore = $from.parent.textBetween(0, $from.parentOffset);

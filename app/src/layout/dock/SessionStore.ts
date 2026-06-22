@@ -59,6 +59,7 @@ export interface AgentSession {
     contextTokens?: number;
     contextTokenBreakdown?: Record<string, number>;
     contextCachedTokens?: number;
+    contextLimit?: number;
     messageHistory?: string[];
     createdAt: number;
     updatedAt: number;

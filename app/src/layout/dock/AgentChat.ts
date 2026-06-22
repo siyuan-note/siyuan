@@ -82,6 +82,7 @@ export class AgentChat extends Model {
     private contextTokens = 0;
     private contextTokenBreakdown: Record<string, number> = {};
     private contextCachedTokens = 0;
+    private contextLimit = 0;
     private tokenPopup: HTMLElement | null = null;
     private tokenPopupShowTimer = 0;
     private tokenPopupHideTimer = 0;
@@ -222,9 +223,14 @@ export class AgentChat extends Model {
             '<div class="agent-chat__buttons">' +
             '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
             '<span class="fn__flex-1"></span>' +
-            '<span class="agent-chat__tokens fn__none"></span>' +
-            '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconCirclePlay"></use></svg></button>' +
-            '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconCircleStop"></use></svg></button>' +
+            '<span class="agent-chat__tokens fn__none" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
+                '<svg viewBox="0 0 24 24">' +
+                    '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="2.5"></circle>' +
+                    '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="2.5" stroke-dasharray="0 56.55"></circle>' +
+                "</svg>" +
+            "</span>" +
+            '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
+            '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
         '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
@@ -264,6 +270,9 @@ export class AgentChat extends Model {
 
         this.composer = mountComposer(this.composerHost, () => {
             this.sendMessage();
+        }, () => {
+            // 内容变化时刷新发送按钮可用性（含用户输入、IME、程序化 clear 等所有 doc 变更）。
+            this.updateSendButtonState();
         });
         this.sessionPanel = new AgentSessionPanel(
             this.sessionMenuBtn,
@@ -573,6 +582,7 @@ export class AgentChat extends Model {
                 this.contextTokens = session.contextTokens ?? 0;
                 this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
                 this.contextCachedTokens = session.contextCachedTokens ?? 0;
+                this.contextLimit = session.contextLimit ?? 0;
                 if (session.model) {
                     this.applySessionModelIfValid(session.model);
                 }
@@ -607,6 +617,7 @@ export class AgentChat extends Model {
             contextTokens: this.contextTokens,
             contextTokenBreakdown: this.contextTokenBreakdown,
             contextCachedTokens: this.contextCachedTokens,
+            contextLimit: this.contextLimit,
             createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
             messageHistory: this.composer?.getHistory() || [],
@@ -739,6 +750,7 @@ export class AgentChat extends Model {
         this.contextTokens = session.contextTokens ?? 0;
         this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
         this.contextCachedTokens = session.contextCachedTokens ?? 0;
+        this.contextLimit = session.contextLimit ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -809,6 +821,7 @@ export class AgentChat extends Model {
         this.contextTokens = session.contextTokens ?? 0;
         this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
         this.contextCachedTokens = session.contextCachedTokens ?? 0;
+        this.contextLimit = session.contextLimit ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -1082,6 +1095,7 @@ export class AgentChat extends Model {
         this.contextTokens = 0;
         this.contextTokenBreakdown = {};
         this.contextCachedTokens = 0;
+        this.contextLimit = 0;
         this.currentToolCalls = [];
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
@@ -1101,6 +1115,8 @@ export class AgentChat extends Model {
         if (this.composer) {
             this.composer.focus();
         }
+        // clear() 是程序化清空，不触发原生 input 事件，需显式刷新发送按钮（空输入 → 禁用）。
+        this.updateSendButtonState();
         this.showWelcome();
         this.scrollToBottom(true);
     }
@@ -1381,7 +1397,7 @@ export class AgentChat extends Model {
                     await this.finishResponse();
                     break;
                 case "usage":
-                    this.appendUsage(event.lastPromptTokens, event.tokenBreakdown, event.cachedTokens);
+                    this.appendUsage(event.lastPromptTokens, event.tokenBreakdown, event.cachedTokens, event.contextLimit);
                     break;
                 case "error":
                     this.flushTokenUpdate();
@@ -2438,30 +2454,47 @@ export class AgentChat extends Model {
         return L.agentThinking || "Thinking";
     }
 
-    // 刷新底部「当前上下文 tokens」显示。无值时隐藏。
+    // 刷新底部 token 圆环显示。contextTokens 为 0 时隐藏（含切换到无统计的旧会话场景）。
     private updateTokenDisplay() {
         if (!this.tokenDisplayEl) {
             return;
         }
-        // contextTokens 为 0 时隐藏显示（含切换到无统计的旧会话场景），避免残留上一会话的数字。
         if (this.contextTokens === 0) {
             this.tokenDisplayEl.classList.add("fn__none");
             return;
         }
         this.tokenDisplayEl.classList.remove("fn__none");
-        const text = this.contextTokens >= 1000
-            ? (this.contextTokens / 1000).toFixed(1) + "k"
-            : this.contextTokens.toString();
-        this.tokenDisplayEl.textContent = text;
-        this.tokenDisplayEl.classList.remove("fn__none");
+        const arc = this.tokenDisplayEl.querySelector(".agent-chat__tokens-arc") as SVGCircleElement | null;
+        if (!arc) {
+            return;
+        }
+        const circumference = 2 * Math.PI * 9; // r=9 → ≈56.55
+        const tokens = this.contextTokens;
+        const limit = this.contextLimit;
+        // 颜色档位 class：未知上限 → unknown；按占用率分 low/mid/warn/high（与横条共用算法）。
+        const levelClass = limit > 0
+            ? "agent-chat__tokens--" + this.contextUsageLevel(tokens / limit)
+            : "agent-chat__tokens--unknown";
+        this.tokenDisplayEl.classList.remove(
+            "agent-chat__tokens--low",
+            "agent-chat__tokens--mid",
+            "agent-chat__tokens--warn",
+            "agent-chat__tokens--high",
+            "agent-chat__tokens--unknown"
+        );
+        this.tokenDisplayEl.classList.add(levelClass);
+        // 弧长：未知上限（limit=0）时画一个小占位弧（约 15%），表示有用量但无上限。
+        const ratio = limit > 0 ? Math.min(tokens / limit, 1) : 0.15;
+        const filled = circumference * ratio;
+        arc.setAttribute("stroke-dasharray", filled.toFixed(2) + " " + circumference.toFixed(2));
     }
 
-    // 记录最近一轮的 prompt tokens（= 当前上下文已用），覆盖式更新而非累加。
-    // 记录最近一轮的 prompt tokens（= 当前上下文已用）+ 分类明细 + 缓存命中，覆盖式更新而非累加。
-    private appendUsage(lastPromptTokens: number, tokenBreakdown: Record<string, number>, cachedTokens: number) {
+    // 记录最近一轮的 prompt tokens（= 当前上下文已用）+ 分类明细 + 缓存命中 + 模型上限，覆盖式更新而非累加。
+    private appendUsage(lastPromptTokens: number, tokenBreakdown: Record<string, number>, cachedTokens: number, contextLimit: number) {
         this.contextTokens = lastPromptTokens;
         this.contextTokenBreakdown = tokenBreakdown;
         this.contextCachedTokens = cachedTokens;
+        this.contextLimit = contextLimit;
         this.updateTokenDisplay();
     }
 
@@ -2475,13 +2508,25 @@ export class AgentChat extends Model {
         const popup = document.createElement("div");
         popup.className = "agent-token-popup b3-menu";
         let html = '<div class="b3-menu__items">';
-        // 第一行：上下文用量（总数）。
+        // 第一行：已用 / 上限 · 占用百分比；未知上限时仅显示已用。
+        const limitLine = this.contextLimit > 0
+            ? this.formatTokenCount(this.contextTokens) + " / " + this.formatTokenCount(this.contextLimit) + " · " + Math.round(this.contextTokens / this.contextLimit * 100) + "%"
+            : this.formatTokenCount(this.contextTokens);
         html += '<div class="agent-token-popup__total">' +
             '<span class="agent-token-popup__label">' + (L.tokenUsage || "Context Usage") + "</span>" +
-            '<span class="agent-token-popup__value">' + this.formatTokenCount(this.contextTokens) + "</span>" +
+            '<span class="agent-token-popup__value">' + limitLine + "</span>" +
         "</div>";
-        // 分隔线。
-        html += '<div class="agent-token-popup__divider"></div>';
+        // 第一行下方的占用横条：总长=上限，填充=已用占比，颜色档位与圆环一致。
+        // 未知上限（contextLimit=0）时不画横条（无总长基线）。
+        if (this.contextLimit > 0) {
+            const ratio = Math.min(this.contextTokens / this.contextLimit, 1);
+            const barLevel = this.contextUsageLevel(ratio);
+            html += '<div class="agent-token-popup__bar agent-token-popup__bar--' + barLevel + '">' +
+                '<span style="width:' + (ratio * 100).toFixed(1) + '%"></span>' +
+            "</div>";
+        } else {
+            html += '<div class="agent-token-popup__divider"></div>';
+        }
         // 各分类（0 值跳过），百分比格式。
         for (const row of this.formatTokenBreakdown()) {
             html += '<div class="agent-token-popup__row">' +
@@ -2502,9 +2547,12 @@ export class AgentChat extends Model {
         popup.innerHTML = html;
         document.body.appendChild(popup);
         popup.style.zIndex = (++window.siyuan.zIndex).toString();
-        // 定位在 tokens 数字上方。
+        // 定位：右对齐到 trigger 右边缘并向左延伸。trigger（圆环）只有 24px 宽且紧贴发送按钮，
+        // 左对齐会让 popup 向右溢出后挤到屏幕右边缘、首行末尾贴边，故改用右对齐。
         const rect = this.tokenDisplayEl.getBoundingClientRect();
-        setPosition(popup, rect.left, rect.top, rect.height, rect.width);
+        const popupWidth = popup.offsetWidth;
+        const rightAlignedLeft = rect.right - popupWidth;
+        setPosition(popup, rightAlignedLeft, rect.top, rect.height);
         // popup 自身 hover 保持显示（鼠标移入时取消关闭计时，移出时关闭）。
         popup.addEventListener("mouseenter", () => {
             window.clearTimeout(this.tokenPopupHideTimer);
@@ -2582,9 +2630,39 @@ export class AgentChat extends Model {
         return result;
     }
 
-    // token 数 k 格式化（>=1000 显示为 1.2k）。
+    // 上下文占用率 → 颜色档位名称（low/mid/warn/high）。圆环弧度与弹层横条共用此算法，保证两者配色一致。
+    // 阈值：green(<30%) / yellow(30-45%) / orange(45-85%) / red(≥85%)。
+    private contextUsageLevel(ratio: number): string {
+        if (ratio >= 0.85) { return "high"; }
+        if (ratio >= 0.45) { return "warn"; }
+        if (ratio >= 0.3) { return "mid"; }
+        return "low";
+    }
+
+    // token 数格式化：1024 进制值（2^N，如 131072=128×1024）转成业界惯称（128k、1M），
+    // 仅当「能整除 1024 且商在白名单」时才用 1024 进制，避免 256000 这种 1000 进制值被误判为 250k。
+    // 其余按 1000 进制（200000→200k、1048576→1.0M）。
     private formatTokenCount(n: number): string {
-        return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n);
+        if (n <= 0) {
+            return String(n);
+        }
+        // 白名单：业界常见的 2^N 商（8k/16k/32k/64k/128k/256k/512k/1M）+ 200（200k=204800 少见但存在）。
+        const niceMultiples = new Set([8, 16, 32, 64, 128, 200, 256, 512, 1024]);
+        if (n >= 1024 && n % 1024 === 0 && niceMultiples.has(n / 1024)) {
+            const quotient = n / 1024;
+            if (quotient >= 1024) {
+                return (quotient / 1024) + "M";
+            }
+            return quotient + "k";
+        }
+        // 1000 进制或其他：除以 1000 / 1000000，整除时省略小数（200000→200k，3500→3.5k）。
+        if (n >= 1000000) {
+            return (n / 1000000).toFixed(n % 1000000 === 0 ? 0 : 1) + "M";
+        }
+        if (n >= 1000) {
+            return (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + "k";
+        }
+        return String(n);
     }
 
     private clearThinking() {
@@ -2661,10 +2739,10 @@ export class AgentChat extends Model {
         this.updateSendButtonState();
     }
 
-    // 根据"是否流式中"与"是否有可用模型"综合决定发送按钮与输入框可用性。
+    // 根据"是否流式中"、"是否有可用模型"、"输入框是否有内容"综合决定发送按钮与输入框可用性。
     // 无模型时一并禁用发送按钮与输入框（attr disabled + 灰样式 + composer-host 禁用态），从源头阻止无效请求。
     private updateSendButtonState() {
-        const disabled = this.isStreaming || this.modelOptions.length === 0;
+        const disabled = this.isStreaming || this.modelOptions.length === 0 || !this.hasComposerInput();
         if (disabled) {
             this.sendBtn.setAttribute("disabled", "disabled");
             this.sendBtn.classList.add("agent-chat__send--disabled");
@@ -2674,8 +2752,18 @@ export class AgentChat extends Model {
         }
         if (this.composerHost) {
             // 复用流式时已有的禁用态样式（灰显 + 阻止交互）。
-            this.composerHost.classList.toggle("agent-chat__composer-host--disabled", disabled);
+            // 注意：仅流式 / 无模型时禁用 composer；输入为空不禁用 composer（用户仍可正常编辑）。
+            const composerDisabled = this.isStreaming || this.modelOptions.length === 0;
+            this.composerHost.classList.toggle("agent-chat__composer-host--disabled", composerDisabled);
         }
+    }
+
+    // 输入框当前是否有可发送内容（含 @引用也算）。无 composer 时返回 false。
+    private hasComposerInput(): boolean {
+        if (!this.composer) {
+            return false;
+        }
+        return this.composer.getSendData().text.length > 0;
     }
 
     private scrollToBottom(force = false, smooth = false) {

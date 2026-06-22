@@ -1,0 +1,959 @@
+{
+  "_meta": {
+    "source": "https://openrouter.ai/api/v1/models",
+    "fetchedAt": "2026-06-22",
+    "format": "key 为模型 id 最后一段（provider 前缀已去除）；contextLength 取同名模型最大值；已过滤 :free 后缀、末段等于 free、context_length 为 null/0 的条目。",
+    "totalCount": 340,
+    "nullFiltered": 0,
+    "zeroFiltered": 0,
+    "outputCount": 316
+  },
+  "aion-1.0": {
+    "contextLength": 131072
+  },
+  "aion-1.0-mini": {
+    "contextLength": 131072
+  },
+  "aion-2.0": {
+    "contextLength": 131072
+  },
+  "aion-rp-llama-3.1-8b": {
+    "contextLength": 32768
+  },
+  "auto": {
+    "contextLength": 2000000
+  },
+  "bodybuilder": {
+    "contextLength": 128000
+  },
+  "claude-3-haiku": {
+    "contextLength": 200000
+  },
+  "claude-fable-5": {
+    "contextLength": 1000000
+  },
+  "claude-fable-latest": {
+    "contextLength": 1000000
+  },
+  "claude-haiku-4.5": {
+    "contextLength": 200000
+  },
+  "claude-haiku-latest": {
+    "contextLength": 200000
+  },
+  "claude-opus-4": {
+    "contextLength": 200000
+  },
+  "claude-opus-4.1": {
+    "contextLength": 200000
+  },
+  "claude-opus-4.5": {
+    "contextLength": 200000
+  },
+  "claude-opus-4.6": {
+    "contextLength": 1000000
+  },
+  "claude-opus-4.6-fast": {
+    "contextLength": 1000000
+  },
+  "claude-opus-4.7": {
+    "contextLength": 1000000
+  },
+  "claude-opus-4.7-fast": {
+    "contextLength": 1000000
+  },
+  "claude-opus-4.8": {
+    "contextLength": 1000000
+  },
+  "claude-opus-4.8-fast": {
+    "contextLength": 1000000
+  },
+  "claude-opus-latest": {
+    "contextLength": 1000000
+  },
+  "claude-sonnet-4": {
+    "contextLength": 1000000
+  },
+  "claude-sonnet-4.5": {
+    "contextLength": 1000000
+  },
+  "claude-sonnet-4.6": {
+    "contextLength": 1000000
+  },
+  "claude-sonnet-latest": {
+    "contextLength": 1000000
+  },
+  "coder-large": {
+    "contextLength": 32768
+  },
+  "codestral-2508": {
+    "contextLength": 256000
+  },
+  "cogito-v2.1-671b": {
+    "contextLength": 128000
+  },
+  "command-a": {
+    "contextLength": 256000
+  },
+  "command-r-08-2024": {
+    "contextLength": 128000
+  },
+  "command-r-plus-08-2024": {
+    "contextLength": 128000
+  },
+  "command-r7b-12-2024": {
+    "contextLength": 128000
+  },
+  "cydonia-24b-v4.1": {
+    "contextLength": 131072
+  },
+  "deepseek-chat": {
+    "contextLength": 131072
+  },
+  "deepseek-chat-v3-0324": {
+    "contextLength": 163840
+  },
+  "deepseek-chat-v3.1": {
+    "contextLength": 163840
+  },
+  "deepseek-r1": {
+    "contextLength": 163840
+  },
+  "deepseek-r1-0528": {
+    "contextLength": 163840
+  },
+  "deepseek-r1-distill-llama-70b": {
+    "contextLength": 128000
+  },
+  "deepseek-v3.1-terminus": {
+    "contextLength": 163840
+  },
+  "deepseek-v3.2": {
+    "contextLength": 131072
+  },
+  "deepseek-v3.2-exp": {
+    "contextLength": 163840
+  },
+  "deepseek-v4-flash": {
+    "contextLength": 1048576
+  },
+  "deepseek-v4-pro": {
+    "contextLength": 1048576
+  },
+  "devstral-2512": {
+    "contextLength": 262144
+  },
+  "ernie-4.5-vl-424b-a47b": {
+    "contextLength": 131072
+  },
+  "fusion": {
+    "contextLength": 1000000
+  },
+  "gemini-2.5-flash": {
+    "contextLength": 1048576
+  },
+  "gemini-2.5-flash-image": {
+    "contextLength": 32768
+  },
+  "gemini-2.5-flash-lite": {
+    "contextLength": 1048576
+  },
+  "gemini-2.5-flash-lite-preview-09-2025": {
+    "contextLength": 1048576
+  },
+  "gemini-2.5-pro": {
+    "contextLength": 1048576
+  },
+  "gemini-2.5-pro-preview": {
+    "contextLength": 1048576
+  },
+  "gemini-2.5-pro-preview-05-06": {
+    "contextLength": 1048576
+  },
+  "gemini-3-flash-preview": {
+    "contextLength": 1048576
+  },
+  "gemini-3-pro-image": {
+    "contextLength": 65536
+  },
+  "gemini-3-pro-image-preview": {
+    "contextLength": 65536
+  },
+  "gemini-3.1-flash-image": {
+    "contextLength": 131072
+  },
+  "gemini-3.1-flash-image-preview": {
+    "contextLength": 131072
+  },
+  "gemini-3.1-flash-lite": {
+    "contextLength": 1048576
+  },
+  "gemini-3.1-flash-lite-preview": {
+    "contextLength": 1048576
+  },
+  "gemini-3.1-pro-preview": {
+    "contextLength": 1048576
+  },
+  "gemini-3.1-pro-preview-customtools": {
+    "contextLength": 1048756
+  },
+  "gemini-3.5-flash": {
+    "contextLength": 1048576
+  },
+  "gemini-flash-latest": {
+    "contextLength": 1048576
+  },
+  "gemini-pro-latest": {
+    "contextLength": 1048576
+  },
+  "gemma-2-27b-it": {
+    "contextLength": 8192
+  },
+  "gemma-3-12b-it": {
+    "contextLength": 131072
+  },
+  "gemma-3-27b-it": {
+    "contextLength": 131072
+  },
+  "gemma-3-4b-it": {
+    "contextLength": 131072
+  },
+  "gemma-3n-e4b-it": {
+    "contextLength": 32768
+  },
+  "gemma-4-26b-a4b-it": {
+    "contextLength": 262144
+  },
+  "gemma-4-31b-it": {
+    "contextLength": 262144
+  },
+  "glm-4.5": {
+    "contextLength": 131072
+  },
+  "glm-4.5-air": {
+    "contextLength": 131072
+  },
+  "glm-4.5v": {
+    "contextLength": 65536
+  },
+  "glm-4.6": {
+    "contextLength": 202752
+  },
+  "glm-4.6v": {
+    "contextLength": 131072
+  },
+  "glm-4.7": {
+    "contextLength": 202752
+  },
+  "glm-4.7-flash": {
+    "contextLength": 202752
+  },
+  "glm-5": {
+    "contextLength": 202752
+  },
+  "glm-5-turbo": {
+    "contextLength": 262144
+  },
+  "glm-5.1": {
+    "contextLength": 202752
+  },
+  "glm-5.2": {
+    "contextLength": 1048576
+  },
+  "gpt-3.5-turbo": {
+    "contextLength": 16385
+  },
+  "gpt-3.5-turbo-0613": {
+    "contextLength": 4095
+  },
+  "gpt-3.5-turbo-16k": {
+    "contextLength": 16385
+  },
+  "gpt-3.5-turbo-instruct": {
+    "contextLength": 4095
+  },
+  "gpt-4": {
+    "contextLength": 8191
+  },
+  "gpt-4-turbo": {
+    "contextLength": 128000
+  },
+  "gpt-4-turbo-preview": {
+    "contextLength": 128000
+  },
+  "gpt-4.1": {
+    "contextLength": 1047576
+  },
+  "gpt-4.1-mini": {
+    "contextLength": 1047576
+  },
+  "gpt-4.1-nano": {
+    "contextLength": 1047576
+  },
+  "gpt-4o": {
+    "contextLength": 128000
+  },
+  "gpt-4o-2024-05-13": {
+    "contextLength": 128000
+  },
+  "gpt-4o-2024-08-06": {
+    "contextLength": 128000
+  },
+  "gpt-4o-2024-11-20": {
+    "contextLength": 128000
+  },
+  "gpt-4o-mini": {
+    "contextLength": 128000
+  },
+  "gpt-4o-mini-2024-07-18": {
+    "contextLength": 128000
+  },
+  "gpt-4o-mini-search-preview": {
+    "contextLength": 128000
+  },
+  "gpt-4o-search-preview": {
+    "contextLength": 128000
+  },
+  "gpt-5": {
+    "contextLength": 400000
+  },
+  "gpt-5-chat": {
+    "contextLength": 128000
+  },
+  "gpt-5-codex": {
+    "contextLength": 400000
+  },
+  "gpt-5-image": {
+    "contextLength": 400000
+  },
+  "gpt-5-image-mini": {
+    "contextLength": 400000
+  },
+  "gpt-5-mini": {
+    "contextLength": 400000
+  },
+  "gpt-5-nano": {
+    "contextLength": 400000
+  },
+  "gpt-5-pro": {
+    "contextLength": 400000
+  },
+  "gpt-5.1": {
+    "contextLength": 400000
+  },
+  "gpt-5.1-chat": {
+    "contextLength": 128000
+  },
+  "gpt-5.1-codex": {
+    "contextLength": 400000
+  },
+  "gpt-5.1-codex-max": {
+    "contextLength": 400000
+  },
+  "gpt-5.1-codex-mini": {
+    "contextLength": 400000
+  },
+  "gpt-5.2": {
+    "contextLength": 400000
+  },
+  "gpt-5.2-chat": {
+    "contextLength": 128000
+  },
+  "gpt-5.2-codex": {
+    "contextLength": 400000
+  },
+  "gpt-5.2-pro": {
+    "contextLength": 400000
+  },
+  "gpt-5.3-chat": {
+    "contextLength": 128000
+  },
+  "gpt-5.3-codex": {
+    "contextLength": 400000
+  },
+  "gpt-5.4": {
+    "contextLength": 1050000
+  },
+  "gpt-5.4-image-2": {
+    "contextLength": 272000
+  },
+  "gpt-5.4-mini": {
+    "contextLength": 400000
+  },
+  "gpt-5.4-nano": {
+    "contextLength": 400000
+  },
+  "gpt-5.4-pro": {
+    "contextLength": 1050000
+  },
+  "gpt-5.5": {
+    "contextLength": 1050000
+  },
+  "gpt-5.5-pro": {
+    "contextLength": 1050000
+  },
+  "gpt-audio": {
+    "contextLength": 128000
+  },
+  "gpt-audio-mini": {
+    "contextLength": 128000
+  },
+  "gpt-chat-latest": {
+    "contextLength": 400000
+  },
+  "gpt-latest": {
+    "contextLength": 1050000
+  },
+  "gpt-mini-latest": {
+    "contextLength": 400000
+  },
+  "gpt-oss-120b": {
+    "contextLength": 131072
+  },
+  "gpt-oss-20b": {
+    "contextLength": 131072
+  },
+  "gpt-oss-safeguard-20b": {
+    "contextLength": 131072
+  },
+  "granite-4.0-h-micro": {
+    "contextLength": 131000
+  },
+  "granite-4.1-8b": {
+    "contextLength": 131072
+  },
+  "grok-4.20": {
+    "contextLength": 2000000
+  },
+  "grok-4.20-multi-agent": {
+    "contextLength": 2000000
+  },
+  "grok-4.3": {
+    "contextLength": 1000000
+  },
+  "grok-build-0.1": {
+    "contextLength": 256000
+  },
+  "hermes-3-llama-3.1-405b": {
+    "contextLength": 131072
+  },
+  "hermes-3-llama-3.1-70b": {
+    "contextLength": 131072
+  },
+  "hermes-4-405b": {
+    "contextLength": 131072
+  },
+  "hermes-4-70b": {
+    "contextLength": 131072
+  },
+  "hunyuan-a13b-instruct": {
+    "contextLength": 131072
+  },
+  "hy3-preview": {
+    "contextLength": 262144
+  },
+  "inflection-3-pi": {
+    "contextLength": 8000
+  },
+  "inflection-3-productivity": {
+    "contextLength": 8000
+  },
+  "intellect-3": {
+    "contextLength": 131072
+  },
+  "jamba-large-1.7": {
+    "contextLength": 256000
+  },
+  "kat-coder-pro-v2": {
+    "contextLength": 256000
+  },
+  "kimi-k2": {
+    "contextLength": 131072
+  },
+  "kimi-k2-0905": {
+    "contextLength": 262144
+  },
+  "kimi-k2-thinking": {
+    "contextLength": 262144
+  },
+  "kimi-k2.5": {
+    "contextLength": 262144
+  },
+  "kimi-k2.6": {
+    "contextLength": 262144
+  },
+  "kimi-k2.7-code": {
+    "contextLength": 262144
+  },
+  "kimi-latest": {
+    "contextLength": 262144
+  },
+  "l3-lunaris-8b": {
+    "contextLength": 8192
+  },
+  "l3.1-70b-hanami-x1": {
+    "contextLength": 16000
+  },
+  "l3.1-euryale-70b": {
+    "contextLength": 131072
+  },
+  "l3.3-euryale-70b": {
+    "contextLength": 131072
+  },
+  "laguna-m.1": {
+    "contextLength": 262144
+  },
+  "laguna-xs.2": {
+    "contextLength": 262144
+  },
+  "lfm-2-24b-a2b": {
+    "contextLength": 128000
+  },
+  "ling-2.6-1t": {
+    "contextLength": 262144
+  },
+  "ling-2.6-flash": {
+    "contextLength": 262144
+  },
+  "llama-3-8b-instruct": {
+    "contextLength": 8192
+  },
+  "llama-3.1-70b-instruct": {
+    "contextLength": 131072
+  },
+  "llama-3.1-8b-instruct": {
+    "contextLength": 131072
+  },
+  "llama-3.2-11b-vision-instruct": {
+    "contextLength": 131072
+  },
+  "llama-3.2-1b-instruct": {
+    "contextLength": 131072
+  },
+  "llama-3.2-3b-instruct": {
+    "contextLength": 131072
+  },
+  "llama-3.3-70b-instruct": {
+    "contextLength": 131072
+  },
+  "llama-3.3-nemotron-super-49b-v1.5": {
+    "contextLength": 131072
+  },
+  "llama-4-maverick": {
+    "contextLength": 1048576
+  },
+  "llama-4-scout": {
+    "contextLength": 10000000
+  },
+  "llama-guard-4-12b": {
+    "contextLength": 163840
+  },
+  "lyria-3-clip-preview": {
+    "contextLength": 1048576
+  },
+  "lyria-3-pro-preview": {
+    "contextLength": 1048576
+  },
+  "magnum-v4-72b": {
+    "contextLength": 32768
+  },
+  "mercury-2": {
+    "contextLength": 128000
+  },
+  "mimo-v2.5": {
+    "contextLength": 1048576
+  },
+  "mimo-v2.5-pro": {
+    "contextLength": 1048576
+  },
+  "minimax-01": {
+    "contextLength": 1000192
+  },
+  "minimax-m1": {
+    "contextLength": 1000000
+  },
+  "minimax-m2": {
+    "contextLength": 204800
+  },
+  "minimax-m2-her": {
+    "contextLength": 65536
+  },
+  "minimax-m2.1": {
+    "contextLength": 204800
+  },
+  "minimax-m2.5": {
+    "contextLength": 204800
+  },
+  "minimax-m2.7": {
+    "contextLength": 204800
+  },
+  "minimax-m3": {
+    "contextLength": 1048576
+  },
+  "ministral-14b-2512": {
+    "contextLength": 262144
+  },
+  "ministral-3b-2512": {
+    "contextLength": 131072
+  },
+  "ministral-8b-2512": {
+    "contextLength": 262144
+  },
+  "mistral-large": {
+    "contextLength": 128000
+  },
+  "mistral-large-2407": {
+    "contextLength": 131072
+  },
+  "mistral-large-2512": {
+    "contextLength": 262144
+  },
+  "mistral-medium-3": {
+    "contextLength": 131072
+  },
+  "mistral-medium-3-5": {
+    "contextLength": 262144
+  },
+  "mistral-medium-3.1": {
+    "contextLength": 131072
+  },
+  "mistral-nemo": {
+    "contextLength": 131072
+  },
+  "mistral-saba": {
+    "contextLength": 32768
+  },
+  "mistral-small-24b-instruct-2501": {
+    "contextLength": 32768
+  },
+  "mistral-small-2603": {
+    "contextLength": 262144
+  },
+  "mistral-small-3.1-24b-instruct": {
+    "contextLength": 128000
+  },
+  "mistral-small-3.2-24b-instruct": {
+    "contextLength": 128000
+  },
+  "mixtral-8x22b-instruct": {
+    "contextLength": 65536
+  },
+  "morph-v3-fast": {
+    "contextLength": 81920
+  },
+  "morph-v3-large": {
+    "contextLength": 262144
+  },
+  "mythomax-l2-13b": {
+    "contextLength": 4096
+  },
+  "nemotron-3-nano-30b-a3b": {
+    "contextLength": 262144
+  },
+  "nemotron-3-super-120b-a12b": {
+    "contextLength": 1000000
+  },
+  "nemotron-3-ultra-550b-a55b": {
+    "contextLength": 1000000
+  },
+  "nex-n2-pro": {
+    "contextLength": 262144
+  },
+  "nova-2-lite-v1": {
+    "contextLength": 1000000
+  },
+  "nova-lite-v1": {
+    "contextLength": 300000
+  },
+  "nova-micro-v1": {
+    "contextLength": 128000
+  },
+  "nova-premier-v1": {
+    "contextLength": 1000000
+  },
+  "nova-pro-v1": {
+    "contextLength": 300000
+  },
+  "o1": {
+    "contextLength": 200000
+  },
+  "o1-pro": {
+    "contextLength": 200000
+  },
+  "o3": {
+    "contextLength": 200000
+  },
+  "o3-deep-research": {
+    "contextLength": 200000
+  },
+  "o3-mini": {
+    "contextLength": 200000
+  },
+  "o3-mini-high": {
+    "contextLength": 200000
+  },
+  "o3-pro": {
+    "contextLength": 200000
+  },
+  "o4-mini": {
+    "contextLength": 200000
+  },
+  "o4-mini-deep-research": {
+    "contextLength": 200000
+  },
+  "o4-mini-high": {
+    "contextLength": 200000
+  },
+  "olmo-3-32b-think": {
+    "contextLength": 65536
+  },
+  "owl-alpha": {
+    "contextLength": 1048756
+  },
+  "palmyra-x5": {
+    "contextLength": 1040000
+  },
+  "pareto-code": {
+    "contextLength": 2000000
+  },
+  "perceptron-mk1": {
+    "contextLength": 32768
+  },
+  "phi-4": {
+    "contextLength": 16384
+  },
+  "phi-4-mini-instruct": {
+    "contextLength": 131072
+  },
+  "qwen-2.5-72b-instruct": {
+    "contextLength": 131072
+  },
+  "qwen-2.5-7b-instruct": {
+    "contextLength": 131072
+  },
+  "qwen-2.5-coder-32b-instruct": {
+    "contextLength": 128000
+  },
+  "qwen-plus": {
+    "contextLength": 1000000
+  },
+  "qwen-plus-2025-07-28": {
+    "contextLength": 1000000
+  },
+  "qwen-plus-2025-07-28:thinking": {
+    "contextLength": 1000000
+  },
+  "qwen2.5-vl-72b-instruct": {
+    "contextLength": 131072
+  },
+  "qwen3-14b": {
+    "contextLength": 131702
+  },
+  "qwen3-235b-a22b": {
+    "contextLength": 131072
+  },
+  "qwen3-235b-a22b-2507": {
+    "contextLength": 262144
+  },
+  "qwen3-235b-a22b-thinking-2507": {
+    "contextLength": 262144
+  },
+  "qwen3-30b-a3b": {
+    "contextLength": 131072
+  },
+  "qwen3-30b-a3b-instruct-2507": {
+    "contextLength": 131072
+  },
+  "qwen3-30b-a3b-thinking-2507": {
+    "contextLength": 131072
+  },
+  "qwen3-32b": {
+    "contextLength": 131072
+  },
+  "qwen3-8b": {
+    "contextLength": 131072
+  },
+  "qwen3-coder": {
+    "contextLength": 1048576
+  },
+  "qwen3-coder-30b-a3b-instruct": {
+    "contextLength": 160000
+  },
+  "qwen3-coder-flash": {
+    "contextLength": 1000000
+  },
+  "qwen3-coder-next": {
+    "contextLength": 262144
+  },
+  "qwen3-coder-plus": {
+    "contextLength": 1000000
+  },
+  "qwen3-max": {
+    "contextLength": 262144
+  },
+  "qwen3-max-thinking": {
+    "contextLength": 262144
+  },
+  "qwen3-next-80b-a3b-instruct": {
+    "contextLength": 262144
+  },
+  "qwen3-next-80b-a3b-thinking": {
+    "contextLength": 262144
+  },
+  "qwen3-vl-235b-a22b-instruct": {
+    "contextLength": 262144
+  },
+  "qwen3-vl-235b-a22b-thinking": {
+    "contextLength": 131072
+  },
+  "qwen3-vl-30b-a3b-instruct": {
+    "contextLength": 262144
+  },
+  "qwen3-vl-30b-a3b-thinking": {
+    "contextLength": 131072
+  },
+  "qwen3-vl-32b-instruct": {
+    "contextLength": 262144
+  },
+  "qwen3-vl-8b-instruct": {
+    "contextLength": 256000
+  },
+  "qwen3-vl-8b-thinking": {
+    "contextLength": 256000
+  },
+  "qwen3.5-122b-a10b": {
+    "contextLength": 262144
+  },
+  "qwen3.5-27b": {
+    "contextLength": 262144
+  },
+  "qwen3.5-35b-a3b": {
+    "contextLength": 262144
+  },
+  "qwen3.5-397b-a17b": {
+    "contextLength": 256000
+  },
+  "qwen3.5-9b": {
+    "contextLength": 262144
+  },
+  "qwen3.5-flash-02-23": {
+    "contextLength": 1000000
+  },
+  "qwen3.5-plus-02-15": {
+    "contextLength": 1000000
+  },
+  "qwen3.5-plus-20260420": {
+    "contextLength": 1000000
+  },
+  "qwen3.6-27b": {
+    "contextLength": 262144
+  },
+  "qwen3.6-35b-a3b": {
+    "contextLength": 262144
+  },
+  "qwen3.6-flash": {
+    "contextLength": 1000000
+  },
+  "qwen3.6-max-preview": {
+    "contextLength": 262144
+  },
+  "qwen3.6-plus": {
+    "contextLength": 1000000
+  },
+  "qwen3.7-max": {
+    "contextLength": 1000000
+  },
+  "qwen3.7-plus": {
+    "contextLength": 1000000
+  },
+  "reka-edge": {
+    "contextLength": 16384
+  },
+  "reka-flash-3": {
+    "contextLength": 65536
+  },
+  "relace-apply-3": {
+    "contextLength": 256000
+  },
+  "relace-search": {
+    "contextLength": 256000
+  },
+  "remm-slerp-l2-13b": {
+    "contextLength": 6144
+  },
+  "ring-2.6-1t": {
+    "contextLength": 262144
+  },
+  "rnj-1-instruct": {
+    "contextLength": 32768
+  },
+  "rocinante-12b": {
+    "contextLength": 32768
+  },
+  "router": {
+    "contextLength": 131072
+  },
+  "seed-1.6": {
+    "contextLength": 262144
+  },
+  "seed-1.6-flash": {
+    "contextLength": 262144
+  },
+  "seed-2.0-lite": {
+    "contextLength": 262144
+  },
+  "seed-2.0-mini": {
+    "contextLength": 262144
+  },
+  "skyfall-36b-v2": {
+    "contextLength": 32768
+  },
+  "solar-pro-3": {
+    "contextLength": 128000
+  },
+  "sonar": {
+    "contextLength": 127072
+  },
+  "sonar-deep-research": {
+    "contextLength": 128000
+  },
+  "sonar-pro": {
+    "contextLength": 200000
+  },
+  "sonar-pro-search": {
+    "contextLength": 200000
+  },
+  "sonar-reasoning-pro": {
+    "contextLength": 128000
+  },
+  "step-3.5-flash": {
+    "contextLength": 262144
+  },
+  "step-3.7-flash": {
+    "contextLength": 256000
+  },
+  "trinity-large-thinking": {
+    "contextLength": 262144
+  },
+  "trinity-mini": {
+    "contextLength": 131072
+  },
+  "ui-tars-1.5-7b": {
+    "contextLength": 128000
+  },
+  "unslopnemo-12b": {
+    "contextLength": 32768
+  },
+  "virtuoso-large": {
+    "contextLength": 131072
+  },
+  "voxtral-small-24b-2507": {
+    "contextLength": 32000
+  },
+  "weaver": {
+    "contextLength": 8000
+  },
+  "wizardlm-2-8x22b": {
+    "contextLength": 65536
+  }
+}

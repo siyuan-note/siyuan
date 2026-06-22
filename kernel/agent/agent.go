@@ -220,6 +220,7 @@ type AgentEvent struct {
 	LastPromptTokens int
 	TokenBreakdown   map[string]int
 	CachedTokens     int
+	ContextLimit     int
 	RetryAttempt     int
 	RetryMax         int
 	SnapshotID       string
@@ -308,6 +309,7 @@ type agentCheckpoint struct {
 	ContextTokens        int            `json:"contextTokens,omitempty"`
 	ContextTokenBreakdown map[string]int `json:"contextTokenBreakdown,omitempty"`
 	ContextCachedTokens  int            `json:"contextCachedTokens,omitempty"`
+	ContextLimit         int            `json:"contextLimit,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
@@ -330,6 +332,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
 		var totalPrompt, totalCompletion, lastPromptTokens, lastCachedTokens int
+		contextLimit := GetModelContextLimit(model)
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
@@ -732,12 +735,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				ReasoningContent: reasoningBuilder.String(),
 			})
 
-			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens})
+			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 			return
 		}
 
-		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens})
+		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 	}()
@@ -1284,6 +1287,9 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		}
 		if old.ContextCachedTokens > 0 {
 			cp.ContextCachedTokens = old.ContextCachedTokens
+		}
+		if old.ContextLimit > 0 {
+			cp.ContextLimit = old.ContextLimit
 		}
 	}
 

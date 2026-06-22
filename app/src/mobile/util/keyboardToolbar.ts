@@ -654,6 +654,10 @@ export const initKeyboardToolbar = () => {
             if (slashBtnElement.getAttribute("data-focus") === "true") {
                 focusByRange(protyle.toolbar.range);
             }
+            // (( / {{ 的候选列表无输入框，需保持键盘不收起，否则无法继续输入筛选
+            if (dataValue === "((" || dataValue === "{{") {
+                callMobileAppShowKeyboard();
+            }
             return;
         }
         const buttonElement = hasClosestByTag(target, "BUTTON");

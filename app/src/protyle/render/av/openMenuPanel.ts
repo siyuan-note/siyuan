@@ -484,7 +484,8 @@ export const openMenuPanel = (options: {
                         data: JSON.parse(JSON.stringify(data.view.filters)),
                         blockID
                     }]);
-                    data.view.filters = [];
+                    // 本地状态保持“顶层单个空根组”不变量（后端会同样归一化），避免后续 addFilterGroup 误把新分组当成根组
+                    data.view.filters = [{combination: "and", filters: []}];
                     menuElement.innerHTML = getFiltersHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();

@@ -302,7 +302,7 @@ export const getFiltersHTML = (data: IAV) => {
 ${html}
 <button class="b3-menu__item" data-type="addFilterCondition" data-path="" data-depth="0">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label" style="flex:none;">${window.siyuan.languages.addFilterCondition}</span>
+    <span class="b3-menu__label av__filter-add-label">${window.siyuan.languages.addFilterCondition}</span>
     <svg class="av__filter-arrow"><use xlink:href="#iconDown"></use></svg>
 </button>
 <button class="b3-menu__item b3-menu__item--warning${leafCount > 0 ? "" : " fn__none"}" data-type="removeFilters">

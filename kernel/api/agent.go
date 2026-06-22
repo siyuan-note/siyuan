@@ -412,6 +412,8 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			"promptTokens":     event.PromptTokens,
 			"completionTokens": event.CompletionTokens,
 			"lastPromptTokens": event.LastPromptTokens,
+			"tokenBreakdown":   event.TokenBreakdown,
+			"cachedTokens":     event.CachedTokens,
 		})
 	case "done":
 		return writeSSEEvent(c, "done", map[string]interface{}{})

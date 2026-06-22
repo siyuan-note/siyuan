@@ -12,6 +12,7 @@ import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {escapeAriaLabel, escapeHtml} from "../../util/escape";
+import {setPosition} from "../../util/setPosition";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
@@ -79,6 +80,11 @@ export class AgentChat extends Model {
     private currentContent = "";
     private fullContent = "";
     private contextTokens = 0;
+    private contextTokenBreakdown: Record<string, number> = {};
+    private contextCachedTokens = 0;
+    private tokenPopup: HTMLElement | null = null;
+    private tokenPopupShowTimer = 0;
+    private tokenPopupHideTimer = 0;
     private sessionCreatedAt = 0;
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
@@ -468,6 +474,27 @@ export class AgentChat extends Model {
     }
 
     private bindEvents() {
+        // hover 底部 tokens 数字弹出分类明细面板（移动端 click 触发）。
+        this.tokenDisplayEl.addEventListener("mouseenter", () => {
+            window.clearTimeout(this.tokenPopupHideTimer);
+            this.tokenPopupShowTimer = window.setTimeout(() => {
+                this.showTokenBreakdownPopup();
+            }, 200);
+        });
+        this.tokenDisplayEl.addEventListener("mouseleave", () => {
+            window.clearTimeout(this.tokenPopupShowTimer);
+            this.tokenPopupHideTimer = window.setTimeout(() => {
+                this.closeTokenBreakdownPopup();
+            }, 300);
+        });
+        this.tokenDisplayEl.addEventListener("click", () => {
+            // 移动端无 hover，click 直接切换 popup。
+            if (this.tokenPopup) {
+                this.closeTokenBreakdownPopup();
+            } else {
+                this.showTokenBreakdownPopup();
+            }
+        });
         this.sendBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
             this.sendMessage();
@@ -537,6 +564,8 @@ export class AgentChat extends Model {
                 this.entries = this.buildEntriesFromSession(session);
                 this.hasTitled = session.titled !== false;
                 this.contextTokens = session.contextTokens ?? 0;
+                this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
+                this.contextCachedTokens = session.contextCachedTokens ?? 0;
                 if (session.model) {
                     this.applySessionModelIfValid(session.model);
                 }
@@ -569,6 +598,8 @@ export class AgentChat extends Model {
             titled: this.hasTitled,
             entries: this.entries.slice(),
             contextTokens: this.contextTokens,
+            contextTokenBreakdown: this.contextTokenBreakdown,
+            contextCachedTokens: this.contextCachedTokens,
             createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
             messageHistory: this.composer?.getHistory() || [],
@@ -699,6 +730,8 @@ export class AgentChat extends Model {
         this.hasTitled = session.titled !== false;
         this.sessionCreatedAt = session.createdAt || this.sessionCreatedAt;
         this.contextTokens = session.contextTokens ?? 0;
+        this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
+        this.contextCachedTokens = session.contextCachedTokens ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -767,6 +800,8 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.contextTokens = session.contextTokens ?? 0;
+        this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
+        this.contextCachedTokens = session.contextCachedTokens ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -1038,6 +1073,8 @@ export class AgentChat extends Model {
         this.currentContent = "";
         this.fullContent = "";
         this.contextTokens = 0;
+        this.contextTokenBreakdown = {};
+        this.contextCachedTokens = 0;
         this.currentToolCalls = [];
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
@@ -1337,7 +1374,7 @@ export class AgentChat extends Model {
                     await this.finishResponse();
                     break;
                 case "usage":
-                    this.appendUsage(event.lastPromptTokens);
+                    this.appendUsage(event.lastPromptTokens, event.tokenBreakdown, event.cachedTokens);
                     break;
                 case "error":
                     this.flushTokenUpdate();
@@ -2410,9 +2447,124 @@ export class AgentChat extends Model {
     }
 
     // 记录最近一轮的 prompt tokens（= 当前上下文已用），覆盖式更新而非累加。
-    private appendUsage(lastPromptTokens: number) {
+    // 记录最近一轮的 prompt tokens（= 当前上下文已用）+ 分类明细 + 缓存命中，覆盖式更新而非累加。
+    private appendUsage(lastPromptTokens: number, tokenBreakdown: Record<string, number>, cachedTokens: number) {
         this.contextTokens = lastPromptTokens;
+        this.contextTokenBreakdown = tokenBreakdown;
+        this.contextCachedTokens = cachedTokens;
         this.updateTokenDisplay();
+    }
+
+    // 弹出 token 分类明细面板。breakdown 全 0 时不弹（无内容可显示）。
+    private showTokenBreakdownPopup() {
+        if (!this.formatTokenBreakdown().length && this.contextCachedTokens === 0) {
+            return;
+        }
+        this.closeTokenBreakdownPopup();
+        const L = window.siyuan.languages;
+        const popup = document.createElement("div");
+        popup.className = "agent-token-popup b3-menu";
+        let html = '<div class="b3-menu__items">';
+        // 第一行：上下文用量（总数）。
+        html += '<div class="agent-token-popup__total">' +
+            '<span class="agent-token-popup__label">' + (L.tokenUsage || "Context Usage") + "</span>" +
+            '<span class="agent-token-popup__value">' + this.formatTokenCount(this.contextTokens) + "</span>" +
+        "</div>";
+        // 分隔线。
+        html += '<div class="agent-token-popup__divider"></div>';
+        // 各分类（0 值跳过），百分比格式。
+        for (const row of this.formatTokenBreakdown()) {
+            html += '<div class="agent-token-popup__row">' +
+                '<span class="agent-token-popup__label">' + escapeHtml(row.label) + "</span>" +
+                '<span class="agent-token-popup__value">' + row.percent + "</span>" +
+            "</div>";
+        }
+        // 缓存命中（独立维度，分隔线隔开，为 0 不显示）。
+        if (this.contextCachedTokens > 0 && this.contextTokens > 0) {
+            html += '<div class="agent-token-popup__divider"></div>';
+            const cachedPercent = Math.round(this.contextCachedTokens / this.contextTokens * 100);
+            html += '<div class="agent-token-popup__row">' +
+                '<span class="agent-token-popup__label">' + (L.tokenCatCached || "Cache Hits") + "</span>" +
+                '<span class="agent-token-popup__value">' + cachedPercent + "%</span>" +
+            "</div>";
+        }
+        html += "</div>";
+        popup.innerHTML = html;
+        document.body.appendChild(popup);
+        popup.style.zIndex = (++window.siyuan.zIndex).toString();
+        // 定位在 tokens 数字上方。
+        const rect = this.tokenDisplayEl.getBoundingClientRect();
+        setPosition(popup, rect.left, rect.top, rect.height, rect.width);
+        // popup 自身 hover 保持显示（鼠标移入时取消关闭计时，移出时关闭）。
+        popup.addEventListener("mouseenter", () => {
+            window.clearTimeout(this.tokenPopupHideTimer);
+        });
+        popup.addEventListener("mouseleave", () => {
+            this.tokenPopupHideTimer = window.setTimeout(() => {
+                this.closeTokenBreakdownPopup();
+            }, 300);
+        });
+        // 点击外部/resize/ESC 关闭。
+        popup.addEventListener("click", (e: MouseEvent) => {
+            e.stopPropagation();
+        });
+        const onOutsideClick = () => {
+            this.closeTokenBreakdownPopup();
+            document.removeEventListener("click", onOutsideClick);
+        };
+        setTimeout(() => {
+            document.addEventListener("click", onOutsideClick);
+        }, 10);
+        const onResize = () => {
+            this.closeTokenBreakdownPopup();
+            window.removeEventListener("resize", onResize);
+        };
+        window.addEventListener("resize", onResize);
+        this.tokenPopup = popup;
+    }
+
+    private closeTokenBreakdownPopup() {
+        if (this.tokenPopup) {
+            this.tokenPopup.remove();
+            this.tokenPopup = null;
+        }
+    }
+
+    // 把 contextTokenBreakdown（后端估算的 9 类 + other）格式化为 [{label, percent}]，跳过 0 值。
+    // percent = 各类 token / contextTokens * 100（contextTokens 为 0 时显示 "-")。
+    private formatTokenBreakdown(): Array<{ label: string; percent: string }> {
+        const L = window.siyuan.languages;
+        // 固定顺序展示（与后端 key 对应）。
+        const order: Array<{ key: string; labelKey: string }> = [
+            {key: "system", labelKey: "tokenCatSystem"},
+            {key: "skills", labelKey: "tokenCatSkills"},
+            {key: "messages", labelKey: "tokenCatMessages"},
+            {key: "nativeToolsDef", labelKey: "tokenCatNativeToolsDef"},
+            {key: "pluginToolsDef", labelKey: "tokenCatPluginToolsDef"},
+            {key: "mcpToolsDef", labelKey: "tokenCatMcpToolsDef"},
+            {key: "nativeTool", labelKey: "tokenCatNativeTool"},
+            {key: "pluginTool", labelKey: "tokenCatPluginTool"},
+            {key: "mcpTool", labelKey: "tokenCatMcpTool"},
+            {key: "other", labelKey: "tokenCatOther"},
+        ];
+        const result: Array<{ label: string; percent: string }> = [];
+        for (const item of order) {
+            const tokens = this.contextTokenBreakdown[item.key] || 0;
+            if (tokens <= 0) {
+                continue;
+            }
+            const label = (L as Record<string, string>)[item.labelKey] || item.key;
+            const percent = this.contextTokens > 0
+                ? Math.round(tokens / this.contextTokens * 100) + "%"
+                : "-";
+            result.push({label, percent});
+        }
+        return result;
+    }
+
+    // token 数 k 格式化（>=1000 显示为 1.2k）。
+    private formatTokenCount(n: number): string {
+        return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n);
     }
 
     private clearThinking() {

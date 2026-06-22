@@ -218,6 +218,8 @@ type AgentEvent struct {
 	PromptTokens     int
 	CompletionTokens int
 	LastPromptTokens int
+	TokenBreakdown   map[string]int
+	CachedTokens     int
 	RetryAttempt     int
 	RetryMax         int
 	SnapshotID       string
@@ -291,18 +293,21 @@ type SessionEntryStep struct {
 }
 
 type agentCheckpoint struct {
-	ID               string         `json:"id"`
-	Title            string         `json:"title"`
-	Titled           bool           `json:"titled"`
-	Entries          []SessionEntry `json:"entries"`
-	PromptTokens     int            `json:"promptTokens"`
-	CompletionTokens int            `json:"completionTokens"`
-	TotalDuration    int64          `json:"totalDuration"`
-	CreatedAt        int64          `json:"createdAt"`
-	UpdatedAt        int64          `json:"updatedAt"`
-	MessageHistory   []string       `json:"messageHistory,omitempty"`
-	Snapshots        []string       `json:"snapshots,omitempty"`
-	AlwaysAllow      bool           `json:"alwaysAllow,omitempty"`
+	ID                   string         `json:"id"`
+	Title                string         `json:"title"`
+	Titled               bool           `json:"titled"`
+	Entries              []SessionEntry `json:"entries"`
+	PromptTokens         int            `json:"promptTokens"`
+	CompletionTokens     int            `json:"completionTokens"`
+	TotalDuration        int64          `json:"totalDuration"`
+	CreatedAt            int64          `json:"createdAt"`
+	UpdatedAt            int64          `json:"updatedAt"`
+	MessageHistory       []string       `json:"messageHistory,omitempty"`
+	Snapshots            []string       `json:"snapshots,omitempty"`
+	AlwaysAllow          bool           `json:"alwaysAllow,omitempty"`
+	ContextTokens        int            `json:"contextTokens,omitempty"`
+	ContextTokenBreakdown map[string]int `json:"contextTokenBreakdown,omitempty"`
+	ContextCachedTokens  int            `json:"contextCachedTokens,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
@@ -324,7 +329,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		tools := convertMCPToolsToOpenAI()
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
-		var totalPrompt, totalCompletion, lastPromptTokens int
+		var totalPrompt, totalCompletion, lastPromptTokens, lastCachedTokens int
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
@@ -481,6 +486,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					totalCompletion += resp.Usage.CompletionTokens
 					// 记录最后一次 stream 的 prompt tokens（= 当前上下文已用），供前端底部显示。
 					lastPromptTokens = resp.Usage.PromptTokens
+					// 补读缓存命中 tokens（OpenAI PromptTokensDetails.CachedTokens，精确值）。
+					// 非 OpenAI 兼容提供商可能不返回该字段，nil 安全处理。
+					if resp.Usage.PromptTokensDetails != nil {
+						lastCachedTokens = resp.Usage.PromptTokensDetails.CachedTokens
+					}
 				}
 			}
 
@@ -722,12 +732,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				ReasoningContent: reasoningBuilder.String(),
 			})
 
-			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens})
+			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens})
 			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 			return
 		}
 
-		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens})
+		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens})
 		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
 		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 	}()
@@ -1036,6 +1046,38 @@ func buildInitialMessages(userMessage string, language string, references []Refe
 	}
 }
 
+// skillsSegmentTokens 估算 system prompt 中 <available_skills> 段（含引导句）的 token 数。
+// 该段在 buildSystemPrompt 内部拼成大字符串，这里独立重建同等内容计数，用于分类统计切出 skills 类。
+func skillsSegmentTokens(counter *tokenCounter) int {
+	if counter == nil {
+		return 0
+	}
+	skills := util.DiscoverSkills()
+	if len(skills) == 0 {
+		return 0
+	}
+	var sb strings.Builder
+	sb.WriteString("\n\n<available_skills>\n")
+	for _, s := range skills {
+		sb.WriteString("  <skill>\n    <name>")
+		sb.WriteString(s.Name)
+		sb.WriteString("</name>\n    <description>")
+		sb.WriteString(s.Description)
+		sb.WriteString("</description>\n  </skill>\n")
+	}
+	sb.WriteString("</available_skills>\n\nUse the skill tool to load a skill when a task matches its description.")
+	return counter.count(sb.String())
+}
+
+// computeBreakdownIfNeeded 计算 10 类 token 分类明细。counter 初始化失败时返回 nil（前端兜底）。
+func computeBreakdownIfNeeded(model string, messages []openai.ChatCompletionMessage, tools []openai.Tool, realPromptTokens int) map[string]int {
+	counter, err := getTokenCounter(model)
+	if err != nil || counter == nil {
+		return nil
+	}
+	return computeTokenBreakdown(counter, messages, tools, skillsSegmentTokens(counter), realPromptTokens)
+}
+
 func loadCheckpoint(sessionID string) *agentCheckpoint {
 	if sessionID == "" || !isValidSessionID(sessionID) {
 		return nil
@@ -1226,6 +1268,18 @@ func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int,
 		}
 		if len(old.Snapshots) > 0 {
 			cp.Snapshots = old.Snapshots
+		}
+		// 回填前端写入的上下文 token 统计字段，避免后端 checkpoint 擦除它们（双写覆盖修复）。
+		// 后端 saveCheckpoint 在流式中途/结束都会触发，但这些统计值是 stream 结束时才由前端写入的，
+		// 所以后端只保留磁盘已有值，不自行计算。
+		if old.ContextTokens > 0 {
+			cp.ContextTokens = old.ContextTokens
+		}
+		if len(old.ContextTokenBreakdown) > 0 {
+			cp.ContextTokenBreakdown = old.ContextTokenBreakdown
+		}
+		if old.ContextCachedTokens > 0 {
+			cp.ContextCachedTokens = old.ContextCachedTokens
 		}
 	}
 

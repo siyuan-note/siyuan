@@ -80,5 +80,8 @@ func RemoveTool(name string) {
 }
 
 func register(t *Tool) {
+	if t.Source == "" {
+		t.Source = "native"
+	}
 	SetTool(t.Name, t)
 }

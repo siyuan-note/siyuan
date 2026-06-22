@@ -22,6 +22,9 @@ type Tool struct {
 	Description  string      `json:"description"`
 	InputSchema  ToolSchema  `json:"inputSchema"`
 	OutputSchema *ToolSchema `json:"outputSchema,omitempty"`
+	// Source 标记工具来源："native"（SiYuan 内置）、"plugin"（插件注册）、"mcp"（外部 MCP 服务）。
+	// 用于 token 分类统计按来源拆分。空值按 "native" 处理（兼容旧调用方）。
+	Source string `json:"source,omitempty"`
 
 	Handler func(args map[string]interface{}) (CallToolResult, error) `json:"-"`
 }

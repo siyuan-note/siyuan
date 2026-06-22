@@ -2623,12 +2623,15 @@ export class AgentChat extends Model {
             if (tokens <= 0) {
                 continue;
             }
+            // 占比保留 1 位小数；四舍五入为 0 的类（占比极小）跳过不显示，避免无意义的 0%。
+            const rounded = this.contextTokens > 0
+                ? Math.round(tokens / this.contextTokens * 1000) / 10
+                : 0;
+            if (rounded <= 0) {
+                continue;
+            }
             const label = (L as Record<string, string>)[item.labelKey] || item.key;
-            // 占比保留 1 位小数。
-            const percent = this.contextTokens > 0
-                ? (Math.round(tokens / this.contextTokens * 1000) / 10) + "%"
-                : "-";
-            result.push({label, percent});
+            result.push({label, percent: rounded + "%"});
         }
         return result;
     }

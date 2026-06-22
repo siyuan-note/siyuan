@@ -2,11 +2,29 @@
   "_meta": {
     "source": "https://openrouter.ai/api/v1/models",
     "fetchedAt": "2026-06-22",
-    "format": "OpenRouter: key 为模型 id 最后一段（provider 前缀已去除）；火山引擎豆包: key 为完整模型 id。contextLength 取同名模型最大值；已过滤 :free 后缀、末段等于 free、context_length 为 null/0 的条目。",
+    "format": "OpenRouter: key 为模型 id 最后一段（provider 前缀已去除）；火山引擎豆包/零一/百川/InternLM/星火/盘古: key 为完整模型 id 或 OpenAI 兼容 model 名。contextLength 取同名模型最大值；已过滤 :free 后缀、末段等于 free、context_length 为 null/0 的条目。",
     "totalCount": 340,
     "nullFiltered": 0,
     "zeroFiltered": 0,
-    "outputCount": 334
+    "outputCount": 362
+  },
+  "Baichuan-M3-Plus": {
+    "contextLength": 32768
+  },
+  "Baichuan-NPC-Turbo": {
+    "contextLength": 32768
+  },
+  "Baichuan3-Turbo": {
+    "contextLength": 32768
+  },
+  "Baichuan4": {
+    "contextLength": 32768
+  },
+  "Baichuan4-Air": {
+    "contextLength": 32768
+  },
+  "Baichuan4-Turbo": {
+    "contextLength": 32768
   },
   "aion-1.0": {
     "contextLength": 131072
@@ -22,6 +40,12 @@
   },
   "auto": {
     "contextLength": 2000000
+  },
+  "baichuan2-turbo": {
+    "contextLength": 32768
+  },
+  "baichuan2-turbo-192k": {
+    "contextLength": 196608
   },
   "bodybuilder": {
     "contextLength": 128000
@@ -515,6 +539,15 @@
   "intellect-3": {
     "contextLength": 131072
   },
+  "internlm2-latest": {
+    "contextLength": 204800
+  },
+  "internlm2.5-latest": {
+    "contextLength": 1048576
+  },
+  "internlm3-8b-instruct": {
+    "contextLength": 32768
+  },
   "jamba-large-1.7": {
     "contextLength": 256000
   },
@@ -767,6 +800,9 @@
   "palmyra-x5": {
     "contextLength": 1040000
   },
+  "pangu-4": {
+    "contextLength": 8192
+  },
   "pareto-code": {
     "contextLength": 2000000
   },
@@ -980,6 +1016,30 @@
   "sonar-reasoning-pro": {
     "contextLength": 128000
   },
+  "spark-4.0-ultra": {
+    "contextLength": 8192
+  },
+  "spark-lite": {
+    "contextLength": 4096
+  },
+  "spark-max": {
+    "contextLength": 8192
+  },
+  "spark-max-32k": {
+    "contextLength": 32768
+  },
+  "spark-pro": {
+    "contextLength": 8192
+  },
+  "spark-pro-128k": {
+    "contextLength": 131072
+  },
+  "spark-v3.5": {
+    "contextLength": 8192
+  },
+  "spark-v4": {
+    "contextLength": 8192
+  },
   "step-3.5-flash": {
     "contextLength": 262144
   },
@@ -1009,5 +1069,29 @@
   },
   "wizardlm-2-8x22b": {
     "contextLength": 65536
+  },
+  "yi-large": {
+    "contextLength": 32768
+  },
+  "yi-large-turbo": {
+    "contextLength": 16384
+  },
+  "yi-lightning": {
+    "contextLength": 16384
+  },
+  "yi-lightning-pro": {
+    "contextLength": 16384
+  },
+  "yi-medium": {
+    "contextLength": 16384
+  },
+  "yi-medium-200k": {
+    "contextLength": 204800
+  },
+  "yi-spark": {
+    "contextLength": 16384
+  },
+  "yi-vision": {
+    "contextLength": 16384
   }
 }

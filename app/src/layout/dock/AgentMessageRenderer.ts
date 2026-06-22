@@ -4,8 +4,8 @@ import {addScript} from "../../protyle/util/addScript";
 import {Constants} from "../../constants";
 import {mathRender} from "../../protyle/render/mathRender";
 import {showMessage} from "../../dialog/message";
-import {processSYLink} from "../../editor/openLink";
 import type {App} from "../../index";
+import {processSiYuanUri} from "../../editor/openLink";
 
 export const renderTodoList = (result: string): string => {
     const L = window.siyuan.languages;
@@ -269,7 +269,7 @@ export const postRender = (container: HTMLElement, app?: App): void => {
         a.addEventListener("click", (event: MouseEvent) => {
             event.preventDefault();
             event.stopPropagation();
-            void processSYLink(app, href);
+            void processSiYuanUri(app, href);
         });
     });
 };

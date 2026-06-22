@@ -1059,13 +1059,17 @@ func skillsSegmentTokens(counter *tokenCounter) int {
 	var sb strings.Builder
 	sb.WriteString("\n\n<available_skills>\n")
 	for _, s := range skills {
-		sb.WriteString("  <skill>\n    <name>")
+		sb.WriteString("  <skill>\n")
+		sb.WriteString("    <name>")
 		sb.WriteString(s.Name)
-		sb.WriteString("</name>\n    <description>")
+		sb.WriteString("</name>\n")
+		sb.WriteString("    <description>")
 		sb.WriteString(s.Description)
-		sb.WriteString("</description>\n  </skill>\n")
+		sb.WriteString("</description>\n")
+		sb.WriteString("  </skill>\n")
 	}
-	sb.WriteString("</available_skills>\n\nUse the skill tool to load a skill when a task matches its description.")
+	sb.WriteString("</available_skills>\n\n")
+	sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
 	return counter.count(sb.String())
 }
 

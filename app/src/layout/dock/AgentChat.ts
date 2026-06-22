@@ -85,6 +85,8 @@ export class AgentChat extends Model {
     private tokenPopup: HTMLElement | null = null;
     private tokenPopupShowTimer = 0;
     private tokenPopupHideTimer = 0;
+    private tokenPopupOutsideClickHandler: (() => void) | null = null;
+    private tokenPopupResizeHandler: (() => void) | null = null;
     private sessionCreatedAt = 0;
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
@@ -474,27 +476,32 @@ export class AgentChat extends Model {
     }
 
     private bindEvents() {
-        // hover 底部 tokens 数字弹出分类明细面板（移动端 click 触发）。
-        this.tokenDisplayEl.addEventListener("mouseenter", () => {
-            window.clearTimeout(this.tokenPopupHideTimer);
-            this.tokenPopupShowTimer = window.setTimeout(() => {
-                this.showTokenBreakdownPopup();
-            }, 200);
-        });
-        this.tokenDisplayEl.addEventListener("mouseleave", () => {
-            window.clearTimeout(this.tokenPopupShowTimer);
-            this.tokenPopupHideTimer = window.setTimeout(() => {
-                this.closeTokenBreakdownPopup();
-            }, 300);
-        });
-        this.tokenDisplayEl.addEventListener("click", () => {
-            // 移动端无 hover，click 直接切换 popup。
-            if (this.tokenPopup) {
-                this.closeTokenBreakdownPopup();
-            } else {
-                this.showTokenBreakdownPopup();
-            }
-        });
+        // hover 底部 tokens 数字弹出分类明细面板。
+        // 仅在支持 hover 的设备绑定 mouseenter/mouseleave（移动端 tap 会合成 mouse 事件导致闪烁）；
+        // 不支持 hover 的设备（移动端）用 click 切换。
+        const supportsHover = window.matchMedia("(hover: hover)").matches;
+        if (supportsHover) {
+            this.tokenDisplayEl.addEventListener("mouseenter", () => {
+                window.clearTimeout(this.tokenPopupHideTimer);
+                this.tokenPopupShowTimer = window.setTimeout(() => {
+                    this.showTokenBreakdownPopup();
+                }, 200);
+            });
+            this.tokenDisplayEl.addEventListener("mouseleave", () => {
+                window.clearTimeout(this.tokenPopupShowTimer);
+                this.tokenPopupHideTimer = window.setTimeout(() => {
+                    this.closeTokenBreakdownPopup();
+                }, 300);
+            });
+        } else {
+            this.tokenDisplayEl.addEventListener("click", () => {
+                if (this.tokenPopup) {
+                    this.closeTokenBreakdownPopup();
+                } else {
+                    this.showTokenBreakdownPopup();
+                }
+            });
+        }
         this.sendBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
             this.sendMessage();
@@ -2436,9 +2443,12 @@ export class AgentChat extends Model {
         if (!this.tokenDisplayEl) {
             return;
         }
+        // contextTokens 为 0 时隐藏显示（含切换到无统计的旧会话场景），避免残留上一会话的数字。
         if (this.contextTokens === 0) {
+            this.tokenDisplayEl.classList.add("fn__none");
             return;
         }
+        this.tokenDisplayEl.classList.remove("fn__none");
         const text = this.contextTokens >= 1000
             ? (this.contextTokens / 1000).toFixed(1) + "k"
             : this.contextTokens.toString();
@@ -2508,22 +2518,32 @@ export class AgentChat extends Model {
         popup.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
         });
-        const onOutsideClick = () => {
+        // 点击外部/resize 关闭。监听器存为字段，closeTokenBreakdownPopup 统一清理，避免泄漏。
+        this.tokenPopupOutsideClickHandler = () => {
             this.closeTokenBreakdownPopup();
-            document.removeEventListener("click", onOutsideClick);
+        };
+        this.tokenPopupResizeHandler = () => {
+            this.closeTokenBreakdownPopup();
         };
         setTimeout(() => {
-            document.addEventListener("click", onOutsideClick);
+            if (this.tokenPopupOutsideClickHandler) {
+                document.addEventListener("click", this.tokenPopupOutsideClickHandler);
+            }
         }, 10);
-        const onResize = () => {
-            this.closeTokenBreakdownPopup();
-            window.removeEventListener("resize", onResize);
-        };
-        window.addEventListener("resize", onResize);
+        window.addEventListener("resize", this.tokenPopupResizeHandler);
         this.tokenPopup = popup;
     }
 
     private closeTokenBreakdownPopup() {
+        // 统一清理外部监听器，避免多次开合 popup 累积监听器导致内存泄漏。
+        if (this.tokenPopupOutsideClickHandler) {
+            document.removeEventListener("click", this.tokenPopupOutsideClickHandler);
+            this.tokenPopupOutsideClickHandler = null;
+        }
+        if (this.tokenPopupResizeHandler) {
+            window.removeEventListener("resize", this.tokenPopupResizeHandler);
+            this.tokenPopupResizeHandler = null;
+        }
         if (this.tokenPopup) {
             this.tokenPopup.remove();
             this.tokenPopup = null;

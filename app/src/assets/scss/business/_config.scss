@@ -32,7 +32,7 @@
   }
 
   &-group {
-    margin: 24px 48px;
+    margin: 24px;
   }
 
   &-title {
@@ -105,12 +105,12 @@
 
     & > .config__side {
       user-select: none;
-      width: 240px;
+      width: 280px;
       display: flex;
       flex-direction: column;
       min-height: 0;
       overflow: hidden;
-      padding: 8px 0;
+      padding: 24px 12px;
       box-sizing: border-box;
       border-right: 1px solid var(--b3-border-color);
 

@@ -48,7 +48,7 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
         ${tabPanels.join("")}
     </div>
 </div>`,
-        width: "90vw",
+        width: "64vw",
         height: "90vh",
         destroyCallback() {
             clearSyncTabElement();

@@ -46,9 +46,13 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
             range.insertNode(document.createElement("wbr"));
             oldListHTML = sourceElements[0].parentElement.parentElement.outerHTML;
             if (!previousElement) {
-                const newId = Lute.NewNodeID();
-                sourceElements[0].parentElement.previousElementSibling.lastElementChild.insertAdjacentHTML("beforebegin", `<div data-subtype="${sourceElements[0].getAttribute("data-subtype")}" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div id="moveTempLi"></div><div class="protyle-attr" contenteditable="false">&ZeroWidthSpace;</div></div>`);
-                previousElement = sourceElements[0].parentElement.previousElementSibling.querySelector(".list");
+                // 目标 li 无子列表：直接整体移动源列表，与其他块移动保持一致
+                sourceElements[0].parentElement.previousElementSibling.lastElementChild.insertAdjacentElement("beforebegin", sourceElements[0]);
+                updateTransaction(protyle, sourceElements[0].parentElement.parentElement, oldListHTML);
+                preventScroll(protyle);
+                focusByWbr(sourceElements[0], range);
+                scrollCenter(protyle);
+                return;
             }
         } else {
             return;
@@ -152,9 +156,13 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
             range.insertNode(document.createElement("wbr"));
             oldListHTML = sourceElements[0].parentElement.parentElement.outerHTML;
             if (!nextElement) {
-                const newId = Lute.NewNodeID();
-                sourceElements[0].parentElement.nextElementSibling.lastElementChild.insertAdjacentHTML("beforebegin", `<div data-subtype="${sourceElements[0].getAttribute("data-subtype")}" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div class="protyle-attr" contenteditable="false">&ZeroWidthSpace;</div></div>`);
-                nextElement = sourceElements[0].parentElement.nextElementSibling.querySelector(".list > div");
+                // 目标 li 无子列表：直接整体移动源列表，与其他块移动保持一致
+                sourceElements[0].parentElement.nextElementSibling.lastElementChild.insertAdjacentElement("beforebegin", sourceElements[0]);
+                updateTransaction(protyle, sourceElements[0].parentElement.parentElement, oldListHTML);
+                preventScroll(protyle);
+                focusByWbr(sourceElements[0], range);
+                scrollCenter(protyle);
+                return;
             }
         } else {
             return;

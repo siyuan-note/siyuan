@@ -447,6 +447,21 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             const subType = liItemElement.getAttribute("data-subtype");
             tempElement.innerHTML = `<div${subType === "o" ? " data-marker=\"1.\"" : ""} data-subtype="${subType}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         }
+    } else if (cursorLiElement &&
+        tempElement.content.children[0]?.getAttribute("data-type") === "NodeList") {
+        // 列表项内粘贴列表块时拆开为同级列表项 https://github.com/siyuan-note/siyuan/issues/17890
+        blockElement = cursorLiElement;
+        id = blockElement.getAttribute("data-node-id");
+        oldHTML = blockElement.outerHTML;
+        const listElement = tempElement.content.children[0] as HTMLElement;
+        tempElement.innerHTML = "";
+        while (listElement.firstElementChild) {
+            if (listElement.firstElementChild.classList.contains("protyle-attr")) {
+                listElement.firstElementChild.remove();
+                continue;
+            }
+            tempElement.content.appendChild(listElement.firstElementChild);
+        }
     }
     let lastElement: Element;
     let insertBefore = false;

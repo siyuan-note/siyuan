@@ -107,6 +107,7 @@ export const commandPanel = (app: App) => {
         });
     });
 
+    listElement.firstElementChild.classList.add("b3-list-item--focus");
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.focus();
     listElement.addEventListener("click", (event: KeyboardEvent) => {

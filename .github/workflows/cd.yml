@@ -283,10 +283,13 @@ jobs:
           echo "Installed NDK r28b at $NDK_DIR"
 
       - name: Set up gomobile
-        # 锁定到 kernel/go.mod 中 x/mobile 模块的同一版本,避免工具与库版本漂移
+        # 锁定到 kernel/go.mod 中 x/mobile 模块的同一版本,避免工具与库版本漂移。
+        # GOPATH 被显式指向 workspace 下,go install 的产物在 $GOPATH/bin,
+        # 该目录不在默认 PATH 上,需用全路径调用并写入 $GITHUB_PATH 供后续步骤使用。
         run: |
           go install golang.org/x/mobile/cmd/gomobile@2553ed8ce294
-          gomobile init
+          echo "$GOPATH/bin" >> $GITHUB_PATH
+          "$GOPATH/bin/gomobile" init
         env:
           GOPATH: ${{ github.workspace }}/go
 

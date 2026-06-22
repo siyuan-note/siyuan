@@ -1357,6 +1357,66 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let dragoverElement: Element;
     let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, guides: string };
     let disabledPosition: string;
+    // 列表项目标的插入点与提示处理：设置 class、CSS 变量、showDragTip
+    const applyLiTarget = (htmlTarget: HTMLElement, event: DragEvent): void => {
+        cleanupDragIndicators(editorElement);
+        const nodeId = htmlTarget.getAttribute("data-node-id");
+        // Cache expensive computations per target element (never changes while hovering same element)
+        if (!dragCache || dragCache.nodeId !== nodeId) {
+            const contentBlock = Array.from(htmlTarget.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
+            const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
+            const depth = getListDepth(htmlTarget);
+            const computedColor = getComputedStyle(htmlTarget).getPropertyValue("--b3-theme-primary-lighter").trim();
+            const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
+            let siblingGuides = "";
+            for (let n = 1; n <= depth; n++) {
+                if (siblingGuides) siblingGuides += ", ";
+                // guide 竖线透明度从 0.5（最近）渐变到 0.1（最远），均低于插入线（0.6）以突出目标位置
+                const opacity = depth <= 1 ? 0.3 : 0.5 - (n - 1) / (depth - 1) * 0.4;
+                siblingGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
+            }
+            dragCache = {nodeId, indent, rgb, guides: siblingGuides || "none"};
+        }
+        const {indent, rgb, guides} = dragCache;
+
+        const liRect = htmlTarget.getBoundingClientRect();
+        const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
+        const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
+        const isBottom = event.clientY > liRect.top + liRect.height / 2;
+        // 列表项统一使用底部插入点；但列表首项的上半需保留顶部插入点，否则无法在列表最前面插入
+        const isFirstLi = !htmlTarget.previousElementSibling || !htmlTarget.previousElementSibling.classList.contains("li");
+        let position = "bottom";
+        if (isFirstLi && !isBottom) {
+            position = "top";
+        }
+        const isChild = position === "bottom" && offsetX >= indent;
+        const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
+
+        htmlTarget.classList.add(className);
+        htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
+        htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
+        // 仅在成为子项时显示层级 guide 竖线；同级插入时清除，避免横线覆盖后短线残留导致颜色重叠
+        htmlTarget.style.setProperty("--drag-guides", isChild ? guides : "none");
+        // ::before 目标标记仅在成为子项时显示，sibling 时由横线独占该区域避免半透明叠加变深
+        htmlTarget.style.setProperty("--drag-base-bg",
+            isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)` : "transparent");
+        // 横向插入线使用独立颜色，始终显示
+        htmlTarget.style.setProperty("--drag-line-bg",
+            `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
+        highlightByLevel(editorElement, htmlTarget);
+        // Update drag tip to show specific insertion position
+        const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
+        if (isChild) {
+            showDragTip(window.siyuan.dragTitle || "",
+                window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText),
+                event.clientX, event.clientY);
+        } else {
+            const key = position === "bottom" ? "dragTipListItemAfter" : "dragTipListItemBefore";
+            showDragTip(window.siyuan.dragTitle || "",
+                window.siyuan.languages[key].replace("${x}", targetText),
+                event.clientX, event.clientY);
+        }
+    };
     // 缓存当前目标的文本和列布局判断，避免优化路径每次 dragover 重复计算
     let cachedTargetText = "";
     let cachedIsCol = false;
@@ -1610,6 +1670,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         const liTarget = targetElement.getAttribute("data-type") === "NodeListItem"
             ? targetElement : targetElement.parentElement?.getAttribute("data-type") === "NodeListItem"
                 ? targetElement.parentElement : null;
+        // 从文档树拖拽文档到编辑器时，默认禁止拖入（需按 Alt 才能作为引用插入），且不能拖入文档自身
+        if (liTarget && fileTreeIds.indexOf("-") > -1 && isNotAvItem) {
+            if (!event.altKey) {
+                return;
+            } else if (fileTreeIds.split(",").includes(protyle.block.rootID) && event.altKey) {
+                return;
+            }
+        }
+        // 列表项目标无论是否命中优化分支都需立即处理，避免拖到列表标记符（.protyle-action）上时提示和插入点缺失
+        if (liTarget) {
+            applyLiTarget(liTarget as HTMLElement, event);
+            return;
+        }
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
@@ -1629,7 +1702,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.getAttribute("data-type") === "NodeAttributeView" && hasClosestByTag(event.target, "TD")) {
                 return;
             }
-            if (point.className) {
+            if (point.className && !liTarget) {
                 // 超级块本身不显示插入点（实际插入到子块，不会创建超级块）
                 if (targetElement.classList.contains("sb")) {
                     return;
@@ -1647,67 +1720,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);
                     }
-                }
-                return;
-            }
-            // 忘记为什么要限定文档树的拖拽了，先放开 https://github.com/siyuan-note/siyuan/pull/13284#issuecomment-2503853135
-            if (liTarget) {
-                const htmlTarget = liTarget as HTMLElement;
-                const nodeId = htmlTarget.getAttribute("data-node-id");
-                // Cache expensive computations per target element (never changes while hovering same element)
-                if (!dragCache || dragCache.nodeId !== nodeId) {
-                    const contentBlock = Array.from(liTarget.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
-                    const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
-                    const depth = getListDepth(liTarget);
-                    const computedColor = getComputedStyle(liTarget).getPropertyValue("--b3-theme-primary-lighter").trim();
-                    const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
-                    let siblingGuides = "";
-                    for (let n = 1; n <= depth; n++) {
-                        if (siblingGuides) siblingGuides += ", ";
-                        // guide 竖线透明度从 0.5（最近）渐变到 0.1（最远），均低于插入线（0.6）以突出目标位置
-                        const opacity = depth <= 1 ? 0.3 : 0.5 - (n - 1) / (depth - 1) * 0.4;
-                        siblingGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
-                    }
-                    dragCache = {nodeId, indent, rgb, guides: siblingGuides || "none"};
-                }
-                const {indent, rgb, guides} = dragCache;
-
-                const liRect = htmlTarget.getBoundingClientRect();
-                const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
-                const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
-                const isBottom = event.clientY > liRect.top + liRect.height / 2;
-                // 列表项统一使用底部插入点；但列表首项的上半需保留顶部插入点，否则无法在列表最前面插入
-                const isFirstLi = !htmlTarget.previousElementSibling || !htmlTarget.previousElementSibling.classList.contains("li");
-                let position = "bottom";
-                if (isFirstLi && !isBottom) {
-                    position = "top";
-                }
-                const isChild = position === "bottom" && offsetX >= indent;
-                const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
-
-                htmlTarget.classList.add(className);
-                htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
-                htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
-                // 仅在成为子项时显示层级 guide 竖线；同级插入时清除，避免横线覆盖后短线残留导致颜色重叠
-                htmlTarget.style.setProperty("--drag-guides", isChild ? guides : "none");
-                // ::before 目标标记仅在成为子项时显示，sibling 时由横线独占该区域避免半透明叠加变深
-                htmlTarget.style.setProperty("--drag-base-bg",
-                    isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)` : "transparent");
-                // 横向插入线使用独立颜色，始终显示
-                htmlTarget.style.setProperty("--drag-line-bg",
-                    `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
-                highlightByLevel(editorElement, htmlTarget);
-                // Update drag tip to show specific insertion position
-                const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
-                if (isChild) {
-                    showDragTip(window.siyuan.dragTitle || "",
-                        window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText),
-                        event.clientX, event.clientY);
-                } else {
-                    const key = position === "bottom" ? "dragTipListItemAfter" : "dragTipListItemBefore";
-                    showDragTip(window.siyuan.dragTitle || "",
-                        window.siyuan.languages[key].replace("${x}", targetText),
-                        event.clientX, event.clientY);
                 }
                 return;
             }

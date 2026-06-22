@@ -546,20 +546,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-					"TextMarkTextContent": "應用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "導出 Data"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ / "
+									"TextMarkTextContent": "應用"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "導出 Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -601,16 +601,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-					"TextMarkTextContent": "右側欄"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "應用"
+									"TextMarkTextContent": "右側欄"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "應用"
 								},
 								{
 									"Type": "NodeText",
@@ -978,16 +978,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-					"TextMarkTextContent": "帳號與同步"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "資料倉庫密鑰"
+									"TextMarkTextContent": "帳號與同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "資料倉庫密鑰"
 								},
 								{
 									"Type": "NodeText",
@@ -1125,16 +1125,16 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-					"TextMarkTextContent": "帳號與同步"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "資料倉庫密鑰"
+													"TextMarkTextContent": "帳號與同步"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "資料倉庫密鑰"
 												},
 												{
 													"Type": "NodeText",

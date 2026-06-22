@@ -393,11 +393,11 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-					"TextMarkTextContent": "帳號與同步"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中開啟 "
+													"TextMarkTextContent": "帳號與同步"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 中開啟 "
 												},
 												{
 													"Type": "NodeTextMark",

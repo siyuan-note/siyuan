@@ -70,7 +70,7 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
     }
 };
 
-export const parseUriInfo = () => {
+export const parseUriInfo = (): ISiYuanUriBlockInfo => {
     const searchParams = new URLSearchParams(window.location.search);
     const PWAURL = searchParams.get("url");
     if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
@@ -90,10 +90,12 @@ export const parseUriInfo = () => {
     }
 
     // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
-    window.siyuan.editorIsFullscreen = searchParams.get("fullscreen") === "1";
+    const fullscreen = searchParams.get("fullscreen") === "1";
+    window.siyuan.editorIsFullscreen = fullscreen;
     return {
         id: searchParams.get("id") ?? "",
-        focus: searchParams.get("focus") === "1"
+        focus: searchParams.get("focus") === "1",
+        fullscreen,
     };
 };
 

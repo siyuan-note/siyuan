@@ -1857,6 +1857,8 @@ export class AgentChat extends Model {
         this.setStreaming(true);
         this.mirrorLocked = false;
         this.removeMirrorPlaceholder();
+        this.requestStartTime = Date.now();
+        this.currentThinkingDuration = 0;
         const lastUserEntry = this.entries[this.entries.length - 1];
         const lastUserText = lastUserEntry.type === "user" ? lastUserEntry.content : "";
         this.abortController = new AbortController();
@@ -2622,8 +2624,9 @@ export class AgentChat extends Model {
                 continue;
             }
             const label = (L as Record<string, string>)[item.labelKey] || item.key;
+            // 占比保留 1 位小数。
             const percent = this.contextTokens > 0
-                ? Math.round(tokens / this.contextTokens * 100) + "%"
+                ? (Math.round(tokens / this.contextTokens * 1000) / 10) + "%"
                 : "-";
             result.push({label, percent});
         }

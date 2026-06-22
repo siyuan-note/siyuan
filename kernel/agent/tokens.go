@@ -204,7 +204,7 @@ func computeTokenBreakdown(counter *tokenCounter, messages []openai.ChatCompleti
 
 	// 估算之和与真实 prompt tokens 对齐，保证各类百分比相加 = 100%。
 	// 估算 < 真实：差额计入 other（吸收低估残差）。
-	// 估算 > 真实：按比例等比压缩前 9 类（吸收高估残差），other 保持 0。
+	// 估算 > 真实：按比例等比压缩前 9 类（吸收高估残差），整数舍入残差计入 other（不污染本应为 0 的类）。
 	// 不归一化会导致前端各类百分比之和 > 100%（tiktoken 估算/overhead 补偿可能高估）。
 	estimated := 0
 	for k, v := range breakdown {
@@ -218,21 +218,19 @@ func computeTokenBreakdown(counter *tokenCounter, messages []openai.ChatCompleti
 	} else if estimated > realPromptTokens && realPromptTokens > 0 {
 		scale := float64(realPromptTokens) / float64(estimated)
 		allocated := 0
-		// 按固定顺序缩放前 9 类（跳过 other），最后一类承接舍入残差以精确对齐。
+		// 等比缩放前 9 类，原值为 0 的类保持 0（不因残差变成假正值）。
 		keys := []string{"system", "skills", "messages",
 			"nativeToolsDef", "pluginToolsDef", "mcpToolsDef",
 			"nativeTool", "pluginTool", "mcpTool"}
-		for i, k := range keys {
-			if i == len(keys)-1 {
-				breakdown[k] = realPromptTokens - allocated
-				if breakdown[k] < 0 {
-					breakdown[k] = 0
-				}
-				break
-			}
+		for _, k := range keys {
 			scaled := int(float64(breakdown[k]) * scale)
 			breakdown[k] = scaled
 			allocated += scaled
+		}
+		// 整数舍入残差计入 other（可能为正或负，clamp≥0）。
+		breakdown["other"] = realPromptTokens - allocated
+		if breakdown["other"] < 0 {
+			breakdown["other"] = 0
 		}
 	}
 	return breakdown

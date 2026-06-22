@@ -94,7 +94,9 @@ const applyAppearanceConfig = async (data: Config.IAppearance) => {
     /// #endif
 
     loadAssets(data);
+    /// #if !MOBILE
     void remountOpenSettingTab("appearance");
+    /// #endif
 };
 
 /** 外观 Tab 命名空间：设置面板注册项 save */

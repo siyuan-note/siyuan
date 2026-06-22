@@ -7,6 +7,36 @@
   display: flex;
   flex-direction: column;
 
+  &.rtl {
+    .protyle-title__input,
+    .protyle-wysiwyg .p,
+    .protyle-wysiwyg .table table,
+    .protyle-wysiwyg .render-node protyle-html,
+    .protyle-wysiwyg [data-type="NodeHeading"] {
+      direction: rtl
+    }
+
+    .protyle-wysiwyg [data-node-id].li > .protyle-action {
+      right: 0;
+      left: auto;
+      direction: rtl;
+    }
+
+    .protyle-wysiwyg [data-node-id].li > [data-node-id] {
+      margin-right: 34px;
+      margin-left: 0;
+    }
+
+    .protyle-wysiwyg [data-node-id].li::before {
+      right: 17px;
+      left: auto;
+    }
+
+    .b3-typography table:not([style*="text-align: left"]) {
+      margin-left: auto;
+    }
+  }
+
   &-preview {
     flex: 1;
     user-select: text;

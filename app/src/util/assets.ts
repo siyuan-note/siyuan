@@ -274,29 +274,6 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     }
     style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px }
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
-    if (window.siyuan.config.editor.rtl) {
-        style += `\n.protyle-title__input,
-.protyle-wysiwyg .p,
-.protyle-wysiwyg .table table,
-.protyle-wysiwyg .render-node protyle-html,
-.protyle-wysiwyg [data-type="NodeHeading"] {direction: rtl}
-.protyle-wysiwyg [data-node-id].li > .protyle-action {
-    right: 0;
-    left: auto;
-    direction: rtl;
-}
-.protyle-wysiwyg [data-node-id].li > [data-node-id] {
-    margin-right: 34px;
-    margin-left: 0;
-}
-.protyle-wysiwyg [data-node-id].li::before {
-    right: 17px;
-    left: auto;
-}
-.b3-typography table:not([style*="text-align: left"]) {
-  margin-left: auto;
-}`;
-    }
     if (window.siyuan.config.editor.fontFamily) {
         style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${window.siyuan.config.editor.fontWeight ? `font-weight: ${window.siyuan.config.editor.fontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
     }

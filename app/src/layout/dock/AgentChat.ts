@@ -82,6 +82,7 @@ export class AgentChat extends Model {
     private contextTokens = 0;
     private contextTokenBreakdown: Record<string, number> = {};
     private contextCachedTokens = 0;
+    private contextLimit = 0;
     private tokenPopup: HTMLElement | null = null;
     private tokenPopupShowTimer = 0;
     private tokenPopupHideTimer = 0;
@@ -573,6 +574,7 @@ export class AgentChat extends Model {
                 this.contextTokens = session.contextTokens ?? 0;
                 this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
                 this.contextCachedTokens = session.contextCachedTokens ?? 0;
+                this.contextLimit = session.contextLimit ?? 0;
                 if (session.model) {
                     this.applySessionModelIfValid(session.model);
                 }
@@ -607,6 +609,7 @@ export class AgentChat extends Model {
             contextTokens: this.contextTokens,
             contextTokenBreakdown: this.contextTokenBreakdown,
             contextCachedTokens: this.contextCachedTokens,
+            contextLimit: this.contextLimit,
             createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
             messageHistory: this.composer?.getHistory() || [],
@@ -739,6 +742,7 @@ export class AgentChat extends Model {
         this.contextTokens = session.contextTokens ?? 0;
         this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
         this.contextCachedTokens = session.contextCachedTokens ?? 0;
+        this.contextLimit = session.contextLimit ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -809,6 +813,7 @@ export class AgentChat extends Model {
         this.contextTokens = session.contextTokens ?? 0;
         this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
         this.contextCachedTokens = session.contextCachedTokens ?? 0;
+        this.contextLimit = session.contextLimit ?? 0;
         if (session.model) {
             this.applySessionModelIfValid(session.model);
         }
@@ -1082,6 +1087,7 @@ export class AgentChat extends Model {
         this.contextTokens = 0;
         this.contextTokenBreakdown = {};
         this.contextCachedTokens = 0;
+        this.contextLimit = 0;
         this.currentToolCalls = [];
         this.lastStepToolCount = 0;
         this.renderedToolNames = {};
@@ -1381,7 +1387,7 @@ export class AgentChat extends Model {
                     await this.finishResponse();
                     break;
                 case "usage":
-                    this.appendUsage(event.lastPromptTokens, event.tokenBreakdown, event.cachedTokens);
+                    this.appendUsage(event.lastPromptTokens, event.tokenBreakdown, event.cachedTokens, event.contextLimit);
                     break;
                 case "error":
                     this.flushTokenUpdate();
@@ -2449,19 +2455,23 @@ export class AgentChat extends Model {
             return;
         }
         this.tokenDisplayEl.classList.remove("fn__none");
-        const text = this.contextTokens >= 1000
+        const used = this.contextTokens >= 1000
             ? (this.contextTokens / 1000).toFixed(1) + "k"
             : this.contextTokens.toString();
+        // 已知模型上限时显示「已用 / 上限」，未知时仅显示已用。
+        const text = this.contextLimit > 0
+            ? used + " / " + this.formatTokenCount(this.contextLimit)
+            : used;
         this.tokenDisplayEl.textContent = text;
         this.tokenDisplayEl.classList.remove("fn__none");
     }
 
-    // 记录最近一轮的 prompt tokens（= 当前上下文已用），覆盖式更新而非累加。
-    // 记录最近一轮的 prompt tokens（= 当前上下文已用）+ 分类明细 + 缓存命中，覆盖式更新而非累加。
-    private appendUsage(lastPromptTokens: number, tokenBreakdown: Record<string, number>, cachedTokens: number) {
+    // 记录最近一轮的 prompt tokens（= 当前上下文已用）+ 分类明细 + 缓存命中 + 模型上限，覆盖式更新而非累加。
+    private appendUsage(lastPromptTokens: number, tokenBreakdown: Record<string, number>, cachedTokens: number, contextLimit: number) {
         this.contextTokens = lastPromptTokens;
         this.contextTokenBreakdown = tokenBreakdown;
         this.contextCachedTokens = cachedTokens;
+        this.contextLimit = contextLimit;
         this.updateTokenDisplay();
     }
 

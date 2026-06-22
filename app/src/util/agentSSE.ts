@@ -29,6 +29,7 @@ export type ISSEResult = {
     lastPromptTokens: number;
     tokenBreakdown: Record<string, number>;
     cachedTokens: number;
+    contextLimit: number;
 } | {
     type: "retry";
     attempt: number;
@@ -244,6 +245,7 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 lastPromptTokens: (data.lastPromptTokens as number) || 0,
                 tokenBreakdown: (data.tokenBreakdown as Record<string, number>) || {},
                 cachedTokens: (data.cachedTokens as number) || 0,
+                contextLimit: (data.contextLimit as number) || 0,
             };
         case "retry":
             return {

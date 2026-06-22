@@ -1451,14 +1451,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         const liRect = htmlTarget.getBoundingClientRect();
         const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
         const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
-        const isBottom = event.clientY > liRect.top + liRect.height / 2;
-        // 列表项统一使用底部插入点；但列表首项的上半需保留顶部插入点，否则无法在列表最前面插入
+        // 用内容块（不含子列表）的 rect 判断上下半，避免有子列表时下半区域过小难以命中
+        const contentBlockForRect = Array.from(htmlTarget.children).find(c =>
+            c.hasAttribute("data-node-id") && !c.classList.contains("list")) as HTMLElement;
+        const contentRect = contentBlockForRect ? contentBlockForRect.getBoundingClientRect() : liRect;
+        const isBottom = event.clientY > contentRect.top + contentRect.height / 2;
+        // 列表首项的上半保留顶部插入点；其余列表项整个区域统一使用底部插入点，避免下半区域过小难以命中
         const isFirstLi = !htmlTarget.previousElementSibling || !htmlTarget.previousElementSibling.classList.contains("li");
         let position = "bottom";
         if (isFirstLi && !isBottom) {
             position = "top";
         }
-        const isChild = position === "bottom" && offsetX >= indent;
+        const isChild = offsetX >= indent;
         // 源列表项拖到自身、子孙中、或原位置时不显示高亮与提示
         const sourceElements = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
         const isNoOp = sourceElements.some(source =>
@@ -1651,7 +1655,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 命中间隙
                     targetElement = document.elementFromPoint(point.x, point.y - 6) as HTMLElement;
                 }
-                targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
+                // 优先查找最近的 .li（深层列表项），避免命中间隙时回退到顶层 .list 导致无法插入深层列表项
+                const closestLiFromPoint = targetElement.classList.contains("li") ? targetElement : targetElement.closest(".li") as HTMLElement;
+                if (closestLiFromPoint) {
+                    targetElement = closestLiFromPoint;
+                } else {
+                    targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
+                }
                 if (targetElement && targetElement.classList.contains("sb") && targetElement.getAttribute("data-sb-layout") === "col") {
                     const childElement = targetElement.querySelectorAll("[data-node-id]");
                     if (point.className === "dragover__left") {
@@ -2206,4 +2216,6 @@ const clearDragoverElement = (element: Element) => {
         (element as HTMLElement).style.removeProperty("--drag-base-bg");
         element = undefined;
     }
+    // 拖拽被限制（不允许插入）时隐藏提示，避免残留"移动"文字
+    hideDragTip();
 };

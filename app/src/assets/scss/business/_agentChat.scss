@@ -207,15 +207,9 @@
     display: flex;
     gap: 4px;
     width: 100%;
+    justify-content: flex-end;
     opacity: 0;
     transition: var(--b3-transition);
-}
-
-.agent-chat__msg-stats {
-    flex-shrink: 0;
-    margin-right: auto;
-    margin-left: 4px;
-    opacity: 0.6;
 }
 
 .agent-chat__msg--ai:hover .agent-chat__msg-actions,
@@ -915,6 +909,56 @@ pre:hover .agent-chat__copy-wrap {
     opacity: .5;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+// token 分类明细弹层：hover 底部 tokens 数字时弹出，复用 b3-menu 基础样式。
+.agent-token-popup {
+    position: fixed;
+    min-width: 200px;
+    max-width: 280px;
+    padding: 8px 0;
+
+    .b3-menu__items {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+// 总数行（第一行）：加粗，与其他分类区分。
+.agent-token-popup__total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 14px;
+    font-weight: 600;
+    color: var(--b3-theme-on-background);
+}
+
+// 各分类行：两端对齐，左标签右百分比。
+.agent-token-popup__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px 14px;
+    font-size: 13px;
+    color: var(--b3-theme-on-surface);
+}
+
+.agent-token-popup__label {
+    flex-shrink: 0;
+}
+
+.agent-token-popup__value {
+    margin-left: 12px;
+    flex-shrink: 0;
+    color: var(--b3-theme-on-surface-light);
+}
+
+// 总数行与分类之间、分类与缓存命中之间的分隔线。
+.agent-token-popup__divider {
+    height: 1px;
+    margin: 4px 10px;
+    background: var(--b3-border-color);
 }
 
 .agent-session-popup {

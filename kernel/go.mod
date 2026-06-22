@@ -96,6 +96,11 @@ require (
 )
 
 require (
+	github.com/pkoukk/tiktoken-go v0.1.8 // indirect
+	github.com/pkoukk/tiktoken-go-loader v0.0.2 // indirect
+)
+
+require (
 	dario.cat/mergo v1.0.2 // indirect
 	dmitri.shuralyov.com/font/woff2 v0.0.0-20180220214647-957792cbbdab // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect

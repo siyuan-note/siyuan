@@ -121,6 +121,7 @@ func connectServers(servers []conf.MCPServer) []Connection {
 				Name:        name,
 				Description: desc,
 				InputSchema: convertMCPSchema(tool.InputSchema),
+				Source:      "mcp",
 				Handler:     mcpToolHandler(session, tool.Name, serverTimeout(server)),
 			})
 			registered++

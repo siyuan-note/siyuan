@@ -56,6 +56,9 @@ export interface AgentSession {
     promptTokens?: number;
     completionTokens?: number;
     totalDuration?: number;
+    contextTokens?: number;
+    contextTokenBreakdown?: Record<string, number>;
+    contextCachedTokens?: number;
     messageHistory?: string[];
     createdAt: number;
     updatedAt: number;

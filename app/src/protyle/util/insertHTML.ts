@@ -476,8 +476,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
         }
     }
+    let isListPaste = false;
     // 列表项不能单独进行粘贴 https://ld246.com/article/1628681120576/comment/1628681209731#comments
     if (tempElement.content.children[0]?.getAttribute("data-type") === "NodeListItem") {
+        isListPaste = true;
         if (cursorLiElement) {
             blockElement = cursorLiElement;
             id = blockElement.getAttribute("data-node-id");
@@ -489,6 +491,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     } else if (isFirstBlockInLi &&
         tempElement.content.children[0]?.getAttribute("data-type") === "NodeList") {
+        isListPaste = true;
         // 空列表项（光标在第一个段落且为空）内粘贴列表块时拆开为同级列表项 https://github.com/siyuan-note/siyuan/issues/17890
         blockElement = cursorLiElement as HTMLElement;
         id = blockElement.getAttribute("data-node-id");
@@ -644,7 +647,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
     // 粘贴到空列表项（第一个段落为空）后删除空列表项 https://github.com/siyuan-note/siyuan/issues/17890
-    if (cursorLiElement && isFirstBlockInLi) {
+    if (isListPaste && cursorLiElement && isFirstBlockInLi) {
         const editEl = getContenteditableElement(cursorLiElement);
         if (editEl && editEl.textContent.replace(Constants.ZWSP, "").trim() === "") {
             // 把空列表项的子列表移到粘贴的最后一项下面

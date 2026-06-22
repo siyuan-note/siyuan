@@ -183,7 +183,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "安装扩展，在扩展的选项中配置 API token（token 可在思源设置 - 关于中查看）"
+									"Data": "安装扩展，在扩展的选项中配置 API token（token 可在思源 [设置 - 鉴权 - API token] 中查看）"
 								}
 							]
 						}

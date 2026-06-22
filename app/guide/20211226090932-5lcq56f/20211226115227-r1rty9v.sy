@@ -537,7 +537,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
@@ -546,7 +546,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導出"
+									"TextMarkTextContent": "應用"
 								},
 								{
 									"Type": "NodeText",
@@ -610,7 +610,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "關於"
+									"TextMarkTextContent": "應用"
 								},
 								{
 									"Type": "NodeText",
@@ -762,7 +762,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
@@ -835,7 +835,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置"
+					"TextMarkTextContent": "設定"
 				},
 				{
 					"Type": "NodeText",
@@ -969,7 +969,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
@@ -978,7 +978,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "關於"
+									"TextMarkTextContent": "帳號與同步"
 								},
 								{
 									"Type": "NodeText",
@@ -1116,7 +1116,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "設置"
+													"TextMarkTextContent": "設定"
 												},
 												{
 													"Type": "NodeText",
@@ -1125,7 +1125,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "關於"
+													"TextMarkTextContent": "帳號與同步"
 												},
 												{
 													"Type": "NodeText",

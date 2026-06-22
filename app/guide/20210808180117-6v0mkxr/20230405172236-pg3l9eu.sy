@@ -677,7 +677,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "About"
+					"TextMarkTextContent": "App"
 				},
 				{
 					"Type": "NodeText",

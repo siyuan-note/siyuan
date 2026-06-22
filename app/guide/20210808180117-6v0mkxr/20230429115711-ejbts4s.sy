@@ -607,7 +607,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In SiYuan, virtual references automatically detect potential connections based on content block names, aliases, and anchor text, displayed with dashed underlines in the editor. Hovering shows a preview of the corresponding content block; clicking converts it to a formal block reference. Can be toggled in Settings - Editor."
+					"Data": "In SiYuan, virtual references automatically detect potential connections based on content block names, aliases, and anchor text, displayed with dashed underlines in the editor. Hovering shows a preview of the corresponding content block; clicking converts it to a formal block reference. Can be toggled in [Settings - Editor - Virtual Reference]."
 				}
 			]
 		},

@@ -123,7 +123,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com/settings/account",
-									"TextMarkTextContent": "鏈滴 - 設置 - 賬號"
+									"TextMarkTextContent": "鏈滴 - 設定 - 賬號"
 								},
 								{
 									"Type": "NodeText",
@@ -619,7 +619,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://ld246.com/settings/account",
-									"TextMarkTextContent": "鏈滴 - 設置 - 賬號"
+									"TextMarkTextContent": "鏈滴 - 設定 - 賬號"
 								},
 								{
 									"Type": "NodeText",

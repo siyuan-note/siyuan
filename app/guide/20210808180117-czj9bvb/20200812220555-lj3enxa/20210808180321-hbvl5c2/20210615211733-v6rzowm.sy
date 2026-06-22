@@ -231,7 +231,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "编辑器"
+									"TextMarkTextContent": "文档"
 								},
 								{
 									"Type": "NodeText",
@@ -1012,7 +1012,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "编辑器"
+					"TextMarkTextContent": "文档"
 				},
 				{
 					"Type": "NodeText",
@@ -1053,7 +1053,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "编辑器"
+					"TextMarkTextContent": "文档"
 				},
 				{
 					"Type": "NodeText",
@@ -1159,7 +1159,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "关于"
+					"TextMarkTextContent": "账号与同步"
 				},
 				{
 					"Type": "NodeText",
@@ -1617,7 +1617,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "关于"
+									"TextMarkTextContent": "账号与同步"
 								},
 								{
 									"Type": "NodeText",

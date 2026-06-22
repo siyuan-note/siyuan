@@ -677,7 +677,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "關於"
+					"TextMarkTextContent": "應用"
 				},
 				{
 					"Type": "NodeText",

@@ -352,7 +352,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select and configure in Settings - Cloud - Cloud Storage Provider. Currently supported:"
+					"Data": "Select and configure in [Settings - Account & Sync - Cloud storage service provider]. Currently supported:"
 				}
 			]
 		},

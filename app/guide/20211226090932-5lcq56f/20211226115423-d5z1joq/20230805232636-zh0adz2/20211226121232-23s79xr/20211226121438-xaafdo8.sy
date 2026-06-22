@@ -119,7 +119,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設置"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
@@ -128,7 +128,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "雲端"
+									"TextMarkTextContent": "帳號與同步"
 								},
 								{
 									"Type": "NodeText",
@@ -258,7 +258,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果資料量較大，建議通過設置中的 "
+									"Data": "如果資料量較大，建議通過設定中的 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -314,7 +314,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置"
+					"TextMarkTextContent": "設定"
 				},
 				{
 					"Type": "NodeText",
@@ -323,7 +323,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "雲端"
+					"TextMarkTextContent": "帳號與同步"
 				},
 				{
 					"Type": "NodeText",

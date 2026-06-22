@@ -549,7 +549,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Export"
+									"TextMarkTextContent": "App"
 								},
 								{
 									"Type": "NodeText",
@@ -613,7 +613,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "About"
+									"TextMarkTextContent": "App"
 								},
 								{
 									"Type": "NodeText",
@@ -981,7 +981,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "About"
+									"TextMarkTextContent": "Account & Sync"
 								},
 								{
 									"Type": "NodeText",
@@ -1128,7 +1128,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "About"
+													"TextMarkTextContent": "Account & Sync"
 												},
 												{
 													"Type": "NodeText",

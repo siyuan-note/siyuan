@@ -385,7 +385,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "關於"
+					"TextMarkTextContent": "鑑權"
 				},
 				{
 					"Type": "NodeText",
@@ -914,7 +914,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 設定 - 文件 中設定速記的存放位置："
+					"Data": "在 [設定 - 文檔 - 新建閃念速記的默認存放路徑] 中設定速記的存放位置："
 				}
 			]
 		},

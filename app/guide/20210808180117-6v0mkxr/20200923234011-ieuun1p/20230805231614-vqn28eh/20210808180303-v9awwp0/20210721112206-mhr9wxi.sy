@@ -132,7 +132,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Cloud"
+									"TextMarkTextContent": "Account & Sync"
 								},
 								{
 									"Type": "NodeText",
@@ -327,7 +327,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Cloud"
+					"TextMarkTextContent": "Account & Sync"
 				},
 				{
 					"Type": "NodeText",

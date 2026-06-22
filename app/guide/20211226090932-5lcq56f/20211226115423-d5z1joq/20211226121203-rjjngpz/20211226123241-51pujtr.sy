@@ -176,7 +176,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "安裝擴充，在擴充的選項中配置 API token（token 可在思源設置 - 關於中查看）"
+									"Data": "安裝擴充，在擴充的選項中配置 API token（token 可在思源 [設定 - 鑑權 - API token] 中查看）"
 								}
 							]
 						}

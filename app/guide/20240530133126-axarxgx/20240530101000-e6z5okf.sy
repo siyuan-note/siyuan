@@ -97,7 +97,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "情報"
+					"TextMarkTextContent": "認証"
 				},
 				{
 					"Type": "NodeText",
@@ -627,7 +627,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "設定 - ドキュメント でショートハンドの保存先を設定します："
+					"Data": "[設定 - ドキュメント - クイックメモのデフォルト保存場所] でショートハンドの保存先を設定します："
 				}
 			]
 		},

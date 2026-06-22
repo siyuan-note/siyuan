@@ -63,7 +63,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Configure in Settings - About - Network Proxy:"
+					"Data": "Configure in [Settings - App - Network Proxy]:"
 				}
 			]
 		},

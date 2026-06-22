@@ -221,7 +221,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "These rules can be adjusted in Settings - Flashcard."
+					"Data": "These rules can be adjusted in [Settings - Flashcard]."
 				}
 			]
 		},
@@ -754,7 +754,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In Settings - Flashcard, you can adjust global flashcard settings. The "
+					"Data": "In [Settings - Flashcard], you can adjust global flashcard settings. The "
 				},
 				{
 					"Type": "NodeTextMark",

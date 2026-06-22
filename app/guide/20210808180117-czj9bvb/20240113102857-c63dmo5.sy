@@ -385,7 +385,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "关于"
+					"TextMarkTextContent": "鉴权"
 				},
 				{
 					"Type": "NodeText",
@@ -913,7 +913,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 设置 - 文档 中配置闪念速记的存放位置："
+					"Data": "在 [设置 - 文档 - 新建闪念速记的默认存放路径] 中配置闪念速记的存放位置："
 				}
 			]
 		},

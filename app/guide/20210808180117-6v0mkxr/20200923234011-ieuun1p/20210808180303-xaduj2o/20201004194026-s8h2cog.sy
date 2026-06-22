@@ -47,7 +47,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "About"
+					"TextMarkTextContent": "Authentication"
 				},
 				{
 					"Type": "NodeText",
@@ -231,7 +231,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "About"
+					"TextMarkTextContent": "Authentication"
 				},
 				{
 					"Type": "NodeText",

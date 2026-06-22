@@ -166,7 +166,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "云端"
+					"TextMarkTextContent": "账号与同步"
 				},
 				{
 					"Type": "NodeText",

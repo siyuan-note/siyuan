@@ -231,7 +231,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Editor"
+									"TextMarkTextContent": "Documents"
 								},
 								{
 									"Type": "NodeText",
@@ -1028,7 +1028,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Editor"
+					"TextMarkTextContent": "Documents"
 				},
 				{
 					"Type": "NodeText",
@@ -1069,7 +1069,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Editor"
+					"TextMarkTextContent": "Documents"
 				},
 				{
 					"Type": "NodeText",
@@ -1176,7 +1176,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "About"
+					"TextMarkTextContent": "Account & Sync"
 				},
 				{
 					"Type": "NodeText",
@@ -1627,7 +1627,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "About"
+									"TextMarkTextContent": "Account & Sync"
 								},
 								{
 									"Type": "NodeText",

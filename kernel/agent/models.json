@@ -171,7 +171,7 @@
     "contextLength": 32768
   },
   "doubao-1-5-pro-32k-250115": {
-    "contextLength": 131072
+    "contextLength": 32768
   },
   "doubao-1-5-pro-32k-character-250715": {
     "contextLength": 32768
@@ -315,25 +315,25 @@
     "contextLength": 65536
   },
   "glm-4.6": {
-    "contextLength": 202752
+    "contextLength": 200000
   },
   "glm-4.6v": {
     "contextLength": 131072
   },
   "glm-4.7": {
-    "contextLength": 202752
+    "contextLength": 200000
   },
   "glm-4.7-flash": {
-    "contextLength": 202752
+    "contextLength": 200000
   },
   "glm-5": {
-    "contextLength": 202752
+    "contextLength": 200000
   },
   "glm-5-turbo": {
     "contextLength": 262144
   },
   "glm-5.1": {
-    "contextLength": 202752
+    "contextLength": 200000
   },
   "glm-5.2": {
     "contextLength": 1048576
@@ -654,7 +654,7 @@
     "contextLength": 1048576
   },
   "minimax-01": {
-    "contextLength": 1000192
+    "contextLength": 1000000
   },
   "minimax-m1": {
     "contextLength": 1000000
@@ -837,7 +837,7 @@
     "contextLength": 131072
   },
   "qwen3-14b": {
-    "contextLength": 131702
+    "contextLength": 131072
   },
   "qwen3-235b-a22b": {
     "contextLength": 131072

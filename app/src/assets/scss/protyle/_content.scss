@@ -12,7 +12,8 @@
     .protyle-wysiwyg .p,
     .protyle-wysiwyg .table table,
     .protyle-wysiwyg .render-node protyle-html,
-    .protyle-wysiwyg [data-type="NodeHeading"] {
+    .protyle-wysiwyg [data-type="NodeHeading"],
+    .b3-typography .callout .callout-info, .protyle-wysiwyg .callout .callout-info {
       direction: rtl
     }
 
@@ -34,6 +35,17 @@
 
     .b3-typography table:not([style*="text-align: left"]) {
       margin-left: auto;
+    }
+
+    .b3-typography blockquote, .b3-typography .bq, .protyle-wysiwyg blockquote, .protyle-wysiwyg .bq,
+    .b3-typography .callout, .protyle-wysiwyg .callout {
+      padding-right: calc(0.25em + 6px);
+      padding-left: 4px;
+
+      &::before {
+        right: 2px;
+        left: auto;
+      }
     }
   }
 

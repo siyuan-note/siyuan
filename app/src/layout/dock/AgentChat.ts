@@ -225,8 +225,8 @@ export class AgentChat extends Model {
             '<span class="fn__flex-1"></span>' +
             '<span class="agent-chat__tokens fn__none" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
                 '<svg viewBox="0 0 24 24">' +
-                    '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="2.5"></circle>' +
-                    '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="2.5" stroke-dasharray="0 56.55"></circle>' +
+                    '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="3"></circle>' +
+                    '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
                 "</svg>" +
             "</span>" +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +

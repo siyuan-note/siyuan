@@ -8,24 +8,6 @@
     "zeroFiltered": 0,
     "outputCount": 362
   },
-  "Baichuan-M3-Plus": {
-    "contextLength": 32768
-  },
-  "Baichuan-NPC-Turbo": {
-    "contextLength": 32768
-  },
-  "Baichuan3-Turbo": {
-    "contextLength": 32768
-  },
-  "Baichuan4": {
-    "contextLength": 32768
-  },
-  "Baichuan4-Air": {
-    "contextLength": 32768
-  },
-  "Baichuan4-Turbo": {
-    "contextLength": 32768
-  },
   "aion-1.0": {
     "contextLength": 131072
   },
@@ -41,11 +23,29 @@
   "auto": {
     "contextLength": 2000000
   },
+  "baichuan-m3-plus": {
+    "contextLength": 32768
+  },
+  "baichuan-npc-turbo": {
+    "contextLength": 32768
+  },
   "baichuan2-turbo": {
     "contextLength": 32768
   },
   "baichuan2-turbo-192k": {
     "contextLength": 196608
+  },
+  "baichuan3-turbo": {
+    "contextLength": 32768
+  },
+  "baichuan4": {
+    "contextLength": 32768
+  },
+  "baichuan4-air": {
+    "contextLength": 32768
+  },
+  "baichuan4-turbo": {
+    "contextLength": 32768
   },
   "bodybuilder": {
     "contextLength": 128000

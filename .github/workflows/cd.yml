@@ -262,11 +262,24 @@ jobs:
           java-version: "21"
 
       - name: Set up Android NDK
-        # 锁定 NDK r28b(与本地开发环境同版本,保证 CI 产物与本地一致)
+        # 锁定 NDK r28b(与本地开发环境同版本)。sdkmanager 不在 PATH 上
+        # (actions/runner-images#13674),用全路径调用;同时预接受 SDK 许可,
+        # 避免 NDK 安装卡在交互式许可确认。
         run: |
-          sdkmanager "ndk;28.2.13676358" > /dev/null
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager not found under $ANDROID_HOME/cmdline-tools/"
+            exit 1
+          fi
+          echo "Using sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" "ndk;28.2.13676358" > /dev/null
           NDK_DIR="$ANDROID_HOME/ndk/28.2.13676358"
           echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$NDK_DIR" >> $GITHUB_ENV
           echo "Installed NDK r28b at $NDK_DIR"
 
       - name: Set up gomobile
@@ -324,7 +337,11 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Building Android App
+        # local.properties 被 siyuan-android 的 .gitignore 忽略,CI 里需现场生成,
+        # 否则 Gradle 报 "SDK location not found";gradlew 也需显式加可执行权限。
         run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          chmod +x ./gradlew
           ./gradlew assembleOfficialRelease
           cd app/build/outputs/apk/official/release
           mv siyuan-*-official-release.apk siyuan-android.apk

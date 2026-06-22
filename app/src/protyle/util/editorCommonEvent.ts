@@ -770,9 +770,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         let gutterType = "";
-        for (const item of event.dataTransfer.items) {
-            if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                gutterType = item.type;
+        for (const type of event.dataTransfer.types) {
+            if (type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                gutterType = type;
             }
         }
         if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}ViewTab${Constants.ZWSP}`.toLowerCase())) {
@@ -1480,8 +1480,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         htmlTarget.classList.add(className);
         htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
         htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
-        // 仅在成为子项时显示层级 guide 竖线；同级插入时清除，避免横线覆盖后短线残留导致颜色重叠
-        htmlTarget.style.setProperty("--drag-guides", isChild ? guides : "none");
+        // guide 竖线在 sibling 和 child 时都显示（sibling 时 ::before 为 transparent 不会与 guide 线重叠）
+        htmlTarget.style.setProperty("--drag-guides", guides);
         // ::before 目标标记仅在成为子项时显示，sibling 时由横线独占该区域避免半透明叠加变深
         htmlTarget.style.setProperty("--drag-base-bg",
             isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)` : "transparent");
@@ -1514,9 +1514,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         let gutterType = "";
-        for (const item of event.dataTransfer.items) {
-            if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                gutterType = item.type;
+        for (const type of event.dataTransfer.types) {
+            if (type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                gutterType = type;
             }
         }
         if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}ViewTab${Constants.ZWSP}`.toLowerCase())) {
@@ -1656,7 +1656,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement = document.elementFromPoint(point.x, point.y - 6) as HTMLElement;
                 }
                 // 优先查找最近的 .li（深层列表项），避免命中间隙时回退到顶层 .list 导致无法插入深层列表项
-                const closestLiFromPoint = targetElement.classList.contains("li") ? targetElement : targetElement.closest(".li") as HTMLElement;
+                let closestLiFromPoint: HTMLElement;
+                if (targetElement.classList.contains("li")) {
+                    closestLiFromPoint = targetElement;
+                } else if (targetElement.classList.contains("list")) {
+                    // 命中列表容器（间隙下方）：取最后一个 .li，表示插到列表末尾之后
+                    const lis = targetElement.querySelectorAll(":scope > .li");
+                    closestLiFromPoint = lis.length > 0 ? lis[lis.length - 1] as HTMLElement : targetElement.closest(".li") as HTMLElement;
+                } else {
+                    closestLiFromPoint = targetElement.closest(".li") as HTMLElement;
+                }
                 if (closestLiFromPoint) {
                     targetElement = closestLiFromPoint;
                 } else {

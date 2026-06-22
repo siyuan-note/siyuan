@@ -181,7 +181,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Install the extension, configure the API token in the extended options (token can be viewed in SiYuan Settings - About)"
+									"Data": "Install the extension, configure the API token in the extended options (token can be viewed in SiYuan [Settings - Authentication - API token])"
 								}
 							]
 						}

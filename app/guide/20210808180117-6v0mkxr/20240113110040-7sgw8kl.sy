@@ -385,7 +385,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "About"
+					"TextMarkTextContent": "Authentication"
 				},
 				{
 					"Type": "NodeText",
@@ -910,7 +910,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Configure the shorthand save location in Settings - Doc:"
+					"Data": "Configure the shorthand save location in [Settings - Documents - Default shorthand save path]:"
 				}
 			]
 		},

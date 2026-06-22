@@ -223,7 +223,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "編輯器"
+									"TextMarkTextContent": "文檔"
 								},
 								{
 									"Type": "NodeText",
@@ -996,7 +996,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "編輯器"
+					"TextMarkTextContent": "文檔"
 				},
 				{
 					"Type": "NodeText",
@@ -1037,7 +1037,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "編輯器"
+					"TextMarkTextContent": "文檔"
 				},
 				{
 					"Type": "NodeText",
@@ -1135,7 +1135,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "關於"
+					"TextMarkTextContent": "帳號與同步"
 				},
 				{
 					"Type": "NodeText",
@@ -1595,7 +1595,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "關於"
+									"TextMarkTextContent": "帳號與同步"
 								},
 								{
 									"Type": "NodeText",

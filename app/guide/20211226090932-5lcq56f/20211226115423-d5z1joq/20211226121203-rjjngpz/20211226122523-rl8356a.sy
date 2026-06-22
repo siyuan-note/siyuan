@@ -48,7 +48,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "關於"
+					"TextMarkTextContent": "鑑權"
 				},
 				{
 					"Type": "NodeText",
@@ -225,7 +225,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "關於"
+					"TextMarkTextContent": "鑑權"
 				},
 				{
 					"Type": "NodeText",

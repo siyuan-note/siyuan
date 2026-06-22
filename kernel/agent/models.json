@@ -2,11 +2,11 @@
   "_meta": {
     "source": "https://openrouter.ai/api/v1/models",
     "fetchedAt": "2026-06-22",
-    "format": "key 为模型 id 最后一段（provider 前缀已去除）；contextLength 取同名模型最大值；已过滤 :free 后缀、末段等于 free、context_length 为 null/0 的条目。",
+    "format": "OpenRouter: key 为模型 id 最后一段（provider 前缀已去除）；火山引擎豆包: key 为完整模型 id。contextLength 取同名模型最大值；已过滤 :free 后缀、末段等于 free、context_length 为 null/0 的条目。",
     "totalCount": 340,
     "nullFiltered": 0,
     "zeroFiltered": 0,
-    "outputCount": 316
+    "outputCount": 334
   },
   "aion-1.0": {
     "contextLength": 131072
@@ -141,6 +141,60 @@
     "contextLength": 1048576
   },
   "devstral-2512": {
+    "contextLength": 262144
+  },
+  "doubao-1-5-lite-32k-250115": {
+    "contextLength": 32768
+  },
+  "doubao-1-5-pro-32k-250115": {
+    "contextLength": 131072
+  },
+  "doubao-1-5-pro-32k-character-250715": {
+    "contextLength": 32768
+  },
+  "doubao-1-5-vision-pro-32k-250115": {
+    "contextLength": 32768
+  },
+  "doubao-seed-1-6-250615": {
+    "contextLength": 262144
+  },
+  "doubao-seed-1-6-251015": {
+    "contextLength": 262144
+  },
+  "doubao-seed-1-6-flash-250615": {
+    "contextLength": 262144
+  },
+  "doubao-seed-1-6-flash-250828": {
+    "contextLength": 262144
+  },
+  "doubao-seed-1-6-vision-250815": {
+    "contextLength": 262144
+  },
+  "doubao-seed-1-8-251228": {
+    "contextLength": 262144
+  },
+  "doubao-seed-2-0-code-preview-260215": {
+    "contextLength": 262144
+  },
+  "doubao-seed-2-0-lite-260215": {
+    "contextLength": 262144
+  },
+  "doubao-seed-2-0-lite-260428": {
+    "contextLength": 262144
+  },
+  "doubao-seed-2-0-mini-260215": {
+    "contextLength": 262144
+  },
+  "doubao-seed-2-0-mini-260428": {
+    "contextLength": 262144
+  },
+  "doubao-seed-2-0-pro-260215": {
+    "contextLength": 262144
+  },
+  "doubao-seed-character-251128": {
+    "contextLength": 131072
+  },
+  "doubao-seed-code-preview-251028": {
     "contextLength": 262144
   },
   "ernie-4.5-vl-424b-a47b": {

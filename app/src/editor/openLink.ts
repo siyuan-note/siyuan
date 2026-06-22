@@ -1,4 +1,4 @@
-import {isLocalPath, isSiYuanUriProtocol, parseSiYuanUriBlockInfo, pathPosix} from "../util/pathName";
+import {isLocalPath, isSiYuanUriProtocol, parseSiYuanUriInfo, pathPosix} from "../util/pathName";
 /// #if !BROWSER
 import {shell, ipcRenderer} from "electron";
 /// #endif
@@ -15,8 +15,8 @@ import {openMobileFileById} from "../mobile/editor";
 
 import type {App} from "../index";
 
-export const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
-    const blockInfo = parseSiYuanUriBlockInfo(uriObj);
+const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
+    const blockInfo = parseSiYuanUriInfo(uriObj);
     if (blockInfo != null) {
         const {id, focus} = blockInfo;
         window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
@@ -52,7 +52,7 @@ export const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
     return false;
 };
 
-export const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
+const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
     const pluginNameOrTabType: string | null = (() => {
         const name = uriObj.pathname.split("/")[1];
         if (!name) {

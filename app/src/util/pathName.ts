@@ -49,7 +49,7 @@ export const isSiYuanUriProtocol = (uri: URL | string | null | undefined): boole
  * @param uri - the siyuan block uri to parse
  * @returns the block id and other info, or null if the uri is not a valid siyuan block uri
  */
-export const parseSiYuanUriBlockInfo = (uri: URL | string | null | undefined): ISiYuanUriBlockInfo | null => {
+export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYuanUriBlockInfo | null => {
     try {
         if (uri == null) return null;
 
@@ -76,9 +76,9 @@ export const getIdZoomInByPath = () => {
         id: "",
         isZoomIn: false,
     };
-
-    if (searchParams.has("url")) {
-        const dataInfo = parseSiYuanUriBlockInfo(searchParams.get("url"));
+    const PWAURL = searchParams.get("url");
+    if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
+        const dataInfo = parseSiYuanUriInfo(PWAURL);
         if (dataInfo != null) {
             data.id = dataInfo.id;
             data.isZoomIn = dataInfo.focus;
@@ -88,7 +88,7 @@ export const getIdZoomInByPath = () => {
     }
 
     if (window.JSAndroid) {
-        const dataInfo = parseSiYuanUriBlockInfo(window.JSAndroid.getBlockURL());
+        const dataInfo = parseSiYuanUriInfo(window.JSAndroid.getBlockURL());
         if (dataInfo != null) {
             data.id = dataInfo.id;
             data.isZoomIn = dataInfo.focus;

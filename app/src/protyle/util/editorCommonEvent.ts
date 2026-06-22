@@ -1390,6 +1390,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             position = "top";
         }
         const isChild = position === "bottom" && offsetX >= indent;
+        // 源列表项不能拖到自身或子孙中（含原位置），此时不高亮也不显示提示
+        const isSelfOrDescendant = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select"))
+            .some((source: HTMLElement) => source === htmlTarget || source.contains(htmlTarget));
+        if (isSelfOrDescendant) {
+            cleanupDragIndicators(editorElement);
+            hideDragTip();
+            return;
+        }
         const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
 
         htmlTarget.classList.add(className);

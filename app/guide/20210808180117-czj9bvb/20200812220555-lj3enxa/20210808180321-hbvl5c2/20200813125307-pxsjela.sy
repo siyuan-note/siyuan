@@ -230,7 +230,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "导出"
+					"TextMarkTextContent": "应用"
 				},
 				{
 					"Type": "NodeText",
@@ -239,7 +239,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "关于"
+					"TextMarkTextContent": "应用"
 				},
 				{
 					"Type": "NodeText",

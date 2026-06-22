@@ -651,12 +651,14 @@ export const initKeyboardToolbar = () => {
             protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
             event.preventDefault();
             event.stopPropagation();
-            if (slashBtnElement.getAttribute("data-focus") === "true") {
-                focusByRange(protyle.toolbar.range);
-            }
-            // (( / {{ 的候选列表无输入框，需保持键盘不收起，否则无法继续输入筛选
             if (dataValue === "((" || dataValue === "{{") {
+                // (( / {{ 的候选列表无输入框，需保持键盘不收起，否则无法继续输入筛选 https://github.com/siyuan-note/siyuan/issues/17877
                 callMobileAppShowKeyboard();
+                if (isInHarmony() || isInAndroid()) {
+                    setTimeout(() => focusByRange(protyle.toolbar.range), Constants.TIMEOUT_TRANSITION);
+                }
+            } else if (slashBtnElement.getAttribute("data-focus") === "true") {
+                focusByRange(protyle.toolbar.range);
             }
             return;
         }

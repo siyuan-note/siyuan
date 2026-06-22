@@ -1093,6 +1093,33 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const isChild = targetClass.some((c: string) => c.indexOf("--child") > -1);
                     const isBottom = targetClass.some((c: string) => c.indexOf("dragover__bottom") === 0);
 
+                    // 列表项拖到自身、子孙、或原位置时无操作，避免源被移出形成单独列表
+                    const isListItemSource = gutterTypes[0] === "nodelistitem";
+                    if (isListItemSource) {
+                        // targetElement 可能是列表项的子块（如 .p）或列表容器（.list），需找到对应 .li 再判断
+                        let targetLi: HTMLElement;
+                        if (targetElement.classList.contains("li")) {
+                            targetLi = targetElement as HTMLElement;
+                        } else if (targetElement.classList.contains("list")) {
+                            // 列表容器底部：取最后一个 .li（拖到列表末尾）
+                            const lis = targetElement.querySelectorAll(":scope > .li");
+                            targetLi = isBottom ? lis[lis.length - 1] as HTMLElement : lis[0] as HTMLElement;
+                        } else {
+                            targetLi = targetElement.closest(".li") as HTMLElement;
+                        }
+                        if (targetLi) {
+                            const isNoOpDrop = sourceElements.some(source =>
+                                source === targetLi ||                                              // 拖到自身
+                                source.contains(targetLi) ||                                        // 拖到子孙中
+                                (!isChild && isBottom && source === targetLi.nextElementSibling) ||  // 底部同级：源原本就在目标后面
+                                (!isChild && !isBottom && source === targetLi.previousElementSibling)); // 顶部同级：源原本就在目标前面
+                            if (isNoOpDrop) {
+                                dragoverElement = undefined;
+                                return;
+                            }
+                        }
+                    }
+
                     // 拖拽整个列表块（NodeList）到列表项时，展开为其下的列表项，避免形成 list>list 非法嵌套
                     if (targetElement.getAttribute("data-type") === "NodeListItem") {
                         const expandedElements: Element[] = [];
@@ -1152,7 +1179,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     } else {
                         // 列表项拖到列表容器边缘时禁止形成横向超级块
-                        const isListItemSource = gutterTypes[0] === "nodelistitem";
                         const isListTarget = targetElement.classList.contains("list");
                         if (isListItemSource && isListTarget &&
                             (targetClass.includes("dragover__left") || targetClass.includes("dragover__right"))) {
@@ -1396,10 +1422,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             position = "top";
         }
         const isChild = position === "bottom" && offsetX >= indent;
-        // 源列表项不能拖到自身或子孙中（含原位置），此时不高亮也不显示提示
-        const isSelfOrDescendant = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select"))
-            .some((source: HTMLElement) => source === htmlTarget || source.contains(htmlTarget));
-        if (isSelfOrDescendant) {
+        // 源列表项拖到自身、子孙中、或原位置时不显示高亮与提示
+        const sourceElements = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
+        const isNoOp = sourceElements.some(source =>
+            source === htmlTarget ||                                    // 拖到自身
+            source.contains(htmlTarget) ||                              // 拖到子孙中
+            (!isChild && position === "bottom" && source === htmlTarget.nextElementSibling) ||  // 底部同级：源原本就在目标后面
+            (position === "top" && source === htmlTarget.previousElementSibling));              // 顶部同级：源原本就在目标前面
+        if (isNoOp) {
             cleanupDragIndicators(editorElement);
             hideDragTip();
             return;
@@ -1689,6 +1719,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!event.altKey) {
                 return;
             } else if (fileTreeIds.split(",").includes(protyle.block.rootID) && event.altKey) {
+                return;
+            }
+        }
+        // 列表项拖到列表容器底部/顶部时，若源就是列表末尾/开头的项，则为无操作
+        if (gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list")) {
+            const lis = targetElement.querySelectorAll(":scope > .li");
+            const lastLi = lis[lis.length - 1];
+            const firstLi = lis[0];
+            const isListBottom = event.clientY > targetElement.getBoundingClientRect().top + targetElement.getBoundingClientRect().height / 2;
+            const sourceIds = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select"))
+                .map((e: HTMLElement) => e.getAttribute("data-node-id"));
+            const isNoOpList = (isListBottom && lastLi && sourceIds.includes(lastLi.getAttribute("data-node-id"))) ||
+                (!isListBottom && firstLi && sourceIds.includes(firstLi.getAttribute("data-node-id")));
+            if (isNoOpList) {
+                cleanupDragIndicators(editorElement);
+                hideDragTip();
                 return;
             }
         }

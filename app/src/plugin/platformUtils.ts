@@ -3,7 +3,7 @@ import * as compatibility from "../protyle/util/compatibility";
 import {ipcRenderer} from "electron";
 import {Constants} from "../constants";
 /// #endif
-export const openByMobile = compatibility.openByMobile;
+export {openByMobile} from "../editor/openLink";
 export const readText = compatibility.readText;
 export const writeText = compatibility.writeText;
 export const copyPlainText = compatibility.copyPlainText;

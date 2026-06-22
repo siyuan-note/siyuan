@@ -1,5 +1,6 @@
-import {isOnlyMeta, openByMobile, writeText} from "../util/compatibility";
+import {isOnlyMeta, writeText} from "../util/compatibility";
 import {focusByRange} from "../util/selection";
+import {openByMobile} from "../../editor/openLink";
 import {showMessage} from "../../dialog/message";
 import {isLocalPath, pathPosix} from "../../util/pathName";
 import {previewDocImage} from "./image";

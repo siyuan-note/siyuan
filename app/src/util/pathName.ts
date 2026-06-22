@@ -2,7 +2,7 @@ import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {escapeHtml} from "./escape";
-import {getSearch, isMobile} from "./functions";
+import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
 import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
@@ -26,30 +26,81 @@ export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string)
     /// #endif
 };
 
+/**
+ * Check if the given URI is a valid SiYuan URI protocol (siyuan:// or web+siyuan://)
+ * @param uri - the URI to check
+ */
+export const isSiYuanUriProtocol = (uri: URL | string | null | undefined): boolean => {
+    try {
+        if (uri == null) return false;
+
+        const uriObj = uri instanceof URL ? uri : new URL(uri);
+        if (uriObj.protocol === "siyuan:" || uriObj.protocol === "web+siyuan:") {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        return false;
+    }
+};
+
+/**
+ * Parse siyuan://blocks/20221031001313-rk7sd0e?focus=1&fullscreen=1
+ * @param uri - the siyuan block uri to parse
+ * @returns the block id and other info, or null if the uri is not a valid siyuan block uri
+ */
+export const parseSiYuanUriBlockInfo = (uri: URL | string | null | undefined): ISiYuanUriBlockInfo | null => {
+    try {
+        if (uri == null) return null;
+
+        const uriObj = uri instanceof URL ? uri : new URL(uri);
+        if (!isSiYuanUriProtocol(uriObj)) {
+            return null;
+        }
+        if (uriObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(uriObj.pathname)) {
+            return {
+                id: uriObj.pathname.substring(1, 1 + 22),
+                focus: uriObj.searchParams.get("focus") === "1",
+                fullscreen: uriObj.searchParams.get("fullscreen") === "1",
+            };
+        }
+        return null;
+    } catch (error) {
+        return null;
+    }
+};
+
 export const getIdZoomInByPath = () => {
     const searchParams = new URLSearchParams(window.location.search);
-    const PWAURL = searchParams.get("url");
     const data = {
         id: "",
         isZoomIn: false,
     };
-    if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
-        // PWA 捕获 web+siyuan://blocks/20221031001313-rk7sd0e?focus=1
-        data.id = PWAURL.substring(20, 20 + 22);
-        data.isZoomIn = getSearch("focus", PWAURL) === "1";
-        window.siyuan.editorIsFullscreen = getSearch("fullscreen", PWAURL) === "1";
-    } else if (window.JSAndroid) {
-        // PAD 通过思源协议打开
-        const SYURL = window.JSAndroid.getBlockURL();
-        data.id = getIdFromSYProtocol(SYURL);
-        data.isZoomIn = getSearch("focus", SYURL) === "1";
-        window.siyuan.editorIsFullscreen = getSearch("fullscreen", SYURL) === "1";
-    } else {
-        // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
-        data.id = searchParams.get("id");
-        data.isZoomIn = searchParams.get("focus") === "1";
-        window.siyuan.editorIsFullscreen = searchParams.get("fullscreen") === "1";
+
+    if (searchParams.has("url")) {
+        const dataInfo = parseSiYuanUriBlockInfo(searchParams.get("url"));
+        if (dataInfo != null) {
+            data.id = dataInfo.id;
+            data.isZoomIn = dataInfo.focus;
+            window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
+            return data;
+        }
     }
+
+    if (window.JSAndroid) {
+        const dataInfo = parseSiYuanUriBlockInfo(window.JSAndroid.getBlockURL());
+        if (dataInfo != null) {
+            data.id = dataInfo.id;
+            data.isZoomIn = dataInfo.focus;
+            window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
+            return data;
+        }
+    }
+
+    // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
+    data.id = searchParams.get("id") ?? "";
+    data.isZoomIn = searchParams.get("focus") === "1";
+    window.siyuan.editorIsFullscreen = searchParams.get("fullscreen") === "1";
     return data;
 };
 

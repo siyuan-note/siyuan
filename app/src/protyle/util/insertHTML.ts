@@ -17,6 +17,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {updateAttrViewCellAnimation, updateAVName} from "../render/av/action";
 import {updateCellsValue} from "../render/av/cell";
 import {input} from "../wysiwyg/input";
+import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
 import {getFieldIdByCellElement} from "../render/av/row";
@@ -435,9 +436,51 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             return;
         }
     }
+    // 光标是否在列表项的第一个段落块（紧挨 protyle-action）
+    const isFirstBlockInLi = hasClosestByClassName(blockElement, "li") &&
+        blockElement.previousElementSibling?.classList.contains("protyle-action");
     const cursorLiElement = hasClosestByClassName(blockElement, "li");
+    // 粘贴列表到已有列表内时统一列表类型 https://github.com/siyuan-note/siyuan/issues/17890
+    if (cursorLiElement) {
+        const targetSubtype = cursorLiElement.getAttribute("data-subtype");
+        const firstChild = tempElement.content.firstElementChild;
+        if (firstChild && (firstChild.getAttribute("data-type") === "NodeList" ||
+            firstChild.getAttribute("data-type") === "NodeListItem") &&
+            firstChild.getAttribute("data-subtype") !== targetSubtype) {
+            tempElement.content.querySelectorAll(".li").forEach(li => {
+                li.setAttribute("data-subtype", targetSubtype);
+                const actionElement = li.querySelector(".protyle-action");
+                if (!actionElement) return;
+                if (targetSubtype === "o") {
+                    li.removeAttribute("data-task");
+                    li.setAttribute("data-marker", "1.");
+                    actionElement.className = "protyle-action protyle-action--order";
+                    actionElement.setAttribute("contenteditable", "false");
+                    actionElement.textContent = "1.";
+                } else if (targetSubtype === "t") {
+                    li.setAttribute("data-marker", "*");
+                    li.setAttribute("data-task", " ");
+                    actionElement.className = "protyle-action protyle-action--task";
+                    actionElement.removeAttribute("contenteditable");
+                    actionElement.innerHTML = "<svg><use xlink:href=\"#iconUncheck\"></use></svg>";
+                } else {
+                    li.removeAttribute("data-task");
+                    li.setAttribute("data-marker", "*");
+                    actionElement.className = "protyle-action";
+                    actionElement.removeAttribute("contenteditable");
+                    actionElement.innerHTML = "<svg><use xlink:href=\"#iconDot\"></use></svg>";
+                }
+            });
+            tempElement.content.querySelectorAll("[data-type='NodeList']").forEach(list => {
+                list.setAttribute("data-subtype", targetSubtype);
+            });
+        }
+    }
+    let isListPaste = false;
+    let keepEmptyBlock = false;
     // 列表项不能单独进行粘贴 https://ld246.com/article/1628681120576/comment/1628681209731#comments
     if (tempElement.content.children[0]?.getAttribute("data-type") === "NodeListItem") {
+        isListPaste = true;
         if (cursorLiElement) {
             blockElement = cursorLiElement;
             id = blockElement.getAttribute("data-node-id");
@@ -446,6 +489,29 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             const liItemElement = tempElement.content.children[0];
             const subType = liItemElement.getAttribute("data-subtype");
             tempElement.innerHTML = `<div${subType === "o" ? " data-marker=\"1.\"" : ""} data-subtype="${subType}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+        }
+    } else if (isFirstBlockInLi && cursorLiElement &&
+        tempElement.content.children[0]?.getAttribute("data-type") === "NodeList") {
+        const sourceList = tempElement.content.children[0] as HTMLElement;
+        const hasRefCount = sourceList.querySelector(".protyle-attr--refcount");
+        if (!hasRefCount) {
+            isListPaste = true;
+            // 顶层空列表项粘贴列表块时拆开为同级列表项 https://github.com/siyuan-note/siyuan/issues/17890
+            blockElement = cursorLiElement as HTMLElement;
+            id = blockElement.getAttribute("data-node-id");
+            oldHTML = blockElement.outerHTML;
+            const listElement = tempElement.content.children[0] as HTMLElement;
+            tempElement.innerHTML = "";
+            while (listElement.firstElementChild) {
+                if (listElement.firstElementChild.classList.contains("protyle-attr")) {
+                    listElement.firstElementChild.remove();
+                    continue;
+                }
+                tempElement.content.appendChild(listElement.firstElementChild);
+            }
+        } else {
+            // 有 refcount 的列表直接作为子列表插入到空段落后，不拆开不清理 https://github.com/siyuan-note/siyuan/issues/17890
+            keepEmptyBlock = true;
         }
     }
     let lastElement: Element;
@@ -528,7 +594,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             lastElement = item;
         }
     });
-    if (editableElement && editableElement.textContent === "" && blockElement.classList.contains("p")) {
+    if (editableElement && editableElement.textContent === "" && blockElement.classList.contains("p") && !keepEmptyBlock) {
         // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
         doOperation.find((item, index) => {
             if (item.id === id) {
@@ -588,5 +654,92 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         });
         return;
     }
+    // 粘贴到空列表项（第一个段落为空）后删除空列表项 https://github.com/siyuan-note/siyuan/issues/17890
+    if (isListPaste && cursorLiElement && isFirstBlockInLi) {
+        const editEl = getContenteditableElement(cursorLiElement);
+        if (editEl && editEl.textContent.replace(Constants.ZWSP, "").trim() === "") {
+            // 把空列表项的子列表移到粘贴的最后一项下面
+            const subList = cursorLiElement.querySelector(":scope > [data-type='NodeList']");
+            if (subList && lastElement && lastElement.classList.contains("li")) {
+                const movedList = subList.cloneNode(true) as HTMLElement;
+                const existSubList = lastElement.querySelector(":scope > [data-type='NodeList']");
+                if (existSubList) {
+                    // 最后一项已有子列表，合并子列表项
+                    Array.from(movedList.querySelectorAll(":scope > .li")).forEach(li => {
+                        existSubList.appendChild(li);
+                    });
+                } else {
+                    lastElement.appendChild(movedList);
+                }
+                // 更新最后一项的 update 操作 data
+                const lastUpdateOp = doOperation.find(op => op.action === "insert" && op.id === lastElement.getAttribute("data-node-id"));
+                if (lastUpdateOp) {
+                    lastUpdateOp.data = lastElement.outerHTML;
+                }
+            }
+            const liId = cursorLiElement.getAttribute("data-node-id");
+            const liHTML = cursorLiElement.outerHTML;
+            doOperation.push({action: "delete", id: liId});
+            undoOperation.push({
+                action: "insert",
+                data: liHTML,
+                id: liId,
+                previousID: cursorLiElement.previousElementSibling?.getAttribute("data-node-id"),
+                parentID: cursorLiElement.parentElement?.getAttribute("data-node-id")
+            });
+            cursorLiElement.remove();
+        }
+    }
+    // 粘贴后修正有序列表序号 https://github.com/siyuan-note/siyuan/issues/17890
+    const orderLists = new Set<Element>();
+    if (cursorLiElement) {
+        // cursorLiElement 可能已被清理删除，用 parentList 引用
+        const cursorList = cursorLiElement.classList.contains("list") ? cursorLiElement : cursorLiElement.parentElement;
+        if (cursorList?.getAttribute("data-subtype") === "o") {
+            orderLists.add(cursorList);
+        }
+        // 粘贴的最后一项所在的列表
+        if (lastElement?.parentElement?.getAttribute("data-subtype") === "o") {
+            orderLists.add(lastElement.parentElement);
+        }
+    }
+    // 粘贴产生的子列表也可能是有序列表
+    doOperation.forEach(op => {
+        if (op.action === "insert") {
+            const tempEl = document.createElement("template");
+            tempEl.innerHTML = op.data;
+            tempEl.content.querySelectorAll("[data-type='NodeList'][data-subtype='o']").forEach(list => {
+                const existing = protyle.wysiwyg.element.querySelector(`[data-node-id="${list.getAttribute("data-node-id")}"]`);
+                if (existing) {
+                    orderLists.add(existing);
+                }
+            });
+        }
+    });
+    orderLists.forEach(orderList => {
+        // 保存原有列表项的原始状态用于撤销
+        const originalItems: {id: string, html: string}[] = [];
+        orderList.querySelectorAll(":scope > .li").forEach(li => {
+            const liId = li.getAttribute("data-node-id");
+            if (!doOperation.find(o => o.id === liId && o.action === "insert")) {
+                originalItems.push({id: liId, html: li.outerHTML});
+            }
+        });
+        updateListOrder(orderList);
+        // 更新 doOperation 中受影响列表项的 data，原有项补充 update 操作用于撤销
+        orderList.querySelectorAll(":scope > .li").forEach(li => {
+            const liId = li.getAttribute("data-node-id");
+            const op = doOperation.find(o => o.id === liId && o.action === "insert");
+            if (op) {
+                op.data = li.outerHTML;
+            } else {
+                const original = originalItems.find(item => item.id === liId);
+                if (original && original.html !== li.outerHTML) {
+                    doOperation.push({action: "update", id: liId, data: li.outerHTML});
+                    undoOperation.push({action: "update", id: liId, data: original.html});
+                }
+            }
+        });
+    });
     transaction(protyle, doOperation, undoOperation);
 };

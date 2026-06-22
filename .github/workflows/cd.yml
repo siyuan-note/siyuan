@@ -69,7 +69,7 @@ jobs:
   build:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
-    needs: prepare
+    needs: [prepare, build_android]
     strategy:
       matrix:
         config:
@@ -220,10 +220,159 @@ jobs:
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.deb
             ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm
 
+  build_android:
+    runs-on: ubuntu-latest
+    name: ubuntu build android.apk
+    # 串行在桌面 build 之前:Android 链路(gomobile/NDK/Gradle)较脆弱,失败时
+    # 直接跳过桌面 build,避免浪费桌面端的 CI 时间。执行顺序:
+    # prepare -> build_android -> build -> create_release
+    needs: prepare
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
+          cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
+          cache: false
+      - run: go version
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install Node pnpm
+        run: npm install -g ${{ needs.prepare.outputs.packageManager }}
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Install Node Dependencies
+        run: pnpm install --no-frozen-lockfile
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Building UI
+        run: pnpm run build
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Android NDK
+        # 锁定 NDK r28b(与本地开发环境同版本)。sdkmanager 不在 PATH 上
+        # (actions/runner-images#13674),用全路径调用;同时预接受 SDK 许可,
+        # 避免 NDK 安装卡在交互式许可确认。
+        run: |
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager 2>/dev/null | head -1)
+          fi
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager not found under $ANDROID_HOME/cmdline-tools/"
+            exit 1
+          fi
+          echo "Using sdkmanager: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+          "$SDKMANAGER" "ndk;28.2.13676358" > /dev/null
+          NDK_DIR="$ANDROID_HOME/ndk/28.2.13676358"
+          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
+          echo "ANDROID_NDK_ROOT=$NDK_DIR" >> $GITHUB_ENV
+          echo "Installed NDK r28b at $NDK_DIR"
+
+      - name: Set up gomobile
+        # 锁定到 kernel/go.mod 中 x/mobile 模块的同一版本,避免工具与库版本漂移。
+        # GOPATH 被显式指向 workspace 下,go install 的产物在 $GOPATH/bin,
+        # 该目录不在默认 PATH 上,需用全路径调用并写入 $GITHUB_PATH 供后续步骤使用。
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@2553ed8ce294
+          echo "$GOPATH/bin" >> $GITHUB_PATH
+          "$GOPATH/bin/gomobile" init
+        env:
+          GOPATH: ${{ github.workspace }}/go
+
+      - name: Building Android Kernel
+        run: gomobile bind -tags fts5 -ldflags "-s -w" -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+        env:
+          GOPATH: ${{ github.workspace }}/go
+          CGO_ENABLED: 1
+          JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
+
+      - name: Checkout siyuan-android
+        uses: actions/checkout@v6
+        with:
+          repository: siyuan-note/siyuan-android
+          ref: main
+          path: ${{ github.workspace }}/siyuan-android
+
+      - name: Patch siyuan-android Repositories
+        # siyuan-android 默认把阿里云镜像排在最前,某些依赖(如 org.apache:apache:31)
+        # 在阿里云镜像缺失会导致解析失败。CI 在海外,直接走 google()/mavenCentral()
+        # 更稳;sed 删除所有 maven.aliyun.com 行,保留官方仓库。
+        run: |
+          sed -i '/maven.aliyun.com/d' build.gradle
+          echo "=== Patched build.gradle repositories ==="
+          grep -A 6 "repositories" build.gradle | head -20
+        working-directory: ${{ github.workspace }}/siyuan-android
+
+      - name: Prepare siyuan-android Build Inputs
+        run: |
+          mkdir -p ${{ github.workspace }}/siyuan-android/app/libs
+          cp ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/kernel.aar \
+             ${{ github.workspace }}/siyuan-android/app/libs/kernel.aar
+          cd ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+          zip -r app.zip appearance guide stage changelogs
+          mkdir -p ${{ github.workspace }}/siyuan-android/app/src/main/assets
+          cp app.zip ${{ github.workspace }}/siyuan-android/app/src/main/assets/app.zip
+
+      - name: Inject Signing Config
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > ${{ github.workspace }}/siyuan-android/app/siyuan-android.jks
+          cat > ${{ github.workspace }}/siyuan-android/signings.gradle <<EOF
+          android {
+            signingConfigs {
+              siyuanConfig {
+                storeFile file("siyuan-android.jks")
+                storePassword "$ANDROID_KEYSTORE_PASSWORD"
+                keyAlias "$ANDROID_KEY_ALIAS"
+                keyPassword "$ANDROID_KEY_PASSWORD"
+              }
+            }
+          }
+          EOF
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+      - name: Building Android App
+        # local.properties 被 siyuan-android 的 .gitignore 忽略,CI 里需现场生成,
+        # 否则 Gradle 报 "SDK location not found";gradlew 也需显式加可执行权限。
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          chmod +x ./gradlew
+          ./gradlew assembleOfficialRelease
+          cd app/build/outputs/apk/official/release
+          mv siyuan-*-official-release.apk siyuan-android.apk
+        working-directory: ${{ github.workspace }}/siyuan-android
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-android
+          path: ${{ github.workspace }}/siyuan-android/app/build/outputs/apk/official/release/siyuan-android.apk
+
   create_release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [prepare, build]
+    needs: [prepare, build, build_android]
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v8
@@ -252,4 +401,5 @@ jobs:
             "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${REL_VER}-linux.rpm" \
             "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${REL_VER}-mac.dmg" \
             "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${REL_VER}-mac-arm64.dmg" \
-            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${REL_VER}-win.exe"
+            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${REL_VER}-win.exe" \
+            "siyuan-android/siyuan-android.apk#siyuan-${REL_VER}.apk"

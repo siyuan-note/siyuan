@@ -1093,8 +1093,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const isChild = targetClass.some((c: string) => c.indexOf("--child") > -1);
                     const isBottom = targetClass.some((c: string) => c.indexOf("dragover__bottom") === 0);
 
-                    if (isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
-                        // 拖拽整个列表块（NodeList）作为子项时，展开为其下的列表项，避免形成列表直接嵌套列表
+                    // 拖拽整个列表块（NodeList）到列表项时，展开为其下的列表项，避免形成 list>list 非法嵌套
+                    if (targetElement.getAttribute("data-type") === "NodeListItem") {
                         const expandedElements: Element[] = [];
                         sourceElements.forEach(item => {
                             if (item.getAttribute("data-type") === "NodeList") {
@@ -1111,6 +1111,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             sourceElements.length = 0;
                             sourceElements.push(...expandedElements);
                         }
+                    }
+
+                    if (isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
                         const nestedList = Array.from(targetElement.children).find(c => c.classList.contains("list"));
                         let nestedTarget: Element;
                         if (nestedList) {

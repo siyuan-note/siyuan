@@ -2486,7 +2486,8 @@ export class AgentChat extends Model {
         );
         this.tokenDisplayEl.classList.add(levelClass);
         // 弧长：未知上限（limit=0）时画一个小占位弧（约 15%），表示有用量但无上限。
-        const ratio = limit > 0 ? Math.min(tokens / limit, 1) : 0.15;
+        // 弧长：已知上限按真实占用率；未知上限（limit=0）不画弧（只留灰色轨道圈，明确表示无上限信息）。
+        const ratio = limit > 0 ? Math.min(tokens / limit, 1) : 0;
         const filled = circumference * ratio;
         arc.setAttribute("stroke-dasharray", filled.toFixed(2) + " " + circumference.toFixed(2));
     }
@@ -2536,10 +2537,10 @@ export class AgentChat extends Model {
                 '<span class="agent-token-popup__value">' + row.percent + "</span>" +
             "</div>";
         }
-        // 缓存命中（独立维度，分隔线隔开，为 0 不显示）。
+        // 缓存命中（独立维度，分隔线隔开，为 0 不显示——不返回缓存字段的模型整行不出现）。
         if (this.contextCachedTokens > 0 && this.contextTokens > 0) {
             html += '<div class="agent-token-popup__divider"></div>';
-            const cachedPercent = Math.round(this.contextCachedTokens / this.contextTokens * 100);
+            const cachedPercent = Math.round(this.contextCachedTokens / this.contextTokens * 1000) / 10;
             html += '<div class="agent-token-popup__row">' +
                 '<span class="agent-token-popup__label">' + (L.tokenCatCached || "Cache Hits") + "</span>" +
                 '<span class="agent-token-popup__value">' + cachedPercent + "%</span>" +

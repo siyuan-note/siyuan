@@ -18,6 +18,13 @@ package conf
 
 import "github.com/siyuan-note/siyuan/kernel/util"
 
+type OpenLink struct {
+	Click      string `json:"click"`      // 普通点击链接打开方式
+	CtrlClick  string `json:"ctrlClick"`  // Ctrl+点击链接打开方式
+	AltClick   string `json:"altClick"`   // Alt+点击链接打开方式
+	ShiftClick string `json:"shiftClick"` // Shift+点击链接打开方式
+}
+
 type Editor struct {
 	AllowSVGScript                  bool           `json:"allowSVGScript"`                  // 允许执行 SVG 内脚本
 	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 块内脚本
@@ -39,6 +46,7 @@ type Editor struct {
 	VirtualBlockRefExclude          string         `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
 	VirtualBlockRefInclude          string         `json:"virtualBlockRefInclude"`          // 虚拟引用关键字包含列表
 	BlockRefDynamicAnchorTextMaxLen int            `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
+	OpenLink                        *OpenLink      `json:"openLink"`                        // 链接打开行为配置
 	PlantUMLServePath               string         `json:"plantUMLServePath"`               // PlantUML 伺服地址
 	FullWidth                       bool           `json:"fullWidth"`                       // 是否使用最大宽度
 	KaTexMacros                     string         `json:"katexMacros"`                     // KeTex 宏定义
@@ -83,6 +91,7 @@ func NewEditor() *Editor {
 		Emoji:                           []string{},
 		VirtualBlockRef:                 false,
 		BlockRefDynamicAnchorTextMaxLen: 96,
+		OpenLink:                        &OpenLink{Click: "right-tab", CtrlClick: "show-folder", AltClick: "current-tab", ShiftClick: "open-app"},
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
 		FullWidth:                       true,
 		KaTexMacros:                     "{}",

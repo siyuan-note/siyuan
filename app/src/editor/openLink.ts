@@ -96,8 +96,34 @@ export const processSYLink = (app: App, url: string) => {
     return false;
 };
 
+const resolveOpenAction = (ctrlIsPressed: boolean, event?: MouseEvent): Config.TLinkOpenAction => {
+    const config = window.siyuan.config.editor.openLink;
+    if (event && event.altKey) {
+        return config.altClick;
+    }
+    if (event && event.shiftKey) {
+        return config.shiftClick;
+    }
+    if (ctrlIsPressed) {
+        return config.ctrlClick;
+    }
+    return config.click;
+};
+
 export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let linkAddress = Lute.UnEscapeHTMLStr(aLink);
+    const action = resolveOpenAction(ctrlIsPressed, event);
+
+    let preventDefaultCalled = false;
+    for (const plugin of protyle.app.plugins) {
+        if (!plugin.eventBus.emit("open-link", {url: linkAddress, action: action})) {
+            preventDefaultCalled = true;
+        }
+    }
+    if (preventDefaultCalled) {
+        return;
+    }
+
     let pdfParams;
     if (isLocalPath(linkAddress) && !linkAddress.startsWith("file://") && linkAddress.indexOf(".pdf") > -1) {
         const pdfAddress = linkAddress.split("/");
@@ -120,33 +146,46 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
                 (linkAddress.endsWith(".pdf") && linkAddress.startsWith("assets/"))
             )
         ) {
-            if (event && event.altKey) {
-                openAsset(protyle.app, linkAddress, pdfParams);
-            } else if (event && event.shiftKey) {
-                /// #if !BROWSER
-                openBy(linkAddress, "app");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else if (ctrlIsPressed) {
-                /// #if !BROWSER
-                openBy(linkAddress, "folder");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else {
-                openAsset(protyle.app, linkAddress, pdfParams, !window.siyuan.config.fileTree.noSplitScreenWhenOpenTab ? "right" : null);
+            switch (action) {
+                case "current-tab":
+                    openAsset(protyle.app, linkAddress, pdfParams);
+                    break;
+                case "right-tab":
+                    const isOpenRight = !window.siyuan.config.fileTree.noSplitScreenWhenOpenTab ? "right" : null
+                    openAsset(protyle.app, linkAddress, pdfParams, isOpenRight);
+                    break;
+                case "open-app":
+                    /// #if !BROWSER
+                    openBy(linkAddress, "app");
+                    /// #else
+                    openByMobile(linkAddress);
+                    /// #endif
+                    break;
+                case "show-folder":
+                    /// #if !BROWSER
+                    openBy(linkAddress, "folder");
+                    /// #else
+                    openByMobile(linkAddress);
+                    /// #endif
+                    break;
             }
         } else {
-            /// #if !BROWSER
-            if (ctrlIsPressed) {
-                openBy(linkAddress, "folder");
-            } else {
-                openBy(linkAddress, "app");
+            switch (action) {
+                case "show-folder":
+                    /// #if !BROWSER
+                    openBy(linkAddress, "folder");
+                    /// #else
+                    openByMobile(linkAddress);
+                    /// #endif
+                    break;
+                default:
+                    /// #if !BROWSER
+                    openBy(linkAddress, "app");
+                    /// #else
+                    openByMobile(linkAddress);
+                    /// #endif
+                    break;
             }
-            /// #else
-            openByMobile(linkAddress);
-            /// #endif
         }
     } else if (linkAddress) {
         if (0 > linkAddress.indexOf(":")) {

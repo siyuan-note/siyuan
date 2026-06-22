@@ -10,8 +10,7 @@ import {fetchGet, fetchPost} from "./util/fetch";
 import {
     addBaseURL,
     getDocDisplayName,
-    getIdFromSYProtocol,
-    isSYProtocol,
+    parseSiYuanUriInfo,
     redirectToCheckAuth,
     setNoteBook
 } from "./util/pathName";
@@ -31,7 +30,7 @@ import {
 import {initMessage, showMessage} from "./dialog/message";
 import {getAllModels, getAllTabs} from "./layout/getAll";
 import {getLocalStorage, isChromeBrowser, isInMobileApp} from "./protyle/util/compatibility";
-import {getSearch, isBrowser} from "./util/functions";
+import {isBrowser} from "./util/functions";
 import {checkPublishServiceClosed} from "./util/processMessage";
 import {hideAllElements} from "./protyle/ui/hideElements";
 import {loadPlugins, reloadPlugin} from "./plugin/loader";
@@ -276,13 +275,13 @@ export class App {
 const siyuanApp = new App();
 
 window.openFileByURL = (openURL) => {
-    if (openURL && isSYProtocol(openURL)) {
-        const isZoomIn = getSearch("focus", openURL) === "1";
+    const blockInfo = parseSiYuanUriInfo(openURL);
+    if (blockInfo != null) {
         openFileById({
             app: siyuanApp,
-            id: getIdFromSYProtocol(openURL),
-            action: isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-            zoomIn: isZoomIn
+            id: blockInfo.id,
+            action: blockInfo.focus ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+            zoomIn: blockInfo.focus
         });
         return true;
     }

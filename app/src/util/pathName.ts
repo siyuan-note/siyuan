@@ -70,46 +70,31 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
     }
 };
 
-export const getIdZoomInByPath = () => {
+export const parseUriInfo = () => {
     const searchParams = new URLSearchParams(window.location.search);
-    const data = {
-        id: "",
-        isZoomIn: false,
-    };
     const PWAURL = searchParams.get("url");
     if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
         const dataInfo = parseSiYuanUriInfo(PWAURL);
         if (dataInfo != null) {
-            data.id = dataInfo.id;
-            data.isZoomIn = dataInfo.focus;
             window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
-            return data;
+            return dataInfo;
         }
     }
 
     if (window.JSAndroid) {
         const dataInfo = parseSiYuanUriInfo(window.JSAndroid.getBlockURL());
         if (dataInfo != null) {
-            data.id = dataInfo.id;
-            data.isZoomIn = dataInfo.focus;
             window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
-            return data;
+            return dataInfo;
         }
     }
 
     // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
-    data.id = searchParams.get("id") ?? "";
-    data.isZoomIn = searchParams.get("focus") === "1";
     window.siyuan.editorIsFullscreen = searchParams.get("fullscreen") === "1";
-    return data;
-};
-
-export const isSYProtocol = (url: string) => {
-    return /^siyuan:\/\/blocks\/\d{14}-\w{7}/.test(url);
-};
-
-export const getIdFromSYProtocol = (url: string) => {
-    return url.substring(16, 16 + 22);
+    return {
+        id: searchParams.get("id") ?? "",
+        focus: searchParams.get("focus") === "1"
+    };
 };
 
 /* redirect to auth page */

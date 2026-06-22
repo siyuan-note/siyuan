@@ -7,7 +7,7 @@ import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
 import {setEmpty} from "./setEmpty";
-import {getIdZoomInByPath, getOpenNotebookCount} from "../../util/pathName";
+import {getOpenNotebookCount, parseUriInfo} from "../../util/pathName";
 import {popMenu} from "../menu";
 import {MobileFiles} from "../dock/MobileFiles";
 import {MobileOutline} from "../dock/MobileOutline";
@@ -183,10 +183,10 @@ export const initFramework = (app: App, isStart: boolean) => {
         if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {
             return;
         }
-        const idZoomIn = getIdZoomInByPath();
-        if (idZoomIn.id) {
-            openMobileFileById(app, idZoomIn.id,
-                idZoomIn.isZoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+        const info = parseUriInfo();
+        if (info.id) {
+            openMobileFileById(app, info.id,
+                info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
             return;
         }
         if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {

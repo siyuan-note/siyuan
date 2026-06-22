@@ -2,7 +2,7 @@ import {BlockPanel} from "./Panel";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip, tooltipTargetElement} from "../dialog/tooltip";
-import {getIdFromSYProtocol, isLocalPath} from "../util/pathName";
+import {isLocalPath, parseSiYuanUriInfo} from "../util/pathName";
 import {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
@@ -459,10 +459,10 @@ export const showPopover = async (app: App, showRef = false) => {
         }
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
         // 以思源协议开头的链接
-        refDefs = [{refID: getIdFromSYProtocol(popoverTargetElement.getAttribute("data-href"))}];
+        refDefs = [{refID: parseSiYuanUriInfo(popoverTargetElement.getAttribute("data-href"))?.id ?? ""}];
     } else if (popoverTargetElement.dataset.type === "url") {
         // 在 database 的 url 列中以思源协议开头的链接
-        refDefs = [{refID: getIdFromSYProtocol(popoverTargetElement.textContent.trim())}];
+        refDefs = [{refID: parseSiYuanUriInfo(popoverTargetElement.textContent.trim())?.id ?? ""}];
     } else if (popoverTargetElement.dataset.popoverUrl) {
         // 镜像数据库
         const postResponse = await fetchSyncPost(popoverTargetElement.dataset.popoverUrl, {avID: popoverTargetElement.dataset.avId});

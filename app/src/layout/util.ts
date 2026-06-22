@@ -22,7 +22,7 @@ import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {isWindow} from "../util/functions";
 import {showMessage} from "../dialog/message";
-import {getIdZoomInByPath} from "../util/pathName";
+import {parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {App} from "../index";
@@ -494,13 +494,13 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         }
     });
 
-    const idZoomIn = getIdZoomInByPath();
-    if (idZoomIn.id) {
+    const info = parseUriInfo();
+    if (info.id) {
         openFileById({
             app,
-            id: idZoomIn.id,
-            action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-            zoomIn: idZoomIn.isZoomIn,
+            id: info.id,
+            action: info.focus ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+            zoomIn: info.focus,
         });
     } else {
         let latestTabHeaderElement: HTMLElement;

@@ -1151,7 +1151,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             dragSb(protyle, sourceElements, targetElement, isBottom, "row", event.ctrlKey);
                         }
                     } else {
-                        if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
+                        // 列表项拖到列表容器边缘时禁止形成横向超级块
+                        const isListItemSource = gutterTypes[0] === "nodelistitem";
+                        const isListTarget = targetElement.classList.contains("list");
+                        if (isListItemSource && isListTarget &&
+                            (targetClass.includes("dragover__left") || targetClass.includes("dragover__right"))) {
+                            // 列表项拖到列表左右边缘：无操作
+                        } else if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
                             dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), "col", event.ctrlKey);
                         } else {
                             dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
@@ -1687,14 +1693,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
         // 列表项目标无论是否命中优化分支都需立即处理，避免拖到列表标记符（.protyle-action）上时提示和插入点缺失
-        // 但鼠标在列表容器左右边缘时不进入列表项处理，留给通用逻辑处理为横向超级块
-        if (liTarget && point.className !== "dragover__left" && point.className !== "dragover__right") {
-            // 列表项靠左/靠右边缘（列表容器边缘）时，用于形成横向超级块，不走列表项插入点逻辑
+        if (liTarget) {
             const parentList = (liTarget as HTMLElement).parentElement;
             const isListEdge = parentList && parentList.classList.contains("list") &&
                 (event.clientX < parentList.getBoundingClientRect().left + 32 ||
                     event.clientX > parentList.getBoundingClientRect().right - 32);
-            if (!isListEdge) {
+            if (isListEdge) {
+                if (gutterTypes[0] === "nodelistitem") {
+                    // 列表项拖拽不触发横向超级块，清理残留的边缘指示器
+                    cleanupDragIndicators(editorElement);
+                    return;
+                }
+                // 非列表项源拖到列表边缘，走通用逻辑形成横向超级块
+            } else {
                 applyLiTarget(liTarget as HTMLElement, event);
                 return;
             }
@@ -1721,6 +1732,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (point.className && !liTarget) {
                 // 超级块本身不显示插入点（实际插入到子块，不会创建超级块）
                 if (targetElement.classList.contains("sb")) {
+                    return;
+                }
+                // 列表项拖拽不触发横向超级块，列表边缘不显示插入指示
+                if (gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
+                    (point.className === "dragover__left" || point.className === "dragover__right")) {
                     return;
                 }
                 targetElement.classList.add(point.className);

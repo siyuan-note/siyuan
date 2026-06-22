@@ -477,6 +477,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         }
     }
     let isListPaste = false;
+    let keepEmptyBlock = false;
     // 列表项不能单独进行粘贴 https://ld246.com/article/1628681120576/comment/1628681209731#comments
     if (tempElement.content.children[0]?.getAttribute("data-type") === "NodeListItem") {
         isListPaste = true;
@@ -489,21 +490,28 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             const subType = liItemElement.getAttribute("data-subtype");
             tempElement.innerHTML = `<div${subType === "o" ? " data-marker=\"1.\"" : ""} data-subtype="${subType}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         }
-    } else if (isFirstBlockInLi &&
+    } else if (isFirstBlockInLi && cursorLiElement &&
         tempElement.content.children[0]?.getAttribute("data-type") === "NodeList") {
-        isListPaste = true;
-        // 空列表项（光标在第一个段落且为空）内粘贴列表块时拆开为同级列表项 https://github.com/siyuan-note/siyuan/issues/17890
-        blockElement = cursorLiElement as HTMLElement;
-        id = blockElement.getAttribute("data-node-id");
-        oldHTML = blockElement.outerHTML;
-        const listElement = tempElement.content.children[0] as HTMLElement;
-        tempElement.innerHTML = "";
-        while (listElement.firstElementChild) {
-            if (listElement.firstElementChild.classList.contains("protyle-attr")) {
-                listElement.firstElementChild.remove();
-                continue;
+        const sourceList = tempElement.content.children[0] as HTMLElement;
+        const hasRefCount = sourceList.querySelector(".protyle-attr--refcount");
+        if (!hasRefCount) {
+            isListPaste = true;
+            // 顶层空列表项粘贴列表块时拆开为同级列表项 https://github.com/siyuan-note/siyuan/issues/17890
+            blockElement = cursorLiElement as HTMLElement;
+            id = blockElement.getAttribute("data-node-id");
+            oldHTML = blockElement.outerHTML;
+            const listElement = tempElement.content.children[0] as HTMLElement;
+            tempElement.innerHTML = "";
+            while (listElement.firstElementChild) {
+                if (listElement.firstElementChild.classList.contains("protyle-attr")) {
+                    listElement.firstElementChild.remove();
+                    continue;
+                }
+                tempElement.content.appendChild(listElement.firstElementChild);
             }
-            tempElement.content.appendChild(listElement.firstElementChild);
+        } else {
+            // 有 refcount 的列表直接作为子列表插入到空段落后，不拆开不清理 https://github.com/siyuan-note/siyuan/issues/17890
+            keepEmptyBlock = true;
         }
     }
     let lastElement: Element;
@@ -586,7 +594,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             lastElement = item;
         }
     });
-    if (editableElement && editableElement.textContent === "" && blockElement.classList.contains("p")) {
+    if (editableElement && editableElement.textContent === "" && blockElement.classList.contains("p") && !keepEmptyBlock) {
         // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
         doOperation.find((item, index) => {
             if (item.id === id) {

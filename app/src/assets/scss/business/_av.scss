@@ -1012,6 +1012,11 @@
         margin-left: 4px;
       }
 
+      // “添加筛选条件”按钮：label 按内容宽度，使下拉箭头紧跟文案而非被推到最右
+      .av__filter-add-label {
+        flex: none;
+      }
+
       &__item[data-type="nobg"] {
         cursor: auto;
       }

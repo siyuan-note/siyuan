@@ -150,7 +150,7 @@ export const addFilter = (options: {
     parentPath?: string
 }) => {
     const menu = new Menu(Constants.MENU_AV_ADD_FILTER);
-    // 仅在目标分组内查重：同一分组内不重复添加同列叶子，但不同分组允许同列（嵌套的核心价值，如 状态=完成 OR 状态=进行中）
+    // 定位目标分组：支持向指定分组内追加，同分组允许同列多条件（如 状态=完成 OR 状态=进行中）
     let targetGroupFilters: IAVFilter[];
     if (options.parentPath && options.parentPath !== "") {
         const node = getFilterByPath(getRootFilters(options.data), options.parentPath);
@@ -158,15 +158,9 @@ export const addFilter = (options: {
     } else {
         targetGroupFilters = getEditableFilters(options.data);
     }
-    const usedColumns = new Set<string>();
-    targetGroupFilters.forEach(n => {
-        if (!n.filters && n.column) {
-            usedColumns.add(n.column);
-        }
-    });
     getFieldsByData(options.data).forEach((column) => {
-        // 该列是行号类型列，或目标分组内已有该列叶子，则不重复添加
-        if (column.type !== "lineNumber" && !usedColumns.has(column.id)) {
+        // 行号类型列不可筛选
+        if (column.type !== "lineNumber") {
             menu.addItem({
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
@@ -308,7 +302,7 @@ export const getFiltersHTML = (data: IAV) => {
 ${html}
 <button class="b3-menu__item" data-type="addFilterCondition" data-path="" data-depth="0">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label fn__flex-shrink">${window.siyuan.languages.addFilterCondition}</span>
+    <span class="b3-menu__label av__filter-add-label">${window.siyuan.languages.addFilterCondition}</span>
     <svg class="av__filter-arrow"><use xlink:href="#iconDown"></use></svg>
 </button>
 <button class="b3-menu__item b3-menu__item--warning${leafCount > 0 ? "" : " fn__none"}" data-type="removeFilters">

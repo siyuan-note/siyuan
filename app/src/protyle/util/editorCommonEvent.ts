@@ -1687,9 +1687,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
         // 列表项目标无论是否命中优化分支都需立即处理，避免拖到列表标记符（.protyle-action）上时提示和插入点缺失
-        if (liTarget) {
-            applyLiTarget(liTarget as HTMLElement, event);
-            return;
+        // 但鼠标在列表容器左右边缘时不进入列表项处理，留给通用逻辑处理为横向超级块
+        if (liTarget && point.className !== "dragover__left" && point.className !== "dragover__right") {
+            // 列表项靠左/靠右边缘（列表容器边缘）时，用于形成横向超级块，不走列表项插入点逻辑
+            const parentList = (liTarget as HTMLElement).parentElement;
+            const isListEdge = parentList && parentList.classList.contains("list") &&
+                (event.clientX < parentList.getBoundingClientRect().left + 32 ||
+                    event.clientX > parentList.getBoundingClientRect().right - 32);
+            if (!isListEdge) {
+                applyLiTarget(liTarget as HTMLElement, event);
+                return;
+            }
         }
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验

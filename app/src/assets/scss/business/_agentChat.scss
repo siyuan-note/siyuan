@@ -982,8 +982,7 @@ pre:hover .agent-chat__copy-wrap {
 // token 分类明细弹层：hover 底部 tokens 数字时弹出，复用 b3-menu 基础样式。
 .agent-token-popup {
     position: fixed;
-    min-width: 200px;
-    max-width: 280px;
+    width: 280px;
     padding: 8px 0;
 
     .b3-menu__items {

@@ -221,7 +221,6 @@ export class AgentChat extends Model {
         '<div class="agent-chat__input-area">' +
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
-            '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
             '<span class="fn__flex-1"></span>' +
             '<span class="agent-chat__tokens fn__none" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
                 '<svg viewBox="0 0 24 24">' +
@@ -229,6 +228,7 @@ export class AgentChat extends Model {
                     '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
                 "</svg>" +
             "</span>" +
+            '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
@@ -2550,12 +2550,9 @@ export class AgentChat extends Model {
         popup.innerHTML = html;
         document.body.appendChild(popup);
         popup.style.zIndex = (++window.siyuan.zIndex).toString();
-        // 定位：右对齐到 trigger 右边缘并向左延伸。trigger（圆环）只有 24px 宽且紧贴发送按钮，
-        // 左对齐会让 popup 向右溢出后挤到屏幕右边缘、首行末尾贴边，故改用右对齐。
+        // 定位：与模型选择弹出一致——右对齐 trigger 右边缘（width 280px 固定），垂直在 trigger 下方。
         const rect = this.tokenDisplayEl.getBoundingClientRect();
-        const popupWidth = popup.offsetWidth;
-        const rightAlignedLeft = rect.right - popupWidth;
-        setPosition(popup, rightAlignedLeft, rect.top, rect.height);
+        setPosition(popup, rect.right - 280, rect.bottom, rect.height, rect.width);
         // popup 自身 hover 保持显示（鼠标移入时取消关闭计时，移出时关闭）。
         popup.addEventListener("mouseenter", () => {
             window.clearTimeout(this.tokenPopupHideTimer);

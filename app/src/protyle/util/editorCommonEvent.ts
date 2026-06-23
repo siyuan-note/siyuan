@@ -770,9 +770,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         let gutterType = "";
-        for (const item of event.dataTransfer.items) {
-            if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                gutterType = item.type;
+        for (const type of event.dataTransfer.types) {
+            if (type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                gutterType = type;
             }
         }
         if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}ViewTab${Constants.ZWSP}`.toLowerCase())) {
@@ -1093,6 +1093,70 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const isChild = targetClass.some((c: string) => c.indexOf("--child") > -1);
                     const isBottom = targetClass.some((c: string) => c.indexOf("dragover__bottom") === 0);
 
+                    // 列表项/列表块拖到自身、子孙、或原位置时无操作，避免源被移出形成单独列表
+                    const isListItemSource = gutterTypes[0] === "nodelistitem" || gutterTypes[0] === "nodelist";
+                    if (isListItemSource) {
+                        // 源列表项在目标列表容器内部时无操作（子列表项拖到父列表底部/顶部）
+                        if (targetElement.classList.contains("list") &&
+                            sourceElements.some(s => targetElement.contains(s))) {
+                            dragoverElement = undefined;
+                            return;
+                        }
+                        // targetElement 可能是列表项的子块（如 .p）或列表容器（.list），需找到对应 .li 再判断
+                        let targetLi: HTMLElement;
+                        if (targetElement.classList.contains("li")) {
+                            targetLi = targetElement as HTMLElement;
+                        } else if (targetElement.classList.contains("list")) {
+                            // 列表容器底部：取最后一个 .li（拖到列表末尾）
+                            const lis = targetElement.querySelectorAll(":scope > .li");
+                            targetLi = isBottom ? lis[lis.length - 1] as HTMLElement : lis[0] as HTMLElement;
+                        } else {
+                            targetLi = targetElement.closest(".li") as HTMLElement;
+                        }
+                        if (targetLi) {
+                            const isNoOpDrop = sourceElements.some(source =>
+                                source === targetLi ||                                              // 拖到自身
+                                source.contains(targetLi) ||                                        // 拖到子孙中
+                                (!isChild && isBottom && source === targetLi.nextElementSibling) ||  // 底部同级：源原本就在目标后面
+                                (!isChild && !isBottom && source === targetLi.previousElementSibling)); // 顶部同级：源原本就在目标前面
+                            if (isNoOpDrop) {
+                                dragoverElement = undefined;
+                                return;
+                            }
+                        } else {
+                            // 列表项/列表块拖到列表外紧邻块或父列表时无操作（含多级嵌套），避免源被移出形成独立列表
+                            const sourceSelected = sourceElements[0];
+                            if (sourceSelected && (sourceSelected.classList.contains("li") || sourceSelected.classList.contains("list"))) {
+                                // 源在目标列表容器内部时无操作
+                                if (targetElement.classList.contains("list") && targetElement.contains(sourceSelected)) {
+                                    dragoverElement = undefined;
+                                    return;
+                                }
+                                let current: Element = sourceSelected;
+                                while (current && current !== editorElement) {
+                                    if (current.classList.contains("list") || current.classList.contains("li")) {
+                                        const checkSiblings = (container: Element) => {
+                                            let prevSibling = container.previousElementSibling;
+                                            while (prevSibling && prevSibling.classList.contains("protyle-attr")) {
+                                                prevSibling = prevSibling.previousElementSibling;
+                                            }
+                                            let nextSibling = container.nextElementSibling;
+                                            while (nextSibling && nextSibling.classList.contains("protyle-attr")) {
+                                                nextSibling = nextSibling.nextElementSibling;
+                                            }
+                                            return targetElement === prevSibling || targetElement === nextSibling;
+                                        };
+                                        if (checkSiblings(current)) {
+                                            dragoverElement = undefined;
+                                            return;
+                                        }
+                                    }
+                                    current = current.parentElement;
+                                }
+                            }
+                        }
+                    }
+
                     // 拖拽整个列表块（NodeList）到列表项时，展开为其下的列表项，避免形成 list>list 非法嵌套
                     if (targetElement.getAttribute("data-type") === "NodeListItem") {
                         const expandedElements: Element[] = [];
@@ -1151,7 +1215,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             dragSb(protyle, sourceElements, targetElement, isBottom, "row", event.ctrlKey);
                         }
                     } else {
-                        if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
+                        // 列表项拖到列表容器边缘时禁止形成横向超级块（列表块拖到列表边缘可形成超级块）
+                        const isListItemOnlySource = gutterTypes[0] === "nodelistitem";
+                        const isListTarget = targetElement.classList.contains("list");
+                        if (isListItemOnlySource && isListTarget &&
+                            (targetClass.includes("dragover__left") || targetClass.includes("dragover__right"))) {
+                            // 列表项拖到列表左右边缘：无操作
+                        } else if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
                             dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), "col", event.ctrlKey);
                         } else {
                             dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
@@ -1382,18 +1452,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         const liRect = htmlTarget.getBoundingClientRect();
         const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
         const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
-        const isBottom = event.clientY > liRect.top + liRect.height / 2;
-        // 列表项统一使用底部插入点；但列表首项的上半需保留顶部插入点，否则无法在列表最前面插入
+        // 用内容块（不含子列表）的 rect 判断上下半，避免有子列表时下半区域过小难以命中
+        const contentBlockForRect = Array.from(htmlTarget.children).find(c =>
+            c.hasAttribute("data-node-id") && !c.classList.contains("list")) as HTMLElement;
+        const contentRect = contentBlockForRect ? contentBlockForRect.getBoundingClientRect() : liRect;
+        const isBottom = event.clientY > contentRect.top + contentRect.height / 2;
+        // 列表首项的上半保留顶部插入点；其余列表项整个区域统一使用底部插入点，避免下半区域过小难以命中
         const isFirstLi = !htmlTarget.previousElementSibling || !htmlTarget.previousElementSibling.classList.contains("li");
         let position = "bottom";
         if (isFirstLi && !isBottom) {
             position = "top";
         }
-        const isChild = position === "bottom" && offsetX >= indent;
-        // 源列表项不能拖到自身或子孙中（含原位置），此时不高亮也不显示提示
-        const isSelfOrDescendant = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select"))
-            .some((source: HTMLElement) => source === htmlTarget || source.contains(htmlTarget));
-        if (isSelfOrDescendant) {
+        // 有子列表时鼠标无法到达子列表区域（elementFromPoint 会命中子项的 .li），
+        // 因此有子列表的列表项内容区域全部作为 sibling（在目标后插入同级），无子列表时用 offsetX 判断 child/sibling
+        const hasChildList = !!Array.from(htmlTarget.children).find(c => c.classList.contains("list"));
+        const isChild = position === "bottom" && !hasChildList && offsetX >= indent;
+        // 源列表项拖到自身、子孙中、或原位置时不显示高亮与提示
+        const sourceElements = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
+        const isNoOp = sourceElements.some(source =>
+            source === htmlTarget ||                                    // 拖到自身
+            source.contains(htmlTarget) ||                              // 拖到子孙中
+            (!isChild && position === "bottom" && source === htmlTarget.nextElementSibling) ||  // 底部同级：源原本就在目标后面
+            (position === "top" && source === htmlTarget.previousElementSibling));              // 顶部同级：源原本就在目标前面
+        if (isNoOp) {
             cleanupDragIndicators(editorElement);
             hideDragTip();
             return;
@@ -1403,8 +1484,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         htmlTarget.classList.add(className);
         htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
         htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
-        // 仅在成为子项时显示层级 guide 竖线；同级插入时清除，避免横线覆盖后短线残留导致颜色重叠
-        htmlTarget.style.setProperty("--drag-guides", isChild ? guides : "none");
+        // guide 竖线在 sibling 和 child 时都显示（sibling 时 ::before 为 transparent 不会与 guide 线重叠）
+        htmlTarget.style.setProperty("--drag-guides", guides);
         // ::before 目标标记仅在成为子项时显示，sibling 时由横线独占该区域避免半透明叠加变深
         htmlTarget.style.setProperty("--drag-base-bg",
             isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)` : "transparent");
@@ -1437,9 +1518,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         let gutterType = "";
-        for (const item of event.dataTransfer.items) {
-            if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                gutterType = item.type;
+        for (const type of event.dataTransfer.types) {
+            if (type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                gutterType = type;
             }
         }
         if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}ViewTab${Constants.ZWSP}`.toLowerCase())) {
@@ -1574,11 +1655,28 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     point.className = "dragover__right";
                 }
                 targetElement = document.elementFromPoint(point.x, point.y) as HTMLElement;
-                if (targetElement.classList.contains("protyle-wysiwyg")) {
-                    // 命中间隙
-                    targetElement = document.elementFromPoint(point.x, point.y - 6) as HTMLElement;
+                // 命中间隙时逐步向上探测，找到最近的块级元素（解决深层列表项下方间隙无法命中问题）
+                let probeOffset = 6;
+                while (targetElement.classList.contains("protyle-wysiwyg") && probeOffset < 100) {
+                    targetElement = document.elementFromPoint(point.x, point.y - probeOffset) as HTMLElement;
+                    probeOffset += 6;
                 }
-                targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
+                // 列表项源优先深层 .li（精确插入），其他源（含列表块）用顶层块（支持超级块）
+                if (gutterTypes[0] === "nodelistitem") {
+                    let closestLiFromPoint: HTMLElement;
+                    if (targetElement.classList.contains("li")) {
+                        closestLiFromPoint = targetElement;
+                    } else if (targetElement.classList.contains("list")) {
+                        // 命中列表容器：取最后一个 .li，表示插到列表末尾之后
+                        const lis = targetElement.querySelectorAll(":scope > .li");
+                        closestLiFromPoint = lis.length > 0 ? lis[lis.length - 1] as HTMLElement : targetElement.closest(".li") as HTMLElement;
+                    } else {
+                        closestLiFromPoint = targetElement.closest(".li") as HTMLElement;
+                    }
+                    targetElement = closestLiFromPoint || hasTopClosestByAttribute(targetElement, "data-node-id", null) as HTMLElement;
+                } else {
+                    targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null) as HTMLElement;
+                }
                 if (targetElement && targetElement.classList.contains("sb") && targetElement.getAttribute("data-sb-layout") === "col") {
                     const childElement = targetElement.querySelectorAll("[data-node-id]");
                     if (point.className === "dragover__left") {
@@ -1589,11 +1687,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
         } else if (targetElement && targetElement.classList.contains("list")) {
-            if (gutterTypes[0] !== "nodelistitem") {
-                targetElement = hasClosestBlock(document.elementFromPoint(event.clientX, event.clientY - 6));
-            } else {
-                targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 6), "li");
-            }
+            // 列表项和列表块拖拽统一处理，使命中子列表容器时行为一致
+            targetElement = hasClosestBlock(document.elementFromPoint(event.clientX, event.clientY - 6));
         }
         if (gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}`.toLowerCase())) {
             // 表头只能拖拽到当前 av 的表头中
@@ -1675,9 +1770,47 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
         // For list items, resolve to the .li ancestor (but keep targetElement for validation)
-        const liTarget = targetElement.getAttribute("data-type") === "NodeListItem"
-            ? targetElement : targetElement.parentElement?.getAttribute("data-type") === "NodeListItem"
-                ? targetElement.parentElement : null;
+        // 命中子列表容器(.list)时不解析为 liTarget，走通用分支处理（与列表块拖拽行为一致）
+        let liTarget = targetElement.classList.contains("list") ? null :
+            (targetElement.getAttribute("data-type") === "NodeListItem"
+                ? targetElement : targetElement.parentElement?.getAttribute("data-type") === "NodeListItem"
+                    ? targetElement.parentElement : null);
+        const isListSource = gutterTypes[0] === "nodelistitem" || gutterTypes[0] === "nodelist";
+        // 列表项或列表块拖到列表外紧邻块时无操作，避免源被移出形成独立列表（含多级嵌套）
+        if (isListSource && !liTarget) {
+            const sourceSelected = editorElement.querySelector(".protyle-wysiwyg--select") as HTMLElement;
+            if (sourceSelected && (sourceSelected.classList.contains("li") || sourceSelected.classList.contains("list"))) {
+                // 源列表项/列表块在目标列表容器内部时无操作
+                if (targetElement.classList.contains("list") && targetElement.contains(sourceSelected)) {
+                    cleanupDragIndicators(editorElement);
+                    hideDragTip();
+                    return;
+                }
+                // 从源向上遍历，检查目标是否为任一层级 .list 或其所在 .li 的紧邻兄弟
+                let current: Element = sourceSelected;
+                while (current && current !== editorElement) {
+                    if (current.classList.contains("list") || current.classList.contains("li")) {
+                        const checkSiblings = (container: Element) => {
+                            let prevSibling = container.previousElementSibling;
+                            while (prevSibling && prevSibling.classList.contains("protyle-attr")) {
+                                prevSibling = prevSibling.previousElementSibling;
+                            }
+                            let nextSibling = container.nextElementSibling;
+                            while (nextSibling && nextSibling.classList.contains("protyle-attr")) {
+                                nextSibling = nextSibling.nextElementSibling;
+                            }
+                            return targetElement === prevSibling || targetElement === nextSibling;
+                        };
+                        if (checkSiblings(current)) {
+                            cleanupDragIndicators(editorElement);
+                            hideDragTip();
+                            return;
+                        }
+                    }
+                    current = current.parentElement;
+                }
+            }
+        }
         // 从文档树拖拽文档到编辑器时，默认禁止拖入（需按 Alt 才能作为引用插入），且不能拖入文档自身
         if (liTarget && fileTreeIds.indexOf("-") > -1 && isNotAvItem) {
             if (!event.altKey) {
@@ -1686,10 +1819,59 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
         }
+        // 列表项/列表块拖到列表容器底部/顶部时，若源在列表内部或源就是列表末尾/开头的项，则为无操作
+        if (isListSource && targetElement.classList.contains("list")) {
+            const sourceSelected = editorElement.querySelector(".protyle-wysiwyg--select");
+            // 源在目标列表容器内部（子列表项/列表块拖到父列表），无操作
+            if (sourceSelected && targetElement.contains(sourceSelected)) {
+                cleanupDragIndicators(editorElement);
+                hideDragTip();
+                return;
+            }
+            const lis = targetElement.querySelectorAll(":scope > .li");
+            const lastLi = lis[lis.length - 1];
+            const firstLi = lis[0];
+            const isListBottom = event.clientY > targetElement.getBoundingClientRect().top + targetElement.getBoundingClientRect().height / 2;
+            const sourceIds = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select"))
+                .map((e: HTMLElement) => e.getAttribute("data-node-id"));
+            const isNoOpList = (isListBottom && lastLi && sourceIds.includes(lastLi.getAttribute("data-node-id"))) ||
+                (!isListBottom && firstLi && sourceIds.includes(firstLi.getAttribute("data-node-id")));
+            if (isNoOpList) {
+                cleanupDragIndicators(editorElement);
+                hideDragTip();
+                return;
+            }
+        }
         // 列表项目标无论是否命中优化分支都需立即处理，避免拖到列表标记符（.protyle-action）上时提示和插入点缺失
         if (liTarget) {
-            applyLiTarget(liTarget as HTMLElement, event);
-            return;
+            // 向上找顶层列表容器，用于判断整个列表的左右边缘（而非子列表）
+            let topList: Element = liTarget as HTMLElement;
+            while (topList.parentElement?.classList.contains("li") ||
+                   topList.parentElement?.classList.contains("list")) {
+                topList = topList.parentElement;
+                if (topList.classList.contains("list") && !topList.parentElement?.classList.contains("li")) {
+                    break;
+                }
+            }
+            const topListRect = topList.getBoundingClientRect();
+            const isLeftEdge = event.clientX < topListRect.left + 32;
+            const isRightEdge = event.clientX > topListRect.right - 32;
+            if (gutterTypes[0] === "nodelistitem") {
+                // 列表项拖拽：右侧边缘不触发超级块（清理后 return），左侧边缘和中间走 applyLiTarget
+                if (isRightEdge) {
+                    cleanupDragIndicators(editorElement);
+                    return;
+                }
+                applyLiTarget(liTarget as HTMLElement, event);
+                return;
+            }
+            // 非列表项源：边缘不进入 applyLiTarget，清空 liTarget 让后续通用分支处理横向超级块
+            if (isLeftEdge || isRightEdge) {
+                liTarget = null;
+            } else {
+                applyLiTarget(liTarget as HTMLElement, event);
+                return;
+            }
         }
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
@@ -1715,17 +1897,30 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (targetElement.classList.contains("sb")) {
                     return;
                 }
+                // 列表项拖拽不触发横向超级块，列表边缘不显示插入指示
+                if (gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
+                    (point.className === "dragover__left" || point.className === "dragover__right")) {
+                    return;
+                }
                 targetElement.classList.add(point.className);
                 addDragover(targetElement);
+                // .list 目标无 contenteditable 元素，用第一个列表项的文字作为提示名
+                let displayText = cachedTargetText;
+                if (!displayText && targetElement.classList.contains("list")) {
+                    const firstLi = targetElement.querySelector(":scope > .li");
+                    displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
+                }
                 // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
                 if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
                     const isFront = point.className === "dragover__top" || point.className === "dragover__left";
                     const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
-                    if ((isFront || isBack) && cachedTargetText) {
-                        const key = cachedIsCol
+                    if ((isFront || isBack) && displayText) {
+                        // left/right 始终用前方/后方，top/bottom 根据 col 布局判断
+                        const isHorizontal = point.className === "dragover__left" || point.className === "dragover__right";
+                        const key = (isHorizontal || cachedIsCol)
                             ? (isFront ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetBack)
                             : (isFront ? window.siyuan.languages.dragTipMoveTargetAbove : window.siyuan.languages.dragTipMoveTargetBelow);
-                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", cachedTargetText),
+                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", displayText),
                             event.clientX, event.clientY);
                     }
                 }
@@ -2056,4 +2251,6 @@ const clearDragoverElement = (element: Element) => {
         (element as HTMLElement).style.removeProperty("--drag-base-bg");
         element = undefined;
     }
+    // 拖拽被限制（不允许插入）时隐藏提示，避免残留"移动"文字
+    hideDragTip();
 };

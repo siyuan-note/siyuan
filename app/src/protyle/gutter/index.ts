@@ -522,12 +522,12 @@ export class Gutter {
             if (relatedType === "gutterPlusBefore" || relatedType === "gutterPlusAfter") {
                 return;
             }
-            // 延迟隐藏，若期间鼠标进入+号（mousemove 会被取消）则保持显示
+            // 块高亮立即移除，保持原有反馈；+号延迟隐藏，避免移向+号途中误隐藏
+            Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
+                item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
+            });
             window.clearTimeout(hidePlusTimeout);
             hidePlusTimeout = window.setTimeout(() => {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
-                });
                 this.element.querySelectorAll(".protyle-gutters__plus").forEach(item => {
                     (item as HTMLElement).style.display = "none";
                 });
@@ -555,14 +555,9 @@ export class Gutter {
                 return;
             }
             const type = buttonElement.getAttribute("data-type");
-            // 跳过折叠箭头、数据库行+号、数据库行拖拽手柄，保持其原有行为
-            if (type === "fold" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu") {
-                beforeElement.style.display = "none";
-                afterElement.style.display = "none";
-                return;
-            }
             const id = buttonElement.getAttribute("data-node-id");
-            if (!id) {
+            // 跳过折叠箭头、数据库行+号、数据库行拖拽手柄，保持其原有行为
+            if (type === "fold" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
                 beforeElement.style.display = "none";
                 afterElement.style.display = "none";
                 return;
@@ -572,42 +567,31 @@ export class Gutter {
             const rect = buttonElement.getBoundingClientRect();
             // 压缩模式：块标容器宽 24px 且按钮垂直堆叠，+号改放到水平方向避免与堆叠按钮重叠
             const compressed = this.element.style.width === "24px";
-            // 显示目标方向的+号，隐藏另一个；先 display 再测 offset 以避免 display:none 时尺寸为 0
-            const showPlus = (plusElement: HTMLElement, vertical: boolean) => {
-                const otherElement = plusElement === beforeElement ? afterElement : beforeElement;
-                otherElement.style.display = "none";
+            // 正常模式定位+号：与 button 边缘重叠 2px（中心更贴近块标，且鼠标移出 button 即进入+号）
+            const placePlus = (plusElement: HTMLElement) => {
                 plusElement.style.display = "";
                 const plusWidth = plusElement.offsetWidth;
                 const plusHeight = plusElement.offsetHeight;
-                if (vertical) {
-                    // 正常模式：+号与 button 边缘重叠 2px（中心更贴近块标，且鼠标移出 button 即进入+号）
-                    plusElement.style.left = `${rect.left + (rect.width - plusWidth) / 2}px`;
-                    plusElement.style.top = `${(plusElement === beforeElement ? rect.top - plusHeight + 2 : rect.bottom - 2)}px`;
-                } else {
-                    // 压缩模式：+号都放在 button 右侧（避开左侧 tooltip），垂直对齐块标图标中心
-                    const iconSvg = buttonElement.querySelector("svg");
-                    const iconRect = iconSvg.getBoundingClientRect();
-                    plusElement.style.top = `${iconRect.top + iconRect.height / 2 - plusHeight / 2}px`;
-                    plusElement.style.left = `${rect.right - 2}px`;
-                }
+                plusElement.style.left = `${rect.left + (rect.width - plusWidth) / 2}px`;
+                plusElement.style.top = `${(plusElement === beforeElement ? rect.top - plusHeight + 2 : rect.bottom - 2)}px`;
             };
             if (compressed) {
                 // 压缩模式：右侧横排显示两个+号，下方插入在前（更靠近块标，更常用），上方插入在后
-                const iconSvg = buttonElement.querySelector("svg");
-                const iconRect = iconSvg.getBoundingClientRect();
-                const iconMid = iconRect.top + iconRect.height / 2;
+                // 两个+号紧贴（间距 0），避免鼠标从一个移到另一个时经过缝隙触发 mouseleave 隐藏
+                const iconRect = buttonElement.querySelector("svg").getBoundingClientRect();
+                const top = iconRect.top + iconRect.height / 2 - afterElement.offsetHeight / 2;
+                const startX = rect.right - 2;
                 afterElement.style.display = "";
-                beforeElement.style.display = "";
-                const plusWidth = afterElement.offsetWidth;
-                const plusHeight = afterElement.offsetHeight;
-                const top = iconMid - plusHeight / 2;
-                afterElement.style.left = `${rect.right - 2}px`;
+                afterElement.style.left = `${startX}px`;
                 afterElement.style.top = `${top}px`;
-                beforeElement.style.left = `${rect.right - 2 + plusWidth + 1}px`;
+                beforeElement.style.display = "";
+                beforeElement.style.left = `${startX + afterElement.offsetWidth}px`;
                 beforeElement.style.top = `${top}px`;
             } else {
                 // 正常模式下上边缘=上方插入，下边缘=下方插入
-                showPlus(event.clientY < rect.top + rect.height / 2 ? beforeElement : afterElement, true);
+                const target = event.clientY < rect.top + rect.height / 2 ? beforeElement : afterElement;
+                (target === beforeElement ? afterElement : beforeElement).style.display = "none";
+                placePlus(target);
             }
             // 鼠标在块标上移动，取消可能挂起的延迟隐藏
             window.clearTimeout(hidePlusTimeout);

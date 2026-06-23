@@ -1974,6 +1974,33 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.classList.contains("sb")) {
                 return;
             }
+            // targetElement 在超级块内时，左右边缘的插入点和背景高亮基于整个超级块
+            const parentSbForEdge = (targetElement.closest('[data-type="NodeSuperBlock"]') as HTMLElement);
+            if (parentSbForEdge) {
+                const sbRect = parentSbForEdge.getBoundingClientRect();
+                // 用超级块内第一个子块的文字作为提示名
+                const sbFirstBlock = parentSbForEdge.querySelector("[data-node-id]") as HTMLElement;
+                const sbText = getContenteditableElement(sbFirstBlock)?.textContent?.trim() || "";
+                if (event.clientX < sbRect.left + 32) {
+                    parentSbForEdge.classList.add("dragover__left");
+                    addDragover(parentSbForEdge);
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
+                        showDragTip(window.siyuan.dragTitle || "",
+                            window.siyuan.languages.dragTipMoveTargetFront.replace("${x}", sbText),
+                            event.clientX, event.clientY);
+                    }
+                    return;
+                } else if (event.clientX > sbRect.right - 32) {
+                    parentSbForEdge.classList.add("dragover__right");
+                    addDragover(parentSbForEdge);
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
+                        showDragTip(window.siyuan.dragTitle || "",
+                            window.siyuan.languages.dragTipMoveTargetBack.replace("${x}", sbText),
+                            event.clientX, event.clientY);
+                    }
+                    return;
+                }
+            }
 
             // 减小两个列表之间左侧间距，以便拖拽到其中 https://github.com/siyuan-note/siyuan/issues/15672
             if (event.clientX < nodeRect.left + (targetElement.classList.contains("list") ? 8 : 32) &&

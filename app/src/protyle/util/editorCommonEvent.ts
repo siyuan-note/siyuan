@@ -1468,7 +1468,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         const hasChildList = !!Array.from(htmlTarget.children).find(c => c.classList.contains("list"));
         const isChild = position === "bottom" && !hasChildList && offsetX >= indent;
         // 源列表项拖到自身、子孙中、或原位置时不显示高亮与提示
-        const sourceElements = cachedSourceElements;
+        const sourceElements = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
         const isNoOp = sourceElements.some(source =>
             source === htmlTarget ||                                    // 拖到自身
             source.contains(htmlTarget) ||                              // 拖到子孙中
@@ -1509,13 +1509,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     // 缓存当前目标的文本和列布局判断，避免优化路径每次 dragover 重复计算
     let cachedTargetText = "";
     let cachedIsCol = false;
-    // 缓存拖拽源元素列表（拖拽期间不变，避免每次 dragover 都 querySelectorAll）
-    let cachedSourceElements: HTMLElement[] = [];
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-        // 懒初始化源元素缓存（拖拽期间不变）
-        if (cachedSourceElements.length === 0) {
-            cachedSourceElements = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
-        }
         if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
             event.preventDefault();
             event.stopPropagation();
@@ -1868,7 +1862,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const lastLi = lis[lis.length - 1];
             const firstLi = lis[0];
             const isListBottom = event.clientY > targetElement.getBoundingClientRect().top + targetElement.getBoundingClientRect().height / 2;
-            const sourceIds = cachedSourceElements.map((e: HTMLElement) => e.getAttribute("data-node-id"));
+            const sourceIds = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select"))
+                .map((e: HTMLElement) => e.getAttribute("data-node-id"));
             const isNoOpList = (isListBottom && lastLi && sourceIds.includes(lastLi.getAttribute("data-node-id"))) ||
                 (!isListBottom && firstLi && sourceIds.includes(firstLi.getAttribute("data-node-id")));
             if (isNoOpList) {
@@ -2201,7 +2196,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         // Clean up all drag indicators on cancel
         cleanupDragIndicators(editorElement);
         dragoverElement = undefined;
-        cachedSourceElements = [];
         hideDragTip();
         window.siyuan.dragTitle = "";
     });

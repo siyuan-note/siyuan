@@ -1661,6 +1661,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement = document.elementFromPoint(point.x, point.y - probeOffset) as HTMLElement;
                     probeOffset += 6;
                 }
+                // 超级块右侧/左侧间隙：向内（水平）探测找到超级块
+                let hProbed = false;
+                if (targetElement.classList.contains("protyle-wysiwyg")) {
+                    const editorRect = editorElement.getBoundingClientRect();
+                    const editorCenter = editorRect.left + editorRect.width / 2;
+                    let hProbe = 6;
+                    while (targetElement.classList.contains("protyle-wysiwyg") && hProbe < 100) {
+                        // 右侧间隙向左探测，左侧间隙向右探测
+                        const probeX = point.x > editorCenter ? point.x - hProbe : point.x + hProbe;
+                        targetElement = document.elementFromPoint(probeX, point.y) as HTMLElement;
+                        hProbe += 6;
+                    }
+                    hProbed = !targetElement.classList.contains("protyle-wysiwyg");
+                }
                 // 列表项源优先深层 .li（精确插入），其他源（含列表块）用顶层块（支持超级块）
                 if (gutterTypes[0] === "nodelistitem") {
                     let closestLiFromPoint: HTMLElement;
@@ -1678,8 +1692,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null) as HTMLElement;
                 }
                 if (targetElement && targetElement.classList.contains("sb") && targetElement.getAttribute("data-sb-layout") === "col") {
-                    // 鼠标在编辑器左右边缘时保持整个超级块作为目标，否则改为子块
-                    if (point.className !== "dragover__left" && point.className !== "dragover__right") {
+                    // 鼠标在编辑器左右边缘或水平探测找到时保持整个超级块，否则改为子块
+                    if (point.className !== "dragover__left" && point.className !== "dragover__right" && !hProbed) {
                         const childElement = targetElement.querySelectorAll("[data-node-id]");
                         targetElement = childElement[point.className === "dragover__left" ? 0 : childElement.length - 1] as HTMLElement;
                     }
@@ -1762,6 +1776,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             editorElement.querySelectorAll(".dragover__bottom, .dragover__top, .dragover, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right");
             });
+            hideDragTip();
             return;
         }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&
@@ -1778,8 +1793,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const isFirstBlock = targetElement === firstBlock || firstBlock.contains(targetElement);
                 const isLastBlock = targetElement === lastBlock || lastBlock.contains(targetElement);
                 const childRect = targetElement.getBoundingClientRect();
-                if ((isFirstBlock && event.clientX < childRect.left + 16) ||
-                    (isLastBlock && event.clientX > childRect.right - 16)) {
+                if ((isFirstBlock && event.clientX < childRect.left + 8) ||
+                    (isLastBlock && event.clientX > childRect.right - 8)) {
                     targetElement = ancestorSb;
                 }
             }
@@ -1907,11 +1922,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.getAttribute("data-type") === "NodeAttributeView" && hasClosestByTag(event.target, "TD")) {
                 return;
             }
-            if (point.className && !liTarget) {
-                // 超级块由下方专用处理（边缘显示插入点），此处跳过
-                if (!targetElement.classList.contains("sb") &&
-                    !(gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
-                        (point.className === "dragover__left" || point.className === "dragover__right"))) {
+            if (point.className && !liTarget && !targetElement.classList.contains("sb")) {
+                // 列表项拖拽不触发横向超级块，列表边缘不显示插入指示
+                if (!(gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
+                    (point.className === "dragover__left" || point.className === "dragover__right"))) {
                     targetElement.classList.add(point.className);
                     addDragover(targetElement);
                     // .list 目标无 contenteditable 元素，用第一个列表项的文字作为提示名
@@ -1981,7 +1995,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
 
-            // 超级块本身：左右边缘显示整个超级块的插入点，其余不显示（插入到子块）
+            // 超级块本身：左右边缘显示整个超级块的插入点，非边缘走通用判断（和段落一致）
             if (targetElement.classList.contains("sb")) {
                 const sbRect = targetElement.getBoundingClientRect();
                 const isSbLeftEdge = point.className === "dragover__left" || event.clientX < sbRect.left + 32;
@@ -1999,8 +2013,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", sbText),
                             event.clientX, event.clientY);
                     }
+                    return;
                 }
-                return;
+                // 非边缘：不 return，继续走通用判断
             }
 
             // 减小两个列表之间左侧间距，以便拖拽到其中 https://github.com/siyuan-note/siyuan/issues/15672

@@ -585,21 +585,23 @@ export class Gutter {
                 plusElement.style.top = `${(plusElement === beforeElement ? rect.top - plusHeight + 2 : rect.bottom - 2)}px`;
             };
             if (compressed) {
-                // 压缩模式：右侧横排显示两个+号，下方插入在前（更靠近块标，更常用），上方插入在后
+                // 压缩模式：右侧竖排显示两个+号，上方插入在上，下方插入在下
                 // 两个+号紧贴（间距 0），避免鼠标从一个移到另一个时经过缝隙触发 mouseleave 隐藏
                 // 鼠标越往右移动+号越大
                 const xRatio = (event.clientX - rect.left) / rect.width;
                 setPlusSize(beforeElement, xRatio);
                 setPlusSize(afterElement, xRatio);
                 const iconRect = buttonElement.querySelector("svg").getBoundingClientRect();
-                const top = iconRect.top + iconRect.height / 2 - afterElement.offsetHeight / 2;
+                const centerY = iconRect.top + iconRect.height / 2;
+                const totalHeight = beforeElement.offsetHeight + afterElement.offsetHeight;
+                const startY = centerY - totalHeight / 2;
                 const startX = rect.right - 2;
+                beforeElement.style.display = "";
+                beforeElement.style.left = `${startX}px`;
+                beforeElement.style.top = `${startY}px`;
                 afterElement.style.display = "";
                 afterElement.style.left = `${startX}px`;
-                afterElement.style.top = `${top}px`;
-                beforeElement.style.display = "";
-                beforeElement.style.left = `${startX + afterElement.offsetWidth}px`;
-                beforeElement.style.top = `${top}px`;
+                afterElement.style.top = `${startY + beforeElement.offsetHeight}px`;
             } else {
                 // 正常模式下上边缘=上方插入，下边缘=下方插入
                 const target = event.clientY < rect.top + rect.height / 2 ? beforeElement : afterElement;

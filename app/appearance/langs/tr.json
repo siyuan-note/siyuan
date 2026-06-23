@@ -1972,6 +1972,7 @@
     "294": "Etkinleştirme kodu boş olamaz",
     "295": "Bu özellik için [Yıllık Abonelik] gereklidir (zaten satın aldıysan Ayarlar - Hesap ve Senkronizasyon - Hesap kısmından yenile veya tekrar giriş yap)",
     "296": "Arama dizini yeniden oluşturuluyor...",
-    "297": "Çıktı, maksimum tamamlama token sınırına ulaştı"
+    "297": "Çıktı, maksimum tamamlama token sınırına ulaştı",
+    "298": "Ücretsiz deneme aboneliğini zaten kullandınız. Yinelenen deneme abonelikleri desteklenmez."
   }
 }

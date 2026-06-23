@@ -1972,6 +1972,7 @@
     "294": "Activation code cannot be empty",
     "295": "This feature requires the purchase of [Annual Subscription] (if you have already purchased, please refresh or re-login in [Settings - Account & Sync - Account])",
     "296": "Rebuilding search index...",
-    "297": "Output reached the max completion tokens limit"
+    "297": "Output reached the max completion tokens limit",
+    "298": "You have already used a free trial subscription. Duplicate trial subscriptions are not supported."
   }
 }

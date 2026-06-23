@@ -85,13 +85,19 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             let srcParentID = parentBlock?.getAttribute("data-node-id");
             if (!srcParentID) {
                 // 顶层块：父是 .protyle-wysiwyg 容器（无 data-node-id）。
+                let srcRootID = "";
+                /// #if !MOBILE
                 // 通过 getAllEditor 反查 item 所属的源 protyle，取其 block.rootID。
                 const sourceEditor = getAllEditor().find(editor =>
                     editor.protyle.wysiwyg.element === parentBlock);
                 if (sourceEditor?.protyle?.block?.rootID) {
-                    srcParentID = sourceEditor.protyle.block.rootID;
+                    srcRootID = sourceEditor.protyle.block.rootID;
+                }
+                /// #endif
+                if (srcRootID) {
+                    srcParentID = srcRootID;
                 } else {
-                    // 跨窗口拖拽时 getAllEditor 找不到源编辑器，用 kernel API 反查块的真实 rootID。
+                    // 跨窗口/移动端 getAllEditor 找不到源编辑器，用 kernel API 反查块的真实 rootID。
                     // 不能 fallback 到目标 protyle 的 rootID（会导致撤销把块移到错误文档）。
                     const response = await fetchSyncPost("/api/block/getBlockInfo", {id});
                     srcParentID = response?.data?.rootID || "";

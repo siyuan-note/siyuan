@@ -3,7 +3,8 @@ name: CD For SiYuan
 on:
   push:
     tags:
-      - '*-dev*'
+      - '*-alpha*'
+      - '*-beta*'
   workflow_dispatch:
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
@@ -16,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release_version: ${{ steps.release_info.outputs.release_version }}
+      release_title: ${{ steps.release_info.outputs.release_title }}
       version: ${{ steps.version.outputs.value }}
       packageManager: ${{ steps.packageManager.outputs.value }}
       release_body: ${{ steps.release_info.outputs.release_body }}
@@ -54,8 +56,8 @@ jobs:
       - name: Gather Release Information
         id: release_info
         run: |
-          echo "release_title=$(git show --format=%s --no-patch | head -1)" >> $GITHUB_OUTPUT
-          echo "release_version=$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')" >> $GITHUB_OUTPUT
+          echo "release_version=${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
+          echo "release_title=SiYuan v${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
           changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ github.repository }})
           changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ github.repository }})
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
@@ -259,7 +261,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -380,7 +382,7 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ needs.prepare.outputs.release_version }}
+          name: ${{ needs.prepare.outputs.release_title }}
           tag: ${{ github.ref }}
           body: ${{ needs.prepare.outputs.release_body }}
           draft: false

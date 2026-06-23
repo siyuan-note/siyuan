@@ -704,9 +704,13 @@ export const resizeTopBar = () => {
     let afterDragElement = dragElement.nextElementSibling;
     const hideIds: string[] = [];
     while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
-        hideIds.push(afterDragElement.id);
-        afterDragElement.classList.add("fn__none");
-        afterDragElement.setAttribute("data-hide", "true");
+        // 跳过默认即隐藏的元素（如桌面端 #barExit），它们本就不占溢出空间，
+        // 若为其打上 data-hide，最大化后恢复阶段会误将其显示出来
+        if (!afterDragElement.classList.contains("fn__none")) {
+            hideIds.push(afterDragElement.id);
+            afterDragElement.classList.add("fn__none");
+            afterDragElement.setAttribute("data-hide", "true");
+        }
         afterDragElement = afterDragElement.nextElementSibling;
         if (afterDragElement.id === "barMore") {
             break;
@@ -715,9 +719,11 @@ export const resizeTopBar = () => {
 
     let beforeDragElement = dragElement.previousElementSibling;
     while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
-        hideIds.push(beforeDragElement.id);
-        beforeDragElement.classList.add("fn__none");
-        beforeDragElement.setAttribute("data-hide", "true");
+        if (!beforeDragElement.classList.contains("fn__none")) {
+            hideIds.push(beforeDragElement.id);
+            beforeDragElement.classList.add("fn__none");
+            beforeDragElement.setAttribute("data-hide", "true");
+        }
         beforeDragElement = beforeDragElement.previousElementSibling;
         if (beforeDragElement.id === "barWorkspace") {
             break;

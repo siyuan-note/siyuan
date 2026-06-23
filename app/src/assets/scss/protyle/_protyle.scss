@@ -114,6 +114,28 @@
   }
 }
 
+// 块标上下/左右边缘悬浮触发的+号按钮，与 .protyle-gutters 同为 fixed 坐标系，由 JS 按鼠标位置定位
+// 选择器需带 button 标签以提升特异性，覆盖 .protyle-gutters button 的 position:relative 与 svg 尺寸
+// z-index 需高于块标 button 内 span 覆盖层（z-index:2），以便与块标重叠时仍可点击
+.protyle-gutters button.protyle-gutters__plus {
+  position: fixed;
+  z-index: 3;
+  padding: 1px;
+  cursor: copy;
+
+  svg {
+    color: var(--b3-theme-on-surface-light);
+    width: 16px;
+    height: 16px;
+    float: none;
+    transition: var(--b3-color-transition);
+  }
+
+  &:hover svg {
+    color: var(--b3-theme-primary);
+  }
+}
+
 .protyle-select {
   position: fixed;
   background-color: var(--b3-theme-primary-lightest);

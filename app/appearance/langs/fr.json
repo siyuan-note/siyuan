@@ -1972,6 +1972,7 @@
     "294": "Le code d'activation ne peut pas être vide",
     "295": "Cette fonctionnalité nécessite l'achat d'un [abonnement annuel] (si vous avez déjà acheté, actualisez ou reconnectez-vous dans Paramètres - Compte et Synchronisation - Compte)",
     "296": "Reconstruction de l'index de recherche...",
-    "297": "La sortie a atteint la limite maximale de jetons"
+    "297": "La sortie a atteint la limite maximale de jetons",
+    "298": "Vous avez déjà utilisé un abonnement d'essai gratuit. Les abonnements d'essai en double ne sont pas pris en charge."
   }
 }

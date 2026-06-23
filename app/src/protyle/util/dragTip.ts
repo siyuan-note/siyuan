@@ -57,6 +57,10 @@ const renderDragTip = () => {
 };
 
 export const showDragTip = (title: string, action: string, x: number, y: number) => {
+    /// #if MOBILE
+    // 移动端不显示拖拽提示
+    return;
+    /// #endif
     dragTipState.title = title;
     dragTipState.action = action;
     dragTipState.x = x;

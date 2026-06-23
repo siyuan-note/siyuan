@@ -1972,6 +1972,7 @@
     "294": "O código de ativação não pode estar vazio",
     "295": "Este recurso requer a compra de [Assinatura Anual] (se já comprou, por favor atualize ou faça login novamente em Configurações - Conta e Sincronização - Conta)",
     "296": "Reconstruindo o índice de busca...",
-    "297": "A saída atingiu o limite máximo de tokens"
+    "297": "A saída atingiu o limite máximo de tokens",
+    "298": "Você já usou uma assinatura de teste gratuita. Assinaturas de teste duplicadas não são suportadas."
   }
 }

@@ -3,7 +3,7 @@
     background-color: var(--b3-theme-background);
     z-index: 5; // higher than .layout__resize--lr
     position: fixed;
-    box-shadow: var(--b3-point-shadow);
+    box-shadow: var(--b3-dialog-shadow);
     border-radius: var(--b3-border-radius);
     display: flex;
 
@@ -48,7 +48,7 @@
     }
 
     &__divider {
-      border-left: 1px solid var(--b3-theme-on-surface-light);
+      border-left: 1px solid var(--b3-theme-surface-lighter);
       margin: 6px 4px;
     }
   }

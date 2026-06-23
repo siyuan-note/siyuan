@@ -1215,9 +1215,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             dragSb(protyle, sourceElements, targetElement, isBottom, "row", event.ctrlKey);
                         }
                     } else {
-                        // 列表项拖到列表容器边缘时禁止形成横向超级块
+                        // 列表项拖到列表容器边缘时禁止形成横向超级块（列表块拖到列表边缘可形成超级块）
+                        const isListItemOnlySource = gutterTypes[0] === "nodelistitem";
                         const isListTarget = targetElement.classList.contains("list");
-                        if (isListItemSource && isListTarget &&
+                        if (isListItemOnlySource && isListTarget &&
                             (targetClass.includes("dragover__left") || targetClass.includes("dragover__right"))) {
                             // 列表项拖到列表左右边缘：无操作
                         } else if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
@@ -1660,10 +1661,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement = document.elementFromPoint(point.x, point.y - probeOffset) as HTMLElement;
                     probeOffset += 6;
                 }
-                // 优先查找最近的 .li（深层列表项），避免命中间隙时回退到顶层 .list 导致无法插入深层列表项
-                // 仅列表项/列表块源用 closestLiFromPoint，其他源用顶层块（支持列表边缘形成超级块）
-                const isListSourceType = gutterTypes[0] === "nodelistitem" || gutterTypes[0] === "nodelist";
-                if (isListSourceType) {
+                // 列表项源优先深层 .li（精确插入），其他源（含列表块）用顶层块（支持超级块）
+                if (gutterTypes[0] === "nodelistitem") {
                     let closestLiFromPoint: HTMLElement;
                     if (targetElement.classList.contains("li")) {
                         closestLiFromPoint = targetElement;
@@ -1905,15 +1904,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 targetElement.classList.add(point.className);
                 addDragover(targetElement);
+                // .list 目标无 contenteditable 元素，用第一个列表项的文字作为提示名
+                let displayText = cachedTargetText;
+                if (!displayText && targetElement.classList.contains("list")) {
+                    const firstLi = targetElement.querySelector(":scope > .li");
+                    displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
+                }
                 // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
                 if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
                     const isFront = point.className === "dragover__top" || point.className === "dragover__left";
                     const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
-                    if ((isFront || isBack) && cachedTargetText) {
-                        const key = cachedIsCol
+                    if ((isFront || isBack) && displayText) {
+                        // left/right 始终用前方/后方，top/bottom 根据 col 布局判断
+                        const isHorizontal = point.className === "dragover__left" || point.className === "dragover__right";
+                        const key = (isHorizontal || cachedIsCol)
                             ? (isFront ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetBack)
                             : (isFront ? window.siyuan.languages.dragTipMoveTargetAbove : window.siyuan.languages.dragTipMoveTargetBelow);
-                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", cachedTargetText),
+                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", displayText),
                             event.clientX, event.clientY);
                     }
                 }

@@ -1661,20 +1661,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     probeOffset += 6;
                 }
                 // 优先查找最近的 .li（深层列表项），避免命中间隙时回退到顶层 .list 导致无法插入深层列表项
-                let closestLiFromPoint: HTMLElement;
-                if (targetElement.classList.contains("li")) {
-                    closestLiFromPoint = targetElement;
-                } else if (targetElement.classList.contains("list")) {
-                    // 命中列表容器：取最后一个 .li，表示插到列表末尾之后
-                    const lis = targetElement.querySelectorAll(":scope > .li");
-                    closestLiFromPoint = lis.length > 0 ? lis[lis.length - 1] as HTMLElement : targetElement.closest(".li") as HTMLElement;
+                // 仅列表项/列表块源用 closestLiFromPoint，其他源用顶层块（支持列表边缘形成超级块）
+                const isListSourceType = gutterTypes[0] === "nodelistitem" || gutterTypes[0] === "nodelist";
+                if (isListSourceType) {
+                    let closestLiFromPoint: HTMLElement;
+                    if (targetElement.classList.contains("li")) {
+                        closestLiFromPoint = targetElement;
+                    } else if (targetElement.classList.contains("list")) {
+                        // 命中列表容器：取最后一个 .li，表示插到列表末尾之后
+                        const lis = targetElement.querySelectorAll(":scope > .li");
+                        closestLiFromPoint = lis.length > 0 ? lis[lis.length - 1] as HTMLElement : targetElement.closest(".li") as HTMLElement;
+                    } else {
+                        closestLiFromPoint = targetElement.closest(".li") as HTMLElement;
+                    }
+                    targetElement = closestLiFromPoint || hasTopClosestByAttribute(targetElement, "data-node-id", null) as HTMLElement;
                 } else {
-                    closestLiFromPoint = targetElement.closest(".li") as HTMLElement;
-                }
-                if (closestLiFromPoint) {
-                    targetElement = closestLiFromPoint;
-                } else {
-                    targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
+                    targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null) as HTMLElement;
                 }
                 if (targetElement && targetElement.classList.contains("sb") && targetElement.getAttribute("data-sb-layout") === "col") {
                     const childElement = targetElement.querySelectorAll("[data-node-id]");
@@ -1770,7 +1772,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__gallery-add");
         // For list items, resolve to the .li ancestor (but keep targetElement for validation)
         // 命中子列表容器(.list)时不解析为 liTarget，走通用分支处理（与列表块拖拽行为一致）
-        const liTarget = targetElement.classList.contains("list") ? null :
+        let liTarget = targetElement.classList.contains("list") ? null :
             (targetElement.getAttribute("data-type") === "NodeListItem"
                 ? targetElement : targetElement.parentElement?.getAttribute("data-type") === "NodeListItem"
                     ? targetElement.parentElement : null);
@@ -1843,17 +1845,30 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // 列表项目标无论是否命中优化分支都需立即处理，避免拖到列表标记符（.protyle-action）上时提示和插入点缺失
         if (liTarget) {
-            const parentList = (liTarget as HTMLElement).parentElement;
-            // 仅右侧边缘用于横向超级块，左侧（标记符区域）不作为边缘，避免列表项拖拽被误拦截
-            const isListEdge = parentList && parentList.classList.contains("list") &&
-                event.clientX > parentList.getBoundingClientRect().right - 32;
-            if (isListEdge) {
-                if (gutterTypes[0] === "nodelistitem") {
-                    // 列表项拖拽不触发横向超级块，清理残留的边缘指示器
+            // 向上找顶层列表容器，用于判断整个列表的左右边缘（而非子列表）
+            let topList: Element = liTarget as HTMLElement;
+            while (topList.parentElement?.classList.contains("li") ||
+                   topList.parentElement?.classList.contains("list")) {
+                topList = topList.parentElement;
+                if (topList.classList.contains("list") && !topList.parentElement?.classList.contains("li")) {
+                    break;
+                }
+            }
+            const topListRect = topList.getBoundingClientRect();
+            const isLeftEdge = event.clientX < topListRect.left + 32;
+            const isRightEdge = event.clientX > topListRect.right - 32;
+            if (gutterTypes[0] === "nodelistitem") {
+                // 列表项拖拽：右侧边缘不触发超级块（清理后 return），左侧边缘和中间走 applyLiTarget
+                if (isRightEdge) {
                     cleanupDragIndicators(editorElement);
                     return;
                 }
-                // 非列表项源拖到列表边缘，走通用逻辑形成横向超级块
+                applyLiTarget(liTarget as HTMLElement, event);
+                return;
+            }
+            // 非列表项源：边缘不进入 applyLiTarget，清空 liTarget 让后续通用分支处理横向超级块
+            if (isLeftEdge || isRightEdge) {
+                liTarget = null;
             } else {
                 applyLiTarget(liTarget as HTMLElement, event);
                 return;

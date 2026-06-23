@@ -572,13 +572,14 @@ export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle
             const offset = getSelectionOffset(cellElement, nodeElement, range);
             cellElement.classList.add("range");
             const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
-            cellElement.removeAttribute("class");
+            // 仅移除临时打上的 range 标记，保留 fn__none 等单元格原有 class（合并单元格的占位 class 若被清掉会导致多出空格子）
+            cellElement.classList.remove("range");
             const cloneCellElement = cloneNode.querySelector(".range");
             const cloneRange = focusByOffset(cloneCellElement, offset.end, offset.end, false);
             if (cloneRange) {
                 cloneRange.insertNode(document.createElement("wbr"));
             }
-            cloneCellElement.removeAttribute("class");
+            cloneCellElement.classList.remove("range");
             protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
         }
     } else {

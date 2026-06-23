@@ -1861,7 +1861,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const lis = targetElement.querySelectorAll(":scope > .li");
             const lastLi = lis[lis.length - 1];
             const firstLi = lis[0];
-            const isListBottom = event.clientY > targetElement.getBoundingClientRect().top + targetElement.getBoundingClientRect().height / 2;
+            const listRect = targetElement.getBoundingClientRect();
+            const isListBottom = event.clientY > listRect.top + listRect.height / 2;
             const sourceIds = Array.from(editorElement.querySelectorAll(".protyle-wysiwyg--select"))
                 .map((e: HTMLElement) => e.getAttribute("data-node-id"));
             const isNoOpList = (isListBottom && lastLi && sourceIds.includes(lastLi.getAttribute("data-node-id"))) ||

@@ -104,7 +104,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                     }
                 });
                 focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-                scrollCenter(protyle);
+                scrollCenter(protyle, blockElement, "start");
             }
             return true;
         } else {
@@ -136,7 +136,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
             stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);
         }
         focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-        scrollCenter(stack.protyle);
+        scrollCenter(stack.protyle, blockElement, "start");
         getAllModels().outline.forEach(item => {
             if (item.blockId === stack.protyle.block.rootID) {
                 item.setCurrent(blockElement);
@@ -179,7 +179,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                             }
                         });
                         focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-                        scrollCenter(stack.protyle);
+                        scrollCenter(stack.protyle, blockElement, "start");
                     }
                 });
             });
@@ -207,7 +207,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                     }
                 });
                 focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-                scrollCenter(stack.protyle);
+                scrollCenter(stack.protyle, blockElement, "start");
             }
         });
         return true;

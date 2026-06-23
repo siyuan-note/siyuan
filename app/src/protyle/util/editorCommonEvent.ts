@@ -1678,11 +1678,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null) as HTMLElement;
                 }
                 if (targetElement && targetElement.classList.contains("sb") && targetElement.getAttribute("data-sb-layout") === "col") {
-                    const childElement = targetElement.querySelectorAll("[data-node-id]");
-                    if (point.className === "dragover__left") {
-                        targetElement = childElement[0] as HTMLElement;
-                    } else {
-                        targetElement = childElement[childElement.length - 1] as HTMLElement;
+                    // 鼠标在编辑器左右边缘时保持整个超级块作为目标，否则改为子块
+                    if (point.className !== "dragover__left" && point.className !== "dragover__right") {
+                        const childElement = targetElement.querySelectorAll("[data-node-id]");
+                        targetElement = childElement[point.className === "dragover__left" ? 0 : childElement.length - 1] as HTMLElement;
                     }
                 }
             }
@@ -1769,6 +1768,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
+        // targetElement 在超级块内时：仅超级块最外侧子块的边缘（第一个子块左/最后一个子块右）算超级块操作
+        if (!targetElement.classList.contains("sb")) {
+            const ancestorSb = targetElement.closest('[data-type="NodeSuperBlock"]') as HTMLElement;
+            if (ancestorSb) {
+                const sbChildBlocks = Array.from(ancestorSb.querySelectorAll("[data-node-id]"));
+                const firstBlock = sbChildBlocks[0] as HTMLElement;
+                const lastBlock = sbChildBlocks[sbChildBlocks.length - 1] as HTMLElement;
+                const isFirstBlock = targetElement === firstBlock || firstBlock.contains(targetElement);
+                const isLastBlock = targetElement === lastBlock || lastBlock.contains(targetElement);
+                const childRect = targetElement.getBoundingClientRect();
+                if ((isFirstBlock && event.clientX < childRect.left + 16) ||
+                    (isLastBlock && event.clientX > childRect.right - 16)) {
+                    targetElement = ancestorSb;
+                }
+            }
+        }
         // For list items, resolve to the .li ancestor (but keep targetElement for validation)
         // 命中子列表容器(.list)时不解析为 liTarget，走通用分支处理（与列表块拖拽行为一致）
         let liTarget = targetElement.classList.contains("list") ? null :
@@ -1893,35 +1908,31 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (point.className && !liTarget) {
-                // 超级块本身不显示插入点（实际插入到子块，不会创建超级块）
-                if (targetElement.classList.contains("sb")) {
-                    return;
-                }
-                // 列表项拖拽不触发横向超级块，列表边缘不显示插入指示
-                if (gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
-                    (point.className === "dragover__left" || point.className === "dragover__right")) {
-                    return;
-                }
-                targetElement.classList.add(point.className);
-                addDragover(targetElement);
-                // .list 目标无 contenteditable 元素，用第一个列表项的文字作为提示名
-                let displayText = cachedTargetText;
-                if (!displayText && targetElement.classList.contains("list")) {
-                    const firstLi = targetElement.querySelector(":scope > .li");
-                    displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
-                }
-                // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
-                    const isFront = point.className === "dragover__top" || point.className === "dragover__left";
-                    const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
-                    if ((isFront || isBack) && displayText) {
-                        // left/right 始终用前方/后方，top/bottom 根据 col 布局判断
-                        const isHorizontal = point.className === "dragover__left" || point.className === "dragover__right";
-                        const key = (isHorizontal || cachedIsCol)
-                            ? (isFront ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetBack)
-                            : (isFront ? window.siyuan.languages.dragTipMoveTargetAbove : window.siyuan.languages.dragTipMoveTargetBelow);
-                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", displayText),
-                            event.clientX, event.clientY);
+                // 超级块由下方专用处理（边缘显示插入点），此处跳过
+                if (!targetElement.classList.contains("sb") &&
+                    !(gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
+                        (point.className === "dragover__left" || point.className === "dragover__right"))) {
+                    targetElement.classList.add(point.className);
+                    addDragover(targetElement);
+                    // .list 目标无 contenteditable 元素，用第一个列表项的文字作为提示名
+                    let displayText = cachedTargetText;
+                    if (!displayText && targetElement.classList.contains("list")) {
+                        const firstLi = targetElement.querySelector(":scope > .li");
+                        displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
+                    }
+                    // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
+                        const isFront = point.className === "dragover__top" || point.className === "dragover__left";
+                        const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
+                        if ((isFront || isBack) && displayText) {
+                            // left/right 始终用前方/后方，top/bottom 根据 col 布局判断
+                            const isHorizontal = point.className === "dragover__left" || point.className === "dragover__right";
+                            const key = (isHorizontal || cachedIsCol)
+                                ? (isFront ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetBack)
+                                : (isFront ? window.siyuan.languages.dragTipMoveTargetAbove : window.siyuan.languages.dragTipMoveTargetBelow);
+                            showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", displayText),
+                                event.clientX, event.clientY);
+                        }
                     }
                 }
                 return;
@@ -1970,8 +1981,25 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
 
-            // 超级块本身不显示插入点（实际插入到子块，不会创建超级块）
+            // 超级块本身：左右边缘显示整个超级块的插入点，其余不显示（插入到子块）
             if (targetElement.classList.contains("sb")) {
+                const sbRect = targetElement.getBoundingClientRect();
+                const isSbLeftEdge = point.className === "dragover__left" || event.clientX < sbRect.left + 32;
+                const isSbRightEdge = point.className === "dragover__right" || event.clientX > sbRect.right - 32;
+                if (isSbLeftEdge || isSbRightEdge) {
+                    const edgeClass = isSbLeftEdge ? "dragover__left" : "dragover__right";
+                    targetElement.classList.add(edgeClass);
+                    addDragover(targetElement);
+                    const sbFirstBlock = targetElement.querySelector("[data-node-id]") as HTMLElement;
+                    const sbText = getContenteditableElement(sbFirstBlock)?.textContent?.trim() || "";
+                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
+                        const key = isSbLeftEdge
+                            ? window.siyuan.languages.dragTipMoveTargetFront
+                            : window.siyuan.languages.dragTipMoveTargetBack;
+                        showDragTip(window.siyuan.dragTitle || "", key.replace("${x}", sbText),
+                            event.clientX, event.clientY);
+                    }
+                }
                 return;
             }
 
@@ -2235,9 +2263,9 @@ const addDragover = (element: HTMLElement) => {
 
 const highlightColColumn = (element: HTMLElement) => {
     // col 布局中点亮所在列（列级 sb），方便区分左右列
-    const colSb = element.closest('[data-sb-layout="col"]');
-    if (colSb) {
-        colSb.classList.add("dragover");
+    // 仅当目标本身就是 col 超级块时才高亮，子块操作不高亮整个超级块
+    if (element.getAttribute("data-sb-layout") === "col") {
+        element.classList.add("dragover");
     }
 };
 

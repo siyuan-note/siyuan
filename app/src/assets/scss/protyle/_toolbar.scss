@@ -8,7 +8,7 @@
     display: flex;
 
     &__item {
-      color: var(--b3-theme-on-surface);
+      color: var(--b3-theme-on-background);
       border: 0;
       background-color: transparent;
       height: 29px;
@@ -35,7 +35,7 @@
       }
 
       &:hover {
-        background-color: var(--b3-theme-surface-lighter);
+        background-color: var(--b3-list-hover);
       }
 
       &:first-child {
@@ -48,7 +48,7 @@
     }
 
     &__divider {
-      border-left: 1px solid var(--b3-theme-surface-lighter);
+      border-left: 1px solid var(--b3-theme-on-surface-light);
       margin: 6px 4px;
     }
   }

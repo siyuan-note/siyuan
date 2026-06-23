@@ -567,6 +567,15 @@ export class Gutter {
             const rect = buttonElement.getBoundingClientRect();
             // 压缩模式：块标容器宽 24px 且按钮垂直堆叠，+号改放到水平方向避免与堆叠按钮重叠
             const compressed = this.element.style.width === "24px";
+            // 根据鼠标偏离块标中心的程度动态调整+号尺寸（12px→18px）：越往目标方向移动越大，悬浮在块标上时较小
+            const setPlusSize = (plusElement: HTMLElement, ratio: number) => {
+                const size = Math.round(12 + Math.min(Math.max(ratio, 0), 1) * 6);
+                const svg = plusElement.querySelector("svg");
+                if (svg) {
+                    svg.style.width = `${size}px`;
+                    svg.style.height = `${size}px`;
+                }
+            };
             // 正常模式定位+号：与 button 边缘重叠 2px（中心更贴近块标，且鼠标移出 button 即进入+号）
             const placePlus = (plusElement: HTMLElement) => {
                 plusElement.style.display = "";
@@ -578,6 +587,10 @@ export class Gutter {
             if (compressed) {
                 // 压缩模式：右侧横排显示两个+号，下方插入在前（更靠近块标，更常用），上方插入在后
                 // 两个+号紧贴（间距 0），避免鼠标从一个移到另一个时经过缝隙触发 mouseleave 隐藏
+                // 鼠标越往右移动+号越大
+                const xRatio = (event.clientX - rect.left) / rect.width;
+                setPlusSize(beforeElement, xRatio);
+                setPlusSize(afterElement, xRatio);
                 const iconRect = buttonElement.querySelector("svg").getBoundingClientRect();
                 const top = iconRect.top + iconRect.height / 2 - afterElement.offsetHeight / 2;
                 const startX = rect.right - 2;
@@ -590,7 +603,11 @@ export class Gutter {
             } else {
                 // 正常模式下上边缘=上方插入，下边缘=下方插入
                 const target = event.clientY < rect.top + rect.height / 2 ? beforeElement : afterElement;
-                (target === beforeElement ? afterElement : beforeElement).style.display = "none";
+                const otherElement = target === beforeElement ? afterElement : beforeElement;
+                // 鼠标越偏离块标中心（越往上/下移动）目标+号越大
+                const yRatio = Math.abs(event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+                setPlusSize(target, yRatio);
+                otherElement.style.display = "none";
                 placePlus(target);
             }
             // 鼠标在块标上移动，取消可能挂起的延迟隐藏

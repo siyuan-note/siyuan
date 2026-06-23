@@ -38,7 +38,7 @@
   &-title {
     display: block;
     margin: 24px 16px 16px 16px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: bold;
   }
 
@@ -48,6 +48,10 @@
 
     .config-item.config-item--last-visible {
       border-bottom: 0;
+    }
+
+    .b3-label__text {
+      font-size: 13px;
     }
   }
 
@@ -140,6 +144,7 @@
 
       .b3-list-item {
         line-height: 32px;
+        margin: 8px;
 
         &__graphic {
           margin-right: 2px;

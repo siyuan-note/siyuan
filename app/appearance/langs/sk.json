@@ -1972,6 +1972,7 @@
     "294": "Aktivačný kód nemôže byť prázdny",
     "295": "Táto funkcia vyžaduje nákup [Ročné predplatné] (ak ste už kúpili, obnovte alebo sa znova prihláste v [Nastavenia - Účet a Synchronizácia - Účet])",
     "296": "Obnovuje sa index vyhľadávania...",
-    "297": "Výstup dosiahol limit maximálneho počtu tokenov"
+    "297": "Výstup dosiahol limit maximálneho počtu tokenov",
+    "298": "Už ste využili bezplatné skúšobné predplatné. Opakované skúšobné predplatné nie je podporované."
   }
 }

@@ -1972,6 +1972,7 @@
     "294": "Activeringscode mag niet leeg zijn",
     "295": "Deze functie vereist de aankoop van een [Jaarabonnement] (als u al gekocht heeft, vernieuw of log opnieuw in via [Instellingen - Account en synchronisatie - Account])",
     "296": "Zoekindex opnieuw opbouwen...",
-    "297": "De uitvoer heeft de limiet voor max. tokens bereikt"
+    "297": "De uitvoer heeft de limiet voor max. tokens bereikt",
+    "298": "U hebt al een gratis proefabonnement gebruikt. Herhaalde proefabonnementen worden niet ondersteund."
   }
 }

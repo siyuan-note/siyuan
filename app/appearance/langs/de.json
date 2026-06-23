@@ -1972,6 +1972,7 @@
     "294": "Aktivierungscode darf nicht leer sein",
     "295": "Diese Funktion erfordert den Kauf eines [Jahresabonnements] (wenn Sie bereits gekauft haben, aktualisieren oder erneut anmelden in Einstellungen - Konto & Synchronisierung - Konto)",
     "296": "Suchindex wird neu aufgebaut...",
-    "297": "Die Ausgabe hat das Limit für die maximale Token-Anzahl erreicht"
+    "297": "Die Ausgabe hat das Limit für die maximale Token-Anzahl erreicht",
+    "298": "Du hast bereits ein kostenloses Testabonnement genutzt. Ein wiederholtes Testabonnement wird nicht unterstützt."
   }
 }

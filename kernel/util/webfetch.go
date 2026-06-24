@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"mime"
-	"net"
 	"net/url"
 	"os"
 	"path"
@@ -48,15 +47,8 @@ func WebFetch(rawURL, format string) (string, error) {
 		return "", errors.New("URL has no host")
 	}
 
-	host := u.Hostname()
-	ips, err := net.LookupIP(host)
-	if err != nil {
-		return "", errors.New("failed to resolve host: " + err.Error())
-	}
-	for _, ip := range ips {
-		if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsPrivate() || ip.IsUnspecified() {
-			return "", errors.New("access to private/internal IP is prohibited")
-		}
+	if err := CheckHostSSRF(u.Hostname()); err != nil {
+		return "", err
 	}
 
 	resp, err := httpclient.NewBrowserRequest().Get(rawURL)

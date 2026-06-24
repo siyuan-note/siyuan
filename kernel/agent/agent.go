@@ -111,15 +111,16 @@ const (
 // 这些参数会并入死循环签名，避免 agent 对不同 url/query/sql 的合法连续调用被误判；
 // 同时对同一参数反复调用（真死循环）仍能正确触发终止。
 var toolSignatureKeys = map[string][]string{
-	"web_fetch":  {"url", "format"},
-	"web_search": {"query"},
-	"sql":        {"sql", "stmt"},
-	"search":     {"query", "keyword"},
-	"outline":    {"id", "doc_id"},
-	"system":     {"action"},
-	"workspace":  {"action"},
-	"sync":       {"action"},
-	"todo_write": {"todos"},
+	"web_fetch":    {"url", "format"},
+	"web_search":   {"query"},
+	"http_request": {"action", "url"},
+	"sql":          {"sql", "stmt"},
+	"search":       {"query", "keyword"},
+	"outline":      {"id", "doc_id"},
+	"system":       {"action"},
+	"workspace":    {"action"},
+	"sync":         {"action"},
+	"todo_write":   {"todos"},
 }
 
 // buildDoomSignature 用 toolName + action + 关键参数构造死循环签名。
@@ -294,22 +295,22 @@ type SessionEntryStep struct {
 }
 
 type agentCheckpoint struct {
-	ID                   string         `json:"id"`
-	Title                string         `json:"title"`
-	Titled               bool           `json:"titled"`
-	Entries              []SessionEntry `json:"entries"`
-	PromptTokens         int            `json:"promptTokens"`
-	CompletionTokens     int            `json:"completionTokens"`
-	TotalDuration        int64          `json:"totalDuration"`
-	CreatedAt            int64          `json:"createdAt"`
-	UpdatedAt            int64          `json:"updatedAt"`
-	MessageHistory       []string       `json:"messageHistory,omitempty"`
-	Snapshots            []string       `json:"snapshots,omitempty"`
-	AlwaysAllow          bool           `json:"alwaysAllow,omitempty"`
-	ContextTokens        int            `json:"contextTokens,omitempty"`
+	ID                    string         `json:"id"`
+	Title                 string         `json:"title"`
+	Titled                bool           `json:"titled"`
+	Entries               []SessionEntry `json:"entries"`
+	PromptTokens          int            `json:"promptTokens"`
+	CompletionTokens      int            `json:"completionTokens"`
+	TotalDuration         int64          `json:"totalDuration"`
+	CreatedAt             int64          `json:"createdAt"`
+	UpdatedAt             int64          `json:"updatedAt"`
+	MessageHistory        []string       `json:"messageHistory,omitempty"`
+	Snapshots             []string       `json:"snapshots,omitempty"`
+	AlwaysAllow           bool           `json:"alwaysAllow,omitempty"`
+	ContextTokens         int            `json:"contextTokens,omitempty"`
 	ContextTokenBreakdown map[string]int `json:"contextTokenBreakdown,omitempty"`
-	ContextCachedTokens  int            `json:"contextCachedTokens,omitempty"`
-	ContextLimit         int            `json:"contextLimit,omitempty"`
+	ContextCachedTokens   int            `json:"contextCachedTokens,omitempty"`
+	ContextLimit          int            `json:"contextLimit,omitempty"`
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {

@@ -54,7 +54,7 @@ const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
     group.number("flashcard.maximumInterval", {
         title: window.siyuan.languages.flashcardFSRSParamMaximumInterval,
         desc: window.siyuan.languages.flashcardFSRSParamMaximumIntervalTip,
-        min: 365,
+        min: 1,
         max: 36500,
     });
     group.textBlock("flashcard.weights", {

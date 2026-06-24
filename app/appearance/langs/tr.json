@@ -1,4 +1,9 @@
 {
+  "agentGoToSetting": "Ayarlara git",
+  "kernelFault3": "Yaygın nedenler ve sorun giderme",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. Ters proxy WebSocket'i iletmıyor</b><br>SiYuan'a NGINX gibi bir ters proxy üzerinden erişiyorsanız, <code>/ws</code> için protokol yükseltme başlıklarını ayrıca yapılandırmanız gerekir, aksi takdirde WebSocket el sıkışması başarısız olur.</p></div><div class=\"b3-typography\"><p><b>2. Çekirdek süreci sonlandı veya çöktü</b><br>Kapsayıcının veya servisin hala çalıştığından emin olun ve gerekirse yeniden başlatın. Tam günlükleri [Ayarlar - Hakkında - Sistem günlüğü] bölümünde dışa aktarabilirsiniz.</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. Çekirdek süreci sonlandı veya çöktü</b><br>SiYuan'ı yeniden başlatın. Tam günlükleri [Ayarlar - Hakkında - Sistem günlüğü] bölümünde dışa aktarabilirsiniz.</p></div><div class=\"b3-typography\"><p><b>2. Antivirüs veya güvenlik duvarı engellemesi</b><br>Bazı güvenlik yazılımları SiYuan'ı yanlışlıkla engelleyebilir. Lütfen SiYuan kurulum yolunu antivirüs ve güvenlik duvarınızın güven listesine (beyaz liste) ekleyin ve tekrar deneyin.</p></div>",
+  "kernelFault6": "Çık",
   "tokenUsage": "Bağlam kullanımı",
   "tokenCatSystem": "Sistem istemi",
   "tokenCatSkills": "Beceriler",
@@ -1245,7 +1250,7 @@
   "previous": "Önceki",
   "next": "Sonraki",
   "kernelFault0": "SiYuan ufak bir sorunla karşılaştı...",
-  "kernelFault1": "Verilerin güvende olmalı, ağ bağlantısını ve çekirdek sürecini kontrol edip SiYuan’ı yeniden başlat",
+  "kernelFault1": "Çekirdekle bağlantı kesildi, ancak verileriniz güvende olmalıdır. SiYuan her 3 saniyede bir otomatik olarak yeniden bağlanmayı dener ve çekirdek geri geldiğinde bu pencere kendiliğinden kapanır.",
   "kernelFault2": "Sorun devam ederse <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">buradan</a> yardım al veya hata bildir",
   "fontSize": "Yazı boyutu",
   "fontSizeTip": "Varsayılan yazı boyutu <code class='fn__code'>16</code>. Bu ayar düzenleyici ve dışa aktarılan PDF/HTML yazı boyutunu etkiler",

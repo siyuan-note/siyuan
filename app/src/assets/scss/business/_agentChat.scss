@@ -30,33 +30,13 @@
         stroke: var(--b3-scroll-color);
     }
 
-    // 圆环弧度（按占用率描边），rotate -90 让起点在顶部。
+    // 圆环弧度（按占用率描边），统一主色，rotate -90 让起点在顶部。
     .agent-chat__tokens-arc {
         fill: none;
+        stroke: var(--b3-theme-primary);
         stroke-linecap: round;
         transform: rotate(-90deg);
         transform-origin: 50% 50%;
-    }
-
-    // 描边颜色按占用率分档：绿（<30%）、黄（30-45%）、橙（45-85%）、红（≥85%）、未知上限（灰）。
-    &.agent-chat__tokens--low .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-success);
-    }
-
-    &.agent-chat__tokens--mid .agent-chat__tokens-arc {
-        stroke: var(--b3-graph-todo-point);
-    }
-
-    &.agent-chat__tokens--warn .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-secondary);
-    }
-
-    &.agent-chat__tokens--high .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-error);
-    }
-
-    &.agent-chat__tokens--unknown .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-on-surface-light);
     }
 }
 
@@ -203,6 +183,13 @@
     line-height: 1.5;
 }
 
+// 未配置模型时的「去配置」按钮：复用 b3-button 主色实心样式，仅微调尺寸。
+.agent-welcome__go-setting {
+    margin-top: 4px;
+    padding: 4px 14px;
+    font-size: 13px;
+}
+
 .agent-chat__msg {
     display: flex;
     flex-direction: column;
@@ -216,12 +203,11 @@
 
 .agent-chat__msg--user .agent-chat__body,
 .agent-chat__msg--ai .agent-chat__body {
-    @extend .agent-chat__body-content;
     min-width: 0;
     width: 100%;
     background: transparent;
     border: none;
-    color: var(--b3-theme-on-surface);
+    color: var(--b3-theme-on-background);
     border-radius: 0;
     word-break: break-word;
     line-height: 1.5;
@@ -279,350 +265,51 @@
     user-select: text;
 }
 
-.agent-chat__body-content {
-    word-wrap: break-word;
-    overflow: auto;
-    word-break: break-word;
-
-    img {
-        max-width: 100%;
-        margin: 0 auto;
-    }
-
-    video, audio, canvas {
-        max-width: 100%;
-    }
-
-    ol, ul {
-        padding-left: 1.5em;
-        margin: 0.5em 0;
-    }
-
-    ul {
-        list-style-type: disc;
-    }
-
-    table {
-        max-width: 100%;
-        overflow-x: auto;
-    }
-
-    pre {
-        position: relative;
-    }
-
-    blockquote {
-        position: relative;
-        margin: 0.5em 0;
-        padding-left: calc(0.25em + 6px);
-        color: var(--b3-theme-on-surface);
-        background-color: var(--b3-bq-background);
-        border-radius: var(--b3-border-radius);
-
-        &::before {
-            content: '';
-            background-color: var(--b3-theme-surface-lighter);
-            width: .25em;
-            border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
-            position: absolute;
-            left: 2px;
-            top: 4px;
-            bottom: 4px;
-        }
-    }
-
-    :not(pre) > code:not(.hljs) {
-        padding: .2em .4em;
-        font-size: 85%;
-        border-radius: var(--b3-border-radius);
-        font-family: var(--b3-font-family-code);
-        word-break: break-word;
-        overflow-wrap: break-word;
-        background-color: var(--b3-protyle-code-background);
-    }
-
-    pre {
-        padding: 8px 12px;
-        margin: 0.5em 0;
-        font-size: 85%;
-        font-family: var(--b3-font-family-code);
-        border-radius: var(--b3-border-radius);
-        background-color: var(--b3-protyle-code-background);
-    }
-
-    pre[data-language] {
-        padding-top: 24px;
-    }
-
-    pre code.hljs {
-        padding: 0;
-    }
-
-    pre code {
-        overflow-x: auto;
-        display: block;
-    }
-
-    pre[data-language]::before {
-        content: attr(data-language);
-        position: absolute;
-        top: 4px;
-        left: 8px;
-        font-size: 12px;
-        color: var(--b3-theme-on-surface-light);
-        opacity: 0;
-    transition: var(--b3-transition);
+// 覆盖 b3-typography 的基础字号：b3-typography 默认用 --b3-font-size-editor（跟随编辑器字号，默认 16px），
+// 在 dock 面板里偏大。压回面板级 14px，与大纲/书签等其他 dock 面板对齐。
+// 排版（行高、段落间距等）仍沿用 b3-typography 全局规范。
+.agent-chat__body.b3-typography,
+.agent-chat__thinking-chat.b3-typography {
+    font-size: var(--b3-font-size);
 }
 
-pre:hover[data-language]::before {
-        opacity: 0.86;
+// 消息正文复用全局 b3-typography 排版（与导出预览/编辑器预览一致），
+// 仅保留 AgentChat 特有的代码块增强：hover 显示语言标签 + 复制按钮。
+// pre 需 position:relative 作为复制按钮（absolute）和语言标签（::before）的定位上下文。
+.b3-typography pre,
+.agent-chat__body--mirror pre {
+    position: relative;
+    // 左右 padding 统一变量，::before 语言标签用同值 left 保证左对齐代码正文。
+    padding: 8px var(--agent-code-pad, 8px);
+    margin: 0.5em 0;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background-color: var(--b3-protyle-code-background);
+    overflow: auto;
+
+    // 覆盖 hljs 主题的 .hljs padding（其特异性 0,1,0 高于 pre code），用 !important 确保对齐语言标签。
+    code.hljs,
+    code {
+        padding: 0 !important;
+        background: none !important;
+        display: block;
     }
+}
 
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: 600;
-        margin: 0.5em 0 0.2em;
-    }
+// 有语言标签的代码块顶部留空间，避免 ::before 语言标签与正文重叠。
+.b3-typography pre[data-language],
+.agent-chat__body--mirror pre[data-language] {
+    padding-top: 24px;
+}
 
-    h1 { font-size: 1.75em; }
-    h2 { font-size: 1.55em; }
-    h3 { font-size: 1.38em; }
-    h4 { font-size: 1.25em; }
-    h5 { font-size: 1.13em; }
-    h6 { font-size: 1em;   }
-
-    table {
-        border-collapse: collapse;
-        empty-cells: show;
-        margin: 0.5em 0;
-        border-spacing: 0;
-
-        colgroup col {
-            width: auto !important;
-        }
-
-        td, th {
-            padding: 4px 8px;
-            border: 1px solid var(--b3-theme-surface-lighter);
-            box-sizing: border-box;
-            max-width: 620px;
-            word-wrap: break-word;
-
-            &:empty::after {
-                content: "";
-                height: 16px;
-                display: inline-block;
-            }
-        }
-
-        thead th {
-            font-weight: 600;
-        }
-
-        tbody th,
-        tbody td {
-            font-weight: normal;
-        }
-
-        tr:nth-child(even) td {
-            background-color: var(--b3-table-even-background);
-        }
-    }
-
-    a {
-        color: var(--b3-protyle-inline-link-color);
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    hr {
-        border: 0;
-        border-bottom: 1px solid var(--b3-theme-background-light);
-        margin: 0.5em 0;
-    }
-
-    .protyle-task {
-        list-style: none !important;
-        word-break: break-word;
-        overflow-wrap: break-word;
-
-        input {
-            position: absolute;
-            left: -1.5em;
-        }
-    }
-
-    .protyle-task--done {
-        color: var(--b3-theme-on-surface-light);
-        text-decoration: line-through;
-    }
-
-    > * + * {
-        margin-top: 0.6em;
-    }
-
-    & > *:last-child {
-        margin-bottom: 0;
-    }
-
-    p {
-        margin: 0 0 0.5em;
-    }
-
-    li {
-        margin-bottom: 0.3em;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        line-height: 1.5;
-    }
-
-    strong {
-        font-weight: bold;
-        color: var(--b3-protyle-inline-strong-color);
-    }
-
-    em {
-        font-style: italic;
-        color: var(--b3-protyle-inline-em-color);
-    }
-
-    del,
-    s {
-        color: var(--b3-protyle-inline-s-color);
-        text-decoration: line-through;
-    }
-
-    u {
-        border-bottom: 1px solid;
-        color: var(--b3-protyle-inline-u-color);
-    }
-
-    mark {
-        background-color: var(--b3-protyle-inline-mark-background);
-        color: var(--b3-protyle-inline-mark-color);
-    }
-
-    kbd {
-        padding: 2px 4px;
-        font: 75% var(--b3-font-family-kbd);
-        line-height: 1;
-        color: var(--b3-theme-on-surface);
-        vertical-align: middle;
-        background-color: var(--b3-theme-surface);
-        border: solid 1px var(--b3-theme-surface-lighter);
-        border-radius: var(--b3-border-radius);
-        box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
-    }
-
-    sup {
-        position: relative;
-        font-size: 75%;
-        line-height: 0;
-        vertical-align: baseline;
-        top: -.5em;
-    }
-
-    sub {
-        position: relative;
-        font-size: 75%;
-        line-height: 0;
-        vertical-align: baseline;
-        bottom: -.25em;
-    }
-
-    .callout {
-        position: relative;
-        padding-left: calc(0.25em + 6px);
-        color: var(--b3-theme-on-surface);
-        background-color: var(--b3-bq-background);
-        display: flex;
-        flex-direction: column;
-
-        &::before {
-            content: '';
-            background-color: var(--b3-callout-note);
-            width: .25em;
-            border-radius: var(--b3-border-radius);
-            position: absolute;
-            left: 2px;
-            top: 6px;
-            bottom: 6px;
-        }
-
-        .callout-info {
-            color: var(--b3-callout-note);
-            display: flex;
-            align-items: center;
-            user-select: none;
-            margin-bottom: 4px;
-        }
-
-        .callout-icon {
-            width: 1.2em;
-            display: flex;
-            text-align: center;
-            height: 1.2em;
-            line-height: 1.2em;
-            padding: 4px;
-            border-radius: var(--b3-border-radius);
-
-            &:empty {
-                display: none;
-            }
-        }
-
-        .callout-img {
-            height: 1.2em;
-        }
-
-        .callout-title {
-            margin-left: 4px;
-            font-weight: 500;
-            font-size: 114%;
-            opacity: .86;
-        }
-
-        &[data-subtype="WARNING"] {
-            &::before {
-                background-color: var(--b3-callout-warning);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-warning);
-            }
-        }
-
-        &[data-subtype="TIP"] {
-            &::before {
-                background-color: var(--b3-callout-tip);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-tip);
-            }
-        }
-
-        &[data-subtype="IMPORTANT"] {
-            &::before {
-                background-color: var(--b3-callout-important);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-important);
-            }
-        }
-
-        &[data-subtype="CAUTION"] {
-            &::before {
-                background-color: var(--b3-callout-caution);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-caution);
-            }
-        }
-    }
+.b3-typography pre[data-language]::before,
+.agent-chat__body--mirror pre[data-language]::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 4px;
+    left: var(--agent-code-pad, 8px);
+    font-size: 12px;
+    color: var(--b3-theme-on-surface-light);
 }
 
 .agent-chat__copy-wrap {
@@ -654,8 +341,14 @@ pre:hover[data-language]::before {
     }
 }
 
-pre:hover .agent-chat__copy-wrap {
+pre:hover .agent-chat__copy-wrap,
+[data-subtype="math"]:hover .agent-chat__copy-wrap {
     opacity: .86;
+}
+
+// 公式块：position:relative 作为复制按钮定位上下文。
+[data-subtype="math"] {
+    position: relative;
 }
 
 .agent-chat__msg--error .agent-chat__body {
@@ -795,7 +488,6 @@ pre:hover .agent-chat__copy-wrap {
 }
 
 .agent-chat__thinking-chat {
-    @extend .agent-chat__body-content;
     color: var(--b3-theme-on-surface);
     line-height: 1.5;
     margin-bottom: 8px;
@@ -965,10 +657,20 @@ pre:hover .agent-chat__copy-wrap {
     cursor: pointer;
 }
 
-// 无可用模型时的占位态：灰色文案，提示用户去设置配置。
+// 无可用模型时的占位态：灰色文案 + 可点击打开设置（不展开下拉）。
 .agent-chat__model-select--empty {
     color: var(--b3-theme-on-surface-light);
-    cursor: default;
+    cursor: pointer;
+
+    // 隐藏下拉箭头（原生 + b3-select 背景图），提示这是可点击的占位而非下拉选择。
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--b3-menu-background);
+    padding: 1px 8px 0; // 去箭头后回收右侧 padding；顶部 1px 修正垂直居中
+
+    &:hover {
+        background-color: var(--b3-theme-surface);
+    }
 }
 
 // 无可用模型时禁用发送按钮：半透明 + 禁止光标，从源头阻止无效请求。
@@ -1029,7 +731,7 @@ pre:hover .agent-chat__copy-wrap {
 }
 
 // 第一行下方的上下文占用横条：总长 = 模型上限，填充宽度 = 已用占比，
-// 填充色按占用率分档，与底部圆环颜色算法一致；未填充为轨道灰。
+// 填充色统一主色（与底部圆环一致）；未填充为轨道灰。
 .agent-token-popup__bar {
     height: 4px;
     margin: 6px 10px 4px;
@@ -1041,22 +743,7 @@ pre:hover .agent-chat__copy-wrap {
         display: block;
         height: 100%;
         border-radius: 2px;
-    }
-
-    &.agent-token-popup__bar--low > span {
-        background: var(--b3-theme-success);
-    }
-
-    &.agent-token-popup__bar--mid > span {
-        background: var(--b3-graph-todo-point);
-    }
-
-    &.agent-token-popup__bar--warn > span {
-        background: var(--b3-theme-secondary);
-    }
-
-    &.agent-token-popup__bar--high > span {
-        background: var(--b3-theme-error);
+        background: var(--b3-theme-primary);
     }
 }
 

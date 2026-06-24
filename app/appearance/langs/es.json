@@ -1,4 +1,9 @@
 {
+  "agentGoToSetting": "Ir a la configuración",
+  "kernelFault3": "Causas comunes y solución de problemas",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. El proxy inverso no reenvía el WebSocket</b><br>Si accede a SiYuan a través de un proxy inverso como NGINX, debe configurar los encabezados de actualización de protocolo para <code>/ws</code> por separado; de lo contrario, el handshake del WebSocket fallará.</p></div><div class=\"b3-typography\"><p><b>2. El proceso del kernel se cerró o se bloqueó</b><br>Compruebe que el contenedor o el servicio sigan en ejecución y reinícielo si es necesario. Puede exportar los registros completos en [Ajustes - Acerca de - Registro del sistema].</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. El proceso del kernel se cerró o se bloqueó</b><br>Reinicie SiYuan. Puede exportar los registros completos en [Ajustes - Acerca de - Registro del sistema].</p></div><div class=\"b3-typography\"><p><b>2. Bloqueo del antivirus o firewall</b><br>Algunos programas de seguridad pueden bloquear SiYuan por error. Añada la ruta de instalación de SiYuan a la lista de confianza (lista blanca) de su antivirus y firewall, y vuelva a intentarlo.</p></div>",
+  "kernelFault6": "Salir",
   "tokenUsage": "Uso de contexto",
   "tokenCatSystem": "Indicación del sistema",
   "tokenCatSkills": "Habilidades",
@@ -1245,7 +1250,7 @@
   "previous": "Anterior",
   "next": "Siguiente",
   "kernelFault0": "SiYuan está teniendo un problema...",
-  "kernelFault1": "Sus datos deben estar seguros, verifique si la conexión de red y el proceso del kernel son normales y luego reinicie SiYuan",
+  "kernelFault1": "Se ha perdido la conexión con el kernel, pero sus datos deberían estar seguros. SiYuan intentará reconectarse automáticamente cada 3 segundos, y esta ventana se cerrará por sí sola cuando el kernel se recupere.",
   "kernelFault2": "Si el problema persiste, busque ayuda o informe de errores <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">aquí</a>",
   "fontSize": "Tamaño de la fuente",
   "fontSizeTip": "El tamaño de fuente predeterminado es <code class='fn__code'>16</code>, esta configuración afecta el editor y la visualización del tamaño de fuente PDF/HTML exportado",

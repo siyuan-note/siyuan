@@ -1,4 +1,9 @@
 {
+  "agentGoToSetting": "設定に進む",
+  "kernelFault3": "一般的な原因とトラブルシューティング",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. リバースプロキシが WebSocket を転送していない</b><br>NGINX などのリバースプロキシ経由でアクセスする場合、<code>/ws</code> 用にプロトコルアップグレードヘッダーを個別に設定する必要があります。設定しないと WebSocket ハンドシェイクが失敗します。</p></div><div class=\"b3-typography\"><p><b>2. カーネルプロセスが終了またはクラッシュした</b><br>コンテナやサービスがまだ実行中か確認し、必要に応じて再起動してください。完全なログは [設定 - About - システムログ] でエクスポートできます。</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. カーネルプロセスが終了またはクラッシュした</b><br>SiYuan を再起動してください，完全なログは [設定 - About - システムログ] でエクスポートできます。</p></div><div class=\"b3-typography\"><p><b>2. アンチウイルスまたはファイアウォールによるブロック</b><br>一部のセキュリティソフトが SiYuan を誤ってブロックすることがあります。SiYuan のインストール先をアンチウイルスおよびファイアウォールの信頼リスト（ホワイトリスト）に追加してから再試行してください。</p></div>",
+  "kernelFault6": "終了",
   "tokenUsage": "コンテキスト使用量",
   "tokenCatSystem": "システムプロンプト",
   "tokenCatSkills": "スキル",
@@ -1245,7 +1250,7 @@
   "previous": "前へ",
   "next": "次へ",
   "kernelFault0": "SiYuan に予期せぬエラーが発生しました...",
-  "kernelFault1": "データは安全です。ネットワーク接続とカーネルプロセスが正常なことを確認して SiYuan を再起動してください",
+  "kernelFault1": "カーネルとの接続が切断されました。データは通常は安全です。SiYuan は 3 秒ごとに自動的に再接続を試み、カーネルが復旧するとこのウィンドウは自動的に閉じます",
   "kernelFault2": "問題が解決しない場合は<a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">こちら</a>でヘルプやバグレポートを探してください",
   "fontSize": "フォントサイズ",
   "fontSizeTip": "デフォルトのフォントサイズは <code class='fn__code'>16</code> です。この設定はエディタとエクスポートされる PDF/HTML のフォントサイズに影響します",

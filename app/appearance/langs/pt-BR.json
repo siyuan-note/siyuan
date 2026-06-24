@@ -1,4 +1,9 @@
 {
+  "agentGoToSetting": "Ir para configurações",
+  "kernelFault3": "Causas comuns e solução de problemas",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. O proxy reverso não encaminha o WebSocket</b><br>Se você acessa o SiYuan por meio de um proxy reverso como NGINX, é necessário configurar os cabeçalhos de atualização de protocolo para <code>/ws</code> separadamente; caso contrário, o handshake do WebSocket falhará.</p></div><div class=\"b3-typography\"><p><b>2. O processo do kernel foi encerrado ou travou</b><br>Verifique se o contêiner ou serviço ainda está em execução e reinicie-o se necessário. Você pode exportar os logs completos em [Configurações - Sobre - Log do sistema].</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. O processo do kernel foi encerrado ou travou</b><br>Reinicie o SiYuan. Você pode exportar os logs completos em [Configurações - Sobre - Log do sistema].</p></div><div class=\"b3-typography\"><p><b>2. Bloqueio por antivírus ou firewall</b><br>Alguns softwares de segurança podem bloquear o SiYuan por engano. Adicione o caminho de instalação do SiYuan à lista de confiáveis (whitelist) do seu antivírus e firewall e tente novamente.</p></div>",
+  "kernelFault6": "Sair",
   "tokenUsage": "Uso de contexto",
   "tokenCatSystem": "Prompt do sistema",
   "tokenCatSkills": "Habilidades",
@@ -1245,7 +1250,7 @@
   "previous": "Anterior",
   "next": "Próximo",
   "kernelFault0": "SiYuan encontrou um pequeno problema...",
-  "kernelFault1": "Seus dados devem estar seguros, verifique se a conexão de rede e o processo do kernel estão normais e reinicie o SiYuan",
+  "kernelFault1": "A conexão com o kernel foi perdida, mas seus dados devem estar seguros. O SiYuan tentará se reconectar automaticamente a cada 3 segundos, e esta janela se fechará sozinha quando o kernel for recuperado.",
   "kernelFault2": "Se o problema persistir, procure ajuda ou relate bugs <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">aqui</a>",
   "fontSize": "Tamanho da Fonte",
   "fontSizeTip": "O tamanho padrão da fonte é <code class='fn__code'>16</code>, esta configuração afeta o editor e a exibição do tamanho da fonte em PDF/HTML exportados",

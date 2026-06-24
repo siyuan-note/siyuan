@@ -1,4 +1,9 @@
 {
+  "agentGoToSetting": "Go to Settings",
+  "kernelFault3": "Common causes and troubleshooting",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. Reverse proxy does not forward WebSocket</b><br>If you access SiYuan through a reverse proxy such as NGINX, you must configure the protocol upgrade headers for <code>/ws</code> separately, otherwise the WebSocket handshake will fail.</p></div><div class=\"b3-typography\"><p><b>2. Kernel process exited or crashed</b><br>Make sure the container or service is still running, and restart it if needed. You can export the full logs in [Settings - About - System log].</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. Kernel process exited or crashed</b><br>Please restart SiYuan. You can export the full logs in [Settings - About - System log].</p></div><div class=\"b3-typography\"><p><b>2. Antivirus or firewall blocking</b><br>Some security software may mistakenly block SiYuan. Please add the SiYuan installation path to the trust list (whitelist) of your antivirus and firewall, then retry.</p></div>",
+  "kernelFault6": "Exit",
   "tokenUsage": "Context Usage",
   "tokenCatSystem": "System Prompt",
   "tokenCatSkills": "Skills",
@@ -1245,7 +1250,7 @@
   "previous": "Previous",
   "next": "Next",
   "kernelFault0": "SiYuan encountered a little problem...",
-  "kernelFault1": "Your data should be safe, please check whether the network connection and kernel process are normal, and then restart SiYuan",
+  "kernelFault1": "The connection to the kernel has been lost, but your data should be safe. SiYuan will automatically try to reconnect every 3 seconds, and this window will close by itself once the kernel recovers.",
   "kernelFault2": "If the problem persists, please look for help or report bugs <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">here</a>",
   "fontSize": "Font Size",
   "fontSizeTip": "The default font size is <code class='fn__code'>16</code>, this setting affects the editor and exported PDF/HTML font size display",

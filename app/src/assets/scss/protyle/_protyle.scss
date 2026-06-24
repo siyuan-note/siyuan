@@ -90,9 +90,9 @@
       color: var(--b3-theme-on-surface);
     }
 
-    // 悬浮时显示固定尺寸的圆角背景（排除插入元素，它有自己的两态样式）
+    // 悬浮时显示固定尺寸的圆角背景（排除框线与+号，它们有自己的样式）
     // 用 ::before 而非直接设 button 背景，避免受 padding/svg 尺寸影响导致宽高不一致
-    &:not(.protyle-gutters__insert)::before {
+    &:not(.protyle-gutters__line):not(.protyle-gutters__plus)::before {
       content: '';
       position: absolute;
       top: 50%;
@@ -107,7 +107,7 @@
       transition: opacity var(--b3-color-transition);
     }
 
-    &:not(.protyle-gutters__insert):hover::before {
+    &:not(.protyle-gutters__line):not(.protyle-gutters__plus):hover::before {
       opacity: 1;
       background-color: var(--b3-theme-background-light);
     }
@@ -136,72 +136,56 @@
   }
 }
 
-// 块标边缘悬浮触发的插入元素，与 .protyle-gutters 同为 fixed 坐标系，由 JS 按块标边缘固定定位
-// 两态：默认为细线条（悬浮块标时显示），鼠标移到线条上加 .is-active 变+号
-// 选择器需带 button 标签以提升特异性，覆盖 .protyle-gutters button 的 position:relative 与 svg 尺寸
-// z-index 需高于块标 button 内 span 覆盖层（z-index:2），以便与块标重叠时仍可悬浮点击
-.protyle-gutters button.protyle-gutters__insert {
+// 块标边缘框线（悬浮块标显示），与 .protyle-gutters 同为 fixed 坐标系，由 JS 贴块标边缘定位
+// 选择器带 button 标签提升特异性，覆盖 .protyle-gutters button 的 position:relative；z-index 高于块标 span 覆盖层
+.protyle-gutters button.protyle-gutters__line {
   position: fixed;
   z-index: 3;
   padding: 0;
   cursor: pointer;
-  // 线条态：靠自身尺寸（JS 设为细条）+ 背景色呈现线条，颜色与块标悬浮背景一致
   background-color: var(--b3-theme-background-light);
-  transition: background-color .25s;
   // 透明 ::before 扩大可悬浮热区，视觉仍是细线但命中区更大（约 8px）
   &::before {
     content: '';
     position: absolute;
     inset: -4px;
   }
+}
 
-  // svg 线条态隐藏（opacity:0 + 极小），is-active 时用 @keyframes 从小放大（不受 display 切换影响，可靠触发）
+// 块标边缘+号（悬浮框线显示），独立元素定位在外偏位置；tooltip 基于该元素对齐
+.protyle-gutters button.protyle-gutters__plus {
+  position: fixed;
+  z-index: 4;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+  // 从小放大播放动画（不受 display 切换影响，可靠触发）
+  animation: plusPopIn .28s cubic-bezier(.34, 1.56, .64, 1) both;
+
   svg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(.2);
-    opacity: 0;
     color: var(--b3-theme-on-surface-light);
-    width: 20px;
-    height: 20px;
+    width: 100%;
+    height: 100%;
     float: none;
-    pointer-events: none;
-    transition: opacity .2s ease, color var(--b3-color-transition);
+    transition: color var(--b3-color-transition);
   }
 
-  // +号态：鼠标移到线条上时 JS 加 .is-active，背景透明、图标从小放大播放动画
-  // --plus-offset-x/y 由 JS 按横竖排方向设定，整体平移 button（含 svg）到+号位置，
-  // 这样 button 的 targetRect 与+号视觉位置一致，tooltip（west）能正确对齐+号
-  &.is-active {
-    background-color: transparent;
-    transform: translate(var(--plus-offset-x, 0px), var(--plus-offset-y, 0px));
-
-    svg {
-      opacity: 1;
-      pointer-events: auto;
-      animation: plusPopIn .28s cubic-bezier(.34, 1.56, .64, 1) both;
-      // 动画结束后停在居中放大态（偏移由父 button transform 承担）
-      transform: translate(-50%, -50%) scale(1.15);
-    }
-  }
-
-  @keyframes plusPopIn {
-    0% {
-      transform: translate(-50%, -50%) scale(.2);
-      opacity: 0;
-    }
-    40% {
-      opacity: 1;
-    }
-    100% {
-      transform: translate(-50%, -50%) scale(1.15);
-      opacity: 1;
-    }
-  }
-
-  &.is-active:hover svg {
+  &:hover svg {
     color: var(--b3-theme-on-surface);
+  }
+}
+
+@keyframes plusPopIn {
+  0% {
+    transform: scale(.2);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 1;
   }
 }
 

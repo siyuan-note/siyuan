@@ -216,12 +216,11 @@
 
 .agent-chat__msg--user .agent-chat__body,
 .agent-chat__msg--ai .agent-chat__body {
-    @extend .agent-chat__body-content;
     min-width: 0;
     width: 100%;
     background: transparent;
     border: none;
-    color: var(--b3-theme-on-surface);
+    color: var(--b3-theme-on-background);
     border-radius: 0;
     word-break: break-word;
     line-height: 1.5;
@@ -279,350 +278,23 @@
     user-select: text;
 }
 
-.agent-chat__body-content {
-    word-wrap: break-word;
-    overflow: auto;
-    word-break: break-word;
-
-    img {
-        max-width: 100%;
-        margin: 0 auto;
-    }
-
-    video, audio, canvas {
-        max-width: 100%;
-    }
-
-    ol, ul {
-        padding-left: 1.5em;
-        margin: 0.5em 0;
-    }
-
-    ul {
-        list-style-type: disc;
-    }
-
-    table {
-        max-width: 100%;
-        overflow-x: auto;
-    }
-
-    pre {
-        position: relative;
-    }
-
-    blockquote {
-        position: relative;
-        margin: 0.5em 0;
-        padding-left: calc(0.25em + 6px);
-        color: var(--b3-theme-on-surface);
-        background-color: var(--b3-bq-background);
-        border-radius: var(--b3-border-radius);
-
-        &::before {
-            content: '';
-            background-color: var(--b3-theme-surface-lighter);
-            width: .25em;
-            border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
-            position: absolute;
-            left: 2px;
-            top: 4px;
-            bottom: 4px;
-        }
-    }
-
-    :not(pre) > code:not(.hljs) {
-        padding: .2em .4em;
-        font-size: 85%;
-        border-radius: var(--b3-border-radius);
-        font-family: var(--b3-font-family-code);
-        word-break: break-word;
-        overflow-wrap: break-word;
-        background-color: var(--b3-protyle-code-background);
-    }
-
-    pre {
-        padding: 8px 12px;
-        margin: 0.5em 0;
-        font-size: 85%;
-        font-family: var(--b3-font-family-code);
-        border-radius: var(--b3-border-radius);
-        background-color: var(--b3-protyle-code-background);
-    }
-
-    pre[data-language] {
-        padding-top: 24px;
-    }
-
-    pre code.hljs {
-        padding: 0;
-    }
-
-    pre code {
-        overflow-x: auto;
-        display: block;
-    }
-
-    pre[data-language]::before {
-        content: attr(data-language);
-        position: absolute;
-        top: 4px;
-        left: 8px;
-        font-size: 12px;
-        color: var(--b3-theme-on-surface-light);
-        opacity: 0;
+// 消息正文复用全局 b3-typography 排版（与导出预览/编辑器预览一致），
+// 仅保留 AgentChat 特有的代码块增强：hover 显示语言标签 + 复制按钮。
+.b3-typography pre[data-language]::before,
+.agent-chat__body--mirror pre[data-language]::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-size: 12px;
+    color: var(--b3-theme-on-surface-light);
+    opacity: 0;
     transition: var(--b3-transition);
 }
 
-pre:hover[data-language]::before {
-        opacity: 0.86;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-        font-weight: 600;
-        margin: 0.5em 0 0.2em;
-    }
-
-    h1 { font-size: 1.75em; }
-    h2 { font-size: 1.55em; }
-    h3 { font-size: 1.38em; }
-    h4 { font-size: 1.25em; }
-    h5 { font-size: 1.13em; }
-    h6 { font-size: 1em;   }
-
-    table {
-        border-collapse: collapse;
-        empty-cells: show;
-        margin: 0.5em 0;
-        border-spacing: 0;
-
-        colgroup col {
-            width: auto !important;
-        }
-
-        td, th {
-            padding: 4px 8px;
-            border: 1px solid var(--b3-theme-surface-lighter);
-            box-sizing: border-box;
-            max-width: 620px;
-            word-wrap: break-word;
-
-            &:empty::after {
-                content: "";
-                height: 16px;
-                display: inline-block;
-            }
-        }
-
-        thead th {
-            font-weight: 600;
-        }
-
-        tbody th,
-        tbody td {
-            font-weight: normal;
-        }
-
-        tr:nth-child(even) td {
-            background-color: var(--b3-table-even-background);
-        }
-    }
-
-    a {
-        color: var(--b3-protyle-inline-link-color);
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
-    hr {
-        border: 0;
-        border-bottom: 1px solid var(--b3-theme-background-light);
-        margin: 0.5em 0;
-    }
-
-    .protyle-task {
-        list-style: none !important;
-        word-break: break-word;
-        overflow-wrap: break-word;
-
-        input {
-            position: absolute;
-            left: -1.5em;
-        }
-    }
-
-    .protyle-task--done {
-        color: var(--b3-theme-on-surface-light);
-        text-decoration: line-through;
-    }
-
-    > * + * {
-        margin-top: 0.6em;
-    }
-
-    & > *:last-child {
-        margin-bottom: 0;
-    }
-
-    p {
-        margin: 0 0 0.5em;
-    }
-
-    li {
-        margin-bottom: 0.3em;
-        word-break: break-word;
-        overflow-wrap: break-word;
-        line-height: 1.5;
-    }
-
-    strong {
-        font-weight: bold;
-        color: var(--b3-protyle-inline-strong-color);
-    }
-
-    em {
-        font-style: italic;
-        color: var(--b3-protyle-inline-em-color);
-    }
-
-    del,
-    s {
-        color: var(--b3-protyle-inline-s-color);
-        text-decoration: line-through;
-    }
-
-    u {
-        border-bottom: 1px solid;
-        color: var(--b3-protyle-inline-u-color);
-    }
-
-    mark {
-        background-color: var(--b3-protyle-inline-mark-background);
-        color: var(--b3-protyle-inline-mark-color);
-    }
-
-    kbd {
-        padding: 2px 4px;
-        font: 75% var(--b3-font-family-kbd);
-        line-height: 1;
-        color: var(--b3-theme-on-surface);
-        vertical-align: middle;
-        background-color: var(--b3-theme-surface);
-        border: solid 1px var(--b3-theme-surface-lighter);
-        border-radius: var(--b3-border-radius);
-        box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
-    }
-
-    sup {
-        position: relative;
-        font-size: 75%;
-        line-height: 0;
-        vertical-align: baseline;
-        top: -.5em;
-    }
-
-    sub {
-        position: relative;
-        font-size: 75%;
-        line-height: 0;
-        vertical-align: baseline;
-        bottom: -.25em;
-    }
-
-    .callout {
-        position: relative;
-        padding-left: calc(0.25em + 6px);
-        color: var(--b3-theme-on-surface);
-        background-color: var(--b3-bq-background);
-        display: flex;
-        flex-direction: column;
-
-        &::before {
-            content: '';
-            background-color: var(--b3-callout-note);
-            width: .25em;
-            border-radius: var(--b3-border-radius);
-            position: absolute;
-            left: 2px;
-            top: 6px;
-            bottom: 6px;
-        }
-
-        .callout-info {
-            color: var(--b3-callout-note);
-            display: flex;
-            align-items: center;
-            user-select: none;
-            margin-bottom: 4px;
-        }
-
-        .callout-icon {
-            width: 1.2em;
-            display: flex;
-            text-align: center;
-            height: 1.2em;
-            line-height: 1.2em;
-            padding: 4px;
-            border-radius: var(--b3-border-radius);
-
-            &:empty {
-                display: none;
-            }
-        }
-
-        .callout-img {
-            height: 1.2em;
-        }
-
-        .callout-title {
-            margin-left: 4px;
-            font-weight: 500;
-            font-size: 114%;
-            opacity: .86;
-        }
-
-        &[data-subtype="WARNING"] {
-            &::before {
-                background-color: var(--b3-callout-warning);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-warning);
-            }
-        }
-
-        &[data-subtype="TIP"] {
-            &::before {
-                background-color: var(--b3-callout-tip);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-tip);
-            }
-        }
-
-        &[data-subtype="IMPORTANT"] {
-            &::before {
-                background-color: var(--b3-callout-important);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-important);
-            }
-        }
-
-        &[data-subtype="CAUTION"] {
-            &::before {
-                background-color: var(--b3-callout-caution);
-            }
-
-            .callout-info {
-                color: var(--b3-callout-caution);
-            }
-        }
-    }
+.b3-typography pre:hover[data-language]::before,
+.agent-chat__body--mirror pre:hover[data-language]::before {
+    opacity: 0.86;
 }
 
 .agent-chat__copy-wrap {
@@ -795,7 +467,6 @@ pre:hover .agent-chat__copy-wrap {
 }
 
 .agent-chat__thinking-chat {
-    @extend .agent-chat__body-content;
     color: var(--b3-theme-on-surface);
     line-height: 1.5;
     margin-bottom: 8px;
@@ -963,12 +634,20 @@ pre:hover .agent-chat__copy-wrap {
     line-height: 24px;
     padding: 0 22px 0 8px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
 }
 
-// 无可用模型时的占位态：灰色文案，提示用户去设置配置。
+// 无可用模型时的占位态：灰色文案 + 禁用下拉，提示用户去设置配置。
 .agent-chat__model-select--empty {
     color: var(--b3-theme-on-surface-light);
     cursor: default;
+    opacity: 1; // 覆盖原生 disabled 的灰显，用文字色表达禁用即可
+
+    // 隐藏原生下拉箭头，避免误导用户以为可点击展开。
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 8px; // 去掉箭头后回收右侧 padding
 }
 
 // 无可用模型时禁用发送按钮：半透明 + 禁止光标，从源头阻止无效请求。

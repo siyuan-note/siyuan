@@ -334,16 +334,18 @@ export class AgentChat extends Model {
     }
 
     private updateModelLabel() {
-        // 重建 <option> 列表。无可用模型时插入一个禁用的占位项，保持 select 不为空。
+        // 重建 <option> 列表。无可用模型时插入一个占位项并禁用 select，禁止下拉展开。
         let html = "";
         if (this.modelOptions.length === 0) {
             const placeholder = window.siyuan.languages.noModelConfigured || "No model configured";
-            html = '<option value="" disabled selected>' + escapeHtml(placeholder) + "</option>";
+            html = '<option value="" selected>' + escapeHtml(placeholder) + "</option>";
             this.modelSelect.innerHTML = html;
             this.modelSelect.classList.add("agent-chat__model-select--empty");
+            this.modelSelect.setAttribute("disabled", "disabled");
             return;
         }
         this.modelSelect.classList.remove("agent-chat__model-select--empty");
+        this.modelSelect.removeAttribute("disabled");
         for (const o of this.modelOptions) {
             html += '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.name) + "</option>";
         }
@@ -848,7 +850,7 @@ export class AgentChat extends Model {
         if (entryId) {
             el.setAttribute("data-message-id", entryId);
         }
-        el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         postRender(el, this.app);
         this.addCopyButton(el, content, timestamp);
@@ -1500,7 +1502,7 @@ export class AgentChat extends Model {
         if (entryId) {
             el.setAttribute("data-message-id", entryId);
         }
-        let html = '<div class="agent-chat__body">' + escapeHtml(text) + "</div>";
+        let html = '<div class="agent-chat__body b3-typography">' + escapeHtml(text) + "</div>";
         html += '<div class="agent-chat__msg-actions">';
         if (timestamp) {
             html += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
@@ -1526,7 +1528,7 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
         el.setAttribute("data-message-id", this.currentAssistantEntryId);
-        el.innerHTML = '<div class="agent-chat__body agent-chat__body--streaming"></div>';
+        el.innerHTML = '<div class="agent-chat__body b3-typography agent-chat__body--streaming"></div>';
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         this.observeStickTarget(el);
@@ -1545,7 +1547,7 @@ export class AgentChat extends Model {
             let chatEl = thinkBody.querySelector(".agent-chat__thinking-chat--streaming") as HTMLElement;
             if (!chatEl) {
                 chatEl = document.createElement("div");
-                chatEl.className = "agent-chat__thinking-chat agent-chat__thinking-chat--streaming";
+                chatEl.className = "agent-chat__thinking-chat b3-typography agent-chat__thinking-chat--streaming";
                 thinkBody.appendChild(chatEl);
             }
             chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
@@ -1911,7 +1913,7 @@ export class AgentChat extends Model {
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
-            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             postRender(el, this.app);
             this.currentAIElement = el;
@@ -2117,7 +2119,7 @@ export class AgentChat extends Model {
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
-            el.innerHTML = '<div class="agent-chat__body">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             postRender(el, this.app);
             this.currentAIElement = el;
@@ -2399,7 +2401,7 @@ export class AgentChat extends Model {
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             if (step.content) {
-                detail += '<div class="agent-chat__thinking-chat">' + (this.lute.MarkdownStr("", step.content) || escapeHtml(step.content)) + "</div>";
+                detail += '<div class="agent-chat__thinking-chat b3-typography">' + (this.lute.MarkdownStr("", step.content) || escapeHtml(step.content)) + "</div>";
             }
             if (step.reasoningContent) {
                 detail += '<div class="agent-chat__thinking-reasoning-text">' + escapeHtml(step.reasoningContent) + "</div>";

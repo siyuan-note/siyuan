@@ -135,7 +135,10 @@ export class AgentChat extends Model {
     constructor(app: App, tab: Tab) {
         super({app: app});
         this.parent = tab;
-        this.lute = getLute();
+        this.lute = getLute({
+            emojiSite: "/emojis",
+            emojis: {}
+        });
         this.defaultTitle = window.siyuan.languages.agentChat || "Agent";
         this.sessionTitle = this.defaultTitle;
         this.initUI();

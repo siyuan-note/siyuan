@@ -751,10 +751,15 @@ export class Dock {
     }
 
     public add(index: number, sourceElement: Element, previousType?: string) {
-        sourceElement.setAttribute("data-height", "");
-        sourceElement.setAttribute("data-width", "");
         const type = sourceElement.getAttribute("data-type") as TDock;
         const sourceDock = getDockByType(type);
+        // 仅在左右轴与下轴之间跨轴移动时清除尺寸：左右侧之间或下侧内部移动，原有尺寸维度仍然有效
+        if ((sourceDock.position === "Left" || sourceDock.position === "Right") && this.position === "Bottom") {
+            sourceElement.setAttribute("data-width", "");
+        }
+        if (sourceDock.position === "Bottom" && (this.position === "Left" || this.position === "Right")) {
+            sourceElement.setAttribute("data-height", "");
+        }
         if (sourceDock.elements[0].parentElement.querySelectorAll(".dock__item").length === 1) {
             sourceDock.elements[0].parentElement.classList.add("fn__none");
         }

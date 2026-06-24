@@ -17,8 +17,8 @@
     --b3-theme-on-primary: #fff;
     --b3-theme-on-secondary: #fff;
     --b3-theme-on-background: #dadada;
-    --b3-theme-on-surface: #9aa0a6;
-    --b3-theme-on-surface-light: #bababa;
+    --b3-theme-on-surface: rgba(255, 255, 255, .55);
+    --b3-theme-on-surface-light: rgba(255, 255, 255, .7);
     --b3-theme-on-error: #fff;
 
     /* 字体 */
@@ -155,7 +155,7 @@
     --b3-graph-doc-point: #e8eaed;
     --b3-graph-tag-point: #dbf32f;
     --b3-graph-asset-point: #05c091;
-    --b3-graph-line: #9aa0a6;
+    --b3-graph-line: rgba(255, 255, 255, .55);
     --b3-graph-ref-line: #d23f31;
     --b3-graph-tag-line: #5f6b06;
     --b3-graph-tag-tag-line: #dbf32f;
@@ -174,7 +174,7 @@
     --b3-protyle-inline-link-color: #8ab4f8;
     --b3-protyle-inline-mark-background: #b29100;
     --b3-protyle-inline-mark-color: var(--b3-theme-on-background);
-    --b3-protyle-inline-tag-color: #9aa0a6;
+    --b3-protyle-inline-tag-color: rgba(255, 255, 255, .55);
     --b3-protyle-inline-blockref-color: #b388ff;
     --b3-protyle-inline-fileref-color: var(--b3-theme-secondary);
 

@@ -1,4 +1,8 @@
 {
+  "kernelFault3": "Veelvoorkomende oorzaken en probleemoplossing",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. Reverse proxy stuurt WebSocket niet door</b><br>Als je SiYuan via een reverse proxy zoals Nginx benadert, moet je de protocol-upgrade headers voor <code>/ws</code> apart configureren, anders mislukt de WebSocket-handshake. Voorbeeldconfiguratie (vervang upstream door het werkelijke kerneladres):</p><pre><code>location /ws {\n    proxy_pass http://your-upstream;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection \"upgrade\";\n    proxy_set_header Host $host;\n}</code></pre></div><div class=\"b3-typography\"><p><b>2. Kernelproces is afgesloten of gecrasht</b><br>Controleer of de container of service nog draait en start deze zo nodig opnieuw.<br>Je kunt de volledige logs (kernel.log / siyuan.log) exporteren in [Instellingen → Over → Systeemlog].</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. Kernelproces is afgesloten of gecrasht</b><br>Herstart SiYuan.<br>Je kunt de volledige logs (kernel.log / siyuan.log) exporteren in [Instellingen → Over → Systeemlog].</p></div><div class=\"b3-typography\"><p><b>2. Blokkering door antivirus of firewall</b><br>Sommige beveiligingssoftware blokkeert lokaal kernelverkeer of het zelfondertekende HTTPS-certificaat, waardoor de WebSocket niet tot stand kan worden gebracht. Voeg SiYuan toe aan de vertrouwenslijst (whitelist) van je antivirus en firewall en probeer het opnieuw.</p></div>",
+  "kernelFault6": "Venster herladen",
   "tokenUsage": "Contextgebruik",
   "tokenCatSystem": "Systeemprompt",
   "tokenCatSkills": "Vaardigheden",
@@ -1245,7 +1249,7 @@
   "previous": "Vorige",
   "next": "Volgende",
   "kernelFault0": "SiYuan probleem...",
-  "kernelFault1": "Controleer netwerk en kernel, herstart",
+  "kernelFault1": "De verbinding met de kernel is verbroken. Je gegevens zouden veilig moeten zijn — SiYuan probeert automatisch elke 3 seconden opnieuw verbinding te maken, en dit venster sluit zichzelf zodra de kernel is hersteld",
   "kernelFault2": "Blijft het probleem aanhouden? Zoek hulp of meld bugs <a href=\"https://ld246.com/article/1649901726096\" target=\"_blank\">hier</a>",
   "fontSize": "Lettergrootte",
   "fontSizeTip": "Standaard 16; beinvloedt editor en PDF/HTML",

@@ -1,4 +1,8 @@
 {
+  "kernelFault3": "Causes courantes et dépannage",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. Le proxy inverse ne transmet pas le WebSocket</b><br>Si vous accédez à SiYuan via un proxy inverse tel que Nginx, vous devez configurer les en-têtes de mise à niveau de protocole pour <code>/ws</code> séparément, sinon la poignée de main WebSocket échouera. Configuration de référence (remplacez l'upstream par l'adresse réelle de votre noyau) :</p><pre><code>location /ws {\n    proxy_pass http://your-upstream;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection \"upgrade\";\n    proxy_set_header Host $host;\n}</code></pre></div><div class=\"b3-typography\"><p><b>2. Le processus du noyau s'est arrêté ou a planté</b><br>Vérifiez que le conteneur ou le service fonctionne toujours et redémarrez-le si nécessaire.<br>Vous pouvez exporter les journaux complets (kernel.log / siyuan.log) dans [Paramètres → À propos → Journal système].</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. Le processus du noyau s'est arrêté ou a planté</b><br>Veuillez redémarrer SiYuan.<br>Vous pouvez exporter les journaux complets (kernel.log / siyuan.log) dans [Paramètres → À propos → Journal système].</p></div><div class=\"b3-typography\"><p><b>2. Blocage par antivirus ou pare-feu</b><br>Certains logiciels de sécurité bloquent le trafic du noyau local ou le certificat HTTPS auto-signé, ce qui empêche l'établissement du WebSocket. Veuillez ajouter SiYuan à la liste de confiance (liste blanche) de votre antivirus et pare-feu, puis réessayez.</p></div>",
+  "kernelFault6": "Recharger la fenêtre",
   "tokenUsage": "Usage du contexte",
   "tokenCatSystem": "Invite système",
   "tokenCatSkills": "Compétences",
@@ -1245,7 +1249,7 @@
   "previous": "Précédent",
   "next": "Prochain",
   "kernelFault0": "SiYuan a rencontré un petit problème...",
-  "kernelFault1": "Vos données doivent être en sécurité, veuillez vérifier si la connexion réseau et le processus du noyau sont normaux, puis redémarrez SiYuan",
+  "kernelFault1": "La connexion au noyau a été perdue. Vos données devraient être en sécurité — SiYuan tentera de se reconnecter automatiquement toutes les 3 secondes, et cette fenêtre se fermera d'elle-même une fois le noyau rétabli",
   "kernelFault2": "Si le problème persiste, veuillez rechercher de l'aide ou signaler les bogues <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">ici</a>",
   "fontSize": "Taille de la police",
   "fontSizeTip": "La taille de police par défaut est de <code class='fn__code'>16</code>, ce paramètre affecte l'éditeur et l'affichage de la taille de police PDF/HTML exportée",

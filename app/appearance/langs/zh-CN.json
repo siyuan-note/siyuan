@@ -1,4 +1,8 @@
 {
+  "kernelFault3": "常见原因与排查",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. 反向代理未转发 WebSocket</b><br>若通过 Nginx 等反向代理访问，必须为 <code>/ws</code> 单独配置协议升级头，否则 WebSocket 握手会失败。参考配置（upstream 请替换为你实际的内核地址）：</p><pre><code>location /ws {\n    proxy_pass http://your-upstream;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection \"upgrade\";\n    proxy_set_header Host $host;\n}</code></pre></div><div class=\"b3-typography\"><p><b>2. 内核进程已退出或崩溃</b><br>确认容器或服务仍在运行，必要时重启容器。<br>完整日志可在 [设置 → 关于 → 系统日志] 中导出（kernel.log / siyuan.log）。</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. 内核进程已退出或崩溃</b><br>请重启思源笔记。<br>完整日志可在 [设置 → 关于 → 系统日志] 中导出（kernel.log / siyuan.log）。</p></div><div class=\"b3-typography\"><p><b>2. 杀毒软件或防火墙拦截</b><br>部分安全软件会拦截本地内核通信或自签 HTTPS 证书，导致 WebSocket 无法建立。请将思源笔记加入杀毒软件与防火墙的信任列表（白名单）后重试。</p></div>",
+  "kernelFault6": "重新加载窗口",
   "tokenUsage": "上下文用量",
   "tokenCatSystem": "系统提示",
   "tokenCatSkills": "技能",
@@ -1245,7 +1249,7 @@
   "previous": "上一个",
   "next": "下一个",
   "kernelFault0": "思源笔记遇到了一点问题...",
-  "kernelFault1": "你的数据应该是安全的，请检查网络连接和内核进程是否正常，然后重新启动思源笔记",
+  "kernelFault1": "与内核的连接已断开。数据通常是安全的，思源会每 3 秒自动尝试重新连接——如果内核恢复，本窗口会自动关闭",
   "kernelFault2": "如果仍然出现该问题，请在<a href=\"https://ld246.com/article/1649901726096\" target=\"_blank\">这里</a>寻求帮助或者报告缺陷",
   "fontSize": "字号",
   "fontSizeTip": "字号默认为 <code class='fn__code'>16</code>，该设置影响编辑器和导出 PDF/HTML 字体大小显示",

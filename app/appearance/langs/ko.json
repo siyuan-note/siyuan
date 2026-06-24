@@ -1,4 +1,8 @@
 {
+  "kernelFault3": "일반적인 원인 및 문제 해결",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. 역방향 프록시가 WebSocket을 전달하지 않음</b><br>Nginx 등의 역방향 프록시로 접속하는 경우, <code>/ws</code>에 대해 프로토콜 업그레이드 헤더를 별도로 설정해야 합니다. 그렇지 않으면 WebSocket 핸드셰이크가 실패합니다. 참고 설정(upstream은 실제 커널 주소로 바꾸세요):</p><pre><code>location /ws {\n    proxy_pass http://your-upstream;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection \"upgrade\";\n    proxy_set_header Host $host;\n}</code></pre></div><div class=\"b3-typography\"><p><b>2. 커널 프로세스가 종료되었거나 충돌함</b><br>컨테이너나 서비스가 여전히 실행 중인지 확인하고, 필요하면 다시 시작하세요.<br>전체 로그는 [설정 → 정보 → 시스템 로그]에서 내보낼 수 있습니다(kernel.log / siyuan.log).</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. 커널 프로세스가 종료되었거나 충돌함</b><br>SiYuan을 다시 시작하세요.<br>전체 로그는 [설정 → 정보 → 시스템 로그]에서 내보낼 수 있습니다(kernel.log / siyuan.log).</p></div><div class=\"b3-typography\"><p><b>2. 백신 또는 방화벽 차단</b><br>일부 보안 소프트웨어가 로컬 커널 통신이나 자체 서명된 HTTPS 인증서를 차단하여 WebSocket 연결을 방해할 수 있습니다. SiYuan을 백신 및 방화벽의 신뢰 목록(화이트리스트)에 추가한 후 다시 시도하세요.</p></div>",
+  "kernelFault6": "창 다시 로드",
   "tokenUsage": "컨텍스트 사용량",
   "tokenCatSystem": "시스템 프롬프트",
   "tokenCatSkills": "스킬",
@@ -1245,7 +1249,7 @@
   "previous": "이전",
   "next": "다음",
   "kernelFault0": "SiYuan에 약간의 문제가 발생했습니다...",
-  "kernelFault1": "데이터는 안전할 것입니다. 네트워크 연결 및 커널 프로세스가 정상인지 확인한 후 SiYuan을 다시 시작하세요",
+  "kernelFault1": "커널과의 연결이 끊어졌습니다. 데이터는 대개 안전하며, SiYuan은 3초마다 자동으로 재연결을 시도합니다. 커널이 복구되면 이 창은 자동으로 닫힙니다",
   "kernelFault2": "문제가 지속되면 도움을 요청하거나 <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">여기</a>에서 버그를 신고하세요",
   "fontSize": "글꼴 크기",
   "fontSizeTip": "기본 글꼴 크기는 <code class='fn__code'>16</code>이며, 이 설정은 에디터 및 내보낸 PDF/HTML 글꼴 크기 표시에 영향을 줍니다",

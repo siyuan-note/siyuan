@@ -1,4 +1,8 @@
 {
+  "kernelFault3": "Časté príčiny a riešenie problémov",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. Reverzný proxy nepreposiela WebSocket</b><br>Ak pristupujete k SiYuan cez reverzný proxy ako Nginx, musíte samostatne nakonfigurovať hlavičky aktualizácie protokolu pre <code>/ws</code>, inak zlyhá handshake WebSocketu. Referenčná konfigurácia (upstream nahraďte skutočnou adresou jadra):</p><pre><code>location /ws {\n    proxy_pass http://your-upstream;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection \"upgrade\";\n    proxy_set_header Host $host;\n}</code></pre></div><div class=\"b3-typography\"><p><b>2. Proces jadra sa ukončil alebo zlyhal</b><br>Uistite sa, že kontajner alebo služba stále beží, a v prípade potreby ich reštartujte.<br>Úplné denníky (kernel.log / siyuan.log) môžete exportovať v [Nastavenia → O programe → Systémový denník].</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. Proces jadra sa ukončil alebo zlyhal</b><br>Reštartujte SiYuan.<br>Úplné denníky (kernel.log / siyuan.log) môžete exportovať v [Nastavenia → O programe → Systémový denník].</p></div><div class=\"b3-typography\"><p><b>2. Blokovanie antivírusom alebo bránou firewall</b><br>Niektoré bezpečnostné softvérie blokujú lokálnu premávku jadra alebo certifikát HTTPS s vlastným podpisom, čo bráni vytvoreniu WebSocketu. Pridajte SiYuan do zoznamu dôveryhodných (whitelist) svojho antivírusu a brány firewall a skúste to znova.</p></div>",
+  "kernelFault6": "Znovu načítať okno",
   "tokenUsage": "Využitie kontextu",
   "tokenCatSystem": "Systémová výzva",
   "tokenCatSkills": "Zručnosti",
@@ -1245,7 +1249,7 @@
   "previous": "Predchádzajúci",
   "next": "Nasledujúci",
   "kernelFault0": "SiYuan narazil na problém...",
-  "kernelFault1": "Dáta by mali byť v bezpečí. Skontrolujte sieť a reštartujte aplikáciu.",
+  "kernelFault1": "Spojenie s jadrom bolo stratené. Vaše dáta by mali byť v bezpečí — SiYuan sa automaticky pokúsi znova pripojiť každé 3 sekundy a toto okno sa samo zatvorí, keď sa jadro obnoví",
   "kernelFault2": "Ak problém pretrváva, nahláste chybu.",
   "fontSize": "Veľkosť písma",
   "fontSizeTip": "Predvolená je 16. Ovplyvňuje editor aj export.",

@@ -1,4 +1,8 @@
 {
+  "kernelFault3": "Penyebab umum dan pemecahan masalah",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. Reverse proxy tidak meneruskan WebSocket</b><br>Jika Anda mengakses SiYuan melalui reverse proxy seperti Nginx, Anda harus mengonfigurasi header peningkatan protokol untuk <code>/ws</code> secara terpisah, jika tidak, handshake WebSocket akan gagal. Konfigurasi referensi (ganti upstream dengan alamat kernel Anda yang sebenarnya):</p><pre><code>location /ws {\n    proxy_pass http://your-upstream;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection \"upgrade\";\n    proxy_set_header Host $host;\n}</code></pre></div><div class=\"b3-typography\"><p><b>2. Proses kernel berakhir atau macet</b><br>Pastikan kontainer atau layanan masih berjalan, dan mulai ulang jika perlu.<br>Anda dapat mengekspor log lengkap (kernel.log / siyuan.log) di [Pengaturan → Tentang → Log sistem].</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. Proses kernel berakhir atau macet</b><br>Mulai ulang SiYuan.<br>Anda dapat mengekspor log lengkap (kernel.log / siyuan.log) di [Pengaturan → Tentang → Log sistem].</p></div><div class=\"b3-typography\"><p><b>2. Pemblokiran oleh antivirus atau firewall</b><br>Beberapa perangkat lunak keamanan memblokir lalu lintas kernel lokal atau sertifikat HTTPS yang ditandatangani sendiri, yang mencegah pembentukan WebSocket. Silakan tambahkan SiYuan ke daftar kepercayaan (daftar putih) antivirus dan firewall Anda, lalu coba lagi.</p></div>",
+  "kernelFault6": "Muat ulang jendela",
   "tokenUsage": "Penggunaan konteks",
   "tokenCatSystem": "Prompt sistem",
   "tokenCatSkills": "Keterampilan",
@@ -1245,7 +1249,7 @@
   "previous": "Sebelumnya",
   "next": "Berikutnya",
   "kernelFault0": "SiYuan mengalami sedikit masalah...",
-  "kernelFault1": "Data Anda seharusnya aman, harap periksa apakah koneksi jaringan dan proses kernel normal, lalu mulai ulang SiYuan",
+  "kernelFault1": "Koneksi ke kernel telah terputus. Data Anda seharusnya aman — SiYuan akan mencoba menyambung ulang secara otomatis setiap 3 detik, dan jendela ini akan menutup sendiri setelah kernel pulih",
   "kernelFault2": "Jika masalah berlanjut, silakan cari bantuan atau laporkan bug <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">di sini</a>",
   "fontSize": "Ukuran Font",
   "fontSizeTip": "Ukuran font default adalah <code class='fn__code'>16</code>, pengaturan ini memengaruhi tampilan ukuran font editor dan PDF/HTML yang diekspor",

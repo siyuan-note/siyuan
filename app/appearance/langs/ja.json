@@ -1,4 +1,8 @@
 {
+  "kernelFault3": "一般的な原因とトラブルシューティング",
+  "kernelFault4": "<div class=\"b3-typography\"><p><b>1. リバースプロキシが WebSocket を転送していない</b><br>Nginx などのリバースプロキシ経由でアクセスする場合、<code>/ws</code> 用にプロトコルアップグレードヘッダーを個別に設定する必要があります。設定しないと WebSocket ハンドシェイクが失敗します。参考設定（upstream は実際のカーネルアドレスに置き換えてください）：</p><pre><code>location /ws {\n    proxy_pass http://your-upstream;\n    proxy_http_version 1.1;\n    proxy_set_header Upgrade $http_upgrade;\n    proxy_set_header Connection \"upgrade\";\n    proxy_set_header Host $host;\n}</code></pre></div><div class=\"b3-typography\"><p><b>2. カーネルプロセスが終了またはクラッシュした</b><br>コンテナやサービスがまだ実行中か確認し、必要に応じて再起動してください。<br>完全なログは [設定 → About → システムログ] でエクスポートできます（kernel.log / siyuan.log）。</p></div>",
+  "kernelFault5": "<div class=\"b3-typography\"><p><b>1. カーネルプロセスが終了またはクラッシュした</b><br>SiYuan を再起動してください。<br>完全なログは [設定 → About → システムログ] でエクスポートできます（kernel.log / siyuan.log）。</p></div><div class=\"b3-typography\"><p><b>2. アンチウイルスまたはファイアウォールによるブロック</b><br>一部のセキュリティソフトがローカルカーネル通信や自己署名 HTTPS 証明書をブロックし、WebSocket の確立を妨げることがあります。SiYuan をアンチウイルスおよびファイアウォールの信頼リスト（ホワイトリスト）に追加してから再試行してください。</p></div>",
+  "kernelFault6": "ウィンドウを再読み込み",
   "tokenUsage": "コンテキスト使用量",
   "tokenCatSystem": "システムプロンプト",
   "tokenCatSkills": "スキル",
@@ -1245,7 +1249,7 @@
   "previous": "前へ",
   "next": "次へ",
   "kernelFault0": "SiYuan に予期せぬエラーが発生しました...",
-  "kernelFault1": "データは安全です。ネットワーク接続とカーネルプロセスが正常なことを確認して SiYuan を再起動してください",
+  "kernelFault1": "カーネルとの接続が切断されました。データは通常は安全です。SiYuan は 3 秒ごとに自動的に再接続を試み、カーネルが復旧するとこのウィンドウは自動的に閉じます",
   "kernelFault2": "問題が解決しない場合は<a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">こちら</a>でヘルプやバグレポートを探してください",
   "fontSize": "フォントサイズ",
   "fontSizeTip": "デフォルトのフォントサイズは <code class='fn__code'>16</code> です。この設定はエディタとエクスポートされる PDF/HTML のフォントサイズに影響します",

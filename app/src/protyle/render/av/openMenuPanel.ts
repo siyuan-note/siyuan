@@ -58,7 +58,6 @@ import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {Menu} from "../../../plugin/Menu";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
@@ -651,30 +650,22 @@ export const openMenuPanel = (options: {
                         icon: "iconTrashcan",
                         label: window.siyuan.languages.delete,
                         click: () => {
-                            const rmNode = getFilterByPath(getEditableFilters(data), path);
-                            const doRemove = () => {
-                                const cloneBefore = JSON.parse(JSON.stringify(data.view.filters));
-                                removeFilterByPath(getEditableFilters(data), path);
-                                const cloneAfter = JSON.parse(JSON.stringify(data.view.filters));
-                                transaction(options.protyle, [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: cloneAfter,
-                                    blockID
-                                }], [{
-                                    action: "setAttrViewFilters",
-                                    avID,
-                                    data: cloneBefore,
-                                    blockID
-                                }]);
-                                menuElement.innerHTML = getFiltersHTML(data);
-                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
-                            };
-                            if (rmNode && rmNode.filters && rmNode.filters.length > 0) {
-                                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDeleteFilterGroupTip, doRemove);
-                            } else {
-                                doRemove();
-                            }
+                            const cloneBefore = JSON.parse(JSON.stringify(data.view.filters));
+                            removeFilterByPath(getEditableFilters(data), path);
+                            const cloneAfter = JSON.parse(JSON.stringify(data.view.filters));
+                            transaction(options.protyle, [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: cloneAfter,
+                                blockID
+                            }], [{
+                                action: "setAttrViewFilters",
+                                avID,
+                                data: cloneBefore,
+                                blockID
+                            }]);
+                            menuElement.innerHTML = getFiltersHTML(data);
+                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                         }
                     });
                     menu.open({x: event.clientX, y: event.clientY, h: 28});

@@ -76,7 +76,6 @@
   "filterMatchAll": "Соответствуют всем",
   "filterMatchAny": "Соответствует любому",
   "emptyFilterGroup": "Пустая группа",
-  "confirmDeleteFilterGroupTip": "Удаление этой группы приведет к удалению всех условий фильтра в ней. Продолжить?",
   "undoCrossDocConfirm": "Эта отмена повлияет на следующие документы. Продолжить?",
   "calcOperatorTemplate": "Шаблон",
   "calcResultTemplate": "Шаблон",

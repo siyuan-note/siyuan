@@ -76,7 +76,6 @@
   "filterMatchAll": "Corresponder a todos",
   "filterMatchAny": "Corresponder a qualquer",
   "emptyFilterGroup": "Grupo vazio",
-  "confirmDeleteFilterGroupTip": "Excluir este grupo removerá todas as condições de filtro nele. Continuar?",
   "undoCrossDocConfirm": "Este desfazer afetará os seguintes documentos. Continuar?",
   "calcOperatorTemplate": "Modelo",
   "calcResultTemplate": "Modelo",

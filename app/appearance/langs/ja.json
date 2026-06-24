@@ -76,7 +76,6 @@
   "filterMatchAll": "すべてに一致",
   "filterMatchAny": "いずれかに一致",
   "emptyFilterGroup": "空のグループ",
-  "confirmDeleteFilterGroupTip": "このグループを削除すると、その中のすべてのフィルター条件が削除されます。続行しますか？",
   "undoCrossDocConfirm": "この操作は以下のドキュメントに影響します。続行しますか？",
   "calcOperatorTemplate": "テンプレート",
   "calcResultTemplate": "テンプレート",

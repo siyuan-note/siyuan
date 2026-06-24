@@ -127,8 +127,8 @@ interface IBreadcrumb {
 }
 
 interface ILuteOptions extends IMarkdownConfig {
-    emojis?: IObject;
-    emojiSite?: string;
+    emojis: IObject;
+    emojiSite: string;
     headingAnchor?: boolean;
     lazyLoadImage?: string;
 }

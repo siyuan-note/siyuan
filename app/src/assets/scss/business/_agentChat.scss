@@ -276,7 +276,6 @@
 // 消息正文复用全局 b3-typography 排版（与导出预览/编辑器预览一致），
 // 仅保留 AgentChat 特有的代码块增强：hover 显示语言标签 + 复制按钮。
 // pre 需 position:relative 作为复制按钮（absolute）和语言标签（::before）的定位上下文。
-.b3-typography pre,
 .agent-chat__body--mirror pre {
     position: relative;
     // 左右 padding 统一变量，::before 语言标签用同值 left 保证左对齐代码正文。
@@ -297,12 +296,10 @@
 }
 
 // 有语言标签的代码块顶部留空间，避免 ::before 语言标签与正文重叠。
-.b3-typography pre[data-language],
 .agent-chat__body--mirror pre[data-language] {
     padding-top: 24px;
 }
 
-.b3-typography pre[data-language]::before,
 .agent-chat__body--mirror pre[data-language]::before {
     content: attr(data-language);
     position: absolute;

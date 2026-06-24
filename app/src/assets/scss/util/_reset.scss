@@ -9,6 +9,15 @@ html {
   box-sizing: border-box;
 }
 
+// 声明当前配色方案，用于修正 iOS 深色模式下输入法候选词高亮项背景丢失等问题 https://github.com/siyuan-note/siyuan/issues/17894
+:root[data-theme-mode="dark"] {
+  color-scheme: dark;
+}
+
+:root[data-theme-mode="light"] {
+  color-scheme: light;
+}
+
 body {
   text-rendering: optimizeLegibility;
   margin: 0;

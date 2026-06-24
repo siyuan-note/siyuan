@@ -599,6 +599,12 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			}}, ret...)
 		}
 
+		// 容器块（引述/超级块/列表等）内部的标题构成独立的子大纲，扫描容器外部同级标题前需重置标题层级约束，
+		// 否则容器内部更宽（层级更小）的标题会错误地限制容器外部同级标题的收集 https://github.com/siyuan-note/siyuan/issues/17930
+		if ast.NodeDocument != parent.Type && parent.IsContainerBlock() {
+			headingLevel = 16
+		}
+
 		for prev := parent.Previous; nil != prev; prev = prev.Previous {
 			b := prev
 			if ast.NodeSuperBlock == prev.Type {

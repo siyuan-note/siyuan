@@ -4,3 +4,5 @@ allowBuilds:
   electron-winstaller: true
   esbuild: true
 blockExoticSubdeps: false
+minimumReleaseAgeExclude:
+  - electron@41.9.0

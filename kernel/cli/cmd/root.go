@@ -40,6 +40,20 @@ var (
 var rootCmd = &cobra.Command{
 	Use:     "SiYuan-Kernel",
 	Version: util.Ver,
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		// CLI 单次命令没有后台 cron 周期性 flush SQL 队列（server 模式才有 job.StartCron），进程在 main 返回后
+		// 即退出，内存里的 SQL 索引队列会随进程丢失（操作虽已落 index.queue，但要等下次启动 recoverIndexQueue
+		// 才恢复）。这里在命令执行完后统一落库，保证写完即可搜索。
+		name := cmd.Name()
+		// serve 子命令有自己的长驻退出流程（HandleSignal → model.Close 会 flush），不在此处理；
+		// workspace 子命令在 PersistentPreRunE 中跳过了数据库初始化，此时 sql 包未就绪，调用会 panic。
+		if name == "serve" || (cmd.Parent() != nil && cmd.Parent().Name() == "workspace") {
+			return nil
+		}
+		model.FlushTxQueue()
+		sql.FlushQueue()
+		return nil
+	},
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// workspace 子命令不需要工作空间校验
 		if cmd.Parent() != nil && cmd.Parent().Name() == "workspace" {

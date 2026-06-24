@@ -1,7 +1,5 @@
 import {escapeHtml} from "../../util/escape";
-import {setCodeTheme} from "../../protyle/render/util";
-import {addScript} from "../../protyle/util/addScript";
-import {Constants} from "../../constants";
+import {highlightRender} from "../../protyle/render/highlightRender";
 import {mathRender} from "../../protyle/render/mathRender";
 import {mermaidRender} from "../../protyle/render/mermaidRender";
 import {flowchartRender} from "../../protyle/render/flowchartRender";
@@ -174,52 +172,6 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     });
 };
 
-export const highlightCodeBlocks = (container: HTMLElement): void => {
-    const codeElements: Array<{el: HTMLElement; language: string}> = [];
-    // ProtylePreview 输出的 code 会预置 .hljs 但内容未真正高亮，故不能靠 :not(.hljs) 去重，
-    // 改用 data-highlighted 标记，避免重复高亮。
-    container.querySelectorAll("pre code").forEach((codeEl) => {
-        const el = codeEl as HTMLElement;
-        if (el.hasAttribute("data-highlighted")) {
-            return;
-        }
-        let language = "";
-        for (const cls of el.className.split(" ")) {
-            if (cls.startsWith("language-")) {
-                language = cls.replace("language-", "");
-                break;
-            }
-        }
-        if (!language) {
-            language = el.parentElement?.getAttribute("data-language") || "";
-        }
-        if (language) {
-            codeElements.push({el, language});
-        }
-    });
-    if (codeElements.length === 0) { return; }
-
-    const process = () => {
-        codeElements.forEach(({el, language}) => {
-            if (!window.hljs.getLanguage(language)) {
-                language = "plaintext";
-            }
-            el.classList.add("hljs");
-            el.innerHTML = window.hljs.highlight(el.textContent || "", {language, ignoreIllegals: true}).value;
-            el.setAttribute("data-highlighted", "true");
-        });
-    };
-
-    if (window.hljs) {
-        process();
-    } else {
-        setCodeTheme(Constants.PROTYLE_CDN);
-        addScript(`${Constants.PROTYLE_CDN}/js/highlight.js/highlight.min.js?v=11.11.2`, "protyleHljsScript")
-            .then(() => addScript(`${Constants.PROTYLE_CDN}/js/highlight.js/third-languages.js?v=2.0.1`, "protyleHljsThirdScript"))
-            .then(process);
-    }
-};
-
 // 为容器内所有代码块（pre）和公式块（div[data-subtype=math]）注入复制按钮。
 export const addCopyButtons = (container: HTMLElement): void => {
     // 代码块：复制 code 文本。
@@ -293,7 +245,12 @@ export const postRender = (container: HTMLElement, app?: App): void => {
             code.parentElement?.setAttribute("data-language", match[1]);
         }
     });
-    highlightCodeBlocks(container);
+    // Agent 内容由 ProtylePreview 生成，结构与官方 preview 一致，复用 highlightRender 渲染高亮。
+    // 容器自身可能是 b3-typography（流式更新），也可能外层包裹含 b3-typography 的后代，两种情况都需覆盖。
+    const typographyElements = container.classList.contains("b3-typography")
+        ? [container as HTMLElement]
+        : Array.from(container.querySelectorAll<HTMLElement>(".b3-typography"));
+    typographyElements.forEach((item) => highlightRender(item));
     mathRender(container);
     mermaidRender(container);
     flowchartRender(container);

@@ -22,6 +22,8 @@ let firstXY: "x" | "y";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
 let scrollBlock: boolean;
 let isFirstMove = true;
+// 长按进入多选的定时器
+let longPressTimer: number;
 
 const popSide = (render = true) => {
     if (render) {
@@ -32,15 +34,29 @@ const popSide = (render = true) => {
     }
 };
 
+// 清除长按进入多选的定时器
+const clearLongPress = () => {
+    if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = undefined;
+    }
+};
+
 export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
     const editor = getCurrentEditor();
     if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
+            if (longPressTimer) {
+                event.stopImmediatePropagation();
+                event.preventDefault();
+                return;
+            }
             // 多选模式
             const blockElement = hasClosestBlock(target);
             if (blockElement) {
+                // 本次按压已在按住期间触发多选，松手时不切换选中态，仅消费该手势
                 blockElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                     item.classList.remove("protyle-wysiwyg--select");
                 });
@@ -55,7 +71,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
                 event.preventDefault();
             }
         } else if (currentTime - time > Constants.TIMEOUT_LONGPRESS) {
-            // 长按
+            // 长按：多选已在按住满阈值时触发，此处取消定时器避免重复触发
             if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
                 target.dispatchEvent(new MouseEvent("contextmenu", {
                     bubbles: true,
@@ -64,18 +80,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
                     clientY: event.changedTouches[0].clientY,
                 }));
             }
-            // 超长按
-            if (currentTime - time > 2000) {
-                const blockElement = hasClosestBlock(target);
-                if (blockElement) {
-                    const protyle = editor.protyle;
-                    protyle.toolbar.showMultiSelectMode(protyle, blockElement);
-                }
-            }
             event.stopImmediatePropagation();
             event.preventDefault();
             return;
         }
+        clearLongPress();
     }
 
     if (typeof yDiff === "undefined" && window.siyuan.mobile.editor?.protyle.options.render.gutter) {
@@ -236,6 +245,19 @@ export const handleTouchStart = (event: TouchEvent) => {
     }
     isFirstMove = true;
     scrollBlock = false;
+    // 长按编辑器内块达到阈值时直接进入多选模式，无需抬手
+    clearLongPress();
+    if (clientX && clientY && editor && !editor.protyle.toolbar.isMultiSelectMode()) {
+        const blockElement = hasClosestBlock(target);
+        if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
+            longPressTimer = window.setTimeout(() => {
+                // 清空系统文本选区，避免原生长按选中的残留
+                window.getSelection().removeAllRanges();
+                activeBlur();
+                editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
+            }, Constants.TIMEOUT_MULTIPLE_SELECT);
+        }
+    }
 };
 
 let previousClientX: number;
@@ -269,6 +291,10 @@ export const handleTouchMove = (event: TouchEvent) => {
 
     xDiff = Math.floor(clientX - event.touches[0].clientX);
     yDiff = Math.floor(clientY - event.touches[0].clientY);
+    // 位移超过阈值说明是滑动而非长按，取消进入多选的定时器
+    if (Math.abs(xDiff) >= 5 || Math.abs(yDiff) >= 5) {
+        clearLongPress();
+    }
     if (!firstDirection) {
         firstDirection = xDiff > 0 ? "toLeft" : "toRight";
     }

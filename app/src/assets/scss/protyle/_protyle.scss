@@ -90,6 +90,28 @@
       color: var(--b3-theme-on-surface);
     }
 
+    // 悬浮时显示固定尺寸的圆角背景（排除插入元素，它有自己的两态样式）
+    // 用 ::before 而非直接设 button 背景，避免受 padding/svg 尺寸影响导致宽高不一致
+    &:not(.protyle-gutters__insert)::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      transform: translate(-50%, -50%);
+      border-radius: var(--b3-border-radius);
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--b3-color-transition);
+    }
+
+    &:not(.protyle-gutters__insert):hover::before {
+      opacity: 1;
+      background-color: var(--b3-theme-background-light);
+    }
+
     &:active {
       cursor: grabbing;
     }
@@ -123,9 +145,9 @@
   z-index: 3;
   padding: 0;
   cursor: pointer;
-  // 线条态：靠自身尺寸（JS 设为细条）+ 背景色呈现线条
-  background-color: var(--b3-theme-on-surface-light);
-  transition: all .15s;
+  // 线条态：靠自身尺寸（JS 设为细条）+ 背景色呈现线条，颜色与块标悬浮背景一致
+  background-color: var(--b3-theme-background-light);
+  transition: background-color .25s;
   // 透明 ::before 扩大可悬浮热区，视觉仍是细线但命中区更大（约 8px）
   &::before {
     content: '';
@@ -133,33 +155,53 @@
     inset: -4px;
   }
 
-  // svg 线条态隐藏（opacity:0 + 缩小），is-active 时放大淡入；用 opacity/scale 而非 display 以支持过渡动画
+  // svg 线条态隐藏（opacity:0 + 极小），is-active 时用 @keyframes 从小放大（不受 display 切换影响，可靠触发）
   svg {
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(.3);
+    transform: translate(-50%, -50%) scale(.2);
     opacity: 0;
     color: var(--b3-theme-on-surface-light);
     width: 20px;
     height: 20px;
     float: none;
     pointer-events: none;
-    transition: opacity .2s ease, transform .2s cubic-bezier(.34, 1.56, .64, 1), color var(--b3-color-transition);
+    transition: opacity .2s ease, color var(--b3-color-transition);
   }
 
-  // +号态：鼠标移到线条上时 JS 加 .is-active，背景透明、图标放大淡入（带回弹的放大效果）
+  // +号态：鼠标移到线条上时 JS 加 .is-active，背景透明、图标从小放大播放动画
+  // --plus-offset-x/y 由 JS 按横竖排方向设定，整体平移 button（含 svg）到+号位置，
+  // 这样 button 的 targetRect 与+号视觉位置一致，tooltip（west）能正确对齐+号
   &.is-active {
     background-color: transparent;
+    transform: translate(var(--plus-offset-x, 0px), var(--plus-offset-y, 0px));
 
     svg {
+      opacity: 1;
+      pointer-events: auto;
+      animation: plusPopIn .28s cubic-bezier(.34, 1.56, .64, 1) both;
+      // 动画结束后停在居中放大态（偏移由父 button transform 承担）
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+  }
+
+  @keyframes plusPopIn {
+    0% {
+      transform: translate(-50%, -50%) scale(.2);
+      opacity: 0;
+    }
+    40% {
+      opacity: 1;
+    }
+    100% {
       transform: translate(-50%, -50%) scale(1.15);
       opacity: 1;
     }
   }
 
   &.is-active:hover svg {
-    color: var(--b3-theme-primary);
+    color: var(--b3-theme-on-surface);
   }
 }
 

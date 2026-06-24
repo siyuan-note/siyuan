@@ -544,12 +544,13 @@ export class Gutter {
             if (protyle.disabled || !beforeElement || !afterElement) {
                 return;
             }
-            const targetType = (event.target as HTMLElement)?.dataset?.type;
-            // 情况A：鼠标在插入元素上 → 变+号态（鼠标所在那个），另一个保持/恢复线条态
-            if (targetType === "gutterInsertBefore" || targetType === "gutterInsertAfter") {
+            // 情况A：鼠标在插入元素（或其 svg 子元素）上 → 变+号态（鼠标所在那个），另一个保持/恢复线条态
+            const insertElement = hasClosestByClassName(event.target, "protyle-gutters__insert");
+            if (insertElement) {
+                const insertType = insertElement.getAttribute("data-type");
                 window.clearTimeout(hidePlusTimeout);
-                beforeElement.classList.toggle("is-active", targetType === "gutterInsertBefore");
-                afterElement.classList.toggle("is-active", targetType === "gutterInsertAfter");
+                beforeElement.classList.toggle("is-active", insertType === "gutterInsertBefore");
+                afterElement.classList.toggle("is-active", insertType === "gutterInsertAfter");
                 return;
             }
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
@@ -568,6 +569,9 @@ export class Gutter {
             afterElement.dataset.nodeId = id;
             const rect = buttonElement.getBoundingClientRect();
             const compressed = this.element.style.width === "24px";
+            // 竖排时不显示+号提示（清空 aria-label 避免触发 tooltip），横排时恢复
+            beforeElement.setAttribute("aria-label", compressed ? "" : window.siyuan.languages.insertBefore);
+            afterElement.setAttribute("aria-label", compressed ? "" : window.siyuan.languages.insertAfter);
             // 先切换到线条态（移除 is-active），再定位
             beforeElement.classList.remove("is-active");
             afterElement.classList.remove("is-active");
@@ -582,15 +586,19 @@ export class Gutter {
                 beforeElement.style.height = `${lineH}px`;
                 beforeElement.style.left = `${rect.left - 3}px`;
                 beforeElement.style.top = `${top}px`;
+                beforeElement.style.setProperty("--plus-offset-x", "-6px");
+                beforeElement.style.setProperty("--plus-offset-y", "0px");
                 afterElement.style.display = "";
                 afterElement.style.width = "2px";
                 afterElement.style.height = `${lineH}px`;
                 afterElement.style.left = `${rect.right + 1}px`;
                 afterElement.style.top = `${top}px`;
+                afterElement.style.setProperty("--plus-offset-x", "6px");
+                afterElement.style.setProperty("--plus-offset-y", "0px");
                 // 竖排时隐藏块标提示，避免其遮挡左侧线条
                 hideTooltip();
             } else {
-                // 横排：线条放块标上下边缘，线高 2px、线长 10px，水平居中于块标
+                // 横排：线条放块标上下边缘，线高 2px、线长 10px，水平居中于块标；+号往外偏（线条不动）
                 const lineW = 10;
                 const left = rect.left + (rect.width - lineW) / 2;
                 beforeElement.style.display = "";
@@ -598,11 +606,15 @@ export class Gutter {
                 beforeElement.style.height = "2px";
                 beforeElement.style.left = `${left}px`;
                 beforeElement.style.top = `${rect.top}px`;
+                beforeElement.style.setProperty("--plus-offset-x", "0px");
+                beforeElement.style.setProperty("--plus-offset-y", "-8px");
                 afterElement.style.display = "";
                 afterElement.style.width = `${lineW}px`;
                 afterElement.style.height = "2px";
                 afterElement.style.left = `${left}px`;
                 afterElement.style.top = `${rect.bottom - 2}px`;
+                afterElement.style.setProperty("--plus-offset-x", "0px");
+                afterElement.style.setProperty("--plus-offset-y", "8px");
             }
             window.clearTimeout(hidePlusTimeout);
         });
@@ -2905,6 +2917,6 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
             });
         }
         // 追加块标边缘悬浮触发的插入元素（默认隐藏，悬浮块标显示线条，悬浮线条变+号），由 mousemove 定位
-        this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__insert ariaLabel" data-type="gutterInsertBefore" data-position="parentW" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__insert ariaLabel" data-type="gutterInsertAfter" data-position="parentW" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
+        this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__insert ariaLabel" data-type="gutterInsertBefore" data-position="6west" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__insert ariaLabel" data-type="gutterInsertAfter" data-position="6west" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
     }
 }

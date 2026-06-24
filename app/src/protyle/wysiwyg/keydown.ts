@@ -1333,6 +1333,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
                 e.style.direction = "rtl";
+                e.dataset.manualTextDirection = "true";
+                delete e.dataset.autoTextDirection;
             });
             event.stopPropagation();
             event.preventDefault();
@@ -1345,6 +1347,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
                 e.style.direction = "ltr";
+                e.dataset.manualTextDirection = "true";
+                delete e.dataset.autoTextDirection;
             });
             event.stopPropagation();
             event.preventDefault();

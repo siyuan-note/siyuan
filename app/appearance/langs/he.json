@@ -926,6 +926,8 @@
   "rtl": "ימין לשמאל (RTL)",
   "ltr": "שמאל לימין (LTR)",
   "rtlTip": "הפק תוכן מימין לשמאל",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "גובה",
   "deactivateUser": "בטל פעילות חשבון",
   "deactivateUserTip": "<ul class='fn__list'><li>ברגע שהחשבון מושבת, הוא לא יכול להיות משוחזר, אנא אל תנסה את זה בחופשיות</li><li>שם המשתמש יימולא ב<code>someone101</code> (המספר לאחר מכן הוא מספר המשתמש), הסיסמה תאפס למספר אקראי</li><li>נקי את כינוי המשתמש, תווית עצמאי, URL, פרופיל, תמונה פרופיל, קישור לאתר, כתובת דואר ומידע אחר</li><li>כל המעברים בהגדרות הפרטיות יוחזרו למצב ציבורי ברירת מחדל</li><li>לא קישור רגיוני עם רשתות חברתיות צד שלישי, טלפונים ניידים</li><li><strong>שם המשתמש, מספר טלפון נייד, חשבון צד שלישי מקושר לא יוכל להיות שומע מחדש בעתיד</strong></li><li>סטטוס המשתמש מוגדר כבוטל, הרשמיות אסורה</li></ul>",

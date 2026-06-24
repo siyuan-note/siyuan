@@ -926,6 +926,8 @@
   "rtl": "Od prawej do lewej (RTL)",
   "ltr": "Od lewej do prawej (LTR)",
   "rtlTip": "Renderowanie treści od prawej do lewej",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "Wysokość",
   "deactivateUser": "Dezaktywuj konto",
   "deactivateUserTip": "<ul class='fn__list'><li>Po dezaktywowaniu konto nie może zostać przywrócone, proszę nie próbować tego bez powodu</li><li>Nazwa użytkownika zostanie wypełniona <code>someone101</code> (następny numer to numer użytkownika), hasło zostanie zresetowane na losowy numer</li><li>Wyczyść pseudonim użytkownika, samodzielną etykietę, URL, profil, avatar, link do witryny, adres do korespondencji i inne informacje</li><li>Wszystkie przełączniki ustawień prywatności zostaną przywrócone do domyślnego publicznego stanu</li><li>Usunięte zostaną konta społecznościowe firmy trzeciej powiązane z numerem telefonu</li><li><strong>Nazwa użytkownika, numer telefonu, powiązane konto firm trzecich nie będą mogły być używane ponownie w przyszłości</strong></li><li>Status użytkownika zostanie ustawiony na wyłączony, zabroniony logowanie</li></ul>",

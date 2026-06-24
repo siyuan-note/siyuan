@@ -18,6 +18,7 @@ import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
 import {resolveLinkDest} from "../toolbar/util";
+import {autoDirRender} from "./autoDirection";
 
 export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
     // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
@@ -535,6 +536,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
+        autoDirRender(protyle);
     } else if (code) {
         if (!code.startsWith('<div data-type="NodeCodeBlock" class="code-block" data-node-id="')) {
             // 原有代码在行内元素中粘贴会嵌套
@@ -645,6 +647,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 processRender(protyle.wysiwyg.element);
                 highlightRender(protyle.wysiwyg.element);
                 avRender(protyle.wysiwyg.element, protyle);
+                autoDirRender(protyle);
                 scrollCenter(protyle, undefined, "nearest", "smooth");
             });
             return;
@@ -714,6 +717,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         processRender(protyle.wysiwyg.element);
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
+        autoDirRender(protyle);
     }
     const selectCellElement = nodeElement.querySelector(".av__cell--select");
     if (nodeElement.classList.contains("av") && selectCellElement) {

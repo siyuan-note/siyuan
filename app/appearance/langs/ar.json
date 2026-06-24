@@ -926,6 +926,8 @@
   "rtl": "‫اليمين إلى اليسار (RTL)‬",
   "ltr": "‫اليسار إلى اليمين (LTR)‬",
   "rtlTip": "تقديم المحتوى من اليمين إلى اليسار",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "الارتفاع",
   "deactivateUser": "تعطيل الحساب",
   "deactivateUserTip": "‫<ul class='fn__list'><li>لا يمكن استعادة الحساب بمجرد تعطيله، لذا يرجى عدم المحاولة دون تفكير</li><li>سيتم ملء اسم المستخدم بـ <code>someone101</code> (حيث الرقم هو رقم المستخدم)، وسيتم إعادة تعيين كلمة المرور برقم عشوائي</li><li>سيتم مسح الاسم المستعار للمستخدم، والعلامات الشخصية، والروابط، والسيرة الذاتية، والصورة الشخصية، وروابط المواقع، والعنوان البريدي وغيرها من المعلومات</li><li>ستعود جميع إعدادات الخصوصية إلى حالة العرض العام الافتراضية</li><li>سيتم فك ارتباط حسابات التواصل الاجتماعي والهاتف المحمول المرتبطة</li><li><strong>لن يمكن استخدام اسم المستخدم ورقم الهاتف وحسابات الطرف الثالث المرتبطة مرة أخرى في المستقبل</strong></li><li>سيتم تعيين حالة المستخدم إلى معطل، ويمنع تسجيل الدخول</li></ul>‬",

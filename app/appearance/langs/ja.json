@@ -926,6 +926,8 @@
   "rtl": "右から左へ (RTL)",
   "ltr": "左から右へ (LTR)",
   "rtlTip": "コンテンツを右から左へレンダリングします",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "高さ",
   "deactivateUser": "アカウントの無効化",
   "deactivateUserTip": "<ul class='fn__list'><li>一度アカウントを無効にすると復元できません</li><li>ユーザー名は <code>someone101</code> (以下、ユーザー番号が続きます) で埋められ、パスワードはランダムな数字でリセットされます</li><li>ユーザーのニックネーム、自己紹介文、URL、プロフィール、アバター、サイトリンク、メールアドレスなどの情報がすべて消去されます</li><li >すべてのプライバシー設定スイッチがデフォルトの状態に戻ります</li><li>第三者のソーシャルアカウントや携帯電話の紐付けが解除されます</li><li><strong>ユーザー名、携帯電話番号、紐付けられたサードパーティーのアカウントは将来的に再利用できません</strong></li><li>ユーザーステータスは無効に設定され、ログインが禁止されます</li></ul>",

@@ -545,6 +545,10 @@ declare namespace Config {
          */
         rtl: boolean;
         /**
+         * Whether to auto-detect text direction per block
+         */
+        autoTextDirection: boolean;
+        /**
          * Whether to enable spell checking
          */
         spellcheck: boolean;

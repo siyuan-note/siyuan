@@ -926,6 +926,8 @@
   "rtl": "Rechts naar Links",
   "ltr": "Links naar Rechts",
   "rtlTip": "Inhoud RTL weergeven",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "Hoogte",
   "deactivateUser": "Account deactiveren",
   "deactivateUserTip": "<ul class='fn__list'><li>Zodra het account is gedeactiveerd, kan het niet worden hersteld. Probeer dit niet zomaar.</li><li>Gebruikersnaam wordt ingevuld met <code>someone101</code> (cijfer is gebruikersnummer), wachtwoord wordt gereset met willekeurig getal.</li><li>Bijnaam, labels, URL, profiel, avatar, sitelink, postadres en andere gegevens worden gewist.</li><li>Alle privacy-instellingen worden teruggezet naar openbaar.</li><li>Gekoppelde sociale accounts van derden en mobiele nummers worden ontkoppeld.</li><li><strong>Gebruikersnaam, mobiel nummer en gekoppelde accounts van derden kunnen daarna niet opnieuw worden gebruikt.</strong></li><li>Gebruikersstatus wordt gedeactiveerd, inloggen is verboden.</li></ul>",

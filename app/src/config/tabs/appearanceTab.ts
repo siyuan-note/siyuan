@@ -74,6 +74,36 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.rtlTip,
         save: (value) => editorConfigApi.patch("editor.rtl", value),
     });
+    group.switch("editor.autoTextDirection", {
+        title: window.siyuan.languages.autoTextDirection,
+        desc: window.siyuan.languages.autoTextDirectionTip,
+        save: (value) => editorConfigApi.patch("editor.autoTextDirection", value),
+        afterMount: mountAutoTextDirection,
+    });
+};
+
+const mountAutoTextDirection = () => {
+    requestAnimationFrame(() => {
+        const rtlEl = document.getElementById("editor.rtl") as HTMLInputElement;
+        const autoDirEl = document.getElementById("editor.autoTextDirection") as HTMLInputElement;
+        if (!rtlEl || !autoDirEl) {
+            return;
+        }
+        const onRtlChange = () => {
+            if (rtlEl.checked) {
+                autoDirEl.checked = false;
+                autoDirEl.dispatchEvent(new Event("change", {bubbles: true}));
+            }
+        };
+        const onAutoDirChange = () => {
+            if (autoDirEl.checked) {
+                rtlEl.checked = false;
+                rtlEl.dispatchEvent(new Event("change", {bubbles: true}));
+            }
+        };
+        rtlEl.addEventListener("change", onRtlChange);
+        autoDirEl.addEventListener("change", onAutoDirChange);
+    });
 };
 
 const mountAppearanceFontFamily = (root: HTMLElement) => {

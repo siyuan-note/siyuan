@@ -926,6 +926,8 @@
   "rtl": "Da destra a sinistra (RTL)",
   "ltr": "Da sinistra a destra (LTR)",
   "rtlTip": "Rendi il contenuto da destra a sinistra",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "Altezza",
   "deactivateUser": "Disattiva account",
   "deactivateUserTip": "<ul class='fn__list'><li>Una volta disattivato l'account, non può essere recuperato, non provarlo senza motivo</li><li>Il nome utente sarà sostituito con <code>qualcuno101</code> (seguendo il numero utente), la password sarà reimpostata con un numero casuale</li><li>Cancella nickname dell'utente, etichetta personale, URL, biografia, avatar, collegamento al sito, indirizzo di posta e altre informazioni</li><li >Tutti gli interruttori delle impostazioni sulla privacy torneranno allo stato pubblico predefinito</li><li>Disassocia account social di terze parti, numeri di telefono</li><li><strong>Nome utente, numero di telefono e account di terze parti associati non potranno più essere usati in futuro</strong></li><li>Lo stato dell'utente sarà impostato su disabilitato, accesso vietato</li></ul>",

@@ -310,13 +310,6 @@
     left: var(--agent-code-pad, 8px);
     font-size: 12px;
     color: var(--b3-theme-on-surface-light);
-    opacity: 0;
-    transition: var(--b3-transition);
-}
-
-.b3-typography pre:hover[data-language]::before,
-.agent-chat__body--mirror pre:hover[data-language]::before {
-    opacity: 0.86;
 }
 
 .agent-chat__copy-wrap {

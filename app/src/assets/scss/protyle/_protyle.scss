@@ -114,24 +114,51 @@
   }
 }
 
-// 块标上下/左右边缘悬浮触发的+号按钮，与 .protyle-gutters 同为 fixed 坐标系，由 JS 按鼠标位置定位
+// 块标边缘悬浮触发的插入元素，与 .protyle-gutters 同为 fixed 坐标系，由 JS 按块标边缘固定定位
+// 两态：默认为细线条（悬浮块标时显示），鼠标移到线条上加 .is-active 变+号
 // 选择器需带 button 标签以提升特异性，覆盖 .protyle-gutters button 的 position:relative 与 svg 尺寸
-// z-index 需高于块标 button 内 span 覆盖层（z-index:2），以便与块标重叠时仍可点击
-.protyle-gutters button.protyle-gutters__plus {
+// z-index 需高于块标 button 内 span 覆盖层（z-index:2），以便与块标重叠时仍可悬浮点击
+.protyle-gutters button.protyle-gutters__insert {
   position: fixed;
   z-index: 3;
-  padding: 1px;
+  padding: 0;
   cursor: pointer;
-
-  svg {
-    color: var(--b3-theme-on-surface-light);
-    width: 16px;
-    height: 16px;
-    float: none;
-    transition: var(--b3-color-transition);
+  // 线条态：靠自身尺寸（JS 设为细条）+ 背景色呈现线条
+  background-color: var(--b3-theme-on-surface-light);
+  transition: all .15s;
+  // 透明 ::before 扩大可悬浮热区，视觉仍是细线但命中区更大（约 8px）
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
   }
 
-  &:hover svg {
+  // svg 线条态隐藏（opacity:0 + 缩小），is-active 时放大淡入；用 opacity/scale 而非 display 以支持过渡动画
+  svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(.3);
+    opacity: 0;
+    color: var(--b3-theme-on-surface-light);
+    width: 20px;
+    height: 20px;
+    float: none;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s cubic-bezier(.34, 1.56, .64, 1), color var(--b3-color-transition);
+  }
+
+  // +号态：鼠标移到线条上时 JS 加 .is-active，背景透明、图标放大淡入（带回弹的放大效果）
+  &.is-active {
+    background-color: transparent;
+
+    svg {
+      transform: translate(-50%, -50%) scale(1.15);
+      opacity: 1;
+    }
+  }
+
+  &.is-active:hover svg {
     color: var(--b3-theme-primary);
   }
 }

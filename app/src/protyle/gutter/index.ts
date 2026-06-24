@@ -300,14 +300,14 @@ export class Gutter {
                 return;
             }
             const gutterRect = buttonElement.getBoundingClientRect();
-            if (buttonElement.dataset.type === "gutterPlusBefore" || buttonElement.dataset.type === "gutterPlusAfter") {
-                // 块标边缘+号：在对应块上方/下方插入新块，复用 insertEmptyBlock（列表项自动生成新列表项）
+            if (buttonElement.dataset.type === "gutterInsertBefore" || buttonElement.dataset.type === "gutterInsertAfter") {
+                // 块标边缘插入元素：在对应块上方/下方插入新块，复用 insertEmptyBlock（列表项自动生成新列表项）
                 if (protyle.disabled || !id) {
                     return;
                 }
                 hideElements(["gutter"], protyle);
                 countBlockWord([], protyle.block.rootID);
-                insertEmptyBlock(protyle, buttonElement.dataset.type === "gutterPlusBefore" ? "beforebegin" : "afterend", id);
+                insertEmptyBlock(protyle, buttonElement.dataset.type === "gutterInsertBefore" ? "beforebegin" : "afterend", id);
                 return;
             }
             if (buttonElement.dataset.type === "NodeAttributeViewRowMenu" || buttonElement.dataset.type === "NodeAttributeViewRow") {
@@ -514,105 +514,96 @@ export class Gutter {
             event.preventDefault();
             event.stopPropagation();
         });
-        // 延迟隐藏计时器，鼠标在块标与+号之间移动时提供缓冲，避免中途 mouseleave 误隐藏+号
+        // 延迟隐藏计时器，鼠标在块标与插入元素之间移动时提供缓冲，避免中途 mouseleave 误隐藏
         let hidePlusTimeout: number;
+        const hideInsert = () => {
+            this.element.querySelectorAll(".protyle-gutters__insert").forEach(item => {
+                item.classList.remove("is-active");
+                (item as HTMLElement).style.display = "none";
+            });
+        };
         this.element.addEventListener("mouseleave", (event: MouseEvent & { target: HTMLInputElement }) => {
-            // 鼠标移向+号时不隐藏（+号定位在容器外侧，移出容器几何范围会触发 mouseleave）
+            // 鼠标移向插入元素时不隐藏（元素定位在容器外侧，移出容器几何范围会触发 mouseleave）
             const relatedType = (event.relatedTarget as HTMLElement)?.dataset?.type;
-            if (relatedType === "gutterPlusBefore" || relatedType === "gutterPlusAfter") {
+            if (relatedType === "gutterInsertBefore" || relatedType === "gutterInsertAfter") {
                 return;
             }
-            // 块高亮立即移除，保持原有反馈；+号延迟隐藏，避免移向+号途中误隐藏
+            // 块高亮立即移除，保持原有反馈；插入元素延迟隐藏，避免移向它途中误隐藏
             Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
             });
             window.clearTimeout(hidePlusTimeout);
-            hidePlusTimeout = window.setTimeout(() => {
-                this.element.querySelectorAll(".protyle-gutters__plus").forEach(item => {
-                    (item as HTMLElement).style.display = "none";
-                });
-            }, 200);
+            hidePlusTimeout = window.setTimeout(hideInsert, 200);
             event.preventDefault();
             event.stopPropagation();
         });
-        // 鼠标悬浮块标上下边缘（正常模式）或左右边缘（压缩模式）时定位并显示+号
+        // 两态交互：悬浮块标显示线条，悬浮线条变+号；位置固定在块标边缘，不跟随鼠标
         this.element.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
-            const beforeElement = this.element.querySelector('.protyle-gutters__plus[data-type="gutterPlusBefore"]') as HTMLElement;
-            const afterElement = this.element.querySelector('.protyle-gutters__plus[data-type="gutterPlusAfter"]') as HTMLElement;
+            const beforeElement = this.element.querySelector('.protyle-gutters__insert[data-type="gutterInsertBefore"]') as HTMLElement;
+            const afterElement = this.element.querySelector('.protyle-gutters__insert[data-type="gutterInsertAfter"]') as HTMLElement;
             if (protyle.disabled || !beforeElement || !afterElement) {
-                beforeElement?.style.setProperty("display", "none");
-                afterElement?.style.setProperty("display", "none");
                 return;
             }
-            // 鼠标已移到+号上，保持当前显示不重定位
-            const overPlusType = (event.target as HTMLElement)?.dataset?.type;
-            if (overPlusType === "gutterPlusBefore" || overPlusType === "gutterPlusAfter") {
+            const targetType = (event.target as HTMLElement)?.dataset?.type;
+            // 情况A：鼠标在插入元素上 → 变+号态（鼠标所在那个），另一个保持/恢复线条态
+            if (targetType === "gutterInsertBefore" || targetType === "gutterInsertAfter") {
                 window.clearTimeout(hidePlusTimeout);
+                beforeElement.classList.toggle("is-active", targetType === "gutterInsertBefore");
+                afterElement.classList.toggle("is-active", targetType === "gutterInsertAfter");
                 return;
             }
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
-            if (!buttonElement || buttonElement.classList.contains("protyle-gutters__plus")) {
+            if (!buttonElement || buttonElement.classList.contains("protyle-gutters__insert")) {
                 return;
             }
             const type = buttonElement.getAttribute("data-type");
             const id = buttonElement.getAttribute("data-node-id");
-            // 跳过折叠箭头、数据库行+号、数据库行拖拽手柄，保持其原有行为
+            // 情况C：非有效块标（折叠箭头、数据库行等）→ 隐藏插入元素
             if (type === "fold" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
-                beforeElement.style.display = "none";
-                afterElement.style.display = "none";
+                hideInsert();
                 return;
             }
+            // 情况B：悬浮有效块标 → 显示线条（固定定位在块标边缘）
             beforeElement.dataset.nodeId = id;
             afterElement.dataset.nodeId = id;
             const rect = buttonElement.getBoundingClientRect();
-            // 压缩模式：块标容器宽 24px 且按钮垂直堆叠，+号改放到水平方向避免与堆叠按钮重叠
             const compressed = this.element.style.width === "24px";
-            // 根据鼠标偏离块标中心的程度动态调整+号尺寸（12px→18px）：越往目标方向移动越大，悬浮在块标上时较小
-            const setPlusSize = (plusElement: HTMLElement, ratio: number) => {
-                const size = Math.round(12 + Math.min(Math.max(ratio, 0), 1) * 6);
-                const svg = plusElement.querySelector("svg");
-                if (svg) {
-                    svg.style.width = `${size}px`;
-                    svg.style.height = `${size}px`;
-                }
-            };
-            // 正常模式定位+号：与 button 边缘重叠 2px（中心更贴近块标，且鼠标移出 button 即进入+号）
-            const placePlus = (plusElement: HTMLElement) => {
-                plusElement.style.display = "";
-                const plusWidth = plusElement.offsetWidth;
-                const plusHeight = plusElement.offsetHeight;
-                plusElement.style.left = `${rect.left + (rect.width - plusWidth) / 2}px`;
-                plusElement.style.top = `${(plusElement === beforeElement ? rect.top - plusHeight + 2 : rect.bottom - 2)}px`;
-            };
+            // 先切换到线条态（移除 is-active），再定位
+            beforeElement.classList.remove("is-active");
+            afterElement.classList.remove("is-active");
             if (compressed) {
-                // 压缩模式：右侧竖排显示两个+号，上方插入在上，下方插入在下
-                // 两个+号紧贴（间距 0），避免鼠标从一个移到另一个时经过缝隙触发 mouseleave 隐藏
-                // 鼠标越往右移动+号越大
-                const xRatio = (event.clientX - rect.left) / rect.width;
-                setPlusSize(beforeElement, xRatio);
-                setPlusSize(afterElement, xRatio);
+                // 竖排：线条放块标左右两侧，线宽 2px、线长 12px，垂直居中于块标图标，外移避免拥挤
                 const iconRect = buttonElement.querySelector("svg").getBoundingClientRect();
                 const centerY = iconRect.top + iconRect.height / 2;
-                const totalHeight = beforeElement.offsetHeight + afterElement.offsetHeight;
-                const startY = centerY - totalHeight / 2;
-                const startX = rect.right - 2;
+                const lineH = 12;
+                const top = centerY - lineH / 2;
                 beforeElement.style.display = "";
-                beforeElement.style.left = `${startX}px`;
-                beforeElement.style.top = `${startY}px`;
+                beforeElement.style.width = "2px";
+                beforeElement.style.height = `${lineH}px`;
+                beforeElement.style.left = `${rect.left - 3}px`;
+                beforeElement.style.top = `${top}px`;
                 afterElement.style.display = "";
-                afterElement.style.left = `${startX}px`;
-                afterElement.style.top = `${startY + beforeElement.offsetHeight}px`;
+                afterElement.style.width = "2px";
+                afterElement.style.height = `${lineH}px`;
+                afterElement.style.left = `${rect.right + 1}px`;
+                afterElement.style.top = `${top}px`;
+                // 竖排时隐藏块标提示，避免其遮挡左侧线条
+                hideTooltip();
             } else {
-                // 正常模式下上边缘=上方插入，下边缘=下方插入
-                const target = event.clientY < rect.top + rect.height / 2 ? beforeElement : afterElement;
-                const otherElement = target === beforeElement ? afterElement : beforeElement;
-                // 鼠标越偏离块标中心（越往上/下移动）目标+号越大
-                const yRatio = Math.abs(event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-                setPlusSize(target, yRatio);
-                otherElement.style.display = "none";
-                placePlus(target);
+                // 横排：线条放块标上下边缘，线高 2px、线长 10px，水平居中于块标
+                const lineW = 10;
+                const left = rect.left + (rect.width - lineW) / 2;
+                beforeElement.style.display = "";
+                beforeElement.style.width = `${lineW}px`;
+                beforeElement.style.height = "2px";
+                beforeElement.style.left = `${left}px`;
+                beforeElement.style.top = `${rect.top}px`;
+                afterElement.style.display = "";
+                afterElement.style.width = `${lineW}px`;
+                afterElement.style.height = "2px";
+                afterElement.style.left = `${left}px`;
+                afterElement.style.top = `${rect.bottom - 2}px`;
             }
-            // 鼠标在块标上移动，取消可能挂起的延迟隐藏
             window.clearTimeout(hidePlusTimeout);
         });
         // https://github.com/siyuan-note/siyuan/issues/12751
@@ -2838,8 +2829,8 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
             }
         }
         let match = true;
-        // 统计时排除块标边缘+号按钮，它们由 render 末尾单独追加，不参与防抖比较
-        const buttonsElement = this.element.querySelectorAll("button:not(.protyle-gutters__plus)");
+        // 统计时排除块标边缘插入元素，它们由 render 末尾单独追加，不参与防抖比较
+        const buttonsElement = this.element.querySelectorAll("button:not(.protyle-gutters__insert)");
         if (buttonsElement.length !== html.split("</button>").length - 1) {
             match = false;
         } else {
@@ -2898,8 +2889,8 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
             this.element.style.left = `${rect.left - this.element.clientWidth - space / 2 + 3}px`;
             html = "";
             Array.from(this.element.children).reverse().forEach((item, index) => {
-                // 跳过块标边缘+号按钮，避免被压缩重排
-                if (item.classList.contains("protyle-gutters__plus")) {
+                // 跳过块标边缘插入元素，避免被压缩重排
+                if (item.classList.contains("protyle-gutters__insert")) {
                     return;
                 }
                 if (index !== 0) {
@@ -2913,7 +2904,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 item.style.height = "";
             });
         }
-        // 追加块标上下/左右边缘悬浮触发的+号按钮（默认隐藏），由 mousemove 按鼠标位置定位显示
-        this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusBefore" data-position="parentW" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconSquarePlus"></use></svg></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusAfter" data-position="parentW" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconSquarePlus"></use></svg></button>`);
+        // 追加块标边缘悬浮触发的插入元素（默认隐藏，悬浮块标显示线条，悬浮线条变+号），由 mousemove 定位
+        this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__insert ariaLabel" data-type="gutterInsertBefore" data-position="parentW" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__insert ariaLabel" data-type="gutterInsertAfter" data-position="parentW" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
     }
 }

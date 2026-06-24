@@ -12,6 +12,7 @@ import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {getLute} from "../../protyle/render/setLute";
+import {setPanelFocus} from "../util";
 import {escapeAriaLabel, escapeHtml} from "../../util/escape";
 import {setPosition} from "../../util/setPosition";
 import {fetchPost} from "../../util/fetch";
@@ -574,6 +575,7 @@ export class AgentChat extends Model {
         });
 
         this.parent.panelElement.addEventListener("click", (e: MouseEvent) => {
+            setPanelFocus(this.parent.panelElement);
             const t = e.target as HTMLElement;
             let target = t;
             while (target && !target.isEqualNode(this.parent.panelElement)) {

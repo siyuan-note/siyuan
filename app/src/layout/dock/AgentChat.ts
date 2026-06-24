@@ -548,15 +548,17 @@ export class AgentChat extends Model {
                     this.closeTokenBreakdownPopup();
                 }, 300);
             });
-        } else {
-            this.tokenDisplayEl.addEventListener("click", () => {
-                if (this.tokenPopup) {
-                    this.closeTokenBreakdownPopup();
-                } else {
-                    this.showTokenBreakdownPopup();
-                }
-            });
         }
+        // 所有设备：点击 toggle 浮层。hover 设备上 stopPropagation 阻止冒泡到 document 的 outside click handler，
+        // 避免悬浮显示后点击反而关闭（反直觉）。
+        this.tokenDisplayEl.addEventListener("click", (e: MouseEvent) => {
+            e.stopPropagation();
+            if (this.tokenPopup) {
+                this.closeTokenBreakdownPopup();
+            } else {
+                this.showTokenBreakdownPopup();
+            }
+        });
         this.sendBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
             this.sendMessage();

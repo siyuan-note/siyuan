@@ -9,7 +9,7 @@ let luteInstance: Lute | undefined;
  * 仅在首次创建时应用 options，后续调用直接返回已缓存的实例 ——
  * Lute 配置本就源于全局 config，跨编辑器一致，无需按编辑器区分。
  */
-export const getLute = (options: ILuteOptions): Lute => {
+export const getLute = (options?: ILuteOptions): Lute => {
     if (!luteInstance) {
         luteInstance = setLute(options);
     }

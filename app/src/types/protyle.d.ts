@@ -127,9 +127,9 @@ interface IBreadcrumb {
 }
 
 interface ILuteOptions extends IMarkdownConfig {
-    emojis: IObject;
-    emojiSite: string;
-    headingAnchor: boolean;
+    emojis?: IObject;
+    emojiSite?: string;
+    headingAnchor?: boolean;
     lazyLoadImage?: string;
 }
 
@@ -283,6 +283,8 @@ declare class Lute {
     public SetProtyleWYSIWYG(wysiwyg: boolean): void;
 
     public MarkdownStr(name: string, md: string): string;
+
+    public ProtylePreviewStr(name: string, md: string): string;
 
     public GetLinkDest(text: string): string;
 

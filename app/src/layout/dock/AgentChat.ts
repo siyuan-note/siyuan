@@ -135,11 +135,7 @@ export class AgentChat extends Model {
     constructor(app: App, tab: Tab) {
         super({app: app});
         this.parent = tab;
-        this.lute = getLute({
-            emojiSite: "/stage/protyle/emojis",
-            emojis: {},
-            headingAnchor: false,
-        });
+        this.lute = getLute();
         this.defaultTitle = window.siyuan.languages.agentChat || "Agent";
         this.sessionTitle = this.defaultTitle;
         this.initUI();
@@ -219,26 +215,26 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconMin"></use></svg>' +
             "</span>" +
             "</div>" +
-        '<div class="agent-chat__messages-wrap">' +
+            '<div class="agent-chat__messages-wrap">' +
             '<div class="agent-chat__messages fn__flex-1"></div>' +
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
-        "</div>" +
-        '<div class="agent-chat__input-area">' +
+            "</div>" +
+            '<div class="agent-chat__input-area">' +
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
             '<span class="fn__flex-1"></span>' +
             '<span class="agent-chat__tokens fn__none" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
-                '<svg viewBox="0 0 24 24">' +
-                    '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="3"></circle>' +
-                    '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
-                "</svg>" +
+            '<svg viewBox="0 0 24 24">' +
+            '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="3"></circle>' +
+            '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
+            "</svg>" +
             "</span>" +
             '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
-        '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
+            '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
             "</div>";
 
         this.messagesContainer = panel.querySelector(".agent-chat__messages") as HTMLElement;
@@ -252,8 +248,10 @@ export class AgentChat extends Model {
         this.modelSelect = panel.querySelector(".agent-chat__model-select") as HTMLSelectElement;
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
-            if (this.programmaticScroll) { return; }
-            const { scrollTop, scrollHeight, clientHeight } = this.messagesContainer;
+            if (this.programmaticScroll) {
+                return;
+            }
+            const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
             const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
             // Hysteresis: only mark as scrolled-up when clearly above bottom (>=60),
             // and only return to sticky when really at the bottom (<=10).
@@ -343,7 +341,7 @@ export class AgentChat extends Model {
                 if (!displayName) {
                     continue;
                 }
-                newOptions.push({ id: m.id || m.name, name: displayName });
+                newOptions.push({id: m.id || m.name, name: displayName});
             }
         }
         this.modelOptions = newOptions;
@@ -453,7 +451,9 @@ export class AgentChat extends Model {
         });
         this.navRail.addEventListener("click", (e: MouseEvent) => {
             const marker = (e.target as HTMLElement).closest(".agent-chat__nav-rail-marker") as HTMLElement;
-            if (!marker) { return; }
+            if (!marker) {
+                return;
+            }
             this.jumpToMessage(marker.dataset.messageId || "");
         });
 
@@ -462,8 +462,15 @@ export class AgentChat extends Model {
 
     private rebuildNavMarkers() {
         this.navRail.innerHTML = "";
-        const userEntries = this.entries.filter((e): e is { id?: string; type: "user"; content: string; timestamp?: number } => e.type === "user");
-        if (userEntries.length === 0) { return; }
+        const userEntries = this.entries.filter((e): e is {
+            id?: string;
+            type: "user";
+            content: string;
+            timestamp?: number
+        } => e.type === "user");
+        if (userEntries.length === 0) {
+            return;
+        }
 
         const gap = Math.max(0.5, Math.min(3, 40 / userEntries.length));
         this.navRail.style.setProperty("--nav-gap", gap + "px");
@@ -482,7 +489,9 @@ export class AgentChat extends Model {
 
     private updateActiveMarker() {
         const userMsgs = this.messagesContainer.querySelectorAll(".agent-chat__msg--user[data-message-id]");
-        if (userMsgs.length === 0) { return; }
+        if (userMsgs.length === 0) {
+            return;
+        }
         const threshold = this.messagesContainer.scrollTop + 50;
         let activeId = "";
         for (let i = 0; i < userMsgs.length; i++) {
@@ -503,9 +512,13 @@ export class AgentChat extends Model {
     }
 
     private jumpToMessage(messageId: string) {
-        if (!messageId) { return; }
+        if (!messageId) {
+            return;
+        }
         const el = this.messagesContainer.querySelector('[data-message-id="' + messageId + '"]') as HTMLElement;
-        if (!el) { return; }
+        if (!el) {
+            return;
+        }
         el.scrollIntoView({behavior: "smooth", block: "center"});
         el.classList.add("agent-chat__msg--jumped");
         setTimeout(() => {
@@ -947,7 +960,11 @@ export class AgentChat extends Model {
 
     // 持久化前精简 toolCalls：question 工具的完整 questions 参数已由独立的 question entry 存储，
     // assistant entry 的 toolCalls 里只需保留工具名和结果（供 LLM 上下文恢复），避免重复存储。
-    private slimToolCallsForPersistence(toolCalls: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>): Array<{ name: string; arguments: Record<string, unknown>; result?: string }> {
+    private slimToolCallsForPersistence(toolCalls: Array<{
+        name: string;
+        arguments: Record<string, unknown>;
+        result?: string
+    }>): Array<{ name: string; arguments: Record<string, unknown>; result?: string }> {
         return toolCalls.map(tc => {
             if (tc.name === "question" && tc.arguments && tc.arguments.questions) {
                 const slim = {...tc};
@@ -995,7 +1012,9 @@ export class AgentChat extends Model {
             const entryId = (entry as { id?: string }).id;
             switch (entry.type) {
                 case "user":
-                    this.appendUserMessage((entry as { content: string }).content, (entry as { timestamp?: number }).timestamp, entryId);
+                    this.appendUserMessage((entry as { content: string }).content, (entry as {
+                        timestamp?: number
+                    }).timestamp, entryId);
                     break;
                 case "thinking":
                     if (entry.steps && entry.steps.length > 0) {
@@ -1026,14 +1045,20 @@ export class AgentChat extends Model {
                             const lastText = rawEntry.steps[rawEntry.steps.length - 1]?.text;
                             if (lastText) {
                                 const m = lastText.match(/([\d.]+)\s*s/i);
-                                if (m) { dur = parseFloat(m[1]); }
+                                if (m) {
+                                    dur = parseFloat(m[1]);
+                                }
                             }
                         }
                         this.renderMergedThinkingCard(normSteps, entryId, dur);
                     }
                     break;
                 case "assistant": {
-                    const a = entry as { content: string; toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>; timestamp?: number };
+                    const a = entry as {
+                        content: string;
+                        toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string }>;
+                        timestamp?: number
+                    };
                     if (a.toolCalls && a.toolCalls.length > 0) {
                         this.appendPersistedToolCalls(a.content, a.toolCalls, a.timestamp, entryId);
                     } else {
@@ -1286,13 +1311,22 @@ export class AgentChat extends Model {
             e.protyle?.wysiwyg?.element?.querySelectorAll("[data-node-id].protyle-wysiwyg--select")
                 ?.forEach(el => {
                     const id = (el as HTMLElement).getAttribute("data-node-id");
-                    if (id) { allSelected.push(id); }
+                    if (id) {
+                        allSelected.push(id);
+                    }
                 });
         });
         allSelected = Array.from(new Set(allSelected));
 
         // Candidate selection, in priority order:
-        let candidate: { protyle: { block?: { id?: string; rootID?: string }; wysiwyg?: { element?: HTMLElement }; element: HTMLElement; model?: { parent?: { headElement?: HTMLElement } } } } | undefined;
+        let candidate: {
+            protyle: {
+                block?: { id?: string; rootID?: string };
+                wysiwyg?: { element?: HTMLElement };
+                element: HTMLElement;
+                model?: { parent?: { headElement?: HTMLElement } }
+            }
+        } | undefined;
 
         // 1) An editable editor that has its own selected blocks.
         candidate = allEditor.find(e => isEditable(e) &&
@@ -1362,7 +1396,9 @@ export class AgentChat extends Model {
         p.wysiwyg?.element?.querySelectorAll("[data-node-id].protyle-wysiwyg--select")
             ?.forEach(el => {
                 const id = (el as HTMLElement).getAttribute("data-node-id");
-                if (id) { selectedBlockIDs.push(id); }
+                if (id) {
+                    selectedBlockIDs.push(id);
+                }
             });
 
         // Visible blocks: top-level [data-node-id] children whose bounding rect intersects
@@ -1376,13 +1412,19 @@ export class AgentChat extends Model {
             for (let i = 0; i < children.length; i++) {
                 const child = children[i] as HTMLElement;
                 const id = child.getAttribute("data-node-id");
-                if (!id) { continue; }
+                if (!id) {
+                    continue;
+                }
                 const rect = child.getBoundingClientRect();
-                if (rect.height === 0) { continue; }
+                if (rect.height === 0) {
+                    continue;
+                }
                 if (rect.bottom >= view.top && rect.top <= view.bottom) {
                     visibleBlockIDs.push(id);
                 }
-                if (visibleBlockIDs.length >= maxVisibleBlockIDs) { break; }
+                if (visibleBlockIDs.length >= maxVisibleBlockIDs) {
+                    break;
+                }
             }
         }
 
@@ -1391,12 +1433,24 @@ export class AgentChat extends Model {
             return undefined;
         }
         const ctx: IEditorContext = {};
-        if (activeDocID) { ctx.activeDocID = activeDocID; }
-        if (activeDocTitle) { ctx.activeDocTitle = activeDocTitle; }
-        if (notebookID) { ctx.notebookID = notebookID; }
-        if (focusedBlockID && focusedBlockID !== activeDocID) { ctx.focusedBlockID = focusedBlockID; }
-        if (selectedBlockIDs.length > 0) { ctx.selectedBlockIDs = selectedBlockIDs; }
-        if (visibleBlockIDs.length > 0) { ctx.visibleBlockIDs = visibleBlockIDs; }
+        if (activeDocID) {
+            ctx.activeDocID = activeDocID;
+        }
+        if (activeDocTitle) {
+            ctx.activeDocTitle = activeDocTitle;
+        }
+        if (notebookID) {
+            ctx.notebookID = notebookID;
+        }
+        if (focusedBlockID && focusedBlockID !== activeDocID) {
+            ctx.focusedBlockID = focusedBlockID;
+        }
+        if (selectedBlockIDs.length > 0) {
+            ctx.selectedBlockIDs = selectedBlockIDs;
+        }
+        if (visibleBlockIDs.length > 0) {
+            ctx.visibleBlockIDs = visibleBlockIDs;
+        }
         return ctx;
     }
 
@@ -1444,12 +1498,11 @@ export class AgentChat extends Model {
                 case "reasoning":
                     this.appendReasoning(event.token);
                     break;
-                case "snapshot":
-                    {
-                        const snapshotEntryId = SessionStore.newSessionId();
-                        this.entries.push({id: snapshotEntryId, type: "snapshot", snapshotID: event.snapshotID});
-                        this.appendSnapshotInfo(event.snapshotID, snapshotEntryId);
-                    }
+                case "snapshot": {
+                    const snapshotEntryId = SessionStore.newSessionId();
+                    this.entries.push({id: snapshotEntryId, type: "snapshot", snapshotID: event.snapshotID});
+                    this.appendSnapshotInfo(event.snapshotID, snapshotEntryId);
+                }
                     break;
                 case "frontend_tool_call":
                     this.handleFrontendToolCall(event.callID, event.arguments);
@@ -1517,7 +1570,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--error">' +
             '<svg class="agent-chat__error-icon"><use xlink:href="#iconTriangleAlert"></use></svg>' +
             "<span>" + escapeHtml(message) + "</span>" +
-        "</div>";
+            "</div>";
         this.messagesContainer.appendChild(el);
         this.scrollToBottom(true);
         this.flushThinkingStep();
@@ -1535,7 +1588,7 @@ export class AgentChat extends Model {
             html += '<span class="agent-chat__msg-meta agent-chat__msg-time">' + this.formatMessageTime(timestamp) + "</span>";
         }
         html += '<span class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.copy + '"><svg><use xlink:href="#iconCopy"></use></svg></span>' +
-        "</div>";
+            "</div>";
         el.innerHTML = html;
         el.querySelector(".block__icon")?.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -1593,7 +1646,7 @@ export class AgentChat extends Model {
                 this.pendingTokenUpdate = false;
                 const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
                 if (bodyEl) {
-                bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
+                    bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
                     postRender(bodyEl, this.app);
                     void bodyEl.offsetHeight; // force reflow
                     this.scrollToBottom();
@@ -1677,9 +1730,9 @@ export class AgentChat extends Model {
             } else {
                 this.currentAIElement.remove();
             }
-        this.currentAIElement = null;
-        this.currentAssistantEntryId = "";
-        this.currentContent = "";
+            this.currentAIElement = null;
+            this.currentAssistantEntryId = "";
+            this.currentContent = "";
         } else if (reasoning === "processing" && this.currentContent) {
             this.attachStepContent(this.currentContent);
             this.currentContent = "";
@@ -1712,7 +1765,12 @@ export class AgentChat extends Model {
                 this.currentThinkingStepContent = "";
             }
             if (this.currentThinkingSteps.length > 0) {
-                this.entries.push({id: this.currentThinkingEntryId || undefined, type: "thinking", steps: this.currentThinkingSteps.slice(), duration: this.currentThinkingDuration || undefined});
+                this.entries.push({
+                    id: this.currentThinkingEntryId || undefined,
+                    type: "thinking",
+                    steps: this.currentThinkingSteps.slice(),
+                    duration: this.currentThinkingDuration || undefined
+                });
                 this.currentThinkingSteps = [];
                 this.currentThinkingEntryId = "";
                 // 已落盘的卡片耗时归零，避免下一张思考卡片读到上一张的残留值。
@@ -1723,9 +1781,13 @@ export class AgentChat extends Model {
             this.renderedToolNames = {};
             // Flush tool calls as assistant entry
             if (this.currentToolCalls.length > 0) {
-                this.entries.push({id: SessionStore.newSessionId(), type: "assistant", toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)});
+                this.entries.push({
+                    id: SessionStore.newSessionId(),
+                    type: "assistant",
+                    toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)
+                });
                 this.currentToolCalls = [];
-        this.lastStepToolCount = 0;
+                this.lastStepToolCount = 0;
             }
             // Flush pending confirms
             if (this.pendingConfirms.length > 0) {
@@ -1965,7 +2027,11 @@ export class AgentChat extends Model {
                 timestamp: ts,
             });
         } else if (this.currentToolCalls.length > 0) {
-            this.entries.push({id: SessionStore.newSessionId(), type: "assistant", toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)});
+            this.entries.push({
+                id: SessionStore.newSessionId(),
+                type: "assistant",
+                toolCalls: this.slimToolCallsForPersistence(this.currentToolCalls)
+            });
         }
         this.currentAIElement = null;
         this.observeStickTarget(null);
@@ -2028,14 +2094,20 @@ export class AgentChat extends Model {
     }
 
     private tryGenerateTitle() {
-        if (this.hasTitled) { return; }
+        if (this.hasTitled) {
+            return;
+        }
         this.hasTitled = true;
         const userEntry = this.entries.find((e): e is { type: "user"; content: string } => e.type === "user");
         const userMsg = userEntry?.content?.slice(0, 500) || "";
         fetch("/api/ai/agent/title", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: userMsg, model: this.getSelectedModel(), language: window.siyuan.config.appearance.lang}),
+            body: JSON.stringify({
+                message: userMsg,
+                model: this.getSelectedModel(),
+                language: window.siyuan.config.appearance.lang
+            }),
         }).then((resp) => resp.json()).then((data) => {
             if (data.code === 0 && data.data && data.data !== this.sessionTitle) {
                 this.sessionTitle = data.data;
@@ -2422,7 +2494,9 @@ export class AgentChat extends Model {
         toolNames?: string[];
         content?: string
     }>, entryId?: string, duration?: number) {
-        if (!steps || steps.length === 0) { return; }
+        if (!steps || steps.length === 0) {
+            return;
+        }
         let detail = "";
         const seenTools: Record<string, boolean> = {};
         for (let i = 0; i < steps.length; i++) {
@@ -2535,14 +2609,14 @@ export class AgentChat extends Model {
         html += '<div class="agent-token-popup__total">' +
             '<span class="agent-token-popup__label">' + (L.tokenUsage || "Context Usage") + "</span>" +
             '<span class="agent-token-popup__value">' + limitLine + "</span>" +
-        "</div>";
+            "</div>";
         // 第一行下方的占用横条：总长=上限，填充=已用占比，颜色统一主色。
         // 未知上限（contextLimit=0）时不画横条（无总长基线）。
         if (this.contextLimit > 0) {
             const ratio = Math.min(this.contextTokens / this.contextLimit, 1);
             html += '<div class="agent-token-popup__bar">' +
                 '<span style="width:' + (ratio * 100).toFixed(1) + '%"></span>' +
-            "</div>";
+                "</div>";
         } else {
             html += '<div class="agent-token-popup__divider"></div>';
         }
@@ -2551,7 +2625,7 @@ export class AgentChat extends Model {
             html += '<div class="agent-token-popup__row">' +
                 '<span class="agent-token-popup__label">' + escapeHtml(row.label) + "</span>" +
                 '<span class="agent-token-popup__value">' + row.percent + "</span>" +
-            "</div>";
+                "</div>";
         }
         // 缓存命中（独立维度，分隔线隔开，为 0 不显示——不返回缓存字段的模型整行不出现）。
         if (this.contextCachedTokens > 0 && this.contextTokens > 0) {
@@ -2560,7 +2634,7 @@ export class AgentChat extends Model {
             html += '<div class="agent-token-popup__row">' +
                 '<span class="agent-token-popup__label">' + (L.tokenCatCached || "Cache Hits") + "</span>" +
                 '<span class="agent-token-popup__value">' + cachedPercent + "%</span>" +
-            "</div>";
+                "</div>";
         }
         html += "</div>";
         popup.innerHTML = html;
@@ -2731,7 +2805,9 @@ export class AgentChat extends Model {
             const el = items[i] as HTMLElement;
             if (i === items.length - 1) {
                 const streamingChat = el.querySelector(".agent-chat__thinking-chat--streaming");
-                if (streamingChat) { streamingChat.remove(); }
+                if (streamingChat) {
+                    streamingChat.remove();
+                }
             }
             el.classList.add("agent-chat__msg--thinking-done");
             if (doneText) {
@@ -2778,7 +2854,9 @@ export class AgentChat extends Model {
     }
 
     private scrollToBottom(force = false, smooth = false) {
-        if (!force && this.userScrolledUp) { return; }
+        if (!force && this.userScrolledUp) {
+            return;
+        }
         // Guard with a flag so the resulting scroll event can be told apart from
         // a user-driven scroll. Without this, the programmatic stick-to-bottom
         // write itself trips the scroll handler and, while streaming, flips
@@ -2826,7 +2904,9 @@ export class AgentChat extends Model {
             this.stickResizeObserver.disconnect();
             this.stickResizeObserver = null;
         }
-        if (!el) { return; }
+        if (!el) {
+            return;
+        }
         this.stickResizeObserver = new ResizeObserver(() => {
             if (!this.userScrolledUp) {
                 this.scrollToBottom();

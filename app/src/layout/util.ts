@@ -1042,7 +1042,9 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             let width = layout.element.firstElementChild.classList.contains("layout__dockl") ? 8 : 0;
             layout.children.find((item: Layout | Wnd) => {
                 if (item.element.style.width && item.element.style.width !== "0px") {
-                    item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
+                    // 窗口过窄时停靠栏面板已无意义，坍缩为 0 把空间让给编辑区；拉宽后 maxWidth 重置即自动恢复
+                    const target = Math.min(item.element.clientWidth, window.innerWidth) - 8;
+                    item.element.style.maxWidth = (target < 180 ? 0 : target) + "px";
                 }
                 width += item.element.clientWidth;
             });

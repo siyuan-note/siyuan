@@ -214,7 +214,7 @@ export const highlightCodeBlocks = (container: HTMLElement): void => {
         process();
     } else {
         setCodeTheme(Constants.PROTYLE_CDN);
-        addScript(`${Constants.PROTYLE_CDN}/js/highlight.js/highlight.min.js?v=11.11.1`, "protyleHljsScript")
+        addScript(`${Constants.PROTYLE_CDN}/js/highlight.js/highlight.min.js?v=11.11.2`, "protyleHljsScript")
             .then(() => addScript(`${Constants.PROTYLE_CDN}/js/highlight.js/third-languages.js?v=2.0.1`, "protyleHljsThirdScript"))
             .then(process);
     }

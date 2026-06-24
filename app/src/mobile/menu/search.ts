@@ -226,7 +226,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
 </div>`;
     listElement.scrollTop = 0;
     let countHTML = "";
-    if (response) {
+    if (response && response.data.matchedBlockCount > 0) {
         let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
         if (response.data.docMode) {
             text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);

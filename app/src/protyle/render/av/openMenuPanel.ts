@@ -207,7 +207,7 @@ export const openMenuPanel = (options: {
                     blockElement: options.blockElement
                 });
                 setTimeout(() => {
-                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+                    setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
             } else if (options.type === "relation") {
                 bindRelationEvent({
@@ -225,10 +225,10 @@ export const openMenuPanel = (options: {
                     inputElement.select();
                     inputElement.focus();
                 }
-                setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+                setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
             }
         } else {
-            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
             if (options.type === "sorts") {
                 bindSortsEvent(options.protyle, menuElement, data, blockID);
             } else if (options.type === "filters") {
@@ -272,7 +272,7 @@ export const openMenuPanel = (options: {
             // 重渲染以同步所有只读且/或标签（index >= 2 的节点显示的是只读 span）
             menuElement.innerHTML = getFiltersHTML(data);
             bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
-            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
             event.stopPropagation();
         });
         // 多选排序
@@ -372,7 +372,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "go-config") {
                     menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getViewHTML(data);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
@@ -383,7 +383,7 @@ export const openMenuPanel = (options: {
                     tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
                     menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getPropertiesHTML(fields);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
@@ -391,7 +391,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "go-layout") {
                     menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getLayoutHTML(data);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     bindLayoutEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
@@ -401,7 +401,7 @@ export const openMenuPanel = (options: {
                     menuElement.classList.remove("av__filter-panel");
                     menuElement.innerHTML = getSortsHTML(fields, data.view.sorts);
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
@@ -421,7 +421,7 @@ export const openMenuPanel = (options: {
                     data.view.sorts = [];
                     menuElement.innerHTML = getSortsHTML(fields, data.view.sorts);
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -459,7 +459,7 @@ export const openMenuPanel = (options: {
                     }]);
                     menuElement.innerHTML = getSortsHTML(fields, data.view.sorts);
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -467,7 +467,7 @@ export const openMenuPanel = (options: {
                     menuElement.innerHTML = getFiltersHTML(data);
                     menuElement.classList.add("av__filter-panel");
                     bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
@@ -487,7 +487,7 @@ export const openMenuPanel = (options: {
                     // 本地状态保持“顶层单个空根组”不变量（后端会同样归一化），避免后续 addFilterGroup 误把新分组当成根组
                     data.view.filters = [{combination: "and", filters: []}];
                     menuElement.innerHTML = getFiltersHTML(data);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();
@@ -568,7 +568,7 @@ export const openMenuPanel = (options: {
                                     blockID
                                 }]);
                                 menuElement.innerHTML = getFiltersHTML(data);
-                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                             }
                         });
                     }
@@ -599,7 +599,7 @@ export const openMenuPanel = (options: {
                                 blockID
                             }]);
                             menuElement.innerHTML = getFiltersHTML(data);
-                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                         }
                     });
                     if (!isGroup) {
@@ -621,7 +621,7 @@ export const openMenuPanel = (options: {
                                     blockID
                                 }]);
                                 menuElement.innerHTML = getFiltersHTML(data);
-                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                             }
                         });
                     } else if (node && node.filters && 1 === node.filters.length) {
@@ -643,7 +643,7 @@ export const openMenuPanel = (options: {
                                     blockID
                                 }]);
                                 menuElement.innerHTML = getFiltersHTML(data);
-                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                             }
                         });
                     }
@@ -668,7 +668,7 @@ export const openMenuPanel = (options: {
                                     blockID
                                 }]);
                                 menuElement.innerHTML = getFiltersHTML(data);
-                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                                setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                             };
                             if (rmNode && rmNode.filters && rmNode.filters.length > 0) {
                                 confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDeleteFilterGroupTip, doRemove);
@@ -826,7 +826,7 @@ export const openMenuPanel = (options: {
                     if (doOperations.length > 0) {
                         transaction(options.protyle, doOperations, undoOperations);
                         menuElement.innerHTML = getPropertiesHTML(fields);
-                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -856,7 +856,7 @@ export const openMenuPanel = (options: {
                     if (doOperations.length > 0) {
                         transaction(options.protyle, doOperations, undoOperations);
                         menuElement.innerHTML = getPropertiesHTML(fields);
-                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -869,7 +869,7 @@ export const openMenuPanel = (options: {
                         isCustomAttr
                     });
                     bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -957,7 +957,7 @@ export const openMenuPanel = (options: {
                         isCustomAttr
                     });
                     bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -967,7 +967,7 @@ export const openMenuPanel = (options: {
                         editMenuElement.firstElementChild.classList.add("fn__none");
                         editMenuElement.lastElementChild.classList.remove("fn__none");
                     }
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1024,7 +1024,7 @@ export const openMenuPanel = (options: {
                         editMenuElement.firstElementChild.classList.remove("fn__none");
                         editMenuElement.lastElementChild.classList.add("fn__none");
                     }
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1056,7 +1056,7 @@ export const openMenuPanel = (options: {
                     } else {
                         menuElement.innerHTML = getPropertiesHTML(fields);
                     }
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1088,7 +1088,7 @@ export const openMenuPanel = (options: {
                     } else {
                         menuElement.innerHTML = getPropertiesHTML(fields);
                     }
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1451,21 +1451,21 @@ export const openMenuPanel = (options: {
                     } else {
                         menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group, data.viewType);
                     }
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "goGroupsMethod") {
                     window.siyuan.menus.menu.remove();
                     menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group, data.viewType);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "getGroupsNumber") {
                     window.siyuan.menus.menu.remove();
                     menuElement.innerHTML = getGroupsNumberHTML(data.view.group);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     closeCB = bindGroupsNumber({
                         protyle: options.protyle,
                         data,
@@ -1552,7 +1552,7 @@ export const openMenuPanel = (options: {
                     data.view.group = null;
                     delete data.view.groups;
                     menuElement.innerHTML = getGroupsHTML(fields, data.view);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

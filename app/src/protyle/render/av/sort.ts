@@ -55,7 +55,7 @@ export const addSort = (options: {
                     }]);
                     options.menuElement.innerHTML = getSortsHTML(fields, options.data.view.sorts);
                     bindSortsEvent(options.protyle, options.menuElement, options.data, options.blockID);
-                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
+                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height, 0, true);
                 }
             });
         }

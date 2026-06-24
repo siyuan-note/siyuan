@@ -2,7 +2,7 @@ import {Menu} from "../../../plugin/Menu";
 import {hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
-import {escapeLessThans, escapeHtml} from "../../../util/escape";
+import {escapeHtml, escapeLessThans} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
@@ -380,7 +380,7 @@ draggable="true">${genSelectItemHTML({
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML({type: "empty"})}`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
-        setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+        setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
         options.menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
         const inputElement = options.menuElement.querySelector("input");
         inputElement.focus();

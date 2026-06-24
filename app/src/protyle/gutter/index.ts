@@ -545,7 +545,7 @@ export class Gutter {
             if (protyle.disabled || !lineBefore || !lineAfter || !plusBefore || !plusAfter) {
                 return;
             }
-            // 情况A：鼠标在框线或+号上 → 显示对应+号（框线所在方向）
+            // 情况A：鼠标在框线或+号上 → 显示对应+号，框线设透明（视觉隐藏但保留命中区，避免 display:none 导致脱离触发重置闪烁）
             const lineEl = hasClosestByClassName(event.target, "protyle-gutters__line");
             const plusEl = hasClosestByClassName(event.target, "protyle-gutters__plus");
             const hoverEl = lineEl || plusEl;
@@ -554,10 +554,9 @@ export class Gutter {
                 const isBefore = hoverEl.getAttribute("data-type").includes("Before");
                 plusBefore.style.display = isBefore ? "" : "none";
                 plusAfter.style.display = isBefore ? "none" : "";
-                // 鼠标在+号上时隐藏框线（+号已替代框线视觉）；hover 框线时保持框线可见
-                const showLine = !plusEl;
-                lineBefore.style.display = showLine ? "" : "none";
-                lineAfter.style.display = showLine ? "" : "none";
+                // 框线视觉隐藏（opacity:0），但 display 保持以维持命中区
+                lineBefore.style.opacity = "0";
+                lineAfter.style.opacity = "0";
                 return;
             }
             const buttonElement = hasClosestByTag(event.target, "BUTTON");
@@ -589,22 +588,24 @@ export class Gutter {
                 const top = centerY - lineH / 2;
                 const plusSize = 16;
                 lineBefore.style.display = "";
+                lineBefore.style.opacity = "1";
                 lineBefore.style.width = "2px";
                 lineBefore.style.height = `${lineH}px`;
                 lineBefore.style.left = `${rect.left}px`;
                 lineBefore.style.top = `${top}px`;
                 lineAfter.style.display = "";
+                lineAfter.style.opacity = "1";
                 lineAfter.style.width = "2px";
                 lineAfter.style.height = `${lineH}px`;
                 lineAfter.style.left = `${rect.right - 2}px`;
                 lineAfter.style.top = `${top}px`;
                 plusBefore.style.width = `${plusSize}px`;
                 plusBefore.style.height = `${plusSize}px`;
-                plusBefore.style.left = `${rect.left - 9 - plusSize / 2}px`;
+                plusBefore.style.left = `${rect.left - 6 - plusSize / 2}px`;
                 plusBefore.style.top = `${centerY - plusSize / 2}px`;
                 plusAfter.style.width = `${plusSize}px`;
                 plusAfter.style.height = `${plusSize}px`;
-                plusAfter.style.left = `${rect.right + 7 - plusSize / 2}px`;
+                plusAfter.style.left = `${rect.right + 4 - plusSize / 2}px`;
                 plusAfter.style.top = `${centerY - plusSize / 2}px`;
                 // 竖排时隐藏块标提示，避免其遮挡左侧框线
                 hideTooltip();
@@ -615,11 +616,13 @@ export class Gutter {
                 const plusSize = 16;
                 const plusLeft = rect.left + (rect.width - plusSize) / 2;
                 lineBefore.style.display = "";
+                lineBefore.style.opacity = "1";
                 lineBefore.style.width = `${lineW}px`;
                 lineBefore.style.height = "2px";
                 lineBefore.style.left = `${left}px`;
                 lineBefore.style.top = `${rect.top}px`;
                 lineAfter.style.display = "";
+                lineAfter.style.opacity = "1";
                 lineAfter.style.width = `${lineW}px`;
                 lineAfter.style.height = "2px";
                 lineAfter.style.left = `${left}px`;
@@ -627,11 +630,11 @@ export class Gutter {
                 plusBefore.style.width = `${plusSize}px`;
                 plusBefore.style.height = `${plusSize}px`;
                 plusBefore.style.left = `${plusLeft}px`;
-                plusBefore.style.top = `${rect.top - 8 - plusSize / 2 + 1}px`;
+                plusBefore.style.top = `${rect.top - 5 - plusSize / 2 + 1}px`;
                 plusAfter.style.width = `${plusSize}px`;
                 plusAfter.style.height = `${plusSize}px`;
                 plusAfter.style.left = `${plusLeft}px`;
-                plusAfter.style.top = `${rect.bottom + 6 - plusSize / 2 + 1}px`;
+                plusAfter.style.top = `${rect.bottom + 3 - plusSize / 2 + 1}px`;
             }
             window.clearTimeout(hidePlusTimeout);
         });

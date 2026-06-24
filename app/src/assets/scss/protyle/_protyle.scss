@@ -97,8 +97,8 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       transform: translate(-50%, -50%);
       border-radius: var(--b3-border-radius);
       z-index: 0;
@@ -109,7 +109,7 @@
 
     &:not(.protyle-gutters__line):not(.protyle-gutters__plus):hover::before {
       opacity: 1;
-      background-color: var(--b3-theme-background-light);
+      background-color: var(--b3-list-icon-hover);
     }
 
     &:active {
@@ -143,12 +143,12 @@
   z-index: 3;
   padding: 0;
   cursor: pointer;
-  background-color: var(--b3-theme-background-light);
-  // 透明 ::before 扩大可悬浮热区，视觉仍是细线但命中区更大（约 8px）
+  background-color: var(--b3-list-icon-hover);
+  // 透明 ::before 扩大命中区，覆盖框线到+号的间隙，避免鼠标移动中途命中块内容触发重置而闪烁
   &::before {
     content: '';
     position: absolute;
-    inset: -4px;
+    inset: -10px;
   }
 }
 
@@ -161,6 +161,12 @@
   background-color: transparent;
   // 从小放大播放动画（不受 display 切换影响，可靠触发）
   animation: plusPopIn .28s cubic-bezier(.34, 1.56, .64, 1) both;
+  // 透明 ::before 扩大命中区，避免鼠标在+号边缘抖动脱离导致+号消失
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
 
   svg {
     color: var(--b3-theme-on-surface-light);

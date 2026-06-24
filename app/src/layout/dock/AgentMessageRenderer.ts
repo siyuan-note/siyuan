@@ -66,6 +66,9 @@ export const renderWelcomeHTML = (hasModel = true): string => {
 export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknown>>, questionID: string): string => {
     const L = window.siyuan.languages;
     let html = '<div class="agent-chat__question-card">';
+    if (!rawQuestions || !rawQuestions.length) {
+        return html + "</div>";
+    }
     for (let qi = 0; qi < rawQuestions.length; qi++) {
         const q = rawQuestions[qi];
         const header = (q.header as string) || "";

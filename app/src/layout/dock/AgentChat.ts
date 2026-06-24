@@ -2014,6 +2014,13 @@ export class AgentChat extends Model {
             this.addCopyButton(el, undefined, ts);
             this.scrollToBottom(true);
         }
+        // 流式结束：移除普通 AI 消息的 streaming 状态。
+        if (this.currentAIElement) {
+            const bodyEl = this.currentAIElement.querySelector(".agent-chat__body") as HTMLElement;
+            if (bodyEl) {
+                bodyEl.classList.remove("agent-chat__body--streaming");
+            }
+        }
         this.flushThinkingStep();
         if (this.pendingConfirms.length > 0) {
             for (const c of this.pendingConfirms) {

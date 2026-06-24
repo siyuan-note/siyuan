@@ -300,6 +300,24 @@ export class AgentChat extends Model {
         this.modelSelect.addEventListener("change", () => {
             this.selectedModel = this.modelSelect.value;
         });
+        // 无模型时拦截下拉展开，改为打开设置-人工智能面板（动态 import 避免循环依赖）。
+        this.modelSelect.addEventListener("mousedown", (e: MouseEvent) => {
+            if (this.modelOptions.length > 0) {
+                return;
+            }
+            e.preventDefault();
+            this.openAiSetting();
+        });
+    }
+
+    // 打开设置面板并切换到「人工智能」tab。动态 import config 模块避免与 AgentChat 的循环依赖。
+    private async openAiSetting() {
+        const {openSetting} = await import("../../config");
+        // openSetting 若已有设置对话框会先销毁重建，先检测复用避免闪烁。
+        const existing = window.siyuan.dialogs.find(d => d.element.querySelector(".config__tab-container"));
+        if (!existing) {
+            openSetting(this.app, "ai");
+        }
     }
 
     // 从 window.siyuan.config.ai 重新计算可用模型列表，幂等可重复调用。
@@ -334,18 +352,16 @@ export class AgentChat extends Model {
     }
 
     private updateModelLabel() {
-        // 重建 <option> 列表。无可用模型时插入一个占位项并禁用 select，禁止下拉展开。
+        // 重建 <option> 列表。无可用模型时插入一个占位项，点击 select 打开设置-人工智能。
         let html = "";
         if (this.modelOptions.length === 0) {
             const placeholder = window.siyuan.languages.noModelConfigured || "No model configured";
             html = '<option value="" selected>' + escapeHtml(placeholder) + "</option>";
             this.modelSelect.innerHTML = html;
             this.modelSelect.classList.add("agent-chat__model-select--empty");
-            this.modelSelect.setAttribute("disabled", "disabled");
             return;
         }
         this.modelSelect.classList.remove("agent-chat__model-select--empty");
-        this.modelSelect.removeAttribute("disabled");
         for (const o of this.modelOptions) {
             html += '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.name) + "</option>";
         }
@@ -370,7 +386,13 @@ export class AgentChat extends Model {
         const hasModel = this.modelOptions.length > 0;
         this.messagesContainer.innerHTML = renderWelcomeHTML(hasModel);
         if (!hasModel) {
-            // 无模型：仅展示提示文案，不渲染示例（防止点击卡死）。
+            // 无模型：绑定「去配置」按钮，点击打开设置-人工智能面板。
+            const goBtn = this.messagesContainer.querySelector(".agent-welcome__go-setting");
+            if (goBtn) {
+                goBtn.addEventListener("click", () => {
+                    this.openAiSetting();
+                });
+            }
             return;
         }
         const examples = this.messagesContainer.querySelectorAll(".agent-welcome__example");

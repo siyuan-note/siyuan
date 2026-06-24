@@ -41,6 +41,7 @@ export const renderWelcomeHTML = (hasModel = true): string => {
             '<div class="agent-welcome__no-model">' +
                 '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
                 '<div class="agent-welcome__no-model-tip">' + (L.agentNoModelTip || "Please configure a provider and model in Settings - AI first.") + "</div>" +
+                '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
             "</div>" +
         "</div>";
     }

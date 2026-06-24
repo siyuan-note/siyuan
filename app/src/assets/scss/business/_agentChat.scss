@@ -203,6 +203,13 @@
     line-height: 1.5;
 }
 
+// 未配置模型时的「去配置」按钮：复用 b3-button 主色实心样式，仅微调尺寸。
+.agent-welcome__go-setting {
+    margin-top: 4px;
+    padding: 4px 14px;
+    font-size: 13px;
+}
+
 .agent-chat__msg {
     display: flex;
     flex-direction: column;
@@ -276,6 +283,14 @@
 
 .agent-chat__body {
     user-select: text;
+}
+
+// 覆盖 b3-typography 的基础字号：b3-typography 默认用 --b3-font-size-editor（跟随编辑器字号，默认 16px），
+// 在 dock 面板里偏大。压回面板级 14px，与大纲/书签等其他 dock 面板对齐。
+// 排版（行高、段落间距等）仍沿用 b3-typography 全局规范。
+.agent-chat__body.b3-typography,
+.agent-chat__thinking-chat.b3-typography {
+    font-size: var(--b3-font-size);
 }
 
 // 消息正文复用全局 b3-typography 排版（与导出预览/编辑器预览一致），
@@ -634,20 +649,22 @@ pre:hover .agent-chat__copy-wrap {
     line-height: 24px;
     padding: 0 22px 0 8px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
 }
 
-// 无可用模型时的占位态：灰色文案 + 禁用下拉，提示用户去设置配置。
+// 无可用模型时的占位态：灰色文案 + 可点击打开设置（不展开下拉）。
 .agent-chat__model-select--empty {
     color: var(--b3-theme-on-surface-light);
-    cursor: default;
-    opacity: 1; // 覆盖原生 disabled 的灰显，用文字色表达禁用即可
+    cursor: pointer;
 
-    // 隐藏原生下拉箭头，避免误导用户以为可点击展开。
+    // 隐藏下拉箭头（原生 + b3-select 背景图），提示这是可点击的占位而非下拉选择。
     appearance: none;
     -webkit-appearance: none;
-    padding-right: 8px; // 去掉箭头后回收右侧 padding
+    background: var(--b3-menu-background);
+    padding: 1px 8px 0; // 去箭头后回收右侧 padding；顶部 1px 修正垂直居中
+
+    &:hover {
+        background-color: var(--b3-theme-surface);
+    }
 }
 
 // 无可用模型时禁用发送按钮：半透明 + 禁止光标，从源头阻止无效请求。

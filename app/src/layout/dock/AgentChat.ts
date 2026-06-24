@@ -11,6 +11,7 @@ import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../tabUtil";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
+import {getLute} from "../../protyle/render/setLute";
 import {escapeAriaLabel, escapeHtml} from "../../util/escape";
 import {setPosition} from "../../util/setPosition";
 import {fetchPost} from "../../util/fetch";
@@ -134,7 +135,11 @@ export class AgentChat extends Model {
     constructor(app: App, tab: Tab) {
         super({app: app});
         this.parent = tab;
-        this.lute = Lute.New();
+        this.lute = getLute({
+            emojiSite: "/stage/protyle/emojis",
+            emojis: {},
+            headingAnchor: false,
+        });
         this.defaultTitle = window.siyuan.languages.agentChat || "Agent";
         this.sessionTitle = this.defaultTitle;
         this.initUI();
@@ -872,7 +877,7 @@ export class AgentChat extends Model {
         if (entryId) {
             el.setAttribute("data-message-id", entryId);
         }
-        el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.MarkdownStr("", content) || escapeHtml(content)) + "</div>";
+        el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.ProtylePreviewStr("", content) || escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
         postRender(el, this.app);
         this.addCopyButton(el, content, timestamp);
@@ -1572,7 +1577,7 @@ export class AgentChat extends Model {
                 chatEl.className = "agent-chat__thinking-chat b3-typography agent-chat__thinking-chat--streaming";
                 thinkBody.appendChild(chatEl);
             }
-            chatEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
+            chatEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
             postRender(chatEl, this.app);
             this.scrollToBottom();
             return;
@@ -1588,7 +1593,7 @@ export class AgentChat extends Model {
                 this.pendingTokenUpdate = false;
                 const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
                 if (bodyEl) {
-                    bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
+                bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
                     postRender(bodyEl, this.app);
                     void bodyEl.offsetHeight; // force reflow
                     this.scrollToBottom();
@@ -1603,7 +1608,7 @@ export class AgentChat extends Model {
             cancelAnimationFrame(this.rafId);
             const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
             if (bodyEl) {
-                bodyEl.innerHTML = this.lute.MarkdownStr("", this.currentContent) || escapeHtml(this.currentContent);
+                bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
                 postRender(bodyEl, this.app);
             }
         }
@@ -1935,7 +1940,7 @@ export class AgentChat extends Model {
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
-            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.ProtylePreviewStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             postRender(el, this.app);
             this.currentAIElement = el;
@@ -2141,7 +2146,7 @@ export class AgentChat extends Model {
             const el = document.createElement("div");
             el.className = "agent-chat__msg agent-chat__msg--ai";
             el.setAttribute("data-message-id", this.currentAssistantEntryId);
-            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.MarkdownStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
+            el.innerHTML = '<div class="agent-chat__body b3-typography">' + (this.lute.ProtylePreviewStr("", savedContent) || escapeHtml(savedContent)) + "</div>";
             this.messagesContainer.appendChild(el);
             postRender(el, this.app);
             this.currentAIElement = el;
@@ -2423,7 +2428,7 @@ export class AgentChat extends Model {
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             if (step.content) {
-                detail += '<div class="agent-chat__thinking-chat b3-typography">' + (this.lute.MarkdownStr("", step.content) || escapeHtml(step.content)) + "</div>";
+                detail += '<div class="agent-chat__thinking-chat b3-typography">' + (this.lute.ProtylePreviewStr("", step.content) || escapeHtml(step.content)) + "</div>";
             }
             if (step.reasoningContent) {
                 detail += '<div class="agent-chat__thinking-reasoning-text">' + escapeHtml(step.reasoningContent) + "</div>";
@@ -2497,20 +2502,8 @@ export class AgentChat extends Model {
         const circumference = 2 * Math.PI * 9; // r=9 → ≈56.55
         const tokens = this.contextTokens;
         const limit = this.contextLimit;
-        // 颜色档位 class：未知上限 → unknown；按占用率分 low/mid/warn/high（与横条共用算法）。
-        const levelClass = limit > 0
-            ? "agent-chat__tokens--" + this.contextUsageLevel(tokens / limit)
-            : "agent-chat__tokens--unknown";
-        this.tokenDisplayEl.classList.remove(
-            "agent-chat__tokens--low",
-            "agent-chat__tokens--mid",
-            "agent-chat__tokens--warn",
-            "agent-chat__tokens--high",
-            "agent-chat__tokens--unknown"
-        );
-        this.tokenDisplayEl.classList.add(levelClass);
-        // 弧长：未知上限（limit=0）时画一个小占位弧（约 15%），表示有用量但无上限。
-        // 弧长：已知上限按真实占用率；未知上限（limit=0）不画弧（只留灰色轨道圈，明确表示无上限信息）。
+        // 弧长：已知上限按真实占用率；未知上限（limit=0）不画弧（只留灰色轨道圈）。
+        // 颜色统一主色，不再按占用率分档。
         const ratio = limit > 0 ? Math.min(tokens / limit, 1) : 0;
         const filled = circumference * ratio;
         arc.setAttribute("stroke-dasharray", filled.toFixed(2) + " " + circumference.toFixed(2));
@@ -2543,12 +2536,11 @@ export class AgentChat extends Model {
             '<span class="agent-token-popup__label">' + (L.tokenUsage || "Context Usage") + "</span>" +
             '<span class="agent-token-popup__value">' + limitLine + "</span>" +
         "</div>";
-        // 第一行下方的占用横条：总长=上限，填充=已用占比，颜色档位与圆环一致。
+        // 第一行下方的占用横条：总长=上限，填充=已用占比，颜色统一主色。
         // 未知上限（contextLimit=0）时不画横条（无总长基线）。
         if (this.contextLimit > 0) {
             const ratio = Math.min(this.contextTokens / this.contextLimit, 1);
-            const barLevel = this.contextUsageLevel(ratio);
-            html += '<div class="agent-token-popup__bar agent-token-popup__bar--' + barLevel + '">' +
+            html += '<div class="agent-token-popup__bar">' +
                 '<span style="width:' + (ratio * 100).toFixed(1) + '%"></span>' +
             "</div>";
         } else {
@@ -2656,15 +2648,6 @@ export class AgentChat extends Model {
             result.push({label, percent: rounded + "%"});
         }
         return result;
-    }
-
-    // 上下文占用率 → 颜色档位名称（low/mid/warn/high）。圆环弧度与弹层横条共用此算法，保证两者配色一致。
-    // 阈值：green(<30%) / yellow(30-45%) / orange(45-85%) / red(≥85%)。
-    private contextUsageLevel(ratio: number): string {
-        if (ratio >= 0.85) { return "high"; }
-        if (ratio >= 0.45) { return "warn"; }
-        if (ratio >= 0.3) { return "mid"; }
-        return "low";
     }
 
     // token 数格式化：1024 进制值（2^N，如 131072=128×1024）转成业界惯称（128k、1M），

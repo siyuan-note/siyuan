@@ -30,33 +30,13 @@
         stroke: var(--b3-scroll-color);
     }
 
-    // 圆环弧度（按占用率描边），rotate -90 让起点在顶部。
+    // 圆环弧度（按占用率描边），统一主色，rotate -90 让起点在顶部。
     .agent-chat__tokens-arc {
         fill: none;
+        stroke: var(--b3-theme-primary);
         stroke-linecap: round;
         transform: rotate(-90deg);
         transform-origin: 50% 50%;
-    }
-
-    // 描边颜色按占用率分档：绿（<30%）、黄（30-45%）、橙（45-85%）、红（≥85%）、未知上限（灰）。
-    &.agent-chat__tokens--low .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-success);
-    }
-
-    &.agent-chat__tokens--mid .agent-chat__tokens-arc {
-        stroke: var(--b3-graph-todo-point);
-    }
-
-    &.agent-chat__tokens--warn .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-secondary);
-    }
-
-    &.agent-chat__tokens--high .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-error);
-    }
-
-    &.agent-chat__tokens--unknown .agent-chat__tokens-arc {
-        stroke: var(--b3-theme-on-surface-light);
     }
 }
 
@@ -295,12 +275,39 @@
 
 // 消息正文复用全局 b3-typography 排版（与导出预览/编辑器预览一致），
 // 仅保留 AgentChat 特有的代码块增强：hover 显示语言标签 + 复制按钮。
+// pre 需 position:relative 作为复制按钮（absolute）和语言标签（::before）的定位上下文。
+.b3-typography pre,
+.agent-chat__body--mirror pre {
+    position: relative;
+    // 左右 padding 统一变量，::before 语言标签用同值 left 保证左对齐代码正文。
+    padding: 8px var(--agent-code-pad, 8px);
+    margin: 0.5em 0;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background-color: var(--b3-protyle-code-background);
+    overflow: auto;
+
+    // 覆盖 hljs 主题的 .hljs padding（其特异性 0,1,0 高于 pre code），用 !important 确保对齐语言标签。
+    code.hljs,
+    code {
+        padding: 0 !important;
+        background: none !important;
+        display: block;
+    }
+}
+
+// 有语言标签的代码块顶部留空间，避免 ::before 语言标签与正文重叠。
+.b3-typography pre[data-language],
+.agent-chat__body--mirror pre[data-language] {
+    padding-top: 24px;
+}
+
 .b3-typography pre[data-language]::before,
 .agent-chat__body--mirror pre[data-language]::before {
     content: attr(data-language);
     position: absolute;
     top: 4px;
-    left: 8px;
+    left: var(--agent-code-pad, 8px);
     font-size: 12px;
     color: var(--b3-theme-on-surface-light);
     opacity: 0;
@@ -341,8 +348,14 @@
     }
 }
 
-pre:hover .agent-chat__copy-wrap {
+pre:hover .agent-chat__copy-wrap,
+[data-subtype="math"]:hover .agent-chat__copy-wrap {
     opacity: .86;
+}
+
+// 公式块：position:relative 作为复制按钮定位上下文。
+[data-subtype="math"] {
+    position: relative;
 }
 
 .agent-chat__msg--error .agent-chat__body {
@@ -725,7 +738,7 @@ pre:hover .agent-chat__copy-wrap {
 }
 
 // 第一行下方的上下文占用横条：总长 = 模型上限，填充宽度 = 已用占比，
-// 填充色按占用率分档，与底部圆环颜色算法一致；未填充为轨道灰。
+// 填充色统一主色（与底部圆环一致）；未填充为轨道灰。
 .agent-token-popup__bar {
     height: 4px;
     margin: 6px 10px 4px;
@@ -737,22 +750,7 @@ pre:hover .agent-chat__copy-wrap {
         display: block;
         height: 100%;
         border-radius: 2px;
-    }
-
-    &.agent-token-popup__bar--low > span {
-        background: var(--b3-theme-success);
-    }
-
-    &.agent-token-popup__bar--mid > span {
-        background: var(--b3-graph-todo-point);
-    }
-
-    &.agent-token-popup__bar--warn > span {
-        background: var(--b3-theme-secondary);
-    }
-
-    &.agent-token-popup__bar--high > span {
-        background: var(--b3-theme-error);
+        background: var(--b3-theme-primary);
     }
 }
 

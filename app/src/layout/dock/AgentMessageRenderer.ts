@@ -3,6 +3,14 @@ import {setCodeTheme} from "../../protyle/render/util";
 import {addScript} from "../../protyle/util/addScript";
 import {Constants} from "../../constants";
 import {mathRender} from "../../protyle/render/mathRender";
+import {mermaidRender} from "../../protyle/render/mermaidRender";
+import {flowchartRender} from "../../protyle/render/flowchartRender";
+import {graphvizRender} from "../../protyle/render/graphvizRender";
+import {chartRender} from "../../protyle/render/chartRender";
+import {mindmapRender} from "../../protyle/render/mindmapRender";
+import {abcRender} from "../../protyle/render/abcRender";
+import {plantumlRender} from "../../protyle/render/plantumlRender";
+import {htmlRender} from "../../protyle/render/htmlRender";
 import {showMessage} from "../../dialog/message";
 import type {App} from "../../index";
 import {processSiYuanUri} from "../../editor/openLink";
@@ -165,8 +173,13 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
 
 export const highlightCodeBlocks = (container: HTMLElement): void => {
     const codeElements: Array<{el: HTMLElement; language: string}> = [];
-    container.querySelectorAll("pre code:not(.hljs)").forEach((codeEl) => {
+    // ProtylePreview 输出的 code 会预置 .hljs 但内容未真正高亮，故不能靠 :not(.hljs) 去重，
+    // 改用 data-highlighted 标记，避免重复高亮。
+    container.querySelectorAll("pre code").forEach((codeEl) => {
         const el = codeEl as HTMLElement;
+        if (el.hasAttribute("data-highlighted")) {
+            return;
+        }
         let language = "";
         for (const cls of el.className.split(" ")) {
             if (cls.startsWith("language-")) {
@@ -190,6 +203,7 @@ export const highlightCodeBlocks = (container: HTMLElement): void => {
             }
             el.classList.add("hljs");
             el.innerHTML = window.hljs.highlight(el.textContent || "", {language, ignoreIllegals: true}).value;
+            el.setAttribute("data-highlighted", "true");
         });
     };
 
@@ -203,30 +217,51 @@ export const highlightCodeBlocks = (container: HTMLElement): void => {
     }
 };
 
+// 为容器内所有代码块（pre）和公式块（div[data-subtype=math]）注入复制按钮。
 export const addCopyButtons = (container: HTMLElement): void => {
+    // 代码块：复制 code 文本。
     container.querySelectorAll("pre").forEach((pre) => {
         if (pre.querySelector(".agent-chat__copy-btn")) {
             return;
         }
+        const btn = createCopyButton(() => {
+            const code = pre.querySelector("code");
+            return (code?.textContent || "").trimEnd().replace(/\n$/, "");
+        });
         const wrap = document.createElement("div");
         wrap.className = "agent-chat__copy-wrap";
-        const btn = document.createElement("span");
-        btn.className = "agent-chat__copy-btn";
-        btn.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
-        btn.setAttribute("aria-label", window.siyuan.languages.copy);
-        btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const code = pre.querySelector("code");
-            const text = (code?.textContent || "").trimEnd().replace(/\n$/, "");
-            navigator.clipboard.writeText(text).then(() => {
-                showMessage(window.siyuan.languages.copied, 2000);
-            }).catch(() => {
-                showMessage(window.siyuan.languages.copied, 2000);
-            });
-        });
         wrap.appendChild(btn);
         pre.appendChild(wrap);
     });
+    // 公式块：复制 data-content（KaTeX 渲染前的原始 LaTeX）。
+    container.querySelectorAll<HTMLDivElement>('[data-subtype="math"]').forEach((mathBlock) => {
+        if (mathBlock.querySelector(".agent-chat__copy-btn")) {
+            return;
+        }
+        const btn = createCopyButton(() => mathBlock.getAttribute("data-content") || "");
+        const wrap = document.createElement("div");
+        wrap.className = "agent-chat__copy-wrap";
+        wrap.appendChild(btn);
+        mathBlock.appendChild(wrap);
+    });
+};
+
+// 构建单个复制按钮，getText 返回要复制的文本。
+const createCopyButton = (getText: () => string): HTMLElement => {
+    const btn = document.createElement("span");
+    btn.className = "agent-chat__copy-btn";
+    btn.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
+    btn.setAttribute("aria-label", window.siyuan.languages.copy);
+    btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const text = getText();
+        navigator.clipboard.writeText(text).then(() => {
+            showMessage(window.siyuan.languages.copied, 2000);
+        }).catch(() => {
+            showMessage(window.siyuan.languages.copied, 2000);
+        });
+    });
+    return btn;
 };
 
 export const postRender = (container: HTMLElement, app?: App): void => {
@@ -257,6 +292,14 @@ export const postRender = (container: HTMLElement, app?: App): void => {
     });
     highlightCodeBlocks(container);
     mathRender(container);
+    mermaidRender(container);
+    flowchartRender(container);
+    graphvizRender(container);
+    chartRender(container);
+    mindmapRender(container);
+    abcRender(container);
+    plantumlRender(container);
+    htmlRender(container);
     addCopyButtons(container);
     if (!app) {
         return;

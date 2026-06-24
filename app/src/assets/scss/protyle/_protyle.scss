@@ -275,6 +275,10 @@
   flex: 1;
   scrollbar-gutter: stable;
 
+  &:focus {
+    outline: none;
+  }
+
   &--transition {
     .protyle-wysiwyg {
       transition: padding .3s cubic-bezier(.25, .46, .45, .94) 0ms;

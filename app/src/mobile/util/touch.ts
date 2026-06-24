@@ -49,6 +49,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
     if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {
+                clearLongPress();
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;

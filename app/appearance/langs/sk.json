@@ -76,7 +76,6 @@
   "filterMatchAll": "Zodpovedajú všetky",
   "filterMatchAny": "Zodpovedá ľubovoľné",
   "emptyFilterGroup": "Prázdna skupina",
-  "confirmDeleteFilterGroupTip": "Odstránenie tejto skupiny odstráni všetky podmienky filtra v nej. Pokračovať?",
   "undoCrossDocConfirm": "Táto akcia vrátenia späť ovplyvní nasledujúce dokumenty. Pokračovať?",
   "calcOperatorTemplate": "Šablóna",
   "calcResultTemplate": "Šablóna",

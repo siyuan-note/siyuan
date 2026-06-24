@@ -188,7 +188,7 @@ export const addFilter = (options: {
                         blockID
                     }]);
                     options.menuElement.innerHTML = getFiltersHTML(options.data);
-                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
+                    setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height, 0, true);
                 }
             });
         }

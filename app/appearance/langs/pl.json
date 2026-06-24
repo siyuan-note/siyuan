@@ -76,7 +76,6 @@
   "filterMatchAll": "Pasują wszystkie",
   "filterMatchAny": "Pasuje dowolny",
   "emptyFilterGroup": "Pusta grupa",
-  "confirmDeleteFilterGroupTip": "Usunięcie tej grupy spowoduje usunięcie wszystkich warunków filtru w niej zawartych. Kontynuować?",
   "undoCrossDocConfirm": "To cofnięcie wpłynie na następujące dokumenty. Kontynuować?",
   "calcOperatorTemplate": "Szablon",
   "calcResultTemplate": "Szablon",

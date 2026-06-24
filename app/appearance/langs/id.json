@@ -76,7 +76,6 @@
   "filterMatchAll": "Cocok semua",
   "filterMatchAny": "Cocok salah satu",
   "emptyFilterGroup": "Grup kosong",
-  "confirmDeleteFilterGroupTip": "Menghapus grup ini akan menghapus semua kondisi filter di dalamnya. Lanjutkan?",
   "undoCrossDocConfirm": "Pembatalan ini akan memengaruhi dokumen berikut. Lanjutkan?",
   "calcOperatorTemplate": "Templat",
   "calcResultTemplate": "Templat",

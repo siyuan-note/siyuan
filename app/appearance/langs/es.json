@@ -76,7 +76,6 @@
   "filterMatchAll": "Coincidir todo",
   "filterMatchAny": "Coincidir cualquiera",
   "emptyFilterGroup": "Grupo vacío",
-  "confirmDeleteFilterGroupTip": "Eliminar este grupo quitará todas las condiciones de filtro que contiene. ¿Continuar?",
   "undoCrossDocConfirm": "Este deshacer afectará a los siguientes documentos. ¿Continuar?",
   "calcOperatorTemplate": "Plantilla",
   "calcResultTemplate": "Plantilla",

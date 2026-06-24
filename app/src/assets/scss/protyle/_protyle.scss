@@ -90,6 +90,28 @@
       color: var(--b3-theme-on-surface);
     }
 
+    // 悬浮时显示固定尺寸的圆角背景（排除框线与+号，它们有自己的样式）
+    // 用 ::before 而非直接设 button 背景，避免受 padding/svg 尺寸影响导致宽高不一致
+    &:not(.protyle-gutters__line):not(.protyle-gutters__plus)::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      transform: translate(-50%, -50%);
+      border-radius: var(--b3-border-radius);
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--b3-color-transition);
+    }
+
+    &:not(.protyle-gutters__line):not(.protyle-gutters__plus):hover::before {
+      opacity: 1;
+      background-color: var(--b3-list-icon-hover);
+    }
+
     &:active {
       cursor: grabbing;
     }
@@ -114,25 +136,62 @@
   }
 }
 
-// 块标上下/左右边缘悬浮触发的+号按钮，与 .protyle-gutters 同为 fixed 坐标系，由 JS 按鼠标位置定位
-// 选择器需带 button 标签以提升特异性，覆盖 .protyle-gutters button 的 position:relative 与 svg 尺寸
-// z-index 需高于块标 button 内 span 覆盖层（z-index:2），以便与块标重叠时仍可点击
-.protyle-gutters button.protyle-gutters__plus {
+// 块标边缘框线（悬浮块标显示），与 .protyle-gutters 同为 fixed 坐标系，由 JS 贴块标边缘定位
+// 选择器带 button 标签提升特异性，覆盖 .protyle-gutters button 的 position:relative；z-index 高于块标 span 覆盖层
+.protyle-gutters button.protyle-gutters__line {
   position: fixed;
   z-index: 3;
-  padding: 1px;
+  padding: 0;
   cursor: pointer;
+  background-color: var(--b3-list-icon-hover);
+  // 透明 ::before 扩大命中区，覆盖框线到+号的间隙，避免鼠标移动中途命中块内容触发重置而闪烁
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+  }
+}
+
+// 块标边缘+号（悬浮框线显示），独立元素定位在外偏位置；tooltip 基于该元素对齐
+.protyle-gutters button.protyle-gutters__plus {
+  position: fixed;
+  z-index: 4;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+  // 从小放大播放动画（不受 display 切换影响，可靠触发）
+  animation: plusPopIn .28s cubic-bezier(.34, 1.56, .64, 1) both;
+  // 透明 ::before 扩大命中区，避免鼠标在+号边缘抖动脱离导致+号消失
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
 
   svg {
     color: var(--b3-theme-on-surface-light);
-    width: 16px;
-    height: 16px;
+    width: 100%;
+    height: 100%;
     float: none;
-    transition: var(--b3-color-transition);
+    transition: color var(--b3-color-transition);
   }
 
   &:hover svg {
-    color: var(--b3-theme-primary);
+    color: var(--b3-theme-on-surface);
+  }
+}
+
+@keyframes plusPopIn {
+  0% {
+    transform: scale(.2);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 1;
   }
 }
 

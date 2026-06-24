@@ -184,7 +184,7 @@ export const updateAssetCell = (options: {
         });
         const cellRect = (options.cellElements[0].classList.contains("custom-attr__avvalue") ? options.cellElements[0] : options.protyle.wysiwyg.element.querySelector(`.av__cell[data-id="${options.cellElements[0].dataset.id}"]`)).getBoundingClientRect();
         setTimeout(() => {
-            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
+            setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
         }, Constants.TIMEOUT_LOAD);  // 等待图片加载
     }
 };

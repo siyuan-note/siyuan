@@ -76,7 +76,6 @@
   "filterMatchAll": "Alles matchen",
   "filterMatchAny": "Een van deze matchen",
   "emptyFilterGroup": "Lege groep",
-  "confirmDeleteFilterGroupTip": "Het verwijderen van deze groep verwijdert alle filtervoorwaarden erin. Doorgaan?",
   "undoCrossDocConfirm": "Deze ongedaanmakerking beïnvloedt de volgende documenten. Doorgaan?",
   "calcOperatorTemplate": "Sjabloon",
   "calcResultTemplate": "Sjabloon",

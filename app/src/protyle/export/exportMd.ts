@@ -9,6 +9,11 @@ import {saveExportFile} from "../util/compatibility";
 // 通用部分（8 项）可被各导出格式复用，Markdown 专属部分仅 Markdown 导出使用。
 // 默认值一律取自全局 window.siyuan.config.export，确认后本次导出生效，不修改全局设置、不记忆上次选择。
 
+// 类型别名：约束字段 key 与 Config.IExport 的字段类型对应，避免用 string 索引报错
+type BoolKey = "addTitle" | "inlineMemo" | "includeSubDocs" | "includeRelatedDocs" | "markdownYFM" | "removeAssetsID";
+type IntKey = "blockRefMode" | "blockEmbedMode" | "fileAnnotationRefMode";
+type StringKey = "blockRefTextLeft" | "blockRefTextRight" | "tagOpenMarker" | "tagCloseMarker";
+
 interface IExportMdOptions {
     id?: string;
     ids?: string[];
@@ -18,9 +23,9 @@ interface IExportMdOptions {
 // openExportOptionsDialog 渲染「通用 + Markdown 专属」两组开关，确认时回调 onConfirm 传出全部 13 项。
 export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPayload) => void) => {
     const conf = window.siyuan.config.export;
-    const bool = (id: string) => `<input id="${id}" class="b3-switch fn__flex-center" type="checkbox" ${conf[id] ? "checked" : ""}>`;
+    const bool = (id: BoolKey) => `<input id="${id}" class="b3-switch fn__flex-center" type="checkbox" ${conf[id] ? "checked" : ""}>`;
     // 渲染 select：复用设置面板的标准 class（fn__flex-center fn__size200），value 为当前全局值时标记 selected
-    const select = (id: string, options: {value: number; label: string}[]) => {
+    const select = (id: IntKey, options: {value: number; label: string}[]) => {
         const opts = options.map(o =>
             `<option value="${o.value}" ${conf[id] === o.value ? "selected" : ""}>${o.label}</option>`).join("");
         return `<select id="${id}" class="b3-select fn__flex-center fn__size200">${opts}</select>`;
@@ -36,7 +41,7 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
             ${control}
         </label>`;
     // 左右两个输入框，复用设置面板标准宽度 class（fn__size96）
-    const textPair = (leftId: string, rightId: string) =>
+    const textPair = (leftId: StringKey, rightId: StringKey) =>
         `<input id="${leftId}" class="b3-text-field fn__flex-center fn__size96" value="${conf[leftId] ?? ""}">
         <span class="fn__space"></span>
         <input id="${rightId}" class="b3-text-field fn__flex-center fn__size96" value="${conf[rightId] ?? ""}">`;
@@ -130,20 +135,13 @@ interface IExportMdOptionsPayload {
 export const exportMarkdownZip = (options: IExportMdOptions) => {
     openExportOptionsDialog(params => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
-        let url: string;
-        let payload: IObject;
+        const cb = (response: IWebSocketData) => saveExportFile(response.data.zip, msgId);
         if (options.id) {
-            url = "/api/export/exportMd";
-            payload = {id: options.id, ...params};
+            fetchPost("/api/export/exportMd", {id: options.id, ...params}, cb);
         } else if (options.ids) {
-            url = "/api/export/exportMds";
-            payload = {ids: options.ids, ...params};
+            fetchPost("/api/export/exportMds", {ids: options.ids, ...params}, cb);
         } else {
-            url = "/api/export/exportNotebookMd";
-            payload = {notebook: options.notebook, ...params};
+            fetchPost("/api/export/exportNotebookMd", {notebook: options.notebook, ...params}, cb);
         }
-        fetchPost(url, payload, response => {
-            saveExportFile(response.data.zip, msgId);
-        });
     });
 };

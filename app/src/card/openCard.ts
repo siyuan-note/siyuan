@@ -814,7 +814,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
         width: isMobile() ? "100vw" : "80vw",
-        height: isMobile() ? "100vh" : "70vh",
+        height: isMobile() ? "100dvh" : "70vh",
         destroyCallback() {
             if (editor) {
                 editor.destroy();

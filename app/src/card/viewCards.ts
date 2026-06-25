@@ -49,7 +49,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
     </div>
 </div>`,
             width: isMobile() ? "100vw" : "80vw",
-            height: isMobile() ? "100vh" : "70vh",
+            height: isMobile() ? "100dvh" : "70vh",
             destroyCallback() {
                 if (edit) {
                     edit.destroy();

@@ -106,7 +106,7 @@ export const openDocHistory = (options: {
         title: options.pathString,
         content: contentHTML,
         width: isMobile() ? "100vw" : "90vw",
-        height: isMobile() ? "100vh" : "80vh",
+        height: isMobile() ? "100dvh" : "80vh",
         containerClassName: "b3-dialog__container--theme",
         destroyCallback() {
             historyEditor = undefined;

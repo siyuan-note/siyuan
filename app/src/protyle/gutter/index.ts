@@ -225,6 +225,24 @@ export class Gutter {
             event.stopPropagation();
             hideTooltip();
             clearSelect(["cell", "img"], protyle.wysiwyg.element);
+            // 框线点击：若鼠标在块标范围内（框线::before 截获了块标点击），转发为块标菜单；否则无操作
+            if (buttonElement.classList.contains("protyle-gutters__line")) {
+                if (activeBlockButton && !protyle.disabled) {
+                    const br = activeBlockButton.getBoundingClientRect();
+                    if (event.clientX >= br.left && event.clientX <= br.right &&
+                        event.clientY >= br.top && event.clientY <= br.bottom) {
+                        this.renderMenu(protyle, activeBlockButton as HTMLElement);
+                        if (!protyle.toolbar.range) {
+                            protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.querySelector(`[data-node-id="${activeBlockButton.getAttribute("data-node-id")}"]`) || protyle.wysiwyg.element.firstElementChild);
+                        }
+                        /// #if !MOBILE
+                        window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, isLeft: true});
+                        focusByRange(protyle.toolbar.range);
+                        /// #endif
+                    }
+                }
+                return;
+            }
             const id = buttonElement.getAttribute("data-node-id");
             if (!id) {
                 if (buttonElement.getAttribute("disabled")) {

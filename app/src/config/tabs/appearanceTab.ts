@@ -83,7 +83,6 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     });
 };
 
-// 生成单个字体列表项的 HTML，内联字体样式用于预览，data-* 携带选中所需数据
 const genFontListItemHtml = (item: IFontItem, checked: boolean) => {
     return `<div class="b3-list-item b3-list-item--narrow">
     <span class="b3-menu__label" data-family="${item.family}" style='font-family:"${item.family}", var(--b3-font-family);${item.weight ? ` font-weight: ${item.weight};` : ""}'>${item.displayName}</span>
@@ -128,11 +127,13 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
                         const value = inputElement.value.toLowerCase().trim();
                         listElement.querySelector(".b3-list-item--focus")?.classList.add("b3-list-item--focus");
                         listElement.querySelectorAll<HTMLElement>(".b3-list-item .b3-menu__label").forEach((item) => {
-                            if (!value || (item.dataset.family.includes(value) ||
-                                item.textContent.trim().includes(value))) {
-                                item.parentElement.classList.remove("fn__none");
+                            const name = item.textContent.trim();
+                            item.parentElement.classList.toggle("fn__none", !(!value || item.dataset.family.toLowerCase().includes(value) || name.toLowerCase().includes(value)));
+                            const idx = name.toLowerCase().indexOf(value);
+                            if (idx === -1 || !value) {
+                                item.innerHTML = name;
                             } else {
-                                item.parentElement.classList.add("fn__none");
+                                item.innerHTML = `${name.slice(0, idx)}<mark>${name.slice(idx, idx + value.length)}</mark>${name.slice(idx + value.length)}`;
                             }
                         });
                         listElement.querySelector(".b3-list-item:not(.fn__none)")?.classList.add("b3-list-item--focus");

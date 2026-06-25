@@ -19,3 +19,10 @@
     }
   }
 }
+
+// 导出 Markdown 参数对话框 https://github.com/siyuan-note/siyuan/issues/17031
+.export-md__content {
+  .b3-label__text {
+    font-size: 13px !important;
+  }
+}

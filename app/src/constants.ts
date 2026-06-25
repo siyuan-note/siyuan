@@ -202,6 +202,7 @@ export abstract class Constants {
     public static readonly DIALOG_EXPORTIMAGE = "dialog-exportimage"; // 导出为图片
     public static readonly DIALOG_EXPORTTEMPLATE = "dialog-exporttemplate"; // 导出为模板
     public static readonly DIALOG_EXPORTWORD = "dialog-exportword"; // 导出为 word
+    public static readonly DIALOG_EXPORTMARKDOWN = "dialog-exportmarkdown"; // 导出为 Markdown
     public static readonly DIALOG_HISTORY = "dialog-history"; // 数据历史(Alt + H)
     public static readonly DIALOG_HISTORYDOC = "dialog-historydoc"; // 文档历史
     public static readonly DIALOG_MOVEPATHTO = "dialog-movepathto"; // 移动文档

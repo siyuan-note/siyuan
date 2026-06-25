@@ -375,7 +375,7 @@
           align-self: stretch;
           // 手柄不参与收缩，保持拖拽热区宽度恒定
           flex: 0 0 auto;
-          width: 4px;
+          width: 2px;
           border-radius: var(--b3-border-radius);
           cursor: col-resize;
           touch-action: none;

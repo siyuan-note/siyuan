@@ -18,13 +18,17 @@ package conf
 
 import "testing"
 
-// TestSecretsResolveExplicit 验证 {{secrets.NAME}} 显式语法只在密钥库内查找。
+// TestSecretsResolveExplicit 验证 {{secrets.NAME}} 显式语法与 $NAME/${NAME} 只在密钥库内查找。
 func TestSecretsResolveExplicit(t *testing.T) {
 	s := &Secrets{Items: []*Secret{{Name: "KEY", Value: "k1"}}}
 	cases := []struct{ in, want string }{
 		{"{{secrets.KEY}}", "k1"},
 		{"pre {{secrets.KEY}} post", "pre k1 post"},
 		{"{{secrets.MISSING}}", "{{secrets.MISSING}}"}, // 找不到保留原文
+		{"$KEY", "k1"},           // 无前缀简写，密钥库命中
+		{"${KEY}", "k1"},         // 无前缀花括号，密钥库命中
+		{"$MISSING", "$MISSING"}, // 密钥库无此名，保留原文
+		{"$100", "$100"},         // 数字开头不匹配
 		{"", ""},
 	}
 	for _, c := range cases {
@@ -34,17 +38,35 @@ func TestSecretsResolveExplicit(t *testing.T) {
 	}
 }
 
-// TestVariablesResolveExplicit 验证 {{vars.NAME}} 显式语法只在变量库内查找。
+// TestVariablesResolveExplicit 验证 {{vars.NAME}} 显式语法与 $NAME/${NAME} 只在变量库内查找。
 func TestVariablesResolveExplicit(t *testing.T) {
 	v := &Variables{Items: []*Variable{{Name: "VAR", Value: "v1"}}}
 	cases := []struct{ in, want string }{
 		{"{{vars.VAR}}", "v1"},
 		{"{{vars.MISSING}}", "{{vars.MISSING}}"},
+		{"$VAR", "v1"},
+		{"${VAR}", "v1"},
+		{"$MISSING", "$MISSING"},
 	}
 	for _, c := range cases {
 		if got := v.Resolve(c.in); got != c.want {
 			t.Errorf("Variables.Resolve(%q) = %q, want %q", c.in, got, c.want)
 		}
+	}
+}
+
+// TestPerStoreDollarIsolation 验证各库的 Resolve 处理 $NAME 时只查各自库，不跨库。
+// secrets.Resolve("$ONLY_VAR") 不应拿到变量库的值，反之亦然。
+func TestPerStoreDollarIsolation(t *testing.T) {
+	secrets := &Secrets{Items: []*Secret{{Name: "ONLY_SECRET", Value: "s"}}}
+	vars := &Variables{Items: []*Variable{{Name: "ONLY_VAR", Value: "v"}}}
+	// 密钥库的 Resolve 不应解析只在变量库存在的名字
+	if got := secrets.Resolve("$ONLY_VAR"); got != "$ONLY_VAR" {
+		t.Errorf("secrets.Resolve($ONLY_VAR) = %q, want $ONLY_VAR (密钥库不应跨库查变量)", got)
+	}
+	// 变量库的 Resolve 不应解析只在密钥库存在的名字
+	if got := vars.Resolve("$ONLY_SECRET"); got != "$ONLY_SECRET" {
+		t.Errorf("vars.Resolve($ONLY_SECRET) = %q, want $ONLY_SECRET (变量库不应跨库查密钥)", got)
 	}
 }
 

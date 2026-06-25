@@ -37,13 +37,14 @@ func NewVariables() *Variables {
 // varPlaceholder 匹配 {{vars.NAME}} 形式的占位符，NAME 部分不含 } 字符。
 var varPlaceholder = regexp.MustCompile(`\{\{vars\.([^}]+)\}\}`)
 
-// Resolve 把字符串里的 {{vars.NAME}} 占位符替换为对应变量值。
-// 找不到对应名字时保留原占位符不替换，与 Secrets.Resolve 行为一致。
+// Resolve 把字符串里的 {{vars.NAME}} 占位符替换为对应变量值，并处理无前缀的
+// $NAME、${NAME}（仅在变量库存在对应名字时才替换）。找不到对应名字时保留原文，
+// 与 Secrets.Resolve 行为一致。
 func (v *Variables) Resolve(in string) string {
 	if v == nil {
 		return in
 	}
-	return varPlaceholder.ReplaceAllStringFunc(in, func(match string) string {
+	in = varPlaceholder.ReplaceAllStringFunc(in, func(match string) string {
 		sub := varPlaceholder.FindStringSubmatch(match)
 		if len(sub) < 2 {
 			return match
@@ -56,6 +57,7 @@ func (v *Variables) Resolve(in string) string {
 		}
 		return match
 	})
+	return resolveDollar(in, v.lookup)
 }
 
 // lookup 按名查找变量值，返回值及是否存在。

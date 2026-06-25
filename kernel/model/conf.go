@@ -71,6 +71,8 @@ type AppConf struct {
 	Search         *conf.Search     `json:"search"`         // 搜索配置
 	Flashcard      *conf.Flashcard  `json:"flashcard"`      // 闪卡配置
 	AI             *conf.AI         `json:"ai"`             // 人工智能配置
+	Secrets        *conf.Secrets    `json:"secrets"`        // 全局密钥库
+	Variables      *conf.Variables  `json:"variables"`      // 全局变量库
 	Bazaar         *conf.Bazaar     `json:"bazaar"`         // 集市配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
@@ -139,6 +141,9 @@ func InitConf() {
 					if nil != Conf.AI {
 						Conf.AI.DecryptAPIKeys()
 					}
+					if nil != Conf.Secrets {
+						Conf.Secrets.Decrypt()
+					}
 					Conf.Save()
 					logging.LogInfof("migrated AI config [%s]", confPath)
 				}
@@ -151,6 +156,9 @@ func InitConf() {
 				}
 				if nil != Conf.AI {
 					Conf.AI.DecryptAPIKeys()
+				}
+				if nil != Conf.Secrets {
+					Conf.Secrets.Decrypt()
 				}
 			}
 		}
@@ -605,6 +613,14 @@ func InitConf() {
 	}
 	Conf.AI.Normalize()
 
+	if nil == Conf.Secrets {
+		Conf.Secrets = conf.NewSecrets()
+	}
+
+	if nil == Conf.Variables {
+		Conf.Variables = conf.NewVariables()
+	}
+
 	for _, p := range Conf.AI.Providers {
 		if p == nil || len(p.APIKey) == 0 {
 			continue
@@ -935,6 +951,11 @@ func (conf *AppConf) Save() {
 		defer Conf.AI.DecryptAPIKeys()
 	}
 
+	if nil != Conf.Secrets {
+		Conf.Secrets.Encrypt()
+		defer Conf.Secrets.Decrypt()
+	}
+
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	oldData, err := filelock.ReadFile(confPath)
@@ -1127,6 +1148,8 @@ func HideConfSecret(c *AppConf) {
 	c.Publish = &conf.Publish{}
 	c.Repo = &conf.Repo{}
 	c.Sync = &conf.Sync{}
+	c.Secrets = &conf.Secrets{}
+	c.Variables = &conf.Variables{}
 	c.System.AppDir = ""
 	c.System.ConfDir = ""
 	c.System.DataDir = ""

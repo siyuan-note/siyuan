@@ -418,6 +418,24 @@ export class Plugin {
     // Register a frontend action that the AI agent can discover and invoke. The action is exposed
     // to the LLM under the full name "plugin__<pluginName>__<name>" with the given description, and
     // is dispatched via the "frontend" tool. On uninstall, all registered actions are removed.
+    /**
+     * 按名称取密钥值（来自「设置 → 密钥和变量」的密钥库）。找不到时返回空字符串。
+     * 密钥在内核侧加密存储，此处读到的是运行时明文；仅在本地管理员身份下可用。
+     */
+    public getSecret(name: string): string {
+        const found = window.siyuan.config.secrets?.items?.find((item) => item.name === name);
+        return found ? found.value : "";
+    }
+
+    /**
+     * 按名称取变量值（来自「设置 → 密钥和变量」的变量库）。找不到时返回空字符串。
+     * 变量以明文存储，用于非敏感配置。
+     */
+    public getVariable(name: string): string {
+        const found = window.siyuan.config.variables?.items?.find((item) => item.name === name);
+        return found ? found.value : "";
+    }
+
     public addAgentAction(options: {
         name: string,
         description: string,

@@ -2,6 +2,7 @@ import {editorConfigApi} from "../tabs/editorRuntime";
 import {fileConfigApi} from "../tabs/fileRuntime";
 import {flashcardConfigApi} from "../tabs/flashcardRuntime";
 import {aiConfigApi} from "../tabs/aiRuntime";
+import {secretsConfigApi} from "../tabs/secretsVariablesRuntime";
 import {exportConfigApi} from "../tabs/exportRuntime";
 import {searchConfigApi} from "../tabs/searchRuntime";
 import {appearanceConfigApi} from "../tabs/appearanceRuntime";
@@ -18,6 +19,7 @@ import {registerEditorTab} from "../tabs/editorTab";
 import {registerFileTab} from "../tabs/fileTab";
 import {registerFlashcardTab} from "../tabs/flashcardTab";
 import {registerAiTab} from "../tabs/aiTab";
+import {registerSecretsVariablesTab} from "../tabs/secretsVariablesTab";
 import {registerExportTab} from "../tabs/exportTab";
 import {registerSearchTab} from "../tabs/searchTab";
 import {registerAppearanceTab} from "../tabs/appearanceTab";
@@ -68,6 +70,12 @@ const settingTabs = {
         title: () => window.siyuan.languages.ai,
         defaultSave: aiConfigApi.patch,
     }, registerAiTab),
+    secretsVariables: setting.tab({
+        id: "secretsVariables",
+        icon: "iconSquareAsterisk",
+        title: () => window.siyuan.languages.secretsVariables,
+        defaultSave: secretsConfigApi.patch,
+    }, registerSecretsVariablesTab),
     assets: setting.panel({
         id: "assets",
         icon: "iconImage",

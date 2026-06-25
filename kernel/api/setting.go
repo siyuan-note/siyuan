@@ -206,6 +206,64 @@ func setAI(c *gin.Context) {
 	ret.Data = model.Conf.AI
 }
 
+func setSecrets(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	secrets := &conf.Secrets{}
+	if err = gulu.JSON.UnmarshalJSON(param, secrets); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.Conf.Secrets = secrets
+	model.Conf.Save()
+
+	ret.Data = model.Conf.Secrets
+}
+
+func setVariables(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	variables := &conf.Variables{}
+	if err = gulu.JSON.UnmarshalJSON(param, variables); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.Conf.Variables = variables
+	model.Conf.Save()
+
+	ret.Data = model.Conf.Variables
+}
+
 func setFlashcard(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

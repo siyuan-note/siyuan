@@ -509,10 +509,12 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
         <div class="fn__hr"></div>
         <input class="b3-text-field fn__block" id="aiModelDisplayName" type="text" spellcheck="false" value="${Lute.EscapeHTMLStr(initialModel.displayName ?? "")}"/>
     </div>
+    <div style="text-align: right;">
+        <button class="b3-button b3-button--outline" id="aiModelTestBtn"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>
+    </div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--outline" id="aiModelTestBtn"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
     });
@@ -556,7 +558,7 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
             showMessage(`${window.siyuan.languages.testConnectionFail}${data.msg ? "：" + data.msg : ""}`, undefined, "error");
         });
     });
-    btns[2].addEventListener("click", () => {
+    btns[1].addEventListener("click", () => {
         const modelName = dialog.element.querySelector<HTMLInputElement>("#aiModelName").value.trim();
         if (!modelName) {
             showMessage(window.siyuan.languages.testConnectionFailModelRequired);

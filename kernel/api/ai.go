@@ -114,3 +114,44 @@ func testModel(c *gin.Context) {
 	}
 	ret.Data = result
 }
+
+// listModels 拉取指定 Provider 的可用模型清单（GET /v1/models），用于填充前端模型名称下拉框。
+// 不支持该端点的服务会返回错误，由前端回退为手动输入。
+func listModels(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var providerID string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("provider", &providerID, true, true),
+	) {
+		return
+	}
+
+	var provider *conf.Provider
+	for _, p := range model.Conf.AI.Providers {
+		if p != nil && p.ID == providerID {
+			provider = p
+			break
+		}
+	}
+	if nil == provider {
+		ret.Code = -1
+		ret.Msg = "provider not found"
+		return
+	}
+
+	models, err := util.ListAvailableModels(provider.APIKey, provider.BaseURL, provider.RequestTimeout)
+	result := map[string]any{
+		"models": models,
+	}
+	if nil != err {
+		result["msg"] = err.Error()
+	}
+	ret.Data = result
+}

@@ -30,6 +30,9 @@ export const getProvidersBlockKeywords = (): string[] => [
     window.siyuan.languages.testConnection,
     window.siyuan.languages.testConnectionFailModelRequired,
     window.siyuan.languages.testConnectionFailModelNotFound,
+    window.siyuan.languages.fetchAvailableModels,
+    window.siyuan.languages.fetchAvailableModelsFail,
+    window.siyuan.languages.selectModel,
 ];
 
 export const genProvidersBlockHtml = (): string => `<div class="b3-label config-item" id="aiProvidersBlock">
@@ -501,7 +504,11 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
         <div class="config-name">${window.siyuan.languages.apiModel}</div>
         <div class="b3-label__text">${window.siyuan.languages.apiModelTip}</div>
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" id="aiModelName" type="text" spellcheck="false" value="${Lute.EscapeHTMLStr(initialModel.name)}"/>
+        <div class="fn__flex config-wrap" style="overflow: visible !important;">
+            <button class="b3-button b3-button--outline fn__flex-center" id="aiModelFetchBtn" title="${window.siyuan.languages.fetchAvailableModels}"><svg style="margin-right: 4px;"><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.fetchAvailableModels}</button>
+            <span class="fn__space"></span>
+            <input class="b3-text-field fn__flex-1" id="aiModelName" type="text" spellcheck="false" value="${Lute.EscapeHTMLStr(initialModel.name)}"/>
+        </div>
     </div>
     <div class="b3-label b3-label--inner">
         <div class="config-name">${window.siyuan.languages.customDisplayName}</div>
@@ -521,9 +528,48 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
     dialog.element.setAttribute("data-key", Constants.DIALOG_AIMODEL);
     dialog.element.querySelector<HTMLInputElement>("#aiModelName")?.select();
     const btns = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
+    // 读取模型名称当前值：该字段可能是文本输入框（初始或拉取失败回退），也可能是拉取成功后替换成的下拉框
+    const getModelName = () => {
+        const el = dialog.element.querySelector<HTMLInputElement | HTMLSelectElement>("#aiModelName");
+        return (el?.value ?? "").trim();
+    };
     btns[0].addEventListener("click", () => dialog.destroy());
+    // 拉取 Provider 可用模型清单，成功后把文本框替换为下拉框供选择
+    dialog.element.querySelector<HTMLElement>("#aiModelFetchBtn")?.addEventListener("click", () => {
+        const fetchBtn = dialog.element.querySelector<HTMLButtonElement>("#aiModelFetchBtn");
+        const fetchSvg = fetchBtn.querySelector("svg");
+        const originalHtml = fetchBtn.innerHTML;
+        fetchBtn.disabled = true;
+        fetchSvg.style.animation = "agent-mirror-spin 0.8s linear infinite";
+        const restoreFetchBtn = () => {
+            fetchBtn.disabled = false;
+            fetchBtn.innerHTML = originalHtml;
+        };
+        fetchPost("/api/ai/listModels", {provider: providerId}, (response) => {
+            restoreFetchBtn();
+            const data = response.data || {};
+            const models: string[] = Array.isArray(data.models) ? data.models : [];
+            if (models.length === 0) {
+                showMessage(`${window.siyuan.languages.fetchAvailableModelsFail}${data.msg ? "：" + data.msg : ""}`, undefined, "error");
+                return;
+            }
+            // 用下拉框替换原文本框，保留当前已填值
+            const current = getModelName();
+            const inputEl = dialog.element.querySelector<HTMLElement>("#aiModelName");
+            const selectEl = document.createElement("select");
+            selectEl.className = "b3-select fn__flex-1";
+            selectEl.id = "aiModelName";
+            selectEl.innerHTML = `<option value="">${window.siyuan.languages.selectModel}</option>` +
+                models.map((m) => `<option value="${Lute.EscapeHTMLStr(m)}"${m === current ? " selected" : ""}>${Lute.EscapeHTMLStr(m)}</option>`).join("");
+            if (current && models.includes(current)) {
+                selectEl.value = current;
+            }
+            inputEl.replaceWith(selectEl);
+            showMessage(window.siyuan.languages.fetchAvailableModelsSuccess, undefined, "info");
+        });
+    });
     dialog.element.querySelector<HTMLElement>("#aiModelTestBtn")?.addEventListener("click", () => {
-        const modelName = dialog.element.querySelector<HTMLInputElement>("#aiModelName").value.trim();
+        const modelName = getModelName();
         if (!modelName) {
             showMessage(window.siyuan.languages.testConnectionFailModelRequired);
             return;
@@ -559,14 +605,14 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
         });
     });
     btns[1].addEventListener("click", () => {
-        const modelName = dialog.element.querySelector<HTMLInputElement>("#aiModelName").value.trim();
+        const modelName = getModelName();
         if (!modelName) {
             showMessage(window.siyuan.languages.testConnectionFailModelRequired);
             return;
         }
         const nextModel: Config.IModel = {
             ...initialModel,
-            name: dialog.element.querySelector<HTMLInputElement>("#aiModelName").value,
+            name: modelName,
             displayName: dialog.element.querySelector<HTMLInputElement>("#aiModelDisplayName").value,
         };
         const nextProviders = window.siyuan.config.ai.providers.map((item) => {

@@ -138,6 +138,27 @@ func TestModel(apiKey, apiBaseURL, model string, timeout int) (available []strin
 	return
 }
 
+// ListAvailableModels 拉取 Provider 的可用模型清单（GET /v1/models），仅返回模型 ID 列表。
+// 用于填充前端模型名称下拉框。不支持该端点的服务会返回错误，由调用方回退为手动输入。
+func ListAvailableModels(apiKey, apiBaseURL string, timeout int) (models []string, err error) {
+	if 1 > timeout {
+		timeout = 30
+	}
+	client := NewOpenAIClient(apiKey, apiBaseURL)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	defer cancel()
+
+	list, err := client.ListModels(ctx)
+	if nil != err {
+		logging.LogErrorf("list models [%s] failed: %s", apiBaseURL, err)
+		return
+	}
+	for _, m := range list.Models {
+		models = append(models, m.ID)
+	}
+	return
+}
+
 func IsNetworkError(err error) bool {
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "actively refused") ||

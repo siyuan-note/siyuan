@@ -21,6 +21,13 @@ import {genStackHtml} from "../render/render";
 import {controlBoolean} from "../setting/control";
 import {editorConfigApi} from "./editorRuntime";
 import {appearanceThemeModeValue, saveThemeMode} from "./appearanceRuntime";
+import {upDownHint} from "../../util/upDownHint";
+
+interface IFontItem {
+    family: string;
+    weight: number;
+    displayName: string;
+}
 
 const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("content", window.siyuan.languages.configGroupContent);
@@ -76,6 +83,14 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+// 生成单个字体列表项的 HTML，内联字体样式用于预览，data-* 携带选中所需数据
+const genFontListItemHtml = (item: IFontItem, checked: boolean) => {
+    return `<div class="b3-list-item b3-list-item--narrow">
+    <span class="b3-menu__label" data-family="${item.family}" style='font-family:"${item.family}", var(--b3-font-family);${item.weight ? ` font-weight: ${item.weight};` : ""}'>${item.displayName}</span>
+    ${checked ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
+</div>`;
+};
+
 const mountAppearanceFontFamily = (root: HTMLElement) => {
     const fontFamilyEl = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.fontFamily")}`);
     if (!fontFamilyEl) {
@@ -83,72 +98,113 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
     }
     fontFamilyEl.addEventListener("click", () => {
         fetchPost("/api/system/getSysFonts", {}, (response) => {
-            const curFamily = fontFamilyEl.dataset.family || "";
-            const curWeight = parseInt(fontFamilyEl.dataset.weight || "0", 10);
+            const curFamily = fontFamilyEl.dataset.family;
+            const curWeight = parseInt(fontFamilyEl.style.fontWeight || "400", 10);
+            const defaultItemHtml = genFontListItemHtml({
+                family: "",
+                displayName: window.siyuan.languages.default,
+                weight: 400,
+            }, curFamily === "");
+            const fontItemHtml = response.data.map((item: IFontItem) =>
+                genFontListItemHtml(item, item.family === curFamily && item.weight === curWeight)
+            ).join("");
             const fontMenu = new Menu();
             fontMenu.addItem({
                 iconHTML: "",
-                checked: curFamily === "",
-                label: `<div style='var(--b3-font-family);'>${window.siyuan.languages.default}</div>`,
-                click: () => {
-                    const family = fontFamilyEl.dataset.family || "";
-                    const weight = parseInt(fontFamilyEl.dataset.weight || "0", 10);
-                    if (family === "" && weight === 0) {
-                        return;
-                    }
-                    fontFamilyEl.value = window.siyuan.languages.default;
-                    fontFamilyEl.dataset.family = "";
-                    fontFamilyEl.dataset.weight = "0";
-                    fontFamilyEl.dataset.display = "";
-                    fontFamilyEl.style.fontFamily = "";
-                    fontFamilyEl.style.fontWeight = "";
-                    persistEditorFont();
-                },
-            });
-            response.data.forEach((item: {family: string; weight: number; displayName: string}) => {
-                fontMenu.addItem({
-                    iconHTML: "",
-                    checked: item.family === curFamily && item.weight === curWeight,
-                    label: `<div style='font-family:"${item.family}", var(--b3-font-family);${item.weight ? ` font-weight: ${item.weight};` : ""}'>${item.displayName}</div>`,
-                    click: () => {
-                        const family = fontFamilyEl.dataset.family || "";
-                        const weight = parseInt(fontFamilyEl.dataset.weight || "0", 10);
-                        if (family === item.family && weight === item.weight) {
+                type: "empty",
+                label: `<div class="fn__flex-column b3-menu__filter">
+    <div class="b3-form__icon">
+        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+        <input class="b3-text-field fn__block b3-form__icon-input" placeholder="${window.siyuan.languages.search}">
+    </div>
+    <div class="fn__hr"></div>
+    <div class="b3-list fn__flex-1 b3-list--background">${defaultItemHtml}${fontItemHtml}</div>
+</div>`,
+                bind(element) {
+                    const listElement = element.querySelector(".b3-list");
+                    listElement.firstElementChild.classList.add("b3-list-item--focus");
+                    const inputElement = element.querySelector("input");
+                    const filterFontList = () => {
+                        const value = inputElement.value.toLowerCase().trim();
+                        listElement.querySelector(".b3-list-item--focus")?.classList.add("b3-list-item--focus");
+                        listElement.querySelectorAll<HTMLElement>(".b3-list-item .b3-menu__label").forEach((item) => {
+                            if (!value || (item.dataset.family.includes(value) ||
+                                item.textContent.trim().includes(value))) {
+                                item.parentElement.classList.remove("fn__none");
+                            } else {
+                                item.parentElement.classList.add("fn__none");
+                            }
+                        });
+                        listElement.querySelector(".b3-list-item:not(.fn__none)")?.classList.add("b3-list-item--focus");
+                    };
+                    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                        event.stopPropagation();
+                        if (event.isComposing) {
                             return;
                         }
-                        fontFamilyEl.value = item.displayName;
-                        fontFamilyEl.dataset.family = item.family;
-                        fontFamilyEl.dataset.weight = String(item.weight);
-                        fontFamilyEl.dataset.display = item.displayName;
-                        fontFamilyEl.style.fontFamily = item.family + ", var(--b3-font-family);";
-                        fontFamilyEl.style.fontWeight = item.weight ? String(item.weight) : "";
-                        persistEditorFont();
-                    },
-                });
+                        upDownHint(listElement, event);
+                        if (event.key === "Enter") {
+                            const itemEl = listElement.querySelector(".b3-list-item--focus .b3-menu__label") as HTMLElement;
+                            persistEditorFont({
+                                family: itemEl.dataset.family,
+                                displayName: itemEl.textContent.trim(),
+                                weight: parseInt(itemEl.style.fontWeight) || 400
+                            });
+                            fontMenu.close();
+                        } else if (event.key === "Escape") {
+                            window.siyuan.menus.menu.remove();
+                        }
+                    });
+                    inputElement.addEventListener("input", (event: InputEvent) => {
+                        if (event.isComposing) {
+                            return;
+                        }
+                        filterFontList();
+                    });
+                    inputElement.addEventListener("compositionend", filterFontList);
+                    // 列表点击委托，读取 dataset 应用选中逻辑
+                    listElement.addEventListener("click", (event) => {
+                        const target = event.target as HTMLElement;
+                        const itemEl = target.closest(".b3-list-item")?.querySelector(".b3-menu__label") as HTMLElement;
+                        if (!itemEl) {
+                            return;
+                        }
+                        persistEditorFont({
+                            family: itemEl.dataset.family,
+                            displayName: itemEl.textContent.trim(),
+                            weight: parseInt(itemEl.style.fontWeight) || 400
+                        });
+                        fontMenu.close();
+                    });
+                }
             });
             const rect = fontFamilyEl.getBoundingClientRect();
-            fontMenu.open({x: rect.left, y: rect.bottom});
+            fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height});
+            // 内部列表自行滚动，搜索框保持固定
+            fontMenu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+            fontMenu.element.querySelector("input").focus();
         });
     });
 
-    function persistEditorFont() {
+    function persistEditorFont(item: IFontItem) {
+        if (fontFamilyEl.dataset.family === item.family && parseInt(fontFamilyEl.style.fontWeight) === item.weight) {
+            return;
+        }
         fetchPost(
             "/api/setting/setEditor",
             {
                 ...window.siyuan.config.editor,
-                fontFamily: fontFamilyEl.dataset.family || "",
-                fontWeight: parseInt(fontFamilyEl.dataset.weight || "0", 10),
-                fontFamilyDisplay: fontFamilyEl.dataset.display || "",
+                fontFamily: item.family,
+                fontWeight: item.weight,
+                fontFamilyDisplay: item.displayName,
             },
             (response) => {
                 const data = response.data as Config.IEditor;
                 editorConfigApi.apply(data);
                 fontFamilyEl.value = data.fontFamilyDisplay || data.fontFamily || window.siyuan.languages.default;
                 fontFamilyEl.dataset.family = data.fontFamily;
-                fontFamilyEl.dataset.weight = String(data.fontWeight);
-                fontFamilyEl.dataset.display = data.fontFamilyDisplay;
-                fontFamilyEl.style.fontFamily = `${data.fontFamily ? data.fontFamily + ", " : ""}var(--b3-font-family);`;
-                fontFamilyEl.style.fontWeight = data.fontWeight ? String(data.fontWeight) : "";
+                fontFamilyEl.style.fontFamily = `${data.fontFamily ? data.fontFamily + ", " : ""}var(--b3-font-family)`;
+                fontFamilyEl.style.fontWeight = data.fontWeight ? String(data.fontWeight) : "400";
             }
         );
     }
@@ -398,7 +454,7 @@ const bindFloatWindowModeVisibility = (root: HTMLElement) => {
     handleFloatWindowModeChange();
 };
 
-const STATUS_BAR_MSG_ITEMS: {key: keyof Config.IAppearanceStatusBar; taskKey: string}[] = [
+const STATUS_BAR_MSG_ITEMS: { key: keyof Config.IAppearanceStatusBar; taskKey: string }[] = [
     {key: "msgTaskDatabaseIndexCommitDisabled", taskKey: "task.database.index.commit"},
     {key: "msgTaskAssetDatabaseIndexCommitDisabled", taskKey: "task.asset.database.index.commit"},
     {key: "msgTaskHistoryDatabaseIndexCommitDisabled", taskKey: "task.history.database.index.commit"},

@@ -4,8 +4,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {isMobile} from "../../util/functions";
-import {secretsConfigApi} from "./secretsVariablesRuntime";
-import {variablesConfigApi} from "./secretsVariablesRuntime";
+import {secretsConfigApi, variablesConfigApi} from "./secretsVariablesRuntime";
 
 interface NamedItem {
     name: string;
@@ -24,7 +23,6 @@ export const getSecretsBlockKeywords = (): string[] => [
 ];
 
 export const genSecretsBlockHtml = (): string => `<div class="b3-label config-item" id="secretsBlock">
-    <div class="config-name">${window.siyuan.languages.secrets}</div>
     <div class="b3-label__text">${window.siyuan.languages.secretsTip}</div>
     <div class="fn__hr--small"></div>
     <div id="secretList"></div>
@@ -119,7 +117,6 @@ export const getVariablesBlockKeywords = (): string[] => [
 ];
 
 export const genVariablesBlockHtml = (): string => `<div class="b3-label config-item" id="variablesBlock">
-    <div class="config-name">${window.siyuan.languages.variables}</div>
     <div class="b3-label__text">${window.siyuan.languages.variablesTip}</div>
     <div class="fn__hr--small"></div>
     <div id="variableList"></div>

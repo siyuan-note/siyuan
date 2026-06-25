@@ -62,7 +62,7 @@ func SyncDataDownload() {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	err := syncRepoDownload()
+	err := syncRepoDownloadWithDNSRetry()
 	code := 1
 	if err != nil {
 		code = 2
@@ -92,7 +92,7 @@ func SyncDataUpload() {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	err := syncRepoUpload()
+	err := syncRepoUploadWithDNSRetry()
 	code := 1
 	if err != nil {
 		code = 2
@@ -202,7 +202,7 @@ func syncData(exit, byHand bool) {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	dataChanged, err := syncRepo(exit, byHand)
+	dataChanged, err := syncRepoWithDNSRetry(exit, byHand)
 	code := 1
 	if err != nil {
 		code = 2
@@ -660,7 +660,7 @@ func formatRepoErrorMsg(err error) string {
 			msg = fmt.Sprintf(Conf.Language(85), err)
 		} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {
 			msg = Conf.Language(135)
-		} else if strings.Contains(msgLowerCase, "no such host") || strings.Contains(msgLowerCase, "connection failed") || strings.Contains(msgLowerCase, "hostname resolution") || strings.Contains(msgLowerCase, "No address associated with hostname") {
+		} else if isDNSError(msgLowerCase) {
 			msg = Conf.Language(24)
 		} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") || strings.Contains(msgLowerCase, "timeout") || strings.Contains(msgLowerCase, "context cancellation while reading body") {
 			msg = Conf.Language(24)
@@ -670,6 +670,70 @@ func formatRepoErrorMsg(err error) string {
 	}
 	msg += " (Provider: " + conf.ProviderToStr(Conf.Sync.Provider) + ")"
 	return msg
+}
+
+// isDNSError 判断错误信息是否属于 DNS 解析类（域名解析失败、主机名无法解析等）。
+// dejavu/cloud 层用 fmt.Errorf 原样透传底层网络错误，因此这里用字符串匹配兜底。
+func isDNSError(msg string) bool {
+	return strings.Contains(msg, "no such host") ||
+		strings.Contains(msg, "connection failed") ||
+		strings.Contains(msg, "hostname resolution") ||
+		strings.Contains(msg, "no address associated with hostname")
+}
+
+// lastDNSFlushTime 及其锁用于 DNS 刷新节流，避免自动同步循环里反复 fork 系统命令。
+// 由于同步可能从多个入口并发执行（如启动后台同步与手动同步），这里用互斥锁保护。
+var (
+	lastDNSFlushTime   time.Time
+	lastDNSFlushTimeMu sync.Mutex
+)
+
+// flushAndRetryOnDNSError 在确认是 DNS 类错误且距上次刷新超过 5 分钟时，刷新系统 DNS 缓存并返回 true
+// 以触发上层重试一次同步；否则返回 false。节流是为了避免高频自动同步反复 fork 系统命令。
+func flushAndRetryOnDNSError(err error) bool {
+	if !isDNSError(strings.ToLower(err.Error())) {
+		return false
+	}
+
+	lastDNSFlushTimeMu.Lock()
+	defer lastDNSFlushTimeMu.Unlock()
+	if time.Since(lastDNSFlushTime) < 5*time.Minute {
+		logging.LogInfof("sync failed with DNS error, but DNS cache was flushed recently, skip retry")
+		return false
+	}
+	lastDNSFlushTime = time.Now()
+
+	logging.LogInfof("sync failed with DNS error [%s], flushing DNS cache and retrying once", err)
+	flushDNS()
+	return true
+}
+
+// syncRepoWithDNSRetry 执行一次同步，若失败且判定为 DNS 类错误，则刷新系统 DNS 缓存后重试一次。
+// 统一封装 DNS 重试逻辑，供主同步流程（syncData）与启动后台同步复用。
+func syncRepoWithDNSRetry(exit, byHand bool) (dataChanged bool, err error) {
+	dataChanged, err = syncRepo(exit, byHand)
+	if nil != err && flushAndRetryOnDNSError(err) {
+		dataChanged, err = syncRepo(exit, byHand)
+	}
+	return
+}
+
+// syncRepoDownloadWithDNSRetry 仅下载同步，DNS 类错误时刷新系统 DNS 缓存后重试一次。
+func syncRepoDownloadWithDNSRetry() (err error) {
+	err = syncRepoDownload()
+	if nil != err && flushAndRetryOnDNSError(err) {
+		err = syncRepoDownload()
+	}
+	return
+}
+
+// syncRepoUploadWithDNSRetry 仅上传同步，DNS 类错误时刷新系统 DNS 缓存后重试一次。
+func syncRepoUploadWithDNSRetry() (err error) {
+	err = syncRepoUpload()
+	if nil != err && flushAndRetryOnDNSError(err) {
+		err = syncRepoUpload()
+	}
+	return
 }
 
 func getSyncIgnoreLines() (ret []string) {

@@ -225,6 +225,24 @@ export class Gutter {
             event.stopPropagation();
             hideTooltip();
             clearSelect(["cell", "img"], protyle.wysiwyg.element);
+            // 框线点击：若鼠标在块标范围内（框线::before 截获了块标点击），转发为块标菜单；否则无操作
+            if (buttonElement.classList.contains("protyle-gutters__line")) {
+                if (activeBlockButton && !protyle.disabled) {
+                    const br = activeBlockButton.getBoundingClientRect();
+                    if (event.clientX >= br.left && event.clientX <= br.right &&
+                        event.clientY >= br.top && event.clientY <= br.bottom) {
+                        this.renderMenu(protyle, activeBlockButton as HTMLElement);
+                        if (!protyle.toolbar.range) {
+                            protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.querySelector(`[data-node-id="${activeBlockButton.getAttribute("data-node-id")}"]`) || protyle.wysiwyg.element.firstElementChild);
+                        }
+                        /// #if !MOBILE
+                        window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, isLeft: true});
+                        focusByRange(protyle.toolbar.range);
+                        /// #endif
+                    }
+                }
+                return;
+            }
             const id = buttonElement.getAttribute("data-node-id");
             if (!id) {
                 if (buttonElement.getAttribute("disabled")) {
@@ -516,7 +534,10 @@ export class Gutter {
         });
         // 延迟隐藏计时器，鼠标在块标/框线/+号之间移动时提供缓冲，避免中途 mouseleave 误隐藏
         let hidePlusTimeout: number;
+        // 当前悬浮的块标 button，供情况A 坐标判断（鼠标在块标内不误触发+号）
+        let activeBlockButton: Element;
         const hideInsert = () => {
+            activeBlockButton = undefined;
             this.element.querySelectorAll(".protyle-gutters__line, .protyle-gutters__plus").forEach(item => {
                 (item as HTMLElement).style.display = "none";
             });
@@ -551,6 +572,15 @@ export class Gutter {
             const hoverEl = lineEl || plusEl;
             if (hoverEl) {
                 window.clearTimeout(hidePlusTimeout);
+                // 鼠标若仍在块标 button 几何范围内，视为块标 hover，不触发+号
+                // 避免框线::before 扩展区侵入块标导致误把点击块标弹菜单变成插入块
+                if (activeBlockButton) {
+                    const br = activeBlockButton.getBoundingClientRect();
+                    if (event.clientX >= br.left && event.clientX <= br.right &&
+                        event.clientY >= br.top && event.clientY <= br.bottom) {
+                        return;
+                    }
+                }
                 const isBefore = hoverEl.getAttribute("data-type").includes("Before");
                 plusBefore.style.display = isBefore ? "" : "none";
                 plusAfter.style.display = isBefore ? "none" : "";
@@ -573,6 +603,7 @@ export class Gutter {
             // 情况B：悬浮有效块标 → 显示框线（贴边），并预设+号位置（隐藏）
             plusBefore.dataset.nodeId = id;
             plusAfter.dataset.nodeId = id;
+            activeBlockButton = buttonElement;
             const rect = buttonElement.getBoundingClientRect();
             const compressed = this.element.style.width === "24px";
             // 竖排时不显示+号提示（清空 aria-label 避免触发 tooltip），横排时恢复

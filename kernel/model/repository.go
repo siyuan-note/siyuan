@@ -1726,7 +1726,7 @@ func bootSyncRepo() (err error) {
 
 	if 0 < len(fetchedFiles) {
 		go func() {
-			_, syncErr := syncRepo(false, false)
+			_, syncErr := syncRepoWithDNSRetry(false, false)
 			isBootSyncing.Store(false)
 			if err != nil {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)

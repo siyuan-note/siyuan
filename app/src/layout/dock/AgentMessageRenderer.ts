@@ -4,8 +4,8 @@ import {addScript} from "../../protyle/util/addScript";
 import {Constants} from "../../constants";
 import {mathRender} from "../../protyle/render/mathRender";
 import {showMessage} from "../../dialog/message";
+import {processSiYuanUri} from "../../util/uri";
 import type {App} from "../../index";
-import {processSiYuanUri} from "../../editor/openLink";
 
 export const renderTodoList = (result: string): string => {
     const L = window.siyuan.languages;

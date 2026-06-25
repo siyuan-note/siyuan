@@ -1639,6 +1639,8 @@ export class AgentChat extends Model {
             }
             chatEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
             postRender(chatEl, this.app);
+            // 预览态固定高度，滚动到底部让最新流式内容可见。
+            thinkBody.scrollTop = thinkBody.scrollHeight;
             this.scrollToBottom();
             return;
         }
@@ -1824,7 +1826,7 @@ export class AgentChat extends Model {
             existingCard.remove();
         }
 
-        const bodyHTML = '<div class="agent-chat__thinking-body">' +
+        const bodyHTML = '<div class="agent-chat__thinking-body agent-chat__thinking-body--preview">' +
             detailLines +
             "</div>";
 

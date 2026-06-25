@@ -474,6 +474,18 @@ pre:hover .agent-chat__copy-wrap,
     }
 }
 
+.agent-chat__thinking-body--preview {
+    max-height: 120px;
+    overflow-y: auto;
+
+    // 隐藏滚动条，保持预览态视觉干净（内容通过 JS 自动滚到底部）。
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 .agent-chat__thinking-body--expanded {
     max-height: 2000px;
     padding: 8px 0;

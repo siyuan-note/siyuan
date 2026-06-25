@@ -166,9 +166,36 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
     if (!header || !body || !expandIcon || !contractIcon) { return; }
     header.addEventListener("click", () => {
-        const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
-        expandIcon.classList.toggle("fn__none", isExpanded);
-        contractIcon.classList.toggle("fn__none", !isExpanded);
+        const isExpanded = body.classList.contains("agent-chat__thinking-body--expanded");
+        const isDone = el.classList.contains("agent-chat__msg--thinking-done");
+        if (isDone) {
+            // 思考完成后：两态 toggle（折叠↔完全展开），不经过预览中间态。
+            if (isExpanded) {
+                body.classList.remove("agent-chat__thinking-body--expanded");
+                expandIcon.classList.remove("fn__none");
+                contractIcon.classList.add("fn__none");
+            } else {
+                body.classList.remove("agent-chat__thinking-body--preview");
+                body.classList.add("agent-chat__thinking-body--expanded");
+                expandIcon.classList.add("fn__none");
+                contractIcon.classList.remove("fn__none");
+            }
+        } else {
+            // 流式中：三态循环（完全折叠 → 预览 → 完全展开 → 完全折叠）。
+            const isPreview = body.classList.contains("agent-chat__thinking-body--preview");
+            if (isExpanded) {
+                body.classList.remove("agent-chat__thinking-body--expanded");
+                expandIcon.classList.remove("fn__none");
+                contractIcon.classList.add("fn__none");
+            } else if (isPreview) {
+                body.classList.remove("agent-chat__thinking-body--preview");
+                body.classList.add("agent-chat__thinking-body--expanded");
+                expandIcon.classList.add("fn__none");
+                contractIcon.classList.remove("fn__none");
+            } else {
+                body.classList.add("agent-chat__thinking-body--preview");
+            }
+        }
     });
 };
 

@@ -404,6 +404,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/setting/setEmoji", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setEmoji)
 	ginServer.Handle("POST", "/api/setting/setFlashcard", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFlashcard)
 	ginServer.Handle("POST", "/api/setting/setAI", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAI)
+	ginServer.Handle("POST", "/api/setting/setSecrets", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setSecrets)
+	ginServer.Handle("POST", "/api/setting/setVariables", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setVariables)
 	ginServer.Handle("POST", "/api/setting/setBazaar", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setBazaar)
 	ginServer.Handle("POST", "/api/setting/setPublish", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPublish)
 	ginServer.Handle("POST", "/api/setting/getPublish", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getPublish)

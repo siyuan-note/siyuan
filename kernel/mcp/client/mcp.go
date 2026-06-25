@@ -30,6 +30,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
 const (
@@ -70,7 +71,9 @@ type headerRoundTripper struct {
 func (h *headerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	clone := req.Clone(req.Context())
 	for k, v := range h.headers {
-		clone.Header.Set(k, v)
+		// 对每个 header 值里的 {{secrets.NAME}}、{{vars.NAME}} 占位符插值，
+		// 使 MCP 服务的 Authorization 等头部可引用密钥/变量而无需明文存储。
+		clone.Header.Set(k, conf.ResolveSecretsVars(model.Conf.Secrets, model.Conf.Variables, v))
 	}
 	return h.base.RoundTrip(clone)
 }

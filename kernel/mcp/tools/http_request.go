@@ -19,6 +19,8 @@ package tools
 import (
 	"fmt"
 
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -65,6 +67,17 @@ func httpRequestHandler(args map[string]interface{}) (CallToolResult, error) {
 		}
 	}
 	body, _ := args["body"].(string)
+
+	// 对 url/headers/body 中的 {{secrets.NAME}}、{{vars.NAME}} 占位符插值，
+	// 密钥/变量明文只进入出站请求，不进入 LLM 上下文。
+	resolve := func(s string) string {
+		return conf.ResolveSecretsVars(model.Conf.Secrets, model.Conf.Variables, s)
+	}
+	rawURL = resolve(rawURL)
+	for k, v := range headers {
+		headers[k] = resolve(v)
+	}
+	body = resolve(body)
 
 	statusCode, contentType, text, err := util.HTTPRequest(action, rawURL, headers, body)
 	if err != nil {

@@ -74,6 +74,11 @@ declare namespace Config {
          */
         readonly: boolean;
         repo: IRepo;
+        /**
+         * Global secrets store, referenced via {{secrets.NAME}} placeholders.
+         * 全局密钥库，通过 {{secrets.NAME}} 占位符引用
+         */
+        secrets: ISecrets;
         search: ISearch;
         /**
          * Whether to display the changelog for this release version
@@ -89,6 +94,11 @@ declare namespace Config {
          * Community user data (Encrypted)
          */
         userData: string;
+        /**
+         * Global variables store, referenced via {{vars.NAME}} placeholders.
+         * 全局变量库，通过 {{vars.NAME}} 占位符引用
+         */
+        variables: IVariables;
     }
 
     /**
@@ -1429,6 +1439,38 @@ declare namespace Config {
          * Whether to enable JavaScript code snippets
          */
         enabledJS: boolean;
+    }
+
+    /**
+     * A named secret. The value is AES-encrypted at rest on the kernel side.
+     */
+    export interface ISecret {
+        name: string;
+        value: string;
+    }
+
+    /**
+     * Global secrets store. Referenced via {{secrets.NAME}} placeholders by the
+     * agent http_request tool and MCP server headers.
+     */
+    export interface ISecrets {
+        items: ISecret[];
+    }
+
+    /**
+     * A named variable. The value is stored in plain text (non-sensitive data).
+     */
+    export interface IVariable {
+        name: string;
+        value: string;
+    }
+
+    /**
+     * Global variables store. Referenced via {{vars.NAME}} placeholders by the
+     * agent http_request tool and MCP server headers.
+     */
+    export interface IVariables {
+        items: IVariable[];
     }
 
     /**

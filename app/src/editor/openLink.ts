@@ -12,6 +12,7 @@ import {isInIOS, isInAndroid, isInHarmony} from "../protyle/util/compatibility";
 import {fetchPost} from "../util/fetch";
 import {checkFold} from "../util/noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
+// import {openBazaarReadme} from "../config";
 
 import type {App} from "../index";
 
@@ -100,6 +101,24 @@ const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
     return true;
 };
 
+export const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
+    /// #if !MOBILE
+    const [, _type, _name, target] = uriObj.pathname.split("/");
+    if (!_type || !_name) return false;
+    const resourceType = _type as TBazaarType;
+    const resourceName = decodeURIComponent(_name);
+    switch (target) {
+        case "readme":
+            // siyuan://bazaar/plugins/plugin-sample/readme
+            // openBazaarReadme(app, resourceType, resourceName);
+            return true;
+        default:
+            break;
+    }
+    /// #endif
+    return false;
+};
+
 export const processSiYuanUri = (app: App, uri: string) => {
     let uriObj: URL;
     try {
@@ -115,6 +134,8 @@ export const processSiYuanUri = (app: App, uri: string) => {
             return processSiYuanUriBlocks(app, uriObj);
         case "plugins":
             return processSiYuanUriPlugins(app, uriObj);
+        case "bazaar":
+            return processSiYuanUriBazaar(app, uriObj);
         default:
             break;
     }

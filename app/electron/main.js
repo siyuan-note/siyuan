@@ -111,6 +111,40 @@ try {
     app.exit();
 }
 
+// 解析命令行参数，参数需以 `name=value` 形式传入 https://github.com/siyuan-note/siyuan/issues/14748
+const getArg = (name) => {
+    for (let i = 0; i < process.argv.length; i++) {
+        if (process.argv[i].startsWith(name)) {
+            return process.argv[i].split("=")[1];
+        }
+    }
+};
+
+// 检测上次打开的工作空间是否丢失 https://github.com/siyuan-note/siyuan/issues/14748
+let lastWorkspaceMissing = false;
+let missingWorkspacePath = "";
+let availableWorkspaces = [];
+if (!firstOpen && !getArg("--workspace")) {
+    // 显式通过命令行指定工作空间时尊重用户参数，跳过检测
+    try {
+        const wsFile = path.join(confDir, "workspace.json");
+        if (fs.existsSync(wsFile)) {
+            const wsList = JSON.parse(fs.readFileSync(wsFile, "utf8"));
+            if (Array.isArray(wsList) && 0 < wsList.length) {
+                const last = wsList[wsList.length - 1];
+                if (!fs.existsSync(last) || !fs.statSync(last).isDirectory()) {
+                    lastWorkspaceMissing = true;
+                    missingWorkspacePath = last;
+                    availableWorkspaces = wsList.slice(0, -1).filter(p =>
+                        fs.existsSync(p) && fs.statSync(p).isDirectory());
+                }
+            }
+        }
+    } catch (e) {
+        writeLog("check missing workspace failed: " + e);
+    }
+}
+
 const windowNavigate = (currentWindow, windowType) => {
     currentWindow.webContents.on("will-navigate", (event) => {
         const url = event.url;
@@ -1391,15 +1425,49 @@ app.whenReady().then(() => {
             });
             firstOpenWindow.destroy();
         });
-    } else {
-        const getArg = (name) => {
-            for (let i = 0; i < process.argv.length; i++) {
-                if (process.argv[i].startsWith(name)) {
-                    return process.argv[i].split("=")[1];
-                }
-            }
-        };
+    } else if (lastWorkspaceMissing) {
+        // 上次使用的工作空间丢失，弹出选择工作空间窗口 https://github.com/siyuan-note/siyuan/issues/14748
+        const missingWorkspaceWindow = new BrowserWindow({
+            width: Math.floor(screen.getPrimaryDisplay().size.width * 0.55),
+            height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.65),
+            frame: "darwin" === process.platform,
+            titleBarStyle: "hidden",
+            fullscreenable: false,
+            icon: path.join(appDir, "stage", "icon-large.png"),
+            transparent: "darwin" === process.platform,
+            webPreferences: {
+                nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
+            },
+        });
+        let missingWorkspaceHTMLPath = path.join(appDir, "app", "electron", "missing-workspace.html");
+        if (isDevEnv) {
+            missingWorkspaceHTMLPath = path.join(appDir, "electron", "missing-workspace.html");
+        }
 
+        // 改进桌面端初始化时使用的外观语言 https://github.com/siyuan-note/siyuan/issues/6803
+        const languages = app.getPreferredSystemLanguages();
+        const language = resolveAppLanguage(languages);
+        missingWorkspaceWindow.loadFile(missingWorkspaceHTMLPath, {
+            query: {
+                lang: language,
+                home: app.getPath("home"),
+                v: appVer,
+                icon: path.join(appDir, "stage", "icon-large.png"),
+                missing: missingWorkspacePath,
+                workspaces: availableWorkspaces.join("\n"),
+            },
+        });
+        missingWorkspaceWindow.show();
+        // 选择工作空间后启动内核
+        ipcMain.on("siyuan-select-workspace", (event, data) => {
+            initKernel(data.workspace, "", data.lang).then((isSucc) => {
+                if (isSucc) {
+                    initMainWindow();
+                }
+            });
+            missingWorkspaceWindow.destroy();
+        });
+    } else {
         const workspace = getArg("--workspace");
         if (workspace) {
             writeLog("got arg [--workspace=" + workspace + "]");

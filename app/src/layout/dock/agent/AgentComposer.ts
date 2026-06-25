@@ -6,8 +6,8 @@ import HardBreak from "@tiptap/extension-hard-break";
 import Mention from "@tiptap/extension-mention";
 import {Placeholder} from "@tiptap/extension-placeholder";
 import {History} from "@tiptap/extension-history";
-import {getIconByType} from "../../editor/getIcon";
-import {escapeHtml} from "../../util/escape";
+import {getIconByType} from "../../../editor/getIcon";
+import {escapeHtml} from "../../../util/escape";
 
 interface BlockHit {
     id: string;

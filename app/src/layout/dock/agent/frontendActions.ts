@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import type {App} from "../../index";
+import type {App} from "../../../index";
 
 export interface IAction {
     name: string;
@@ -50,7 +50,7 @@ registerAction({
     name: "open_setting",
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
-        const {openSetting} = await import("../../config");
+        const {openSetting} = await import("../../../config");
         // openSetting() has a quirk: if a settings dialog already exists, it DESTROYS it and
         // returns the destroyed dialog (the splice from window.siyuan.dialogs is deferred via
         // setTimeout, so it can't be detected synchronously). To guarantee the panel is visible
@@ -82,7 +82,7 @@ registerAction({
         if (!id) {
             return {error: "missing required argument: id"};
         }
-        const {getAllEditor} = await import("../getAll");
+        const {getAllEditor} = await import("../../getAll");
         // Find the editor whose document contains this block, then scroll it into view.
         let blockEl: HTMLElement | null = null;
         for (const editor of getAllEditor()) {
@@ -112,8 +112,8 @@ registerAction({
         }
         try {
             const [{openFileById}, {Constants}] = await Promise.all([
-                import("../../editor/util"),
-                import("../../constants"),
+                import("../../../editor/util"),
+                import("../../../constants"),
             ]);
             await openFileById({app, id, action: [Constants.CB_GET_FOCUS]});
             return {result: `Opened document ${id}.`};
@@ -128,8 +128,8 @@ registerAction({
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
         const [{openSearch}, {Constants}] = await Promise.all([
-            import("../../search/spread"),
-            import("../../constants"),
+            import("../../../search/spread"),
+            import("../../../constants"),
         ]);
         await openSearch({app, hotkey: Constants.DIALOG_GLOBALSEARCH, key: query});
         return {result: query ? `Opened search dialog with query "${query}".` : "Opened search dialog."};

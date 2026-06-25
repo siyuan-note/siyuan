@@ -10,7 +10,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
-import {unregisterAction} from "../layout/dock/frontendActions";
+import {unregisterAction} from "../layout/dock/agent/frontendActions";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {

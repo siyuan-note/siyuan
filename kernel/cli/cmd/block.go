@@ -261,7 +261,7 @@ var blockAppendCmd = &cobra.Command{
 		dom := markdownToBlockDOM(data)
 		transactions := []*model.Transaction{{
 			DoOperations: []*model.Operation{{
-				Action:   "append",
+				Action:   "appendInsert",
 				Data:     dom,
 				ParentID: parentID,
 			}},

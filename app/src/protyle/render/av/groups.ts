@@ -61,7 +61,7 @@ export const setGroupMethod = async (options: {
         data: options.data
     });
     const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
-    setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
+    setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
 };
 
 export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup, viewType: TAVView) => {
@@ -294,7 +294,7 @@ export const bindGroupsEvent = (options: {
             data: options.data
         });
         const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
-        setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
+        setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
     });
 };
 
@@ -333,7 +333,7 @@ export const goGroupsDate = (options: {
                     data: options.data
                 });
                 const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
-                setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
             }
         });
     });
@@ -383,7 +383,7 @@ export const goGroupsSort = (options: {
                     data: options.data
                 });
                 const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
-                setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
             }
         });
     });

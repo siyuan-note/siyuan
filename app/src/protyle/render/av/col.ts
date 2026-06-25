@@ -668,7 +668,7 @@ const addAttrViewColAnimation = (options: {
         });
         const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
         if (tabRect) {
-            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
         }
         return;
     }
@@ -1257,7 +1257,7 @@ export const removeCol = (options: {
         options.menuElement.innerHTML = getPropertiesHTML(options.fields);
         setPosition(options.menuElement,
             options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom,
-            options.tabRect.height);
+            options.tabRect.height, 0, true);
     }
 };
 

@@ -504,7 +504,7 @@ type="checkbox">
                 const repoURL = bazaar.element.querySelector("#configBazaarReadme .item__side")?.getAttribute("data-repourl");
                 bazaar._data.downloaded.find((i) => {
                     if (i.repoURL === repoURL) {
-                        bazaar._renderReadme(bazaarType, true, i);
+                        bazaar._renderReadme(bazaarType, "downloaded", i);
                         return true;
                     }
                 });
@@ -526,7 +526,7 @@ type="checkbox">
             plugins: [] as IBazaarItem[],
         }
     },
-    _renderReadme(bazaarType: TBazaarType, isDownload: boolean, data: IBazaarItem) {
+    _renderReadme(bazaarType: TBazaarType, from: "downloaded" | "updated" | "bazaar", data: IBazaarItem) {
         const readmeElement = bazaar.element.querySelector("#configBazaarReadme") as HTMLElement;
         const urls = data.repoURL.split("/");
         urls.pop();
@@ -540,7 +540,8 @@ type="checkbox">
         if (!(bazaarType in navTitles)) {
             return;
         }
-        readmeElement.innerHTML = ` <div class="item__side" data-download="${isDownload.toString()}" data-repourl="${escapeAttr(data.repoURL)}">
+        const isDownload = from === "downloaded";
+        readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-repourl="${escapeAttr(data.repoURL)}">
     <div class="fn__flex">
         <div style="padding-right: 8px" class="block__icon block__icon--show ariaLabel" data-position="north" data-type="goBack" aria-label="${window.siyuan.languages.back}">
             <svg><use xlink:href="#iconLeft"></use></svg>
@@ -669,8 +670,11 @@ type="checkbox">
             let pkgItem: IBazaarItem;
             if (repoElement) {
                 const repo = repoElement.getAttribute("data-repourl");
-                if (hasClosestByAttribute(repoElement, "data-type", "downloaded") ||
-                    hasClosestByAttribute(repoElement, "data-download", "true")) {
+                let sideForm;
+                if (repoElement.classList.contains("item__side")) {
+                    sideForm = repoElement.getAttribute("data-from");
+                }
+                if (hasClosestByAttribute(repoElement, "data-type", "downloaded-update") || sideForm === "updated") {
                     for (const bazaarType of ["plugins", "themes", "icons", "templates", "widgets"] as TBazaarType[]) {
                         const item = bazaar._data.update[bazaarType]?.find((i) => i.repoURL === repo);
                         if (item) {
@@ -679,15 +683,14 @@ type="checkbox">
                             break;
                         }
                     }
-                    if (!pkgType) {
-                        const activeBtn = bazaar.element.querySelector("#configBazaarDownloaded")?.previousElementSibling?.querySelector(".b3-button:not(.b3-button--outline)") as HTMLElement;
-                        if (activeBtn?.getAttribute("data-type")) {
-                            const activeBazaarType = bazaar._myType2Type(activeBtn.getAttribute("data-type"));
-                            const item = bazaar._data.downloaded.find((i) => i.repoURL === repo);
-                            if (item) {
-                                pkgType = activeBazaarType;
-                                pkgItem = item;
-                            }
+                } else if (hasClosestByAttribute(repoElement, "id", "configBazaarDownloaded") || sideForm === "downloaded") {
+                    const activeBtn = bazaar.element.querySelector("#configBazaarDownloaded")?.previousElementSibling?.querySelector(".b3-button:not(.b3-button--outline)") as HTMLElement;
+                    if (activeBtn?.getAttribute("data-type")) {
+                        const activeBazaarType = bazaar._myType2Type(activeBtn.getAttribute("data-type"));
+                        const item = bazaar._data.downloaded.find((i) => i.repoURL === repo);
+                        if (item) {
+                            pkgType = activeBazaarType;
+                            pkgItem = item;
                         }
                     }
                 } else {
@@ -973,7 +976,8 @@ type="checkbox">
                     break;
                 } else if (target.classList.contains("b3-card")) {
                     if (!hasClosestByClassName(event.target as HTMLElement, "b3-card__actions--right") && pkgItem && pkgType) {
-                        bazaar._renderReadme(pkgType, target.parentElement.id === "configBazaarDownloaded", pkgItem);
+                        bazaar._renderReadme(pkgType,
+                            target.closest('[data-type="downloaded-update"]') ? "updated" : (target.parentElement.id === "configBazaarDownloaded" ? "downloaded" : "bazaar"), pkgItem);
                     }
                     event.preventDefault();
                     event.stopPropagation();

@@ -1,9 +1,6 @@
-.hljs {
-    display: block;
-    padding: 16px 32px;
-    overflow-x: auto;
+.code-block {
     color: rgba(0, 0, 0, .85);
-    border-radius: 2px;
+    background: #fff;
 }
 
 .hljs::selection {

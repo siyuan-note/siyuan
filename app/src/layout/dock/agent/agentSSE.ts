@@ -51,7 +51,7 @@ export type ISSEResult = {
     arguments: Record<string, unknown>;
 };
 
-import {Constants} from "../constants";
+import {Constants} from "../../../constants";
 
 export type IEditorContext = {
     activeDocID?: string;

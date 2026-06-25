@@ -20,6 +20,7 @@ import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";
+import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -279,6 +280,9 @@ export class MobileFiles extends Model {
                 state.ghostElement.style.left = `${touch.clientX}px`;
                 state.ghostElement.style.top = `${touch.clientY}px`;
 
+                // 手指接近列表上下边缘时自动滚动，避免拖拽时触不到屏外目标
+                dragOverScroll({clientY: touch.clientY} as MouseEvent, this.element.getBoundingClientRect(), this.element);
+
                 const target = document.elementFromPoint(touch.clientX, touch.clientY);
                 const liElement = target?.closest(".b3-list-item") as HTMLElement;
                 if (!liElement) return;
@@ -319,6 +323,7 @@ export class MobileFiles extends Model {
         filesElement.addEventListener("touchend", async () => {
             const state = this.touchDragState;
             if (!state) return;
+            stopScrollAnimation();
             state.selectedElement.style.opacity = "";
             if (state.isDragging) {
                 if (state.ghostElement) {
@@ -457,6 +462,7 @@ export class MobileFiles extends Model {
         });
 
         filesElement.addEventListener("touchcancel", () => {
+            stopScrollAnimation();
             if (this.touchDragState?.ghostElement) {
                 this.touchDragState.ghostElement.remove();
             }

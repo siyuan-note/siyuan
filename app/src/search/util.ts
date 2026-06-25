@@ -1376,12 +1376,16 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                     nextElement.setAttribute("disabled", "disabled");
                 }
                 onSearch(response.data.blocks, edit, element, config, focusId);
-                let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
-                if (response.data.docMode) {
-                    text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
-                }
-                searchResultElement.innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
+                if (response.data.matchedBlockCount > 0) {
+                    let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
+                    if (response.data.docMode) {
+                        text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
+                    }
+                    searchResultElement.innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
 <span class="ft__on-surface">${text}</span>`;
+                } else {
+                    searchResultElement.innerHTML = "";
+                }
                 loadingElement.classList.add("fn__none");
                 searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
             });

@@ -6,6 +6,7 @@ import {bindSettingSaveDelegation} from "./setting/save";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
 import {focusByRange} from "../protyle/util/selection";
+/// #endif
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
@@ -50,7 +51,7 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
         ${tabPanels.join("")}
     </div>
 </div>`,
-        width: "64vw",
+        width: "70vw",
         height: "90vh",
         destroyCallback() {
             clearSyncTabElement();

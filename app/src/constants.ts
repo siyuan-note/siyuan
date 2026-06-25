@@ -68,6 +68,7 @@ export abstract class Constants {
     // 临时标记 DOM 属性以辅助完成其功能
     public static readonly ATTRIBUTE_EDITING = "data-editing";
     public static readonly ATTRIBUTE_V_SCROLL = "data-v-scroll";
+    public static readonly ATTRIBUTE_DOCK_WIDTH = "data-dock-width";
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
@@ -306,6 +307,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_LOAD = 300;
     public static readonly TIMEOUT_LONGPRESS = 400;
+    public static readonly TIMEOUT_MULTIPLE_SELECT = 1500;
     public static readonly TIMEOUT_TRANSITION = 300;
     public static readonly TIMEOUT_COUNT = 1000;
 
@@ -846,7 +848,7 @@ export abstract class Constants {
         "felipec", "github-dark", "github-dark-dimmed", "gml", "gradient-dark", "hybrid", "ir-black", "isbl-editor-dark",
         "kimbie-dark", "lioshi", "monokai", "monokai-sublime", "night-owl", "nnfx-dark", "nord", "obsidian", "panda-syntax-dark",
         "paraiso-dark", "pojoaque", "qtcreator-dark", "rainbow", "rose-pine", "rose-pine-moon", "shades-of-purple", "srcery",
-        "stackoverflow-dark", "sunburst", "tomorrow-night-blue", "tomorrow-night-bright", "tokyo-night-dark", "vs2015", "xt256"
+        "stackoverflow-dark", "sunburst", "tomorrow-night-blue", "tomorrow-night-bright", "tokyo-night-dark", "vs-dark", "vs2015", "xt256"
     ];
     public static readonly SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE: string[] = ["ant-design",
         "1c-light", "a11y-light", "arduino-light", "ascetic", "atom-one-light", "base16/atelier-cave-light", "base16/atelier-dune-light",

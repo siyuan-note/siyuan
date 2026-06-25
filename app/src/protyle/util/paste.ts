@@ -585,6 +585,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265 https://github.com/siyuan-note/siyuan/issues/14313
                 isHTML = false;
             }
+        } else if (textPlain && textPlain.trimStart().startsWith("<")) {
+            // 剪贴板没有 text/html，但 text/plain 实际是 HTML 表格（如从纯文本编辑器复制的表格 HTML）
+            // Md2BlockDOM 会把标签当字面文本，需走 html2BlockDOM 解析
+            // Improve pasting for tables containing merged cells https://github.com/siyuan-note/siyuan/issues/11888
+            if (textPlain.toLowerCase().indexOf("</table>") > -1) {
+                textHTML = textPlain;
+                isHTML = true;
+            }
         }
         if (isHTML) {
             const tempElement = document.createElement("div");

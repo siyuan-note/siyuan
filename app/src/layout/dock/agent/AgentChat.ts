@@ -1,25 +1,25 @@
-import {Tab} from "../Tab";
-import {Model} from "../Model";
-import {App} from "../../index";
-import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult} from "../../util/agentSSE";
-import {genUUID} from "../../util/genID";
+import {Tab} from "../../Tab";
+import {Model} from "../../Model";
+import {App} from "../../../index";
+import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult} from "./agentSSE";
+import {genUUID} from "../../../util/genID";
 import {mountComposer} from "./AgentComposer";
-import {getAllEditor} from "../getAll";
+import {getAllEditor} from "../../getAll";
 import "./frontendActions";
 import {listActions, lookupAction} from "./frontendActions";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
-import {getDockByType} from "../tabUtil";
-import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
-import {getLute} from "../../protyle/render/setLute";
-import {setPanelFocus} from "../util";
-import {escapeAriaLabel, escapeHtml} from "../../util/escape";
-import {setPosition} from "../../util/setPosition";
-import {fetchPost} from "../../util/fetch";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {showMessage} from "../../dialog/message";
+import {getDockByType} from "../../tabUtil";
+import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
+import {getLute} from "../../../protyle/render/setLute";
+import {setPanelFocus} from "../../util";
+import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
+import {setPosition} from "../../../util/setPosition";
+import {fetchPost} from "../../../util/fetch";
+import {confirmDialog} from "../../../dialog/confirmDialog";
+import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
-import {sendNotification} from "../../plugin/platformUtils";
+import {sendNotification} from "../../../plugin/platformUtils";
 import {
     bindThinkingCardToggle,
     createThinkingCardElement,
@@ -319,7 +319,7 @@ export class AgentChat extends Model {
 
     // 打开设置面板并切换到「人工智能」tab。动态 import config 模块避免与 AgentChat 的循环依赖。
     private async openAiSetting() {
-        const {openSetting} = await import("../../config");
+        const {openSetting} = await import("../../../config");
         // openSetting 若已有设置对话框会先销毁重建，先检测复用避免闪烁。
         const existing = window.siyuan.dialogs.find(d => d.element.querySelector(".config__tab-container"));
         if (!existing) {

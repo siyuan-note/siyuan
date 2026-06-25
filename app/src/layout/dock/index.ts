@@ -14,7 +14,7 @@ import {getDockByType, resizeTabs, setTabPosition} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
-import {AgentChat} from "./AgentChat";
+import {AgentChat} from "./agent/AgentChat";
 import {adjustDockPadding, resetFloatDockSize} from "./util";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {App} from "../../index";

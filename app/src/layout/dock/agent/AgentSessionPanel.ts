@@ -1,7 +1,7 @@
 import {SessionIndexItem, SessionStore} from "./SessionStore";
-import {escapeHtml} from "../../util/escape";
-import {setPosition} from "../../util/setPosition";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {escapeHtml} from "../../../util/escape";
+import {setPosition} from "../../../util/setPosition";
+import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;

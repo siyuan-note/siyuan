@@ -1,5 +1,5 @@
-import {fetchSyncPost} from "../../util/fetch";
-import {Constants} from "../../constants";
+import {fetchSyncPost} from "../../../util/fetch";
+import {Constants} from "../../../constants";
 
 const API = "/api/ai/agent";
 

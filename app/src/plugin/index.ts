@@ -24,7 +24,7 @@ import {uninstall} from "./uninstall";
 import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
-import {registerAction} from "../layout/dock/frontendActions";
+import {registerAction} from "../layout/dock/agent/frontendActions";
 
 export class Plugin {
     private app: App;

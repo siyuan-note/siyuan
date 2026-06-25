@@ -57,3 +57,16 @@ func (v *Variables) Resolve(in string) string {
 		return match
 	})
 }
+
+// lookup 按名查找变量值，返回值及是否存在。
+func (v *Variables) lookup(name string) (string, bool) {
+	if v == nil {
+		return "", false
+	}
+	for _, item := range v.Items {
+		if item != nil && item.Name == name {
+			return item.Value, true
+		}
+	}
+	return "", false
+}

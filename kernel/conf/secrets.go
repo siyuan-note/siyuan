@@ -97,11 +97,46 @@ func (s *Secrets) Resolve(in string) string {
 	})
 }
 
-// ResolveSecretsVars 同时替换 {{secrets.NAME}} 与 {{vars.NAME}} 两种占位符，
+// lookup 按名查找密钥值，返回值及是否存在。
+func (s *Secrets) lookup(name string) (string, bool) {
+	if s == nil {
+		return "", false
+	}
+	for _, item := range s.Items {
+		if item != nil && item.Name == name {
+			return item.Value, true
+		}
+	}
+	return "", false
+}
+
+// dollarPlaceholder 匹配无前缀的 shell 风格变量引用：${NAME} 与 $NAME。
+// NAME 限定为字母/数字/下划线，避免误匹配 $100、正则等。
+var dollarPlaceholder = regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)`)
+
+// ResolveSecretsVars 先替换显式语法 {{secrets.NAME}}、{{vars.NAME}}，再处理无前缀的
+// $NAME、${NAME}（shell 风格）。无前缀引用按「先密钥后变量」的优先级解析，仅在密钥库或
+// 变量库中存在对应名字时才替换，找不到保留原文——因此 $100、正则等不相关内容不受影响。
 // 供智能体 http_request 工具、MCP 服务 headers 等统一消费密钥与变量。
-// 任一参数为 nil 时跳过其对应占位符的替换。
 func ResolveSecretsVars(secrets *Secrets, vars *Variables, in string) string {
 	in = secrets.Resolve(in)
 	in = vars.Resolve(in)
-	return in
+	return dollarPlaceholder.ReplaceAllStringFunc(in, func(match string) string {
+		sub := dollarPlaceholder.FindStringSubmatch(match)
+		// sub[1] 为 ${NAME} 捕获组，sub[2] 为 $NAME 捕获组。
+		name := sub[1]
+		if name == "" {
+			name = sub[2]
+		}
+		if name == "" {
+			return match
+		}
+		if v, ok := secrets.lookup(name); ok {
+			return v
+		}
+		if v, ok := vars.lookup(name); ok {
+			return v
+		}
+		return match
+	})
 }

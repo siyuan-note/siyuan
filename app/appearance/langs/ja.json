@@ -1,4 +1,10 @@
 {
+  "testConnection": "接続テスト",
+  "testConnectionTesting": "テスト中...",
+  "testConnectionSuccess": "接続成功",
+  "testConnectionFail": "接続失敗",
+  "testConnectionFailModelRequired": "モデル名を入力してください",
+  "testConnectionFailModelNotFound": "このモデルは利用可能なモデル一覧にありません",
   "secretsVariables": "シークレットと変数",
   "secrets": "シークレット",
   "variables": "変数",

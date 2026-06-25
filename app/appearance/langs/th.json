@@ -1,4 +1,10 @@
 {
+  "testConnection": "ทดสอบการเชื่อมต่อ",
+  "testConnectionTesting": "กำลังทดสอบ...",
+  "testConnectionSuccess": "เชื่อมต่อสำเร็จ",
+  "testConnectionFail": "การเชื่อมต่อล้มเหลว",
+  "testConnectionFailModelRequired": "กรุณากรอกชื่อโมเดล",
+  "testConnectionFailModelNotFound": "โมเดลนี้ไม่อยู่ในรายการโมเดลที่ใช้ได้",
   "secretsVariables": "ความลับและตัวแปร",
   "secrets": "ความลับ",
   "variables": "ตัวแปร",

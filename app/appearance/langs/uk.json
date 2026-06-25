@@ -1,4 +1,10 @@
 {
+  "testConnection": "Перевірити з'єднання",
+  "testConnectionTesting": "Перевірка...",
+  "testConnectionSuccess": "З'єднання успішне",
+  "testConnectionFail": "Помилка з'єднання",
+  "testConnectionFailModelRequired": "Введіть назву моделі",
+  "testConnectionFailModelNotFound": "Цієї моделі немає в списку доступних моделей",
   "secretsVariables": "Секрети та змінні",
   "secrets": "Секрети",
   "variables": "Змінні",

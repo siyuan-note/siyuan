@@ -1,4 +1,10 @@
 {
+  "testConnection": "연결 테스트",
+  "testConnectionTesting": "테스트 중...",
+  "testConnectionSuccess": "연결 성공",
+  "testConnectionFail": "연결 실패",
+  "testConnectionFailModelRequired": "모델 이름을 입력하세요",
+  "testConnectionFailModelNotFound": "이 모델은 사용 가능한 모델 목록에 없습니다",
   "secretsVariables": "시크릿 및 변수",
   "secrets": "시크릿",
   "variables": "변수",

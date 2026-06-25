@@ -1,4 +1,10 @@
 {
+  "testConnection": "Bağlantıyı test et",
+  "testConnectionTesting": "Test ediliyor...",
+  "testConnectionSuccess": "Bağlantı başarılı",
+  "testConnectionFail": "Bağlantı başarısız",
+  "testConnectionFailModelRequired": "Lütfen model adını girin",
+  "testConnectionFailModelNotFound": "Bu model kullanılabilir modeller listesinde değil",
   "secretsVariables": "Gizli Anahtarlar ve Değişkenler",
   "secrets": "Gizli Anahtarlar",
   "variables": "Değişkenler",

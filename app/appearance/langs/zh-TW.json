@@ -1,4 +1,10 @@
 {
+  "testConnection": "測試連線",
+  "testConnectionTesting": "測試中...",
+  "testConnectionSuccess": "連線成功",
+  "testConnectionFail": "連線失敗",
+  "testConnectionFailModelRequired": "請填寫模型名稱",
+  "testConnectionFailModelNotFound": "此模型不在可用模型清單中",
   "secretsVariables": "金鑰和變數",
   "secrets": "金鑰",
   "variables": "變數",

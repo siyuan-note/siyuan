@@ -1,4 +1,10 @@
 {
+  "testConnection": "בדיקת חיבור",
+  "testConnectionTesting": "בודק...",
+  "testConnectionSuccess": "החיבור הצליח",
+  "testConnectionFail": "החיבור נכשל",
+  "testConnectionFailModelRequired": "נא להזין את שם המודל",
+  "testConnectionFailModelNotFound": "מודל זה אינו ברשימת המודלים הזמינים",
   "secretsVariables": "סודות ומשתנים",
   "secrets": "סודות",
   "variables": "משתנים",

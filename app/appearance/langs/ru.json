@@ -1,4 +1,10 @@
 {
+  "testConnection": "Проверить подключение",
+  "testConnectionTesting": "Проверка...",
+  "testConnectionSuccess": "Подключение успешно",
+  "testConnectionFail": "Ошибка подключения",
+  "testConnectionFailModelRequired": "Введите имя модели",
+  "testConnectionFailModelNotFound": "Этой модели нет в списке доступных моделей",
   "secretsVariables": "Секреты и переменные",
   "secrets": "Секреты",
   "variables": "Переменные",

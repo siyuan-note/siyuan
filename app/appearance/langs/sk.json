@@ -1,4 +1,10 @@
 {
+  "testConnection": "Otestovať pripojenie",
+  "testConnectionTesting": "Testuje sa...",
+  "testConnectionSuccess": "Pripojenie úspešné",
+  "testConnectionFail": "Pripojenie zlyhalo",
+  "testConnectionFailModelRequired": "Zadajte názov modelu",
+  "testConnectionFailModelNotFound": "Tento model nie je v zozname dostupných modelov",
   "secretsVariables": "Tajomstvá a premenné",
   "secrets": "Tajomstvá",
   "variables": "Premenné",

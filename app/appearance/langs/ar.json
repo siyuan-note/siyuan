@@ -1,4 +1,10 @@
 {
+  "testConnection": "اختبار الاتصال",
+  "testConnectionTesting": "جارٍ الاختبار...",
+  "testConnectionSuccess": "تم الاتصال بنجاح",
+  "testConnectionFail": "فشل الاتصال",
+  "testConnectionFailModelRequired": "يرجى إدخال اسم النموذج",
+  "testConnectionFailModelNotFound": "هذا النموذج غير موجود في قائمة النماذج المتاحة",
   "secretsVariables": "الأسرار والمتغيرات",
   "secrets": "الأسرار",
   "variables": "المتغيرات",

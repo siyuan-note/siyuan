@@ -1,4 +1,10 @@
 {
+  "testConnection": "Probar conexión",
+  "testConnectionTesting": "Probando...",
+  "testConnectionSuccess": "Conexión correcta",
+  "testConnectionFail": "Conexión fallida",
+  "testConnectionFailModelRequired": "Introduzca el nombre del modelo",
+  "testConnectionFailModelNotFound": "Este modelo no está en la lista de modelos disponibles",
   "secretsVariables": "Secretos y variables",
   "secrets": "Secretos",
   "variables": "Variables",

@@ -1,4 +1,10 @@
 {
+  "testConnection": "Verbinding testen",
+  "testConnectionTesting": "Bezig met testen...",
+  "testConnectionSuccess": "Verbinding geslaagd",
+  "testConnectionFail": "Verbinding mislukt",
+  "testConnectionFailModelRequired": "Voer de modelnaam in",
+  "testConnectionFailModelNotFound": "Dit model staat niet in de lijst met beschikbare modellen",
   "secretsVariables": "Secrets en variabelen",
   "secrets": "Secrets",
   "variables": "Variabelen",

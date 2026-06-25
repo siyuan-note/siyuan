@@ -1,4 +1,10 @@
 {
+  "testConnection": "Uji koneksi",
+  "testConnectionTesting": "Menguji...",
+  "testConnectionSuccess": "Koneksi berhasil",
+  "testConnectionFail": "Koneksi gagal",
+  "testConnectionFailModelRequired": "Silakan masukkan nama model",
+  "testConnectionFailModelNotFound": "Model ini tidak ada dalam daftar model yang tersedia",
   "secretsVariables": "Rahasia dan Variabel",
   "secrets": "Rahasia",
   "variables": "Variabel",

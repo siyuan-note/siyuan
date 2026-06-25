@@ -4,6 +4,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {isMobile} from "../../util/functions";
+import {fetchPost} from "../../util/fetch";
 import {aiConfigApi} from "./aiRuntime";
 
 export const getProvidersBlockKeywords = (): string[] => [
@@ -26,6 +27,9 @@ export const getProvidersBlockKeywords = (): string[] => [
     window.siyuan.languages.apiModelTip,
     window.siyuan.languages.noProviderConfigured,
     window.siyuan.languages.noModelConfigured,
+    window.siyuan.languages.testConnection,
+    window.siyuan.languages.testConnectionFailModelRequired,
+    window.siyuan.languages.testConnectionFailModelNotFound,
 ];
 
 export const genProvidersBlockHtml = (): string => `<div class="b3-label config-item" id="aiProvidersBlock">
@@ -508,6 +512,7 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--outline" id="aiModelTestBtn"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
     });
@@ -515,7 +520,48 @@ const openModelDialog = (root: HTMLElement, providerId: string, modelId: string 
     dialog.element.querySelector<HTMLInputElement>("#aiModelName")?.select();
     const btns = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
     btns[0].addEventListener("click", () => dialog.destroy());
-    btns[1].addEventListener("click", () => {
+    dialog.element.querySelector<HTMLElement>("#aiModelTestBtn")?.addEventListener("click", () => {
+        const modelName = dialog.element.querySelector<HTMLInputElement>("#aiModelName").value.trim();
+        if (!modelName) {
+            showMessage(window.siyuan.languages.testConnectionFailModelRequired);
+            return;
+        }
+        const testBtn = dialog.element.querySelector<HTMLButtonElement>("#aiModelTestBtn");
+        const iconUse = testBtn.querySelector("use");
+        const svgEl = testBtn.querySelector("svg");
+        const labelSpan = testBtn.querySelector("span");
+        const originalHref = iconUse.getAttribute("xlink:href");
+        testBtn.disabled = true;
+        iconUse.setAttribute("xlink:href", "#iconRefresh");
+        svgEl.style.animation = "agent-mirror-spin 0.8s linear infinite";
+        labelSpan.textContent = window.siyuan.languages.testConnectionTesting;
+        const restoreBtn = () => {
+            testBtn.disabled = false;
+            iconUse.setAttribute("xlink:href", originalHref);
+            svgEl.style.animation = "";
+            labelSpan.textContent = window.siyuan.languages.testConnection;
+        };
+        fetchPost("/api/ai/testModel", {provider: providerId, model: modelName}, (response) => {
+            restoreBtn();
+            const data = response.data || {};
+            if (data.matched) {
+                showMessage(window.siyuan.languages.testConnectionSuccess, undefined, "info");
+                return;
+            }
+            const available = data.available;
+            if (Array.isArray(available) && available.length > 0) {
+                showMessage(`${window.siyuan.languages.testConnectionFailModelNotFound}（${available.slice(0, 10).join(", ")}）`, undefined, "error");
+                return;
+            }
+            showMessage(`${window.siyuan.languages.testConnectionFail}${data.msg ? "：" + data.msg : ""}`, undefined, "error");
+        });
+    });
+    btns[2].addEventListener("click", () => {
+        const modelName = dialog.element.querySelector<HTMLInputElement>("#aiModelName").value.trim();
+        if (!modelName) {
+            showMessage(window.siyuan.languages.testConnectionFailModelRequired);
+            return;
+        }
         const nextModel: Config.IModel = {
             ...initialModel,
             name: dialog.element.querySelector<HTMLInputElement>("#aiModelName").value,

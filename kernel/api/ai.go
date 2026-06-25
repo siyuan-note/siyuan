@@ -21,6 +21,8 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -57,4 +59,58 @@ func chatGPTWithAction(c *gin.Context) {
 	}
 	action := arg["action"].(string)
 	ret.Data = model.ChatGPTWithAction(ids, action)
+}
+
+// testModel 测试 AI 模型可用性。用该 Provider 已保存的 baseURL/APIKey/超时，
+// 校验指定模型是否可用。优先通过 ListModels 拉取可用模型清单精确匹配，
+// 若该端点不可用则回退到极简 Chat Completion 验证连通性。
+func testModel(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var providerID, modelName string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("provider", &providerID, true, true),
+		util.BindJsonArg("model", &modelName, true, true),
+	) {
+		return
+	}
+
+	// 按 ID 查找 Provider（不限制启用状态，便于测试尚未启用的配置）
+	var provider *conf.Provider
+	for _, p := range model.Conf.AI.Providers {
+		if p != nil && p.ID == providerID {
+			provider = p
+			break
+		}
+	}
+	if nil == provider {
+		ret.Code = -1
+		ret.Msg = "provider not found"
+		return
+	}
+
+	available, matched, err := util.TestModel(provider.APIKey, provider.BaseURL, modelName, provider.RequestTimeout)
+	// 可用模型清单裁剪到前 50 条，避免响应体过大
+	if 50 < len(available) {
+		available = available[:50]
+	}
+	// 测试结果统一以 code=0 返回，具体成败信息放在 data 中由前端控制展示，
+	// 避免触发统一的错误消息提示导致按钮状态无法恢复
+	result := map[string]any{
+		"available": available,
+		"matched":   matched,
+	}
+	if nil != err {
+		result["msg"] = err.Error()
+		logging.LogErrorf("test model [%s] failed: %s", modelName, err)
+	} else if !matched {
+		result["msg"] = "model not in available list"
+	}
+	ret.Data = result
 }

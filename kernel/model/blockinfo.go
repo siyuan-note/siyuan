@@ -112,6 +112,10 @@ func GetDocInfo(blockID string) (ret *BlockInfo, err error) {
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
 	avIDs := strings.Split(ret.IAL[av.NodeAttrNameAvs], ",")
 	for _, avID := range avIDs {
+		if !ast.IsNodeIDPattern(avID) {
+			continue
+		}
+
 		avName, getErr := av.GetAttributeViewName(avID)
 		if nil != getErr {
 			continue
@@ -201,6 +205,10 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
 			avIDs := strings.Split(ret.IAL[av.NodeAttrNameAvs], ",")
 			for _, avID := range avIDs {
+				if !ast.IsNodeIDPattern(avID) {
+					continue
+				}
+
 				avName, getErr := av.GetAttributeViewName(avID)
 				if nil != getErr {
 					continue

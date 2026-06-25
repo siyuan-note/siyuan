@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
 import {saveExportFile} from "../util/compatibility";
 
@@ -21,7 +21,8 @@ interface IExportMdOptions {
 }
 
 // openExportOptionsDialog 渲染「通用 + Markdown 专属」两组开关，确认时回调 onConfirm 传出全部 13 项。
-export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPayload) => void) => {
+// showSubDocs/showRelatedDocs 控制是否显示「包含子文档/关联文档」项（单文档无对应内容时隐藏）。
+export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPayload) => void, showSubDocs = true, showRelatedDocs = true) => {
     const conf = window.siyuan.config.export;
     const bool = (id: BoolKey) => `<input id="${id}" class="b3-switch fn__flex-center" type="checkbox" ${conf[id] ? "checked" : ""}>`;
     // 渲染 select：复用设置面板的标准 class（fn__flex-center fn__size200），value 为当前全局值时标记 selected
@@ -51,8 +52,8 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
         content: `<div class="b3-dialog__content export-md__content">
     <!-- 常用 -->
     ${row(window.siyuan.languages.export17, window.siyuan.languages.export18, bool("addTitle"))}
-    ${row(window.siyuan.languages.includeSubDocs, window.siyuan.languages.includeSubDocsTip, bool("includeSubDocs"))}
-    ${row(window.siyuan.languages.includeRelatedDocs, window.siyuan.languages.includeRelatedDocsTip, bool("includeRelatedDocs"))}
+    ${showSubDocs ? row(window.siyuan.languages.includeSubDocs, window.siyuan.languages.includeSubDocsTip, bool("includeSubDocs")) : ""}
+    ${showRelatedDocs ? row(window.siyuan.languages.includeRelatedDocs, window.siyuan.languages.includeRelatedDocsTip, bool("includeRelatedDocs")) : ""}
     ${row(window.siyuan.languages.export23, window.siyuan.languages.export24, bool("markdownYFM"))}
     ${row(window.siyuan.languages.removeAssetsID, window.siyuan.languages.removeAssetsIDTip, bool("removeAssetsID"))}
     <!-- 其他 -->
@@ -88,6 +89,11 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
     dialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTMARKDOWN);
 
     const el = dialog.element;
+    // 控件可能未渲染（如无子文档时），此时回退到全局配置值
+    const boolVal = (id: BoolKey) => {
+        const input = el.querySelector("#" + id) as HTMLInputElement;
+        return input ? input.checked : conf[id];
+    };
     const collect = (): IExportMdOptionsPayload => ({
         addTitle: (el.querySelector("#addTitle") as HTMLInputElement).checked,
         inlineMemo: (el.querySelector("#inlineMemo") as HTMLInputElement).checked,
@@ -98,8 +104,8 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
         blockRefTextRight: (el.querySelector("#blockRefTextRight") as HTMLInputElement).value,
         tagOpenMarker: (el.querySelector("#tagOpenMarker") as HTMLInputElement).value,
         tagCloseMarker: (el.querySelector("#tagCloseMarker") as HTMLInputElement).value,
-        includeSubDocs: (el.querySelector("#includeSubDocs") as HTMLInputElement).checked,
-        includeRelatedDocs: (el.querySelector("#includeRelatedDocs") as HTMLInputElement).checked,
+        includeSubDocs: boolVal("includeSubDocs"),
+        includeRelatedDocs: boolVal("includeRelatedDocs"),
         markdownYFM: (el.querySelector("#markdownYFM") as HTMLInputElement).checked,
         removeAssetsID: (el.querySelector("#removeAssetsID") as HTMLInputElement).checked,
     });
@@ -132,7 +138,17 @@ interface IExportMdOptionsPayload {
 }
 
 // exportMarkdownZip 为 Markdown .zip 导出入口：弹参数对话框，确认后按 id/ids/notebook 调对应 API。
-export const exportMarkdownZip = (options: IExportMdOptions) => {
+// 单文档时先查询文档信息，若无子文档/关联文档则隐藏对应配置项，减少干扰。
+export const exportMarkdownZip = async(options: IExportMdOptions) => {
+    let showSubDocs = true;
+    let showRelatedDocs = true;
+    if (options.id) {
+        // 查询文档是否有子文档、引用及绑定的数据库，无则隐藏对应配置项 #17031
+        const docInfo = await fetchSyncPost("/api/block/getDocInfo", {id: options.id});
+        const data = docInfo.data;
+        showSubDocs = 0 < data.subFileCount;
+        showRelatedDocs = 0 < (data.refCount || 0) || 0 < (data.attrViews?.length || 0);
+    }
     openExportOptionsDialog(params => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         const cb = (response: IWebSocketData) => saveExportFile(response.data.zip, msgId);
@@ -143,5 +159,5 @@ export const exportMarkdownZip = (options: IExportMdOptions) => {
         } else {
             fetchPost("/api/export/exportNotebookMd", {notebook: options.notebook, ...params}, cb);
         }
-    });
+    }, showSubDocs, showRelatedDocs);
 };

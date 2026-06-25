@@ -68,6 +68,7 @@ export abstract class Constants {
     // 临时标记 DOM 属性以辅助完成其功能
     public static readonly ATTRIBUTE_EDITING = "data-editing";
     public static readonly ATTRIBUTE_V_SCROLL = "data-v-scroll";
+    public static readonly ATTRIBUTE_DOCK_WIDTH = "data-dock-width";
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;

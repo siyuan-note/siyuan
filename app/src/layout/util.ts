@@ -555,7 +555,11 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
             if (layout.element.classList.contains("fn__flex-1")) {
                 json.size = "auto";
             } else {
-                json.size = (layout.parent.direction === "tb" ? layout.element.clientHeight : layout.element.clientWidth) + "px";
+                if (layout.element.style.maxWidth && layout.parent.direction !== "tb") {
+                    json.size = layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH) + "px";
+                } else {
+                    json.size = (layout.parent.direction === "tb" ? layout.element.clientHeight : layout.element.clientWidth) + "px";
+                }
             }
         }
         json.resize = layout.resize;
@@ -1023,6 +1027,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
 export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.parent) => {
     layout.children.forEach((item: Layout | Wnd) => {
         item.element.style.maxWidth = "";
+        item.element.removeAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
         if (!item.element.style.width && !item.element.classList.contains("layout__center")) {
             item.element.style.minWidth = "8px";
         } else {
@@ -1042,6 +1047,9 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             let width = layout.element.firstElementChild.classList.contains("layout__dockl") ? 8 : 0;
             layout.children.find((item: Layout | Wnd) => {
                 if (item.element.style.width && item.element.style.width !== "0px") {
+                    if (!item.element.hasAttribute(Constants.ATTRIBUTE_DOCK_WIDTH)) {
+                        item.element.setAttribute(Constants.ATTRIBUTE_DOCK_WIDTH, item.element.clientWidth.toString());
+                    }
                     item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 168) + "px";
                 }
                 width += item.element.clientWidth;

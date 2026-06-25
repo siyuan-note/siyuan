@@ -757,7 +757,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     title: liElement.querySelector(".b3-list-item__text").textContent.trim(),
                     content: '<div class="b3-dialog__content"><div style="border-radius: var(--b3-border-radius-b);"></div></div>',
                     width: isMobile() ? "100vw" : "80vw",
-                    height: isMobile() ? "100vh" : "70vh",
+                    height: isMobile() ? "100dvh" : "70vh",
                     disableAnimation: true,
                 });
                 const contentElement = dialog.element.querySelector(".b3-dialog__content");

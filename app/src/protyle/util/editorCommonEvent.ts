@@ -1785,6 +1785,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideDragTip();
             return;
         }
+        // 不允许拖拽到嵌入块中（嵌入块本身或其内部任意内容均不可作为拖拽目标）
+        // 需置于列表/超级块等会提前 return 的分支之前，否则列表项、超级块等场景会绕过该限制
+        if (isInEmbedBlock(targetElement) || targetElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+            clearDragoverElement(dragoverElement);
+            return;
+        }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
@@ -2109,11 +2115,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             });
             if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
-                clearDragoverElement(dragoverElement);
-                return;
-            }
-            if (isInEmbedBlock(targetElement)) {
-                // 不允许托入嵌入块
                 clearDragoverElement(dragoverElement);
                 return;
             }

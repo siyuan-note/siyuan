@@ -828,7 +828,7 @@ export class WYSIWYG {
                 sbChildren.forEach(child => {
                     child.style.position = "relative";
                     const tip = document.createElement("span");
-                    tip.className = "sb__resize-tip protyle-icon";
+                    tip.className = "sb__resize-tip protyle-icon protyle-icon--first protyle-icon--last";
                     child.appendChild(tip);
                     tips.push({el: tip, child});
                 });

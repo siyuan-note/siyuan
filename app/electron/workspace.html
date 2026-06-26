@@ -154,6 +154,19 @@
             background-color: #2c66e0;
         }
 
+        /* 次操作按钮：透明背景 + 描边，与主操作（安全模式）形成对比 */
+        .b3-button--outline {
+            color: rgba(0, 0, 0, .75);
+            background-color: transparent;
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .25);
+        }
+
+        .b3-button--outline:hover, .b3-button--outline:focus {
+            color: #222;
+            background-color: rgba(0, 0, 0, .06);
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .4);
+        }
+
         @media (prefers-color-scheme: dark) {
             .wsPanel {
                 background-color: #2c2c2c;
@@ -208,6 +221,18 @@
                 color: #9aa0a6;
                 background-color: rgba(255, 255, 255, .05);
             }
+
+            .b3-button--outline {
+                color: #9aa0a6;
+                background-color: transparent;
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .25);
+            }
+
+            .b3-button--outline:hover, .b3-button--outline:focus {
+                color: #dadada;
+                background-color: rgba(255, 255, 255, .075);
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .4);
+            }
         }
     </style>
 </head>
@@ -232,7 +257,7 @@
             <pre class="crash-log"></pre>
             <div class="crash-actions">
                 <button class="b3-button b3-button--safe safeMode" data-i18n="safeModeBtn"></button>
-                <button class="b3-button normal" data-i18n="normalBtn"></button>
+                <button class="b3-button b3-button--outline normal" data-i18n="normalBtn"></button>
             </div>
         </div>
         <div class="fn__flex-1"></div>

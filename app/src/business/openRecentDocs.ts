@@ -95,10 +95,7 @@ export const openRecentDocs = () => {
             title: `<div class="fn__flex">
 <div class="fn__flex-center">${window.siyuan.languages.recentDocs}</div>
 <div class="fn__flex-1"></div>
-<div class="b3-form__icon fn__size200">
-    <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-    <input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__block b3-form__icon-input">
-</div>
+<input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__size200">
 <span class="fn__space"></span>
 <div class="fn__flex-center">
     <select class="b3-select" id="recentDocsSort">

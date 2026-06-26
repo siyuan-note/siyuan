@@ -125,7 +125,7 @@ const genAccountMainHTML = () => {
 
 const genAccountAuthHTML = (mode: "login" | "deactivate") => {
     return `<div class="b3-form__space--small" id="form1">
-        <div class="b3-form__icon">
+    <div class="b3-form__icon">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconAccount"></use></svg>
         <input id="userName" class="b3-text-field fn__block b3-form__icon-input" placeholder="${window.siyuan.languages.accountName}">
     </div>

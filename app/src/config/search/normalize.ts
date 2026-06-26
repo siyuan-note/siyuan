@@ -13,7 +13,7 @@ export const normalizeSearchText = (text: string): string => {
 
 /** 获取设置对话框搜索框关键词 */
 export const getSearchKeywordsLower = (dialogElement: HTMLElement): string | undefined => {
-    const searchInput = dialogElement.querySelector(".b3-form__icon input") as HTMLInputElement | null;
+    const searchInput = dialogElement.querySelector(".config__tab-head .b3-text-field") as HTMLInputElement | null;
     const keywords = normalizeSearchText(searchInput?.value ?? "");
     return keywords || undefined;
 };

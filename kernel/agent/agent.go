@@ -958,7 +958,7 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 
 	sb.WriteString("\n\n")
 	sb.WriteString("## Skill Management\n")
-	sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"remove\", \"rename\" (name + new_name), \"list\".")
+	sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"install\" (download & install a skill from a remote source — pass url; accepts 'owner/repo' shorthand like Tencent/WeChatReading, a full GitHub URL, a raw SKILL.md URL, or a release zip URL; installed globally), \"remove\", \"rename\" (name + new_name), \"list\". When the user says \"install xxx skill\" or pastes a command like \"npx skills add owner/repo -g\", extract the owner/repo and call skill.install.")
 
 	sb.WriteString("\n\nReply in ")
 	sb.WriteString(util.I18nTerm(language, "_label"))

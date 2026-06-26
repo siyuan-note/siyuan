@@ -48,7 +48,7 @@ type System struct {
 
 	MicrosoftDefenderExcluded bool `json:"microsoftDefenderExcluded"` // 是否已加入 Microsoft Defender 排除项 https://github.com/siyuan-note/siyuan/issues/13650
 
-	SafeMode bool `json:"safeMode"` // 是否以安全模式运行（渲染进程崩溃恢复时由主进程注入，禁用代码片段、插件、自定义主题与图标）
+	SafeMode bool `json:"safeMode"` // 是否以安全模式运行（纯运行时状态，由 --safe-mode 注入，不随 conf.json 持久化）
 }
 
 func NewSystem() *System {

@@ -680,9 +680,11 @@ func InitConf() {
 	Conf.Save()
 
 	// 安全模式：渲染进程崩溃恢复后由桌面端主进程通过 --safe-mode 注入。
-	// 直接覆盖外观、集市、代码片段相关配置并持久化，禁用代码片段、插件、自定义主题与图标，以排除扩展导致再次崩溃的可能。
-	// 注意：这是破坏性操作，会覆盖用户原有配置，后续不会自动恢复。
+	// safeMode 是纯运行时状态，不随 conf.json 持久化（Save 时会被排除），故每次启动都按 util.SafeMode 重新赋值。
+	Conf.System.SafeMode = util.SafeMode
 	if util.SafeMode {
+		// 直接覆盖外观、集市、代码片段相关配置并持久化，禁用代码片段、插件、自定义主题与图标，以排除扩展导致再次崩溃的可能。
+		// 注意：这是破坏性操作，会覆盖用户原有配置，后续不会自动恢复。
 		Conf.Appearance.ThemeLight = "daylight"
 		Conf.Appearance.ThemeDark = "midnight"
 		Conf.Appearance.Icon = "litheness"
@@ -690,7 +692,6 @@ func InitConf() {
 		Conf.Bazaar.PetalDisabled = true
 		Conf.Snippet.EnabledCSS = false
 		Conf.Snippet.EnabledJS = false
-		Conf.System.SafeMode = true
 		Conf.Save()
 		logging.LogInfof("booted in safe mode")
 	}
@@ -972,6 +973,12 @@ func (conf *AppConf) Save() {
 		Conf.Secrets.Encrypt()
 		defer Conf.Secrets.Decrypt()
 	}
+
+	// safeMode 是纯运行时状态（由 --safe-mode 注入），不随 conf.json 持久化，避免跨启动残留。
+	// 序列化写盘时临时清零，写完恢复内存值（供 getConf 等运行时读取）。
+	safeMode := Conf.System.SafeMode
+	Conf.System.SafeMode = false
+	defer func() { Conf.System.SafeMode = safeMode }()
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")

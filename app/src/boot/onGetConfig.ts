@@ -78,6 +78,10 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initAssets();
     setInlineStyle();
     renderSnippet();
+    if (window.siyuan.config.system.safeMode) {
+        // 安全模式已禁用代码片段、插件、自定义主题和图标
+        showMessage(window.siyuan.languages.safeModeTip);
+    }
     let resizeTimeout = 0;
     let firstResize = true;
     window.addEventListener("resize", () => {

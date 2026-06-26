@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -79,6 +80,9 @@ func skillLoad(args map[string]interface{}) (CallToolResult, error) {
 			IsError: true,
 		}, nil
 	}
+
+	// 变量（非敏感）在技能正文注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
+	content = model.Conf.Variables.Resolve(content)
 
 	result := "<skill_content name=\"" + name + "\">\n\n" + content + "\n\n</skill_content>"
 	return CallToolResult{

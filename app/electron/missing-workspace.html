@@ -14,6 +14,60 @@
             font-family: BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", arial, "Microsoft Yahei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Twemoji Mozilla", "Android Emoji", "EmojiSymbols";
         }
 
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .wsPanel {
+            flex: none;
+            width: 300px;
+            border-right: 1px solid #e0e0e0;
+            padding: 24px;
+            overflow-y: auto;
+            text-align: left;
+            box-sizing: border-box;
+            background-color: #f6f6f6;
+        }
+
+        .wsTitle {
+            font-size: 16px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, .6);
+            margin-bottom: 16px;
+        }
+
+        .ws-item {
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 6px;
+            cursor: default;
+        }
+
+        .ws-item:hover {
+            background: #dfe0e1;
+        }
+
+        .ws-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ws-name {
+            font-size: 16px;
+            color: #222;
+            line-height: 1.5;
+        }
+
+        .ws-path {
+            font-size: 12px;
+            color: rgba(0, 0, 0, .6);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
         .fn__flex-column {
             display: flex;
             flex-direction: column;
@@ -22,6 +76,11 @@
             min-height: 100vh;
             box-sizing: border-box;
             padding: 0 calc((100vw - 608px) * 0.3);
+        }
+
+        .right {
+            flex: 1;
+            padding: 0 32px;
         }
 
         .fn__flex-1 {
@@ -52,6 +111,7 @@
             appearance: none;
             cursor: pointer;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .b3-select:focus {
@@ -74,6 +134,7 @@
             box-sizing: border-box;
             text-align: center;
             width: 96px;
+            flex-shrink: 0;
         }
 
         .b3-button:hover, .b3-button:focus {
@@ -83,6 +144,32 @@
 
         .b3-button:active {
             box-shadow: 0 2px 3px 1px rgb(0 0 0 / .3), 0 2px 4px 2px rgb(0 0 0 /.15);
+        }
+
+        .ws-open {
+            width: auto;
+            padding: 2px 12px;
+            color: rgba(0, 0, 0, .6);
+            background-color: transparent;
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 120ms ease;
+        }
+
+        .ws-item:hover .ws-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .ws-open:hover, .ws-open:focus {
+            color: #222;
+            background-color: rgba(0, 0, 0, .06);
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .4);
+        }
+
+        .ws-open:active {
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .4);
         }
 
         .b3-label {
@@ -153,11 +240,26 @@
         .notice {
             font-size: 14px;
             color: rgba(0, 0, 0, .6);
+            text-align: center;
         }
 
-        .icon {
-            width: 96px;
-            margin: 0 auto 16px;
+        .missing-tip {
+            font-size: 18px;
+            color: #222;
+            text-align: left;
+            padding: 0 24px;
+            line-height: 1.6;
+        }
+
+        .missing-path {
+            font-size: 14px;
+            color: rgba(0, 0, 0, .6);
+            margin-top: 8px;
+            word-break: break-all;
+        }
+
+        code {
+            word-break: break-all;
         }
 
         kbd {
@@ -170,6 +272,11 @@
             background-color: #f6f6f6;
             border: solid 1px #e0e0e0;
             box-shadow: inset 0 -1px 0 #e0e0e0;
+        }
+
+        .icon {
+            width: 96px;
+            margin: 0 auto 16px;
         }
 
         .feedback {
@@ -203,14 +310,25 @@
                 color: #dadada;
             }
 
-            .b3-select {
-                color: #dadada;
-                box-shadow: inset 0 0 0 0.6px #9aa0a6;
-                background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #1e1e1e;
+            .wsPanel {
+                background-color: #2c2c2c;
+                border-right: 1px solid #363636;
             }
 
-            .b3-select:focus {
-                box-shadow: inset 0 0 0 1px #3573f0, 0 0 0 3px rgba(53, 115, 240, .24);
+            .wsTitle {
+                color: #9aa0a6;
+            }
+
+            .ws-item:hover {
+                background: rgba(255, 255, 255, .075);
+            }
+
+            .ws-name {
+                color: #dadada;
+            }
+
+            .ws-path {
+                color: #9aa0a6;
             }
 
             .b3-button {
@@ -223,6 +341,32 @@
 
             .b3-button:active {
                 box-shadow: 0 2px 3px 1px rgb(0 0 0 / .3), 0 2px 4px 2px rgb(255 255 255 /.15);
+            }
+
+            .ws-open {
+                color: #9aa0a6;
+                background-color: transparent;
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .25);
+            }
+
+            .ws-open:hover, .ws-open:focus {
+                color: #dadada;
+                background-color: rgba(255, 255, 255, .075);
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .4);
+            }
+
+            .ws-open:active {
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .4);
+            }
+
+            .b3-select {
+                color: #dadada;
+                box-shadow: inset 0 0 0 0.6px #9aa0a6;
+                background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #1e1e1e;
+            }
+
+            .b3-select:focus {
+                box-shadow: inset 0 0 0 1px #3573f0, 0 0 0 3px rgba(53, 115, 240, .24);
             }
 
             .b3-label {
@@ -254,6 +398,14 @@
                 color: #9aa0a6;
             }
 
+            .missing-tip {
+                color: #dadada;
+            }
+
+            .missing-path {
+                color: #9aa0a6;
+            }
+
             kbd {
                 color: #9aa0a6;
                 background-color: #262626;
@@ -264,60 +416,70 @@
     </style>
 </head>
 <body>
-<div id="layout" class="fn__flex-column">
-    <div class="fn__flex-1"></div>
-    <img class="icon">
-    <h2 data-i18n="title"></h2>
-    <div class="slogan" data-i18n="slogan"></div>
-    <div class="fn__flex-1"></div>
-    <label class="b3-label">
-        <div>
-            <span data-i18n="lang"></span>
-            <div class="b3-label__text" data-i18n-html="langDesc"></div>
+<div id="layout" class="layout">
+    <div class="wsPanel">
+        <div class="wsTitle" data-i18n="wsTitle"></div>
+        <div class="wsList"></div>
+    </div>
+    <div class="fn__flex-column right">
+        <div class="fn__flex-1"></div>
+        <img class="icon">
+        <h2 data-i18n="title"></h2>
+        <div class="fn__flex-1"></div>
+        <div class="missing-tip">
+            <div data-i18n="missingTip"></div>
+            <div class="missing-path"><code class="missing"></code></div>
         </div>
         <div class="fn__flex-1"></div>
-        <select class="b3-select lang">
-            <option value="ar">العربية</option>
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="he">עברית</option>
-            <option value="hi">हिन्दी</option>
-            <option value="id">Bahasa Indonesia</option>
-            <option value="it">Italiano</option>
-            <option value="ja">日本語</option>
-            <option value="ko">한국어</option>
-            <option value="nl">Nederlands</option>
-            <option value="pl">Polski</option>
-            <option value="pt-BR">Português (Brasil)</option>
-            <option value="ru">Русский</option>
-            <option value="sk">Slovenčina</option>
-            <option value="th">ไทย</option>
-            <option value="tr">Türkçe</option>
-            <option value="uk">Українська</option>
-            <option value="zh-TW">繁體中文</option>
-            <option value="zh-CN">简体中文</option>
-        </select>
-    </label>
-    <label class="b3-label">
-        <div>
-            <span data-i18n="workspace"></span>
-            <div class="b3-label__text" data-i18n="workspaceDesc"></div>
+        <div class="notice fn__none emptyHint">
+            <span data-i18n="emptyHint"></span>
+        </div>
+        <label class="b3-label">
+            <div>
+                <span data-i18n="selectPath"></span>
+                <div class="b3-label__text" data-i18n="selectPathDesc"></div>
+            </div>
+            <div class="fn__flex-1"></div>
+            <button class="b3-button fn__flex-center choosePath" data-i18n="selectBtn"></button>
+        </label>
+        <label class="b3-label">
+            <div>
+                <span data-i18n="lang"></span>
+                <div class="b3-label__text" data-i18n-html="langDesc"></div>
+            </div>
+            <div class="fn__flex-1"></div>
+            <select class="b3-select lang">
+                <option value="ar">العربية</option>
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="he">עברית</option>
+                <option value="hi">हिन्दी</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="it">Italiano</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="nl">Nederlands</option>
+                <option value="pl">Polski</option>
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="ru">Русский</option>
+                <option value="sk">Slovenčina</option>
+                <option value="th">ไทย</option>
+                <option value="tr">Türkçe</option>
+                <option value="uk">Українська</option>
+                <option value="zh-TW">繁體中文</option>
+                <option value="zh-CN">简体中文</option>
+            </select>
+        </label>
+        <div class="fn__flex-1"></div>
+        <div class="feedback">
+            <span>❤️ <a data-i18n-href="feedbackUrl" target="_blank" data-i18n="feedback"></a></span>
+            <span>🏘️ <a data-i18n-href="communityUrl" target="_blank" data-i18n="community"></a></span>
+            <span>🔖 <a data-i18n-href="downloadUrl" target="_blank" class="version"></a></span>
         </div>
         <div class="fn__flex-1"></div>
-        <button class="b3-button fn__flex-center choosePath" data-i18n="selectBtn"></button>
-    </label>
-    <div class="fn__flex-1"></div>
-    <div class="fn__flex-1 notice">
-        <span data-i18n="notice"></span>
     </div>
-    <div class="feedback">
-        <span>❤️ <a data-i18n-href="feedbackUrl" target="_blank" data-i18n="feedback"></a></span>
-        <span>🏘️ <a data-i18n-href="communityUrl" target="_blank" data-i18n="community"></a></span>
-        <span>🔖 <a data-i18n-href="downloadUrl" target="_blank" class="version"></a></span>
-    </div>
-    <div class="fn__flex-1"></div>
 </div>
 <svg class="svg" id="min" viewBox="0 0 32 32">
     <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
@@ -344,15 +506,17 @@
     }
 
     // 多语言文案，直接写死在 HTML 中，支持 21 种语言
-    // 中文用 ld246.com，其他语言用 liuyun.io
+    // 中文用 ld246.com，其他语言用 liuyun.io https://github.com/siyuan-note/siyuan/issues/14748
     const I18N = {
         "zh-CN": {
-            title: "思源笔记", slogan: "重构你的思维", workspace: "🗂️ 工作空间",
-            workspaceDesc: "工作空间用于存放数据，后续可以在顶栏左上角的主菜单中进行切换",
+            title: "思源笔记", wsTitle: "工作空间",
+            missingTip: "⚠️ 找不到上次打开的工作空间路径",
+            emptyHint: "当前没有可用的工作空间，请选择新的工作空间路径",
+            selectPath: "🗂️ 选择新的工作空间路径",
+            selectPathDesc: "工作空间用于存放数据，后续可以在顶栏左上角的主菜单中进行切换",
             selectBtn: "选择", lang: "🌐 外观语言",
             langDesc: "用户界面语言，后续可以在 <kbd>设置</kbd> - <kbd>外观</kbd> 中进行切换",
-            notice: "⚠️ 请勿使用第三方同步盘同步数据，否则会导致运行异常和数据损坏",
-            feedback: "求助反馈建议", community: "用户社区汇总", download: "下载最新版",
+            open: "打开", feedback: "求助反馈建议", community: "用户社区汇总", download: "下载最新版",
             feedbackUrl: "https://ld246.com/article/1649901726096",
             communityUrl: "https://ld246.com/article/1640266171309",
             downloadUrl: "https://b3log.org/siyuan/download.html",
@@ -363,12 +527,14 @@
             msgConfirm: "⚠️ 请确认没有将工作空间设置在第三方同步盘路径下，否则会造成数据损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等），是否继续？",
         },
         "zh-TW": {
-            title: "思源筆記", slogan: "重構你的思維", workspace: "🗂️ 工作空間",
-            workspaceDesc: "工作空間用於存放資料，後續可以在頂欄左上角的主選單中進行切換",
+            title: "思源筆記", wsTitle: "工作空間",
+            missingTip: "⚠️ 找不到上次開啟的工作空間路徑",
+            emptyHint: "目前沒有可用的工作空間，請選擇新的工作空間路徑",
+            selectPath: "🗂️ 選擇新的工作空間路徑",
+            selectPathDesc: "工作空間用於存放資料，後續可以在頂欄左上角的主選單中進行切換",
             selectBtn: "選擇", lang: "🌐 外觀語言",
             langDesc: "使用者介面語言，後續可以在 <kbd>設定</kbd> - <kbd>外觀</kbd> 中進行切換",
-            notice: "⚠️ 請勿使用第三方同步盤同步資料，否則會導致執行異常和資料損壞",
-            feedback: "求助回饋建議", community: "使用者社群匯總", download: "下載最新版",
+            open: "開啟", feedback: "求助回饋建議", community: "使用者社群匯總", download: "下載最新版",
             feedbackUrl: "https://ld246.com/article/1649901726096",
             communityUrl: "https://ld246.com/article/1640266171309",
             downloadUrl: "https://b3log.org/siyuan/download.html",
@@ -379,12 +545,14 @@
             msgConfirm: "⚠️ 請確認沒有將工作空間設定在第三方同步盤路徑下，否則會造成資料損壞（iCloud/OneDrive/Dropbox/Google Drive/堅果雲/百度網盤/騰訊微雲等），是否繼續？",
         },
         "en": {
-            title: "SiYuan", slogan: "Refactor your thinking", workspace: "🗂️ Workspace",
-            workspaceDesc: "The workspace is used to store data, which can be switched later in the top bar menu later",
+            title: "SiYuan", wsTitle: "Workspaces",
+            missingTip: "⚠️ The last opened workspace path could not be found",
+            emptyHint: "No available workspaces, please select a new workspace path",
+            selectPath: "🗂️ Select a new workspace path",
+            selectPathDesc: "The workspace is used to store data, which can be switched later in the top bar menu later",
             selectBtn: "Select", lang: "🌐 Language",
             langDesc: "User interface language, which can be switched later in <kbd>Settings</kbd> - <kbd>Appearance</kbd>",
-            notice: "⚠️ Do not use a third-party sync disk to sync data, otherwise it will cause abnormal operation and data damage",
-            feedback: "Support and Feedback", community: "User community summary", download: "Download",
+            open: "Open", feedback: "Support and Feedback", community: "User community summary", download: "Download",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -395,12 +563,14 @@
             msgConfirm: "⚠️ Please confirm that the workspace is not set under the path of a third-party sync disk, otherwise it will cause data damage (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continue?",
         },
         "ar": {
-            title: "SiYuan", slogan: "أعد هيكلة تفكيرك", workspace: "🗂️ مساحة العمل",
-            workspaceDesc: "تُستخدم مساحة العمل لتخزين البيانات، ويمكن تبديلها لاحقًا من القائمة الرئيسية في الزاوية العلوية اليسرى",
+            title: "SiYuan", wsTitle: "مساحات العمل",
+            missingTip: "⚠️ تعذر العثور على مسار مساحة العمل المفتوحة آخر مرة",
+            emptyHint: "لا توجد مساحات عمل متاحة، يرجى تحديد مسار مساحة عمل جديد",
+            selectPath: "🗂️ تحديد مسار مساحة عمل جديد",
+            selectPathDesc: "تُستخدم مساحة العمل لتخزين البيانات، ويمكن تبديلها لاحقًا من القائمة الرئيسية في الزاوية العلوية اليسرى",
             selectBtn: "تحديد", lang: "🌐 اللغة",
             langDesc: "لغة واجهة المستخدم، يمكن تبديلها لاحقًا في <kbd>الإعدادات</kbd> - <kbd>المظهر</kbd>",
-            notice: "⚠️ لا تستخدم قرص مزامنة تابع لجهة خارجية لمزامنة البيانات، وإلا فقد يؤدي ذلك إلى تشغيل غير طبيعي وتلف البيانات",
-            feedback: "الدعم والملاحظات", community: "ملخص مجتمع المستخدمين", download: "تحميل",
+            open: "فتح", feedback: "الدعم والملاحظات", community: "ملخص مجتمع المستخدمين", download: "تحميل",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -411,12 +581,14 @@
             msgConfirm: "⚠️ يرجى تأكيد عدم تعيين مساحة العمل ضمن مسار قرص مزامنة تابع لجهة خارجية، وإلا فقد يتسبب ذلك في تلف البيانات (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun وغيرها)، هل تريد المتابعة؟",
         },
         "de": {
-            title: "SiYuan", slogan: "Strukturiere dein Denken", workspace: "🗂️ Arbeitsbereich",
-            workspaceDesc: "Der Arbeitsbereich dient zum Speichern von Daten und kann später im Hauptmenü der oberen Leiste gewechselt werden",
+            title: "SiYuan", wsTitle: "Arbeitsbereiche",
+            missingTip: "⚠️ Der zuletzt geöffnete Arbeitsbereich-Pfad konnte nicht gefunden werden",
+            emptyHint: "Keine verfügbaren Arbeitsbereiche, bitte einen neuen Arbeitsbereich-Pfad auswählen",
+            selectPath: "🗂️ Neuen Arbeitsbereich-Pfad auswählen",
+            selectPathDesc: "Der Arbeitsbereich dient zum Speichern von Daten und kann später im Hauptmenü der oberen Leiste gewechselt werden",
             selectBtn: "Auswählen", lang: "🌐 Sprache",
             langDesc: "Sprache der Benutzeroberfläche, die später in <kbd>Einstellungen</kbd> - <kbd>Erscheinungsbild</kbd> gewechselt werden kann",
-            notice: "⚠️ Verwende keine Sync-Festplatte eines Drittanbieters zum Synchronisieren von Daten, da dies zu Fehlfunktionen und Datenverlust führen kann",
-            feedback: "Support und Feedback", community: "Zusammenfassung der Benutzergemeinschaft", download: "Herunterladen",
+            open: "Öffnen", feedback: "Support und Feedback", community: "Zusammenfassung der Benutzergemeinschaft", download: "Herunterladen",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -427,12 +599,14 @@
             msgConfirm: "⚠️ Bitte bestätigen Sie, dass der Arbeitsbereich nicht unter dem Pfad einer Sync-Festplatte eines Drittanbieters eingerichtet ist, da dies zu Datenbeschädigung führen kann (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun usw.), fortfahren?",
         },
         "es": {
-            title: "SiYuan", slogan: "Reestructura tu pensamiento", workspace: "🗂️ Espacio de trabajo",
-            workspaceDesc: "El espacio de trabajo se utiliza para almacenar datos, que se pueden cambiar más tarde en el menú principal de la barra superior",
+            title: "SiYuan", wsTitle: "Espacios de trabajo",
+            missingTip: "⚠️ No se pudo encontrar la ruta del último espacio de trabajo abierto",
+            emptyHint: "No hay espacios de trabajo disponibles, seleccione una nueva ruta de espacio de trabajo",
+            selectPath: "🗂️ Seleccionar una nueva ruta de espacio de trabajo",
+            selectPathDesc: "El espacio de trabajo se utiliza para almacenar datos, que se pueden cambiar más tarde en el menú principal de la barra superior",
             selectBtn: "Seleccionar", lang: "🌐 Idioma",
             langDesc: "Idioma de la interfaz de usuario, que se puede cambiar más tarde en <kbd>Ajustes</kbd> - <kbd>Apariencia</kbd>",
-            notice: "⚠️ No utilice un disco de sincronización de terceros para sincronizar datos, de lo contrario puede causar un funcionamiento anormal y daño en los datos",
-            feedback: "Soporte y comentarios", community: "Resumen de la comunidad de usuarios", download: "Descargar",
+            open: "Abrir", feedback: "Soporte y comentarios", community: "Resumen de la comunidad de usuarios", download: "Descargar",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -443,12 +617,14 @@
             msgConfirm: "⚠️ Confirme que el espacio de trabajo no está configurado bajo la ruta de un disco de sincronización de terceros, de lo contrario causará daños en los datos (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), ¿continuar?",
         },
         "fr": {
-            title: "SiYuan", slogan: "Restructurez votre pensée", workspace: "🗂️ Espace de travail",
-            workspaceDesc: "L'espace de travail est utilisé pour stocker des données, il peut être changé plus tard dans le menu principal de la barre supérieure",
+            title: "SiYuan", wsTitle: "Espaces de travail",
+            missingTip: "⚠️ Le chemin du dernier espace de travail ouvert est introuvable",
+            emptyHint: "Aucun espace de travail disponible, veuillez sélectionner un nouveau chemin d'espace de travail",
+            selectPath: "🗂️ Sélectionner un nouveau chemin d'espace de travail",
+            selectPathDesc: "L'espace de travail est utilisé pour stocker des données, il peut être changé plus tard dans le menu principal de la barre supérieure",
             selectBtn: "Sélectionner", lang: "🌐 Langue",
             langDesc: "Langue de l'interface utilisateur, pouvant être modifiée ultérieurement dans <kbd>Paramètres</kbd> - <kbd>Apparence</kbd>",
-            notice: "⚠️ N'utilisez pas un disque de synchronisation tiers pour synchroniser les données, sinon cela entraînera un fonctionnement anormal et des dommages aux données",
-            feedback: "Assistance et commentaires", community: "Résumé de la communauté d'utilisateurs", download: "Télécharger",
+            open: "Ouvrir", feedback: "Assistance et commentaires", community: "Résumé de la communauté d'utilisateurs", download: "Télécharger",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -459,12 +635,14 @@
             msgConfirm: "⚠️ Veuillez confirmer que l'espace de travail n'est pas défini sous le chemin d'un disque de synchronisation tiers, sinon cela causera des dommages aux données (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continuer ?",
         },
         "he": {
-            title: "SiYuan", slogan: "ארגן מחדש את החשיבה שלך", workspace: "🗂️ סביבת עבודה",
-            workspaceDesc: "סביבת העבודה משמשת לאחסון נתונים, ניתן להחליף אותה מאוחר יותר בתפריט הראשי בסרגל העליון",
+            title: "SiYuan", wsTitle: "סביבות עבודה",
+            missingTip: "⚠️ לא ניתן היה למצוא את הנתיב של סביבת העבודה האחרונה שנפתחה",
+            emptyHint: "אין סביבות עבודה זמינות, נא לבחור נתיב סביבת עבודה חדש",
+            selectPath: "🗂️ בחירת נתיב סביבת עבודה חדש",
+            selectPathDesc: "סביבת העבודה משמשת לאחסון נתונים, ניתן להחליף אותה מאוחר יותר בתפריט הראשי בסרגל העליון",
             selectBtn: "בחירה", lang: "🌐 שפה",
             langDesc: "שפת ממשק המשתמש, ניתן להחליף מאוחר יותר ב-<kbd>הגדרות</kbd> - <kbd>מראה</kbd>",
-            notice: "⚠️ אל תשתמש בדיסק סנכרון של צד שלישי לסנכרון נתונים, אחרת זה עלול לגרום לפעולה לא תקינה ולנזק לנתונים",
-            feedback: "תמיכה ומשוב", community: "סיכום קהילת המשתמשים", download: "הורדה",
+            open: "פתיחה", feedback: "תמיכה ומשוב", community: "סיכום קהילת המשתמשים", download: "הורדה",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -475,12 +653,14 @@
             msgConfirm: "⚠️ נא לאשר שסביבת העבודה אינה מוגדרת תחת נתיב של דיסק סנכרון של צד שלישי, אחרת זה יגרום לנזק לנתונים (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun וכו'), להמשיך?",
         },
         "hi": {
-            title: "SiYuan", slogan: "अपनी सोच को पुनर्गठित करें", workspace: "🗂️ वर्कस्पेस",
-            workspaceDesc: "वर्कस्पेस का उपयोग डेटा संग्रहीत करने के लिए किया जाता है, जिसे बाद में शीर्ष बार मेन्यू में बदला जा सकता है",
+            title: "SiYuan", wsTitle: "वर्कस्पेस",
+            missingTip: "⚠️ अंतिम बार खोला गया वर्कस्पेस पथ नहीं मिल सका",
+            emptyHint: "कोई उपलब्ध वर्कस्पेस नहीं, कृपया एक नया वर्कस्पेस पथ चुनें",
+            selectPath: "🗂️ एक नया वर्कस्पेस पथ चुनें",
+            selectPathDesc: "वर्कस्पेस का उपयोग डेटा संग्रहीत करने के लिए किया जाता है, जिसे बाद में शीर्ष बार मेन्यू में बदला जा सकता है",
             selectBtn: "चुनें", lang: "🌐 भाषा",
             langDesc: "उपयोगकर्ता इंटरफ़ेस भाषा, जिसे बाद में <kbd>सेटिंग्स</kbd> - <kbd>रूप</kbd> में बदला जा सकता है",
-            notice: "⚠️ डेटा को सिंक करने के लिए तृतीय-पक्ष सिंक डिस्क का उपयोग न करें, अन्यथा यह असामान्य संचालन और डेटा क्षति का कारण बनेगा",
-            feedback: "सहायता और प्रतिक्रिया", community: "उपयोगकर्ता समुदाय सारांश", download: "डाउनलोड",
+            open: "खोलें", feedback: "सहायता और प्रतिक्रिया", community: "उपयोगकर्ता समुदाय सारांश", download: "डाउनलोड",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -491,12 +671,14 @@
             msgConfirm: "⚠️ कृपया पुष्टि करें कि वर्कस्पेस किसी तृतीय-पक्ष सिंक डिस्क के पथ के अंतर्गत सेट नहीं है, अन्यथा यह डेटा क्षति का कारण बनेगा (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun आदि), जारी रखें?",
         },
         "id": {
-            title: "SiYuan", slogan: "Restruktur pemikiran Anda", workspace: "🗂️ Ruang Kerja",
-            workspaceDesc: "Ruang kerja digunakan untuk menyimpan data, yang dapat dialihkan nanti di menu bilah atas",
+            title: "SiYuan", wsTitle: "Ruang Kerja",
+            missingTip: "⚠️ Jalur ruang kerja yang terakhir dibuka tidak dapat ditemukan",
+            emptyHint: "Tidak ada ruang kerja yang tersedia, silakan pilih jalur ruang kerja baru",
+            selectPath: "🗂️ Pilih jalur ruang kerja baru",
+            selectPathDesc: "Ruang kerja digunakan untuk menyimpan data, yang dapat dialihkan nanti di menu bilah atas",
             selectBtn: "Pilih", lang: "🌐 Bahasa",
             langDesc: "Bahasa antarmuka pengguna, yang dapat dialihkan nanti di <kbd>Pengaturan</kbd> - <kbd>Tampilan</kbd>",
-            notice: "⚠️ Jangan gunakan disk sinkronisasi pihak ketiga untuk menyinkronkan data, jika tidak akan menyebabkan operasi abnormal dan kerusakan data",
-            feedback: "Dukungan dan Umpan Balik", community: "Ringkasan komunitas pengguna", download: "Unduh",
+            open: "Buka", feedback: "Dukungan dan Umpan Balik", community: "Ringkasan komunitas pengguna", download: "Unduh",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -507,12 +689,14 @@
             msgConfirm: "⚠️ Harap konfirmasi bahwa ruang kerja tidak diatur di bawah jalur disk sinkronisasi pihak ketiga, jika tidak itu akan menyebabkan kerusakan data (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, dll.), lanjutkan?",
         },
         "it": {
-            title: "SiYuan", slogan: "Ristruttura il tuo pensiero", workspace: "🗂️ Spazio di lavoro",
-            workspaceDesc: "Lo spazio di lavoro viene utilizzato per memorizzare i dati, che può essere cambiato successivamente nel menu principale della barra superiore",
+            title: "SiYuan", wsTitle: "Spazi di lavoro",
+            missingTip: "⚠️ Impossibile trovare il percorso dell'ultimo spazio di lavoro aperto",
+            emptyHint: "Nessuno spazio di lavoro disponibile, selezionare un nuovo percorso dello spazio di lavoro",
+            selectPath: "🗂️ Seleziona un nuovo percorso dello spazio di lavoro",
+            selectPathDesc: "Lo spazio di lavoro viene utilizzato per memorizzare i dati, che può essere cambiato successivamente nel menu principale della barra superiore",
             selectBtn: "Seleziona", lang: "🌐 Lingua",
             langDesc: "Lingua dell'interfaccia utente, che può essere cambiata successivamente in <kbd>Impostazioni</kbd> - <kbd>Aspetto</kbd>",
-            notice: "⚠️ Non utilizzare un disco di sincronizzazione di terze parti per sincronizzare i dati, altrimenti causerà malfunzionamenti e danni ai dati",
-            feedback: "Supporto e feedback", community: "Riepilogo della community degli utenti", download: "Scarica",
+            open: "Apri", feedback: "Supporto e feedback", community: "Riepilogo della community degli utenti", download: "Scarica",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -523,12 +707,14 @@
             msgConfirm: "⚠️ Si prega di confermare che lo spazio di lavoro non è impostato nel percorso di un disco di sincronizzazione di terze parti, altrimenti causerà danni ai dati (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, ecc.), continuare?",
         },
         "ja": {
-            title: "SiYuan", slogan: "思考を再構築する", workspace: "🗂️ ワークスペース",
-            workspaceDesc: "ワークスペースはデータの保存に使用されます。後でトップバーのメインメニューで切り替えることができます",
+            title: "SiYuan", wsTitle: "ワークスペース",
+            missingTip: "⚠️ 最後に開いたワークスペースのパスが見つかりませんでした",
+            emptyHint: "利用可能なワークスペースがありません。新しいワークスペースのパスを選択してください",
+            selectPath: "🗂️ 新しいワークスペースのパスを選択",
+            selectPathDesc: "ワークスペースはデータの保存に使用されます。後でトップバーのメインメニューで切り替えることができます",
             selectBtn: "選択", lang: "🌐 言語",
             langDesc: "ユーザーインターフェースの言語です。後で<kbd>設定</kbd> - <kbd>外観</kbd>で切り替えることができます",
-            notice: "⚠️ サードパーティの同期ディスクを使用してデータを同期しないでください。そうしないと、異常な動作やデータの破損が発生する可能性があります",
-            feedback: "サポートとフィードバック", community: "ユーザーコミュニティの概要", download: "ダウンロード",
+            open: "開く", feedback: "サポートとフィードバック", community: "ユーザーコミュニティの概要", download: "ダウンロード",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -539,12 +725,14 @@
             msgConfirm: "⚠️ ワークスペースがサードパーティの同期ディスクのパスの下に設定されていないことを確認してください。そうでないとデータの破損が発生する可能性があります（iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyunなど）。続行しますか？",
         },
         "ko": {
-            title: "SiYuan", slogan: "당신의 사고를 재구성하세요", workspace: "🗂️ 워크스페이스",
-            workspaceDesc: "워크스페이스는 데이터를 저장하는 데 사용되며, 나중에 상단 표시줄 메뉴에서 전환할 수 있습니다",
+            title: "SiYuan", wsTitle: "워크스페이스",
+            missingTip: "⚠️ 마지막으로 열린 워크스페이스 경로를 찾을 수 없습니다",
+            emptyHint: "사용 가능한 워크스페이스가 없습니다. 새 워크스페이스 경로를 선택하세요",
+            selectPath: "🗂️ 새 워크스페이스 경로 선택",
+            selectPathDesc: "워크스페이스는 데이터를 저장하는 데 사용되며, 나중에 상단 표시줄 메뉴에서 전환할 수 있습니다",
             selectBtn: "선택", lang: "🌐 언어",
             langDesc: "사용자 인터페이스 언어이며, 나중에 <kbd>설정</kbd> - <kbd>외관</kbd>에서 전환할 수 있습니다",
-            notice: "⚠️ 타사 동기화 디스크를 사용하여 데이터를 동기화하지 마세요. 그렇지 않으면 비정상적인 작동과 데이터 손상이 발생할 수 있습니다",
-            feedback: "지원 및 피드백", community: "사용자 커뮤니티 요약", download: "다운로드",
+            open: "열기", feedback: "지원 및 피드백", community: "사용자 커뮤니티 요약", download: "다운로드",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -555,12 +743,14 @@
             msgConfirm: "⚠️ 워크스페이스가 타사 동기화 디스크 경로 아래에 설정되지 않았는지 확인하세요. 그렇지 않으면 데이터 손상이 발생합니다(iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun 등). 계속하시겠습니까?",
         },
         "nl": {
-            title: "SiYuan", slogan: "Herstructureer je denken", workspace: "🗂️ Werkruimte",
-            workspaceDesc: "De werkruimte wordt gebruikt om gegevens op te slaan, die later kan worden gewisseld in het hoofdmenu van de bovenste balk",
+            title: "SiYuan", wsTitle: "Werkruimten",
+            missingTip: "⚠️ Het laatst geopende werkruimtepad kon niet worden gevonden",
+            emptyHint: "Geen beschikbare werkruimten, selecteer een nieuw werkruimtepad",
+            selectPath: "🗂️ Selecteer een nieuw werkruimtepad",
+            selectPathDesc: "De werkruimte wordt gebruikt om gegevens op te slaan, die later kan worden gewisseld in het hoofdmenu van de bovenste balk",
             selectBtn: "Selecteren", lang: "🌐 Taal",
             langDesc: "Taal van de gebruikersinterface, die later kan worden gewisseld in <kbd>Instellingen</kbd> - <kbd>Weergave</kbd>",
-            notice: "⚠️ Gebruik geen synchronisatieschijf van derden om gegevens te synchroniseren, anders leidt dit tot abnormale werking en gegevensbeschadiging",
-            feedback: "Ondersteuning en feedback", community: "Overzicht van gebruikersgemeenschap", download: "Downloaden",
+            open: "Openen", feedback: "Ondersteuning en feedback", community: "Overzicht van gebruikersgemeenschap", download: "Downloaden",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -571,12 +761,14 @@
             msgConfirm: "⚠️ Bevestig dat de werkruimte niet is ingesteld onder het pad van een synchronisatieschijf van derden, anders veroorzaakt dit gegevensbeschadiging (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), doorgaan?",
         },
         "pl": {
-            title: "SiYuan", slogan: "Zrestrukturyzuj swoje myślenie", workspace: "🗂️ Obszar roboczy",
-            workspaceDesc: "Obszar roboczy służy do przechowywania danych, które można później przełączyć w głównym menu górnego paska",
+            title: "SiYuan", wsTitle: "Obszary robocze",
+            missingTip: "⚠️ Nie można znaleźć ścieżki ostatnio otwartego obszaru roboczego",
+            emptyHint: "Brak dostępnych obszarów roboczych, wybierz nową ścieżkę obszaru roboczego",
+            selectPath: "🗂️ Wybierz nową ścieżkę obszaru roboczego",
+            selectPathDesc: "Obszar roboczy służy do przechowywania danych, które można później przełączyć w głównym menu górnego paska",
             selectBtn: "Wybierz", lang: "🌐 Język",
             langDesc: "Język interfejsu użytkownika, który można później przełączyć w <kbd>Ustawieniach</kbd> - <kbd>Wygląd</kbd>",
-            notice: "⚠️ Nie używaj dysku synchronizacji innej firmy do synchronizacji danych, w przeciwnym razie doprowadzi to do nieprawidłowego działania i uszkodzenia danych",
-            feedback: "Wsparcie i opinie", community: "Podsumowanie społeczności użytkowników", download: "Pobierz",
+            open: "Otwórz", feedback: "Wsparcie i opinie", community: "Podsumowanie społeczności użytkowników", download: "Pobierz",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -587,12 +779,14 @@
             msgConfirm: "⚠️ Potwierdź, że obszar roboczy nie jest ustawiony w ścieżce dysku synchronizacji innej firmy, w przeciwnym razie spowoduje to uszkodzenie danych (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun itd.), kontynuować?",
         },
         "pt-BR": {
-            title: "SiYuan", slogan: "Restruture seu pensamento", workspace: "🗂️ Espaço de trabalho",
-            workspaceDesc: "O espaço de trabalho é usado para armazenar dados, que pode ser alterado posteriormente no menu principal da barra superior",
+            title: "SiYuan", wsTitle: "Espaços de trabalho",
+            missingTip: "⚠️ O caminho do último espaço de trabalho aberto não pôde ser encontrado",
+            emptyHint: "Nenhum espaço de trabalho disponível, selecione um novo caminho de espaço de trabalho",
+            selectPath: "🗂️ Selecionar um novo caminho de espaço de trabalho",
+            selectPathDesc: "O espaço de trabalho é usado para armazenar dados, que pode ser alterado posteriormente no menu principal da barra superior",
             selectBtn: "Selecionar", lang: "🌐 Idioma",
             langDesc: "Idioma da interface do usuário, que pode ser alterado posteriormente em <kbd>Configurações</kbd> - <kbd>Aparência</kbd>",
-            notice: "⚠️ Não use um disco de sincronização de terceiros para sincronizar dados, caso contrário, causará operação anormal e danos aos dados",
-            feedback: "Suporte e Feedback", community: "Resumo da comunidade de usuários", download: "Baixar",
+            open: "Abrir", feedback: "Suporte e Feedback", community: "Resumo da comunidade de usuários", download: "Baixar",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -603,12 +797,14 @@
             msgConfirm: "⚠️ Confirme que o espaço de trabalho não está definido sob o caminho de um disco de sincronização de terceiros, caso contrário causará danos aos dados (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continuar?",
         },
         "ru": {
-            title: "SiYuan", slogan: "Реструктурируйте своё мышление", workspace: "🗂️ Рабочее пространство",
-            workspaceDesc: "Рабочее пространство используется для хранения данных, его можно переключить позже в главном меню верхней панели",
+            title: "SiYuan", wsTitle: "Рабочие пространства",
+            missingTip: "⚠️ Не удалось найти путь последнего открытого рабочего пространства",
+            emptyHint: "Нет доступных рабочих пространств, выберите новый путь рабочего пространства",
+            selectPath: "🗂️ Выберите новый путь рабочего пространства",
+            selectPathDesc: "Рабочее пространство используется для хранения данных, его можно переключить позже в главном меню верхней панели",
             selectBtn: "Выбрать", lang: "🌐 Язык",
             langDesc: "Язык интерфейса пользователя, который можно переключить позже в <kbd>Настройках</kbd> - <kbd>Внешний вид</kbd>",
-            notice: "⚠️ Не используйте сторонний диск синхронизации для синхронизации данных, иначе это приведёт к неправильной работе и повреждению данных",
-            feedback: "Поддержка и обратная связь", community: "Сводка сообщества пользователей", download: "Скачать",
+            open: "Открыть", feedback: "Поддержка и обратная связь", community: "Сводка сообщества пользователей", download: "Скачать",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -619,12 +815,14 @@
             msgConfirm: "⚠️ Подтвердите, что рабочее пространство не настроено по пути стороннего диска синхронизации, иначе это приведёт к повреждению данных (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun и т. д.), продолжить?",
         },
         "sk": {
-            title: "SiYuan", slogan: "Reštrukturalizujte svoje myslenie", workspace: "🗂️ Pracovný priestor",
-            workspaceDesc: "Pracovný priestor sa používa na ukladanie údajov, ktoré sa dá neskôr prepnúť v hlavnej ponuke hornej lišty",
+            title: "SiYuan", wsTitle: "Pracovné priestory",
+            missingTip: "⚠️ Nepodarilo sa nájsť cestu k poslednému otvorenému pracovnému priestoru",
+            emptyHint: "Žiadne dostupné pracovné priestory, vyberte novú cestu pracovného priestoru",
+            selectPath: "🗂️ Vybrať novú cestu pracovného priestoru",
+            selectPathDesc: "Pracovný priestor sa používa na ukladanie údajov, ktoré sa dá neskôr prepnúť v hlavnej ponuke hornej lišty",
             selectBtn: "Vybrať", lang: "🌐 Jazyk",
             langDesc: "Jazyk používateľského rozhrania, ktorý možno neskôr prepnúť v <kbd>Nastaveniach</kbd> - <kbd>Vzhľad</kbd>",
-            notice: "⚠️ Nepoužívajte synchronizačný disk tretej strany na synchronizáciu údajov, inak to spôsobí abnormálnu prevádzku a poškodenie údajov",
-            feedback: "Podpora a spätná väzba", community: "Súhrn komunity používateľov", download: "Stiahnuť",
+            open: "Otvoriť", feedback: "Podpora a spätná väzba", community: "Súhrn komunity používateľov", download: "Stiahnuť",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -635,12 +833,14 @@
             msgConfirm: "⚠️ Potvrďte, že pracovný priestor nie je nastavený pod cestou synchronizačného disku tretej strany, inak to spôsobí poškodenie údajov (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun atď.), pokračovať?",
         },
         "th": {
-            title: "SiYuan", slogan: "ปรับโครงสร้างความคิดของคุณ", workspace: "🗂️ พื้นที่ทำงาน",
-            workspaceDesc: "พื้นที่ทำงานใช้สำหรับจัดเก็บข้อมูล ซึ่งสามารถสลับได้ในภายหลังในเมนูหลักของแถบด้านบน",
+            title: "SiYuan", wsTitle: "พื้นที่ทำงาน",
+            missingTip: "⚠️ ไม่พบเส้นทางพื้นที่ทำงานที่เปิดล่าสุด",
+            emptyHint: "ไม่มีพื้นที่ทำงานที่พร้อมใช้งาน โปรดเลือกเส้นทางพื้นที่ทำงานใหม่",
+            selectPath: "🗂️ เลือกเส้นทางพื้นที่ทำงานใหม่",
+            selectPathDesc: "พื้นที่ทำงานใช้สำหรับจัดเก็บข้อมูล ซึ่งสามารถสลับได้ในภายหลังในเมนูหลักของแถบด้านบน",
             selectBtn: "เลือก", lang: "🌐 ภาษา",
             langDesc: "ภาษาของอินเทอร์เฟซผู้ใช้ ซึ่งสามารถสลับได้ในภายหลังใน <kbd>การตั้งค่า</kbd> - <kbd>ลักษณะ</kbd>",
-            notice: "⚠️ อย่าใช้ดิสก์ซิงค์ของบุคคลที่สามในการซิงค์ข้อมูล มิฉะนั้นจะทำให้การทำงานผิดปกติและข้อมูลเสียหาย",
-            feedback: "การสนับสนุนและข้อเสนอแนะ", community: "สรุปชุมชนผู้ใช้", download: "ดาวน์โหลด",
+            open: "เปิด", feedback: "การสนับสนุนและข้อเสนอแนะ", community: "สรุปชุมชนผู้ใช้", download: "ดาวน์โหลด",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -651,12 +851,14 @@
             msgConfirm: "⚠️ โปรดยืนยันว่าพื้นที่ทำงานไม่ได้ตั้งไว้ภายใต้เส้นทางของดิสก์ซิงค์ของบุคคลที่สาม มิฉะนั้นจะทำให้ข้อมูลเสียหาย (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun ฯลฯ) ดำเนินการต่อ?",
         },
         "tr": {
-            title: "SiYuan", slogan: "Düşüncenizi yeniden yapılandırın", workspace: "🗂️ Çalışma alanı",
-            workspaceDesc: "Çalışma alanı verileri depolamak için kullanılır, daha sonra üst çubuk menüsünde değiştirilebilir",
+            title: "SiYuan", wsTitle: "Çalışma alanları",
+            missingTip: "⚠️ Son açılan çalışma alanı yolu bulunamadı",
+            emptyHint: "Kullanılabilir çalışma alanı yok, lütfen yeni bir çalışma alanı yolu seçin",
+            selectPath: "🗂️ Yeni bir çalışma alanı yolu seçin",
+            selectPathDesc: "Çalışma alanı verileri depolamak için kullanılır, daha sonra üst çubuk menüsünde değiştirilebilir",
             selectBtn: "Seç", lang: "🌐 Dil",
             langDesc: "Kullanıcı arayüzü dili, daha sonra <kbd>Ayarlar</kbd> - <kbd>Görünüm</kbd> bölümünde değiştirilebilir",
-            notice: "⚠️ Verileri senkronize etmek için üçüncü taraf bir senkronizasyon diski kullanmayın, aksi takdirde anormal çalışmaya ve veri hasarına neden olur",
-            feedback: "Destek ve Geri Bildirim", community: "Kullanıcı topluluğu özeti", download: "İndir",
+            open: "Aç", feedback: "Destek ve Geri Bildirim", community: "Kullanıcı topluluğu özeti", download: "İndir",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -667,12 +869,14 @@
             msgConfirm: "⚠️ Çalışma alanının üçüncü taraf eşzamanlama diskinin yolu altında ayarlanmadığını onaylayın, aksi takdirde veri hasarına neden olur (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun vb.), devam edilsin mi?",
         },
         "uk": {
-            title: "SiYuan", slogan: "Реструктуруйте своє мислення", workspace: "🗂️ Робочий простір",
-            workspaceDesc: "Робочий простір використовується для зберігання даних, який пізніше можна змінити в головному меню верхньої панелі",
+            title: "SiYuan", wsTitle: "Робочі простори",
+            missingTip: "⚠️ Не вдалося знайти шлях до останнього відкритого робочого простору",
+            emptyHint: "Немає доступних робочих просторів, виберіть новий шлях робочого простору",
+            selectPath: "🗂️ Виберіть новий шлях робочого простору",
+            selectPathDesc: "Робочий простір використовується для зберігання даних, який пізніше можна змінити в головному меню верхньої панелі",
             selectBtn: "Вибрати", lang: "🌐 Мова",
             langDesc: "Мова інтерфейсу користувача, яку пізніше можна змінити в <kbd>Налаштуваннях</kbd> - <kbd>Вигляд</kbd>",
-            notice: "⚠️ Не використовуйте сторонній диск синхронізації для синхронізації даних, інакше це призведе до ненормальної роботи та пошкодження даних",
-            feedback: "Підтримка та зворотний зв'язок", community: "Огляд спільноти користувачів", download: "Завантажити",
+            open: "Відкрити", feedback: "Підтримка та зворотний зв'язок", community: "Огляд спільноти користувачів", download: "Завантажити",
             feedbackUrl: "https://liuyun.io/article/1686530886208",
             communityUrl: "https://liuyun.io/article/1687779743723",
             downloadUrl: "https://b3log.org/siyuan/en/download.html",
@@ -684,9 +888,11 @@
         },
     }
 
+    const path = require('path')
+    const {ipcRenderer} = require('electron')
     let currentLang = decodeURIComponent(getSearch('lang'))
 
-    // 应用指定语言的文案到 DOM
+    // 应用指定语言的文案到 DOM https://github.com/siyuan-note/siyuan/issues/14748
     const applyLang = (lang) => {
         const langData = I18N[lang] || I18N["en"]
         document.title = `${langData.title} v${getSearch('v')}`
@@ -696,6 +902,7 @@
                 item.textContent = langData[key]
             }
         })
+        // 含 HTML 标签（如 <kbd>）的文案用 innerHTML
         document.querySelectorAll('[data-i18n-html]').forEach(item => {
             const key = item.getAttribute('data-i18n-html')
             if (langData[key]) {
@@ -714,10 +921,13 @@
 
     document.querySelector('.version').textContent = `v${getSearch('v')}`
     document.querySelector('.icon').src = decodeURIComponent(`${getSearch('icon')}`)
+    document.querySelector('.missing').textContent = decodeURIComponent(getSearch('missing'))
 
     document.querySelector('.lang').value = currentLang
     document.querySelector('.lang').addEventListener('change', (event) => {
         applyLang(event.target.value)
+        // 重新渲染列表项按钮文案
+        renderWsList()
     })
 
     if (process.platform === 'darwin') {
@@ -725,17 +935,58 @@
     }
 
     document.getElementById('close').addEventListener('click', () => {
-        const {ipcRenderer} = require('electron')
         ipcRenderer.send('siyuan-first-quit')
     })
     document.getElementById('min').addEventListener('click', () => {
-        const {ipcRenderer} = require('electron')
         ipcRenderer.send("siyuan-cmd", "minimize");
     })
 
+    // 渲染可用工作空间列表 https://github.com/siyuan-note/siyuan/issues/14748
+    const wsRaw = decodeURIComponent(getSearch('workspaces'))
+    const wsList = wsRaw.split('\n').filter(item => '' !== item.trim())
+    const renderWsList = () => {
+        const langData = I18N[currentLang] || I18N["en"]
+        const root = document.querySelector('.wsList')
+        root.innerHTML = ''
+        wsList.forEach(p => {
+            const div = document.createElement('div')
+            div.className = 'ws-item'
+            const text = document.createElement('div')
+            text.className = 'ws-text'
+            const name = document.createElement('div')
+            name.className = 'ws-name'
+            name.textContent = path.basename(p)
+            const wsPath = document.createElement('div')
+            wsPath.className = 'ws-path'
+            wsPath.textContent = p
+            text.appendChild(name)
+            text.appendChild(wsPath)
+            const btn = document.createElement('button')
+            btn.className = 'b3-button ws-open'
+            btn.textContent = langData.open
+            btn.dataset.path = p
+            btn.addEventListener('click', () => {
+                ipcRenderer.send('siyuan-select-workspace', {
+                    workspace: p,
+                    lang: currentLang,
+                })
+            })
+            div.appendChild(text)
+            div.appendChild(btn)
+            root.appendChild(div)
+        })
+    }
+    if (0 < wsList.length) {
+        // 存在可用工作空间时渲染左列列表
+        renderWsList()
+    } else {
+        // 没有可用工作空间时隐藏左列，显示右列空提示
+        document.querySelector('.wsPanel').classList.add('fn__none')
+        document.querySelector('.emptyHint').classList.remove('fn__none')
+    }
+
     document.querySelector('.choosePath').addEventListener('click', async () => {
         const langData = I18N[currentLang] || I18N["en"]
-        const path = require('path')
         const fs = require('fs')
 
         let defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "SiYuan")
@@ -747,7 +998,6 @@
             fs.mkdirSync(defaultWorkspace, {mode: 0o755, recursive: true})
         }
 
-        const {ipcRenderer} = require('electron')
         const result = await ipcRenderer.invoke("siyuan-get", {
             cmd: "showOpenDialog",
             defaultPath: defaultWorkspace,
@@ -784,9 +1034,9 @@
         if (!fs.existsSync(initPath)) {
             fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
         }
-        ipcRenderer.send('siyuan-first-init', {
+        ipcRenderer.send('siyuan-select-workspace', {
             workspace: initPath,
-            lang: document.querySelector('.lang').value
+            lang: currentLang,
         })
     })
 
@@ -807,6 +1057,7 @@
     }
 
     const isWorkspaceDir = (absPath) => {
+        const fs = require('fs');
         const conf = path.join(absPath, 'conf', 'conf.json');
         let data;
         try {
@@ -833,10 +1084,9 @@
         }
 
         // macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
-        const homePath = decodeURIComponent(getSearch('home'))
+        const iCloudRoot = path.join(decodeURIComponent(getSearch('home')), 'Library', 'Mobile Documents')
         const absPathLower = absPath.toLowerCase()
-        const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
-        if (!simpleCheckIcloudPath(absPath, homePath)) {
+        if (!simpleCheckIcloudPath(absPath)) {
             // 简单判断无法通过则复杂验证
             const allFiles = walk(iCloudRoot)
             for (const file of allFiles) {
@@ -850,13 +1100,14 @@
 
     // 简单判断 iCloud 同步目录
     // 不允许 为桌面 文档 和 iCloud 文件夹 和软链接
-    const simpleCheckIcloudPath = (absPath, homePath) => {
+    const simpleCheckIcloudPath = (absPath) => {
         const fs = require('fs')
         let stat = fs.lstatSync(absPath)
         if (stat.isSymbolicLink()) {
             return false
         }
 
+        const homePath = decodeURIComponent(getSearch('home'))
         const absPathLower = absPath.toLowerCase()
         const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
         if (absPathLower.startsWith(iCloudRoot.toLowerCase())) {

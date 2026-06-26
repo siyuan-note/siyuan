@@ -1183,7 +1183,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
 
-                    if (isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                    // 非列表项源（如段落）拖到子列表首项上方间隙：列表只能包含列表项，段落无法成为 .li 的同级，
+                    // 而该间隙的语义实为"插入到父列表项内容末尾（子列表之前）"，故锚点改为父列表项，
+                    // 将段落作为父列表项内容插到子列表之前。命中后需跳过下方 isChild/sibling 链，避免重复插入。
+                    let liGapIntercepted = false;
+                    if (!isListItemSource && !isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                        const parentLi = targetElement.parentElement?.parentElement;
+                        if (targetClass.some((c: string) => c.indexOf("dragover__top--sibling") === 0) &&
+                            parentLi?.classList.contains("li")) {
+                            const contentLi = parentLi as HTMLElement;
+                            const contentBlocks = Array.from(contentLi.children).filter(
+                                c => c.hasAttribute("data-node-id") && !c.classList.contains("list"));
+                            const anchorBlock = contentBlocks.length > 0 ? contentBlocks[contentBlocks.length - 1] : null;
+                            if (anchorBlock) {
+                                // 插到最后一个内容块之后：moveTo 会把段落放在子列表之前，形成列表项内容
+                                dragSame(protyle, sourceElements, anchorBlock, true, event.ctrlKey);
+                            } else {
+                                dragSame(protyle, sourceElements, contentLi, isBottom, event.ctrlKey);
+                            }
+                            liGapIntercepted = true;
+                        }
+                    }
+
+                    if (!liGapIntercepted && isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
                         const nestedList = Array.from(targetElement.children).find(c => c.classList.contains("list"));
                         let nestedTarget: Element;
                         if (nestedList) {
@@ -1785,6 +1807,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideDragTip();
             return;
         }
+        // 不允许拖拽到嵌入块中（嵌入块本身或其内部任意内容均不可作为拖拽目标）
+        // 需置于列表/超级块等会提前 return 的分支之前，否则列表项、超级块等场景会绕过该限制
+        if (isInEmbedBlock(targetElement) || targetElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+            clearDragoverElement(dragoverElement);
+            return;
+        }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
@@ -2109,11 +2137,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             });
             if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
-                clearDragoverElement(dragoverElement);
-                return;
-            }
-            if (isInEmbedBlock(targetElement)) {
-                // 不允许托入嵌入块
                 clearDragoverElement(dragoverElement);
                 return;
             }

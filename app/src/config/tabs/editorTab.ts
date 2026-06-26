@@ -1,6 +1,6 @@
-import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {Constants} from "../../constants";
-import {isBrowser} from "../../util/functions";
+import {isBrowser, isMobile} from "../../util/functions";
+import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {editorConfigApi} from "./editorRuntime";
 import type {SettingTabBuilder} from "../setting/builder";
 /// #if !BROWSER
@@ -9,29 +9,32 @@ import {ipcRenderer} from "electron";
 
 /** 编辑器 Tab：各组注册实现（由 setting/tabs.ts 调用） */
 const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
-    const browser = isBrowser();
     const group = tab.group("behavior", window.siyuan.languages.configGroupBehavior);
     const readOnlyKeymap = window.siyuan.config.keymap.general.editReadonly.custom;
     group.switch("editor.readOnly", {
-        title: `${window.siyuan.languages.editReadonly} <code class="fn__code${readOnlyKeymap ? "" : " fn__none"}">${updateHotkeyTip(readOnlyKeymap)}</code>`,
+        title: isMobile()
+            ? window.siyuan.languages.editReadonly
+            : `${window.siyuan.languages.editReadonly} <code class="fn__code${readOnlyKeymap ? "" : " fn__none"}">${updateHotkeyTip(readOnlyKeymap)}</code>`,
         desc: window.siyuan.languages.editReadonlyTip,
     });
     group.switch("editor.spellcheck", {
         title: window.siyuan.languages.spellcheck,
-        desc: browser ? window.siyuan.languages.spellcheckTip : window.siyuan.languages.spellcheckTip2,
+        desc: isBrowser() ? window.siyuan.languages.spellcheckTip : window.siyuan.languages.spellcheckTip2,
+        /// #if !BROWSER
         afterMount: bindSpellcheckLanguagesVisibility,
+        /// #endif
     });
-    if (!browser) {
-        group.slot({
-            key: "spellcheckLanguages",
-            keywords: [
-                window.siyuan.languages.spellcheck,
-                window.siyuan.languages.spellcheckTip2,
-            ],
-            html: () => '<div class="fn__flex b3-label config-item fn__none"><div class="b3-chips" id="editor.spellcheckLanguages"></div></div>',
-            afterMount: bindSpellcheckLanguagesChips,
-        });
-    }
+    /// #if !BROWSER
+    group.slot({
+        key: "spellcheckLanguages",
+        keywords: [
+            window.siyuan.languages.spellcheck,
+            window.siyuan.languages.spellcheckTip2,
+        ],
+        html: () => '<div class="fn__flex b3-label config-item fn__none"><div class="b3-chips" id="editor.spellcheckLanguages"></div></div>',
+        afterMount: bindSpellcheckLanguagesChips,
+    });
+    /// #endif
     group.range("editor.codeTabSpaces", {
         title: window.siyuan.languages.md29,
         desc: window.siyuan.languages.md30,
@@ -57,8 +60,9 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         min: 48,
     });
 };
+
+/// #if !BROWSER
 const bindSpellcheckLanguagesVisibility = async (root: HTMLElement) => {
-    /// #if !BROWSER
     const spellcheckSwitch = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.spellcheck")}`);
     if (!spellcheckSwitch) {
         return;
@@ -68,10 +72,9 @@ const bindSpellcheckLanguagesVisibility = async (root: HTMLElement) => {
     };
     spellcheckSwitch.addEventListener("change", toggleWrap);
     toggleWrap();
-    /// #endif
 };
+
 const bindSpellcheckLanguagesChips = async (root: HTMLElement) => {
-    /// #if !BROWSER
     const el = root.querySelector<HTMLDivElement>(`#${CSS.escape("editor.spellcheckLanguages")}`);
     if (!el) {
         return;
@@ -94,8 +97,8 @@ const bindSpellcheckLanguagesChips = async (root: HTMLElement) => {
             editorConfigApi.patch("spellcheckLanguages", selected);
         }
     });
-    /// #endif
 };
+/// #endif
 
 const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("blockFeatures", window.siyuan.languages.configGroupBlockFeatures);

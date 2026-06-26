@@ -1,19 +1,19 @@
 /// #if !BROWSER
 import * as path from "path";
+import {useShell} from "../../util/pathName";
 /// #endif
 import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
 /// #if !MOBILE
 import {resetLayout} from "../../layout/util";
+import {updateHotkeyTip} from "../../protyle/util/compatibility";
 /// #endif
 import {desktopModeCookie} from "../../util/cookie";
-import {isBrowser, isMobile, objEquals} from "../../util/functions";
+import {isMobile, objEquals} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
 import {openSnippets} from "../util/snippets";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Dialog} from "../../dialog";
-import {useShell} from "../../util/pathName";
-import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {Menu} from "../../plugin/Menu";
 import {escapeAttr} from "../../util/escape";
 import {genConfigItemMainHtml, genListSwitchItemHtml} from "../render/fragments";
@@ -61,11 +61,13 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
         step: 1,
         save: (value) => editorConfigApi.patch("editor.fontSize", value),
     });
+    /// #if !MOBILE
     group.switch("editor.fontSizeScrollZoom", {
         title: window.siyuan.languages.fontSizeScrollZoom,
         desc: window.siyuan.languages.fontSizeScrollZoomTip,
         save: (value) => editorConfigApi.patch("editor.fontSizeScrollZoom", value),
     });
+    /// #endif
     group.switch("editor.fullWidth", {
         title: window.siyuan.languages.fullWidth,
         desc: window.siyuan.languages.fullWidthTip,
@@ -212,7 +214,6 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
 };
 
 const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
-    const browser = isBrowser();
     const group = tab.group("interface", window.siyuan.languages.configGroupInterface);
 
     group.select("appearance.lang", {
@@ -246,21 +247,21 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.appearance9,
         ],
         afterMount: (root) => {
-            if (!browser) {
-                root.querySelector("#appearanceOpenTheme")?.addEventListener("click", () => {
-                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
-                });
-            }
+            /// #if !BROWSER
+            root.querySelector("#appearanceOpenTheme")?.addEventListener("click", () => {
+                useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
+            });
+            /// #endif
         },
     }, (stack) => {
         stack.title(window.siyuan.languages.theme);
-        if (!browser) {
-            stack.button({
-                id: "appearanceOpenTheme",
-                label: window.siyuan.languages.appearance9,
-                icon: "iconFolder",
-            });
-        }
+        /// #if !BROWSER
+        stack.button({
+            id: "appearanceOpenTheme",
+            label: window.siyuan.languages.appearance9,
+            icon: "iconFolder",
+        });
+        /// #endif
         stack.select("appearance.themeLight", {
             desc: window.siyuan.languages.theme11,
             options: window.siyuan.config.appearance.lightThemes.map((item) => ({
@@ -284,21 +285,21 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.appearance8,
         ],
         afterMount: (root) => {
-            if (!browser) {
-                root.querySelector("#appearanceOpenIcon")?.addEventListener("click", () => {
-                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
-                });
-            }
+            /// #if !BROWSER
+            root.querySelector("#appearanceOpenIcon")?.addEventListener("click", () => {
+                useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
+            });
+            /// #endif
         },
     }, (stack) => {
         stack.title(window.siyuan.languages.icon);
-        if (!browser) {
-            stack.button({
-                id: "appearanceOpenIcon",
-                label: window.siyuan.languages.appearance8,
-                icon: "iconFolder",
-            });
-        }
+        /// #if !BROWSER
+        stack.button({
+            id: "appearanceOpenIcon",
+            label: window.siyuan.languages.appearance8,
+            icon: "iconFolder",
+        });
+        /// #endif
         stack.select("appearance.icon", {
             desc: window.siyuan.languages.theme2,
             options: window.siyuan.config.appearance.icons.map((item) => ({
@@ -330,6 +331,7 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
 const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
 
+    /// #if !MOBILE
     group.select("editor.floatWindowMode", {
         title: window.siyuan.languages.floatWindowMode,
         desc: window.siyuan.languages.floatWindowModeTip,
@@ -361,6 +363,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.appearance19,
         desc: window.siyuan.languages.appearance20,
     });
+    /// #endif
     group.stack({
         key: "statusBar",
         keywords: [
@@ -441,6 +444,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     /// #endif
 };
 
+/// #if !MOBILE
 const bindFloatWindowModeVisibility = (root: HTMLElement) => {
     const fwModeEl = root.querySelector<HTMLSelectElement>(`#${CSS.escape("editor.floatWindowMode")}`);
     const delayRow = root.querySelector(`#${CSS.escape("editor.floatWindowDelay")}`)?.closest(".config-item");
@@ -454,6 +458,7 @@ const bindFloatWindowModeVisibility = (root: HTMLElement) => {
     fwModeEl.addEventListener("change", handleFloatWindowModeChange);
     handleFloatWindowModeChange();
 };
+/// #endif
 
 const STATUS_BAR_MSG_ITEMS: { key: keyof Config.IAppearanceStatusBar; taskKey: string }[] = [
     {key: "msgTaskDatabaseIndexCommitDisabled", taskKey: "task.database.index.commit"},
@@ -502,23 +507,22 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
 };
 
 const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
-    const browser = isBrowser();
     const group = tab.group("personalization", window.siyuan.languages.configGroupPersonalization);
 
-    if (!browser) {
-        group.button({
-            id: "appearanceOpenEmoji",
-            title: window.siyuan.languages.customEmoji,
-            desc: window.siyuan.languages.customEmojiTip,
-            label: window.siyuan.languages.showInFolder,
-            icon: "iconFolder",
-            afterMount: (root) => {
-                root.querySelector("#appearanceOpenEmoji")?.addEventListener("click", () => {
-                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
-                });
-            },
-        });
-    }
+    /// #if !BROWSER
+    group.button({
+        id: "appearanceOpenEmoji",
+        title: window.siyuan.languages.customEmoji,
+        desc: window.siyuan.languages.customEmojiTip,
+        label: window.siyuan.languages.showInFolder,
+        icon: "iconFolder",
+        afterMount: (root) => {
+            root.querySelector("#appearanceOpenEmoji")?.addEventListener("click", () => {
+                useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
+            });
+        },
+    });
+    /// #endif
     group.stack({
         key: "codeSnippet",
         keywords: [

@@ -343,6 +343,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var doomLoop doomLoopTracker
 		var compactCount int
 		var snapshotIDs []string
+		snapshotCreated := false // 整个 AgentChat 过程最多打一次自动快照，避免多轮工具调用时每轮都打
 		var roundsSinceCheckpoint int
 
 		if sessionID != "" {
@@ -537,7 +538,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				checkpointMsgs = append(checkpointMsgs, checkpointMsg)
 				assistantIdx := len(checkpointMsgs) - 1
 
-				snapshotCreated := false
 				for i, tc := range aggregatedToolCalls {
 					args := parsedArgs[i]
 					action := ""

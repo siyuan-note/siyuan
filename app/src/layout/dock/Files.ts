@@ -1414,7 +1414,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     </span>
     <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
-    <span class="b3-list-item__text ariaLabel" data-position="parentE"
+    <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>

@@ -357,19 +357,21 @@ jobs:
       - name: Building Android App
         # local.properties 被 siyuan-android 的 .gitignore 忽略,CI 里需现场生成,
         # 否则 Gradle 报 "SDK location not found";gradlew 也需显式加可执行权限。
+        # 产物重命名为带版本号的固定名,确保下载文件名正确(GitHub Release 的下载名
+        # 取决于上传时的本地文件名,# 语法只改显示标签)。
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x ./gradlew
           ./gradlew assembleOfficialRelease
           cd app/build/outputs/apk/official/release
-          mv siyuan-*-official-release.apk siyuan-android.apk
+          mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.release_version }}.apk
         working-directory: ${{ github.workspace }}/siyuan-android
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: siyuan-android
-          path: ${{ github.workspace }}/siyuan-android/app/build/outputs/apk/official/release/siyuan-android.apk
+          path: ${{ github.workspace }}/siyuan-android/app/build/outputs/apk/official/release/siyuan-${{ needs.prepare.outputs.release_version }}.apk
 
   create_release:
     name: Create Release
@@ -404,4 +406,4 @@ jobs:
             "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${REL_VER}-mac.dmg" \
             "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${REL_VER}-mac-arm64.dmg" \
             "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${REL_VER}-win.exe" \
-            "siyuan-android/siyuan-android.apk#siyuan-${REL_VER}.apk"
+            "siyuan-android/siyuan-${REL_VER}.apk#siyuan-${REL_VER}.apk"

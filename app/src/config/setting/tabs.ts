@@ -14,6 +14,9 @@ import {collectBazaarTabSearchStrings, mountBazaarTab} from "../bazaar";
 import {collectKeymapTabSearchStrings, mountKeymapTab} from "../tabs/keymapUi";
 /// #endif
 import {isHuawei, isInHarmony} from "../../protyle/util/compatibility";
+/// #if MOBILE
+import {isDisabledFeature} from "../../protyle/util/compatibility";
+/// #endif
 import {SettingBuilder, type SettingTab} from "./builder";
 import {registerEditorTab} from "../tabs/editorTab";
 import {registerFileTab} from "../tabs/fileTab";
@@ -69,6 +72,9 @@ const settingTabs = {
         icon: "iconSparkles",
         title: () => window.siyuan.languages.ai,
         defaultSave: aiConfigApi.patch,
+        /// #if MOBILE
+        hidden: () => isHuawei() || isDisabledFeature("ai"),
+        /// #endif
     }, registerAiTab),
     secretsVariables: setting.tab({
         id: "secretsVariables",

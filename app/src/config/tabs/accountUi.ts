@@ -9,7 +9,9 @@ import {processSync} from "../../dialog/processSystem";
 import {getCloudURL, getIndexURL} from "../util/about";
 import {iOSPurchase} from "../../util/iOSPurchase";
 import {hideElements} from "../../protyle/ui/hideElements";
+/// #if MOBILE
 import {closePanel} from "../../mobile/util/closePanel";
+/// #endif
 import md5 from "blueimp-md5";
 import type {SettingTabBuilder} from "../setting/builder";
 import {patchSyncConfig, refreshSyncCloudSpaceGroup} from "./syncRuntime";

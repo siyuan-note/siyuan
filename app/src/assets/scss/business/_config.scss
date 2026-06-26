@@ -425,6 +425,12 @@
 }
 
 #configAccountPayment {
+  @media (max-width: 750px) {
+    .config-wrap > .fn__space {
+      display: block;
+    }
+  }
+
   .ft__on-surface svg {
     width: 16px !important;
     height: 16px !important;

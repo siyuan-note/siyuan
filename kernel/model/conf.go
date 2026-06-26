@@ -678,6 +678,23 @@ func InitConf() {
 	}
 
 	Conf.Save()
+
+	// 安全模式：渲染进程崩溃恢复后由桌面端主进程通过 --safe-mode 注入。
+	// 直接覆盖外观、集市、代码片段相关配置并持久化，禁用代码片段、插件、自定义主题与图标，以排除扩展导致再次崩溃的可能。
+	// 注意：这是破坏性操作，会覆盖用户原有配置，后续不会自动恢复。
+	if util.SafeMode {
+		Conf.Appearance.ThemeLight = "daylight"
+		Conf.Appearance.ThemeDark = "midnight"
+		Conf.Appearance.Icon = "litheness"
+		Conf.Appearance.ThemeJS = false
+		Conf.Bazaar.PetalDisabled = true
+		Conf.Snippet.EnabledCSS = false
+		Conf.Snippet.EnabledJS = false
+		Conf.System.SafeMode = true
+		Conf.Save()
+		logging.LogInfof("booted in safe mode")
+	}
+
 	logging.SetLogLevel(Conf.LogLevel)
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())

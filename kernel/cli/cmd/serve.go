@@ -38,6 +38,7 @@ var (
 	serveMode            string
 	serveSSL             bool
 	serveAttachUI        bool
+	serveSafeMode        bool
 )
 
 var serveCmd = &cobra.Command{
@@ -52,7 +53,7 @@ var serveCmd = &cobra.Command{
 		// --workspace 优先取 serve 自己的（rootCmd 的 persistent flag），兜底环境变量与默认值交给 util.BootWithFlags 内部处理（与原 Boot() 行为一致）。
 		ws := workspacePath
 
-		util.BootWithFlags(ws, serveWdPath, servePort, serveReadOnly, serveAccessAuthCode, serveLang, serveMode, serveSSL, serveAttachUI)
+		util.BootWithFlags(ws, serveWdPath, servePort, serveReadOnly, serveAccessAuthCode, serveLang, serveMode, serveSSL, serveAttachUI, serveSafeMode)
 
 		model.InitJwtKey()
 		model.InitConf()
@@ -98,6 +99,7 @@ func init() {
 	serveCmd.Flags().StringVar(&serveMode, "mode", "prod", "dev/prod")
 	serveCmd.Flags().BoolVar(&serveSSL, "ssl", false, "for https and wss")
 	serveCmd.Flags().BoolVar(&serveAttachUI, "attach-ui", false, "attach kernel lifecycle to desktop UI process (used by Electron)")
+	serveCmd.Flags().BoolVar(&serveSafeMode, "safe-mode", false, "boot in safe mode")
 
 	rootCmd.AddCommand(serveCmd)
 }

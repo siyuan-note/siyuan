@@ -67,6 +67,8 @@ var (
 	bootDetails  string           // 启动细节描述
 	HttpServer   *http.Server     // HTTP 伺服器实例
 	HttpServing  = false          // 是否 HTTP 伺服已经可用
+
+	SafeMode = false // 是否以安全模式启动：禁用代码片段、插件、自定义主题与图标
 )
 
 // If a commandline parameter is empty, fallback to the env var.
@@ -124,13 +126,15 @@ func Boot() {
 	attachUI := flag.Bool("attach-ui", false, "attach kernel lifecycle to desktop UI process (used by Electron)")
 	lang := flag.String("lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/th/tr/uk/zh-CN/zh-TW")
 	mode := flag.String("mode", "prod", "dev/prod")
+	safeMode := flag.Bool("safe-mode", false, "boot in safe mode")
 	flag.Parse()
 
-	BootWithFlags(*workspacePath, *wdPath, *port, *readOnly, *accessAuthCode, *lang, *mode, *ssl, *attachUI)
+	BootWithFlags(*workspacePath, *wdPath, *port, *readOnly, *accessAuthCode, *lang, *mode, *ssl, *attachUI, *safeMode)
 }
 
 // BootWithFlags 接收已解析好的启动参数，完成环境变量回退、全局变量赋值、工作空间初始化与加锁等启动收尾工作。Boot()（标准库 flag 解析）和 serve 子命令（cobra 解析）都走这个统一入口。
-func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, mode string, ssl, attachUI bool) {
+func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, mode string, ssl, attachUI, safeMode bool) {
+	SafeMode = safeMode
 	// Fallback to env vars if commandline args are not set
 	// valid only for CLI args that default to "", as the
 	// others have explicit (sane) defaults

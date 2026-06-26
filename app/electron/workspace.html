@@ -6,7 +6,7 @@
     <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="window.css">
     <style>
-        /* missing-workspace.html 独有样式，公共样式在 window.css 中 */
+        /* workspace.html 独有样式，公共样式在 window.css 中 */
         .layout {
             display: flex;
             min-height: 100vh;
@@ -111,6 +111,49 @@
             word-break: break-all;
         }
 
+        /* 安全模式分支（渲染进程崩溃恢复）独有样式 */
+        .crash-tip {
+            font-size: 18px;
+            color: #222;
+            text-align: left;
+            padding: 0 24px;
+            line-height: 1.6;
+        }
+
+        .crash-log {
+            font-size: 12px;
+            color: rgba(0, 0, 0, .6);
+            background-color: rgba(0, 0, 0, .04);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 12px 0 0;
+            max-height: 160px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .crash-actions {
+            display: flex;
+            gap: 16px;
+            padding: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .crash-actions .b3-button {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .b3-button--safe {
+            color: #fff;
+            background-color: #3575f0;
+        }
+
+        .b3-button--safe:hover {
+            background-color: #2c66e0;
+        }
+
         @media (prefers-color-scheme: dark) {
             .wsPanel {
                 background-color: #2c2c2c;
@@ -156,6 +199,15 @@
             .missing-path {
                 color: #9aa0a6;
             }
+
+            .crash-tip {
+                color: #dadada;
+            }
+
+            .crash-log {
+                color: #9aa0a6;
+                background-color: rgba(255, 255, 255, .05);
+            }
         }
     </style>
 </head>
@@ -174,6 +226,14 @@
         <div class="missing-tip">
             <div data-i18n="missingTip"></div>
             <div class="missing-path"><code class="missing"></code></div>
+        </div>
+        <div class="crash-tip fn__none">
+            <div data-i18n="crashTip"></div>
+            <pre class="crash-log"></pre>
+            <div class="crash-actions">
+                <button class="b3-button b3-button--safe safeMode" data-i18n="safeModeBtn"></button>
+                <button class="b3-button normal" data-i18n="normalBtn"></button>
+            </div>
         </div>
         <div class="fn__flex-1"></div>
         <div class="notice fn__none emptyHint">
@@ -288,7 +348,36 @@
 
     initWindowChrome()
 
-    if (0 < wsList.length) {
+    // 渲染进程崩溃恢复：显示安全模式选择，隐藏工作空间选择相关 UI
+    const isCrash = "1" === getSearch("crash")
+    const crashWorkspace = decodeURIComponent(getSearch("workspace"))
+    if (isCrash) {
+        document.querySelector(".wsPanel").classList.add("fn__none")
+        document.querySelector(".missing-tip").classList.add("fn__none")
+        document.querySelectorAll(".b3-label").forEach(item => item.classList.add("fn__none"))
+        const crashLogEl = document.querySelector(".crash-log")
+        const crashInfo = decodeURIComponent(getSearch("crashInfo"))
+        if (crashInfo) {
+            crashLogEl.textContent = crashInfo
+        } else {
+            crashLogEl.classList.add("fn__none")
+        }
+        document.querySelector(".crash-tip").classList.remove("fn__none")
+        document.querySelector(".safeMode").addEventListener("click", () => {
+            ipcRenderer.send("siyuan-select-workspace", {
+                workspace: crashWorkspace,
+                lang: currentLang,
+                safeMode: true,
+            })
+        })
+        document.querySelector(".normal").addEventListener("click", () => {
+            ipcRenderer.send("siyuan-select-workspace", {
+                workspace: crashWorkspace,
+                lang: currentLang,
+                safeMode: false,
+            })
+        })
+    } else if (0 < wsList.length) {
         // 存在可用工作空间时渲染左列列表
         renderWsList()
     } else {

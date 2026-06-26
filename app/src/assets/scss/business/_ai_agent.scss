@@ -1052,36 +1052,21 @@
 
 .agent-composer__pm {
     outline: none;
-    caret-color: var(--b3-theme-on-background);
     font-size: 14px;
     line-height: 1.6;
     color: var(--b3-theme-on-background);
     min-height: 24px;
     max-height: 120px;
     overflow-y: auto;
-
-    &:focus {
-        outline: none;
-    }
-
-    // 清除可能的蓝色竖条来源：ProseMirror 选中态 outline、selection 残留、子元素 border/outline。
-    .ProseMirror-selectednode {
-        outline: none;
-    }
-
-    // 空段落的 <br> 不应有可见渲染（ProseMirror 用 br 占位空段落）。
-    p br {
-        user-select: none;
-    }
 }
 
 .agent-composer__pm p {
     margin: 0;
 }
 
-.agent-composer__pm.ProseMirror p.is-editor-empty:first-child::before {
+.agent-composer__pm p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
-    color: var(--b3-theme-on-surface-light) !important;
+    color: var(--b3-theme-on-surface-light);
     pointer-events: none;
     float: left;
     height: 0;

@@ -1621,19 +1621,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
-            const targetAssetElement = hasClosestBlock(event.target);
-            if (targetAssetElement) {
-                targetAssetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
-                targetAssetElement.removeAttribute("select-start");
-                targetAssetElement.removeAttribute("select-end");
-            } else {
-                // https://github.com/siyuan-note/siyuan/issues/14177
-                editorElement.querySelectorAll(".dragover__top, .protyle-wysiwyg--select, .dragover__bottom, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
-                    item.removeAttribute("select-start");
-                    item.removeAttribute("select-end");
-                });
-            }
+            // Alt=插入引用 / Shift=嵌入块：走光标定位语义，清除全部拖拽指示。
+            // 复用 cleanupDragIndicators 以覆盖列表专属指示类（--sibling/--child）与 --drag-* 变量，
+            // 否则按 Alt/Shift 时列表指示线会冻结在原处不动（仅清通用类不足以移除列表指示）。
+            // 注意：保留源块 .protyle-wysiwyg--select 不移除——该类仅在 dragstart 添加一次，
+            // 移除后永不恢复；松开修饰键回到普通拖拽时，no-op 守卫需靠它识别源块，
+            // 否则源项可被"移动"回自身原位。引用/嵌入语义不依赖该类（用 gutterTypes[2] 的 id）。
+            cleanupDragIndicators(editorElement);
+            editorElement.querySelectorAll("[select-start], [select-end]").forEach((item: HTMLElement) => {
+                item.removeAttribute("select-start");
+                item.removeAttribute("select-end");
+            });
             event.preventDefault();
             return;
         }

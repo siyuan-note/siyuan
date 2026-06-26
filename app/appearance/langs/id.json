@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ Mode aman diaktifkan (cuplikan kode, plugin, tema kustom, dan ikon kustom dinonaktifkan)",
   "gutterTipBacklink": "Klik <span class='ft__on-surface'>atau</span> ⌘/ <span class='ft__on-surface'>Buka Menu</span><br>Seret ${x} <span class='ft__on-surface'>Pindahkan posisi</span><br>⌘Klik⌥→ <span class='ft__on-surface'>Buka</span>",
   "testConnection": "Uji koneksi",
   "testConnectionTesting": "Menguji...",

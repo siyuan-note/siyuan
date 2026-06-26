@@ -679,35 +679,9 @@ export class AgentChat extends Model {
     }
 
     private async initSessions() {
-        const list = await SessionStore.init();
-        if (list.length > 0) {
-            list.sort((a, b) => b.createdAt - a.createdAt);
-            const last = list[0];
-            const session = await SessionStore.load(last.id);
-            if (session) {
-                this.sessionId = session.id;
-                this.sessionCreatedAt = session.createdAt || Date.now();
-                this.sessionTitle = session.title;
-                this.entries = this.buildEntriesFromSession(session);
-                this.hasTitled = session.titled !== false;
-                this.contextTokens = session.contextTokens ?? 0;
-                this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
-                this.contextCachedTokens = session.contextCachedTokens ?? 0;
-                this.contextLimit = session.contextLimit ?? 0;
-                if (session.model) {
-                    this.applySessionModelIfValid(session.model);
-                }
-                if (this.composer) {
-                    this.composer.restoreHistory(session.messageHistory || []);
-                }
-                this.titleElement.textContent = session.title;
-                this.updateTokenDisplay();
-                this.renderLoadedSession(session);
-                this.rebuildNavMarkers();
-                this.scrollToBottom(true);
-                return;
-            }
-        }
+        // 启动时始终进入新会话界面（欢迎页），不自动加载上次会话内容。
+        // 历史会话仍可通过会话面板点击切换查看。
+        await SessionStore.init();
         this.sessionId = SessionStore.newSessionId();
         this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;

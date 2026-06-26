@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ सुरक्षित मोड सक्षम है (कोड स्निपेट, प्लगइन्स, कस्टम थीम और कस्टम आइकन अक्षम हैं)",
   "gutterTipBacklink": "क्लिक <span class='ft__on-surface'>या</span> ⌘/ <span class='ft__on-surface'>मेनू खोलें</span><br>ड्रैग ${x} <span class='ft__on-surface'>स्थिति बदलें</span><br>⌘क्लिक⌥→ <span class='ft__on-surface'>खोलें</span>",
   "testConnection": "कनेक्शन परीक्षण",
   "testConnectionTesting": "परीक्षण कर रहा है...",

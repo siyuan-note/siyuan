@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ تم تفعيل الوضع الآمن (تم تعطيل مقتطفات التعليمات البرمجية والإضافات والسمة المخصصة والأيقونة المخصصة)",
   "gutterTipBacklink": "‫نقر <span class='ft__on-surface'>أو</span> ⌘/ <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫سحب ${x} <span class='ft__on-surface'>نقل الموضع</span>‬<br>‫⌘نقر⌥→ <span class='ft__on-surface'>فتح</span>‬",
   "testConnection": "اختبار الاتصال",
   "testConnectionTesting": "جارٍ الاختبار...",

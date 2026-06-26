@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ 安全模式已启用（已禁用代码片段、插件、自定义主题和自定义图标）",
   "gutterTipBacklink": "点击 <span class='ft__on-surface'>或</span> ⌘/ <span class='ft__on-surface'>打开菜单</span><br>拖拽 ${x} <span class='ft__on-surface'>移动位置</span><br>⌘点击⌥→ <span class='ft__on-surface'>打开</span>",
   "testConnection": "测试连接",
   "testConnectionTesting": "测试中...",

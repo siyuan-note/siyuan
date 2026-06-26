@@ -1212,6 +1212,28 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
                             }
                         }
+                    } else if (!isListItemSource && targetElement.getAttribute("data-type") === "NodeListItem") {
+                        // 非列表项源（如段落）拖到列表项：列表只能包含列表项，段落无法成为 .li 的同级，
+                        // 需降级为"作为某个列表项的内容插入"。两种命中：
+                        // 1) dragover__bottom--sibling：拖到含子列表的列表项下方 → 作为该列表项内容、插到子列表之前
+                        // 2) dragover__top--sibling：拖到子列表首项上方间隙（targetElement 是子列表首项）→
+                        //    实为"插到父列表项内容末尾（子列表之前）"，故锚点改为父列表项
+                        const isBottomSibling = targetClass.some((c: string) => c.indexOf("dragover__bottom--sibling") === 0);
+                        const parentLi = targetElement.parentElement?.parentElement;
+                        const isNestedTopSibling = targetClass.some((c: string) => c.indexOf("dragover__top--sibling") === 0) &&
+                            !!parentLi?.classList.contains("li");
+                        if (isBottomSibling || isNestedTopSibling) {
+                            const contentLi = isNestedTopSibling ? parentLi as HTMLElement : targetElement;
+                            const contentBlocks = Array.from(contentLi.children).filter(
+                                c => c.hasAttribute("data-node-id") && !c.classList.contains("list"));
+                            const anchorBlock = contentBlocks.length > 0 ? contentBlocks[contentBlocks.length - 1] : null;
+                            if (anchorBlock) {
+                                // 插到最后一个内容块之后：moveTo 会把段落放在子列表之前，形成列表项内容
+                                dragSame(protyle, sourceElements, anchorBlock, true, event.ctrlKey);
+                            } else {
+                                dragSame(protyle, sourceElements, contentLi, isBottom, event.ctrlKey);
+                            }
+                        }
                     } else if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
                         if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {

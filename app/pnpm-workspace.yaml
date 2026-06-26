@@ -5,4 +5,4 @@ allowBuilds:
   esbuild: true
 blockExoticSubdeps: false
 minimumReleaseAgeExclude:
-  - electron@41.9.0
+  - electron@42.5.0

@@ -1,4 +1,5 @@
 {
+  "gutterTipBacklink": "Klik <span class='ft__on-surface'>Buka Menu</span><br>Seret ${x} <span class='ft__on-surface'>Pindahkan posisi</span><br>⌘Klik⌥→ <span class='ft__on-surface'>Buka</span>",
   "testConnection": "Uji koneksi",
   "testConnectionTesting": "Menguji...",
   "testConnectionSuccess": "Koneksi berhasil",
@@ -1186,7 +1187,7 @@
   "collapse": "Ciutkan",
   "blockEmbed": "Sematkan Blok",
   "rowTip": "Klik <span class='ft__on-surface'>Buka Menu</span><br>Seret <span class='ft__on-surface'>Urutkan</span><br>⇧Klik <span class='ft__on-surface'>Perbarui atribut</span>",
-  "gutterTip": "Klik/⌘/ <span class='ft__on-surface'>Buka Menu</span><br>⌘Klik⌥→ <span class='ft__on-surface'>Fokus</span><br>⌥Klik⌘↑ <span class='ft__on-surface'>Ciutkan/Perluas</span><br>⇧Klik⌥⌘A <span class='ft__on-surface'>Perbarui atribut</span><br>Seret <span class='ft__on-surface'>Pindahkan posisi</span><br>⌃Seret <span class='ft__on-surface'>Ulangi</span><br>⌥Seret <span class='ft__on-surface'>Hasilkan referensi blok</span><br>⇧Seret <span class='ft__on-surface'>Hasilkan blok semat</span>",
+  "gutterTip": "Klik <span class='ft__on-surface'>Buka Menu</span><br>Seret ${x} <span class='ft__on-surface'>Pindahkan posisi</span>",
   "gutterTip2": "Klik <span class='ft__on-surface'>Buka Menu</span><br>⇧Klik <span class='ft__on-surface'>Perbarui atribut</span>",
   "linkDistance": "Jarak tautan",
   "collideStrength": "Kekuatan tabrakan",

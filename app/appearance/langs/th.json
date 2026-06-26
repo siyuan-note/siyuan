@@ -1,4 +1,5 @@
 {
+  "gutterTipBacklink": "คลิก <span class='ft__on-surface'>เปิดเมนู</span><br>ลาก ${x} <span class='ft__on-surface'>ย้ายตำแหน่ง</span><br>⌘คลิก⌥→ <span class='ft__on-surface'>เปิด</span>",
   "testConnection": "ทดสอบการเชื่อมต่อ",
   "testConnectionTesting": "กำลังทดสอบ...",
   "testConnectionSuccess": "เชื่อมต่อสำเร็จ",
@@ -1186,7 +1187,7 @@
   "collapse": "ยุบ",
   "blockEmbed": "บล็อกฝัง",
   "rowTip": "คลิก <span class='ft__on-surface'>เปิดเมนู</span><br>ลาก <span class='ft__on-surface'>เรียงลำดับ</span><br>⇧คลิก <span class='ft__on-surface'>แก้ไขแอตทริบิวต์</span>",
-  "gutterTip": "คลิก/⌘/ <span class='ft__on-surface'>เปิดเมนู</span><br>⌘คลิก⌥→ <span class='ft__on-surface'>โฟกัส</span><br>⌥คลิก⌘↑ <span class='ft__on-surface'>ยุบ/ขยาย</span><br>⇧คลิก⌥⌘A <span class='ft__on-surface'>แก้ไขแอตทริบิวต์</span><br>ลาก <span class='ft__on-surface'>ย้ายตำแหน่ง</span><br>⌃ลาก <span class='ft__on-surface'>ทำซ้ำ</span><br>⌥ลาก <span class='ft__on-surface'>สร้างการอ้างอิงบล็อก</span><br>⇧ลาก <span class='ft__on-surface'>สร้างบล็อกแบบฝัง</span>",
+  "gutterTip": "คลิก <span class='ft__on-surface'>เปิดเมนู</span><br>ลาก ${x} <span class='ft__on-surface'>ย้ายตำแหน่ง</span>",
   "gutterTip2": "คลิก <span class='ft__on-surface'>เปิดเมนู</span><br>⇧คลิก <span class='ft__on-surface'>อัปเดตแอตทริบิวต์</span>",
   "linkDistance": "ระยะลิงก์",
   "collideStrength": "แรงผลัก",

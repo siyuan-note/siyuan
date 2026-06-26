@@ -1,4 +1,5 @@
 {
+  "gutterTipBacklink": "क्लिक <span class='ft__on-surface'>मेनू खोलें</span><br>ड्रैग ${x} <span class='ft__on-surface'>स्थिति बदलें</span><br>⌘क्लिक⌥→ <span class='ft__on-surface'>खोलें</span>",
   "testConnection": "कनेक्शन परीक्षण",
   "testConnectionTesting": "परीक्षण कर रहा है...",
   "testConnectionSuccess": "कनेक्शन सफल",
@@ -1186,7 +1187,7 @@
   "collapse": "संकुचित करें",
   "blockEmbed": "एम्बेड ब्लॉक",
   "rowTip": "क्लिक करें <span class='ft__on-surface'>मेनू खोलें</span><br>ड्रैग करें <span class='ft__on-surface'>क्रमबद्ध करें</span><br>⇧क्लिक करें <span class='ft__on-surface'>विशेषता अपडेट करें</span>",
-  "gutterTip": "क्लिक/⌘/<span class='ft__on-surface'>मेनू खोलें</span><br>⌘क्लिक⌥→ <span class='ft__on-surface'>फ़ोकस</span><br>⌥क्लिक⌘↑ <span class='ft__on-surface'>संकुचित/विस्तारित करें</span><br>⇧क्लिक⌥⌘A <span class='ft__on-surface'>विशेषता अपडेट करें</span><br>ड्रैग <span class='ft__on-surface'>स्थिति बदलें</span><br>⌃ड्रैग <span class='ft__on-surface'>दोहराएं</span><br>⌥ड्रैग <span class='ft__on-surface'>ब्लॉक संदर्भ उत्पन्न करें</span><br>⇧ड्रैग <span class='ft__on-surface'>एम्बेडेड ब्लॉक उत्पन्न करें</span>",
+  "gutterTip": "क्लिक <span class='ft__on-surface'>मेनू खोलें</span><br>ड्रैग ${x} <span class='ft__on-surface'>स्थिति बदलें</span>",
   "gutterTip2": "क्लिक <span class='ft__on-surface'>मेनू खोलें</span><br>⇧क्लिक <span class='ft__on-surface'>विशेषता अपडेट करें</span>",
   "linkDistance": "लिंक दूरी",
   "collideStrength": "टकराव शक्ति",

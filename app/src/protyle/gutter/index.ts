@@ -69,23 +69,51 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 
+// 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
+const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
+    NodeParagraph: "paragraph",
+    NodeHeading: "headings",
+    NodeList: "list1",
+    NodeListItem: "listItem",
+    NodeBlockquote: "quote",
+    NodeCallout: "callout",
+    NodeSuperBlock: "superBlock",
+    NodeTable: "table",
+    NodeCodeBlock: "code",
+    NodeMathBlock: "math",
+    NodeBlockQueryEmbed: "blockEmbed",
+    NodeThematicBreak: "line",
+    NodeVideo: "video",
+    NodeAudio: "audio",
+    NodeWidget: "widget",
+    NodeAttributeView: "database",
+};
+
+// 根据块 data-type 返回本地化的类型名，用于块标拖拽提示「拖拽 ${x} 移动位置」
+const getBlockTypeName = (type: string) => {
+    const langKey = BLOCK_TYPE_LANG_KEYS[type];
+    if (langKey && (window.siyuan.languages as { [key: string]: string })[langKey]) {
+        return (window.siyuan.languages as { [key: string]: string })[langKey];
+    }
+    // 未知类型兜底，与拖拽 ghost 文案保持一致
+    return getLangByType(type);
+};
+
 export class Gutter {
     public element: HTMLElement;
+    // 普通块标提示模板（含 ${x} 块类型占位符），反链面板使用 gutterTipBacklink
     private gutterTip: string;
+    private gutterTipBacklink: string;
 
     constructor(protyle: IProtyle) {
         if (isMac()) {
-            this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyAfterTip(window.siyuan.config.keymap.general.enter.custom, "/"))
-                .replace("⌘↑", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom, "/"))
-                .replace("⌥⌘A", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.attr.custom, "/"));
+            this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyAfterTip(window.siyuan.config.keymap.general.enter.custom, "/"));
+            this.gutterTipBacklink = window.siyuan.languages.gutterTipBacklink.replace("⌥→", updateHotkeyAfterTip(window.siyuan.config.keymap.general.enter.custom, "/"));
         } else {
             this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyAfterTip(window.siyuan.config.keymap.general.enter.custom, "/"))
-                .replace("⌘↑", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom, "/"))
-                .replace("⌥⌘A", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.attr.custom, "/"))
                 .replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
-        }
-        if (protyle.options.backlinkData) {
-            this.gutterTip = this.gutterTip.replace(window.siyuan.languages.enter, window.siyuan.languages.openBy);
+            this.gutterTipBacklink = window.siyuan.languages.gutterTipBacklink.replace("⌥→", updateHotkeyAfterTip(window.siyuan.config.keymap.general.enter.custom, "/"))
+                .replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
         }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
@@ -2755,7 +2783,7 @@ export class Gutter {
         while (nodeElement) {
             let parentElement = hasClosestBlock(nodeElement.parentElement);
             if (!isInEmbedBlock(nodeElement)) {
-                let type;
+                let type: string;
                 if (!hideParent) {
                     type = nodeElement.getAttribute("data-type");
                 }
@@ -2830,9 +2858,12 @@ export class Gutter {
                     html = "";
                 }
                 index += 1;
-                let gutterTip = this.gutterTip;
+                // 按块类型与是否反链面板生成提示，${x} 替换为该块的本地化类型名（如「段落/表格/超级块」）
+                // 使用回调返回值，避免类型名中可能的 $ 字符被当作替换模式
+                let gutterTip = (protyle.options.backlinkData ? this.gutterTipBacklink : this.gutterTip)
+                    .replace("${x}", () => getBlockTypeName(type));
                 if (protyle.disabled) {
-                    gutterTip = this.gutterTip.split("<br>").splice(0, 2).join("<br>");
+                    gutterTip = gutterTip.split("<br>").splice(0, 2).join("<br>");
                 }
 
                 let popoverHTML = "";

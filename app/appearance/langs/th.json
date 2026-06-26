@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ เปิดใช้งานโหมดปลอดภัยแล้ว (ส่วนย่อยของโค้ด ปลั๊กอิน ธีมที่กำหนดเอง และไอคอนที่กำหนดเองถูกปิดใช้งาน)",
   "gutterTipBacklink": "คลิก <span class='ft__on-surface'>หรือ</span> ⌘/ <span class='ft__on-surface'>เปิดเมนู</span><br>ลาก ${x} <span class='ft__on-surface'>ย้ายตำแหน่ง</span><br>⌘คลิก⌥→ <span class='ft__on-surface'>เปิด</span>",
   "testConnection": "ทดสอบการเชื่อมต่อ",
   "testConnectionTesting": "กำลังทดสอบ...",

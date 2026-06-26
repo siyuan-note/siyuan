@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ Der abgesicherte Modus ist aktiviert (Code-Snippets, Plug-ins, benutzerdefiniertes Design und Icon sind deaktiviert)",
   "gutterTipBacklink": "Klicken <span class='ft__on-surface'>oder</span> ⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>Ziehen ${x} <span class='ft__on-surface'>Position verschieben</span><br>⌘Klick⌥→ <span class='ft__on-surface'>Öffnen</span>",
   "testConnection": "Verbindung testen",
   "testConnectionTesting": "Wird getestet …",

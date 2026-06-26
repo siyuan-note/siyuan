@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ セーフモードが有効になっています（コードスニペット、プラグイン、カスタムテーマ、カスタムアイコンは無効です）",
   "gutterTipBacklink": "クリック <span class='ft__on-surface'>または</span> ⌘/ <span class='ft__on-surface'>ブロックメニューを開く</span><br>ドラッグ ${x} <span class='ft__on-surface'>ブロックを移動</span><br>⌘クリック⌥→ <span class='ft__on-surface'>開く</span>",
   "testConnection": "接続テスト",
   "testConnectionTesting": "テスト中...",

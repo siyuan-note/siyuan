@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ Включён безопасный режим (фрагменты кода, плагины, пользовательская тема и пользовательский значок отключены)",
   "gutterTipBacklink": "Нажмите <span class='ft__on-surface'>или</span> ⌘/ <span class='ft__on-surface'>Открыть меню</span><br>Перетащите ${x} <span class='ft__on-surface'>Переместить позицию</span><br>⌘Клик⌥→ <span class='ft__on-surface'>Открыть</span>",
   "testConnection": "Проверить подключение",
   "testConnectionTesting": "Проверка...",

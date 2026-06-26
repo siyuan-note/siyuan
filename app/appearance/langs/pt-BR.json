@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ O modo de segurança está ativado (trechos de código, plug-ins, tema personalizado e ícone personalizado estão desativados)",
   "gutterTipBacklink": "Clique <span class='ft__on-surface'>ou</span> ⌘/ <span class='ft__on-surface'>Abrir Menu</span><br>Arraste ${x} <span class='ft__on-surface'>Mover posição</span><br>⌘Clique⌥→ <span class='ft__on-surface'>Abrir</span>",
   "testConnection": "Testar conexão",
   "testConnectionTesting": "Testando...",

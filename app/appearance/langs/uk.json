@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ Увімкнено безпечний режим (фрагменти коду, плагіни, власна тема та власна піктограма вимкнені)",
   "gutterTipBacklink": "Клік <span class='ft__on-surface'>або</span> ⌘/ <span class='ft__on-surface'>Відкрити меню</span><br>Перетягування ${x} <span class='ft__on-surface'>Перемістити</span><br>⌘Клік⌥→ <span class='ft__on-surface'>Відкрити</span>",
   "testConnection": "Перевірити з'єднання",
   "testConnectionTesting": "Перевірка...",

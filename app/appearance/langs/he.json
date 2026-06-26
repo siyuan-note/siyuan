@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ המצב הבטוח מופעל (קטעי קוד, תוספים, ערכת נושא מותאמת אישית וסמל מותאם אישית מבוטלים)",
   "gutterTipBacklink": "לחץ <span class='ft__on-surface'>או</span> ⌘/ <span class='ft__on-surface'>פתח תפריט<span><br>גרור ${x} <span class='ft__on-surface'>שנה מקום<span><br>⌘לחץ⌥→ <span class='ft__on-surface'>פתח</span>",
   "testConnection": "בדיקת חיבור",
   "testConnectionTesting": "בודק...",

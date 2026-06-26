@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ Safe mode is enabled (code snippets, plugins, custom theme and custom icon are disabled)",
   "gutterTipBacklink": "Click <span class='ft__on-surface'>or</span> ⌘/ <span class='ft__on-surface'>Open Menu</span><br>Drag ${x} <span class='ft__on-surface'>Move position</span><br>⌘Click⌥→ <span class='ft__on-surface'>Open</span>",
   "testConnection": "Test connection",
   "testConnectionTesting": "Testing...",

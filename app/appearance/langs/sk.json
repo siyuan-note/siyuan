@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ Núdzový režim je aktivovaný (úryvky kódu, doplnky, vlastný motív a vlastná ikona sú zakázané)",
   "gutterTipBacklink": "Kliknúť <span class='ft__on-surface'>alebo</span> ⌘/ <span class='ft__on-surface'>Otvoriť menu</span><br>Potiahnuť ${x} <span class='ft__on-surface'>Presunúť pozíciu</span><br>⌘Kliknúť⌥→ <span class='ft__on-surface'>Otvoriť</span>",
   "testConnection": "Otestovať pripojenie",
   "testConnectionTesting": "Testuje sa...",

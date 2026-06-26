@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ 안전 모드가 활성화되었습니다 (코드 스니펫, 플러그인, 사용자 지정 테마 및 사용자 지정 아이콘이 비활성화됨)",
   "gutterTipBacklink": "클릭 <span class='ft__on-surface'>또는</span> ⌘/ <span class='ft__on-surface'>메뉴 열기</span><br>드래그 ${x} <span class='ft__on-surface'>위치 이동</span><br>⌘클릭⌥→ <span class='ft__on-surface'>열기</span>",
   "testConnection": "연결 테스트",
   "testConnectionTesting": "테스트 중...",

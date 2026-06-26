@@ -1,4 +1,5 @@
 {
+  "safeModeTip": "🛡️ Le mode sans échec est activé (les extraits de code, les plugins, le thème personnalisé et l'icône personnalisée sont désactivés)",
   "gutterTipBacklink": "Cliquez <span class='ft__on-surface'>ou</span> ⌘/ <span class='ft__on-surface'>Ouvrir le menu</span><br>Faites glisser ${x} <span class='ft__on-surface'>Déplacer la position</span><br>⌘Cliquez⌥→ <span class='ft__on-surface'>Ouvrir</span>",
   "testConnection": "Tester la connexion",
   "testConnectionTesting": "Test en cours...",

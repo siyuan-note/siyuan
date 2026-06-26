@@ -2870,7 +2870,7 @@ export class Gutter {
                 if (protyle.options.backlinkData) {
                     popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
                 }
-                const buttonHTML = type ? `<button class="ariaLabel" data-position="parentW" aria-label="${gutterTip}" 
+                const buttonHTML = type ? `<button class="ariaLabel" data-delay="500" data-position="parentW" aria-label="${gutterTip}"
 data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${popoverHTML} ${protyle.disabled ? "" : 'draggable="true"'}></span>
@@ -2881,7 +2881,7 @@ data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" d
                 let foldHTML = "";
                 if (type === "NodeListItem" && nodeElement.childElementCount > 3 || type === "NodeHeading") {
                     const fold = nodeElement.getAttribute("fold");
-                    foldHTML = `<button class="ariaLabel" data-position="parentW" aria-label="${window.siyuan.languages.fold}" 
+                    foldHTML = `<button class="ariaLabel" data-delay="500" data-position="parentW" aria-label="${window.siyuan.languages.fold}"
 data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold === "1" ? "" : "transform:rotate(90deg)"}"><use xlink:href="#iconPlay"></use></svg></button>`;
                 }
                 if (type === "NodeListItem" || type === "NodeList") {

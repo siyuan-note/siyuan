@@ -155,6 +155,10 @@ jobs:
         run: pnpm install --no-frozen-lockfile
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
+      - name: Install Electron Binary
+        run: pnpm run install:electron
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
       - name: Building UI
         run: pnpm run build
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app

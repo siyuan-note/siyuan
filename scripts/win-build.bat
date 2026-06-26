@@ -75,6 +75,10 @@ call pnpm install
 if errorlevel 1 (
     exit /b %errorlevel%
 )
+call pnpm run install:electron
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
 call pnpm run build
 if errorlevel 1 (
     exit /b %errorlevel%

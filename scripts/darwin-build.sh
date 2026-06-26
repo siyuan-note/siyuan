@@ -55,6 +55,7 @@ echo
 echo 'Building UI'
 cd "$PROJECT_ROOT/app"
 pnpm install
+pnpm run install:electron
 pnpm run build
 
 echo

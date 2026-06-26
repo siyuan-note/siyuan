@@ -15,10 +15,10 @@
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@41.9.0 -D`
+* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@42.5.0 -D`
 * Windows：
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@41.9.0 -D`
+  * `pnpm install electron@42.5.0 -D`
 
 NPM 镜像：
 
@@ -28,9 +28,12 @@ NPM 镜像：
 
 进入 app 文件夹执行：
 
-* `pnpm install electron@41.9.0 -D`
+* `pnpm install electron@42.5.0 -D`
+* `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`
+
+注意：Electron 42 起在 `pnpm install` 时不再自动下载二进制。需先执行 `pnpm run install:electron`（中国大陆请先设置 `ELECTRON_MIRROR`）拉取二进制，再 `pnpm run start`。
 
 注意：在开发环境下不会自动拉起内核进程，需要先手动拉起内核进程。
 

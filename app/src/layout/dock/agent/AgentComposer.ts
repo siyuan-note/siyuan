@@ -55,7 +55,6 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
     let slashActive = false;
     let slashRange: {from: number; to: number} | null = null;
-    let cachedSkills: BlockHit[] | null = null;
 
     const updateHighlight = () => {
         if (!suggestionMenu) { return; }
@@ -350,32 +349,28 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                     slashRange = null;
                 };
                 openMenu(filtered, suggestionCommand!, slashClientRect);
-                cachedSkills = skills;
             };
 
-            if (cachedSkills) {
-                filterAndOpen(cachedSkills);
-            } else {
-                fetch("/api/ai/agent/lsSkills", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                }).then(function (r) { return r.json(); }).then(function (data) {
-                    const rawSkills = (data && data.data) ? data.data : [];
-                    const items: BlockHit[] = rawSkills.map(function (s: Record<string, string>) {
-                        return {
-                            id: s.name,
-                            label: s.name,
-                            icon: "",
-                            hPath: s.description || "",
-                        };
-                    });
-                    filterAndOpen(items);
-                }).catch(function () {
-                    closeMenu();
-                    slashActive = false;
-                    slashRange = null;
+            // 每次打开 / 菜单都重新拉取 skill 列表，确保 install/remove/save/rename 后立即反映变化。
+            fetch("/api/ai/agent/lsSkills", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                const rawSkills = (data && data.data) ? data.data : [];
+                const items: BlockHit[] = rawSkills.map(function (s: Record<string, string>) {
+                    return {
+                        id: s.name,
+                        label: s.name,
+                        icon: "",
+                        hPath: s.description || "",
+                    };
                 });
-            }
+                filterAndOpen(items);
+            }).catch(function () {
+                closeMenu();
+                slashActive = false;
+                slashRange = null;
+            });
         } else if (slashActive) {
             closeMenu();
             slashActive = false;

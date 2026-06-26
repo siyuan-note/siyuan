@@ -114,10 +114,7 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
                 iconHTML: "",
                 type: "empty",
                 label: `<div class="fn__flex-column b3-menu__filter">
-    <div class="b3-form__icon">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input class="b3-text-field fn__block b3-form__icon-input" placeholder="${window.siyuan.languages.search}">
-    </div>
+    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.search}">
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">${defaultItemHtml}${fontItemHtml}</div>
 </div>`,

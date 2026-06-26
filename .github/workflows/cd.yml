@@ -16,7 +16,6 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     outputs:
-      release_version: ${{ steps.release_info.outputs.release_version }}
       release_title: ${{ steps.release_info.outputs.release_title }}
       version: ${{ steps.version.outputs.value }}
       packageManager: ${{ steps.packageManager.outputs.value }}
@@ -56,7 +55,6 @@ jobs:
       - name: Gather Release Information
         id: release_info
         run: |
-          echo "release_version=${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
           echo "release_title=SiYuan v${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
           changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ github.repository }})
           changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ github.repository }})
@@ -364,14 +362,14 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleOfficialRelease
           cd app/build/outputs/apk/official/release
-          mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.release_version }}.apk
+          mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.version }}.apk
         working-directory: ${{ github.workspace }}/siyuan-android
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: siyuan-android
-          path: ${{ github.workspace }}/siyuan-android/app/build/outputs/apk/official/release/siyuan-${{ needs.prepare.outputs.release_version }}.apk
+          path: ${{ github.workspace }}/siyuan-android/app/build/outputs/apk/official/release/siyuan-${{ needs.prepare.outputs.version }}.apk
 
   create_release:
     name: Create Release
@@ -397,13 +395,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           VERSION=${{ needs.prepare.outputs.version }}
-          REL_VER=${{ needs.prepare.outputs.release_version }}
           gh release upload ${{ github.ref_name }} \
-            "siyuan-linux/siyuan-${VERSION}-linux.AppImage#siyuan-${REL_VER}-linux.AppImage" \
-            "siyuan-linux/siyuan-${VERSION}-linux.tar.gz#siyuan-${REL_VER}-linux.tar.gz" \
-            "siyuan-linux/siyuan-${VERSION}-linux.deb#siyuan-${REL_VER}-linux.deb" \
-            "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${REL_VER}-linux.rpm" \
-            "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${REL_VER}-mac.dmg" \
-            "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${REL_VER}-mac-arm64.dmg" \
-            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${REL_VER}-win.exe" \
-            "siyuan-android/siyuan-${REL_VER}.apk#siyuan-${REL_VER}.apk"
+            "siyuan-linux/siyuan-${VERSION}-linux.AppImage#siyuan-${VERSION}-linux.AppImage" \
+            "siyuan-linux/siyuan-${VERSION}-linux.tar.gz#siyuan-${VERSION}-linux.tar.gz" \
+            "siyuan-linux/siyuan-${VERSION}-linux.deb#siyuan-${VERSION}-linux.deb" \
+            "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${VERSION}-linux.rpm" \
+            "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${VERSION}-mac.dmg" \
+            "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${VERSION}-mac-arm64.dmg" \
+            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${VERSION}-win.exe" \
+            "siyuan-android/siyuan-${VERSION}.apk#siyuan-${VERSION}.apk"

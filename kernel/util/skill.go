@@ -335,9 +335,10 @@ func normalizeGitHubURL(u *url.URL) (normalizedSkillSource, error) {
 	ownerRepo := parts[0] + "/" + parts[1]
 
 	// releases/download/<tag>/<asset>
-	if len(parts) >= 5 && parts[2] == "releases" && parts[3] == "download" {
-		// release 资源通常是 zip；是否 zip 交由 Content-Type 最终判定，这里先标 isZip
-		return normalizedSkillSource{downloadURL: u.String(), isZip: strings.HasSuffix(parts[4], ".zip")}, nil
+	if len(parts) >= 6 && parts[2] == "releases" && parts[3] == "download" {
+		asset := parts[5]
+		// 是否 zip 交由 Content-Type 最终判定，这里仅按 asset 后缀预判
+		return normalizedSkillSource{downloadURL: u.String(), isZip: strings.HasSuffix(asset, ".zip")}, nil
 	}
 
 	// tree/<branch>[/path] 或 blob/<branch>/...
@@ -446,53 +447,47 @@ func installFromZip(data []byte) (*InstallSkillResult, error) {
 	return installSkillDirs(skillDirs, unzipDir)
 }
 
-// findSkillDirs 在解压根下查找含 SKILL.md 的目录，返回相对 root 的路径
-// 识别三种结构：根 SKILL.md / skills/<name>/SKILL.md / <name>/SKILL.md（单层包裹）
+// findSkillDirs 在解压根下查找含 SKILL.md 的 skill 目录，返回相对 root 的路径。
+// 递归下钻以兼容任意包裹层（codeload 会把仓库内容包在 <repo-name>/ 下），
+// 但一旦某个目录被认定为 skill（直接含 SKILL.md）就停止下钻，避免误入 skill 内部的
+// references/scripts 等子目录。识别的结构：
+//   - SKILL.md 直接在 root（无包裹）
+//   - <wrap>/SKILL.md（单层或多层包裹的单 skill）
+//   - <wrap>/skills/<name>/SKILL.md（集合仓库，wrap 可有可无）
 func findSkillDirs(root string) []string {
-	// 1. 根目录直接有 SKILL.md
 	if gulu.File.IsExist(filepath.Join(root, "SKILL.md")) {
 		return []string{"."}
 	}
+	return findSkillDirsRecursive(root, root)
+}
 
-	entries, err := os.ReadDir(root)
+func findSkillDirsRecursive(dir, root string) []string {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil
 	}
-
-	// 2. skills/<name>/SKILL.md —— 集合仓库
-	var collection []string
+	var result []string
 	for _, e := range entries {
 		if !e.IsDir() {
 			continue
 		}
-		if e.Name() == "skills" {
-			skillsDir := filepath.Join(root, "skills")
-			subs, serr := os.ReadDir(skillsDir)
-			if serr != nil {
-				continue
-			}
-			for _, s := range subs {
-				if s.IsDir() && gulu.File.IsExist(filepath.Join(skillsDir, s.Name(), "SKILL.md")) {
-					collection = append(collection, filepath.Join("skills", s.Name()))
-				}
-			}
-			if len(collection) > 0 {
-				return collection
-			}
-		}
-	}
-
-	// 3. <name>/SKILL.md —— 单层包裹（codeload zip 默认包一层 repo-name/）
-	var wrapped []string
-	for _, e := range entries {
-		if !e.IsDir() {
+		// 跳过点目录与 VCS 元数据，避免无意义下钻
+		name := e.Name()
+		if name == ".git" || name == ".github" || name == ".idea" || name == "node_modules" {
 			continue
 		}
-		if gulu.File.IsExist(filepath.Join(root, e.Name(), "SKILL.md")) {
-			wrapped = append(wrapped, e.Name())
+		sub := filepath.Join(dir, name)
+		if gulu.File.IsExist(filepath.Join(sub, "SKILL.md")) {
+			// 该目录是一个 skill，记录相对路径并停止下钻
+			if rel, rerr := filepath.Rel(root, sub); rerr == nil {
+				result = append(result, rel)
+			}
+		} else {
+			// 继续下钻处理包裹层 / skills/ 容器
+			result = append(result, findSkillDirsRecursive(sub, root)...)
 		}
 	}
-	return wrapped
+	return result
 }
 
 // installSkillDirs 把若干相对 root 的 skill 目录落地到 SkillsDir()
@@ -509,13 +504,16 @@ func installSkillDirs(relDirs []string, root string) (*InstallSkillResult, error
 			logging.LogWarnf("read SKILL.md [%s] failed: %s", skillMdPath, err)
 			continue
 		}
-		fm, _ := parseSkillFrontmatter(string(b))
+		fm, body := parseSkillFrontmatter(string(b))
 		name := fm["name"]
 		if name == "" {
-			name = filepath.Base(rel)
-			if name == "." {
-				name = filepath.Base(root)
+			// frontmatter 缺 name 字段：根目录场景无法用目录名兜底（root 是临时目录），
+			// 直接跳过；子目录场景用目录名兜底
+			if rel == "." {
+				logging.LogWarnf("skip SKILL.md at archive root without 'name' frontmatter")
+				continue
 			}
+			name = filepath.Base(rel)
 		}
 		if verr := validateSkillName(name); verr != nil {
 			logging.LogWarnf("skip invalid skill name [%s]: %s", name, verr)
@@ -536,7 +534,7 @@ func installSkillDirs(relDirs []string, root string) (*InstallSkillResult, error
 		result.Names = append(result.Names, name)
 		desc := fm["description"]
 		if desc == "" {
-			desc = firstLine(strings.TrimSpace(strings.TrimPrefix(string(b), frontmatterBlock(string(b)))))
+			desc = firstLine(body)
 		}
 		result.Descriptions = append(result.Descriptions, desc)
 	}
@@ -564,17 +562,4 @@ func installFromSingleSkillMD(data []byte) (*InstallSkillResult, error) {
 		Names:        []string{name},
 		Descriptions: []string{firstLine(body)},
 	}, nil
-}
-
-// frontmatterBlock 返回文本开头的 frontmatter 块（含分隔符），无则返回空
-func frontmatterBlock(text string) string {
-	t := strings.TrimSpace(text)
-	if !strings.HasPrefix(t, "---") {
-		return ""
-	}
-	end := strings.Index(t[3:], "\n---")
-	if end < 0 {
-		return ""
-	}
-	return t[:3+end+4]
 }

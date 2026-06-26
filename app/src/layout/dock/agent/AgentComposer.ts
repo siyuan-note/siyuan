@@ -25,6 +25,8 @@ interface ComposerHandle {
     getHistory: () => string[];
     clearHistory: () => void;
     restoreHistory: (h: string[]) => void;
+    insertMention: (id: string, label: string) => void;
+    insertMentions: (mentions: Array<{id: string; label: string}>) => void;
 }
 
 // 内容变化回调（含用户输入、IME、程序化 clearContent 等所有 doc 变更）。
@@ -404,5 +406,22 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         getHistory: function () { return history.slice(); },
         clearHistory: function () { history.length = 0; historyIdx = -1; },
         restoreHistory: function (h: string[]) { history.length = 0; history.push(...h); historyIdx = -1; },
+        insertMention: function (id: string, label: string) {
+            editor.chain().focus().insertContent([
+                {type: "mention", attrs: {id, label}},
+                {type: "text", text: " "},
+            ]).run();
+        },
+        insertMentions: function (mentions: Array<{id: string; label: string}>) {
+            // 批量插入多个 mention chip，一次性 insertContent 避免多次 focus/选择重置。
+            const nodes: Array<Record<string, unknown>> = [];
+            for (const m of mentions) {
+                nodes.push({type: "mention", attrs: {id: m.id, label: m.label}});
+                nodes.push({type: "text", text: " "});
+            }
+            if (nodes.length) {
+                editor.chain().focus().insertContent(nodes).run();
+            }
+        },
     };
 }

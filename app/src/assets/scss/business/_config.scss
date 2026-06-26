@@ -307,6 +307,8 @@
     &__panel {
       height: 100%;
       overflow: auto;
+      padding-bottom: 16px;
+      box-sizing: border-box;
     }
 
     &__title {

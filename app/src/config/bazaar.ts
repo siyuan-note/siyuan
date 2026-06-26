@@ -734,7 +734,7 @@ type="checkbox">
                             widgets: "/api/bazaar/installBazaarWidget",
                         };
                         fetchPost(installAPI[pkgType], {
-                            keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-form__icon-input`) as HTMLInputElement).value,
+                            keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,
                             repoURL: pkgItem.repoURL,
                             packageName: pkgItem.name,
                             repoHash: pkgItem.repoHash,
@@ -799,7 +799,7 @@ type="checkbox">
                                 target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 16px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
                             }
                             fetchPost(installAPI[pkgType], {
-                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-form__icon-input`) as HTMLInputElement).value,
+                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,
                                 repoURL: pkgItem.repoURL,
                                 packageName: pkgItem.name,
                                 repoHash: pkgItem.repoHash,
@@ -833,7 +833,7 @@ type="checkbox">
                         confirmDialog("⚠️ " + window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
                             fetchPost(uninstallAPI[pkgType], {
                                 packageName,
-                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-form__icon-input`) as HTMLInputElement).value,
+                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,
                                 frontend: getFrontend()
                             }, response => {
                                 this._genMyHTML(pkgType, app);
@@ -1011,7 +1011,7 @@ type="checkbox">
             }
         });
 
-        bazaar.element.querySelectorAll(".config-bazaar__panel .b3-form__icon > .b3-text-field").forEach((inputElement: HTMLInputElement) => {
+        bazaar.element.querySelectorAll(".config-bazaar__panel .b3-text-field").forEach((inputElement: HTMLInputElement) => {
             inputElement.addEventListener("keydown", (event) => {
                 if (event.isComposing) {
                     return;
@@ -1048,7 +1048,7 @@ type="checkbox">
                             bazaar._data.plugins = response.data.packages;
                         });
                     } else if (type === "downloaded") {
-                        this._genMyHTML(bazaar._myType2Type(inputElement.parentElement.parentElement.querySelector(".b3-button:not(.b3-button--outline)").getAttribute("data-type")), app);
+                        this._genMyHTML(bazaar._myType2Type(inputElement.parentElement.querySelector(".b3-button:not(.b3-button--outline)").getAttribute("data-type")), app);
                     }
                     event.preventDefault();
                     return;

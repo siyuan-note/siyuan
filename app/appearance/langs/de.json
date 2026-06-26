@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Klicken/⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>Ziehen ${x} <span class='ft__on-surface'>Position verschieben</span><br>⌘Klick⌥→ <span class='ft__on-surface'>Öffnen</span>",
+  "gutterTipBacklink": "Klicken <span class='ft__on-surface'>oder</span> ⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>Ziehen ${x} <span class='ft__on-surface'>Position verschieben</span><br>⌘Klick⌥→ <span class='ft__on-surface'>Öffnen</span>",
   "testConnection": "Verbindung testen",
   "testConnectionTesting": "Wird getestet …",
   "testConnectionSuccess": "Verbindung erfolgreich",
@@ -1191,7 +1191,7 @@
   "collapse": "Einklappen",
   "blockEmbed": "Block einbetten",
   "rowTip": "Klicken Sie <span class='ft__on-surface'>Menü öffnen</span><br> Ziehen <span class='ft__on-surface'>Sortieren</span><br>⇧Klicken <span class='ft__on-surface'>Attribut aktualisieren</span>",
-  "gutterTip": "Klicken/⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>Ziehen ${x} <span class='ft__on-surface'>Position verschieben</span>",
+  "gutterTip": "Klicken <span class='ft__on-surface'>oder</span> ⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>Ziehen ${x} <span class='ft__on-surface'>Position verschieben</span>",
   "gutterTip2": "Klicken <span class='ft__on-surface'>Menü öffnen</span><br>⇧Klicken <span class='ft__on-surface'>Attribut aktualisieren</span>",
   "linkDistance": "Link-Distanz",
   "collideStrength": "Kollisionsstärke",

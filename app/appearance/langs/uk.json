@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Клік/⌘/ <span class='ft__on-surface'>Відкрити меню</span><br>Перетягування ${x} <span class='ft__on-surface'>Перемістити</span><br>⌘Клік⌥→ <span class='ft__on-surface'>Відкрити</span>",
+  "gutterTipBacklink": "Клік <span class='ft__on-surface'>або</span> ⌘/ <span class='ft__on-surface'>Відкрити меню</span><br>Перетягування ${x} <span class='ft__on-surface'>Перемістити</span><br>⌘Клік⌥→ <span class='ft__on-surface'>Відкрити</span>",
   "testConnection": "Перевірити з'єднання",
   "testConnectionTesting": "Перевірка...",
   "testConnectionSuccess": "З'єднання успішне",
@@ -1191,7 +1191,7 @@
   "collapse": "Згорнути",
   "blockEmbed": "Вбудований блок",
   "rowTip": "Клік <span class='ft__on-surface'>Відкрити меню</span><br>Перетягування <span class='ft__on-surface'>Сортування</span><br>⇧Клік <span class='ft__on-surface'>Оновити атрибут</span>",
-  "gutterTip": "Клік/⌘/ <span class='ft__on-surface'>Відкрити меню</span><br>Перетягування ${x} <span class='ft__on-surface'>Перемістити</span>",
+  "gutterTip": "Клік <span class='ft__on-surface'>або</span> ⌘/ <span class='ft__on-surface'>Відкрити меню</span><br>Перетягування ${x} <span class='ft__on-surface'>Перемістити</span>",
   "gutterTip2": "Клік <span class='ft__on-surface'>Відкрити меню</span><br>⇧Клік <span class='ft__on-surface'>Оновити атрибут</span>",
   "linkDistance": "Відстань між зв’язками",
   "collideStrength": "Сила зіткнення",

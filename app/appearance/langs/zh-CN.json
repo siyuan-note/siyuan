@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "点击/⌘/ <span class='ft__on-surface'>打开菜单</span><br>拖拽 ${x} <span class='ft__on-surface'>移动位置</span><br>⌘点击⌥→ <span class='ft__on-surface'>打开</span>",
+  "gutterTipBacklink": "点击 <span class='ft__on-surface'>或</span> ⌘/ <span class='ft__on-surface'>打开菜单</span><br>拖拽 ${x} <span class='ft__on-surface'>移动位置</span><br>⌘点击⌥→ <span class='ft__on-surface'>打开</span>",
   "testConnection": "测试连接",
   "testConnectionTesting": "测试中...",
   "testConnectionSuccess": "连接成功",
@@ -1191,7 +1191,7 @@
   "collapse": "折叠",
   "blockEmbed": "嵌入块",
   "rowTip": "点击 <span class='ft__on-surface'>打开菜单</span><br>拖拽 <span class='ft__on-surface'>排序</span><br>⇧点击 <span class='ft__on-surface'>修改属性</span>",
-  "gutterTip": "点击/⌘/ <span class='ft__on-surface'>打开菜单</span><br>拖拽 ${x} <span class='ft__on-surface'>移动位置</span>",
+  "gutterTip": "点击 <span class='ft__on-surface'>或</span> ⌘/ <span class='ft__on-surface'>打开菜单</span><br>拖拽 ${x} <span class='ft__on-surface'>移动位置</span>",
   "gutterTip2": "点击 <span class='ft__on-surface'>打开菜单</span><br>⇧点击 <span class='ft__on-surface'>修改属性</span>",
   "linkDistance": "链接距离",
   "collideStrength": "斥力强度",

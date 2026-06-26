@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "‫نقر/⌘/ <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫سحب ${x} <span class='ft__on-surface'>نقل الموضع</span>‬<br>‫⌘نقر⌥→ <span class='ft__on-surface'>فتح</span>‬",
+  "gutterTipBacklink": "‫نقر <span class='ft__on-surface'>أو</span> ⌘/ <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫سحب ${x} <span class='ft__on-surface'>نقل الموضع</span>‬<br>‫⌘نقر⌥→ <span class='ft__on-surface'>فتح</span>‬",
   "testConnection": "اختبار الاتصال",
   "testConnectionTesting": "جارٍ الاختبار...",
   "testConnectionSuccess": "تم الاتصال بنجاح",
@@ -1191,7 +1191,7 @@
   "collapse": "طي",
   "blockEmbed": "كتل التضمين",
   "rowTip": "‫نقر <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫سحب <span class='ft__on-surface'>فرز</span>‬<br>‫⇧نقر <span class='ft__on-surface'>تحديث السمة</span>‬",
-  "gutterTip": "‫نقر/⌘/ <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫سحب ${x} <span class='ft__on-surface'>نقل الموضع</span>‬",
+  "gutterTip": "‫نقر <span class='ft__on-surface'>أو</span> ⌘/ <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫سحب ${x} <span class='ft__on-surface'>نقل الموضع</span>‬",
   "gutterTip2": "‫نقر <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫⇧نقرة <span class='ft__on-surface'>تحديث السمة</span>‬",
   "linkDistance": "مسافة الرابط",
   "collideStrength": "قوة التنافر",

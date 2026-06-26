@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "לחץ/⌘/ <span class='ft__on-surface'>פתח תפריט<span><br>גרור ${x} <span class='ft__on-surface'>שנה מקום<span><br>⌘לחץ⌥→ <span class='ft__on-surface'>פתח</span>",
+  "gutterTipBacklink": "לחץ <span class='ft__on-surface'>או</span> ⌘/ <span class='ft__on-surface'>פתח תפריט<span><br>גרור ${x} <span class='ft__on-surface'>שנה מקום<span><br>⌘לחץ⌥→ <span class='ft__on-surface'>פתח</span>",
   "testConnection": "בדיקת חיבור",
   "testConnectionTesting": "בודק...",
   "testConnectionSuccess": "החיבור הצליח",
@@ -1191,7 +1191,7 @@
   "collapse": "התרסק",
   "blockEmbed": "הטבעה בלוק",
   "rowTip": "לחץ על <span class='ft__on-surface'>פתח תפריט</span><br>גרור את <span class='ft__on-surface'>מיין</span><br>⇧לחץ על <span class='ft__on-surface'>עדכן מאפיין</span>",
-  "gutterTip": "לחץ/⌘/ <span class='ft__on-surface'>פתח תפריט<span><br>גרור ${x} <span class='ft__on-surface'>שנה מקום<span>",
+  "gutterTip": "לחץ <span class='ft__on-surface'>או</span> ⌘/ <span class='ft__on-surface'>פתח תפריט<span><br>גרור ${x} <span class='ft__on-surface'>שנה מקום<span>",
   "gutterTip2": "לחץ <span class='ft__on-surface'>פתח תפריט</span><br>⇧לחץ <span class='ft__on-surface'>עדכן מאפיין</span>",
   "linkDistance": "מרחק קישור",
   "collideStrength": "עוצמת התנגדות",

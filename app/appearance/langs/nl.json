@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Klik/⌘/ <span class='ft__on-surface'>Menu openen</span><br>Sleep ${x} <span class='ft__on-surface'>Verplaatsen</span><br>⌘Klik⌥→ <span class='ft__on-surface'>Openen</span>",
+  "gutterTipBacklink": "Klik <span class='ft__on-surface'>of</span> ⌘/ <span class='ft__on-surface'>Menu openen</span><br>Sleep ${x} <span class='ft__on-surface'>Verplaatsen</span><br>⌘Klik⌥→ <span class='ft__on-surface'>Openen</span>",
   "testConnection": "Verbinding testen",
   "testConnectionTesting": "Bezig met testen...",
   "testConnectionSuccess": "Verbinding geslaagd",
@@ -1191,7 +1191,7 @@
   "collapse": "Inklappen",
   "blockEmbed": "Invoegblok",
   "rowTip": "Klik <span class='ft__on-surface'>Menu openen</span><br>Sleep <span class='ft__on-surface'>Sorteren</span><br>⇧Klik <span class='ft__on-surface'>Attribuut wijzigen</span>",
-  "gutterTip": "Klik/⌘/ <span class='ft__on-surface'>Menu openen</span><br>Sleep ${x} <span class='ft__on-surface'>Verplaatsen</span>",
+  "gutterTip": "Klik <span class='ft__on-surface'>of</span> ⌘/ <span class='ft__on-surface'>Menu openen</span><br>Sleep ${x} <span class='ft__on-surface'>Verplaatsen</span>",
   "gutterTip2": "Klik <span class='ft__on-surface'>Menu openen</span><br>⇧Klik <span class='ft__on-surface'>Attribuut wijzigen</span>",
   "linkDistance": "Linkafstand",
   "collideStrength": "Botsingskracht",

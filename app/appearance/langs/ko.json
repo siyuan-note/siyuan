@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "클릭/⌘/ <span class='ft__on-surface'>메뉴 열기</span><br>드래그 ${x} <span class='ft__on-surface'>위치 이동</span><br>⌘클릭⌥→ <span class='ft__on-surface'>열기</span>",
+  "gutterTipBacklink": "클릭 <span class='ft__on-surface'>또는</span> ⌘/ <span class='ft__on-surface'>메뉴 열기</span><br>드래그 ${x} <span class='ft__on-surface'>위치 이동</span><br>⌘클릭⌥→ <span class='ft__on-surface'>열기</span>",
   "testConnection": "연결 테스트",
   "testConnectionTesting": "테스트 중...",
   "testConnectionSuccess": "연결 성공",
@@ -1191,7 +1191,7 @@
   "collapse": "접기",
   "blockEmbed": "임베드 블록",
   "rowTip": "클릭 <span class='ft__on-surface'>메뉴 열기</span><br>드래그 <span class='ft__on-surface'>정렬</span><br>⇧클릭 <span class='ft__on-surface'>속성 업데이트</span>",
-  "gutterTip": "클릭/⌘/ <span class='ft__on-surface'>메뉴 열기</span><br>드래그 ${x} <span class='ft__on-surface'>위치 이동</span>",
+  "gutterTip": "클릭 <span class='ft__on-surface'>또는</span> ⌘/ <span class='ft__on-surface'>메뉴 열기</span><br>드래그 ${x} <span class='ft__on-surface'>위치 이동</span>",
   "gutterTip2": "클릭 <span class='ft__on-surface'>메뉴 열기</span><br>⇧클릭 <span class='ft__on-surface'>속성 업데이트</span>",
   "linkDistance": "링크 거리",
   "collideStrength": "충돌 강도",

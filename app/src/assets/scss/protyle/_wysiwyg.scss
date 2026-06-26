@@ -515,6 +515,10 @@
           border-top: 1px dashed var(--b3-theme-on-surface-light);
           position: relative;
 
+          &:hover .protyle-icons {
+            opacity: 1;
+          }
+
           .code-block:hover .protyle-icon,
           .render-node:hover .protyle-icons {
             opacity: 0 !important;

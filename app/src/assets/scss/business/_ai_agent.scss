@@ -313,43 +313,14 @@
     color: var(--b3-theme-on-surface-light);
 }
 
-.agent-chat__copy-wrap {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    z-index: 1;
-    opacity: 0;
-    transition: var(--b3-transition);
-}
-
-.agent-chat__copy-btn {
-    width: 22px;
-    height: 22px;
+.agent-chat__body .protyle-icons {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--b3-border-radius);
-    color: var(--b3-theme-on-surface);
-    cursor: pointer;
-
-    svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    &:hover, &:focus-visible {
-        background-color: var(--b3-theme-surface-lighter);
-    }
 }
 
-pre:hover .agent-chat__copy-wrap,
-[data-subtype="math"]:hover .agent-chat__copy-wrap {
+// hover 显隐：对齐原 agent-chat__copy-wrap 行为，opacity 渐显。
+.agent-chat__body pre:hover .protyle-icons,
+.agent-chat__body [data-subtype="math"]:hover .protyle-icons {
     opacity: .86;
-}
-
-// 公式块：position:relative 作为复制按钮定位上下文。
-[data-subtype="math"] {
-    position: relative;
 }
 
 .agent-chat__msg--error .agent-chat__body {

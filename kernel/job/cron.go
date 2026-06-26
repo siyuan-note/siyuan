@@ -48,7 +48,7 @@ func StartCron() {
 	go every(30*time.Minute, model.AutoCheckMicrosoftDefenderJob)
 	go every(24*time.Hour, model.ClearOutdatedHistoryDirJob)
 	if util.IsMobileContainer() {
-		go every(7*time.Second, model.AutoConsumeShorthandsJob)
+		go every(3*time.Second, model.AutoConsumeShorthandsJob)
 	}
 
 	model.StartPushQueueConsumer()

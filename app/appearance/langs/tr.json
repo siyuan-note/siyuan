@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Tıkla <span class='ft__on-surface'>Menüyü aç</span><br>Sürükle ${x} <span class='ft__on-surface'>Taşı</span><br>⌘Tıkla⌥→ <span class='ft__on-surface'>Aç</span>",
+  "gutterTipBacklink": "Tıkla/⌘/ <span class='ft__on-surface'>Menüyü aç</span><br>Sürükle ${x} <span class='ft__on-surface'>Taşı</span><br>⌘Tıkla⌥→ <span class='ft__on-surface'>Aç</span>",
   "testConnection": "Bağlantıyı test et",
   "testConnectionTesting": "Test ediliyor...",
   "testConnectionSuccess": "Bağlantı başarılı",
@@ -1187,7 +1187,7 @@
   "collapse": "Daralt",
   "blockEmbed": "Blok göm",
   "rowTip": "Tıkla <span class='ft__on-surface'>Menüyü aç</span><br>Sürükle <span class='ft__on-surface'>Sırala</span><br>⇧Tıkla <span class='ft__on-surface'>Özniteliği güncelle</span>",
-  "gutterTip": "Tıkla <span class='ft__on-surface'>Menüyü aç</span><br>Sürükle ${x} <span class='ft__on-surface'>Taşı</span>",
+  "gutterTip": "Tıkla/⌘/ <span class='ft__on-surface'>Menüyü aç</span><br>Sürükle ${x} <span class='ft__on-surface'>Taşı</span>",
   "gutterTip2": "Tıkla <span class='ft__on-surface'>Menüyü aç</span><br>⇧Tıkla <span class='ft__on-surface'>Özniteliği güncelle</span>",
   "linkDistance": "Bağlantı mesafesi",
   "collideStrength": "Çarpışma kuvveti",

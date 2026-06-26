@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Clicca <span class='ft__on-surface'>Apri Menu</span><br>Trascina ${x} <span class='ft__on-surface'>Sposta posizione</span><br>⌘Clicca⌥→ <span class='ft__on-surface'>Apri</span>",
+  "gutterTipBacklink": "Clicca/⌘/ <span class='ft__on-surface'>Apri Menu</span><br>Trascina ${x} <span class='ft__on-surface'>Sposta posizione</span><br>⌘Clicca⌥→ <span class='ft__on-surface'>Apri</span>",
   "testConnection": "Testa connessione",
   "testConnectionTesting": "Test in corso...",
   "testConnectionSuccess": "Connessione riuscita",
@@ -1187,7 +1187,7 @@
   "collapse": "Comprimi",
   "blockEmbed": "Incorpora Blocco",
   "rowTip": "Clicca <span class='ft__on-surface'>Apri Menu</span><br>Trascina <span class='ft__on-surface'>Ordina</span><br>⇧Clicca <span class='ft__on-surface'>Aggiorna attributo</span>",
-  "gutterTip": "Clicca <span class='ft__on-surface'>Apri Menu</span><br>Trascina ${x} <span class='ft__on-surface'>Sposta posizione</span>",
+  "gutterTip": "Clicca/⌘/ <span class='ft__on-surface'>Apri Menu</span><br>Trascina ${x} <span class='ft__on-surface'>Sposta posizione</span>",
   "gutterTip2": "Clicca <span class='ft__on-surface'>Apri Menu</span><br>⇧Clicca <span class='ft__on-surface'>Aggiorna attributo</span>",
   "linkDistance": "Distanza del collegamento",
   "collideStrength": "Forza di collisione",

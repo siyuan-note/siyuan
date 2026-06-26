@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Click <span class='ft__on-surface'>Open Menu</span><br>Drag ${x} <span class='ft__on-surface'>Move position</span><br>⌘Click⌥→ <span class='ft__on-surface'>Open</span>",
+  "gutterTipBacklink": "Click/⌘/ <span class='ft__on-surface'>Open Menu</span><br>Drag ${x} <span class='ft__on-surface'>Move position</span><br>⌘Click⌥→ <span class='ft__on-surface'>Open</span>",
   "testConnection": "Test connection",
   "testConnectionTesting": "Testing...",
   "testConnectionSuccess": "Connection successful",
@@ -1187,7 +1187,7 @@
   "collapse": "Collapse",
   "blockEmbed": "Embed Block",
   "rowTip": "Click <span class='ft__on-surface'>Open Menu</span><br>Drag <span class='ft__on-surface'>Sort</span><br>⇧Click <span class='ft__on-surface'>Update attribute</span>",
-  "gutterTip": "Click <span class='ft__on-surface'>Open Menu</span><br>Drag ${x} <span class='ft__on-surface'>Move position</span>",
+  "gutterTip": "Click/⌘/ <span class='ft__on-surface'>Open Menu</span><br>Drag ${x} <span class='ft__on-surface'>Move position</span>",
   "gutterTip2": "Click <span class='ft__on-surface'>Open Menu</span><br>⇧Click <span class='ft__on-surface'>Update attribute</span>",
   "linkDistance": "Link distance",
   "collideStrength": "Collide strength",

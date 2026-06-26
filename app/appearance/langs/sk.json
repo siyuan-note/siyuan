@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Kliknúť <span class='ft__on-surface'>Otvoriť menu</span><br>Potiahnuť ${x} <span class='ft__on-surface'>Presunúť pozíciu</span><br>⌘Kliknúť⌥→ <span class='ft__on-surface'>Otvoriť</span>",
+  "gutterTipBacklink": "Kliknúť/⌘/ <span class='ft__on-surface'>Otvoriť menu</span><br>Potiahnuť ${x} <span class='ft__on-surface'>Presunúť pozíciu</span><br>⌘Kliknúť⌥→ <span class='ft__on-surface'>Otvoriť</span>",
   "testConnection": "Otestovať pripojenie",
   "testConnectionTesting": "Testuje sa...",
   "testConnectionSuccess": "Pripojenie úspešné",
@@ -1187,7 +1187,7 @@
   "collapse": "Zbaliť",
   "blockEmbed": "Vložený blok",
   "rowTip": "Klik: Menu | Potiahnutie: Poradie | ⇧Klik: Atribút",
-  "gutterTip": "Kliknúť <span class='ft__on-surface'>Otvoriť menu</span><br>Potiahnuť ${x} <span class='ft__on-surface'>Presunúť pozíciu</span>",
+  "gutterTip": "Kliknúť/⌘/ <span class='ft__on-surface'>Otvoriť menu</span><br>Potiahnuť ${x} <span class='ft__on-surface'>Presunúť pozíciu</span>",
   "gutterTip2": "Klik: Menu | ⇧Klik: Atribút",
   "linkDistance": "Vzdialenosť odkazov",
   "collideStrength": "Sila kolízie",

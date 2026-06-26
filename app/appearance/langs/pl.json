@@ -1,5 +1,5 @@
 {
-  "gutterTipBacklink": "Kliknij <span class='ft__on-surface'>Otwórz menu</span><br>Przeciągnij ${x} <span class='ft__on-surface'>Przesuń pozycję</span><br>⌘Kliknij⌥→ <span class='ft__on-surface'>Otwórz</span>",
+  "gutterTipBacklink": "Kliknij/⌘/ <span class='ft__on-surface'>Otwórz menu</span><br>Przeciągnij ${x} <span class='ft__on-surface'>Przesuń pozycję</span><br>⌘Kliknij⌥→ <span class='ft__on-surface'>Otwórz</span>",
   "testConnection": "Testuj połączenie",
   "testConnectionTesting": "Testowanie...",
   "testConnectionSuccess": "Połączenie nawiązane",
@@ -1187,7 +1187,7 @@
   "collapse": "Zwiń",
   "blockEmbed": "Wstaw blok",
   "rowTip": "Kliknij <span class='ft__on-surface'>Otwórz menu</span><br>Przeciągnij <span class='ft__on-surface'>Sortuj</span><br>⇧Kliknij <span class='ft__on-surface'>Zaktualizuj atrybut</span>",
-  "gutterTip": "Kliknij <span class='ft__on-surface'>Otwórz menu</span><br>Przeciągnij ${x} <span class='ft__on-surface'>Przesuń pozycję</span>",
+  "gutterTip": "Kliknij/⌘/ <span class='ft__on-surface'>Otwórz menu</span><br>Przeciągnij ${x} <span class='ft__on-surface'>Przesuń pozycję</span>",
   "gutterTip2": "Kliknij <span class='ft__on-surface'>Otwórz menu</span><br>⇧Kliknij <span class='ft__on-surface'>Zaktualizuj atrybut</span>",
   "linkDistance": "Odległość linku",
   "collideStrength": "Siła kolizji",

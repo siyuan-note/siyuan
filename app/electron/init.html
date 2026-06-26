@@ -71,41 +71,16 @@
 <div class="drag"></div>
 <script src="window.js"></script>
 <script>
-    // init.html 独有文案（slogan / workspace 等），公共文案在 window.js 的 I18N_BASE 中
-    const EXTRA_I18N = {
-        "zh-CN": {workspace: "🗂️ 工作空间", workspaceDesc: "工作空间用于存放数据，后续可以在顶栏左上角的主菜单中进行切换", notice: "⚠️ 请勿使用第三方同步盘同步数据，否则会导致运行异常和数据损坏"},
-        "zh-TW": {workspace: "🗂️ 工作空間", workspaceDesc: "工作空間用於存放資料，後續可以在頂欄左上角的主選單中進行切換", notice: "⚠️ 請勿使用第三方同步盤同步資料，否則會導致執行異常和資料損壞"},
-        "en": {workspace: "🗂️ Workspace", workspaceDesc: "The workspace is used to store data, which can be switched later in the top bar menu later", notice: "⚠️ Do not use a third-party sync disk to sync data, otherwise it will cause abnormal operation and data damage"},
-        "ar": {workspace: "🗂️ مساحة العمل", workspaceDesc: "تُستخدم مساحة العمل لتخزين البيانات، ويمكن تبديلها لاحقًا من القائمة الرئيسية في الزاوية العلوية اليسرى", notice: "⚠️ لا تستخدم قرص مزامنة تابع لجهة خارجية لمزامنة البيانات، وإلا فقد يؤدي ذلك إلى تشغيل غير طبيعي وتلف البيانات"},
-        "de": {workspace: "🗂️ Arbeitsbereich", workspaceDesc: "Der Arbeitsbereich dient zum Speichern von Daten und kann später im Hauptmenü der oberen Leiste gewechselt werden", notice: "⚠️ Verwende keine Sync-Festplatte eines Drittanbieters zum Synchronisieren von Daten, da dies zu Fehlfunktionen und Datenverlust führen kann"},
-        "es": {workspace: "🗂️ Espacio de trabajo", workspaceDesc: "El espacio de trabajo se utiliza para almacenar datos, que se pueden cambiar más tarde en el menú principal de la barra superior", notice: "⚠️ No utilice un disco de sincronización de terceros para sincronizar datos, de lo contrario puede causar un funcionamiento anormal y daño en los datos"},
-        "fr": {workspace: "🗂️ Espace de travail", workspaceDesc: "L'espace de travail est utilisé pour stocker des données, il peut être changé plus tard dans le menu principal de la barre supérieure", notice: "⚠️ N'utilisez pas un disque de synchronisation tiers pour synchroniser les données, sinon cela entraînera un fonctionnement anormal et des dommages aux données"},
-        "he": {workspace: "🗂️ סביבת עבודה", workspaceDesc: "סביבת העבודה משמשת לאחסון נתונים, ניתן להחליף אותה מאוחר יותר בתפריט הראשי בסרגל העליון", notice: "⚠️ אל תשתמש בדיסק סנכרון של צד שלישי לסנכרון נתונים, אחרת זה עלול לגרום לפעולה לא תקינה ולנזק לנתונים"},
-        "hi": {workspace: "🗂️ वर्कस्पेस", workspaceDesc: "वर्कस्पेस का उपयोग डेटा संग्रहीत करने के लिए किया जाता है, जिसे बाद में शीर्ष बार मेन्यू में बदला जा सकता है", notice: "⚠️ डेटा को सिंक करने के लिए तृतीय-पक्ष सिंक डिस्क का उपयोग न करें, अन्यथा यह असामान्य संचालन और डेटा क्षति का कारण बनेगा"},
-        "id": {workspace: "🗂️ Ruang Kerja", workspaceDesc: "Ruang kerja digunakan untuk menyimpan data, yang dapat dialihkan nanti di menu bilah atas", notice: "⚠️ Jangan gunakan disk sinkronisasi pihak ketiga untuk menyinkronkan data, jika tidak akan menyebabkan operasi abnormal dan kerusakan data"},
-        "it": {workspace: "🗂️ Spazio di lavoro", workspaceDesc: "Lo spazio di lavoro viene utilizzato per memorizzare i dati, che può essere cambiato successivamente nel menu principale della barra superiore", notice: "⚠️ Non utilizzare un disco di sincronizzazione di terze parti per sincronizzare i dati, altrimenti causerà malfunzionamenti e danni ai dati"},
-        "ja": {workspace: "🗂️ ワークスペース", workspaceDesc: "ワークスペースはデータの保存に使用されます。後でトップバーのメインメニューで切り替えることができます", notice: "⚠️ サードパーティの同期ディスクを使用してデータを同期しないでください。そうしないと、異常な動作やデータの破損が発生する可能性があります"},
-        "ko": {workspace: "🗂️ 워크스페이스", workspaceDesc: "워크스페이스는 데이터를 저장하는 데 사용되며, 나중에 상단 표시줄 메뉴에서 전환할 수 있습니다", notice: "⚠️ 타사 동기화 디스크를 사용하여 데이터를 동기화하지 마세요. 그렇지 않으면 비정상적인 작동과 데이터 손상이 발생할 수 있습니다"},
-        "nl": {workspace: "🗂️ Werkruimte", workspaceDesc: "De werkruimte wordt gebruikt om gegevens op te slaan, die later kan worden gewisseld in het hoofdmenu van de bovenste balk", notice: "⚠️ Gebruik geen synchronisatieschijf van derden om gegevens te synchroniseren, anders leidt dit tot abnormale werking en gegevensbeschadiging"},
-        "pl": {workspace: "🗂️ Obszar roboczy", workspaceDesc: "Obszar roboczy służy do przechowywania danych, które można później przełączyć w głównym menu górnego paska", notice: "⚠️ Nie używaj dysku synchronizacji innej firmy do synchronizacji danych, w przeciwnym razie doprowadzi to do nieprawidłowego działania i uszkodzenia danych"},
-        "pt-BR": {workspace: "🗂️ Espaço de trabalho", workspaceDesc: "O espaço de trabalho é usado para armazenar dados, que pode ser alterado posteriormente no menu principal da barra superior", notice: "⚠️ Não use um disco de sincronização de terceiros para sincronizar dados, caso contrário, causará operação anormal e danos aos dados"},
-        "ru": {workspace: "🗂️ Рабочее пространство", workspaceDesc: "Рабочее пространство используется для хранения данных, его можно переключить позже в главном меню верхней панели", notice: "⚠️ Не используйте сторонний диск синхронизации для синхронизации данных, иначе это приведёт к неправильной работе и повреждению данных"},
-        "sk": {workspace: "🗂️ Pracovný priestor", workspaceDesc: "Pracovný priestor sa používa na ukladanie údajov, ktoré sa dá neskôr prepnúť v hlavnej ponuke hornej lišty", notice: "⚠️ Nepoužívajte synchronizačný disk tretej strany na synchronizáciu údajov, inak to spôsobí abnormálnu prevádzku a poškodenie údajov"},
-        "th": {workspace: "🗂️ พื้นที่ทำงาน", workspaceDesc: "พื้นที่ทำงานใช้สำหรับจัดเก็บข้อมูล ซึ่งสามารถสลับได้ในภายหลังในเมนูหลักของแถบด้านบน", notice: "⚠️ อย่าใช้ดิสก์ซิงค์ของบุคคลที่สามในการซิงค์ข้อมูล มิฉะนั้นจะทำให้การทำงานผิดปกติและข้อมูลเสียหาย"},
-        "tr": {workspace: "🗂️ Çalışma alanı", workspaceDesc: "Çalışma alanı verileri depolamak için kullanılır, daha sonra üst çubuk menüsünde değiştirilebilir", notice: "⚠️ Verileri senkronize etmek için üçüncü taraf bir senkronizasyon diski kullanmayın, aksi takdirde anormal çalışmaya ve veri hasarına neden olur"},
-        "uk": {workspace: "🗂️ Робочий простір", workspaceDesc: "Робочий простір використовується для зберігання даних, який пізніше можна змінити в головному меню верхньої панелі", notice: "⚠️ Не використовуйте сторонній диск синхронізації для синхронізації даних, інакше це призведе до ненормальної роботи та пошкодження даних"},
-    }
-
     // 初始化启动
     const langSelect = document.querySelector(".lang")
     langSelect.value = currentLang
-    let langData = applyLang(currentLang, EXTRA_I18N)
+    let langData = applyLang(currentLang)
 
     document.querySelector(".version").textContent = `v${getSearch("v")}`
     document.querySelector(".icon").src = decodeURIComponent(`${getSearch("icon")}`)
 
     langSelect.addEventListener("change", (event) => {
-        langData = applyLang(event.target.value, EXTRA_I18N)
+        langData = applyLang(event.target.value)
     })
 
     initWindowChrome()

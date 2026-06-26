@@ -235,39 +235,13 @@
 <div class="drag"></div>
 <script src="window.js"></script>
 <script>
-    // missing-workspace.html 独有文案（wsTitle / missingTip 等），公共文案在 window.js 的 I18N_BASE 中
-    // https://github.com/siyuan-note/siyuan/issues/14748
-    const EXTRA_I18N = {
-        "zh-CN": {wsTitle: "工作空间", missingTip: "⚠️ 找不到上次打开的工作空间路径", emptyHint: "当前没有可用的工作空间，请选择新的工作空间路径", selectPath: "🗂️ 选择新的工作空间路径", selectPathDesc: "工作空间用于存放数据，后续可以在顶栏左上角的主菜单中进行切换", open: "打开"},
-        "zh-TW": {wsTitle: "工作空間", missingTip: "⚠️ 找不到上次開啟的工作空間路徑", emptyHint: "目前沒有可用的工作空間，請選擇新的工作空間路徑", selectPath: "🗂️ 選擇新的工作空間路徑", selectPathDesc: "工作空間用於存放資料，後續可以在頂欄左上角的主選單中進行切換", open: "開啟"},
-        "en": {wsTitle: "Workspaces", missingTip: "⚠️ The last opened workspace path could not be found", emptyHint: "No available workspaces, please select a new workspace path", selectPath: "🗂️ Select a new workspace path", selectPathDesc: "The workspace is used to store data, which can be switched later in the top bar menu later", open: "Open"},
-        "ar": {wsTitle: "مساحات العمل", missingTip: "⚠️ تعذر العثور على مسار مساحة العمل المفتوحة آخر مرة", emptyHint: "لا توجد مساحات عمل متاحة، يرجى تحديد مسار مساحة عمل جديد", selectPath: "🗂️ تحديد مسار مساحة عمل جديد", selectPathDesc: "تُستخدم مساحة العمل لتخزين البيانات، ويمكن تبديلها لاحقًا من القائمة الرئيسية في الزاوية العلوية اليسرى", open: "فتح"},
-        "de": {wsTitle: "Arbeitsbereiche", missingTip: "⚠️ Der zuletzt geöffnete Arbeitsbereich-Pfad konnte nicht gefunden werden", emptyHint: "Keine verfügbaren Arbeitsbereiche, bitte einen neuen Arbeitsbereich-Pfad auswählen", selectPath: "🗂️ Neuen Arbeitsbereich-Pfad auswählen", selectPathDesc: "Der Arbeitsbereich dient zum Speichern von Daten und kann später im Hauptmenü der oberen Leiste gewechselt werden", open: "Öffnen"},
-        "es": {wsTitle: "Espacios de trabajo", missingTip: "⚠️ No se pudo encontrar la ruta del último espacio de trabajo abierto", emptyHint: "No hay espacios de trabajo disponibles, seleccione una nueva ruta de espacio de trabajo", selectPath: "🗂️ Seleccionar una nueva ruta de espacio de trabajo", selectPathDesc: "El espacio de trabajo se utiliza para almacenar datos, que se pueden cambiar más tarde en el menú principal de la barra superior", open: "Abrir"},
-        "fr": {wsTitle: "Espaces de travail", missingTip: "⚠️ Le chemin du dernier espace de travail ouvert est introuvable", emptyHint: "Aucun espace de travail disponible, veuillez sélectionner un nouveau chemin d'espace de travail", selectPath: "🗂️ Sélectionner un nouveau chemin d'espace de travail", selectPathDesc: "L'espace de travail est utilisé pour stocker des données, il peut être changé plus tard dans le menu principal de la barre supérieure", open: "Ouvrir"},
-        "he": {wsTitle: "סביבות עבודה", missingTip: "⚠️ לא ניתן היה למצוא את הנתיב של סביבת העבודה האחרונה שנפתחה", emptyHint: "אין סביבות עבודה זמינות, נא לבחור נתיב סביבת עבודה חדש", selectPath: "🗂️ בחירת נתיב סביבת עבודה חדש", selectPathDesc: "סביבת העבודה משמשת לאחסון נתונים, ניתן להחליף אותה מאוחר יותר בתפריט הראשי בסרגל העליון", open: "פתיחה"},
-        "hi": {wsTitle: "वर्कस्पेस", missingTip: "⚠️ अंतिम बार खोला गया वर्कस्पेस पथ नहीं मिल सका", emptyHint: "कोई उपलब्ध वर्कस्पेस नहीं, कृपया एक नया वर्कस्पेस पथ चुनें", selectPath: "🗂️ एक नया वर्कस्पेस पथ चुनें", selectPathDesc: "वर्कस्पेस का उपयोग डेटा संग्रहीत करने के लिए किया जाता है, जिसे बाद में शीर्ष बार मेन्यू में बदला जा सकता है", open: "खोलें"},
-        "id": {wsTitle: "Ruang Kerja", missingTip: "⚠️ Jalur ruang kerja yang terakhir dibuka tidak dapat ditemukan", emptyHint: "Tidak ada ruang kerja yang tersedia, silakan pilih jalur ruang kerja baru", selectPath: "🗂️ Pilih jalur ruang kerja baru", selectPathDesc: "Ruang kerja digunakan untuk menyimpan data, yang dapat dialihkan nanti di menu bilah atas", open: "Buka"},
-        "it": {wsTitle: "Spazi di lavoro", missingTip: "⚠️ Impossibile trovare il percorso dell'ultimo spazio di lavoro aperto", emptyHint: "Nessuno spazio di lavoro disponibile, selezionare un nuovo percorso dello spazio di lavoro", selectPath: "🗂️ Seleziona un nuovo percorso dello spazio di lavoro", selectPathDesc: "Lo spazio di lavoro viene utilizzato per memorizzare i dati, che può essere cambiato successivamente nel menu principale della barra superiore", open: "Apri"},
-        "ja": {wsTitle: "ワークスペース", missingTip: "⚠️ 最後に開いたワークスペースのパスが見つかりませんでした", emptyHint: "利用可能なワークスペースがありません。新しいワークスペースのパスを選択してください", selectPath: "🗂️ 新しいワークスペースのパスを選択", selectPathDesc: "ワークスペースはデータの保存に使用されます。後でトップバーのメインメニューで切り替えることができます", open: "開く"},
-        "ko": {wsTitle: "워크스페이스", missingTip: "⚠️ 마지막으로 열린 워크스페이스 경로를 찾을 수 없습니다", emptyHint: "사용 가능한 워크스페이스가 없습니다. 새 워크스페이스 경로를 선택하세요", selectPath: "🗂️ 새 워크스페이스 경로 선택", selectPathDesc: "워크스페이스는 데이터를 저장하는 데 사용되며, 나중에 상단 표시줄 메뉴에서 전환할 수 있습니다", open: "열기"},
-        "nl": {wsTitle: "Werkruimten", missingTip: "⚠️ Het laatst geopende werkruimtepad kon niet worden gevonden", emptyHint: "Geen beschikbare werkruimten, selecteer een nieuw werkruimtepad", selectPath: "🗂️ Selecteer een nieuw werkruimtepad", selectPathDesc: "De werkruimte wordt gebruikt om gegevens op te slaan, die later kan worden gewisseld in het hoofdmenu van de bovenste balk", open: "Openen"},
-        "pl": {wsTitle: "Obszary robocze", missingTip: "⚠️ Nie można znaleźć ścieżki ostatnio otwartego obszaru roboczego", emptyHint: "Brak dostępnych obszarów roboczych, wybierz nową ścieżkę obszaru roboczego", selectPath: "🗂️ Wybierz nową ścieżkę obszaru roboczego", selectPathDesc: "Obszar roboczy służy do przechowywania danych, które można później przełączyć w głównym menu górnego paska", open: "Otwórz"},
-        "pt-BR": {wsTitle: "Espaços de trabalho", missingTip: "⚠️ O caminho do último espaço de trabalho aberto não pôde ser encontrado", emptyHint: "Nenhum espaço de trabalho disponível, selecione um novo caminho de espaço de trabalho", selectPath: "🗂️ Selecionar um novo caminho de espaço de trabalho", selectPathDesc: "O espaço de trabalho é usado para armazenar dados, que pode ser alterado posteriormente no menu principal da barra superior", open: "Abrir"},
-        "ru": {wsTitle: "Рабочие пространства", missingTip: "⚠️ Не удалось найти путь последнего открытого рабочего пространства", emptyHint: "Нет доступных рабочих пространств, выберите новый путь рабочего пространства", selectPath: "🗂️ Выберите новый путь рабочего пространства", selectPathDesc: "Рабочее пространство используется для хранения данных, его можно переключить позже в главном меню верхней панели", open: "Открыть"},
-        "sk": {wsTitle: "Pracovné priestory", missingTip: "⚠️ Nepodarilo sa nájsť cestu k poslednému otvorenému pracovnému priestoru", emptyHint: "Žiadne dostupné pracovné priestory, vyberte novú cestu pracovného priestoru", selectPath: "🗂️ Vybrať novú cestu pracovného priestoru", selectPathDesc: "Pracovný priestor sa používa na ukladanie údajov, ktoré sa dá neskôr prepnúť v hlavnej ponuke hornej lišty", open: "Otvoriť"},
-        "th": {wsTitle: "พื้นที่ทำงาน", missingTip: "⚠️ ไม่พบเส้นทางพื้นที่ทำงานที่เปิดล่าสุด", emptyHint: "ไม่มีพื้นที่ทำงานที่พร้อมใช้งาน โปรดเลือกเส้นทางพื้นที่ทำงานใหม่", selectPath: "🗂️ เลือกเส้นทางพื้นที่ทำงานใหม่", selectPathDesc: "พื้นที่ทำงานใช้สำหรับจัดเก็บข้อมูล ซึ่งสามารถสลับได้ในภายหลังในเมนูหลักของแถบด้านบน", open: "เปิด"},
-        "tr": {wsTitle: "Çalışma alanları", missingTip: "⚠️ Son açılan çalışma alanı yolu bulunamadı", emptyHint: "Kullanılabilir çalışma alanı yok, lütfen yeni bir çalışma alanı yolu seçin", selectPath: "🗂️ Yeni bir çalışma alanı yolu seçin", selectPathDesc: "Çalışma alanı verileri depolamak için kullanılır, daha sonra üst çubuk menüsünde değiştirilebilir", open: "Aç"},
-        "uk": {wsTitle: "Робочі простори", missingTip: "⚠️ Не вдалося знайти шлях до останнього відкритого робочого простору", emptyHint: "Немає доступних робочих просторів, виберіть новий шлях робочого простору", selectPath: "🗂️ Виберіть новий шлях робочого простору", selectPathDesc: "Робочий простір використовується для зберігання даних, який пізніше можна змінити в головному меню верхньої панелі", open: "Відкрити"},
-    }
-
     const path = require("path")
     const {ipcRenderer} = require("electron")
 
     // 渲染可用工作空间列表
     const wsRaw = decodeURIComponent(getSearch("workspaces"))
     const wsList = wsRaw.split("\n").filter(item => "" !== item.trim())
-    let langData = applyLang(currentLang, EXTRA_I18N)
+    let langData = applyLang(currentLang)
     const renderWsList = () => {
         const root = document.querySelector(".wsList")
         root.innerHTML = ""
@@ -307,7 +281,7 @@
     document.querySelector(".missing").textContent = decodeURIComponent(getSearch("missing"))
 
     langSelect.addEventListener("change", (event) => {
-        langData = applyLang(event.target.value, EXTRA_I18N)
+        langData = applyLang(event.target.value)
         // 重新渲染列表项按钮文案
         renderWsList()
     })

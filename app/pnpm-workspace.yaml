@@ -6,3 +6,13 @@ allowBuilds:
 blockExoticSubdeps: false
 minimumReleaseAgeExclude:
   - electron@42.5.0
+  - app-builder-lib@26.15.6
+  - dmg-builder@26.15.6
+  - electron-builder-squirrel-windows@26.15.6
+  - electron-builder@26.15.6
+overrides:
+  # 锁定 4.0.3:app-builder-lib@26.15.x 代码访问 @electron/get 的 ElectronDownloadCacheMode.ReadWrite,
+  # 该导出仅在 @electron/get@4.x 存在(3.x 为 CacheMode,5.x 由 electron@42 引入且 API 不兼容),
+  # 故强制统一到 4.0.3 消除多版本碎片化,修复 electron-builder 打包时的 "Cannot read properties of
+  # undefined (reading 'ReadWrite')" 错误。
+  '@electron/get': 4.0.3

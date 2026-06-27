@@ -344,19 +344,16 @@ export class AgentSessionPanel {
             }
             this.closeMoreMenu();
         });
-        // 悬浮效果：mouseenter 添加 --current，鼠标移出菜单后清除（与 SiYuan Menu 组件一致）。
-        menu.querySelectorAll(".b3-menu__item").forEach((item) => {
-            item.addEventListener("mouseenter", () => {
-                menu.querySelectorAll(".b3-menu__item--current").forEach((el) => {
-                    el.classList.remove("b3-menu__item--current");
-                });
-                item.classList.add("b3-menu__item--current");
-            });
-        });
-        menu.addEventListener("mouseleave", () => {
+        // 悬浮效果：mouseover 事件委托，清除所有 --current 后给当前项添加（与 Menu 组件一致）。
+        menu.addEventListener("mouseover", (e: MouseEvent) => {
+            const item = hasClosestByClassName(e.target as HTMLElement, "b3-menu__item");
+            if (!item) {
+                return;
+            }
             menu.querySelectorAll(".b3-menu__item--current").forEach((el) => {
                 el.classList.remove("b3-menu__item--current");
             });
+            item.classList.add("b3-menu__item--current");
         });
         const onOutside = (e: MouseEvent) => {
             if (menu.contains(e.target as Node)) {

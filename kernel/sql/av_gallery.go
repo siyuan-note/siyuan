@@ -40,13 +40,13 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	// 组装字段
 	for _, field := range view.Gallery.CardFields {
 		key, getErr := attrView.GetKey(field.ID)
-			if nil != getErr {
-				// 找不到字段则在视图中删除（元数据查询场景不写盘）
-				if !ignoreRows {
-					removeMissingField(attrView, view, field.ID)
-				}
-				continue
+		if nil != getErr {
+			// 找不到字段则在视图中删除（元数据查询场景不写盘）
+			if !ignoreRows {
+				removeMissingField(attrView, view, field.ID)
 			}
+			continue
+		}
 
 		ret.Fields = append(ret.Fields, &av.GalleryField{
 			BaseInstanceField: &av.BaseInstanceField{

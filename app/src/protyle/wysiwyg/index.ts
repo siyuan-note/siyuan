@@ -1289,17 +1289,17 @@ export class WYSIWYG {
 
             // 多选节点
             // 起点落在内容区域外的 padding 上时，需用内容区内的坐标定位起始块
+            let fromOutsideX: number;
             if (event.clientX > mostRight) {
-                const pointElement = document.elementFromPoint(mostRight - 10, event.clientY);
-                if (pointElement && pointElement.classList.contains("protyle-wysiwyg")) {
-                    nodeElement = hasClosestBlock(document.elementFromPoint(mostRight - 10, event.clientY + 12)) as HTMLElement;
-                } else {
-                    nodeElement = hasClosestBlock(pointElement) as HTMLElement;
-                }
+                fromOutsideX = mostRight - 10;
             } else if (event.clientX < mostLeft) {
-                const pointElement = document.elementFromPoint(mostLeft + 10, event.clientY);
+                fromOutsideX = mostLeft + 10;
+            }
+            if (fromOutsideX !== undefined) {
+                const pointElement = document.elementFromPoint(fromOutsideX, event.clientY);
                 if (pointElement && pointElement.classList.contains("protyle-wysiwyg")) {
-                    nodeElement = hasClosestBlock(document.elementFromPoint(mostLeft + 10, event.clientY + 12)) as HTMLElement;
+                    // 落点为 wysiwyg 容器本身（块间空白）时，下移 12px 重新定位
+                    nodeElement = hasClosestBlock(document.elementFromPoint(fromOutsideX, event.clientY + 12)) as HTMLElement;
                 } else {
                     nodeElement = hasClosestBlock(pointElement) as HTMLElement;
                 }
@@ -1420,17 +1420,14 @@ export class WYSIWYG {
                 let newLeft = 0;
                 let newWidth = 0;
                 let newHeight = 0;
-                // 矩形两端钳制在编辑区（含 padding）范围内，避免划出 wysiwyg
-                const minLeft = wysiwygRect.left;
-                const maxRight = wysiwygRect.right;
                 if (moveEvent.clientX < event.clientX) {
                     // 向左：左边缘跟随鼠标，右边缘固定为起点
-                    newLeft = Math.max(moveEvent.clientX, minLeft);
-                    newWidth = Math.min(event.clientX, maxRight) - newLeft;
+                    newLeft = Math.max(moveEvent.clientX, wysiwygRect.left);
+                    newWidth = Math.min(event.clientX, wysiwygRect.right) - newLeft;
                 } else {
                     // 向右：左边缘固定为起点，右边缘跟随鼠标
-                    newLeft = Math.max(event.clientX, minLeft);
-                    newWidth = Math.min(moveEvent.clientX, maxRight) - newLeft;
+                    newLeft = Math.max(event.clientX, wysiwygRect.left);
+                    newWidth = Math.min(moveEvent.clientX, wysiwygRect.right) - newLeft;
                 }
 
                 if (moveEvent.clientY > y) {

@@ -130,6 +130,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 3. **Comments:** Write comments in Chinese
 4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
 5. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
+6. **Go:** Format with `gofmt` after editing
 
 ---
 

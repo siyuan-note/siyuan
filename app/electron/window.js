@@ -1,4 +1,4 @@
-// 桌面端 pre-boot 窗口（init.html / missing-workspace.html）共享脚本
+// 桌面端 pre-boot 窗口（init.html / workspace.html）共享脚本
 // 由各 HTML 通过 <script src="window.js"></script> 引入，依赖 nodeIntegration: true
 // 中文用 ld246.com，其他语言用 liuyun.io
 "use strict";
@@ -24,6 +24,9 @@ const getSearch = (key) => {
 const I18N_BASE = {
     "zh-CN": {
         title: "思源笔记",
+        crashTip: "⚠️ 思源上次异常退出（渲染进程崩溃），可能是代码片段、插件或自定义主题/图标导致。建议以安全模式启动（将禁用代码片段、插件、自定义主题和图标）",
+        safeModeBtn: "🛡️ 安全模式启动",
+        normalBtn: "正常启动",
         slogan: "重构你的思维",
         wsTitle: "工作空间",
         missingTip: "⚠️ 找不到上次打开的工作空间路径",
@@ -51,6 +54,9 @@ const I18N_BASE = {
     },
     "zh-TW": {
         title: "思源筆記",
+        crashTip: "⚠️ 思源上次異常退出（渲染處理程序崩潰），可能是程式碼片段、外掛或自訂主題/圖示導致。建議以安全模式啟動（將停用程式碼片段、外掛、自訂主題和圖示）",
+        safeModeBtn: "🛡️ 安全模式啟動",
+        normalBtn: "正常啟動",
         slogan: "重構你的思維",
         wsTitle: "工作空間",
         missingTip: "⚠️ 找不到上次開啟的工作空間路徑",
@@ -78,6 +84,9 @@ const I18N_BASE = {
     },
     "en": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan exited unexpectedly last time (renderer process crashed). This may be caused by code snippets, plugins, or a custom theme/icon. It is recommended to start in safe mode (which disables code snippets, plugins, and the custom theme and icon).",
+        safeModeBtn: "🛡️ Start in safe mode",
+        normalBtn: "Start normally",
         slogan: "Refactor your thinking",
         wsTitle: "Workspaces",
         missingTip: "⚠️ The last opened workspace path could not be found",
@@ -105,6 +114,9 @@ const I18N_BASE = {
     },
     "ar": {
         title: "SiYuan",
+        crashTip: "⚠️ خرج SiYuan بشكل غير متوقع في المرة الأخيرة (تعطل عملية العارض). قد يكون ذلك بسبب مقتطفات التعليمات البرمجية أو الإضافات أو سمة/أيقونة مخصصة. يُوصى بالبدء في الوضع الآمن (والذي يعطّل مقتطفات التعليمات البرمجية والإضافات والسمة والأيقونة المخصصة).",
+        safeModeBtn: "🛡️ البدء في الوضع الآمن",
+        normalBtn: "البدء بشكل طبيعي",
         slogan: "أعد هيكلة تفكيرك",
         wsTitle: "مساحات العمل",
         missingTip: "⚠️ تعذر العثور على مسار مساحة العمل المفتوحة آخر مرة",
@@ -132,6 +144,9 @@ const I18N_BASE = {
     },
     "de": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan wurde beim letzten Mal unerwartet beendet (Renderer-Prozess abgestürzt). Dies kann durch Code-Snippets, Plugins oder ein benutzerdefiniertes Design/Icon verursacht worden sein. Es wird empfohlen, im abgesicherten Modus zu starten (der Code-Snippets, Plugins sowie das benutzerdefinierte Design und Icon deaktiviert).",
+        safeModeBtn: "🛡️ Im abgesicherten Modus starten",
+        normalBtn: "Normal starten",
         slogan: "Strukturiere dein Denken",
         wsTitle: "Arbeitsbereiche",
         missingTip: "⚠️ Der zuletzt geöffnete Arbeitsbereich-Pfad konnte nicht gefunden werden",
@@ -159,6 +174,9 @@ const I18N_BASE = {
     },
     "es": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan se cerró inesperadamente la última vez (el proceso de renderizado falló). Esto puede deberse a fragmentos de código, complementos o un tema/icono personalizado. Se recomienda iniciar en modo seguro (que desactiva los fragmentos de código, los complementos y el tema e icono personalizados).",
+        safeModeBtn: "🛡️ Iniciar en modo seguro",
+        normalBtn: "Iniciar normalmente",
         slogan: "Reestructura tu pensamiento",
         wsTitle: "Espacios de trabajo",
         missingTip: "⚠️ No se pudo encontrar la ruta del último espacio de trabajo abierto",
@@ -186,6 +204,9 @@ const I18N_BASE = {
     },
     "fr": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan s'est fermé de manière inattendue la dernière fois (le processus de rendu a planté). Cela peut être dû à des extraits de code, des plugins ou un thème/icône personnalisé. Il est recommandé de démarrer en mode sans échec (qui désactive les extraits de code, les plugins, ainsi que le thème et l'icône personnalisés).",
+        safeModeBtn: "🛡️ Démarrer en mode sans échec",
+        normalBtn: "Démarrer normalement",
         slogan: "Restructurez votre pensée",
         wsTitle: "Espaces de travail",
         missingTip: "⚠️ Le chemin du dernier espace de travail ouvert est introuvable",
@@ -213,6 +234,9 @@ const I18N_BASE = {
     },
     "he": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan נסגר באופן בלתי צפוי בפעם האחרונה (תהליך העיבוד קרס). ייתכן שהדבר נגרם על ידי קטעי קוד, תוספים או ערכת נושא/סמל מותאמים אישית. מומלץ להפעיל במצב בטוח (אשר משבית קטעי קוד, תוספים וכן את ערכת הנושא והסמל המותאמים אישית).",
+        safeModeBtn: "🛡️ הפעלה במצב בטוח",
+        normalBtn: "הפעלה רגילה",
         slogan: "ארגן מחדש את החשיבה שלך",
         wsTitle: "סביבות עבודה",
         missingTip: "⚠️ לא ניתן היה למצוא את הנתיב של סביבת העבודה האחרונה שנפתחה",
@@ -240,6 +264,9 @@ const I18N_BASE = {
     },
     "hi": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan पिछली बार अप्रत्याशित रूप से बंद हो गया (रेंडरर प्रक्रिया क्रैश हो गई)। यह कोड स्निपेट, प्लगइन्स, या कस्टम थीम/आइकन के कारण हो सकता है। सुरक्षित मोड में प्रारंभ करने की अनुशंसा की जाती है (जो कोड स्निपेट, प्लगइन्स और कस्टम थीम तथा आइकन को अक्षम कर देता है)।",
+        safeModeBtn: "🛡️ सुरक्षित मोड में प्रारंभ करें",
+        normalBtn: "सामान्य रूप से प्रारंभ करें",
         slogan: "अपनी सोच को पुनर्गठित करें",
         wsTitle: "वर्कस्पेस",
         missingTip: "⚠️ अंतिम बार खोला गया वर्कस्पेस पथ नहीं मिल सका",
@@ -267,6 +294,9 @@ const I18N_BASE = {
     },
     "id": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan tertutup secara tak terduga terakhir kali (proses renderer mogok). Hal ini mungkin disebabkan oleh cuplikan kode, plugin, atau tema/ikon kustom. Disarankan untuk memulai dalam mode aman (yang menonaktifkan cuplikan kode, plugin, serta tema dan ikon kustom).",
+        safeModeBtn: "🛡️ Mulai dalam mode aman",
+        normalBtn: "Mulai secara normal",
         slogan: "Restruktur pemikiran Anda",
         wsTitle: "Ruang Kerja",
         missingTip: "⚠️ Jalur ruang kerja yang terakhir dibuka tidak dapat ditemukan",
@@ -294,6 +324,9 @@ const I18N_BASE = {
     },
     "it": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan si è chiuso in modo imprevisto l'ultima volta (il processo di rendering si è arrestato in modo anomalo). Ciò potrebbe essere causato da snippet di codice, plugin o un tema/icona personalizzato. Si consiglia di avviare in modalità sicura (che disabilita gli snippet di codice, i plugin e il tema e l'icona personalizzati).",
+        safeModeBtn: "🛡️ Avvia in modalità sicura",
+        normalBtn: "Avvia normalmente",
         slogan: "Ristruttura il tuo pensiero",
         wsTitle: "Spazi di lavoro",
         missingTip: "⚠️ Impossibile trovare il percorso dell'ultimo spazio di lavoro aperto",
@@ -321,6 +354,9 @@ const I18N_BASE = {
     },
     "ja": {
         title: "SiYuan",
+        crashTip: "⚠️ 前回 SiYuan が予期せず終了しました（レンダラープロセスがクラッシュしました）。コードスニペット、プラグイン、またはカスタムテーマ/アイコンが原因の可能性があります。セーフモードで起動することをお勧めします（コードスニペット、プラグイン、カスタムテーマとアイコンを無効にします）。",
+        safeModeBtn: "🛡️ セーフモードで起動",
+        normalBtn: "通常起動",
         slogan: "思考を再構築する",
         wsTitle: "ワークスペース",
         missingTip: "⚠️ 最後に開いたワークスペースのパスが見つかりませんでした",
@@ -348,6 +384,9 @@ const I18N_BASE = {
     },
     "ko": {
         title: "SiYuan",
+        crashTip: "⚠️ 지난번에 SiYuan이 예기치 않게 종료되었습니다(렌더러 프로세스 충돌). 코드 스니펫, 플러그인 또는 사용자 지정 테마/아이콘 때문일 수 있습니다. 안전 모드로 시작하는 것을 권장합니다(코드 스니펫, 플러그인, 사용자 지정 테마 및 아이콘이 비활성화됨).",
+        safeModeBtn: "🛡️ 안전 모드로 시작",
+        normalBtn: "정상적으로 시작",
         slogan: "당신의 사고를 재구성하세요",
         wsTitle: "워크스페이스",
         missingTip: "⚠️ 마지막으로 열린 워크스페이스 경로를 찾을 수 없습니다",
@@ -375,6 +414,9 @@ const I18N_BASE = {
     },
     "nl": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan is de laatste keer onverwacht afgesloten (het renderer-proces is gecrasht). Dit kan worden veroorzaakt door codefragmenten, plug-ins of een aangepast thema/pictogram. Het wordt aanbevolen om te starten in de veilige modus (die codefragmenten, plug-ins en het aangepaste thema en pictogram uitschakelt).",
+        safeModeBtn: "🛡️ Start in veilige modus",
+        normalBtn: "Normaal starten",
         slogan: "Herstructureer je denken",
         wsTitle: "Werkruimten",
         missingTip: "⚠️ Het laatst geopende werkruimtepad kon niet worden gevonden",
@@ -402,6 +444,9 @@ const I18N_BASE = {
     },
     "pl": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan zakończył działanie niespodziewanie za ostatnim razem (awaria procesu renderowania). Może to być spowodowane przez fragmenty kodu, wtyczki lub niestandardowy motyw/ikonę. Zaleca się uruchomienie w trybie awaryjnym (który wyłącza fragmenty kodu, wtyczki oraz niestandardowy motyw i ikonę).",
+        safeModeBtn: "🛡️ Uruchom w trybie awaryjnym",
+        normalBtn: "Uruchom normalnie",
         slogan: "Zrestrukturyzuj swoje myślenie",
         wsTitle: "Obszary robocze",
         missingTip: "⚠️ Nie można znaleźć ścieżki ostatnio otwartego obszaru roboczego",
@@ -429,6 +474,9 @@ const I18N_BASE = {
     },
     "pt-BR": {
         title: "SiYuan",
+        crashTip: "⚠️ O SiYuan fechou inesperadamente na última vez (o processo de renderização travou). Isso pode ter sido causado por trechos de código, plug-ins ou um tema/ícone personalizado. Recomenda-se iniciar no modo de segurança (que desativa trechos de código, plug-ins e o tema e ícone personalizados).",
+        safeModeBtn: "🛡️ Iniciar no modo de segurança",
+        normalBtn: "Iniciar normalmente",
         slogan: "Restruture seu pensamento",
         wsTitle: "Espaços de trabalho",
         missingTip: "⚠️ O caminho do último espaço de trabalho aberto não pôde ser encontrado",
@@ -456,6 +504,9 @@ const I18N_BASE = {
     },
     "ru": {
         title: "SiYuan",
+        crashTip: "⚠️ В прошлый раз SiYuan завершился неожиданно (сбой процесса отрисовки). Это могло быть вызвано фрагментами кода, плагинами или пользовательской темой/значком. Рекомендуется запустить в безопасном режиме (отключаются фрагменты кода, плагины, а также пользовательские тема и значок).",
+        safeModeBtn: "🛡️ Запустить в безопасном режиме",
+        normalBtn: "Запустить в обычном режиме",
         slogan: "Реструктурируйте своё мышление",
         wsTitle: "Рабочие пространства",
         missingTip: "⚠️ Не удалось найти путь последнего открытого рабочего пространства",
@@ -483,6 +534,9 @@ const I18N_BASE = {
     },
     "sk": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan sa naposledy neočakávane ukončil (proces vykresľovania zlyhal). Môže to byť spôsobené úryvkami kódu, doplnkami alebo vlastným motívom/ikonou. Odporúča sa spustiť v núdzovom režime (ktorý zakáže úryvky kódu, doplnky a vlastný motív a ikonu).",
+        safeModeBtn: "🛡️ Spustiť v núdzovom režime",
+        normalBtn: "Spustiť normálne",
         slogan: "Reštrukturalizujte svoje myslenie",
         wsTitle: "Pracovné priestory",
         missingTip: "⚠️ Nepodarilo sa nájsť cestu k poslednému otvorenému pracovnému priestoru",
@@ -510,6 +564,9 @@ const I18N_BASE = {
     },
     "th": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan ปิดตัวลงอย่างกะทันหันในครั้งก่อน (กระบวนการเรนเดอเรอร์ขัดข้อง) อาจเกิดจากส่วนย่อยของโค้ด ปลั๊กอิน หรือธีม/ไอคอนที่กำหนดเอง ขอแนะนำให้เริ่มในโหมดปลอดภัย (ซึ่งจะปิดใช้งานส่วนย่อยของโค้ด ปลั๊กอิน และธีมพร้อมไอคอนที่กำหนดเอง)",
+        safeModeBtn: "🛡️ เริ่มในโหมดปลอดภัย",
+        normalBtn: "เริ่มแบบปกติ",
         slogan: "ปรับโครงสร้างความคิดของคุณ",
         wsTitle: "พื้นที่ทำงาน",
         missingTip: "⚠️ ไม่พบเส้นทางพื้นที่ทำงานที่เปิดล่าสุด",
@@ -537,6 +594,9 @@ const I18N_BASE = {
     },
     "tr": {
         title: "SiYuan",
+        crashTip: "⚠️ SiYuan en son beklenmedik şekilde kapandı (işleyici işlemi çöktü). Bu, kod parçacıkları, eklentiler veya özel bir tema/simge nedeniyle olabilir. Güvenli modda başlatılması önerilir (kod parçacıklarını, eklentileri ve özel tema ile simgeyi devre dışı bırakır).",
+        safeModeBtn: "🛡️ Güvenli modda başlat",
+        normalBtn: "Normal şekilde başlat",
         slogan: "Düşüncenizi yeniden yapılandırın",
         wsTitle: "Çalışma alanları",
         missingTip: "⚠️ Son açılan çalışma alanı yolu bulunamadı",
@@ -564,6 +624,9 @@ const I18N_BASE = {
     },
     "uk": {
         title: "SiYuan",
+        crashTip: "⚠️ Минулого разу SiYuan несподівано завершив роботу (аварійна зупинка процесу відображення). Це могло бути спричинено фрагментами коду, плагінами або власною темою/піктограмою. Рекомендується запустити в безпечному режимі (вимикаються фрагменти коду, плагіни, а також власні тема та піктограма).",
+        safeModeBtn: "🛡️ Запустити в безпечному режимі",
+        normalBtn: "Запустити у звичайному режимі",
         slogan: "Реструктуруйте своє мислення",
         wsTitle: "Робочі простори",
         missingTip: "⚠️ Не вдалося знайти шлях до останнього відкритого робочого простору",

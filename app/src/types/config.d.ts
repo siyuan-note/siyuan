@@ -1748,6 +1748,10 @@ declare namespace Config {
          */
         osPlatform: string;
         /**
+         * Whether the current boot is in safe mode (disables code snippets, plugins, custom theme and icon)
+         */
+        safeMode: boolean;
+        /**
          * The absolute path of the workspace directory
          */
         workspaceDir: string;

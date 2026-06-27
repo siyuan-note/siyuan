@@ -43,6 +43,7 @@ const isDevEnv = process.env.NODE_ENV === "development";
 const appVer = app.getVersion();
 const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
+const appCrashLogPath = path.join(confDir, "app.crash.log");
 let bootWindow;
 let latestActiveWindow;
 let firstOpen = false;
@@ -87,7 +88,7 @@ if (!app.isPackaged) {
 
 for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
-    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
+    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("--safe-mode=") || arg.startsWith("siyuan://")) {
         // 跳过内置参数
         if (arg.startsWith("--openAsHidden")) {
             openAsHidden = true;
@@ -142,6 +143,22 @@ if (!firstOpen && !getArg("--workspace")) {
         }
     } catch (e) {
         writeLog("check missing workspace failed: " + e);
+    }
+}
+
+// 读取上次打开的工作空间路径，用于崩溃恢复时默认选中该工作空间
+let lastWorkspacePath = "";
+if (!firstOpen && !getArg("--workspace")) {
+    try {
+        const wsFile = path.join(confDir, "workspace.json");
+        if (fs.existsSync(wsFile)) {
+            const wsList = JSON.parse(fs.readFileSync(wsFile, "utf8"));
+            if (Array.isArray(wsList) && 0 < wsList.length) {
+                lastWorkspacePath = wsList[wsList.length - 1];
+            }
+        }
+    } catch (e) {
+        writeLog("read last workspace path failed: " + e);
     }
 }
 
@@ -529,10 +546,6 @@ const initMainWindow = () => {
         }
     });
 
-    currentWindow.webContents.on("render-process-gone", (event, details) => {
-        writeLog("Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode + "]");
-    });
-
     if (windowState.isDevToolsOpened) {
         currentWindow.webContents.openDevTools({mode: "bottom"});
     }
@@ -596,7 +609,7 @@ const showWindow = (wnd) => {
     wnd.show();
 };
 
-const initKernel = (workspace, port, lang) => {
+const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
         bootWindow = new BrowserWindow({
             show: false,
@@ -667,6 +680,9 @@ const initKernel = (workspace, port, lang) => {
         }
         if (lang && "" !== lang) {
             cmds.push("--lang", lang);
+        }
+        if (safeMode) {
+            cmds.push("--safe-mode", "true");
         }
         let cmd = `ui version [${appVer}], booting kernel [${kernelPath} ${cmds.join(" ")}]`;
         writeLog(cmd);
@@ -782,6 +798,13 @@ app.whenReady().then(() => {
         } else {
             callback(-3); // default Chromium handling
         }
+    });
+
+    // 渲染进程崩溃监听，应用级别监听比 webContents 级别更早注册、更可靠（可覆盖所有渲染进程）
+    app.on("render-process-gone", (event, webContents, details) => {
+        writeLog("Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode + "]");
+        writeAppCrashLog(details.reason, details.exitCode);
+        exitApp(kernelPort); // 退出当前工作空间的窗口和内核进程，下次启动时由用户选择是否以安全模式启动
     });
 
     const resetTrayMenu = (tray, lang, mainWindow) => {
@@ -1425,6 +1448,56 @@ app.whenReady().then(() => {
             });
             firstOpenWindow.destroy();
         });
+    } else if (hasAppCrashLog()) {
+        // 上次渲染进程崩溃，弹出安全模式选择窗口
+        const safeModeWindow = new BrowserWindow({
+            width: Math.floor(screen.getPrimaryDisplay().size.width * 0.55),
+            height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.65),
+            frame: "darwin" === process.platform,
+            titleBarStyle: "hidden",
+            fullscreenable: false,
+            icon: path.join(appDir, "stage", "icon-large.png"),
+            transparent: "darwin" === process.platform,
+            webPreferences: {
+                nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
+            },
+        });
+        let safeModeHTMLPath = path.join(appDir, "app", "electron", "workspace.html");
+        if (isDevEnv) {
+            safeModeHTMLPath = path.join(appDir, "electron", "workspace.html");
+        }
+
+        // 改进桌面端初始化时使用的外观语言 https://github.com/siyuan-note/siyuan/issues/6803
+        const languages = app.getPreferredSystemLanguages();
+        const language = resolveAppLanguage(languages);
+        let crashInfo = "";
+        try {
+            crashInfo = fs.readFileSync(appCrashLogPath, "utf8");
+        } catch (e) {
+            writeLog("read crash log failed: " + e);
+        }
+        safeModeWindow.loadFile(safeModeHTMLPath, {
+            query: {
+                lang: language,
+                home: app.getPath("home"),
+                v: appVer,
+                icon: path.join(appDir, "stage", "icon-large.png"),
+                crash: "1",
+                workspace: lastWorkspacePath,
+                crashInfo: crashInfo,
+            },
+        });
+        safeModeWindow.show();
+        // 用户选择启动方式后启动内核，仅在崩溃恢复路径下、内核启动成功后删除崩溃日志
+        ipcMain.on("siyuan-select-workspace", (event, data) => {
+            initKernel(data.workspace, "", data.lang, data.safeMode).then((isSucc) => {
+                if (isSucc) {
+                    clearAppCrashLog();
+                    initMainWindow();
+                }
+            });
+            safeModeWindow.destroy();
+        });
     } else if (lastWorkspaceMissing) {
         // 上次使用的工作空间丢失，弹出选择工作空间窗口 https://github.com/siyuan-note/siyuan/issues/14748
         const missingWorkspaceWindow = new BrowserWindow({
@@ -1439,9 +1512,9 @@ app.whenReady().then(() => {
                 nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
             },
         });
-        let missingWorkspaceHTMLPath = path.join(appDir, "app", "electron", "missing-workspace.html");
+        let missingWorkspaceHTMLPath = path.join(appDir, "app", "electron", "workspace.html");
         if (isDevEnv) {
-            missingWorkspaceHTMLPath = path.join(appDir, "electron", "missing-workspace.html");
+            missingWorkspaceHTMLPath = path.join(appDir, "electron", "workspace.html");
         }
 
         // 改进桌面端初始化时使用的外观语言 https://github.com/siyuan-note/siyuan/issues/6803
@@ -1476,7 +1549,11 @@ app.whenReady().then(() => {
         if (port) {
             writeLog("got arg [--port=" + port + "]");
         }
-        initKernel(workspace, port, "").then((isSucc) => {
+        const safeMode = getArg("--safe-mode") === "true";
+        if (safeMode) {
+            writeLog("got arg [--safe-mode=true]");
+        }
+        initKernel(workspace, port, "", safeMode).then((isSucc) => {
             if (isSucc) {
                 initMainWindow();
             }
@@ -1657,3 +1734,34 @@ function writeLog(out) {
         console.error(e);
     }
 }
+
+// 记录渲染进程崩溃信息，多次崩溃追加记录，供下次启动时判断是否进入安全模式
+const writeAppCrashLog = (reason, exitCode) => {
+    try {
+        const line = new Date().toISOString().replace(/T/, " ").replace(/\..+/, "") +
+            " Render process gone [reason=" + reason + ", exitCode=" + exitCode + "]\n";
+        // 与 writeLog 一致，用 readFileSync + writeFileSync 实现，确保同步落盘
+        let log = "";
+        if (fs.existsSync(appCrashLogPath)) {
+            log = fs.readFileSync(appCrashLogPath).toString();
+        }
+        log += line;
+        fs.writeFileSync(appCrashLogPath, log);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+// 删除崩溃日志，在内核启动成功后调用
+const clearAppCrashLog = () => {
+    try {
+        fs.unlinkSync(appCrashLogPath);
+    } catch (e) {
+        // 文件不存在等异常忽略
+    }
+};
+
+// 是否存在崩溃日志（上次渲染进程崩溃）
+const hasAppCrashLog = () => {
+    return fs.existsSync(appCrashLogPath);
+};

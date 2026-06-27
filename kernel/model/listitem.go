@@ -27,7 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (srcRootBlockID, newTargetPath string, err error) {
+func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
 	FlushTxQueue()
 
 	srcTree, _ := LoadTreeByBlockID(srcListItemID)
@@ -130,11 +130,13 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = treenode.CurrentSpec
-	if "" != previousPath {
-		box.addSort(previousPath, newTree.ID)
-	} else {
-		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
-	}
+		if "" != previousPath {
+			box.addSort(previousPath, newTree.ID)
+		} else if toTop {
+			box.addMinSort(path.Dir(newTargetPath), newTree.ID)
+		} else {
+			box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
+		}
 	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
 		return "", "", err
 	}

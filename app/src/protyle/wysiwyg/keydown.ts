@@ -108,7 +108,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (protyle.disabled ||
-            (!protyle.selectElement.classList.contains("fn__none") && protyle.selectElement.style.backgroundColor === "")) {
+            (!protyle.selectElement.classList.contains("fn__none") && !protyle.selectElement.getAttribute("data-empty"))) {
             event.stopPropagation();
             event.preventDefault();
             return;

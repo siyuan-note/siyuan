@@ -1295,15 +1295,25 @@ export class WYSIWYG {
             } else if (event.clientX < mostLeft) {
                 fromOutsideX = mostLeft + 10;
             }
-            if (fromOutsideX !== undefined) {
-                const pointElement = document.elementFromPoint(fromOutsideX, event.clientY);
-                if (pointElement && pointElement.classList.contains("protyle-wysiwyg")) {
-                    // 落点为 wysiwyg 容器本身（块间空白）时，下移 12px 重新定位
-                    nodeElement = hasClosestBlock(document.elementFromPoint(fromOutsideX, event.clientY + 12)) as HTMLElement;
-                } else {
-                    nodeElement = hasClosestBlock(pointElement) as HTMLElement;
+            // 起点落在 padding 外或块间空白（target 为 wysiwyg 容器本身）时，需用 elementFromPoint 定位起始块
+            if (fromOutsideX !== undefined || target.classList.contains("protyle-wysiwyg")) {
+                const startX = fromOutsideX !== undefined ? fromOutsideX : event.clientX;
+                // 块间缝隙可能大于固定偏移量，需沿 y 轴循环探测直到命中块
+                nodeElement = hasClosestBlock(document.elementFromPoint(startX, event.clientY)) as HTMLElement;
+                if (!nodeElement) {
+                    let probeY = event.clientY;
+                    // 步长 8px，上限 96px（约 6 个普通行高），避免在超大空白块上无限循环
+                    while (!nodeElement && probeY < event.clientY + 96) {
+                        probeY += 8;
+                        const probeElement = document.elementFromPoint(startX, probeY);
+                        if (probeElement && !probeElement.classList.contains("protyle-wysiwyg")) {
+                            nodeElement = hasClosestBlock(probeElement) as HTMLElement;
+                        }
+                    }
                 }
             }
+            // 落点是否在缝隙/padding（nodeElement 为落点下方的块），滚动后该相对关系不变，于 mousedown 时记录一次
+            const startBelowPoint = !!nodeElement && nodeElement.getBoundingClientRect().top > y;
             if (!nodeElement) {
                 const breadElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
                 if (breadElement) {
@@ -1317,6 +1327,10 @@ export class WYSIWYG {
                 item.style.pointerEvents = "none";
             });
             const needScroll = ["IMG", "VIDEO", "AUDIO"].includes(target.tagName) || target.classList.contains("img");
+            // 容器类元素判断（划选时 elementFromPoint 命中它们的边缘/空白需继续探测子块）
+            const isContainer = (el: Element) => el.classList.contains("protyle-wysiwyg") || el.classList.contains("list") ||
+                el.classList.contains("li") || el.classList.contains("sb") ||
+                el.classList.contains("callout") || el.classList.contains("bq");
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 let moveTarget: boolean | HTMLElement = moveEvent.target as HTMLElement;
                 // table cell select
@@ -1453,7 +1467,7 @@ export class WYSIWYG {
                 if (newHeight < 4) {
                     return;
                 }
-                protyle.selectElement.setAttribute("style", `background-color: ${protyle.selectElement.style.backgroundColor};top:${newTop}px;height:${newHeight}px;left:${newLeft + 2}px;width:${newWidth - 2}px;`);
+                protyle.selectElement.setAttribute("style", `top:${newTop}px;height:${newHeight}px;left:${newLeft + 2}px;width:${newWidth - 2}px;`);
                 const newMouseElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
                 if (mouseElement && mouseElement === newMouseElement && !mouseElement.classList.contains("protyle-wysiwyg") &&
                     !mouseElement.classList.contains("list") && !mouseElement.classList.contains("bq") &&
@@ -1464,19 +1478,37 @@ export class WYSIWYG {
                     mouseElement = newMouseElement;
                 }
                 hideElements(["select"], protyle);
+                // 块选择判定用的右边界需落在内容区，避免矩形右边缘在 padding 内时选不中块
+                const selectRight = Math.max(newLeft + newWidth, mostLeft);
+                // 向上划选时以 nodeElement 的实时边作为遍历终点（兼容滚动 https://github.com/siyuan-note/siyuan/issues/14664）；
+                // 落点在缝隙时 nodeElement 为下方块，需用其 top（不含自身）避免误选下方块
+                const startBlockRect = nodeElement.getBoundingClientRect();
+                const selectBottom = moveEvent.clientY <= selectStartY
+                    ? (startBelowPoint ? startBlockRect.top : startBlockRect.bottom)
+                    : (newTop + newHeight);
+                // newLeft 落在 padding 内时 elementFromPoint 会命中 wysiwyg 容器，需钳制到内容区
+                const detectX = Math.max(mostLeft, Math.min(newLeft, mostRight));
                 let firstElement;
                 if (moveEvent.clientY > selectStartY) {
                     firstElement = nodeElement;
                 } else {
-                    firstElement = document.elementFromPoint(newLeft, newTop);
+                    firstElement = document.elementFromPoint(detectX, newTop);
                 }
                 if (!firstElement) {
                     return;
                 }
-                if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") ||
-                    firstElement.classList.contains("li") || firstElement.classList.contains("sb") ||
-                    firstElement.classList.contains("callout") || firstElement.classList.contains("bq")) {
-                    firstElement = document.elementFromPoint(newLeft, newTop + 16);
+                // 向上划选且落点在 padding/缝隙时，elementFromPoint 易命中 wysiwyg 容器或容器类元素，
+                // 需沿 y 轴循环向下探测以定位到实际块，避免回退到文档首块导致误选上部所有块
+                if (moveEvent.clientY <= selectStartY && isContainer(firstElement)) {
+                    let probeY = newTop;
+                    while (probeY < selectBottom) {
+                        probeY += 8;
+                        const probeElement = document.elementFromPoint(detectX, probeY);
+                        if (probeElement && !isContainer(probeElement)) {
+                            firstElement = probeElement;
+                            break;
+                        }
+                    }
                 }
                 if (!firstElement) {
                     return;
@@ -1505,10 +1537,6 @@ export class WYSIWYG {
                 }
 
                 let hasJump = false;
-                // 块选择判定用的右边界需落在内容区，避免矩形右边缘在 padding 内时选不中块
-                const selectRight = Math.max(newLeft + newWidth, mostLeft);
-                // 向上划选时，A 始终是最后一个块，故以 A 的实时底边作为遍历终点，避免滚动后选不中 https://github.com/siyuan-note/siyuan/issues/14664
-                const selectBottom = moveEvent.clientY <= selectStartY ? nodeElement.getBoundingClientRect().bottom : (newTop + newHeight);
                 while (currentElement) {
                     if (currentElement && !currentElement.classList.contains("protyle-attr")) {
                         const currentRect = currentElement.getBoundingClientRect();
@@ -1561,8 +1589,8 @@ export class WYSIWYG {
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
                     !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
                     !selectElements[0].classList.contains("sb")) {
-                    // 只有一个 p 时不选中
-                    protyle.selectElement.style.backgroundColor = "transparent";
+                    // 只有一个 p 时不选中，用 data 属性标记未选中状态（矩形视觉保持可见）
+                    protyle.selectElement.setAttribute("data-empty", "true");
                     protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 } else {
                     protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
@@ -1571,7 +1599,7 @@ export class WYSIWYG {
                             item.classList.add("protyle-wysiwyg--select");
                         }
                     });
-                    protyle.selectElement.style.backgroundColor = "";
+                    protyle.selectElement.removeAttribute("data-empty");
                 }
             };
 
@@ -1589,6 +1617,7 @@ export class WYSIWYG {
                 });
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
+                protyle.selectElement.removeAttribute("data-empty");
                 if (tableBlockElement) {
                     // @ts-ignore
                     tableBlockElement.firstElementChild.style.webkitUserModify = "";

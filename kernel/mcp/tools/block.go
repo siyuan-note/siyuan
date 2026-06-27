@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -296,13 +297,9 @@ func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
 	}
 
-	if dataType == "markdown" {
-		var err error
-		data, err = markdownToBlockDOM(data)
-		if err != nil {
-			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "convert markdown failed: " + err.Error()}}, IsError: true}, nil
-		}
-	}
+	// markdown 转 DOM 时 Lute 会给块生成全新的随机 ID，update 前必须把原块 id 钉回去，
+	// 否则块 ID 每次更新都会变，后续按原 id 操作会报 block not found
+	data = pinBlockID(data, dataType, id)
 
 	transactions := []*model.Transaction{{
 		DoOperations: []*model.Operation{{
@@ -319,6 +316,42 @@ func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
 		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block updated"}}}, nil
+}
+
+// pinBlockID 把原块 id 钉回 markdown/dom 数据，保证 update 不改变块 ID。
+// 参照 HTTP API /api/block/updateBlock 的 id 复位逻辑（block_op.go updateBlock 非 Document 分支）。
+func pinBlockID(data, dataType, id string) string {
+	luteEngine := util.NewLute()
+	if dataType == "markdown" {
+		var err error
+		data, err = markdownToBlockDOM(data)
+		if err != nil {
+			return data
+		}
+	}
+
+	tree := luteEngine.BlockDOM2Tree(data)
+	if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
+		return data
+	}
+
+	// 更新列表项时 markdown 会渲染成 NodeList>ListItem，需要先把列表项提升到根下，渲染器才能正常工作
+	// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
+	if ast.NodeList == tree.Root.FirstChild.Type {
+		tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾
+		tree.Root.FirstChild.Unlink()                          // 删除列表
+		if nil != tree.Root.FirstChild && ast.NodeKramdownBlockIAL == tree.Root.FirstChild.Type {
+			tree.Root.FirstChild.Unlink() // 继续删除列表 IAL
+		}
+	}
+
+	if nil != tree.Root.FirstChild {
+		tree.Root.FirstChild.SetIALAttr("id", id)
+	} else {
+		tree.Root.AppendChild(treenode.NewParagraph(id))
+	}
+
+	return luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 }
 
 func blockDelete(args map[string]interface{}) (CallToolResult, error) {

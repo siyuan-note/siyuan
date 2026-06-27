@@ -234,7 +234,7 @@ export class AgentChat extends Model {
             '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
             "</svg>" +
             "</span>" +
-            '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
+            '<select class="b3-select" tabindex="0"></select>' +
             '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
@@ -250,7 +250,7 @@ export class AgentChat extends Model {
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
-        this.modelSelect = panel.querySelector(".agent-chat__model-select") as HTMLSelectElement;
+        this.modelSelect = panel.querySelector(".b3-select") as HTMLSelectElement;
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             if (this.programmaticScroll) {
@@ -427,10 +427,10 @@ export class AgentChat extends Model {
             const placeholder = window.siyuan.languages.noModelConfigured || "No model configured";
             html = '<option value="" selected>' + escapeHtml(placeholder) + "</option>";
             this.modelSelect.innerHTML = html;
-            this.modelSelect.classList.add("agent-chat__model-select--empty");
+            this.modelSelect.disabled = true;
             return;
         }
-        this.modelSelect.classList.remove("agent-chat__model-select--empty");
+        this.modelSelect.disabled = false;
         for (const o of this.modelOptions) {
             html += '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.name) + "</option>";
         }
@@ -668,7 +668,7 @@ export class AgentChat extends Model {
             if (t.closest(".agent-session-popup")) {
                 return;
             }
-            if (t.closest(".agent-chat__model-select")) {
+            if (t.closest(".b3-select")) {
                 return;
             }
             if (this.composer) {

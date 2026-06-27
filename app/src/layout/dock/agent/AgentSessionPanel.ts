@@ -12,7 +12,6 @@ export class AgentSessionPanel {
     private isLoadingMore = false;
     private searchTimer: number | null = null;
     private searchKeyword = "";
-    private titleElement: HTMLElement | null = null;
 
     constructor(
         private triggerBtn: HTMLElement,

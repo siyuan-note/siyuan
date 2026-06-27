@@ -633,33 +633,6 @@
     }
 }
 
-// 模型选择器：原生 select，复用 b3-select 基础样式，此处只补充尺寸约束。
-// height 与 line-height 一致以保证文字垂直居中（b3-select 默认 28/20，这里压到 24/24）。
-.agent-chat__model-select {
-    max-width: 160px;
-    font-size: 13px;
-    height: 24px;
-    line-height: 24px;
-    padding: 0 22px 0 8px;
-    cursor: pointer;
-}
-
-// 无可用模型时的占位态：灰色文案 + 可点击打开设置（不展开下拉）。
-.agent-chat__model-select--empty {
-    color: var(--b3-theme-on-surface-light);
-    cursor: pointer;
-
-    // 隐藏下拉箭头（原生 + b3-select 背景图），提示这是可点击的占位而非下拉选择。
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--b3-menu-background);
-    padding: 1px 8px 0; // 去箭头后回收右侧 padding；顶部 1px 修正垂直居中
-
-    &:hover {
-        background-color: var(--b3-theme-surface);
-    }
-}
-
 // 无可用模型时禁用发送按钮：半透明 + 禁止光标，从源头阻止无效请求。
 .agent-chat__send--disabled,
 .agent-chat__send[disabled] {

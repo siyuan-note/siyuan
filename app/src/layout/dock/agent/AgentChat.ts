@@ -2863,6 +2863,11 @@ export class AgentChat extends Model {
                     streamingChat.remove();
                 }
             }
+            // 用户未手动操作且仍在预览态 → 思考完成后自动折叠（尊重用户已展开/折叠的最终状态）。
+            if (!el.hasAttribute("data-user-interacted")) {
+                const body = el.querySelector(".agent-chat__thinking-body");
+                body?.classList.remove("agent-chat__thinking-body--preview");
+            }
             el.classList.add("agent-chat__msg--thinking-done");
             if (doneText) {
                 const textEl = el.querySelector(".agent-chat__thinking-text");

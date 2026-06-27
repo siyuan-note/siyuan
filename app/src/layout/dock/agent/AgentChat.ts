@@ -228,7 +228,7 @@ export class AgentChat extends Model {
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
             '<span class="fn__flex-1"></span>' +
-            '<span class="agent-chat__tokens fn__none" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
+            '<span class="agent-chat__tokens fn__none b3-button b3-button--cancel" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
             '<svg viewBox="0 0 24 24">' +
             '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="3"></circle>' +
             '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
@@ -2886,10 +2886,8 @@ export class AgentChat extends Model {
         const disabled = this.isStreaming || this.modelOptions.length === 0 || !this.hasComposerInput();
         if (disabled) {
             this.sendBtn.setAttribute("disabled", "disabled");
-            this.sendBtn.classList.add("agent-chat__send--disabled");
         } else {
             this.sendBtn.removeAttribute("disabled");
-            this.sendBtn.classList.remove("agent-chat__send--disabled");
         }
         if (this.composerHost) {
             // 复用流式时已有的禁用态样式（灰显 + 阻止交互）。

@@ -57,12 +57,6 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bo
 		}
 	}
 
-	root := treenode.GetBlockTreeRootByPath(boxID, hPath)
-	if nil != root {
-		retID = root.ID
-		return
-	}
-
 	hPathBuilder := bytes.Buffer{}
 	hpathBtMap := map[string]*treenode.BlockTree{}
 	parts := strings.Split(hPath, "/")[1:]
@@ -76,7 +70,7 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bo
 		hPathBuilder.WriteString("/")
 		hPathBuilder.WriteString(part)
 		hp := hPathBuilder.String()
-		root = treenode.GetBlockTreeRootByHPath(boxID, hp)
+		root := treenode.GetBlockTreeRootByHPath(boxID, hp)
 		if nil == root {
 			break
 		}
@@ -91,7 +85,7 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bo
 	for i, part := range parts {
 		hPathBuilder.WriteString(part)
 		hp := hPathBuilder.String()
-		root = hpathBtMap[hp]
+		root := hpathBtMap[hp]
 		isNotLast := i < len(parts)-1
 		if nil == root {
 			rootID := ast.NewNodeID()

@@ -166,6 +166,7 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
     if (!header || !body || !expandIcon || !contractIcon) { return; }
     header.addEventListener("click", () => {
+        el.setAttribute("data-user-interacted", "true");
         const isExpanded = body.classList.contains("agent-chat__thinking-body--expanded");
         const isDone = el.classList.contains("agent-chat__msg--thinking-done");
         if (isDone) {

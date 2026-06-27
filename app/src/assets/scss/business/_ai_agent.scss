@@ -437,6 +437,7 @@
 .agent-chat__thinking-body--preview {
   max-height: 120px;
   overflow-y: auto;
+  contain: none;  // 覆盖 base 的 contain:layout paint，该值会阻止 JS 设置 scrollTop 生效
 
   // 隐藏滚动条，保持预览态视觉干净（内容通过 JS 自动滚到底部）。
   scrollbar-width: none;

@@ -1661,6 +1661,7 @@ export class AgentChat extends Model {
     }
 
     private pendingTokenUpdate = false;
+    private pendingReasoningUpdate = false;
     private rafId = 0;
 
     private appendToken(token: string) {
@@ -1675,11 +1676,20 @@ export class AgentChat extends Model {
                 chatEl.className = "agent-chat__thinking-chat b3-typography agent-chat__thinking-chat--streaming";
                 thinkBody.appendChild(chatEl);
             }
-            chatEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-            postRender(chatEl, this.app);
-            // 预览态固定高度，滚动到底部让最新流式内容可见。
-            thinkBody.scrollTop = thinkBody.scrollHeight;
-            this.scrollToBottom();
+            if (!this.pendingTokenUpdate) {
+                this.pendingTokenUpdate = true;
+                // 用 RAF 合并更新（与普通 AI 消息一致），减少重建频率。
+                this.rafId = requestAnimationFrame(() => {
+                    this.pendingTokenUpdate = false;
+                    chatEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
+                    postRender(chatEl, this.app);
+                    const body = chatEl.closest(".agent-chat__thinking-body") as HTMLElement | null;
+                    if (body) {
+                        body.scrollTop = body.scrollHeight;
+                    }
+                    this.scrollToBottom();
+                });
+            }
             return;
         }
 
@@ -1706,6 +1716,17 @@ export class AgentChat extends Model {
         if (this.pendingTokenUpdate) {
             this.pendingTokenUpdate = false;
             cancelAnimationFrame(this.rafId);
+            // 思考卡片流式：更新 chatEl 并滚到底部（与 appendToken 思考分支一致）。
+            const thinkChat = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-chat--streaming") as HTMLElement;
+            if (thinkChat) {
+                thinkChat.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
+                postRender(thinkChat, this.app);
+                const thinkBody = thinkChat.parentElement;
+                if (thinkBody) {
+                    thinkBody.scrollTop = thinkBody.scrollHeight;
+                }
+                return;
+            }
             const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
             if (bodyEl) {
                 bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
@@ -1900,21 +1921,28 @@ export class AgentChat extends Model {
             return;
         }
         const thinking = thinkingElems[thinkingElems.length - 1];
-        let reasoningEl: HTMLElement;
+        // 新轮次立即创建 reasoning 元素（保证多轮顺序），文本内容用 RAF 合并追加（减少 reflow）。
         if (isNewRound) {
-            reasoningEl = document.createElement("div");
+            const reasoningEl = document.createElement("div");
             reasoningEl.className = "agent-chat__thinking-reasoning-text";
             thinking.appendChild(reasoningEl);
-        } else {
-            const allReasoning = thinking.querySelectorAll(".agent-chat__thinking-reasoning-text");
-            reasoningEl = allReasoning[allReasoning.length - 1] as HTMLElement;
-            if (!reasoningEl) {
-                reasoningEl = document.createElement("div");
-                reasoningEl.className = "agent-chat__thinking-reasoning-text";
-                thinking.appendChild(reasoningEl);
-            }
         }
-        reasoningEl.textContent += token;
+        if (!this.pendingReasoningUpdate) {
+            this.pendingReasoningUpdate = true;
+            requestAnimationFrame(() => {
+                this.pendingReasoningUpdate = false;
+                const allReasoning = thinking.querySelectorAll(".agent-chat__thinking-reasoning-text");
+                const reasoningEl = allReasoning[allReasoning.length - 1] as HTMLElement;
+                if (reasoningEl) {
+                    reasoningEl.textContent = this.currentThinkingReasoningContent;
+                    // 预览态固定高度，滚到底部让最新 reasoning 内容可见。
+                    const body = reasoningEl.closest(".agent-chat__thinking-body") as HTMLElement | null;
+                    if (body) {
+                        body.scrollTop = body.scrollHeight;
+                    }
+                }
+            });
+        }
     }
 
     private addCopyButton(el: HTMLElement, contentOverride?: string, timestamp?: number) {
@@ -2862,6 +2890,11 @@ export class AgentChat extends Model {
                 if (streamingChat) {
                     streamingChat.remove();
                 }
+            }
+            // 用户未手动操作且仍在预览态 → 思考完成后自动折叠（尊重用户已展开/折叠的最终状态）。
+            if (!el.hasAttribute("data-user-interacted")) {
+                const body = el.querySelector(".agent-chat__thinking-body");
+                body?.classList.remove("agent-chat__thinking-body--preview");
             }
             el.classList.add("agent-chat__msg--thinking-done");
             if (doneText) {

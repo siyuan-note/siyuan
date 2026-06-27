@@ -39,8 +39,10 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	for _, col := range view.Table.Columns {
 		key, getErr := attrView.GetKey(col.ID)
 		if nil != getErr {
-			// 找不到字段则在视图中删除
-			removeMissingField(attrView, view, col.ID)
+			// 找不到字段则在视图中删除（元数据查询场景不写盘）
+			if !ignoreRows {
+				removeMissingField(attrView, view, col.ID)
+			}
 			continue
 		}
 

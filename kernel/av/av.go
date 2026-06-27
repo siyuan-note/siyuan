@@ -47,6 +47,8 @@ type AttributeView struct {
 	Views     []*View      `json:"views"`     // 视图
 
 	RenderedViewables map[string]Viewable `json:"-"` // 已经渲染好的视图
+
+	keysOnlyParsed bool `json:"-"` // 标记是否为 keys-only 流式解析的结果（Values 被跳过，禁止落盘）
 }
 
 // KeyValues 描述了属性视图属性键值列表的结构。
@@ -665,10 +667,17 @@ func ParseAttributeViewKeysByPath(avJSONPath string) (ret *AttributeView, err er
 	if err = CheckSpec(ret); err != nil {
 		return nil, err
 	}
+	ret.keysOnlyParsed = true // 标记为 keys-only 解析结果，禁止后续 SaveAttributeView 落盘
 	return
 }
 
 func SaveAttributeView(av *AttributeView) (err error) {
+	if av.keysOnlyParsed {
+		// keys-only 解析结果不含行数据（Values 被流式跳过），落盘会丢失行数据。
+		// 这里静默跳过（只读菜单场景的副作用不应落盘），避免中断调用链。
+		logging.LogWarnf("skip save attribute view [%s]: it is a keys-only parsed snapshot", av.ID)
+		return
+	}
 	if "" == av.ID {
 		err = errors.New("av id is empty")
 		logging.LogErrorf("save attribute view failed: %s", err)

@@ -150,3 +150,39 @@ func TestParseAttributeViewKeysByPath_NotExist(t *testing.T) {
 		t.Errorf("err = %v, want ErrViewNotFound", err)
 	}
 }
+
+// TestSaveAttributeView_RejectKeysOnly 校验 keys-only 解析结果不会被落盘（静默跳过），避免数据丢失。
+func TestSaveAttributeView_RejectKeysOnly(t *testing.T) {
+	tmpDir := t.TempDir()
+	avID := "20260611104916-testsave01"
+	avJSONPath := filepath.Join(tmpDir, avID+".json")
+	avJSON := `{"spec":5,"id":"` + avID + `","name":"库","keyValues":[{"key":{"id":"k1","name":"主键","type":"block"},"values":[{"id":"v1","keyID":"k1","blockID":"b1","type":"block"}]}],"views":[]}`
+	if err := os.WriteFile(avJSONPath, []byte(avJSON), 0644); err != nil {
+		t.Fatalf("write av.json failed: %s", err)
+	}
+	cache.ClearAVCache()
+
+	// keys-only 解析：Values 被跳过
+	keysAV, err := ParseAttributeViewKeysByPath(avJSONPath)
+	if err != nil {
+		t.Fatalf("parse failed: %s", err)
+	}
+	if !keysAV.keysOnlyParsed {
+		t.Fatal("keysOnlyParsed flag not set")
+	}
+
+	// 尝试保存 keys-only 对象：应静默跳过（无 error），不写文件
+	if err := SaveAttributeView(keysAV); err != nil {
+		t.Fatalf("SaveAttributeView returned error for keys-only: %s", err)
+	}
+
+	// 重新全量解析，确认磁盘上的 Values 仍在（未被空 Values 覆盖）
+	cache.ClearAVCache()
+	fullAV, err := ParseAttributeViewByPath(avJSONPath)
+	if err != nil {
+		t.Fatalf("re-parse failed: %s", err)
+	}
+	if len(fullAV.KeyValues) != 1 || len(fullAV.KeyValues[0].Values) != 1 {
+		t.Errorf("disk data corrupted: KeyValues[0].Values len = %d, want 1 (keys-only save must not overwrite)", len(fullAV.KeyValues[0].Values))
+	}
+}

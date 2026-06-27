@@ -81,13 +81,13 @@ export const handleTouchEnd = (event: TouchEvent) => {
                     clientY: event.changedTouches[0].clientY,
                 }));
             }
+            clearLongPress();
             event.stopImmediatePropagation();
             event.preventDefault();
             return;
         }
-        clearLongPress();
     }
-
+    clearLongPress();
     if (typeof yDiff === "undefined" && window.siyuan.mobile.editor?.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {

@@ -3,6 +3,11 @@ import {escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
 import {upDownHint} from "../../../util/upDownHint";
+/// #if !BROWSER
+import * as path from "path";
+import {useShell} from "../../../util/pathName";
+
+/// #endif
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;
@@ -39,6 +44,7 @@ export class AgentSessionPanel {
     }
 
     close() {
+        this.closeMoreMenu();
         document.querySelectorAll(".agent-session-popup").forEach(function (el) {
             el.remove();
         });
@@ -147,7 +153,7 @@ export class AgentSessionPanel {
                 html += '<div class="b3-list-item  b3-list-item--hide-action' + (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
                     '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(s.title || defaultTitle) + '">' + escapeHtml(s.title || defaultTitle) + "</span>" +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
-                    '<span class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.delete + '"><svg><use xlink:href="#iconTrashcan"></use></svg></span>' +
+                    '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw agent-session-more" data-id="' + s.id + '" aria-label="' + (window.siyuan.languages.method || "More") + '"><svg><use xlink:href="#iconMore"></use></svg></span>' +
                     "</div>";
             }
         }
@@ -172,24 +178,21 @@ export class AgentSessionPanel {
         container.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
 
-            const deleteBtn = hasClosestByClassName(target, "b3-list-item__action--warning");
-            if (deleteBtn) {
-                e.stopPropagation();
-                const id = (deleteBtn as HTMLElement).getAttribute("data-id") || "";
-                if (id) {
-                    this.callbacks.onDelete(id).then(() => {
-                        this.refresh();
-                    });
+            const actionBtn = hasClosestByClassName(target, "b3-list-item__action");
+            if (actionBtn) {
+                // "更多"按钮：弹出文件夹（桌面端）和删除操作。
+                if (actionBtn.classList.contains("agent-session-more")) {
+                    e.stopPropagation();
+                    const id = (actionBtn as HTMLElement).getAttribute("data-id") || "";
+                    if (id) {
+                        this.showMoreMenu(actionBtn as HTMLElement, id);
+                    }
+                    return;
                 }
-                return;
-            }
-
-            const renameBtn = hasClosestByClassName(target, "b3-list-item__action");
-            if (renameBtn) {
                 e.stopPropagation();
-                const id = (renameBtn as HTMLElement).getAttribute("data-id") || "";
+                const id = (actionBtn as HTMLElement).getAttribute("data-id") || "";
                 if (id) {
-                    this.startRename(id, renameBtn.parentElement);
+                    this.startRename(id, actionBtn.parentElement);
                 }
                 return;
             }
@@ -304,5 +307,66 @@ export class AgentSessionPanel {
         this.total = result.total;
         this.page = 1;
         this.renderItems(itemsContainer, result.sessions, false);
+    }
+
+    // 会话条目的"更多"菜单：桌面端显示"打开文件位置"和"删除"两项。
+    private moreMenu: HTMLElement | null = null;
+    private moreMenuCleanup: (() => void) | null = null;
+
+    private showMoreMenu(anchor: HTMLElement, id: string) {
+        this.closeMoreMenu();
+        let isDesktop = false;
+        /// #if !BROWSER
+        isDesktop = true;
+        /// #endif
+        const L = window.siyuan.languages;
+        const menu = document.createElement("div");
+        menu.className = "b3-menu agent-session-more-menu";
+        let html = "";
+        if (isDesktop) {
+            html += '<button class="b3-menu__item" data-action="folder"><svg class="b3-menu__icon"><use xlink:href="#iconFolder"></use></svg><span class="b3-menu__label">' + escapeHtml(L.showInFolder) + "</span></button>";
+        }
+        html += '<button class="b3-menu__item b3-menu__item--warning" data-action="delete"><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">' + escapeHtml(L.delete) + "</span></button>";
+        menu.innerHTML = html;
+        menu.addEventListener("click", (e: MouseEvent) => {
+            const btn = hasClosestByClassName(e.target as HTMLElement, "b3-menu__item");
+            if (!btn) { return; }
+            const action = btn.getAttribute("data-action");
+            if (action === "delete") {
+                this.callbacks.onDelete(id).then(() => {
+                    this.refresh();
+                });
+            }
+            if (action === "folder") {
+                /// #if !BROWSER
+                useShell("openPath", path.join(window.siyuan.config.system.dataDir, "storage", "ai", "agent", "sessions", id));
+                /// #endif
+            }
+            this.closeMoreMenu();
+        });
+        const onOutside = (e: MouseEvent) => {
+            if (menu.contains(e.target as Node)) {
+                return;
+            }
+            this.closeMoreMenu();
+        };
+        document.addEventListener("mousedown", onOutside, {once: true});
+        this.moreMenuCleanup = () => document.removeEventListener("mousedown", onOutside);
+        this.moreMenu = menu;
+        document.body.appendChild(menu);
+        menu.style.zIndex = (++window.siyuan.zIndex).toString();
+        const btnRect = anchor.getBoundingClientRect();
+        setPosition(menu, btnRect.right - 8, btnRect.top - 8, btnRect.height);
+    }
+
+    private closeMoreMenu() {
+        if (this.moreMenu) {
+            this.moreMenu.remove();
+            this.moreMenu = null;
+        }
+        if (this.moreMenuCleanup) {
+            this.moreMenuCleanup();
+            this.moreMenuCleanup = null;
+        }
     }
 }

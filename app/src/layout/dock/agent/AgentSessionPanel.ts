@@ -330,9 +330,30 @@ export class AgentSessionPanel {
         }
         this.closeAllSubmenus(anchor);
         anchor.classList.add("b3-menu__item--show");
-        // 子菜单项 hover 高亮（限定 b3-menu__items 内的项）。
         const submenu = anchor.querySelector(".b3-menu__submenu") as HTMLElement | null;
         if (submenu) {
+            // 使用 position: fixed 定位子菜单，避免在可滚动列表内触发滚动条。
+            // 在按钮左侧展开；左侧空间不够则在右侧展开。
+            const anchorRect = anchor.getBoundingClientRect();
+            const submenuRect = submenu.getBoundingClientRect();
+            let left = anchorRect.left - submenuRect.width - 4;
+            let top = anchorRect.top;
+            if (left < 0) {
+                left = anchorRect.right + 4;
+            }
+            // 防止超出屏幕底部
+            if (top + submenuRect.height > window.innerHeight) {
+                top = window.innerHeight - submenuRect.height - 4;
+            }
+            // 防止超出屏幕顶部
+            if (top < 0) {
+                top = 4;
+            }
+            submenu.style.top = top + "px";
+            submenu.style.left = left + "px";
+            submenu.style.zIndex = (++window.siyuan.zIndex).toString();
+
+            // 子菜单项 hover 高亮（限定 b3-menu__items 内的项）。
             const itemsContainer = submenu.querySelector(".b3-menu__items");
             if (itemsContainer) {
                 itemsContainer.addEventListener("mouseover", (e: MouseEvent) => {
@@ -344,44 +365,44 @@ export class AgentSessionPanel {
                     item.classList.add("b3-menu__item--current");
                 });
             }
-        // 关闭子菜单：点击子菜单项执行操作后关闭，或点击外部关闭。
-        const onClose = () => {
-            anchor.classList.remove("b3-menu__item--show");
-            submenu?.querySelectorAll(".b3-menu__item--current").forEach((el) => {
-                el.classList.remove("b3-menu__item--current");
-            });
-            document.removeEventListener("mousedown", onOutside);
-        };
-        const onOutside = (e: MouseEvent) => {
-            if (anchor.contains(e.target as Node)) {
-                return;
-            }
-            onClose();
-        };
-        document.addEventListener("mousedown", onOutside, {once: true});
-        // 子菜单项 click 事件委托。
-        if (submenu && !submenu.dataset.eventsBound) {
-            submenu.dataset.eventsBound = "1";
-            submenu.addEventListener("click", (e: MouseEvent) => {
-                const btn = hasClosestByClassName(e.target as HTMLElement, "b3-menu__item");
-                if (!btn) { return; }
-                e.stopPropagation();
-                const action = btn.getAttribute("data-action");
-                if (action === "delete") {
-                    this.callbacks.onDelete(id).then(() => {
-                        this.refresh();
-                    });
-                }
-                if (action === "folder") {
-                    /// #if !BROWSER
-                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "storage", "ai", "agent", "sessions", id));
-                    /// #endif
+            // 关闭子菜单：点击子菜单项执行操作后关闭，或点击外部关闭。
+            const onClose = () => {
+                anchor.classList.remove("b3-menu__item--show");
+                submenu.querySelectorAll(".b3-menu__item--current").forEach((el) => {
+                    el.classList.remove("b3-menu__item--current");
+                });
+                document.removeEventListener("mousedown", onOutside);
+            };
+            const onOutside = (e: MouseEvent) => {
+                if (anchor.contains(e.target as Node)) {
+                    return;
                 }
                 onClose();
-            });
-	        }
-	    }
-	}
+            };
+            document.addEventListener("mousedown", onOutside, {once: true});
+            // 子菜单项 click 事件委托。
+            if (!submenu.dataset.eventsBound) {
+                submenu.dataset.eventsBound = "1";
+                submenu.addEventListener("click", (e: MouseEvent) => {
+                    const btn = hasClosestByClassName(e.target as HTMLElement, "b3-menu__item");
+                    if (!btn) { return; }
+                    e.stopPropagation();
+                    const action = btn.getAttribute("data-action");
+                    if (action === "delete") {
+                        this.callbacks.onDelete(id).then(() => {
+                            this.refresh();
+                        });
+                    }
+                    if (action === "folder") {
+                        /// #if !BROWSER
+                        useShell("openPath", path.join(window.siyuan.config.system.dataDir, "storage", "ai", "agent", "sessions", id));
+                        /// #endif
+                    }
+                    onClose();
+                });
+            }
+        }
+    }
 
 	private closeAllSubmenus(except?: HTMLElement) {
         this.host.querySelectorAll(".agent-session-more.b3-menu__item--show").forEach((el) => {

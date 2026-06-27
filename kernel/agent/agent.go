@@ -58,6 +58,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Modify: block.update replaces ONE block's content with new markdown — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
 - Organize: document.move (full document), document.rename (title), block.move (single content block), document.delete.
 - Attributes: attr.get/set on any block. Database/attribute views: database.item_add (rows), database.key_add (columns), database.render (view). Create database blocks via database tools, never via the file tool.
+- Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 
 ## Response Guidelines
 - Reply in the user's language. When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
@@ -122,8 +123,13 @@ const (
 )
 
 // toolSignatureKeys 列出各工具里真正"区分一次调用"的关键参数。
-// 这些参数会并入死循环签名，避免 agent 对不同 url/query/sql 的合法连续调用被误判；
+// 这些参数会并入死循环签名，避免 agent 对不同 url/query/id 的合法连续调用被误判；
 // 同时对同一参数反复调用（真死循环）仍能正确触发终止。
+//
+// 选键原则：只纳入稳定的"目标标识符"类参数（id/ids/path/label/name/keyword/notebook/url 等），
+// 不纳入易变的"内容值"类参数（data/markdown/content/value/memo/title 等）。
+// 此外，object/array 类参数（如 attr 的 attrs、block 的 items）经 fmt.Sprint 字符串化后
+// 顺序不稳定（map 迭代无序），会削弱签名稳定性，故一律排除。
 var toolSignatureKeys = map[string][]string{
 	"web_fetch":    {"url", "format"},
 	"web_search":   {"query"},
@@ -131,10 +137,28 @@ var toolSignatureKeys = map[string][]string{
 	"sql":          {"sql", "stmt"},
 	"search":       {"query", "keyword"},
 	"outline":      {"id", "doc_id"},
-	"system":       {"action"},
-	"workspace":    {"action"},
-	"sync":         {"action"},
-	"todo_write":   {"todos"},
+
+	"attr":      {"id", "ids"},
+	"block":     {"id", "ids", "parentID", "nextID", "previousID"},
+	"document":  {"id", "path", "notebook", "keyword"},
+	"database":  {"id", "keyID", "itemID", "itemIDs", "keyword"},
+	"ref":       {"id", "keyword"},
+	"notebook":  {"id", "name"},
+	"tag":       {"label", "old", "new", "keyword"},
+	"bookmark":  {"label", "old", "new"},
+	"dailynote": {"notebook"},
+	"template":  {"id", "path", "name", "keyword"},
+	"history":   {"path", "notebook", "query"},
+	"repo":      {"id", "left", "right", "name", "keyword"},
+	"asset":     {"id", "path"},
+	"import":    {"notebook", "path"},
+	"export":    {"id"},
+	"skill":     {"name", "url"},
+
+	"system":     {"action"},
+	"workspace":  {"action"},
+	"sync":       {"action"},
+	"todo_write": {"todos"},
 }
 
 // buildDoomSignature 用 toolName + action + 关键参数构造死循环签名。

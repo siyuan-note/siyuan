@@ -669,71 +669,14 @@
 }
 
 .agent-session-popup {
-  position: fixed;
   width: 280px;
   max-height: 360px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-
-  .b3-menu__items {
-    flex: 1;
-    min-height: 0;
-  }
-
-  .b3-menu__item:hover {
-    background: var(--b3-list-hover);
-  }
-
-  .b3-menu__label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
 .agent-session-popup__search {
-  width: calc(100% - 16px);
   margin: 0 8px 4px;
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-.agent-session-popup__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.agent-session-popup__delete {
-  width: 12px;
-  height: 12px;
-  color: var(--b3-theme-error);
-
-  &:hover, &:focus-visible {
-    opacity: 0.7;
-  }
-}
-
-.agent-session-popup__rename {
-  width: 12px;
-  height: 12px;
-
-  &:hover, &:focus-visible {
-    opacity: 0.7;
-  }
-}
-
-.agent-session-popup__rename-input {
-  flex: 1;
-  font-size: 13px;
-  padding: 2px 4px;
-  border: 1px solid var(--b3-theme-primary);
-  border-radius: var(--b3-border-radius);
-  outline: none;
-  background: var(--b3-theme-background);
-  color: var(--b3-theme-on-background);
 }
 
 // Todo list styles

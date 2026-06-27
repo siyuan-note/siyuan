@@ -57,7 +57,7 @@ type SessionEntry =
     timestamp?: number
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string })
-    | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string })
+    | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string; answers?: string[] })
     | (EntryBase & { type: "snapshot"; snapshotID: string })
     | (EntryBase & { type: "rollback"; snapshotID: string });
 
@@ -1026,7 +1026,8 @@ export class AgentChat extends Model {
         id?: string;
         questionID: string;
         questions: Array<Record<string, unknown>>;
-        status?: string
+        status?: string;
+        answers?: string[];
     }) {
         const L = window.siyuan.languages;
         const el = document.createElement("div");
@@ -1048,6 +1049,19 @@ export class AgentChat extends Model {
         el.querySelectorAll("input").forEach((inp) => {
             (inp as HTMLInputElement).disabled = true;
         });
+        // 恢复已提交的选中状态（answers 中存的是选项 value）。
+        if (entry.answers && entry.answers.length > 0) {
+            el.querySelectorAll("input[type=radio], input[type=checkbox]").forEach((inp) => {
+                (inp as HTMLInputElement).checked = entry.answers!.includes((inp as HTMLInputElement).value);
+            });
+            const customInput = el.querySelector(".agent-chat__question-custom") as HTMLInputElement | null;
+            if (customInput) {
+                const customAnswer = entry.answers.find(a => el.querySelector('input[value="' + a + '"]') === null);
+                if (customAnswer) {
+                    customInput.value = customAnswer;
+                }
+            }
+        }
         this.messagesContainer.appendChild(el);
     }
 
@@ -1125,7 +1139,8 @@ export class AgentChat extends Model {
                         id?: string;
                         questionID: string;
                         questions: Array<Record<string, unknown>>;
-                        status?: string
+                        status?: string;
+                        answers?: string[];
                     });
                     break;
                 case "snapshot":
@@ -2551,10 +2566,11 @@ export class AgentChat extends Model {
             console.error("agent question request error:", e);
         }
         const entry = this.entries.find(e => e.type === "question" && e.questionID === questionID) as {
-            status?: string
+            status?: string; answers?: string[]
         } | undefined;
         if (entry) {
             entry.status = "submitted";
+            entry.answers = answers;
         }
         await this.saveSession();
     }

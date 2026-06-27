@@ -649,6 +649,7 @@ export class Files extends Model {
                     const toDocOptions: {
                         targetNoteBook: string;
                         pushMode: number;
+                        toTop?: boolean;
                         srcHeadingID?: string;
                         srcListItemID?: string;
                         targetPath?: string;
@@ -665,7 +666,10 @@ export class Files extends Model {
                         if (newElement.previousElementSibling) {
                             toDocOptions.previousPath = newElement.previousElementSibling.getAttribute("data-path");
                         } else {
-                            toDocOptions.targetPath = newElement.parentElement.previousElementSibling.getAttribute("data-path");
+                            // 拖到第一个子文档上方，作为父文档的第一个子文档 https://github.com/siyuan-note/siyuan/issues/17797
+                            const parentLi = newElement.parentElement.previousElementSibling as HTMLElement;
+                            toDocOptions.targetPath = parentLi.getAttribute("data-path");
+                            toDocOptions.toTop = true;
                         }
                     }
                     if (gutterTypes[0] === "nodeheading") {

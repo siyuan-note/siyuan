@@ -2272,7 +2272,20 @@ export class AgentChat extends Model {
                 });
             });
         });
-        this.insertBeforeAI(el);
+        // 快照应在执行区域之前：有确认卡片时插到确认卡片前，否则查找活跃的思考卡片
+        const confirmCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--confirm");
+        if (confirmCards.length > 0) {
+            this.messagesContainer.insertBefore(el, confirmCards[confirmCards.length - 1]);
+        } else {
+            const activeThinking = this.messagesContainer.querySelector(
+                ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+            );
+            if (activeThinking) {
+                this.messagesContainer.insertBefore(el, activeThinking);
+            } else {
+                this.insertBeforeAI(el);
+            }
+        }
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }

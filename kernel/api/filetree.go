@@ -246,7 +246,11 @@ func heading2Doc(c *gin.Context) {
 	if arg["previousPath"] != nil {
 		previousPath = arg["previousPath"].(string)
 	}
-	srcRootBlockID, targetPath, err := model.Heading2Doc(srcHeadingID, targetNotebook, targetPath, previousPath)
+	var toTop bool
+	if arg["toTop"] != nil {
+		toTop = arg["toTop"].(bool)
+	}
+	srcRootBlockID, targetPath, err := model.Heading2Doc(srcHeadingID, targetNotebook, targetPath, previousPath, toTop)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -285,7 +289,11 @@ func li2Doc(c *gin.Context) {
 	if arg["previousPath"] != nil {
 		previousPath = arg["previousPath"].(string)
 	}
-	srcRootBlockID, targetPath, err := model.ListItem2Doc(srcListItemID, targetNotebook, targetPath, previousPath)
+	var toTop bool
+	if arg["toTop"] != nil {
+		toTop = arg["toTop"].(bool)
+	}
+	srcRootBlockID, targetPath, err := model.ListItem2Doc(srcListItemID, targetNotebook, targetPath, previousPath, toTop)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

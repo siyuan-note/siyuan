@@ -302,7 +302,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	return
 }
 
-func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (srcRootBlockID, newTargetPath string, err error) {
+func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
 	FlushTxQueue()
 
 	srcTree, _ := LoadTreeByBlockID(srcHeadingID)
@@ -427,6 +427,8 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (sr
 	newTree.Root.Spec = treenode.CurrentSpec
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
+	} else if toTop {
+		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
 	} else {
 		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
 	}

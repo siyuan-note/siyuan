@@ -2505,6 +2505,9 @@ export class AgentChat extends Model {
                 wasChecked = input.checked;
             });
             option.addEventListener("click", (e) => {
+                if (el.classList.contains("agent-chat__msg--confirmed")) {
+                    return;
+                }
                 if (input.type === "radio" && wasChecked) {
                     e.preventDefault();
                     input.checked = false;
@@ -2534,6 +2537,10 @@ export class AgentChat extends Model {
                 if (actions) {
                     (actions as HTMLElement).innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentQuestionSubmitted || "Submitted") + "</span>";
                 }
+                // 提交后禁用所有输入，不可再修改。
+                el.querySelectorAll("input").forEach((inp) => {
+                    (inp as HTMLInputElement).disabled = true;
+                });
                 this.postQuestionAnswer(questionID, answers);
             });
         }

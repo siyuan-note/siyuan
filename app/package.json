@@ -8,6 +8,7 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "lint": "eslint . --fix --cache",
+    "test": "node --import tsx --test",
     "dev": "webpack --mode development",
     "dev:mobile": "webpack --mode development --config webpack.mobile.js",
     "dev:desktop": "webpack --mode development --config webpack.desktop.js",
@@ -87,6 +88,7 @@
     "safer-buffer": "^2.1.2",
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
+    "tsx": "^4.22.4",
     "typescript": "^4.9.5",
     "webpack": "^5.104.1",
     "webpack-bundle-analyzer": "^4.5.0",

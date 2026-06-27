@@ -5,7 +5,7 @@ import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
 import {getDocDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
-import {newFile} from "../../util/newFile";
+import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {MenuItem} from "../../menus/Menu";
 import {showMessage} from "../../dialog/message";
@@ -244,13 +244,7 @@ export class Files extends Model {
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile({
-                                    app: options.app,
-                                    notebookId,
-                                    currentPath: pathString,
-                                    useSavePath: false,
-                                    listDocTree: true,
-                                });
+                                newFileInTree(options.app, notebookId, pathString);
                             } else if (type === "more-root") {
                                 initNavigationMenu(options.app, target.parentElement).popup({
                                     x: event.clientX,
@@ -1299,13 +1293,7 @@ data-type="navigation-root" data-path="/">
             app: Constants.SIYUAN_APPID,
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
-                newFile({
-                    app: this.app,
-                    notebookId,
-                    currentPath: "/",
-                    useSavePath: false,
-                    listDocTree: true,
-                });
+                newFileInTree(this.app, notebookId, "/");
                 return;
             }
             this.onLsHTML(response.data);

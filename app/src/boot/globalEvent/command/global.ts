@@ -435,10 +435,7 @@ export const globalCommand = (command: string, app: App) => {
             lockScreen(app);
             return true;
         case "newFile":
-            newFile({
-                app,
-                useSavePath: true
-            });
+            newFile(app);
             return true;
         case "riffCard":
             openCard(app);

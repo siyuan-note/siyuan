@@ -53,10 +53,7 @@ export const setEmpty = (app: App) => {
                 event.preventDefault();
                 break;
             } else if (target.id === "emptyNewFile") {
-                newFile({
-                    app,
-                    useSavePath: true
-                });
+                newFile(app);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

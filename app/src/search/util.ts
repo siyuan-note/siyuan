@@ -17,7 +17,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
 import {isIPad, isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
-import {newFileByName} from "../util/newFile";
+import {newFile} from "../util/newFile";
 import {
     filterMenu,
     getKeyByLiElement,
@@ -799,7 +799,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 const searchAssetInputElement = element.querySelector("#searchAssetInput") as HTMLInputElement;
                 if (type === "search-new") {
                     if (config.method == 0) {
-                        newFileByName(app, searchInputElement.value);
+                        newFile(app, searchInputElement.value);
                     }
                 } else if (type === "search-item") {
                     const searchType = target.dataset.id ? "asset" : (unRefPanelElement.classList.contains("fn__none") ? "doc" : "unRef");

@@ -1,10 +1,10 @@
 import {showMessage} from "../dialog/message";
-import {getAllModels} from "../layout/getAll";
-import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {getDockByType} from "../layout/tabUtil";
+import {hasTopClosestByTag} from "../protyle/util/hasClosest";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
+import {Editor} from "../editor";
 import {openFileById} from "../editor/util";
+import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #endif
 import {fetchPost} from "./fetch";
 import {getDisplayName, getOpenNotebookCount, pathPosix} from "./pathName";
@@ -13,235 +13,64 @@ import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import {App} from "../index";
+import {NewDocTargetByHPath, NewDocTargetSubDoc, getNewDocTargetFromSavePath, getNewDocTargetFromTree} from "./parseNewDocTarget";
 
-export const getNewFilePath = (useSavePath: boolean) => {
-    let notebookId = "";
-    let currentPath = "";
-    /// #if !MOBILE
-    getAllModels().editor.find((item) => {
-        const currentElement = item.parent.headElement;
-        if (currentElement.classList.contains("item--focus")) {
-            notebookId = item.editor.protyle.notebookId;
-            if (useSavePath) {
-                currentPath = item.editor.protyle.path;
-            } else {
-                currentPath = pathPosix().dirname(item.editor.protyle.path);
-            }
-            if (hasClosestByClassName(currentElement, "layout__wnd--active")) {
-                return true;
-            }
-        }
-    });
-    if (!notebookId) {
-        const fileModel = getDockByType("file").data.file;
-        if (fileModel instanceof Files) {
-            const currentElement = fileModel.element.querySelector(".b3-list-item--focus");
-            if (currentElement) {
-                const topElement = hasTopClosestByTag(currentElement, "UL");
-                if (topElement) {
-                    notebookId = topElement.getAttribute("data-url");
-                }
-                const selectPath = currentElement.getAttribute("data-path");
-                if (useSavePath) {
-                    currentPath = selectPath;
-                } else {
-                    currentPath = pathPosix().dirname(selectPath);
-                }
-            }
-        }
-    }
-    /// #else
-    if (window.siyuan.mobile.editor && document.getElementById("empty").classList.contains("fn__none")) {
-        notebookId = window.siyuan.mobile.editor.protyle.notebookId;
-        if (useSavePath) {
-            currentPath = window.siyuan.mobile.editor.protyle.path;
-        } else {
-            currentPath = pathPosix().dirname(window.siyuan.mobile.editor.protyle.path);
-        }
-    }
-    /// #endif
-    if (!notebookId) {
-        window.siyuan.notebooks.find(item => {
-            if (!item.closed) {
-                notebookId = item.id;
-                currentPath = "/";
-                return true;
-            }
-        });
-    }
-    return {notebookId, currentPath};
+type NewDocRequest = {
+    app: App;
+    notebookId: string;
+    currentPath: string;
+    /** 是否有来自编辑器或文件树选中项的焦点目标 */
+    hasFocusTarget: boolean;
+    name?: string;
+    paths?: string[];
+    listDocTree?: boolean;
+    onCreated?: (id: string, title: string) => void;
 };
 
-export const newFile = (optios: {
-    app: App,
-    notebookId?: string,
-    currentPath?: string,
-    paths?: string[],
-    useSavePath: boolean,
-    name?: string,
-    afterCB?: (id: string, title: string) => void
-    listDocTree?: boolean
-}) => {
+/** 按配置路径创建文档；从聚焦编辑器或文件树推断上下文；可选 name 指定文档名 */
+export const newFile = (app: App, name?: string) => {
     if (getOpenNotebookCount() === 0) {
         showMessage(window.siyuan.languages.newFileTip);
         return;
     }
-    if (!optios.notebookId) {
-        const resultData = getNewFilePath(optios.useSavePath);
-        optios.notebookId = resultData.notebookId;
-        optios.currentPath = resultData.currentPath;
+    const {notebookId, currentPath, hasFocusTarget} = getNewFilePath();
+    if (name === undefined) {
+        runNewDoc({
+            app,
+            notebookId,
+            currentPath,
+            hasFocusTarget,
+        });
+    } else {
+        runNewDoc({
+            app,
+            notebookId,
+            currentPath,
+            hasFocusTarget,
+            name: replaceFileName(name.trim()),
+            onCreated: () => hideElements(["dialog"]),
+        });
     }
-    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: optios.notebookId}, (data) => {
-        if (!optios.useSavePath) {
-            data.data.box = optios.notebookId;
-        }
-        const docName = optios.name || window.siyuan.languages._kernel[16];
-        const titleEmpty = !optios.name;
-        if ((data.data.path.indexOf("/") > -1 && optios.useSavePath) || optios.name) {
-            if (data.data.path.startsWith("/") || optios.currentPath === "/") {
-                const createPath = pathPosix().join(data.data.path, docName);
-                fetchPost("/api/filetree/createDocWithMd", {
-                    notebook: data.data.box,
-                    path: createPath,
-                    // 根目录时无法确定 parentID
-                    markdown: "",
-                    titleEmpty,
-                    listDocTree: optios.listDocTree
-                }, response => {
-                    if (optios.afterCB) {
-                        optios.afterCB(response.data, pathPosix().basename(createPath));
-                    }
-                    /// #if !MOBILE
-                    openFileById({
-                        app: optios.app,
-                        id: response.data,
-                        action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
-                    });
-                    /// #else
-                    openMobileFileById(optios.app, response.data, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
-                    /// #endif
-                });
-            } else {
-                fetchPost("/api/filetree/getHPathByPath", {
-                    notebook: data.data.box,
-                    path: optios.notebookId === data.data.box ? (optios.currentPath.endsWith(".sy") ? optios.currentPath : optios.currentPath + ".sy") : (data.data.path || "/")
-                }, (responseHPath) => {
-                    const createPath = pathPosix().join(responseHPath.data, data.data.path, docName);
-                    fetchPost("/api/filetree/createDocWithMd", {
-                        notebook: data.data.box,
-                        path: createPath,
-                        parentID: getDisplayName(optios.currentPath, true, true),
-                        markdown: "",
-                        titleEmpty,
-                        listDocTree: optios.listDocTree
-                    }, response => {
-                        if (optios.afterCB) {
-                            optios.afterCB(response.data, pathPosix().basename(createPath));
-                        }
-                        /// #if !MOBILE
-                        openFileById({
-                            app: optios.app,
-                            id: response.data,
-                            action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
-                        });
-                        /// #else
-                        openMobileFileById(optios.app, response.data, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
-                        /// #endif
-                    });
-                });
-            }
-        } else {
-            const title = pathPosix().basename(data.data.path);
-            if (!validateName(title)) {
-                return;
-            }
-            if (optios.notebookId !== data.data.box) {
-                const createPath = pathPosix().join(data.data.path || "/", docName);
-                fetchPost("/api/filetree/createDocWithMd", {
-                    notebook: data.data.box,
-                    path: createPath,
-                    markdown: "",
-                    titleEmpty,
-                    listDocTree: optios.listDocTree
-                }, response => {
-                    if (optios.afterCB) {
-                        optios.afterCB(response.data, pathPosix().basename(createPath));
-                    }
-                    /// #if !MOBILE
-                    openFileById({
-                        app: optios.app,
-                        id: response.data,
-                        action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
-                    });
-                    /// #else
-                    openMobileFileById(optios.app, response.data, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
-                    /// #endif
-                });
-                return;
-            }
+};
 
-            const id = Lute.NewNodeID();
-            const newPath = (pathPosix().join(getDisplayName(optios.currentPath, false, true), id + ".sy"));
-            if (optios.paths) {
-                optios.paths[optios.paths.indexOf(undefined)] = newPath;
-            }
-            fetchPost("/api/filetree/createDoc", {
-                notebook: data.data.box,
-                path: newPath,
-                title,
-                md: "",
-                sorts: optios.paths,
-                listDocTree: optios.listDocTree
-            }, () => {
-                if (optios.afterCB) {
-                    optios.afterCB(id, title);
-                }
-                /// #if !MOBILE
-                openFileById({app: optios.app, id, action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]});
-                /// #else
-                openMobileFileById(optios.app, id, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
-                /// #endif
-            });
-        }
+export const newFileInProtyle = (protyle: IProtyle, onCreated: (id: string, title: string) => void) => {
+    runNewDoc({
+        app: protyle.app,
+        notebookId: protyle.notebookId,
+        currentPath: protyle.path,
+        hasFocusTarget: true,
+        onCreated,
     });
 };
 
-export const getSavePath = (pathString: string, notebookId: string, cb: (p: string, notebookId: string) => void) => {
-    fetchPost("/api/filetree/getRefCreateSavePath", {
-        notebook: notebookId
-    }, (data) => {
-        let targetPath = pathString;
-        if (notebookId !== data.data.box) {
-            targetPath = data.data.path || "/";
-        }
-        if (data.data.path) {
-            if (data.data.path.startsWith("/")) {
-                cb(getDisplayName(data.data.path, false, true), data.data.box);
-            } else {
-                fetchPost("/api/filetree/getHPathByPath", {
-                    notebook: data.data.box,
-                    path: targetPath
-                }, (response) => {
-                    cb(getDisplayName(pathPosix().join(response.data, data.data.path), false, true), data.data.box);
-                });
-            }
-        } else {
-            fetchPost("/api/filetree/getHPathByPath", {
-                notebook: data.data.box,
-                path: targetPath
-            }, (response) => {
-                cb(getDisplayName(response.data, false, true), data.data.box);
-            });
-        }
-    });
-};
-
-export const newFileByName = (app: App, value: string) => {
-    hideElements(["dialog"]);
-    newFile({
+export const newFileInTree = (app: App, notebookId: string, currentPath: string, paths?: string[]) => {
+    runNewDocInTree({
         app,
-        useSavePath: true,
-        name: replaceFileName(value.trim())
+        notebookId,
+        currentPath,
+        hasFocusTarget: true,
+        paths,
+        listDocTree: true,
     });
 };
 
@@ -281,3 +110,179 @@ export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeEleme
         hideElements(["toolbar"], protyle);
     });
 };
+
+export const getRefCreateSavePath = (notebookId: string, currentPath: string, cb: (targetNotebookId: string, hPath: string) => void) => {
+    fetchPost("/api/filetree/getRefCreateSavePath", {
+        notebook: notebookId
+    }, (data) => {
+        let targetPath = currentPath;
+        if (notebookId !== data.data.box) {
+            targetPath = data.data.path || "/";
+        }
+        if (data.data.path) {
+            if (data.data.path.startsWith("/")) {
+                cb(data.data.box, getDisplayName(data.data.path, false, true));
+            } else {
+                fetchPost("/api/filetree/getHPathByPath", {
+                    notebook: data.data.box,
+                    path: targetPath
+                }, (response) => {
+                    cb(data.data.box, getDisplayName(pathPosix().join(response.data, data.data.path), false, true));
+                });
+            }
+        } else {
+            fetchPost("/api/filetree/getHPathByPath", {
+                notebook: data.data.box,
+                path: targetPath
+            }, (response) => {
+                cb(data.data.box, getDisplayName(response.data, false, true));
+            });
+        }
+    });
+};
+
+function getNewFilePath(): Pick<NewDocRequest, "notebookId" | "currentPath" | "hasFocusTarget"> {
+    let notebookId = "";
+    let currentPath = "";
+    let hasFocusTarget = false;
+    /// #if !MOBILE
+    const tab = getActiveTab(false);
+    if (tab?.model instanceof Editor) {
+        notebookId = tab.model.editor.protyle.notebookId;
+        currentPath = tab.model.editor.protyle.path;
+        hasFocusTarget = true;
+    }
+    if (!notebookId) {
+        const fileModel = getDockByType("file").data.file;
+        if (fileModel instanceof Files) {
+            const currentElement = fileModel.element.querySelector(".b3-list-item--focus");
+            if (currentElement) {
+                const topElement = hasTopClosestByTag(currentElement, "UL");
+                if (topElement) {
+                    notebookId = topElement.getAttribute("data-url");
+                }
+                currentPath = currentElement.getAttribute("data-path");
+                hasFocusTarget = true;
+            }
+        }
+    }
+    /// #else
+    if (window.siyuan.mobile.editor && document.getElementById("empty").classList.contains("fn__none")) {
+        notebookId = window.siyuan.mobile.editor.protyle.notebookId;
+        currentPath = window.siyuan.mobile.editor.protyle.path;
+        hasFocusTarget = true;
+    }
+    /// #endif
+    if (!notebookId) {
+        const openNotebook = window.siyuan.notebooks.find(item => !item.closed);
+        if (openNotebook) {
+            notebookId = openNotebook.id;
+            currentPath = "/";
+        }
+    }
+    return {notebookId, currentPath, hasFocusTarget};
+}
+
+function runNewDoc(request: NewDocRequest) {
+    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: request.notebookId}, (savePathResponse) => {
+        const templatePath = savePathResponse.data.path as string;
+        const targetNotebookId = savePathResponse.data.box as string;
+        getNewDocHPath(request, targetNotebookId, (hPath) => {
+            createNewDoc(request, templatePath, targetNotebookId, hPath);
+        });
+    });
+}
+
+function getNewDocHPath(request: NewDocRequest, targetNotebookId: string, callback: (hPath: string) => void) {
+    if (targetNotebookId !== request.notebookId) {
+        // 跨笔记本时当前文档路径在目标笔记本中不存在，直接按目标笔记本根路径解析
+        callback("/");
+        return;
+    }
+    fetchPost("/api/filetree/getHPathByPath", {
+        notebook: targetNotebookId,
+        path: request.currentPath,
+    }, (hPathResponse) => {
+        callback(hPathResponse.data);
+    });
+}
+
+function createNewDoc(request: NewDocRequest, templatePath: string, targetNotebookId: string, hPath: string) {
+    const target = getNewDocTargetFromSavePath({
+        templatePath,
+        hPath: hPath || "/",
+        targetNotebookId,
+        currentNotebookId: request.notebookId,
+        name: request.name,
+        hasFocusTarget: request.hasFocusTarget,
+        currentPath: request.currentPath,
+    });
+    if (target.kind === "hPath") {
+        createNewDocByHPath(request, target);
+    } else if (target.kind === "subDoc") {
+        createNewDocAsSubDoc(request, target);
+    }
+}
+
+function runNewDocInTree(request: NewDocRequest) {
+    fetchPost("/api/filetree/getDocCreateSavePath", {notebook: request.notebookId}, (savePathResponse) => {
+        const target = getNewDocTargetFromTree({
+            templatePath: savePathResponse.data.path as string,
+            currentNotebookId: request.notebookId,
+            currentPath: request.currentPath,
+            name: request.name,
+        });
+        createNewDocAsSubDoc(request, target);
+    });
+}
+
+function createNewDocByHPath(request: NewDocRequest, target: NewDocTargetByHPath) {
+    if (target.title && !validateName(target.title)) {
+        return;
+    }
+    const parentID = request.hasFocusTarget && request.notebookId === target.targetNotebookId && request.currentPath !== "/"
+        ? getDisplayName(request.currentPath, true, true)
+        : undefined;
+    fetchPost("/api/filetree/createDocWithMd", {
+        notebook: target.targetNotebookId,
+        path: target.hPath,
+        parentID,
+        markdown: "",
+        titleEmpty: !target.title,
+    }, (response) => {
+        openCreatedDoc(request.app, response.data, request.onCreated, target.title);
+    });
+}
+
+function createNewDocAsSubDoc(request: NewDocRequest, target: NewDocTargetSubDoc) {
+    const id = Lute.NewNodeID();
+    const newPath = pathPosix().join(getDisplayName(target.parentPath, false, true), id + ".sy");
+    if (request.paths) {
+        request.paths[request.paths.indexOf(undefined)] = newPath;
+    }
+    fetchPost("/api/filetree/createDoc", {
+        notebook: target.targetNotebookId,
+        path: newPath,
+        title: target.title,
+        md: "",
+        sorts: request.paths,
+        listDocTree: request.listDocTree,
+    }, () => {
+        openCreatedDoc(request.app, id, request.onCreated, target.title);
+    });
+}
+
+function openCreatedDoc(app: App, id: string, onCreated?: (id: string, title: string) => void, title?: string) {
+    if (onCreated) {
+        onCreated(id, title || "");
+    }
+    /// #if !MOBILE
+    openFileById({
+        app,
+        id,
+        action: [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]
+    });
+    /// #else
+    openMobileFileById(app, id, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
+    /// #endif
+}

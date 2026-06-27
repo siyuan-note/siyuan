@@ -18,6 +18,7 @@ extraFiles:
 linux:
   icon: "src/assets/icon/"
   category: "Utility"
+  syncDesktopName: true
   executableName: "siyuan"
   desktop: {
     entry: {

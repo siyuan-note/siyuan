@@ -602,6 +602,12 @@
   }
 }
 
+// 停止按钮：常显悬浮背景色，图标主色填充。
+.agent-chat__stop {
+  background: var(--b3-list-hover);
+  color: var(--b3-theme-primary);
+}
+
 // token 分类明细弹层：hover 底部 tokens 数字时弹出，复用 b3-menu 基础样式。
 .agent-token-popup {
   position: fixed;

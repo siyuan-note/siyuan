@@ -1,5 +1,6 @@
 {
   "name": "SiYuan",
+  "desktopName": "org.b3log.siyuan",
   "version": "3.7.0-beta.3",
   "description": "Refactor your thinking",
   "homepage": "https://b3log.org/siyuan",
@@ -70,7 +71,7 @@
     "css-loader": "^7.1.2",
     "dayjs": "^1.11.5",
     "electron": "42.5.0",
-    "electron-builder": "26.15.5",
+    "electron-builder": "26.15.6",
     "encoding": "^0.1.13",
     "esbuild-loader": "^3.0.1",
     "eslint": "^9.15.0",

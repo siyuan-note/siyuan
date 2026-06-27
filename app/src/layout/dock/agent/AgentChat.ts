@@ -631,10 +631,12 @@ export class AgentChat extends Model {
         });
         this.newSessionBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
+            setPanelFocus(this.parent.panelElement);
             this.createSession();
         });
         this.sessionMenuBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
+            setPanelFocus(this.parent.panelElement);
             this.sessionPanel.toggle();
         });
 
@@ -1328,7 +1330,7 @@ export class AgentChat extends Model {
     }
 
     // Capture a read-only snapshot of the user's editor to inject into the system prompt.
-    // Strategy: scan ALL editors. Prefer one that (a) is visible and (b) has selected blocks; 
+    // Strategy: scan ALL editors. Prefer one that (a) is visible and (b) has selected blocks;
     // this directly targets "user selected blocks here" regardless of which window has focus.
     // Falls back to the editor hosting the DOM selection, then the most-recently-activated tab.
     private captureEditorContext(): IEditorContext | undefined {

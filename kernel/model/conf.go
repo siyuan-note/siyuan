@@ -33,6 +33,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
+	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -97,6 +98,22 @@ func NewAppConf() *AppConf {
 	}
 }
 
+// mergeConfWithDefaults 将部分解析失败的配置合并到完整默认配置中。
+// 利用 copier 的 IgnoreEmpty 跳过零值/nil 字段，保留已成功解析的配置项，
+// 未成功解析的字段回退到 NewAppConf() 的默认值。
+func mergeConfWithDefaults() {
+	fresh := NewAppConf()
+	if err := copier.CopyWithOption(fresh, Conf, copier.Option{IgnoreEmpty: true, DeepCopy: true}); err != nil {
+		logging.LogErrorf("merge conf with defaults failed: %s", err)
+		return
+	}
+	// copier 会通过 unsafe 复制未导出字段，导致 fresh 的锁（json.Unmarshal 后为 nil）覆盖默认值，
+	// 必须在合并后重新初始化锁，否则后续 Lock/Unlock 会 panic。
+	fresh.m = &sync.RWMutex{}
+	fresh.userLock = &sync.RWMutex{}
+	Conf = fresh
+}
+
 func (conf *AppConf) GetUILayout() *conf.UILayout {
 	conf.m.Lock()
 	defer conf.m.Unlock()
@@ -132,7 +149,8 @@ func InitConf() {
 		} else {
 			if conf.NeedsAIMigration(data) {
 				if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
-					logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+					logging.LogWarnf("parse conf failed, merge available config with defaults: %s", err)
+					mergeConfWithDefaults()
 				} else {
 					Conf.AI = conf.MigrateAI(data)
 					if nil != Conf.Search && Conf.Search.HanSensitive == nil {
@@ -148,7 +166,8 @@ func InitConf() {
 					logging.LogInfof("migrated AI config [%s]", confPath)
 				}
 			} else if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
-				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+				logging.LogWarnf("parse conf failed, merge available config with defaults: %s", err)
+				mergeConfWithDefaults()
 			} else {
 				logging.LogInfof("loaded conf [%s]", confPath)
 				if nil != Conf.Search && Conf.Search.HanSensitive == nil {

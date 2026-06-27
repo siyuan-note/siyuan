@@ -678,6 +678,19 @@
   margin: 0 8px 4px;
 }
 
+// 会话条目"更多"按钮的子菜单定位：在按钮右侧展开。
+.agent-session-more {
+  position: relative;
+
+  .b3-menu__submenu {
+    position: absolute;
+    right: 100%;
+    top: 0;
+    white-space: nowrap;
+    z-index: 2;
+  }
+}
+
 // Todo list styles
 
 .agent-chat__todo-header {

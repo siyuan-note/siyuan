@@ -3,6 +3,11 @@ import {escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
 import {upDownHint} from "../../../util/upDownHint";
+/// #if !BROWSER
+import * as path from "path";
+import {useShell} from "../../../util/pathName";
+
+/// #endif
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;
@@ -39,6 +44,7 @@ export class AgentSessionPanel {
     }
 
     close() {
+        this.closeAllSubmenus();
         document.querySelectorAll(".agent-session-popup").forEach(function (el) {
             el.remove();
         });
@@ -141,13 +147,26 @@ export class AgentSessionPanel {
         } else {
             const currentId = this.getCurrentSessionId();
             const defaultTitle = this.getDefaultTitle();
+            let isDesktop = false;
+            /// #if !BROWSER
+            isDesktop = true;
+            /// #endif
+            const L = window.siyuan.languages;
             for (let i = 0; i < listItems.length; i++) {
                 const s = listItems[i];
                 const isActive = s.id === currentId;
                 html += '<div class="b3-list-item  b3-list-item--hide-action' + (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
                     '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(s.title || defaultTitle) + '">' + escapeHtml(s.title || defaultTitle) + "</span>" +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
-                    '<span class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.delete + '"><svg><use xlink:href="#iconTrashcan"></use></svg></span>' +
+                    '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw agent-session-more" data-id="' + s.id + '" aria-label="' + (L.more || "More") + '">' +
+                        '<svg><use xlink:href="#iconMore"></use></svg>' +
+                        '<div class="b3-menu__submenu">' +
+                            '<div class="b3-menu__items">' +
+                            (isDesktop ? '<button class="b3-menu__item" data-action="folder"><svg class="b3-menu__icon"><use xlink:href="#iconFolder"></use></svg><span class="b3-menu__label">' + escapeHtml(L.showInFolder) + "</span></button>" : "") +
+                            '<button class="b3-menu__item b3-menu__item--warning" data-action="delete"><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">' + escapeHtml(L.delete) + "</span></button>" +
+                            "</div>" +
+                        "</div>" +
+                    "</span>" +
                     "</div>";
             }
         }
@@ -172,24 +191,21 @@ export class AgentSessionPanel {
         container.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
 
-            const deleteBtn = hasClosestByClassName(target, "b3-list-item__action--warning");
-            if (deleteBtn) {
-                e.stopPropagation();
-                const id = (deleteBtn as HTMLElement).getAttribute("data-id") || "";
-                if (id) {
-                    this.callbacks.onDelete(id).then(() => {
-                        this.refresh();
-                    });
+            const actionBtn = hasClosestByClassName(target, "b3-list-item__action");
+            if (actionBtn) {
+                // "更多"按钮：弹出文件夹（桌面端）和删除操作。
+                if (actionBtn.classList.contains("agent-session-more")) {
+                    e.stopPropagation();
+                    const id = (actionBtn as HTMLElement).getAttribute("data-id") || "";
+                    if (id) {
+                        this.showMoreMenu(actionBtn as HTMLElement, id);
+                    }
+                    return;
                 }
-                return;
-            }
-
-            const renameBtn = hasClosestByClassName(target, "b3-list-item__action");
-            if (renameBtn) {
                 e.stopPropagation();
-                const id = (renameBtn as HTMLElement).getAttribute("data-id") || "";
+                const id = (actionBtn as HTMLElement).getAttribute("data-id") || "";
                 if (id) {
-                    this.startRename(id, renameBtn.parentElement);
+                    this.startRename(id, actionBtn.parentElement);
                 }
                 return;
             }
@@ -304,5 +320,74 @@ export class AgentSessionPanel {
         this.total = result.total;
         this.page = 1;
         this.renderItems(itemsContainer, result.sessions, false);
+    }
+
+    private showMoreMenu(anchor: HTMLElement, id: string) {
+        // 内嵌子菜单（b3-menu__submenu），点击 toggle 展开/关闭。
+        if (anchor.classList.contains("b3-menu__item--show")) {
+            anchor.classList.remove("b3-menu__item--show");
+            return;
+        }
+        this.closeAllSubmenus(anchor);
+        anchor.classList.add("b3-menu__item--show");
+        // 子菜单项 hover 高亮（限定 b3-menu__items 内的项）。
+        const submenu = anchor.querySelector(".b3-menu__submenu") as HTMLElement | null;
+        if (submenu) {
+            const itemsContainer = submenu.querySelector(".b3-menu__items");
+            if (itemsContainer) {
+                itemsContainer.addEventListener("mouseover", (e: MouseEvent) => {
+                    const item = hasClosestByClassName(e.target as HTMLElement, "b3-menu__item");
+                    if (!item) { return; }
+                    submenu.querySelectorAll(".b3-menu__item--current").forEach((el) => {
+                        el.classList.remove("b3-menu__item--current");
+                    });
+                    item.classList.add("b3-menu__item--current");
+                });
+            }
+        // 关闭子菜单：点击子菜单项执行操作后关闭，或点击外部关闭。
+        const onClose = () => {
+            anchor.classList.remove("b3-menu__item--show");
+            submenu?.querySelectorAll(".b3-menu__item--current").forEach((el) => {
+                el.classList.remove("b3-menu__item--current");
+            });
+            document.removeEventListener("mousedown", onOutside);
+        };
+        const onOutside = (e: MouseEvent) => {
+            if (anchor.contains(e.target as Node)) {
+                return;
+            }
+            onClose();
+        };
+        document.addEventListener("mousedown", onOutside, {once: true});
+        // 子菜单项 click 事件委托。
+        if (submenu && !submenu.dataset.eventsBound) {
+            submenu.dataset.eventsBound = "1";
+            submenu.addEventListener("click", (e: MouseEvent) => {
+                const btn = hasClosestByClassName(e.target as HTMLElement, "b3-menu__item");
+                if (!btn) { return; }
+                e.stopPropagation();
+                const action = btn.getAttribute("data-action");
+                if (action === "delete") {
+                    this.callbacks.onDelete(id).then(() => {
+                        this.refresh();
+                    });
+                }
+                if (action === "folder") {
+                    /// #if !BROWSER
+                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "storage", "ai", "agent", "sessions", id));
+                    /// #endif
+                }
+                onClose();
+            });
+	        }
+	    }
+	}
+
+	private closeAllSubmenus(except?: HTMLElement) {
+        this.host.querySelectorAll(".agent-session-more.b3-menu__item--show").forEach((el) => {
+            if (el !== except) {
+                el.classList.remove("b3-menu__item--show");
+            }
+        });
     }
 }

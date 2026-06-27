@@ -594,14 +594,6 @@
   margin-top: 8px;
 }
 
-.agent-chat__send,
-.agent-chat__tokens,
-.agent-chat__stop {
-  svg {
-    margin-right: 0;
-  }
-}
-
 // 停止按钮：常显悬浮背景色，图标主色填充。
 .agent-chat__stop {
   background: var(--b3-list-hover);

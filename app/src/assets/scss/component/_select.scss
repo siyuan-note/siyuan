@@ -23,6 +23,14 @@
     box-shadow: inset 0 0 0 .6px var(--b3-theme-primary-light), 0 0 0 2px var(--b3-theme-primary-lighter);
   }
 
+  &--noborder {
+    box-shadow: none;
+
+    &:hover {
+      box-shadow: none;
+    }
+  }
+
   // 仅 Windows 桌面端与浏览器启用 base-select 统一样式
   .body--win32 &, .body--win32-browser & {
     @supports (appearance: base-select) {

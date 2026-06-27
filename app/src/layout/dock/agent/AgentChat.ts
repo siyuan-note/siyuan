@@ -228,15 +228,15 @@ export class AgentChat extends Model {
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
             '<span class="fn__flex-1"></span>' +
-            '<span class="agent-chat__tokens fn__none b3-button b3-button--cancel" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
+            '<span class="agent-chat__tokens fn__none b3-button b3-button--icon b3-button--cancel" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
             '<svg viewBox="0 0 24 24">' +
             '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="3"></circle>' +
             '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
             "</svg>" +
             "</span>" +
-            '<select class="b3-select" tabindex="0"></select>' +
-            '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
-            '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
+            '<select class="b3-select b3-select--noborder" tabindex="0"></select>' +
+            '<button class="agent-chat__send b3-button b3-button--icon b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
+            '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
             '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +

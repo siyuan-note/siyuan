@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {focusBlock} from "../../../util/selection";
@@ -78,7 +78,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled)}
     <div>
         ${avBodyHTML}
     </div>
@@ -264,7 +264,7 @@ export const renderGallery = async (options: {
     const bodyHTML = getGalleryHTML(view, options.blockElement, virtualData.all);
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled)}
     <div>
         <div class="av__body" data-group-id="" data-page-size="${view.pageSize}">
             ${bodyHTML}

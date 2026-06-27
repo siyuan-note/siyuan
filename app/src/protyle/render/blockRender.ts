@@ -110,7 +110,7 @@ const renderEmbed = (blocks: {
         }
         let popover = "";
         if (index !== 0) {
-            popover = `<div class="protyle-icons"><span data-id="${blocksItem.block.id}" aria-label="${window.siyuan.languages.refPopover}" data-position="4north" class="popover__block ariaLabel protyle-icon protyle-icon--last protyle-icon--first"><svg><use xlink:href="#iconPictureInPicture"></use></svg></span></div>`;
+            popover = `<div class="protyle-icons"><span data-id="${blocksItem.block.id}" data-action="openFloat" aria-label="${window.siyuan.languages.refPopover}" data-position="4north" class="ariaLabel protyle-icon protyle-icon--last protyle-icon--first"><svg><use xlink:href="#iconPictureInPicture"></use></svg></span></div>`;
         } else {
             const popoverElement = item.querySelectorAll(".protyle-icon")[2];
             if (popoverElement) {

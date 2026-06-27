@@ -105,6 +105,7 @@ import {reloadProtyle} from "../util/reload";
 import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold} from "../util/blockFold";
+import {BlockPanel} from "../../block/Panel";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -824,7 +825,7 @@ export class WYSIWYG {
                 // 为所有子块创建右上角百分比提示
                 const sbChildren = Array.from(sbElement.querySelectorAll(":scope > [data-node-id]")) as HTMLElement[];
                 const gapHalve = gapPx / 2 + 1;
-                const tips: {el: HTMLElement, child: HTMLElement}[] = [];
+                const tips: { el: HTMLElement, child: HTMLElement }[] = [];
                 sbChildren.forEach(child => {
                     child.style.position = "relative";
                     const tip = document.createElement("span");
@@ -3218,6 +3219,24 @@ export class WYSIWYG {
             const editElement = hasClosestByClassName(event.target, "protyle-action__edit");
             if (editElement && !protyle.disabled) {
                 protyle.toolbar.showRender(protyle, editElement.parentElement.parentElement);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+
+            const openFloatElement = hasClosestByAttribute(event.target, "data-action", "openFloat");
+            if (openFloatElement) {
+                const id = openFloatElement.getAttribute("data-id");
+                /// #if MOBILE
+                openMobileFileById(protyle.app, id, [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                /// #else
+                window.siyuan.blockPanels.push(new BlockPanel({
+                    app: protyle.app,
+                    isBacklink: false,
+                    targetElement: openFloatElement,
+                    refDefs: [{refID: id}]
+                }));
+                /// #endif
                 event.stopPropagation();
                 event.preventDefault();
                 return;

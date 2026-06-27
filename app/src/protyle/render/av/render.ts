@@ -4,7 +4,7 @@ import {Constants} from "../../../constants";
 import {addDragFill, cellScrollIntoView, popTextCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {getRowHTML, stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
@@ -264,7 +264,7 @@ const renderGroupTable = (options: ITableOptions) => {
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
@@ -544,7 +544,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
 </div>`;
         if (renderAll) {
             e.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>

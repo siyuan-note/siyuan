@@ -678,18 +678,6 @@
   margin: 0 8px 4px;
 }
 
-// 会话条目"更多"菜单：hover 悬浮效果。
-.agent-session-more-menu {
-  .b3-menu__item {
-    cursor: pointer;
-    transition: background-color .15s ease;
-
-    &:hover {
-      background-color: var(--b3-list-hover);
-    }
-  }
-}
-
 // Todo list styles
 
 .agent-chat__todo-header {

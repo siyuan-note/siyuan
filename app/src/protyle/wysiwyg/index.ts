@@ -1288,14 +1288,29 @@ export class WYSIWYG {
             }
 
             // 多选节点
-            let clentX = event.clientX;
+            // 起点落在内容区域外的 padding 上时，需用内容区内的坐标定位起始块
             if (event.clientX > mostRight) {
-                clentX = mostRight;
+                const pointElement = document.elementFromPoint(mostRight - 10, event.clientY);
+                if (pointElement && pointElement.classList.contains("protyle-wysiwyg")) {
+                    nodeElement = hasClosestBlock(document.elementFromPoint(mostRight - 10, event.clientY + 12)) as HTMLElement;
+                } else {
+                    nodeElement = hasClosestBlock(pointElement) as HTMLElement;
+                }
             } else if (event.clientX < mostLeft) {
-                clentX = mostLeft;
+                const pointElement = document.elementFromPoint(mostLeft + 10, event.clientY);
+                if (pointElement && pointElement.classList.contains("protyle-wysiwyg")) {
+                    nodeElement = hasClosestBlock(document.elementFromPoint(mostLeft + 10, event.clientY + 12)) as HTMLElement;
+                } else {
+                    nodeElement = hasClosestBlock(pointElement) as HTMLElement;
+                }
+            }
+            if (!nodeElement) {
+                const breadElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
+                if (breadElement) {
+                    nodeElement = breadElement.nextElementSibling as HTMLElement;
+                }
             }
             const mostTop = protyleRect.top + (protyle.options.render.breadcrumb ? protyle.breadcrumb.element.parentElement.clientHeight : 0);
-
             let mouseElement: Element;
             let moveCellElement: HTMLElement;
             this.element.querySelectorAll("iframe").forEach(item => {
@@ -1395,12 +1410,6 @@ export class WYSIWYG {
                     }
                 }
                 if (!nodeElement) {
-                    const breadElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
-                    if (breadElement) {
-                        nodeElement = breadElement.nextElementSibling as HTMLElement;
-                    }
-                }
-                if (!nodeElement) {
                     return;
                 }
                 protyle.selectElement.classList.remove("fn__none");
@@ -1411,25 +1420,17 @@ export class WYSIWYG {
                 let newLeft = 0;
                 let newWidth = 0;
                 let newHeight = 0;
-                if (moveEvent.clientX < clentX) {
-                    if (moveEvent.clientX < mostLeft) {
-                        // 向左越界
-                        newLeft = mostLeft;
-                    } else {
-                        // 向左
-                        newLeft = moveEvent.clientX;
-                    }
-                    newWidth = clentX - newLeft;
+                // 矩形两端钳制在编辑区（含 padding）范围内，避免划出 wysiwyg
+                const minLeft = wysiwygRect.left;
+                const maxRight = wysiwygRect.right;
+                if (moveEvent.clientX < event.clientX) {
+                    // 向左：左边缘跟随鼠标，右边缘固定为起点
+                    newLeft = Math.max(moveEvent.clientX, minLeft);
+                    newWidth = Math.min(event.clientX, maxRight) - newLeft;
                 } else {
-                    if (moveEvent.clientX > mostRight) {
-                        // 向右越界
-                        newLeft = clentX;
-                        newWidth = mostRight - newLeft;
-                    } else {
-                        // 向右
-                        newLeft = clentX;
-                        newWidth = moveEvent.clientX - clentX;
-                    }
+                    // 向右：左边缘固定为起点，右边缘跟随鼠标
+                    newLeft = Math.max(event.clientX, minLeft);
+                    newWidth = Math.min(moveEvent.clientX, maxRight) - newLeft;
                 }
 
                 if (moveEvent.clientY > y) {
@@ -1507,17 +1508,19 @@ export class WYSIWYG {
                 }
 
                 let hasJump = false;
+                // 块选择判定用的右边界需落在内容区，避免矩形右边缘在 padding 内时选不中块
+                const selectRight = Math.max(newLeft + newWidth, mostLeft);
                 // 向上划选时，A 始终是最后一个块，故以 A 的实时底边作为遍历终点，避免滚动后选不中 https://github.com/siyuan-note/siyuan/issues/14664
                 const selectBottom = moveEvent.clientY <= selectStartY ? nodeElement.getBoundingClientRect().bottom : (newTop + newHeight);
                 while (currentElement) {
                     if (currentElement && !currentElement.classList.contains("protyle-attr")) {
                         const currentRect = currentElement.getBoundingClientRect();
-                        if (currentRect.height > 0 && currentRect.top < selectBottom && currentRect.left < newLeft + newWidth) {
+                        if (currentRect.height > 0 && currentRect.top < selectBottom && currentRect.left < selectRight) {
                             if (hasJump) {
                                 // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
                                 if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
                                     const nextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                    if (nextRect.top < selectBottom && nextRect.left < newLeft + newWidth) {
+                                    if (nextRect.top < selectBottom && nextRect.left < selectRight) {
                                         selectElements = [currentElement];
                                         currentElement = currentElement.nextElementSibling;
                                         hasJump = false;

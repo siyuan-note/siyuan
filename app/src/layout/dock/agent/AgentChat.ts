@@ -2272,7 +2272,15 @@ export class AgentChat extends Model {
                 });
             });
         });
-        this.insertBeforeAI(el);
+        // 快照应在执行框（思考卡片）之前，需向前查找活跃的思考卡片而非追加到末尾
+        const activeThinking = this.messagesContainer.querySelector(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+        );
+        if (activeThinking) {
+            this.messagesContainer.insertBefore(el, activeThinking);
+        } else {
+            this.insertBeforeAI(el);
+        }
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }

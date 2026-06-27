@@ -56,7 +56,12 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		}
 	}
 
-	attrView, err = av.ParseAttributeView(avID)
+	// ignoreRows 时只需字段/视图元数据，用流式 keys-only 解析跳过行数据反序列化
+	if ignoreRows {
+		attrView, err = av.ParseAttributeViewKeys(avID)
+	} else {
+		attrView, err = av.ParseAttributeView(avID)
+	}
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return

@@ -589,6 +589,85 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 	return
 }
 
+// ParseAttributeViewKeys 仅解析 av.json 中的字段/视图元数据（Key + Views + 基本信息），
+// 跳过 keyValues[].values 中的行数据，适用于只读元数据的场景（如配置菜单）。
+// 若 av.json 版本非当前版本（CurrentSpec），自动回退全量 ParseAttributeView 以保证兼容性。
+func ParseAttributeViewKeys(avID string) (ret *AttributeView, err error) {
+	avJSONPath := GetAttributeViewDataPath(avID)
+	return ParseAttributeViewKeysByPath(avJSONPath)
+}
+
+// ParseAttributeViewKeysByPath 是 ParseAttributeViewKeys 的路径版本。
+// 参考 filesys.DocIAL（tree.go）的流式解析技术：用 jsoniter.Parse 流式遍历顶层对象，
+// keyValues 数组仅解析 key，调用 iter.Skip() 跳过 values。
+func ParseAttributeViewKeysByPath(avJSONPath string) (ret *AttributeView, err error) {
+	if !filelock.IsExist(avJSONPath) {
+		err = ErrViewNotFound
+		return
+	}
+
+	avID := filepath.Base(avJSONPath)
+	avID = strings.TrimSuffix(avID, filepath.Ext(avID))
+
+	var data []byte
+	if cached, ok := cache.GetAVData(avID); ok {
+		data = cached
+	} else {
+		var readErr error
+		data, readErr = filelock.ReadFile(avJSONPath)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+		cache.SetAVData(avID, data)
+	}
+
+	// 惰性读取 spec 判断版本，非当前版本回退全量解析以保持旧版兼容
+	specVal := jsoniter.Get(data, "spec")
+	if specVal.ValueType() == jsoniter.InvalidValue || specVal.ToInt() != CurrentSpec {
+		return ParseAttributeViewByPath(avJSONPath)
+	}
+
+	// 流式 keys-only 解析：仅解码 Key/Views 元数据，通过 Skip() 跳过 values 数组
+	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, bytes.NewReader(data), 512)
+	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
+	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
+		switch field {
+		case "spec":
+			ret.Spec = iter.ReadInt()
+		case "id":
+			ret.ID = iter.ReadString()
+		case "name":
+			ret.Name = iter.ReadString()
+		case "viewID":
+			ret.ViewID = iter.ReadString()
+		case "keyIDs":
+			iter.ReadVal(&ret.KeyIDs)
+		case "views":
+			iter.ReadVal(&ret.Views)
+		case "keyValues":
+			for ok := iter.ReadArray(); ok; ok = iter.ReadArray() {
+				kv := &KeyValues{Values: []*Value{}}
+				for kvField := iter.ReadObject(); kvField != ""; kvField = iter.ReadObject() {
+					if kvField == "key" {
+						iter.ReadVal(&kv.Key)
+					} else {
+						iter.Skip()
+					}
+				}
+				ret.KeyValues = append(ret.KeyValues, kv)
+			}
+		default:
+			iter.Skip()
+		}
+	}
+
+	if err = CheckSpec(ret); err != nil {
+		return nil, err
+	}
+	return
+}
+
 func SaveAttributeView(av *AttributeView) (err error) {
 	if "" == av.ID {
 		err = errors.New("av id is empty")

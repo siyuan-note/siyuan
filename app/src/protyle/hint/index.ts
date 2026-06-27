@@ -15,7 +15,7 @@ import {
     getSelectionPosition,
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
-import {getRefCreateSavePath, newFileInProtyle} from "../../util/newFile";
+import {newFileByRefHint, newFileInProtyle} from "../../util/newFile";
 import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -479,29 +479,21 @@ ${genHintItemHTML(item)}
                 const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
                 const newID = Lute.NewNodeID();
                 rowElement.dataset.id = newID;
-                getRefCreateSavePath(protyle.notebookId, protyle.path, (targetNotebookId, hPath) => {
-                    fetchPost("/api/filetree/createDocWithMd", {
-                        notebook: targetNotebookId,
-                        path: pathPosix().join(hPath, realFileName),
-                        parentID: protyle.notebookId === targetNotebookId ? protyle.block.rootID : "",
-                        markdown: "",
-                        id: newID,
-                    }, () => {
-                        transaction(protyle, [{
-                            action: "replaceAttrViewBlock",
-                            avID,
-                            previousID,
-                            nextID: newID,
-                            isDetached: false,
-                        }], [{
-                            action: "replaceAttrViewBlock",
-                            avID,
-                            previousID: newID,
-                            nextID: previousID,
-                            isDetached: true,
-                        }]);
-                    });
-                });
+                newFileByRefHint(protyle, realFileName, () => {
+                    transaction(protyle, [{
+                        action: "replaceAttrViewBlock",
+                        avID,
+                        previousID,
+                        nextID: newID,
+                        isDetached: false,
+                    }], [{
+                        action: "replaceAttrViewBlock",
+                        avID,
+                        previousID: newID,
+                        nextID: previousID,
+                        isDetached: true,
+                    }]);
+                }, newID);
                 updateAttrViewCellAnimation(cellElement, {
                     type: "block",
                     isDetached: false,
@@ -578,24 +570,17 @@ ${genHintItemHTML(item)}
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
             const fileNames = value.substring(11, value.length - 4).split(`"${Constants.ZWSP}'`);
             const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
-            getRefCreateSavePath(protyle.notebookId, protyle.path, (targetNotebookId, hPath) => {
-                fetchPost("/api/filetree/createDocWithMd", {
-                    notebook: targetNotebookId,
-                    path: pathPosix().join(hPath, realFileName),
-                    parentID: protyle.notebookId === targetNotebookId ? protyle.block.rootID : "",
-                    markdown: ""
-                }, response => {
-                    // https://github.com/siyuan-note/siyuan/issues/10133
-                    protyle.toolbar.range = range;
-                    const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
-                        type: "id",
-                        color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
-                    });
-                    if (refElement[0]) {
-                        protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
-                    }
-                    protyle.toolbar.range.collapse(false);
+            newFileByRefHint(protyle, realFileName, (id) => {
+                // https://github.com/siyuan-note/siyuan/issues/10133
+                protyle.toolbar.range = range;
+                const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                    type: "id",
+                    color: `${id}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                 });
+                if (refElement[0]) {
+                    protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
+                }
+                protyle.toolbar.range.collapse(false);
             });
             return;
         }

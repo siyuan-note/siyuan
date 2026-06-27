@@ -476,14 +476,9 @@ func setFiletree(c *gin.Context) {
 		return
 	}
 
-	fileTree.RefCreateSavePath = util.TrimSpaceInPath(fileTree.RefCreateSavePath)
-	if "" != fileTree.RefCreateSavePath {
-		if !strings.HasSuffix(fileTree.RefCreateSavePath, "/") {
-			fileTree.RefCreateSavePath += "/"
-		}
-	}
-
 	fileTree.DocCreateSavePath = util.TrimSpaceInPath(fileTree.DocCreateSavePath)
+
+	fileTree.RefCreateSavePath = util.TrimSpaceInPath(fileTree.RefCreateSavePath)
 
 	fileTree.ShorthandSavePath = util.TrimSpaceInPath(fileTree.ShorthandSavePath)
 	if "" != fileTree.ShorthandSavePath {

@@ -96,11 +96,9 @@
 
 **容器 block**:`NodeList`、`NodeListItem`、`NodeBlockquote`、`NodeCallout`、`NodeSuperBlock`
 
-**块级内容子节点**(位于块内部,也带 ID):`NodeCodeBlockCode`、`NodeMathBlockContent`
-
 ### 内联/标记节点(无 ID)
 
-`NodeText`、`NodeTextMark`、`NodeImage`、`NodeKramdownSpanIAL`、`NodeHeadingC8hMarker`、`NodeBlockquoteMarker`、`NodeTaskListItemMarker`、`NodeBang`、`NodeOpenBracket`、`NodeCloseBracket`、`NodeOpenParen`、`NodeCloseParen`、`NodeLinkText`、`NodeLinkDest`、`NodeCodeBlockFenceOpenMarker`、`NodeCodeBlockFenceInfoMarker`、`NodeCodeBlockFenceCloseMarker`、`NodeMathBlockOpenMarker`、`NodeMathBlockCloseMarker`、`NodeSuperBlockOpenMarker`、`NodeSuperBlockLayoutMarker`、`NodeSuperBlockCloseMarker`、`NodeOpenBrace`、`NodeCloseBrace`、`NodeBlockQueryEmbedScript`、`NodeTableHead`、`NodeTableRow`、`NodeTableCell`
+`NodeText`、`NodeTextMark`、`NodeImage`、`NodeKramdownSpanIAL`、`NodeHeadingC8hMarker`、`NodeBlockquoteMarker`、`NodeTaskListItemMarker`、`NodeBang`、`NodeOpenBracket`、`NodeCloseBracket`、`NodeOpenParen`、`NodeCloseParen`、`NodeLinkText`、`NodeLinkDest`、`NodeCodeBlockCode`、`NodeCodeBlockFenceOpenMarker`、`NodeCodeBlockFenceInfoMarker`、`NodeCodeBlockFenceCloseMarker`、`NodeMathBlockContent`、`NodeMathBlockOpenMarker`、`NodeMathBlockCloseMarker`、`NodeSuperBlockOpenMarker`、`NodeSuperBlockLayoutMarker`、`NodeSuperBlockCloseMarker`、`NodeOpenBrace`、`NodeCloseBrace`、`NodeBlockQueryEmbedScript`、`NodeTableHead`、`NodeTableRow`、`NodeTableCell`
 
 > 思源禁用的类型(脚注 / ToC / YAML / LinkRef / HeadingID 等)见 §11,不应出现在 `.sy` 中,故未列入目录。
 
@@ -181,7 +179,7 @@ NodeList                        NodeList
   "ListData": { "Typ": 3, "Tight": true, "BulletChar": 45, "Padding": 2, "Checked": true, "Marker": "LQ==", "Num": -1 },
   "Properties": { "id": "..." },
   "Children": [
-    { "Type": "NodeTaskListItemMarker", "Data": "[X]", "TaskListItemChecked": true },
+    { "Type": "NodeTaskListItemMarker", "TaskListItemChecked": true },
     { "Type": "NodeParagraph", "ID": "...", "Properties": { "id": "..." },
       "Children": [ { "Type": "NodeText", "Data": "待办一" } ] }
   ] }
@@ -189,30 +187,30 @@ NodeList                        NodeList
 
 ### 5.4 `ListData` 字段全解(★ 最易踩坑)
 
-| 字段 | 类型 | 说明 |
-|---|---|---|
-| `Typ` | int | **列表类型判别**:缺省=无序,`1`=有序,`3`=任务 |
-| `Tight` | bool | 紧凑态(无空行);可选 |
-| `BulletChar` | int | 无序/任务列表的项目符号 **ASCII 码点**(`42`=`*`,`45`=`-`) |
-| `Delimiter` | int | 有序列表分隔符 ASCII 码点(`46`=`.`) |
-| `Start` | int | 有序列表起始编号 |
-| `Num` | int | 该项序号;**无序/任务列表恒为 `-1`** |
-| `Padding` | int | 缩进填充数;可选 |
-| `Checked` | bool | 任务列表项是否勾选(列表级聚合) |
-| `Marker` | string(base64) | 标记符原文的 **base64**;可能含分隔符(`"MS4="`=`1.`)也可能不含(`"MQ=="`=`1`) |
+| 字段 | 类型(代码) | JSON 表现 | 说明 |
+|---|---|---|---|
+| `Typ` | int | 数字 | **列表类型判别**:缺省=无序,`1`=有序,`3`=任务 |
+| `Tight` | bool | 布尔 | 紧凑态(无空行);可选 |
+| `BulletChar` | byte | 数字 | 无序/任务列表的项目符号 **ASCII 码点**(`42`=`*`,`45`=`-`) |
+| `Delimiter` | byte | 数字 | 有序列表分隔符 ASCII 码点(`46`=`.`) |
+| `Start` | int | 数字 | 有序列表起始编号 |
+| `Num` | int | 数字 | 该项序号;无序/任务列表通常缺省或为 `-1` |
+| `Padding` | int | 数字 | 缩进填充数;可选 |
+| `Checked` | bool | 布尔 | 任务列表项是否勾选(列表级聚合) |
+| `Marker` | []byte | **base64 字符串** | 标记符原文的 **base64**;可能含分隔符(`"MS4="`=`1.`)也可能不含(`"MQ=="`=`1`) |
 
-> 关键区分:**`BulletChar`/`Delimiter` 是 int(ASCII 码点)**;**`Marker` 是 base64 字符串**。二者容易混淆。
+> 关键区分:**`BulletChar`/`Delimiter` 在代码里是 `byte`,JSON 中表现为数字 ASCII 码点**;**`Marker` 在代码里是 `[]byte`,JSON 中表现为 base64 字符串**。`Marker`/`BulletChar`/`Delimiter` 都带 `omitempty`,可缺省。
 
 ### 5.5 任务标记
 
 ```json
 // 已勾选
-{ "Type": "NodeTaskListItemMarker", "Data": "[X]", "TaskListItemChecked": true }
+{ "Type": "NodeTaskListItemMarker", "TaskListItemChecked": true }
 // 未勾选
-{ "Type": "NodeTaskListItemMarker", "Data": "[ ]" }
+{ "Type": "NodeTaskListItemMarker" }
 ```
 
-> 勾选态 `Data` 是大写 `[X]`,**不是** `[x]`。未勾选可省略 `TaskListItemChecked`(缺省即 false)。
+> 真实 `.sy` 里 `NodeTaskListItemMarker` **通常没有 `Data` 字段**(思源走 DOM `data-task` 属性重建标记,不保留 `[X]`/`[ ]` 原文),勾选时仅有 `Type`+`TaskListItemChecked`,未勾选仅有 `Type`。规范上若手动写入 `Data`,勾选态应为大写 `[X]`(非 `[x]`),仅用于导出 Markdown 时的归一化输出。
 
 ### 5.6 引述块
 
@@ -284,15 +282,15 @@ NodeList                        NodeList
   "Children": [
     { "Type": "NodeCodeBlockFenceOpenMarker", "Data": "```", "CodeBlockFenceLen": 3 },
     { "Type": "NodeCodeBlockFenceInfoMarker", "CodeBlockInfo": "Z28=" },
-    { "Type": "NodeCodeBlockCode", "ID": "...", "Data": "package main\n...\n", "Properties": { "id": "..." } },
+    { "Type": "NodeCodeBlockCode", "Data": "package main\n...\n" },
     { "Type": "NodeCodeBlockFenceCloseMarker", "Data": "```", "CodeBlockFenceLen": 3 }
   ] }
 ```
 
 要点:
-- `NodeCodeBlockCode` 是**块级**(有 `ID`、`Properties`),内容放 `Data`(原始文本,`\n` 转义)。
-- 外围 marker 是内联(无 ID)。
-- `CodeBlockInfo` 是**语言名的 base64**(`"Z28="`=`go`)。三个 fence 字段(`CodeBlockOpenFence`/`CloseFence` 都是 `"YGBg"`=` ``` `)和 `CodeBlockFenceChar`/`FenceLen` 是**可选**的(简写时可省略,只用 `IsFencedCodeBlock:true`)。
+- `NodeCodeBlockCode` 承载代码内容(放 `Data`,原始文本,`\n` 转义),是 `NodeCodeBlock` 的内联子节点。
+- 外围 fence marker(Open/Info/Close)同样是内联子节点。
+- `CodeBlockInfo` 是**语言名的 base64**(`"Z28="`=`go`)。父节点上的 7 个字段(`IsFencedCodeBlock`/`CodeBlockFenceChar`/`CodeBlockFenceLen`/`CodeBlockOpenFence`/`CodeBlockInfo`/`CodeBlockCloseFence`)全部带 `omitempty`,可按需省略——新版 `.sy` 常仅写 `"IsFencedCodeBlock": true`。
 - 思源**不支持缩进式代码块**(`SetIndentCodeBlock(false)`),所有代码块都是围栏式。
 
 ### 5.11 数学块(三段结构)
@@ -301,7 +299,7 @@ NodeList                        NodeList
 { "Type": "NodeMathBlock", "ID": "...", "Properties": { "id": "..." },
   "Children": [
     { "Type": "NodeMathBlockOpenMarker" },
-    { "Type": "NodeMathBlockContent", "ID": "...", "Data": "a^2 + b^2 = c^2", "Properties": { "id": "..." } },
+    { "Type": "NodeMathBlockContent", "Data": "a^2 + b^2 = c^2" },
     { "Type": "NodeMathBlockCloseMarker" }
   ] }
 ```
@@ -393,7 +391,7 @@ NodeList                        NodeList
 | `block-ref` | 块引用 | `TextMarkBlockRefID`、`TextMarkBlockRefSubtype`、`TextMarkTextContent` |
 | `inline-math` | 行内公式 | `TextMarkInlineMathContent`(**无** `TextMarkTextContent`) |
 | `inline-memo` | 行级备注 | `TextMarkInlineMemoContent`、`TextMarkTextContent` |
-| `file-annotation-ref` | 文件注释引用 | `TextMarkFileAnnotationRefID` 等 `【推断】` |
+| `file-annotation-ref` | 文件注释引用 | `TextMarkFileAnnotationRefID`、`TextMarkTextContent` |
 
 样例:
 
@@ -404,10 +402,11 @@ NodeList                        NodeList
 { "Type": "NodeTextMark", "TextMarkType": "inline-memo", "TextMarkInlineMemoContent": "这是一个行级备注", "TextMarkTextContent": "备注" }
 ```
 
-- `TextMarkBlockRefSubtype`:`"s"`=静态文本,`"d"`=动态嵌入。
+- `TextMarkBlockRefSubtype`:`"s"`=静态锚文本,`"d"`=动态锚文本(锚文本跟随目标块内容变化;注意「嵌入块」是另一种节点 `NodeBlockQueryEmbed`,与此无关)。
 - `TextMarkType` 可空格叠加多标记,如 `"strong em"`。
 - `TextMarkTextContent` 不是所有类型都有(`inline-math` 就没有)。
 - 删除线**仅支持双波浪 `~~x~~`**,不支持单波浪 `~x~`(`SetGFMStrikethrough1(false)`)。
+- 反斜杠转义不是 `NodeTextMark` 子类型:它对应独立的 `NodeBackslash` 节点,不会出现在 `TextMarkType` 取值中。
 
 ### 6.3 带样式的内联文本(★ 必须成对)
 
@@ -503,6 +502,8 @@ NodeList                        NodeList
 | `SetLinkRef(false)` | `NodeLinkRefDef`/`NodeLinkRefDefBlock` | 链接引用定义 |
 | `SetGFMStrikethrough1(false)` | 单波浪线删除线 `~x~` | 仅支持双波浪 `~~x~~` |
 
+> 注:`NewLute()` 另有 `SetAutoSpace(false)`、`SetCodeSyntaxHighlight(false)`、`SetExportNormalizeTaskListMarker(false)` 等非语法类开关,只影响渲染/导出行为,不会让任何节点类型消失,故未列入上表。
+
 ---
 
 ## 12. AI 写入检查清单
@@ -515,10 +516,10 @@ NodeList                        NodeList
 4. ☐ 内联/标记节点**不带** `ID`
 5. ☐ 列表用 `ListData.Typ` 区分(缺省=无序/`1`=有序/`3`=任务)
 6. ☐ `NodeList` 直接子节点**只能是** `NodeListItem`;嵌套列表要再套一层 `NodeList`
-7. ☐ `BulletChar`/`Delimiter` 用 int 码点;`Marker` 用 base64
-8. ☐ 任务勾选用 `[X]`(大写),未勾选 `[ ]`
+7. ☐ `BulletChar`/`Delimiter` 是 byte(JSON 表现为 int 码点);`Marker` 是 base64
+8. ☐ 任务标记通常不带 `Data`(勾选时 `TaskListItemChecked:true`,未勾选仅有 `Type`)
 9. ☐ 代码块四段、数学块三段、嵌入块五段、超级块三段——结构完整
-10. ☐ `NodeCodeBlockCode`/`NodeMathBlockContent` 是块级(带 ID);外围 marker 是内联(无 ID)
+10. ☐ `NodeCodeBlockCode`/`NodeMathBlockContent` 是内联子节点,通常只有 `Type`+`Data`
 11. ☐ base64 字段已编码;内容字段保持原文
 12. ☐ 内联格式优先用 `NodeTextMark`,不用 `NodeStrong`/`NodeEmphasis`/`NodeLink`
 13. ☐ 带样式的 TextMark 后必须跟配对的 `NodeKramdownSpanIAL`
@@ -536,8 +537,8 @@ NodeList                        NodeList
 | 内联节点带 `ID` | 内联/标记节点不带 `ID` |
 | 用 `NodeStrong`/`NodeLink` 等旧式节点 | 用 `NodeTextMark` + `TextMarkType` |
 | `ListData.Typ` 只认 `1` | `Typ` 缺省=无序,`1`=有序,`3`=任务 |
-| 把 `BulletChar` 当 base64 | 它是 int ASCII 码点(`42`) |
-| 任务勾选写 `[x]` 小写 | 大写 `[X]` |
+| 把 `BulletChar` 当 base64 | 它是 byte,JSON 中表现为 int 码点(`42`=`*`) |
+| 任务标记里强写 `"Data":"[X]"` | 真实 `.sy` 通常无 `Data`,勾选仅写 `TaskListItemChecked:true` |
 | 带样式 TextMark 不配 IAL | 必须配 `NodeKramdownSpanIAL` |
 | 给 `NodeAttributeView` 加 Children | 它是叶子,用 `AttributeViewID`/`AttributeViewType` |
 | 改 `ID` 不同步 `Properties.id` | 二者必须一致 |

@@ -96,11 +96,9 @@ Division of labor among the four paths:
 
 **Container blocks:** `NodeList`, `NodeListItem`, `NodeBlockquote`, `NodeCallout`, `NodeSuperBlock`
 
-**Block-level content children** (live inside a block, also have an ID): `NodeCodeBlockCode`, `NodeMathBlockContent`
-
 ### Inline / marker nodes (no ID)
 
-`NodeText`, `NodeTextMark`, `NodeImage`, `NodeKramdownSpanIAL`, `NodeHeadingC8hMarker`, `NodeBlockquoteMarker`, `NodeTaskListItemMarker`, `NodeBang`, `NodeOpenBracket`, `NodeCloseBracket`, `NodeOpenParen`, `NodeCloseParen`, `NodeLinkText`, `NodeLinkDest`, `NodeCodeBlockFenceOpenMarker`, `NodeCodeBlockFenceInfoMarker`, `NodeCodeBlockFenceCloseMarker`, `NodeMathBlockOpenMarker`, `NodeMathBlockCloseMarker`, `NodeSuperBlockOpenMarker`, `NodeSuperBlockLayoutMarker`, `NodeSuperBlockCloseMarker`, `NodeOpenBrace`, `NodeCloseBrace`, `NodeBlockQueryEmbedScript`, `NodeTableHead`, `NodeTableRow`, `NodeTableCell`
+`NodeText`, `NodeTextMark`, `NodeImage`, `NodeKramdownSpanIAL`, `NodeHeadingC8hMarker`, `NodeBlockquoteMarker`, `NodeTaskListItemMarker`, `NodeBang`, `NodeOpenBracket`, `NodeCloseBracket`, `NodeOpenParen`, `NodeCloseParen`, `NodeLinkText`, `NodeLinkDest`, `NodeCodeBlockCode`, `NodeCodeBlockFenceOpenMarker`, `NodeCodeBlockFenceInfoMarker`, `NodeCodeBlockFenceCloseMarker`, `NodeMathBlockContent`, `NodeMathBlockOpenMarker`, `NodeMathBlockCloseMarker`, `NodeSuperBlockOpenMarker`, `NodeSuperBlockLayoutMarker`, `NodeSuperBlockCloseMarker`, `NodeOpenBrace`, `NodeCloseBrace`, `NodeBlockQueryEmbedScript`, `NodeTableHead`, `NodeTableRow`, `NodeTableCell`
 
 > Types disabled by SiYuan (footnotes / ToC / YAML / LinkRef / HeadingID, etc.) are listed in §11 and never appear in a `.sy` — they are intentionally excluded from this catalog.
 
@@ -181,7 +179,7 @@ NodeList                         NodeList
   "ListData": { "Typ": 3, "Tight": true, "BulletChar": 45, "Padding": 2, "Checked": true, "Marker": "LQ==", "Num": -1 },
   "Properties": { "id": "..." },
   "Children": [
-    { "Type": "NodeTaskListItemMarker", "Data": "[X]", "TaskListItemChecked": true },
+    { "Type": "NodeTaskListItemMarker", "TaskListItemChecked": true },
     { "Type": "NodeParagraph", "ID": "...", "Properties": { "id": "..." },
       "Children": [ { "Type": "NodeText", "Data": "Task one" } ] }
   ] }
@@ -189,30 +187,30 @@ NodeList                         NodeList
 
 ### 5.4 `ListData` fields in full (★ easiest to get wrong)
 
-| Field | Type | Meaning |
-|---|---|---|
-| `Typ` | int | **List type discriminator:** omitted = unordered, `1` = ordered, `3` = task |
-| `Tight` | bool | Tight (no blank lines); optional |
-| `BulletChar` | int | Bullet **ASCII codepoint** for unordered/task lists (`42` = `*`, `45` = `-`) |
-| `Delimiter` | int | Ordered-list delimiter ASCII codepoint (`46` = `.`) |
-| `Start` | int | Ordered-list start number |
-| `Num` | int | This item's number; **always `-1` for unordered/task lists** |
-| `Padding` | int | Indent padding; optional |
-| `Checked` | bool | Whether the task item is checked (aggregated at the list level) |
-| `Marker` | string(base64) | The marker text, **base64-encoded**; may include a delimiter (`"MS4="` = `1.`) or not (`"MQ=="` = `1`) |
+| Field | Type (code) | JSON form | Meaning |
+|---|---|---|---|
+| `Typ` | int | number | **List type discriminator:** omitted = unordered, `1` = ordered, `3` = task |
+| `Tight` | bool | boolean | Tight (no blank lines); optional |
+| `BulletChar` | byte | number | Bullet **ASCII codepoint** for unordered/task lists (`42` = `*`, `45` = `-`) |
+| `Delimiter` | byte | number | Ordered-list delimiter ASCII codepoint (`46` = `.`) |
+| `Start` | int | number | Ordered-list start number |
+| `Num` | int | number | This item's number; usually omitted or `-1` for unordered/task lists |
+| `Padding` | int | number | Indent padding; optional |
+| `Checked` | bool | boolean | Whether the task item is checked (aggregated at the list level) |
+| `Marker` | []byte | **base64 string** | The marker text, **base64-encoded**; may include a delimiter (`"MS4="` = `1.`) or not (`"MQ=="` = `1`) |
 
-> Key distinction: **`BulletChar`/`Delimiter` are int codepoints**; **`Marker` is a base64 string**. Easy to confuse.
+> Key distinction: **`BulletChar`/`Delimiter` are `byte` in code and appear as int codepoints in JSON**; **`Marker` is `[]byte` in code and appears as a base64 string in JSON**. `Marker`/`BulletChar`/`Delimiter` all carry `omitempty` and may be omitted.
 
 ### 5.5 Task marker
 
 ```json
 // Checked
-{ "Type": "NodeTaskListItemMarker", "Data": "[X]", "TaskListItemChecked": true }
+{ "Type": "NodeTaskListItemMarker", "TaskListItemChecked": true }
 // Unchecked
-{ "Type": "NodeTaskListItemMarker", "Data": "[ ]" }
+{ "Type": "NodeTaskListItemMarker" }
 ```
 
-> The checked-state `Data` is uppercase `[X]`, **not** `[x]`. Unchecked may omit `TaskListItemChecked` (default false).
+> In real `.sy` files, `NodeTaskListItemMarker` **usually has no `Data` field** (SiYuan rebuilds the marker from the DOM `data-task` attribute and doesn't keep the `[X]`/`[ ]` source): checked items carry only `Type`+`TaskListItemChecked`, unchecked only `Type`. If you do write `Data` by hand, the checked form should be uppercase `[X]` (not `[x]`) — but that's only used for normalized Markdown export.
 
 ### 5.6 Blockquote
 
@@ -284,15 +282,15 @@ NodeList                         NodeList
   "Children": [
     { "Type": "NodeCodeBlockFenceOpenMarker", "Data": "```", "CodeBlockFenceLen": 3 },
     { "Type": "NodeCodeBlockFenceInfoMarker", "CodeBlockInfo": "Z28=" },
-    { "Type": "NodeCodeBlockCode", "ID": "...", "Data": "package main\n...\n", "Properties": { "id": "..." } },
+    { "Type": "NodeCodeBlockCode", "Data": "package main\n...\n" },
     { "Type": "NodeCodeBlockFenceCloseMarker", "Data": "```", "CodeBlockFenceLen": 3 }
   ] }
 ```
 
 Notes:
-- `NodeCodeBlockCode` is **block-level** (has `ID`, `Properties`); content goes in `Data` (raw text, `\n` escaped).
-- The surrounding markers are inline (no ID).
-- `CodeBlockInfo` is the **base64-encoded language** (`"Z28="` = `go`). The three fence fields (`CodeBlockOpenFence`/`CloseFence` are both `"YGBg"` = ` ``` `) and `CodeBlockFenceChar`/`FenceLen` are **optional** (in the shorthand form they can be omitted, using only `IsFencedCodeBlock: true`).
+- `NodeCodeBlockCode` carries the code content (in `Data`, raw text with `\n` escaped); it's an inline child of `NodeCodeBlock`.
+- The surrounding fence markers (Open/Info/Close) are likewise inline children.
+- `CodeBlockInfo` is the **base64-encoded language** (`"Z28="` = `go`). The parent's seven fields (`IsFencedCodeBlock`/`CodeBlockFenceChar`/`CodeBlockFenceLen`/`CodeBlockOpenFence`/`CodeBlockInfo`/`CodeBlockCloseFence`) all carry `omitempty` and may be omitted as needed — newer `.sy` files often write only `"IsFencedCodeBlock": true`.
 - SiYuan **does not support indented code blocks** (`SetIndentCodeBlock(false)`); all code blocks are fenced.
 
 ### 5.11 Math block (three-part structure)
@@ -301,7 +299,7 @@ Notes:
 { "Type": "NodeMathBlock", "ID": "...", "Properties": { "id": "..." },
   "Children": [
     { "Type": "NodeMathBlockOpenMarker" },
-    { "Type": "NodeMathBlockContent", "ID": "...", "Data": "a^2 + b^2 = c^2", "Properties": { "id": "..." } },
+    { "Type": "NodeMathBlockContent", "Data": "a^2 + b^2 = c^2" },
     { "Type": "NodeMathBlockCloseMarker" }
   ] }
 ```
@@ -393,7 +391,7 @@ In `.sy` files, bold/italic/link/inline-code/block-ref etc. are **almost all** `
 | `block-ref` | block reference | `TextMarkBlockRefID`, `TextMarkBlockRefSubtype`, `TextMarkTextContent` |
 | `inline-math` | inline math | `TextMarkInlineMathContent` (**no** `TextMarkTextContent`) |
 | `inline-memo` | inline note | `TextMarkInlineMemoContent`, `TextMarkTextContent` |
-| `file-annotation-ref` | file-annotation ref | `TextMarkFileAnnotationRefID`, etc. `【inferred】` |
+| `file-annotation-ref` | file-annotation ref | `TextMarkFileAnnotationRefID`, `TextMarkTextContent` |
 
 Samples:
 
@@ -404,10 +402,11 @@ Samples:
 { "Type": "NodeTextMark", "TextMarkType": "inline-memo", "TextMarkInlineMemoContent": "an inline note", "TextMarkTextContent": "note" }
 ```
 
-- `TextMarkBlockRefSubtype`: `"s"` = static text, `"d"` = dynamic embed.
+- `TextMarkBlockRefSubtype`: `"s"` = static anchor text, `"d"` = dynamic anchor text (the anchor text follows the target block's content; note that "embed block" is a separate node `NodeBlockQueryEmbed`, unrelated to this).
 - `TextMarkType` may stack multiple marks separated by spaces, e.g. `"strong em"`.
 - `TextMarkTextContent` is not present on every type (`inline-math` lacks it).
 - Strikethrough **supports only double-tilde `~~x~~`**, not single-tilde `~x~` (`SetGFMStrikethrough1(false)`).
+- Backslash escape is **not** a `NodeTextMark` subtype: it maps to the separate `NodeBackslash` node and never appears as a `TextMarkType` value.
 
 ### 6.3 Styled inline text (★ must be paired)
 
@@ -503,6 +502,8 @@ SiYuan disables the following syntax via `SetXxx(false)` in `NewLute()` (`kernel
 | `SetLinkRef(false)` | `NodeLinkRefDef`/`NodeLinkRefDefBlock` | link reference definitions |
 | `SetGFMStrikethrough1(false)` | single-tilde strikethrough `~x~` | only double-tilde `~~x~~` is supported |
 
+> Note: `NewLute()` also sets `SetAutoSpace(false)`, `SetCodeSyntaxHighlight(false)`, and `SetExportNormalizeTaskListMarker(false)` — these are non-syntax switches that only affect rendering/export and never remove any node type, so they're omitted from the table above.
+
 ---
 
 ## 12. AI write checklist
@@ -515,10 +516,10 @@ When generating a `.sy` that SiYuan can load cleanly, verify item by item:
 4. ☐ Inline/marker nodes **do not carry** `ID`
 5. ☐ Lists are distinguished via `ListData.Typ` (omitted = unordered / `1` = ordered / `3` = task)
 6. ☐ `NodeList`'s direct children are **only** `NodeListItem`; nested lists wrap another `NodeList`
-7. ☐ `BulletChar`/`Delimiter` are int codepoints; `Marker` is base64
-8. ☐ Task checks use uppercase `[X]`, unchecked `[ ]`
+7. ☐ `BulletChar`/`Delimiter` are byte (appear as int codepoints in JSON); `Marker` is base64
+8. ☐ Task markers usually carry no `Data` (checked items use `TaskListItemChecked:true`, unchecked only `Type`)
 9. ☐ Code block four parts, math block three parts, embed five parts, super block three parts — structure intact
-10. ☐ `NodeCodeBlockCode`/`NodeMathBlockContent` are block-level (with ID); surrounding markers are inline (no ID)
+10. ☐ `NodeCodeBlockCode`/`NodeMathBlockContent` are inline children, usually only `Type`+`Data`
 11. ☐ base64 fields are encoded; content fields stay raw
 12. ☐ Prefer `NodeTextMark` for inline formatting over legacy `NodeStrong`/`NodeEmphasis`/`NodeLink`
 13. ☐ A styled `TextMark` must be followed by a paired `NodeKramdownSpanIAL`
@@ -536,8 +537,8 @@ When generating a `.sy` that SiYuan can load cleanly, verify item by item:
 | Inline node carries `ID` | Inline/marker nodes have no `ID` |
 | Using legacy nodes like `NodeStrong`/`NodeLink` | Use `NodeTextMark` + `TextMarkType` |
 | `ListData.Typ` only accepts `1` | omitted = unordered, `1` = ordered, `3` = task |
-| Treating `BulletChar` as base64 | It's an int ASCII codepoint (`42`) |
-| Writing task checks lowercase `[x]` | Uppercase `[X]` |
+| Treating `BulletChar` as base64 | It's `byte`, appearing as an int codepoint in JSON (`42` = `*`) |
+| Forcing `"Data":"[X]"` into a task marker | Real `.sy` usually has no `Data`; checked items only carry `TaskListItemChecked:true` |
 | Styled `TextMark` without the IAL | Must pair with `NodeKramdownSpanIAL` |
 | Adding `Children` to `NodeAttributeView` | It's a leaf — use `AttributeViewID`/`AttributeViewType` |
 | Changing `ID` without syncing `Properties.id` | The two must match |

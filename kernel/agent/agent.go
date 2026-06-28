@@ -225,9 +225,12 @@ func FrontendToolResult(callID string, result string, isError bool) {
 }
 
 func sendEvent(ch chan<- AgentEvent, ev AgentEvent) {
+	// 仍用非阻塞发送，避免 SSE 消费端卡住时拖死 agent 主循环；缓冲已加大以降低背压概率。
+	// 仅在确实丢弃（背压）时记日志，便于诊断长会话偶发丢字。
 	select {
 	case ch <- ev:
 	default:
+		logging.LogWarnf("agent event dropped (type=%s): SSE consumer too slow", ev.Type)
 	}
 }
 
@@ -352,7 +355,7 @@ type agentCheckpoint struct {
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
-	ch := make(chan AgentEvent, 100)
+	ch := make(chan AgentEvent, 256)
 
 	go func() {
 		defer close(ch)
@@ -383,6 +386,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var snapshotIDs []string
 		snapshotCreated := false // 整个 AgentChat 过程最多打一次自动快照，避免多轮工具调用时每轮都打
 		var roundsSinceCheckpoint int
+		var pendingCheckpoints sync.WaitGroup // 跟踪挂起的中途异步 checkpoint，保证最终落盘前全部完成
+		// finalCheckpoint 先等待所有挂起的中途异步 checkpoint 完成，再做最终的同步落盘，
+		// 确保旧的异步数据不会在最终 checkpoint 之后写入而覆盖新数据。
+		finalCheckpoint := func() {
+			pendingCheckpoints.Wait()
+			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+		}
 
 		if sessionID != "" {
 			if cp := loadCheckpoint(sessionID); cp != nil {
@@ -466,7 +476,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				}
 				logging.LogErrorf("agent API request failed: %s", streamErr.Error())
 				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
-				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+				finalCheckpoint()
 				return
 			}
 
@@ -486,7 +496,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					if content != "" || reasoningBuilder.String() != "" {
 						checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
 					}
-					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+					finalCheckpoint()
 					stream.Close()
 					return
 				}
@@ -628,7 +638,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								})
 								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: cancelMsg})
 							}
-							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+							finalCheckpoint()
 							return
 						case <-time.After(confirmTimeout):
 							confirmChannelsMu.Lock()
@@ -685,7 +695,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								})
 								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: abortMsg})
 							}
-							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+							finalCheckpoint()
 							return
 						}
 						snapshotIDs = append(snapshotIDs, id)
@@ -752,13 +762,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				if doomLoop.count >= doomLoopStopThreshold {
 					errMsg := "Repetitive tool calls detected: '" + doomLoop.prevName + "' called " + fmt.Sprintf("%d", doomLoop.count) + " times with the same action. Operation terminated."
 					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
-					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+					finalCheckpoint()
 					return
 				}
 
 				roundsSinceCheckpoint++
 				if roundsSinceCheckpoint >= 3 {
-					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+					// 流式中途的兜底 checkpoint 改为异步写盘，避免随会话增长的全文件重写阻塞 agent 主循环。
+					// 出错/取消/done 时的 checkpoint 仍为同步调用，确保最终状态可靠落盘。
+					saveCheckpointAsync(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow, &pendingCheckpoints)
 					roundsSinceCheckpoint = 0
 				}
 				continue
@@ -768,7 +780,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			if content != "" {
 				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
 			}
-			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+			finalCheckpoint()
 			if content == "" {
 				content = " "
 			}
@@ -784,7 +796,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		}
 
 		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
-		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+		finalCheckpoint()
 		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 	}()
 
@@ -1270,11 +1282,46 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 	return entries
 }
 
+// checkpointMu 串行化对 session.json 的 read-modify-write，避免同步与异步 checkpoint 并发写时丢数据。
+var checkpointMu sync.Mutex
+
 func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
 	if sessionID == "" || !isValidSessionID(sessionID) {
 		return
 	}
+	checkpointMu.Lock()
+	defer checkpointMu.Unlock()
+	writeCheckpointLocked(sessionID, messages, promptTokens, completionTokens, startTime, snapshotIDs, alwaysAllow)
+}
 
+// saveCheckpointAsync 在独立 goroutine 中执行写盘，不阻塞 agent 主循环（用于流式中途的兜底 checkpoint）。
+// messages 会被深拷贝，避免与主循环的 append 产生数据竞争；写盘仍经 checkpointMu 串行化。
+// wg 用于在最终落盘（saveCheckpoint）前等待所有挂起的中途 checkpoint 完成，避免旧数据覆盖新数据。
+func saveCheckpointAsync(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool, wg *sync.WaitGroup) {
+	if sessionID == "" || !isValidSessionID(sessionID) {
+		return
+	}
+	// 深拷贝 messages：主循环会持续 append/替换 checkpointMsgs，异步读需隔离。
+	snap := make([]AgentMessage, len(messages))
+	copy(snap, messages)
+	snapshotIDsCopy := append([]string(nil), snapshotIDs...)
+	var alwaysAllowCopy map[string]bool
+	if alwaysAllow != nil {
+		alwaysAllowCopy = make(map[string]bool, len(alwaysAllow))
+		for k, v := range alwaysAllow {
+			alwaysAllowCopy[k] = v
+		}
+	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		checkpointMu.Lock()
+		defer checkpointMu.Unlock()
+		writeCheckpointLocked(sessionID, snap, promptTokens, completionTokens, startTime, snapshotIDsCopy, alwaysAllowCopy)
+	}()
+}
+
+func writeCheckpointLocked(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
 	cp := agentCheckpoint{
 		ID:               sessionID,
 		Title:            "AI Agent",

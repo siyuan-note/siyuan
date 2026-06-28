@@ -243,6 +243,9 @@
 
 .agent-chat__body--streaming {
   min-height: 20px;
+  // 流式期 body 是纯文本（textContent），需保留换行与空白，富渲染在结束后才进行。
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .agent-chat__body {
@@ -475,6 +478,9 @@
 
 .agent-chat__thinking-chat--streaming {
   min-height: 20px;
+  // 流式期是纯文本（textContent），保留换行；富渲染在结束后进行。
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .agent-chat__thinking-summary {

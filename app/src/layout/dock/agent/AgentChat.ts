@@ -1544,6 +1544,10 @@ export class AgentChat extends Model {
                     break;
                 case "error":
                     this.flushTokenUpdate();
+                    // 中断时同样需把已收到的纯文本 body 富渲染（与正常结束的 finalizeStreamingBody 一致）。
+                    if (this.currentContent) {
+                        this.finalizeStreamingBody(this.currentContent, Date.now());
+                    }
                     this.requestStartTime = 0;
                     this.appendError(event.message);
                     this.setStreaming(false);
@@ -1571,6 +1575,9 @@ export class AgentChat extends Model {
         } catch (e) {
             console.error("agent SSE event handler error:", e, event);
             this.flushTokenUpdate();
+            if (this.currentContent) {
+                this.finalizeStreamingBody(this.currentContent, Date.now());
+            }
             this.requestStartTime = 0;
             this.setStreaming(false);
         }
@@ -1578,6 +1585,9 @@ export class AgentChat extends Model {
 
     private async handleError(err: Error) {
         this.flushTokenUpdate();
+        if (this.currentContent) {
+            this.finalizeStreamingBody(this.currentContent, Date.now());
+        }
         this.requestStartTime = 0;
         this.appendError(err.message);
         this.setStreaming(false);
@@ -1588,6 +1598,9 @@ export class AgentChat extends Model {
     // 否则回退到普通错误卡。userEntryId 用于在"未配置"时回滚刚追加的 user 消息（避免留下空对话）。
     private async handleConfigError(err: Error, userEntryId?: string) {
         this.flushTokenUpdate();
+        if (this.currentContent) {
+            this.finalizeStreamingBody(this.currentContent, Date.now());
+        }
         this.requestStartTime = 0;
         const configMsg = window.siyuan.languages._kernel[193] || "";
         const isConfigError = !!configMsg && err.message === configMsg;
@@ -1694,10 +1707,10 @@ export class AgentChat extends Model {
             if (!this.pendingTokenUpdate) {
                 this.pendingTokenUpdate = true;
                 // 用 RAF 合并更新（与普通 AI 消息一致），减少重建频率。
+                // 流式期间用 textContent 写纯文本，富渲染推迟到完成时，避免每帧重解析整段 markdown。
                 this.rafId = requestAnimationFrame(() => {
                     this.pendingTokenUpdate = false;
-                    chatEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-                    postRender(chatEl, this.app);
+                    chatEl.textContent = this.currentContent;
                     const body = chatEl.closest(".agent-chat__thinking-body") as HTMLElement | null;
                     if (body) {
                         body.scrollTop = body.scrollHeight;
@@ -1714,13 +1727,13 @@ export class AgentChat extends Model {
 
         if (!this.pendingTokenUpdate) {
             this.pendingTokenUpdate = true;
+            // 流式期间只用 textContent 写入纯文本，跳过 Lute 解析与 postRender 富渲染。
+            // 富渲染（高亮/公式/图表）推迟到 finishResponse 一次性完成，避免每帧 O(n²) 重建。
             this.rafId = requestAnimationFrame(() => {
                 this.pendingTokenUpdate = false;
                 const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
                 if (bodyEl) {
-                    bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-                    postRender(bodyEl, this.app);
-                    void bodyEl.offsetHeight; // force reflow
+                    bodyEl.textContent = this.currentContent;
                     this.scrollToBottom();
                 }
             });
@@ -1732,10 +1745,10 @@ export class AgentChat extends Model {
             this.pendingTokenUpdate = false;
             cancelAnimationFrame(this.rafId);
             // 思考卡片流式：更新 chatEl 并滚到底部（与 appendToken 思考分支一致）。
+            // 与 appendToken 一致用 textContent，富渲染由 finishResponse 完成时统一处理。
             const thinkChat = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-chat--streaming") as HTMLElement;
             if (thinkChat) {
-                thinkChat.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-                postRender(thinkChat, this.app);
+                thinkChat.textContent = this.currentContent;
                 const thinkBody = thinkChat.parentElement;
                 if (thinkBody) {
                     thinkBody.scrollTop = thinkBody.scrollHeight;
@@ -1744,8 +1757,7 @@ export class AgentChat extends Model {
             }
             const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
             if (bodyEl) {
-                bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-                postRender(bodyEl, this.app);
+                bodyEl.textContent = this.currentContent;
             }
         }
     }
@@ -2075,11 +2087,33 @@ export class AgentChat extends Model {
         );
     }
 
+    // 流式结束时把 currentAIElement 的 body 从纯文本一次性转为富渲染（Lute + postRender）。
+    // 由 finishResponse（正常结束）与 error 路径（中断）共用，保证流式期轻渲染后仍得到完整富文本。
+    private finalizeStreamingBody(content: string, ts: number) {
+        if (!this.currentAIElement) {
+            return;
+        }
+        const bodyEl = this.currentAIElement.querySelector(".agent-chat__body") as HTMLElement;
+        if (!bodyEl) {
+            return;
+        }
+        bodyEl.classList.remove("agent-chat__body--streaming");
+        if (content) {
+            // 富渲染只在此处执行一次，避免流式期间每帧 O(n²) 重建带来的卡顿。
+            bodyEl.innerHTML = this.lute.ProtylePreviewStr("", content) || escapeHtml(content);
+            postRender(bodyEl, this.app);
+            this.addCopyButton(this.currentAIElement, undefined, ts);
+            this.scrollToBottom(true);
+        }
+    }
+
     private async finishResponse() {
         this.finishActiveThinking();
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
         const ts = Date.now();
+        // 流式结束：把 body 从流式期的纯文本转为一次性完整富渲染（Lute + postRender）。
+        // 场景一：内容在流式期间落到了思考卡片里（currentAIElement 仍为空），需新建普通 AI 消息承载。
         if (!this.currentAIElement && savedContent) {
             const thinkBody = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
             if (thinkBody) {
@@ -2100,13 +2134,9 @@ export class AgentChat extends Model {
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, ts);
             this.scrollToBottom(true);
-        }
-        // 流式结束：移除普通 AI 消息的 streaming 状态。
-        if (this.currentAIElement) {
-            const bodyEl = this.currentAIElement.querySelector(".agent-chat__body") as HTMLElement;
-            if (bodyEl) {
-                bodyEl.classList.remove("agent-chat__body--streaming");
-            }
+        } else if (this.currentAIElement) {
+            // 场景二：普通流式元素（createAIMessagePlaceholder 创建，body 仍是纯文本），一次性富渲染。
+            this.finalizeStreamingBody(savedContent, ts);
         }
         this.flushThinkingStep();
         if (this.pendingConfirms.length > 0) {

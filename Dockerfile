@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM node:21 AS node-build
+FROM --platform=$BUILDPLATFORM node:22 AS node-build
 
 ARG NPM_REGISTRY=
 

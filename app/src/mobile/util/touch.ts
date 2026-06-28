@@ -35,10 +35,16 @@ const popSide = (render = true) => {
 };
 
 // 清除长按进入多选的定时器
-export const clearLongPress = () => {
+const clearLongPress = () => {
     if (longPressTimer) {
         clearTimeout(longPressTimer);
         longPressTimer = undefined;
+    }
+};
+
+export const handlePointerUp = () => {
+    if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
+        clearLongPress();
     }
 };
 
@@ -49,7 +55,6 @@ export const handleTouchEnd = (event: TouchEvent) => {
     if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {
-                clearLongPress();
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;
@@ -83,13 +88,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
                     clientY: event.changedTouches[0].clientY,
                 }));
             }
-            clearLongPress();
             event.stopImmediatePropagation();
             event.preventDefault();
             return;
         }
     }
-    clearLongPress();
     if (typeof yDiff === "undefined" && window.siyuan.mobile.editor?.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {
@@ -254,19 +257,7 @@ export const handleTouchStart = (event: TouchEvent) => {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
             longPressTimer = window.setTimeout(() => {
-                // 原生长按选中文本后继续按压，达到阈值进入块多选模式
-                const selection = window.getSelection();
-                if (selection && selection.toString() !== "") {
-                    setTimeout(() => {
-                        if (longPressTimer) {
-                            selection?.removeAllRanges();
-                            activeBlur();
-                            editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
-                        }
-                    }, 1000);
-                    return;
-                }
-                selection?.removeAllRanges();
+                window.getSelection()?.removeAllRanges();
                 activeBlur();
                 editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
             }, Constants.TIMEOUT_MULTIPLE_SELECT);

@@ -1578,6 +1578,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (isAvTarget) {
                 // 拖到数据库视图：绑定为记录
                 action = window.siyuan.languages.addToDatabase;
+            } else if (event.ctrlKey) {
+                // Ctrl=创建副本
+                action = window.siyuan.languages.duplicate;
             } else if (event.altKey) {
                 // 编辑器内重排：Alt=插入引用，Shift=嵌入块，默认=移动
                 action = window.siyuan.languages.dragTipRef;

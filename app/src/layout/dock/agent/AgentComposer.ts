@@ -60,9 +60,9 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
     const updateHighlight = () => {
         if (!suggestionMenu) { return; }
-        const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+        const items = suggestionMenu.querySelectorAll(".b3-list-item");
         for (let i = 0; i < items.length; i++) {
-            items[i].classList.toggle("agent-mention-menu__item--active", i === selectedIndex);
+            items[i].classList.toggle("b3-list-item--focus", i === selectedIndex);
         }
     };
 
@@ -71,19 +71,20 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         if (items.length === 0) { return; }
 
         suggestionMenu = document.createElement("div");
-        suggestionMenu.className = "agent-mention-menu";
+        suggestionMenu.className = "b3-list b3-list--background agent-mention-menu protyle-hint";
+        suggestionMenu.innerHTML = '<div style="flex: 1;overflow:auto;"></div>';
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             const row = document.createElement("div");
-            row.className = "agent-mention-menu__item";
+            row.className = "b3-list-item b3-list-item--two";
             row.setAttribute("data-index", i.toString());
-            const iconSvg = item.icon ? '<svg class="agent-mention-menu__icon"><use xlink:href="#' + item.icon + '"></use></svg>' : "";
-            const hPathText = item.hPath ? '<div class="agent-mention-menu__hpath">' + escapeHtml(item.hPath) + "</div>" : "";
-            row.innerHTML = '<div class="agent-mention-menu__first">' + iconSvg + '<span class="agent-mention-menu__text">' + escapeHtml(item.label) + "</span></div>" + hPathText;
+            const iconSvg = item.icon ? '<svg class="b3-list-item__graphic"><use xlink:href="#' + item.icon + '"></use></svg>' : "";
+            const hPathText = item.hPath ? '<span class="b3-list-item__meta b3-list-item__showall">' + escapeHtml(item.hPath) + "</span>" : "";
+            row.innerHTML = '<div class="b3-list-item__first">' + iconSvg + '<span class="b3-list-item__text">' + escapeHtml(item.label) + "</span></div>" + hPathText;
             row.addEventListener("mousedown", function (hit: BlockHit) {
                 return function (e: MouseEvent) { e.preventDefault(); command(hit); };
             }(item));
-            suggestionMenu.appendChild(row);
+            suggestionMenu.firstElementChild.appendChild(row);
         }
 
         document.body.appendChild(suggestionMenu);
@@ -177,7 +178,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                                 if (!suggestionMenu) { return false; }
                                 if (props.event.key === "ArrowDown") {
                                     props.event.preventDefault();
-                                    const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                                    const items = suggestionMenu.querySelectorAll(".b3-list-item");
                                     if (items.length > 0) {
                                         selectedIndex = (selectedIndex + 1) % items.length;
                                         updateHighlight();
@@ -186,7 +187,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                                 }
                                 if (props.event.key === "ArrowUp") {
                                     props.event.preventDefault();
-                                    const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                                    const items = suggestionMenu.querySelectorAll(".b3-list-item");
                                     if (items.length > 0) {
                                         selectedIndex = (selectedIndex - 1 + items.length) % items.length;
                                         updateHighlight();
@@ -238,7 +239,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                 if (suggestionMenu && slashActive) {
                     if (event.key === "ArrowDown") {
                         event.preventDefault();
-                        const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                        const items = suggestionMenu.querySelectorAll(".b3-list-item");
                         if (items.length > 0) {
                             selectedIndex = (selectedIndex + 1) % items.length;
                             updateHighlight();
@@ -247,7 +248,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                     }
                     if (event.key === "ArrowUp") {
                         event.preventDefault();
-                        const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+                        const items = suggestionMenu.querySelectorAll(".b3-list-item");
                         if (items.length > 0) {
                             selectedIndex = (selectedIndex - 1 + items.length) % items.length;
                             updateHighlight();

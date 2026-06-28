@@ -665,6 +665,13 @@ ${genHintItemHTML(item)}
                 this.splitChar = value;
                 this.lastIndex = 0;
                 range.deleteContents();
+                // 光标位于 block-ref 内末尾时，需调整到 block-ref 的外面，避免把标记符插入到引用内部
+                const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
+                if (refElement && range.startContainer.nodeType === 3 &&
+                    range.startOffset === (range.startContainer as Text).textContent.length) {
+                    range.setStartAfter(refElement);
+                    range.collapse(true);
+                }
                 const textNode = document.createTextNode(value);
                 range.insertNode(textNode);
                 range.setEnd(textNode, value.length);

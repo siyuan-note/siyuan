@@ -3,7 +3,7 @@
 <br>
 <em>Düşünceni Yeniden Şekillendir</em>
 <br><br>
-<a title="Derleme Durumu" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
+<a title="Derleme Durumu" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Sürümler" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
 <a title="İndirme Sayısı" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/downloads/siyuan-note/siyuan/total.svg?style=flat-square&color=blueviolet"></a>
 <br>
@@ -207,7 +207,7 @@ Docker görüntüsü oluşturulurken giriş noktası şu şekilde ayarlanır: `E
 - `--workspace`: çalışma alanı klasör yolunu belirtir, host üzerinde `-v` parametresiyle bağlanır  
 - `--accessAuthCode`: ekran kilidi şifresini belirtir
 
-> **Not:** v3.7.0'ten itibaren `serve` alt komutunu açıkça belirtmen gerekir (ör. `docker run b3log/siyuan serve --workspace=...`). Önceki sürümler bare flag'leri otomatik algılıyordu; bu örtük davranış açıklık için kaldırıldı. Tüm sunucu seçeneklerini görmek için `docker run --rm b3log/siyuan serve --help` komutunu çalıştır.  
+> **Not:** v3.7.0'ten itibaren `serve` alt komutunu açıkça belirtmen gerekir (ör. `docker run b3log/siyuan serve --workspace=...`). Tüm sunucu seçeneklerini görmek için `docker run --rm b3log/siyuan serve --help` komutunu çalıştır.
 
 Tüm parametreleri görmek için `--help` komutunu kullanabilirsin. Yeni ortam değişkenleriyle bir örnek başlatma komutu aşağıdadır:
 
@@ -386,18 +386,19 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 | Kategori | Komutlar |
 |----------|----------|
-| Defterler ve Belgeler | `notebook`, `document` — CRUD |
-| İçerik | `block`, `attr` — okuma/yazma, özel nitelikler |
-| Meta Veri | `tag`, `bookmark` |
+| Defterler ve Belgeler | `notebook`, `document`, `dailynote` — CRUD ve günlük notlar |
+| İçerik | `block`, `attr`, `outline` — blok okuma/yazma, nitelikler, ana hat |
+| Meta Veri | `tag`, `bookmark`, `template` — etiketler, yer imleri, şablon parçacıkları |
 | Sorgular | `search`, `sql` — tam metin ve SQL sorguları |
 | Referanslar | `ref` — geri bağlantılar ve bahsetmeler |
-| İçe/Dışa Aktarma | `export`, `import` — Markdown, HTML, PDF, Word, .sy.zip |
+| İçe/Dışa Aktarma | `export`, `import` — Markdown, HTML, preview, Word, .sy.zip, Data |
 | Veri Yönetimi | `repo`, `history`, `sync` — anlık görüntüler, sürümler, bulut senkronizasyonu |
 | Araçlar | `asset`, `file` — kaynaklar ve dosya sistemi |
 | Veritabanı | `database` — öznitelik görünümü yönetimi |
-| Çalışma Alanı | `workspace` — listeleme ve inceleme |
+| Sunucu | `serve` — çekirdek HTTP sunucusunu başlat |
+| Çalışma Alanı ve Sistem | `workspace`, `system` — listeleme, inceleme, sistem bilgileri |
 
-Ayrıntılar için `siyuan --help` komutunu çalıştırın. Betik dostu çıktı için `-f json` kullanın.
+Ayrıntılar için `siyuan --help` komutunu çalıştırın. Betik dostu çıktı için (varsayılan `-f table` yerine) `-f json` kullanın. Değişiklik yapan komutların çoğu ayrıca `--dry-run` seçeneğini destekler; bu sayede değişiklikleri uygulamadan önizleyebilirsin.
 
 ### Kurulum
 

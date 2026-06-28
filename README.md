@@ -3,7 +3,7 @@
 <br>
 <em>Refactor your thinking</em>
 <br><br>
-<a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
+<a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
 <a title="Downloads" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/downloads/siyuan-note/siyuan/total.svg?style=flat-square&color=blueviolet"></a>
 <br>
@@ -204,7 +204,7 @@ The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan
 
 Use the following parameters when running the container with `docker run b3log/siyuan`:
 
-> **Note:** Since v3.7.0, the `serve` subcommand must be passed explicitly (e.g. `docker run b3log/siyuan serve --workspace=...`). Previously the kernel auto-detected bare flags; that implicit behavior has been removed for clarity. Run `docker run --rm b3log/siyuan serve --help` to see all serving options.
+> **Note:** Since v3.7.0, the `serve` subcommand must be passed explicitly (e.g. `docker run b3log/siyuan serve --workspace=...`). Run `docker run --rm b3log/siyuan serve --help` to see all serving options.
 
 - `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
 - `--accessAuthCode`: Specifies the lock screen password
@@ -386,18 +386,19 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 | Category | Commands |
 |----------|----------|
-| Notebooks & Documents | `notebook`, `document` — CRUD |
-| Content | `block`, `attr` — read/write, custom attributes |
-| Metadata | `tag`, `bookmark` |
+| Notebooks & Documents | `notebook`, `document`, `dailynote` — CRUD and daily notes |
+| Content | `block`, `attr`, `outline` — block read/write, attributes, outline |
+| Metadata | `tag`, `bookmark`, `template` — tags, bookmarks, template snippets |
 | Queries | `search`, `sql` — full-text and SQL queries |
 | References | `ref` — backlinks and mentions |
-| Import/Export | `export`, `import` — Markdown, HTML, PDF, Word, .sy.zip |
+| Import/Export | `export`, `import` — Markdown, HTML, preview, Word, .sy.zip, Data |
 | Data Management | `repo`, `history`, `sync` — snapshots, versions, cloud sync |
 | Utilities | `asset`, `file` — resources and file system |
 | Database | `database` — attribute view management |
-| Workspace | `workspace` — list and inspect |
+| Server | `serve` — start the kernel HTTP server |
+| Workspace & System | `workspace`, `system` — list, inspect, system info |
 
-Run `siyuan --help` for the full command tree. Use `-f json` for script-friendly output.
+Run `siyuan --help` for the full command tree. Use `-f json` (default is `-f table`) for script-friendly output. Most mutating commands also support `--dry-run` to preview changes without applying them.
 
 ### Setup
 

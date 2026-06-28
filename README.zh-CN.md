@@ -3,7 +3,7 @@
 <br>
 <em>重构你的思维</em>
 <br><br>
-<a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
+<a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
 <a title="Downloads" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/downloads/siyuan-note/siyuan/total.svg?style=flat-square&color=blueviolet"></a>
 <br>
@@ -213,7 +213,7 @@
 - `--workspace`：指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
 - `--accessAuthCode`：指定锁屏密码
 
-> **注意：** 自 v3.7.0 起，必须显式传入 `serve` 子命令（例如 `docker run b3log/siyuan serve --workspace=...`）。早期版本会自动识别裸 flag，该隐式行为已为清晰起见移除。运行 `docker run --rm b3log/siyuan serve --help` 可查看全部伺服参数。
+> **注意：** 自 v3.7.0 起，必须显式传入 `serve` 子命令（例如 `docker run b3log/siyuan serve --workspace=...`）。运行 `docker run --rm b3log/siyuan serve --help` 可查看全部伺服参数。
 
 更多的参数可参考 `--help`。下面是一条启动命令示例：
 
@@ -487,18 +487,19 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 | 分类 | 命令 |
 |------|------|
-| 笔记本与文档 | `notebook`、`document` — 增删改查 |
-| 内容 | `block`、`attr` — 块读写、自定义属性 |
-| 元数据 | `tag`、`bookmark` |
+| 笔记本与文档 | `notebook`、`document`、`dailynote` — 增删改查、每日笔记 |
+| 内容 | `block`、`attr`、`outline` — 块读写、自定义属性、大纲 |
+| 元数据 | `tag`、`bookmark`、`template` — 标签、书签、模板片段 |
 | 查询 | `search`、`sql` — 全文和 SQL 查询 |
 | 引用 | `ref` — 反向链接和提及 |
-| 导入导出 | `export`、`import` — Markdown、HTML、PDF、Word、.sy.zip |
+| 导入导出 | `export`、`import` — Markdown、HTML、preview、Word、.sy.zip、Data |
 | 数据管理 | `repo`、`history`、`sync` — 快照、历史、云端同步 |
 | 工具 | `asset`、`file` — 资源与文件系统 |
 | 数据库 | `database` — 属性视图管理 |
-| 工作空间 | `workspace` — 列出和查看 |
+| 伺服 | `serve` — 启动内核 HTTP 服务 |
+| 工作空间与系统 | `workspace`、`system` — 列出、查看、系统信息 |
 
-运行 `siyuan --help` 查看完整命令树。使用 `-f json` 获得适合脚本处理的输出。
+运行 `siyuan --help` 查看完整命令树。使用 `-f json`（默认 `-f table`）获得适合脚本处理的输出。大多数写命令还支持 `--dry-run`，可预览将要发生的改动而不实际执行。
 
 ### 设置
 

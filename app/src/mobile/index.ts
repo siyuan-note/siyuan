@@ -12,7 +12,7 @@ import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
 import {addBaseURL, parseSiYuanUriInfo, setNoteBook} from "../util/pathName";
-import {handlePointerUp, handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
+import {handleTouchEnd, handleTouchMove, handleTouchStart, handleTouchUp} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets} from "../util/assets";
@@ -179,7 +179,7 @@ class App {
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", handleTouchEnd, false);
             document.addEventListener("touchcancel", handleTouchEnd, false);
-            window.addEventListener("pointerup", handlePointerUp, false);
+            window.addEventListener("androidPhysicalTouchUp", handleTouchUp, false);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;

@@ -2,7 +2,8 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName,
-    hasTopClosestByClassName, isInEmbedBlock,
+    hasTopClosestByClassName,
+    isInEmbedBlock,
 } from "../../protyle/util/hasClosest";
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
@@ -42,7 +43,7 @@ const clearLongPress = () => {
     }
 };
 
-export const handlePointerUp = () => {
+export const handleTouchUp = () => {
     if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
         clearLongPress();
     }

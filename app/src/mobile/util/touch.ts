@@ -35,7 +35,7 @@ const popSide = (render = true) => {
 };
 
 // 清除长按进入多选的定时器
-const clearLongPress = () => {
+export const clearLongPress = () => {
     if (longPressTimer) {
         clearTimeout(longPressTimer);
         longPressTimer = undefined;

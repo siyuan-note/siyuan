@@ -12,7 +12,7 @@ import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
 import {addBaseURL, parseSiYuanUriInfo, setNoteBook} from "../util/pathName";
-import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
+import {clearLongPress, handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets} from "../util/assets";
@@ -178,6 +178,11 @@ class App {
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", handleTouchEnd, false);
+            document.addEventListener("touchcancel", handleTouchEnd, false);
+            // 系统长按选中文本会接管触摸事件，touchend 可能收不到，用 pointerup 兜底清除多选定定时器
+            window.addEventListener("pointerup", () => {
+                clearLongPress();
+            });
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;

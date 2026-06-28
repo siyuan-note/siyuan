@@ -55,6 +55,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
                 return;
             }
             // 多选模式
+            window.getSelection()?.removeAllRanges();
+            activeBlur();
             const blockElement = hasClosestBlock(target);
             if (blockElement) {
                 // 本次按压已在按住期间触发多选，松手时不切换选中态，仅消费该手势
@@ -252,12 +254,18 @@ export const handleTouchStart = (event: TouchEvent) => {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
             longPressTimer = window.setTimeout(() => {
-                // 用户已通过原生长按选中文本时，不进入多选模式
+                // 原生长按选中文本后继续按压，达到阈值进入块多选模式
                 const selection = window.getSelection();
                 if (selection && selection.toString() !== "") {
+                    setTimeout(() => {
+                        if (longPressTimer) {
+                            selection?.removeAllRanges();
+                            activeBlur();
+                            editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
+                        }
+                    }, 1000);
                     return;
                 }
-                // 清空系统文本选区，避免原生长按选中的残留
                 selection?.removeAllRanges();
                 activeBlur();
                 editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);

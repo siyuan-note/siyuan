@@ -69,7 +69,7 @@ jobs:
   build:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
-    needs: [prepare, build_android]
+    needs: [prepare]
     strategy:
       matrix:
         config:
@@ -227,9 +227,8 @@ jobs:
   build_android:
     runs-on: ubuntu-latest
     name: ubuntu build android.apk
-    # 串行在桌面 build 之前:Android 链路(gomobile/NDK/Gradle)较脆弱,失败时
-    # 直接跳过桌面 build,避免浪费桌面端的 CI 时间。执行顺序:
-    # prepare -> build_android -> build -> create_release
+    # Android and desktop builds run in parallel, both depend on prepare.
+    # create_release aggregates all artifacts once both jobs succeed.
     needs: prepare
     steps:
       - name: Checkout code

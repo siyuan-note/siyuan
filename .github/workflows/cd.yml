@@ -128,7 +128,7 @@ jobs:
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
           cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: false
+          cache: true
       - run: go version
 
       - name: Set up goversioninfo
@@ -151,6 +151,13 @@ jobs:
         run: npm install -g ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('app/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
@@ -163,24 +170,10 @@ jobs:
         run: pnpm run build
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
-      - name: Remove Build Directory
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
-        shell: bash
-
-      - name: Remove Kernel Directory for Linux
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-linux"
-        shell: bash
-
-      - name: Remove Kernel Directory for Windows
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel"
-        shell: bash
-
-      - name: Remove Kernel Directory for macOS
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin"
-        shell: bash
-
-      - name: Remove Kernel Directory for macOS ARM64
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin-arm64"
+      - name: Clean Build and Kernel Directories
+        run: |
+          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
+          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel"*
         shell: bash
 
       - name: Generate Icon Resource and Properties/Version Info For Windows
@@ -241,7 +234,7 @@ jobs:
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
           cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: false
+          cache: true
       - run: go version
 
       - name: Set up Node
@@ -252,6 +245,13 @@ jobs:
       - name: Install Node pnpm
         run: npm install -g ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('app/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
 
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile

@@ -252,8 +252,13 @@ export const handleTouchStart = (event: TouchEvent) => {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
             longPressTimer = window.setTimeout(() => {
+                // 用户已通过原生长按选中文本时，不进入多选模式
+                const selection = window.getSelection();
+                if (selection && selection.toString() !== "") {
+                    return;
+                }
                 // 清空系统文本选区，避免原生长按选中的残留
-                window.getSelection().removeAllRanges();
+                selection?.removeAllRanges();
                 activeBlur();
                 editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
             }, Constants.TIMEOUT_MULTIPLE_SELECT);

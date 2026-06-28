@@ -2108,6 +2108,10 @@ export class AgentChat extends Model {
     }
 
     private async finishResponse() {
+        // 思考结束前先记录最后一张未完成的思考卡片，折叠后用于定位滚动锚点。
+        const activeThinkCard = this.messagesContainer.querySelector(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+        ) as HTMLElement | null;
         this.finishActiveThinking();
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
@@ -2133,7 +2137,12 @@ export class AgentChat extends Model {
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, ts);
-            this.scrollToBottom(true);
+            // 思考结束场景：定位到思考卡片下方（卡片贴顶、正文向下展开），而非直接滚到对话最底部。
+            if (activeThinkCard) {
+                this.scrollToThinkingCardBelow(activeThinkCard);
+            } else {
+                this.scrollToBottom(true);
+            }
         } else if (this.currentAIElement) {
             // 场景二：普通流式元素（createAIMessagePlaceholder 创建，body 仍是纯文本），一次性富渲染。
             this.finalizeStreamingBody(savedContent, ts);
@@ -3004,11 +3013,37 @@ export class AgentChat extends Model {
         return this.composer.getSendData().text.length > 0;
     }
 
+    // 思考结束后定位到思考卡片下方：让折叠后的思考卡片底部贴近容器视口顶部，
+    // 其下方留出空间承载即将/已开始流式的正文。delay 用于等待卡片折叠的 max-height 过渡（约 0.2s）完成。
+    private scrollToThinkingCardBelow(card: HTMLElement, delay = 220) {
+        const align = () => {
+            if (!card.isConnected) {
+                return;
+            }
+            // 用 getBoundingClientRect 计算卡片底部相对滚动容器的偏移，
+            // 避免依赖 offsetParent 是否为滚动容器（定位祖先可能不是 messagesContainer）。
+            const containerRect = this.messagesContainer.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+            // 卡片底部在文档中的位置 - 容器顶部在文档中的位置 + 当前已滚动量 = 卡片底部的 scrollTop 目标值。
+            const target = this.messagesContainer.scrollTop + (cardRect.bottom - containerRect.top) + 8;
+            const max = this.messagesContainer.scrollHeight - this.messagesContainer.clientHeight;
+            this.programmaticScroll = true;
+            this.messagesContainer.scrollTop = Math.min(target, max);
+            requestAnimationFrame(() => {
+                this.programmaticScroll = false;
+            });
+        };
+        if (delay > 0) {
+            window.setTimeout(align, delay);
+        } else {
+            align();
+        }
+    }
+
     private scrollToBottom(force = false, smooth = false) {
         if (!force && this.userScrolledUp) {
             return;
-        }
-        // Guard with a flag so the resulting scroll event can be told apart from
+        }        // Guard with a flag so the resulting scroll event can be told apart from
         // a user-driven scroll. Without this, the programmatic stick-to-bottom
         // write itself trips the scroll handler and, while streaming, flips
         // userScrolledUp on transiently (scrollHeight keeps growing) which

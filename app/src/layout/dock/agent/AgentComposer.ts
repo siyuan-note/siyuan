@@ -142,14 +142,16 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                             return blocks.slice(0, 10).map(function (b: Record<string, unknown>) {
                                 const id = String(b.id || "");
                                 const raw = String(b.content || b.refText || b.name || id);
-                                const plain = raw.replace(/<[^>]+>/g, "").trim() || id;
+                                // 内核返回的 content 已做 HTML 转义并可能含 <mark> 标签，先剥离标签再反转为纯文本，
+                                // 否则 escapeHtml 会再次转义导致显示成 "&lt;" 等字面量。
+                                const plain = Lute.UnEscapeHTMLStr(raw.replace(/<[^>]+>/g, "")).trim() || id;
                                 const type = String(b.type || "NodeParagraph");
                                 const sub = b.subType ? String(b.subType) : "";
                                 return {
                                     id: id,
                                     label: plain.slice(0, 80),
                                     icon: getIconByType(type, sub),
-                                    hPath: String(b.hPath || ""),
+                                    hPath: Lute.UnEscapeHTMLStr(String(b.hPath || "")),
                                 };
                             });
                         } catch (e) {

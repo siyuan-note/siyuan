@@ -106,7 +106,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 				logging.LogErrorf("parse [%s] to int failed: %s", t, parseErr)
 				continue
 			}
-			hPath = "/" + time.UnixMilli(i).Format("2006-01-02")
+			hPath = "/" + time.UnixMilli(i).Format("2006-01-02 15:04:05")
 			var retID string
 			retID, err = CreateWithMarkdown("", boxID, hPath, content, "", "", false, "", nil)
 			if nil != err {

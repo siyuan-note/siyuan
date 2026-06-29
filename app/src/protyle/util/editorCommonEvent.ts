@@ -1526,18 +1526,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         htmlTarget.style.setProperty("--drag-line-bg",
             `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
         highlightByLevel(editorElement, htmlTarget);
-        // Update drag tip to show specific insertion position
+        // 提示文案：修饰键显示对应操作，无修饰键显示插入位置
         const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
-        if (isChild) {
-            showDragTip(window.siyuan.dragTitle || "",
-                window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText),
-                event.clientX, event.clientY);
+        let action: string;
+        if (event.altKey) {
+            action = window.siyuan.languages.dragTipRef;
+        } else if (event.shiftKey) {
+            action = window.siyuan.languages.dragTipEmbed;
+        } else if (event.ctrlKey) {
+            action = window.siyuan.languages.duplicate;
+        } else if (isChild) {
+            action = window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText);
         } else {
             const key = position === "bottom" ? "dragTipListItemAfter" : "dragTipListItemBefore";
-            showDragTip(window.siyuan.dragTitle || "",
-                window.siyuan.languages[key].replace("${x}", targetText),
-                event.clientX, event.clientY);
+            action = window.siyuan.languages[key].replace("${x}", targetText);
         }
+        showDragTip(window.siyuan.dragTitle || "", action, event.clientX, event.clientY);
     };
     // 缓存当前目标的文本和列布局判断，避免优化路径每次 dragover 重复计算
     let cachedTargetText = "";
@@ -1992,7 +1996,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
                     }
                     // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
                         const isFront = point.className === "dragover__top" || point.className === "dragover__left";
                         const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
                         if ((isFront || isBack) && displayText) {
@@ -2063,7 +2067,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     addDragover(targetElement);
                     const sbFirstBlock = targetElement.querySelector("[data-node-id]") as HTMLElement;
                     const sbText = getContenteditableElement(sbFirstBlock)?.textContent?.trim() || "";
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
                         const key = isSbLeftEdge
                             ? window.siyuan.languages.dragTipMoveTargetFront
                             : window.siyuan.languages.dragTipMoveTargetBack;
@@ -2082,7 +2086,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement.classList.add("dragover__left");
                 addDragover(targetElement);
                 // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                     showDragTip(window.siyuan.dragTitle || "",
                         window.siyuan.languages.dragTipMoveTargetFront.replace("${x}", cachedTargetText),
                         event.clientX, event.clientY);
@@ -2092,7 +2096,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement.classList.add("dragover__right");
                 addDragover(targetElement);
                 // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                     showDragTip(window.siyuan.dragTitle || "",
                         window.siyuan.languages.dragTipMoveTargetBack.replace("${x}", cachedTargetText),
                         event.clientX, event.clientY);
@@ -2106,7 +2110,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement.classList.add("dragover__bottom");
                     addDragover(targetElement);
                     // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
                             (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetBack : window.siyuan.languages.dragTipMoveTargetBelow).replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);
@@ -2115,7 +2119,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement.classList.add("dragover__top");
                     addDragover(targetElement);
                     // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
                             (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetAbove).replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);
@@ -2207,7 +2211,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             highlightColColumn(targetElement as HTMLElement);
         }
         // 默认移动（无修饰键、非 AV 目标、普通块源）时，更新下半为带目标名的位置文案
-        if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && targetElement && !isAvTarget && point.className) {
+        if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && targetElement && !isAvTarget && point.className) {
             const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
             const isFront = point.className === "dragover__top" || point.className === "dragover__left";
             const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";

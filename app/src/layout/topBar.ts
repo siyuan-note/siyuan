@@ -122,6 +122,10 @@ export const initBar = (app: App) => {
                 window.siyuan.menus.menu.remove();
                 window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_MORE);
                 (target.getAttribute("data-hideids") || "").split(",").forEach((itemId) => {
+                    // data-hideids 可能为空字符串，split(",") 会得到 [""]，导致 querySelector("#") 抛出无效选择器异常
+                    if (!itemId) {
+                        return;
+                    }
                     const hideElement = toolbarElement.querySelector("#" + itemId);
                     const useElement = hideElement.querySelector("use");
                     const menuOptions: IMenu = {

@@ -501,8 +501,10 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
 <option value="1"${relativeDate?.direction === 1 ? " selected" : ""}>${window.siyuan.languages.nextDate}</option>
 <option value="0"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
 </select>`;
+        // “当前”方向下数量 count 无意义（后端按单位取今天/本周/本月/今年），故仅隐藏 relCount；
+        // 但单位 relUnit 必须保留，以便用户选择天/周/月/年
         const relCount = `<input type="number" min="1" step="1" value="${relativeDate?.count || 1}" class="b3-text-field b3-text-field--text av__filter-num" data-type="relCount${suffix}" data-path="${path}" style="${(!relativeDate || showToday) ? "display:none;" : ""}">`;
-        const relUnit = `<select class="b3-select" data-type="relUnit${suffix}" data-path="${path}" style="${(!relativeDate || showToday) ? "display:none;" : ""}">
+        const relUnit = `<select class="b3-select" data-type="relUnit${suffix}" data-path="${path}" style="${!relativeDate ? "display:none;" : ""}">
 <option value="0"${relativeDate?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
 <option value="1"${(!relativeDate || relativeDate?.unit === 1) ? " selected" : ""}>${window.siyuan.languages.week}</option>
 <option value="2"${relativeDate?.unit === 2 ? " selected" : ""}>${window.siyuan.languages.month}</option>
@@ -761,8 +763,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             filter.operator = newOp as TAVFilterOperator;
             saveRow(row, path, structureChange);
         } else if (type === "quantifier" || type?.startsWith("dataDirection") || type?.startsWith("dateType")) {
-            // 量化器、日期方向、日期类型变化：保存（dateType 变化需重渲染以切换绝对/相对）
-            if (type === "dateType" || type === "dateType2") {
+            // 量化器、日期方向、日期类型变化：保存。dateType 切换绝对/相对、dataDirection 切换“当前/前/后”
+            // 都会改变 relCount/relUnit 的显示状态，需重渲染
+            if (type === "dateType" || type === "dateType2" || type?.startsWith("dataDirection")) {
                 saveRow(row, path, true);
             } else {
                 saveRow(row, path, false);

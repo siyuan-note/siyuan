@@ -25,9 +25,13 @@ import {getAvBodyData} from "../render/av/virtualScroll";
 import {processClonePHElement} from "../render/util";
 import {setFold} from "./blockFold";
 
+// 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
+const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
+
 // 获取当前数据行的下一行。虚拟滚动会把视口外的数据行裁掉，此时 nextElementSibling 指向的是
 // .av__row--util 等非数据行。此处按 data-index 递增，若目标行未渲染则按数据源生成占位行插入后再返回，
 // 使粘贴可以覆盖视口外（被虚拟滚动裁掉的）数据行。nextIndex 超出已有行数时返回 null 以终止遍历。
+// 占位行带 av__row--placeholder 标记，由调用方在粘贴循环结束后移除，以免破坏虚拟滚动状态。
 const getNextDataRow = (currentRowElement: Element): HTMLElement => {
     const nextSibling = currentRowElement.nextElementSibling as HTMLElement;
     if (nextSibling && nextSibling.classList.contains("av__row") &&
@@ -49,7 +53,14 @@ const getNextDataRow = (currentRowElement: Element): HTMLElement => {
     const rowHTML = getRowHTML({data: view, row: view.rows[nextIndex], rowIndex: nextIndex, pinIndex, type: "table"});
     const bottomElement = bodyElement.querySelector(".av__row--util");
     bottomElement.insertAdjacentHTML("beforebegin", rowHTML);
-    return bottomElement.previousElementSibling as HTMLElement;
+    const newRowElement = bottomElement.previousElementSibling as HTMLElement;
+    newRowElement.classList.add(PLACEHOLDER_ROW_CLASS);
+    return newRowElement;
+};
+
+// 移除粘贴过程中插入的占位行，使 DOM 恢复到与虚拟滚动 bodyStates 一致的裁剪状态
+const removePlaceholderRows = (blockElement: HTMLElement) => {
+    blockElement.querySelectorAll("." + PLACEHOLDER_ROW_CLASS).forEach(item => item.remove());
 };
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
@@ -123,6 +134,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     }
                 }
             }
+            removePlaceholderRows(blockElement as HTMLElement);
             if (doOperations.length > 0) {
                 doOperations.push({
                     action: "doUpdateUpdated",
@@ -225,6 +237,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         }
                     }
                 }
+                removePlaceholderRows(blockElement as HTMLElement);
                 if (doOperations.length > 0) {
                     const id = blockElement.getAttribute("data-node-id");
                     doOperations.push({

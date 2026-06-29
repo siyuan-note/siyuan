@@ -198,6 +198,11 @@
   position: fixed;
   background-color: var(--b3-theme-primary-lightest);
   z-index: 3; // 需大于 database header and footer
+
+  // 划选未超过一个块时不显示矩形
+  &[data-empty="true"] {
+    display: none;
+  }
 }
 
 .protyle-breadcrumb {

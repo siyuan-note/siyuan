@@ -1125,7 +1125,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 source.contains(targetLi) ||                                        // 拖到子孙中
                                 (!isChild && isBottom && source === targetLi.nextElementSibling) ||  // 底部同级：源原本就在目标后面
                                 (!isChild && !isBottom && source === targetLi.previousElementSibling)); // 顶部同级：源原本就在目标前面
-                            if (isNoOpDrop) {
+                            // Ctrl(复制)/Shift(嵌入) 允许落在源自身/原位置（创建副本/嵌入块），不做 no-op 拦截
+                            if (isNoOpDrop && !event.ctrlKey && !event.shiftKey) {
                                 dragoverElement = undefined;
                                 return;
                             }
@@ -2181,7 +2182,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return true;
                 }
             });
-            if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
+            if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0] && !event.ctrlKey && !event.shiftKey) {
+                // 拖到自身/子孙时无操作；但 Ctrl(复制)/Shift(嵌入) 允许落在源自身位置（创建副本/嵌入块），不拦截
                 clearDragoverElement(dragoverElement);
                 return;
             }

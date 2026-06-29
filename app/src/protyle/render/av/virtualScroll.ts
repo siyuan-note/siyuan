@@ -246,6 +246,11 @@ const getBodyData = (bodyEl: HTMLElement) => {
     return groupId ? stored.data.view.groups.find((g: IAVView) => g.id === groupId) : stored.data.view;
 };
 
+// 对外暴露 body 数据源，供虚拟滚动状态下写入/粘贴未渲染行时生成占位行 HTML
+export const getAvBodyData = (bodyEl: HTMLElement): IAVView | null => {
+    return getBodyData(bodyEl);
+};
+
 export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     if (blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true" || trimPending.has(blockElement)) {
         return;

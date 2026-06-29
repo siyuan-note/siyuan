@@ -20,9 +20,37 @@ import {input} from "../wysiwyg/input";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
-import {getFieldIdByCellElement} from "../render/av/row";
+import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
+import {getAvBodyData} from "../render/av/virtualScroll";
 import {processClonePHElement} from "../render/util";
 import {setFold} from "./blockFold";
+
+// 获取当前数据行的下一行。虚拟滚动会把视口外的数据行裁掉，此时 nextElementSibling 指向的是
+// .av__row--util 等非数据行。此处按 data-index 递增，若目标行未渲染则按数据源生成占位行插入后再返回，
+// 使粘贴可以覆盖视口外（被虚拟滚动裁掉的）数据行。nextIndex 超出已有行数时返回 null 以终止遍历。
+const getNextDataRow = (currentRowElement: Element): HTMLElement => {
+    const nextSibling = currentRowElement.nextElementSibling as HTMLElement;
+    if (nextSibling && nextSibling.classList.contains("av__row") &&
+        !nextSibling.classList.contains("av__row--util") &&
+        !nextSibling.classList.contains("av__row--footer") &&
+        !nextSibling.classList.contains("av__row--header")) {
+        return nextSibling;
+    }
+    const nextIndex = parseInt(currentRowElement.getAttribute("data-index")) + 1;
+    const bodyElement = hasClosestByClassName(currentRowElement, "av__body") as HTMLElement;
+    if (!bodyElement) {
+        return null;
+    }
+    const view = getAvBodyData(bodyElement) as IAVTable;
+    if (!view || !view.rows || nextIndex >= view.rows.length) {
+        return null;
+    }
+    const pinIndex = parseInt(bodyElement.querySelector(".av__row--header > .block__icons")?.getAttribute("data-pinindex") || "-1");
+    const rowHTML = getRowHTML({data: view, row: view.rows[nextIndex], rowIndex: nextIndex, pinIndex, type: "table"});
+    const bottomElement = bodyElement.querySelector(".av__row--util");
+    bottomElement.insertAdjacentHTML("beforebegin", rowHTML);
+    return bottomElement.previousElementSibling as HTMLElement;
+};
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -67,9 +95,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 if (!currentRowElement) {
                     currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                 } else {
-                    currentRowElement = currentRowElement.nextElementSibling;
+                    currentRowElement = getNextDataRow(currentRowElement);
                 }
-                if (!currentRowElement.classList.contains("av__row")) {
+                if (!currentRowElement) {
                     break;
                 }
                 let cellElement: HTMLElement;
@@ -169,9 +197,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     if (!currentRowElement) {
                         currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                     } else {
-                        currentRowElement = currentRowElement.nextElementSibling;
+                        currentRowElement = getNextDataRow(currentRowElement);
                     }
-                    if (!currentRowElement.classList.contains("av__row")) {
+                    if (!currentRowElement) {
                         break;
                     }
                     let cellElement: HTMLElement;

@@ -461,7 +461,8 @@ export class WYSIWYG {
                     textPlain = range.toString();
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
-                    textPlain = selectImgElement.querySelector("img").getAttribute("data-src");
+                    // 和图片菜单中的复制保持一致
+                    textPlain = protyle.lute.BlockDOM2StdMd(html).replace(/%20/g, " ");
                 } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 &&
                     range.startContainer.parentElement.tagName === "SPAN" &&
                     range.startContainer.parentElement === range.endContainer.parentElement) {

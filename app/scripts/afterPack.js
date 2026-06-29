@@ -24,7 +24,9 @@ async function trimPackagedChangelogs(appOutDir, packager, platform) {
       console.error(`trimChangelogs: ${result.reason}`);
       return;
     }
-    console.log(`trimChangelogs: ${result.path}`);
+    if (result.path) {
+      console.log(`trimChangelogs: ${result.path}`);
+    }
   } catch (error) {
     console.error("Failed to trim changelogs:", error.message);
   }

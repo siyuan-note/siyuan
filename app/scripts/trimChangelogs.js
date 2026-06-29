@@ -1,12 +1,25 @@
 const fsPromises = require("fs").promises;
 const path = require("path");
 
-// 裁剪 changelog，只保留顶层 changelogs/v{version}/。
+// 裁剪 changelog，只保留顶层 changelogs/v{version}/；预发布版删除整个 changelogs 目录。
 // 版本号须与 package.json、kernel/util/working.go 的 Ver 一致（内核按此路径读取）。
 async function trimChangelogs(changelogsDir, version) {
+  let exists = true;
   try {
     await fsPromises.access(changelogsDir);
   } catch {
+    exists = false;
+  }
+
+  if (version.includes("-")) {
+    // 预发布版
+    if (exists) {
+      await fsPromises.rm(changelogsDir, {recursive: true, force: true});
+    }
+    return {ok: true};
+  }
+
+  if (!exists) {
     return {ok: false, reason: "directory not found"};
   }
 
@@ -48,7 +61,9 @@ if (require.main === module) {
       console.error(`trimChangelogs: ${result.reason}`);
       return;
     }
-    console.log(`trimChangelogs: ${result.path}`);
+    if (result.path) {
+      console.log(`trimChangelogs: ${result.path}`);
+    }
   }).catch((error) => {
     console.error("trimChangelogs failed:", error.message);
   });

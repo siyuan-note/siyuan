@@ -331,7 +331,8 @@ jobs:
           cp ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/kernel.aar \
              ${{ github.workspace }}/siyuan-android/app/libs/kernel.aar
           cd ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-          zip -r app.zip appearance guide stage changelogs
+          node scripts/trimChangelogs.js
+          zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs)
           mkdir -p ${{ github.workspace }}/siyuan-android/app/src/main/assets
           cp app.zip ${{ github.workspace }}/siyuan-android/app/src/main/assets/app.zip
 

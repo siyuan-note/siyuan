@@ -19,7 +19,8 @@ RUN <<EORUN
 pnpm run build
 node scripts/trimChangelogs.js
 mkdir /artifacts
-mv appearance stage guide changelogs /artifacts/
+mv appearance stage guide /artifacts/
+if [ -d changelogs ]; then mv changelogs /artifacts/; fi
 EORUN
 
 FROM golang:1.25-alpine AS go-build

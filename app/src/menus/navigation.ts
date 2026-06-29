@@ -15,7 +15,7 @@ import {closePanel} from "../mobile/util/closePanel";
 import {popSearch} from "../mobile/menu/search";
 /// #endif
 import {Constants} from "../constants";
-import {newFile} from "../util/newFile";
+import {newFileInTree} from "../util/newFile";
 import {hasClosestByTag, hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles} from "../editor/deleteFile";
 import {getDockByType} from "../layout/tabUtil";
@@ -451,14 +451,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                             paths.push(item.getAttribute("data-path"));
                         }
                     });
-                    newFile({
-                        app,
-                        notebookId,
-                        currentPath: pathPosix().dirname(pathString),
-                        paths,
-                        useSavePath: false,
-                        listDocTree: true,
-                    });
+                    newFileInTree(app, notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -475,14 +468,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                             }
                         }
                     });
-                    newFile({
-                        app,
-                        notebookId,
-                        currentPath: pathPosix().dirname(pathString),
-                        paths,
-                        useSavePath: false,
-                        listDocTree: true,
-                    });
+                    newFileInTree(app, notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);

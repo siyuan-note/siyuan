@@ -1427,6 +1427,15 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
+                // 块划选时原生文字选区会在 Windows 上跨块扩展（macOS 不会），需实时收回起点块，避免拖动中可见 AB 之间的文字被选中
+                if (getSelection().rangeCount > 0) {
+                    const range = getSelection().getRangeAt(0);
+                    const startBlockElement = hasClosestBlock(range.startContainer);
+                    const endBlockElement = hasClosestBlock(range.endContainer);
+                    if (startBlockElement && endBlockElement && startBlockElement !== endBlockElement) {
+                        range.collapse(false);
+                    }
+                }
                 protyle.selectElement.classList.remove("fn__none");
                 // 向左选择，遇到 gutter 就不会弹出 toolbar
                 hideElements(["gutter"], protyle);

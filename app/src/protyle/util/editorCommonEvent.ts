@@ -6,7 +6,7 @@ import {
     getSbChildBlockCount,
     getTopAloneElement
 } from "../wysiwyg/getBlock";
-import {hideDragTip, showDragTip, transparentImgSrc} from "./dragTip";
+import {hideCaretLine, hideDragTip, showCaretLine, showDragTip, transparentImgSrc} from "./dragTip";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1581,8 +1581,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 isAvTarget ? window.siyuan.languages.addToDatabase :
                     (event.altKey ? window.siyuan.languages.dragTip2Heading : window.siyuan.languages.dragTipRef),
                 event.clientX, event.clientY);
-        } else if (gutterType && !isAvSubType) {
+        } else if (gutterType && !isAvSubType && !(event.altKey && isInEmbedBlock(event.target))) {
             // 普通块（段落/标题/列表/引用/AV块等，排除 AV 行/列/视图/卡片）拖入编辑器
+            // Alt 拖到嵌入块上不支持插入引用，跳过提示
             let action: string;
             if (isAvTarget) {
                 // 拖到数据库视图：绑定为记录
@@ -1591,7 +1592,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // Ctrl=创建副本
                 action = window.siyuan.languages.duplicate;
             } else if (event.altKey) {
-                // 编辑器内重排：Alt=插入引用，Shift=嵌入块，默认=移动
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
                 action = window.siyuan.languages.dragTipEmbed;
@@ -1644,9 +1644,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
             });
+            // 绘制行级竖线指示：定位到光标位置
+            const range = getRangeByPoint(event.clientX, event.clientY);
+            if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+                const rect = range.getBoundingClientRect();
+                if (rect.height > 0) {
+                    showCaretLine(rect.left, rect.top, rect.height);
+                }
+            }
             event.preventDefault();
             return;
         }
+        // 非 Alt 路径：清除可能残留的 Alt 竖线指示
+        hideCaretLine();
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
         targetElement = hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||

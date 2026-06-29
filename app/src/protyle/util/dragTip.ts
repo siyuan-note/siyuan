@@ -71,6 +71,26 @@ export const showDragTip = (title: string, action: string, x: number, y: number)
     }
 };
 
+// Alt 拖拽插入引用时的行级竖线指示
+let caretLineElement: HTMLElement | null = null;
+
+export const showCaretLine = (left: number, top: number, height: number) => {
+    if (!caretLineElement) {
+        caretLineElement = document.createElement("div");
+        caretLineElement.style.cssText = "position:fixed;width:2px;background-color:var(--b3-theme-primary-light);z-index:1000000;pointer-events:none;border-radius:var(--b3-border-radius);";
+        document.body.append(caretLineElement);
+    }
+    caretLineElement.style.left = left + "px";
+    caretLineElement.style.top = top + "px";
+    caretLineElement.style.height = height + "px";
+    caretLineElement.style.display = "";
+};
+
+export const hideCaretLine = () => {
+    caretLineElement?.remove();
+    caretLineElement = null;
+};
+
 export const hideDragTip = () => {
     if (dragTipState.rafId) {
         cancelAnimationFrame(dragTipState.rafId);
@@ -82,4 +102,5 @@ export const hideDragTip = () => {
     dragTipState.actionElement = null;
     dragTipState.lastTitle = "";
     dragTipState.lastAction = "";
+    hideCaretLine();
 };

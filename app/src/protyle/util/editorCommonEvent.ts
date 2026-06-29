@@ -1125,8 +1125,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 source.contains(targetLi) ||                                        // 拖到子孙中
                                 (!isChild && isBottom && source === targetLi.nextElementSibling) ||  // 底部同级：源原本就在目标后面
                                 (!isChild && !isBottom && source === targetLi.previousElementSibling)); // 顶部同级：源原本就在目标前面
-                            // Ctrl(复制)/Shift(嵌入) 允许落在源自身/原位置（创建副本/嵌入块），不做 no-op 拦截
-                            if (isNoOpDrop && !event.ctrlKey && !event.shiftKey) {
+                            // Ctrl(复制)/Shift(嵌入)/Alt(引用) 走各自的 drop 分支，不进此移动 no-op；此处仅纯移动需拦截
+                            if (isNoOpDrop && !event.ctrlKey && !event.shiftKey && !event.altKey) {
                                 dragoverElement = undefined;
                                 return;
                             }
@@ -2003,6 +2003,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.getAttribute("data-type") === "NodeAttributeView" && hasClosestByTag(event.target, "TD")) {
                 return;
             }
+            // 拖到自身/子孙且为纯移动（无修饰键）时为无效移动：松开 Ctrl/Shift/Alt 后恢复成"拖拽自身"状态，不显示移动指示线
+            // Ctrl(复制)/Shift(嵌入)/Alt(引用) 允许落在源自身位置（创建副本/嵌入块/引用），不拦截
+            const isSelfFast = !event.ctrlKey && !event.shiftKey && !event.altKey && gutterTypes[2]?.split(",").some((item: string) =>
+                item && hasClosestByAttribute(targetElement as HTMLElement, "data-node-id", item));
+            if (isSelfFast && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
+                hideDragTip();
+                return;
+            }
             if (point.className && !liTarget && !targetElement.classList.contains("sb")) {
                 // 列表项拖拽不触发横向超级块，列表边缘不显示插入指示
                 if (!(gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
@@ -2182,8 +2190,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return true;
                 }
             });
-            if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0] && !event.ctrlKey && !event.shiftKey) {
-                // 拖到自身/子孙时无操作；但 Ctrl(复制)/Shift(嵌入) 允许落在源自身位置（创建副本/嵌入块），不拦截
+            if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0] && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+                // 拖到自身/子孙且为纯移动时无操作；Ctrl(复制)/Shift(嵌入)/Alt(引用) 允许落在源自身位置（创建副本/嵌入块/引用），不拦截
                 clearDragoverElement(dragoverElement);
                 return;
             }

@@ -53,6 +53,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
     const editor = getCurrentEditor();
+    handleTouchUp();
     if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {

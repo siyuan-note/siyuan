@@ -286,8 +286,8 @@ const handleDragStart = (e: TouchEvent) => {
         isDragging: false,
         draggableElement: draggable,
         editorElement: null,
-        // File tree and gallery items need long-press to avoid conflict with scroll
-        requireLongPress: draggable.closest(".sy__file") !== null || draggable.closest(".av__gallery-item") !== null,
+        // File tree, gallery items and list actions need long-press to avoid conflict with scroll
+        requireLongPress: draggable.closest(".sy__file") !== null || draggable.closest(".av__gallery-item") !== null || draggable.closest(".protyle-action") !== null,
         touchStartTime: Date.now(),
         longPressCancelled: false,
     };
@@ -306,7 +306,7 @@ const handleDragMove = (e: TouchEvent) => {
             return;
         }
 
-        // File tree and gallery items: must hold still for 300ms, then drag.
+        // File tree, gallery items and list actions: must hold still for 300ms, then drag.
         // Moving before 400ms is a scroll — cancel drag entirely.
         if (dragState.requireLongPress) {
             if (dragState.longPressCancelled) {

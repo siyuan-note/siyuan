@@ -8,7 +8,7 @@ import {
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur} from "./keyboardToolbar";
-import {isChromeBrowser, isIPhone} from "../../protyle/util/compatibility";
+import {isChromeBrowser, isInAndroid, isInHarmony, isIPhone} from "../../protyle/util/compatibility";
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
@@ -53,7 +53,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
     const editor = getCurrentEditor();
-    handleTouchUp();
+    if (!isInHarmony() && !isInAndroid()) {
+        handleTouchUp();
+    }
     if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {

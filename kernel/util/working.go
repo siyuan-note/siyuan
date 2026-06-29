@@ -38,6 +38,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"golang.org/x/mod/semver"
 )
 
 // var Mode = "dev"
@@ -47,6 +48,12 @@ const (
 	Ver       = "3.7.0-rc.2"
 	IsInsider = false
 )
+
+// IsReleaseVer 判断是否为正式版（不含 beta、rc 等预发布标识）。
+func IsReleaseVer(ver string) bool {
+	v := "v" + strings.TrimPrefix(ver, "v")
+	return semver.IsValid(v) && semver.Prerelease(v) == ""
+}
 
 var (
 	RunInContainer             = false // 是否运行在容器中

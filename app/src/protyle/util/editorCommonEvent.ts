@@ -1644,13 +1644,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
             });
-            // 绘制行级竖线指示：定位到光标位置
-            const range = getRangeByPoint(event.clientX, event.clientY);
-            if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
-                const rect = range.getBoundingClientRect();
-                if (rect.height > 0) {
-                    showCaretLine(rect.left, rect.top, rect.height);
+            // 绘制行级竖线指示：定位到光标位置（最后一个块下方是新建块，不显示竖线）
+            if (event.y <= protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
+                const range = getRangeByPoint(event.clientX, event.clientY);
+                if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+                    const rect = range.getBoundingClientRect();
+                    if (rect.height > 0) {
+                        showCaretLine(rect.left, rect.top, rect.height);
+                    }
                 }
+            } else {
+                hideCaretLine();
             }
             event.preventDefault();
             return;

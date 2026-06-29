@@ -13,6 +13,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasC
 import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr, escapeHtml} from "../util/escape";
+import {formatCount} from "../util/number";
 import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
@@ -285,7 +286,7 @@ const bazaar = {
             <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space--small"></span>
-                ${item.downloads}
+                ${formatCount(item.downloads)}
             </span>
             <span class="fn__space--small"></span>
             <span class="block__icon block__icon--show block__icon--text">
@@ -570,17 +571,17 @@ type="checkbox">
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconStar"></use></svg>
         <span class="fn__space"></span>
-        <a href="${data.repoURL}/stargazers" target="_blank" title="Stars">${data.stars}</a>
+        <a href="${data.repoURL}/stargazers" target="_blank" title="Stars">${formatCount(data.stars)}</a>
         <span class="fn__space"></span>
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGitHubI"></use></svg>
         <span class="fn__space"></span>
-        <a href="${data.repoURL}/issues" target="_blank" title="Open issues">${data.openIssues}</a>
+        <a href="${data.repoURL}/issues" target="_blank" title="Open issues">${formatCount(data.openIssues)}</a>
         <span class="fn__space"></span>
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconDownload"></use></svg>
         <span class="fn__space"></span>
-        ${data.downloads}
+        ${formatCount(data.downloads)}
     </div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>

@@ -30,14 +30,14 @@ import (
 // 叶子节点：Column/Operator/Value 等字段有效，Filters 为空。
 // 分组节点：Combination 指明子节点的组合方式，Filters 为子节点列表（递归）。
 type ViewFilter struct {
-	Column        string             `json:"column"`                  // 字段（列）ID，叶子节点有效
-	Qualifier     FilterQuantifier   `json:"quantifier,omitempty"`    // 量词，叶子节点有效
-	Operator      FilterOperator     `json:"operator"`                // 操作符，叶子节点有效
-	Value         *Value             `json:"value"`                   // 过滤值，叶子节点有效
-	RelativeDate  *RelativeDate      `json:"relativeDate,omitempty"`  // 相对时间，叶子节点有效
-	RelativeDate2 *RelativeDate      `json:"relativeDate2,omitempty"` // 第二个相对时间，叶子节点有效
-	Combination   FilterCombination  `json:"combination,omitempty"`   // 组合方式，分组节点有效
-	Filters       []*ViewFilter      `json:"filters,omitempty"`       // 子节点，分组节点有效（递归）
+	Column        string            `json:"column"`                  // 字段（列）ID，叶子节点有效
+	Qualifier     FilterQuantifier  `json:"quantifier,omitempty"`    // 量词，叶子节点有效
+	Operator      FilterOperator    `json:"operator"`                // 操作符，叶子节点有效
+	Value         *Value            `json:"value"`                   // 过滤值，叶子节点有效
+	RelativeDate  *RelativeDate     `json:"relativeDate,omitempty"`  // 相对时间，叶子节点有效
+	RelativeDate2 *RelativeDate     `json:"relativeDate2,omitempty"` // 第二个相对时间，叶子节点有效
+	Combination   FilterCombination `json:"combination,omitempty"`   // 组合方式，分组节点有效
+	Filters       []*ViewFilter     `json:"filters,omitempty"`       // 子节点，分组节点有效（递归）
 }
 
 // FilterCombination 描述了分组节点中子过滤条件的组合方式。
@@ -842,9 +842,14 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 			}
 
 			if nil != relativeDate { // 使用相对时间比较
+				// 非 Is between 时前端不会下发 relativeDate2，为 nil 时复用第一段作为安全默认，避免空指针
+				secondRelativeDate := relativeDate2
+				if nil == secondRelativeDate {
+					secondRelativeDate = relativeDate
+				}
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
-				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
-				return filterRelativeTime(value.Date.Content, value.Date.IsNotEmpty, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, relativeDate2.Direction)
+				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(secondRelativeDate.Count, secondRelativeDate.Unit, secondRelativeDate.Direction)
+				return filterRelativeTime(value.Date.Content, value.Date.IsNotEmpty, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, secondRelativeDate.Direction)
 			}
 			// 使用具体时间比较
 			if nil == other.Date {
@@ -855,9 +860,14 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	case KeyTypeCreated:
 		if nil != value.Created {
 			if nil != relativeDate { // 使用相对时间比较
+				// 非 Is between 时前端不会下发 relativeDate2，为 nil 时复用第一段作为安全默认，避免空指针
+				secondRelativeDate := relativeDate2
+				if nil == secondRelativeDate {
+					secondRelativeDate = relativeDate
+				}
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
-				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
-				return filterRelativeTime(value.Created.Content, true, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, relativeDate2.Direction)
+				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(secondRelativeDate.Count, secondRelativeDate.Unit, secondRelativeDate.Direction)
+				return filterRelativeTime(value.Created.Content, true, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, secondRelativeDate.Direction)
 			}
 			// 使用具体时间比较
 			if nil == other.Created {
@@ -868,9 +878,14 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	case KeyTypeUpdated:
 		if nil != value.Updated {
 			if nil != relativeDate { // 使用相对时间比较
+				// 非 Is between 时前端不会下发 relativeDate2，为 nil 时复用第一段作为安全默认，避免空指针
+				secondRelativeDate := relativeDate2
+				if nil == secondRelativeDate {
+					secondRelativeDate = relativeDate
+				}
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
-				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
-				return filterRelativeTime(value.Updated.Content, true, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, relativeDate2.Direction)
+				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(secondRelativeDate.Count, secondRelativeDate.Unit, secondRelativeDate.Direction)
+				return filterRelativeTime(value.Updated.Content, true, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, secondRelativeDate.Direction)
 			}
 			// 使用具体时间比较
 			if nil == other.Updated {

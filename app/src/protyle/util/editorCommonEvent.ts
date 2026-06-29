@@ -1654,7 +1654,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             } else {
+                // 最后一个块下方：新建块，显示水平插入线
                 hideCaretLine();
+                const lastBlock = protyle.wysiwyg.element.lastElementChild as HTMLElement;
+                if (lastBlock && lastBlock.hasAttribute("data-node-id")) {
+                    lastBlock.classList.add("dragover__bottom");
+                }
             }
             event.preventDefault();
             return;

@@ -1,8 +1,8 @@
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {forceQuit} from "../dialog/processSystem";
-import {isKernelInContainer, isMobile} from "./functions";
-import {isInIOS} from "../protyle/util/compatibility";
+import {isBrowser, isKernelInContainer, isMobile} from "./functions";
+import {isInIOS, isInMobileApp} from "../protyle/util/compatibility";
 
 export const kernelError = () => {
     if (document.querySelector("#errorLog")) {
@@ -39,9 +39,9 @@ export const kernelError = () => {
     </ol>
     <div class="ft__on-surface">${window.siyuan.languages.kernelFault2}</div>
 </div>
-<div class="b3-dialog__action">
+${isBrowser() && !isInMobileApp() ? "" : `<div class="b3-dialog__action">
     <button class="b3-button">${window.siyuan.languages.safeQuit}</button>
-</div>`;
+</div>`}`;
     }
     const dialog = new Dialog({
         disableClose: true,
@@ -58,9 +58,12 @@ export const kernelError = () => {
             window.webkit.messageHandlers.startKernelFast.postMessage("startKernelFast");
         });
     } else {
-        btnsElement[0].addEventListener("click", () => {
-            dialog.destroy();
-            forceQuit();
-        });
+        const btn = btnsElement[0];
+        if (btn) {
+            btn.addEventListener("click", () => {
+                dialog.destroy();
+                forceQuit();
+            });
+        }
     }
 };

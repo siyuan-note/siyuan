@@ -1124,20 +1124,28 @@ export const updateHeaderCell = (cellElement: HTMLElement, headerValue: {
 };
 
 export const getPositionByCellElement = (cellElement: HTMLElement) => {
-    let rowElement = hasClosestByClassName(cellElement, "av__row");
+    const rowElement = hasClosestByClassName(cellElement, "av__row");
     if (!rowElement) {
         return;
     }
+    // 直接取该行在 body 内 .av__row 列表中的序号，与划选/拖拽填充遍历 querySelectorAll(".av__row")
+    // 时的 index 保持同一基准，避免固定表头占位、虚拟滚动 spacer 等结构导致 previousElementSibling 计数错位
+    const bodyElement = hasClosestByClassName(rowElement, "av__body");
     let rowIndex = -1;
-    while (rowElement) {
-        rowElement = rowElement.previousElementSibling as HTMLElement;
-        rowIndex++;
+    if (bodyElement) {
+        Array.from(bodyElement.querySelectorAll(".av__row")).find((item: HTMLElement, index: number) => {
+            if (item === rowElement) {
+                rowIndex = index;
+                return true;
+            }
+        });
     }
     let celIndex = -2;
-    while (cellElement) {
-        cellElement = cellElement.previousElementSibling as HTMLElement;
-        if (cellElement && cellElement.classList.contains("av__colsticky")) {
-            cellElement = cellElement.lastElementChild as HTMLElement;
+    let currentCellElement = cellElement;
+    while (currentCellElement) {
+        currentCellElement = currentCellElement.previousElementSibling as HTMLElement;
+        if (currentCellElement && currentCellElement.classList.contains("av__colsticky")) {
+            currentCellElement = currentCellElement.lastElementChild as HTMLElement;
         }
         celIndex++;
     }

@@ -26,6 +26,11 @@ const handleManualTouchStart = (e: TouchEvent) => {
     if (e.touches.length !== 1) return;
 
     const target = e.target as HTMLElement;
+    // 原生 <select> 下拉层由 WebView 以系统 overlay 绘制，合成 mousedown 会干扰其触摸序列导致下拉层闪退
+    // https://github.com/siyuan-note/siyuan/issues/17953
+    if (target.tagName === "SELECT" || target.tagName === "OPTION" || target.closest("select")) {
+        return;
+    }
     // All areas with manual mousedown/mousemove/mouseup drag/resize operations
     if (!target.closest(".dock") &&
         !target.closest(".b3-dialog") &&

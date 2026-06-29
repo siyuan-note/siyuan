@@ -1433,7 +1433,7 @@ export class WYSIWYG {
                     const startBlockElement = hasClosestBlock(range.startContainer);
                     const endBlockElement = hasClosestBlock(range.endContainer);
                     if (startBlockElement && endBlockElement && startBlockElement !== endBlockElement) {
-                        range.collapse(false);
+                        protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
                     }
                 }
                 protyle.selectElement.classList.remove("fn__none");

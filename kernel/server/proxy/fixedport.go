@@ -51,7 +51,7 @@ func InitFixedPortService(host string, certPath, keyPath string) {
 				return
 			}
 
-			if serveErr := util.ServeMultiplexed(ln, proxy, certPath, keyPath, nil); serveErr != nil {
+			if _, _, serveErr := util.ServeMultiplexed(ln, proxy, certPath, keyPath, nil, nil); serveErr != nil {
 				if !errors.Is(serveErr, cmux.ErrListenerClosed) && !errors.Is(serveErr, http.ErrServerClosed) {
 					logging.LogWarnf("fixed port cmux serve error: %s", serveErr)
 				}

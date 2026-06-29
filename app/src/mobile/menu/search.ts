@@ -10,7 +10,7 @@ import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
-import {newFileByName} from "../../util/newFile";
+import {newFile} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {activeBlur} from "../util/keyboardToolbar";
@@ -670,7 +670,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 break;
             } else if (target.classList.contains("b3-list-item")) {
                 if (target.getAttribute("data-type") === "search-new") {
-                    newFileByName(app, searchInputElement.value);
+                    newFile(app, searchInputElement.value);
                 } else if (target.getAttribute("data-type") === "search-item") {
                     const id = target.getAttribute("data-node-id");
                     if (id) {
@@ -830,7 +830,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
 </div>`,
         bindEvent(element) {
             document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
-                newFileByName(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
+                newFile(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
             });
             const historyElement = document.querySelector('.toolbar [data-type="history"]');
             historyElement.addEventListener("click", () => {

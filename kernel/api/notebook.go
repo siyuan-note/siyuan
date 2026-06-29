@@ -370,12 +370,9 @@ func setNotebookConf(c *gin.Context) {
 		return
 	}
 
+	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
+
 	boxConf.RefCreateSavePath = util.TrimSpaceInPath(boxConf.RefCreateSavePath)
-	if "" != boxConf.RefCreateSavePath {
-		if !strings.HasSuffix(boxConf.RefCreateSavePath, "/") {
-			boxConf.RefCreateSavePath += "/"
-		}
-	}
 
 	boxConf.DailyNoteSavePath = util.TrimSpaceInPath(boxConf.DailyNoteSavePath)
 	if "" != boxConf.DailyNoteSavePath {
@@ -398,8 +395,6 @@ func setNotebookConf(c *gin.Context) {
 			boxConf.DailyNoteTemplatePath = "/" + boxConf.DailyNoteTemplatePath
 		}
 	}
-
-	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
 
 	box.SaveConf(boxConf)
 	ret.Data = boxConf

@@ -1153,6 +1153,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                             return targetElement === prevSibling || targetElement === nextSibling;
                                         };
                                         if (checkSiblings(current)) {
+                                            // 源列表本身是文档顶层块、目标是其顶层紧邻块时，属合法顶层重排
+                                            // （moveTo 会为新位置新建合法列表包装），不拦截
+                                            if (current.parentElement === editorElement) {
+                                                break;
+                                            }
                                             dragoverElement = undefined;
                                             return;
                                         }
@@ -1809,8 +1814,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         // 不允许拖拽到嵌入块中（嵌入块本身或其内部任意内容均不可作为拖拽目标）
-        // 需置于列表/超级块等会提前 return 的分支之前，否则列表项、超级块等场景会绕过该限制
-        if (isInEmbedBlock(targetElement) || targetElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+        // 例外：嵌入块是文档首块/末块且光标在其顶/底边外时，允许作为"嵌入块上/下方"落点（before/afterend 插入）
+        if (targetElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+            if (editorElement.firstElementChild === targetElement &&
+                event.clientY < targetElement.getBoundingClientRect().top) {
+                point.className = "dragover__top";
+            } else if (editorElement.lastElementChild === targetElement &&
+                event.clientY > targetElement.getBoundingClientRect().bottom) {
+                point.className = "dragover__bottom";
+            } else {
+                clearDragoverElement(dragoverElement);
+                return;
+            }
+        } else if (isInEmbedBlock(targetElement)) {
             clearDragoverElement(dragoverElement);
             return;
         }
@@ -1867,6 +1883,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             return targetElement === prevSibling || targetElement === nextSibling;
                         };
                         if (checkSiblings(current)) {
+                            // 源列表本身是文档顶层块、目标是其顶层紧邻块时，属合法顶层重排
+                            // （moveTo 会为新位置新建合法列表包装），不拦截
+                            if (current.parentElement === editorElement) {
+                                break;
+                            }
                             cleanupDragIndicators(editorElement);
                             hideDragTip();
                             return;

@@ -51,6 +51,11 @@ const (
 	embeddingBackoffBase  = 30      // 首次失败后 30s 重试
 	embeddingBackoffMax   = 30 * 60 // 上限 30min
 	embeddingMaxFailCount = 8       // 单块连续失败到此次数视为永久失败，不再调度
+
+	// block_embeddings.ignored_type 取值：区分块被跳过未嵌入的原因
+	embeddingIgnoredNone   = 0 // 未忽略（正常嵌入或失败重试中）
+	embeddingIgnoredByLen  = 1 // 内容长度超限（< 7 或 > 12000 字符）
+	embeddingIgnoredByConf = 2 // 被 .siyuan/embeddingignore 配置匹配
 )
 
 var (
@@ -200,10 +205,16 @@ func processPendingEmbeddings() {
 				}
 
 				matcher := getEmbeddingIgnoreMatcher()
-				if (nil != matcher && matcher.MatchesPath("/"+box+path)) ||
-					len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
-					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)",
-						id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
+				if nil != matcher && matcher.MatchesPath("/"+box+path) {
+					// 被 .siyuan/embeddingignore 配置匹配，配置忽略优先于长度忽略
+					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?)",
+						id, rootID, box, path, []byte{}, embeddingModel(), 0, updated, embeddingIgnoredByConf)
+					continue
+				}
+				if len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
+					// 内容长度超限（过短或过长），长度忽略
+					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, ?)",
+						id, rootID, box, path, []byte{}, embeddingModel(), 0, updated, embeddingIgnoredByLen)
 					continue
 				}
 				row["plain_text"] = content
@@ -308,9 +319,9 @@ func doEmbedAndStore(texts []string, blocks []map[string]any) {
 			path, _ := row["path"].(string)
 			updated, _ := row["updated"].(string)
 			// 先确保占位行存在（INSERT OR IGNORE 不覆盖已有行），再累加失败计数
-			sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)",
+			sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
 				id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
-			sql.Exec("UPDATE block_embeddings SET fail_count = fail_count + 1, last_tried = ?, embedding = ?, model = ?, content_len = 0 WHERE id = ?",
+			sql.Exec("UPDATE block_embeddings SET fail_count = fail_count + 1, last_tried = ?, embedding = ?, model = ?, content_len = 0, ignored_type = 0 WHERE id = ?",
 				now, []byte{}, embeddingModel(), id)
 		}
 		return
@@ -326,8 +337,8 @@ func doEmbedAndStore(texts []string, blocks []map[string]any) {
 
 		buf := encodeVector(vectors[i])
 
-		// 成功则整行重写，fail_count/last_tried 复位为 0
-		err = sql.Exec("INSERT OR REPLACE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)",
+		// 成功则整行重写，fail_count/last_tried/ignored_type 复位为 0
+		err = sql.Exec("INSERT OR REPLACE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
 			id, rootID, box, path, buf, embeddingModel(), len(plainText), updated)
 		if err != nil {
 			logging.LogErrorf("store embedding failed for block [%s]: %s", id, err)
@@ -591,12 +602,13 @@ func fullReindexEmbedding() {
 
 // EmbeddingStat 嵌入索引进度统计，供设置页展示。
 type EmbeddingStat struct {
-	Total   int  `json:"total"`   // blocks 表总块数（分母）
-	Indexed int  `json:"indexed"` // 有效向量数（length(embedding)>0）
-	Pending int  `json:"pending"` // 待索引块数（blocks 中无对应 block_embeddings 行的）
-	Failed  int  `json:"failed"`  // 失败块数（fail_count>0）
-	Ignored int  `json:"ignored"` // 被忽略块数（被 embeddingignore 匹配或内容长度超限，fail_count=0 且 length(embedding)=0）
-	Enabled bool `json:"enabled"` // 是否已启用嵌入
+	Total           int  `json:"total"`           // blocks 表总块数（分母）
+	Indexed         int  `json:"indexed"`         // 有效向量数（length(embedding)>0）
+	Pending         int  `json:"pending"`         // 待索引块数（blocks 中无对应 block_embeddings 行的）
+	Failed          int  `json:"failed"`          // 失败块数（fail_count>0）
+	IgnoredByLen    int  `json:"ignoredByLen"`    // 长度忽略（内容过短或过长，ignored_type=1）
+	IgnoredByConfig int  `json:"ignoredByConfig"` // 配置忽略（被 .siyuan/embeddingignore 匹配，ignored_type=2）
+	Enabled         bool `json:"enabled"`         // 是否已启用嵌入
 }
 
 // GetEmbeddingStat 查询嵌入索引进度统计。表不存在或未启用时返回零值统计。
@@ -636,11 +648,14 @@ func GetEmbeddingStat() (ret *EmbeddingStat) {
 		}
 	}
 
-	// 被忽略块（embeddingignore 匹配或内容长度超限被跳过：空 embedding 且从未失败）
-	rows, err = sql.QueryNoLimit("SELECT COUNT(*) AS c FROM block_embeddings WHERE fail_count = 0 AND length(embedding) = 0")
+	// 忽略块按原因分别统计：ignored_type=1 为长度忽略，=2 为配置忽略
+	rows, err = sql.QueryNoLimit("SELECT SUM(CASE WHEN ignored_type = 1 THEN 1 ELSE 0 END) AS by_len, SUM(CASE WHEN ignored_type = 2 THEN 1 ELSE 0 END) AS by_conf FROM block_embeddings WHERE ignored_type > 0")
 	if err == nil && 0 < len(rows) {
-		if c, ok := rows[0]["c"].(int64); ok {
-			ret.Ignored = int(c)
+		if byLen, ok := rows[0]["by_len"].(int64); ok {
+			ret.IgnoredByLen = int(byLen)
+		}
+		if byConf, ok := rows[0]["by_conf"].(int64); ok {
+			ret.IgnoredByConfig = int(byConf)
 		}
 	}
 	return

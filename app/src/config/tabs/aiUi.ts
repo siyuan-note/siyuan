@@ -66,7 +66,7 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
     const render = () => {
         fetchPost("/api/ai/embeddingStat", {}, (response) => {
             const stat = response.data as {
-                total: number, indexed: number, pending: number, failed: number, ignored: number, enabled: boolean,
+                total: number, indexed: number, pending: number, failed: number, ignoredByLen: number, ignoredByConfig: number, enabled: boolean,
             };
             const contentEl = block.querySelector("#aiEmbeddingStatsContent") as HTMLElement;
             const disabledEl = block.querySelector("#aiEmbeddingStatsDisabled") as HTMLElement;
@@ -98,10 +98,11 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             }
 
             const numEl = block.querySelector("#aiEmbeddingStatsNum");
-            numEl.innerHTML = `${window.siyuan.languages.embeddingIndexed}: <b>${indexed}</b> / ${total}
-                <span class="fn__space"></span>${window.siyuan.languages.embeddingPending}: <b>${stat.pending || 0}</b>
-                <span class="fn__space"></span>${window.siyuan.languages.embeddingFailed}: <b>${stat.failed || 0}</b>
-                <span class="fn__space"></span>${window.siyuan.languages.embeddingIgnored}: <b>${stat.ignored || 0}</b>`;
+            numEl.innerHTML = `${window.siyuan.languages.embeddingIndexed}<b>${indexed}</b> / ${total}
+                <span class="fn__space"></span>${window.siyuan.languages.embeddingPending}<b>${stat.pending || 0}</b>
+                <span class="fn__space"></span>${window.siyuan.languages.embeddingFailed}<b>${stat.failed || 0}</b>
+                <span class="fn__space"></span>${window.siyuan.languages.embeddingIgnoredByLen}<b>${stat.ignoredByLen || 0}</b>
+                <span class="fn__space"></span>${window.siyuan.languages.embeddingIgnoredByConfig}<b>${stat.ignoredByConfig || 0}</b>`;
         });
     };
 

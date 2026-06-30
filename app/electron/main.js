@@ -600,8 +600,10 @@ const initMainWindow = () => {
     // 强制销毁 boot 窗口并显示主窗口，避免永久卡在启动页
     const readyToShowTimeout = setTimeout(() => {
         if (bootWindow && !bootWindow.isDestroyed()) {
-            writeLog("siyuan-ready-to-show timeout, force showing main window");
-            currentWindow.show();
+            if (!currentWindow.isDestroyed()) {
+                writeLog("siyuan-ready-to-show timeout, force showing main window");
+                currentWindow.show();
+            }
             bootWindow.destroy();
         }
     }, 60000);

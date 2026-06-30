@@ -92,6 +92,14 @@ func StartEmbeddingIndexer() {
 	}
 }
 
+// PrepareEmbeddingSearch 仅检查表与配置并把 embeddingTableOk 置真，不启动后台索引循环。
+// 供 CLI 一次性命令（如 search -m 4）使用：StartEmbeddingIndexer 是死循环，不能直接用于会立即退出的进程。
+func PrepareEmbeddingSearch() {
+	if checkEmbeddingTable() && isEmbeddingEnabled() {
+		embeddingTableOk = true
+	}
+}
+
 type embeddingJob struct {
 	texts  []string
 	blocks []map[string]any

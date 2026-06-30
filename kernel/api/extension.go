@@ -91,12 +91,14 @@ func extensionCopy(c *gin.Context) {
 
 	uploaded := map[string]string{}
 	for originalName, file := range form.File {
-		oName, err := url.PathUnescape(originalName)
-		unescaped := oName
-
-		if clippingSym && strings.Contains(oName, "img-loading.svg") {
+		// 链滴/流云整页剪藏走服务端原始 Markdown，扩展上传的 DOM 资源地址与原始 Markdown 中的地址必然不一致，
+		// 上传的文件无法被匹配引用；该路径下由内核按“下载资源”开关统一下载本地化，因此跳过扩展上传的文件
+		if clippingSym {
 			continue
 		}
+
+		oName, err := url.PathUnescape(originalName)
+		unescaped := oName
 
 		if err != nil {
 			if strings.Contains(originalName, "%u") {
@@ -211,6 +213,12 @@ func extensionCopy(c *gin.Context) {
 				}
 				return ast.WalkContinue
 			})
+
+			// 链滴/流云整页剪藏时扩展上传的 DOM 资源地址与服务端原始 Markdown 中的地址不一致，
+			// 扩展上传的文件无法匹配；当用户开启“下载资源”时由内核直接下载原始 Markdown 中的网络资源到本地
+			if assetsOn := len(form.Value["assets"]) > 0 && "true" == form.Value["assets"][0]; assetsOn {
+				model.DownloadNetAssets2LocalAssets(tree, false, symArticleHref, assets)
+			}
 
 			md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 		}

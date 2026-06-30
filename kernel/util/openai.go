@@ -20,6 +20,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
@@ -179,6 +180,27 @@ func IsNetworkError(err error) bool {
 		strings.Contains(msg, "network")
 }
 
+// embeddingHTTPClient 单例 HTTP 客户端，复用连接池并限制每主机最大连接数，
+// 避免 embedding 索引器在 API 不可用时新建大量连接形成连接风暴。
+// 单次请求超时由调用方用 context.WithTimeout 控制，client 本身不设全局 Timeout。
+var (
+	embeddingHTTPClientOnce sync.Once
+	embeddingHTTPClient     *http.Client
+)
+
+func getEmbeddingHTTPClient() *http.Client {
+	embeddingHTTPClientOnce.Do(func() {
+		transport := &http.Transport{
+			MaxConnsPerHost:     4, // 同一 embedding endpoint 的并发连接上限
+			MaxIdleConns:        8,
+			MaxIdleConnsPerHost: 4,
+			IdleConnTimeout:     90 * time.Second,
+		}
+		embeddingHTTPClient = &http.Client{Transport: transport}
+	})
+	return embeddingHTTPClient
+}
+
 func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout int) (ret [][]float32, err error) {
 	if 1 > len(texts) {
 		return
@@ -186,10 +208,7 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout i
 
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = baseURL
-	config.HTTPClient = &http.Client{
-		Timeout:   time.Duration(timeout) * time.Second,
-		Transport: &http.Transport{},
-	}
+	config.HTTPClient = getEmbeddingHTTPClient()
 	client := openai.NewClientWithConfig(config)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)

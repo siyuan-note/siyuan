@@ -99,6 +99,8 @@ var rootCmd = &cobra.Command{
 		sql.InitAssetContentDatabase(false)
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
+		// 让 CLI 一次性命令（如 search -m 4）也能命中语义搜索：StartEmbeddingIndexer 是死循环不能用于会立即退出的进程，这里只把开关置真
+		model.PrepareEmbeddingSearch()
 		return nil
 	},
 }

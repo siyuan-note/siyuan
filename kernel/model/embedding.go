@@ -44,6 +44,12 @@ const (
 	embeddingMinTextLen     = 7
 	embeddingMaxContentLen  = 12000
 	embeddingVectorDim      = 4 // float32 = 4 bytes
+
+	// 嵌入失败重试的退避参数：API 不可用时避免连接风暴
+	// delay = min(embeddingBackoffBase << (failCount-1), embeddingBackoffMax)
+	embeddingBackoffBase  = 30      // 首次失败后 30s 重试
+	embeddingBackoffMax   = 30 * 60 // 上限 30min
+	embeddingMaxFailCount = 8       // 单块连续失败到此次数视为永久失败，不再调度
 )
 
 var (
@@ -55,6 +61,10 @@ var (
 	embeddingIgnoreLock    sync.Mutex
 
 	embeddingStop atomic.Bool
+
+	// embeddingErrNotified 标记本轮是否已向用户提示过嵌入失败，避免多个并发 worker 失败时重复弹窗。
+	// 每次 processPendingEmbeddings 开始时随 embeddingStop 一起重置。
+	embeddingErrNotified atomic.Bool
 )
 
 func checkEmbeddingTable() bool {
@@ -92,6 +102,14 @@ func StartEmbeddingIndexer() {
 	}
 }
 
+// PrepareEmbeddingSearch 仅检查表与配置并把 embeddingTableOk 置真，不启动后台索引循环。
+// 供 CLI 一次性命令（如 search -m 4）使用：StartEmbeddingIndexer 是死循环，不能直接用于会立即退出的进程。
+func PrepareEmbeddingSearch() {
+	if checkEmbeddingTable() && isEmbeddingEnabled() {
+		embeddingTableOk = true
+	}
+}
+
 type embeddingJob struct {
 	texts  []string
 	blocks []map[string]any
@@ -103,6 +121,7 @@ func processPendingEmbeddings() {
 	}
 
 	embeddingStop.Store(false)
+	embeddingErrNotified.Store(false)
 
 	workCh := make(chan embeddingJob, embeddingMaxConcurrency*2)
 
@@ -127,7 +146,10 @@ func processPendingEmbeddings() {
 				return
 			}
 
-			results, err := sql.QueryNoLimit(stmtPendingBlocks)
+			// SQL 粗筛下界用最小退避间隔，保证不漏掉到期的重试块；逐块的精确退避在下面 Go 侧再判
+			now := time.Now().Unix()
+			cutoff := now - int64(embeddingBackoffBase) // embeddingBackoffBase 单位为秒
+			results, err := sql.QueryNoLimitArgs(stmtPendingBlocks, embeddingMaxFailCount, cutoff)
 			if err != nil {
 				logging.LogErrorf("query pending embedding blocks failed: %s", err)
 				return
@@ -139,6 +161,9 @@ func processPendingEmbeddings() {
 
 			var texts []string
 			var blocks []map[string]any
+			anySubmitted := false   // 本轮是否向 workCh 提交过 job
+			backoffSkipped := 0     // 因未到退避时间被跳过的块数（这类块状态不变，下轮还会被捞出）
+			minRemaining := int64(embeddingBackoffMax) // 这些块中最近的剩余等待秒数（embeddingBackoffMax 单位为秒）
 			for _, row := range results {
 				id, _ := row["id"].(string)
 				rootID, _ := row["root_id"].(string)
@@ -146,10 +171,28 @@ func processPendingEmbeddings() {
 				path, _ := row["path"].(string)
 				updated, _ := row["updated"].(string)
 				content, _ := row["content"].(string)
+
+				// 失败过的块按各自 fail_count 精确判断是否到退避时间，未到期则本轮跳过
+				failCount, _ := row["fail_count"].(int64)
+				lastTried, _ := row["last_tried"].(int64)
+				if failCount > 0 {
+					if failCount >= embeddingMaxFailCount {
+						continue // 永久失败，不再调度
+					}
+					required := int64(embeddingBackoffFor(int(failCount)) / time.Second)
+					if elapsed := now - lastTried; elapsed < required {
+						backoffSkipped++
+						if remaining := required - elapsed; remaining < minRemaining {
+							minRemaining = remaining
+						}
+						continue // 未到该块的退避时间
+					}
+				}
+
 				matcher := getEmbeddingIgnoreMatcher()
 				if (nil != matcher && matcher.MatchesPath("/"+box+path)) ||
 					len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
-					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)",
 						id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
 					continue
 				}
@@ -159,12 +202,32 @@ func processPendingEmbeddings() {
 
 				if len(texts) >= embeddingBatchSize {
 					workCh <- embeddingJob{texts: texts, blocks: blocks}
+					anySubmitted = true
 					texts = nil
 					blocks = nil
 				}
 			}
 			if len(texts) > 0 {
 				workCh <- embeddingJob{texts: texts, blocks: blocks}
+				anySubmitted = true
+			}
+
+			// 本轮没有提交任何 job，且全部是被退避跳过的块：这些块状态没变，下轮 SQL 还会捞出同样的块，
+			// 直接进下一轮会 CPU 忙等 + 高频 DB 查询。sleep 到最近的到期时间再继续，期间检查熔断以便及时退出。
+			if !anySubmitted && backoffSkipped > 0 {
+				wait := time.Duration(minRemaining) * time.Second
+				if wait < time.Second {
+					wait = time.Second
+				}
+				// 分段 sleep，每秒检查一次 embeddingStop，熔断时尽快退出
+				for wait > 0 && !embeddingStop.Load() {
+					step := wait
+					if step > time.Second {
+						step = time.Second
+					}
+					time.Sleep(step)
+					wait -= step
+				}
 			}
 		}
 	}()
@@ -172,10 +235,33 @@ func processPendingEmbeddings() {
 	workersWg.Wait()
 }
 
-const stmtPendingBlocks = "SELECT b.id, b.root_id, b.box, b.path, b.content, b.updated FROM blocks b " +
+// stmtPendingBlocks 捞取待嵌入块，分两类：
+//  1. 从未尝试过（e.id IS NULL）；
+//  2. 失败过、未达永久失败阈值、且距上次尝试已超过退避间隔（e.last_tried < ?）。
+// 参数顺序：?1=maxFailCount，?2=now-backoff（仅作 fail_count>0 块的粗筛下界，精确退避由 Go 侧按每块 fail_count 计算）。
+const stmtPendingBlocks = "SELECT b.id, b.root_id, b.box, b.path, b.content, b.updated, " +
+	"COALESCE(e.fail_count, 0) AS fail_count, COALESCE(e.last_tried, 0) AS last_tried " +
+	"FROM blocks b " +
 	"LEFT JOIN block_embeddings e ON b.id = e.id " +
 	"WHERE e.id IS NULL " +
-	"ORDER BY b.updated DESC LIMIT 100"
+	"OR (e.fail_count > 0 AND e.fail_count < ? AND e.last_tried < ?) " +
+	"ORDER BY fail_count ASC, b.updated DESC LIMIT 100"
+
+// embeddingBackoffFor 返回给定失败次数对应的退避间隔（首次失败 fail_count=1 对应 base）。
+func embeddingBackoffFor(failCount int) time.Duration {
+	if failCount < 1 {
+		return time.Duration(embeddingBackoffBase) * time.Second
+	}
+	shift := failCount - 1
+	if shift > 20 {
+		shift = 20 // 防溢出
+	}
+	d := embeddingBackoffBase << uint(shift)
+	if d > embeddingBackoffMax || d < 0 {
+		return time.Duration(embeddingBackoffMax) * time.Second
+	}
+	return time.Duration(d) * time.Second
+}
 
 func encodeVector(vec []float32) []byte {
 	buf := make([]byte, len(vec)*embeddingVectorDim)
@@ -195,8 +281,27 @@ func decodeVector(b []byte) []float32 {
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
 	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
 	if err != nil {
-		if util.IsNetworkError(err) {
-			embeddingStop.Store(true)
+		// 任何 API 错误（含模型不存在/鉴权失败/限流/网络异常）都熔断本轮，避免连接风暴
+		embeddingStop.Store(true)
+		logging.LogErrorf("create embeddings failed, stop this round: %s", err)
+		// 多个 worker 可能并发失败，用 CAS 保证本轮只向用户提示一次
+		if embeddingErrNotified.CompareAndSwap(false, true) {
+			util.PushErrMsg("Embedding request failed, indexing paused. Please check AI embedding config.", 5000)
+		}
+
+		// 失败块记录 fail_count/last_tried，使其进入按各自退避节奏的重试队列，而非被反复无界重试
+		now := time.Now().Unix()
+		for _, row := range blocks {
+			id, _ := row["id"].(string)
+			rootID, _ := row["root_id"].(string)
+			box, _ := row["box"].(string)
+			path, _ := row["path"].(string)
+			updated, _ := row["updated"].(string)
+			// 先确保占位行存在（INSERT OR IGNORE 不覆盖已有行），再累加失败计数
+			sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)",
+				id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
+			sql.Exec("UPDATE block_embeddings SET fail_count = fail_count + 1, last_tried = ?, embedding = ?, model = ?, content_len = 0 WHERE id = ?",
+				now, []byte{}, embeddingModel(), id)
 		}
 		return
 	}
@@ -211,7 +316,8 @@ func doEmbedAndStore(texts []string, blocks []map[string]any) {
 
 		buf := encodeVector(vectors[i])
 
-		err = sql.Exec("INSERT OR REPLACE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		// 成功则整行重写，fail_count/last_tried 复位为 0
+		err = sql.Exec("INSERT OR REPLACE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)",
 			id, rootID, box, path, buf, embeddingModel(), len(plainText), updated)
 		if err != nil {
 			logging.LogErrorf("store embedding failed for block [%s]: %s", id, err)

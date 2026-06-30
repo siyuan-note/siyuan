@@ -133,7 +133,7 @@ func init() {
 	searchCmd.Flags().StringArray("path", nil, "path prefix filter (repeatable)")
 	searchCmd.Flags().StringArrayP("type", "t", nil, "block type filter, repeatable (document heading paragraph list listItem codeBlock mathBlock table blockquote superBlock htmlBlock embedBlock databaseBlock audioBlock videoBlock iframeBlock widgetBlock callout)")
 	searchCmd.Flags().StringArray("subtype", nil, "block subtype filter, repeatable (o u t)")
-	searchCmd.Flags().IntP("method", "m", 0, "search method: 0=keyword 1=query-syntax 2=sql 3=regex 4=fuzzy")
+	searchCmd.Flags().IntP("method", "m", 0, "search method: 0=keyword 1=query-syntax 2=sql 3=regex 4=semantic")
 	searchCmd.Flags().IntP("order-by", "o", 0, "order: 0=type 1=created-asc 2=created-desc 3=updated-asc 4=updated-desc 5=content 6=relevance-asc 7=relevance-desc")
 	searchCmd.Flags().IntP("page", "p", 1, "page number")
 	searchCmd.Flags().IntP("page-size", "s", 32, "results per page")

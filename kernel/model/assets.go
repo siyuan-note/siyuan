@@ -451,6 +451,12 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 	return
 }
 
+// DownloadNetAssets2LocalAssets 将语法树中的网络资源下载到本地并改写链接，
+// 不持久化文档树，由调用方负责后续保存与渲染。
+func DownloadNetAssets2LocalAssets(tree *parse.Tree, onlyImg bool, originalURL string, assetsDirPath string) {
+	netAssets2LocalAssets0(tree, onlyImg, originalURL, assetsDirPath, false)
+}
+
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
 	var keywords []string

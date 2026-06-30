@@ -324,7 +324,7 @@ Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
 SIYUAN_LANG: tr
-Publish parameters: --accessAuthCode=******(Lock screen password)
+Publish parameters: serve --accessAuthCode=******(Lock screen password)
 ```
 
 </details>

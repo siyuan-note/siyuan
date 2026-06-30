@@ -329,7 +329,7 @@ Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
 SIYUAN_LANG: zh-CN
-Publish parameters: --accessAuthCode=******（锁屏密码）
+Publish parameters: serve --accessAuthCode=******（锁屏密码）
 ```
 
 </details>

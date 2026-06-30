@@ -320,7 +320,7 @@ Container Path: /home/siyuan
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
-Publish parameters: --accessAuthCode=******(Lock screen password)
+Publish parameters: serve --accessAuthCode=******(Lock screen password)
 ```
 
 </details>

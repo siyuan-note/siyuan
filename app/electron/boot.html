@@ -218,8 +218,8 @@
             if (target > currentDisplay) {
                 currentDisplay = target
                 progressEl.style.width = target + '%'
-                // 显示进度达到随机值的 10% 时触发 logo 汇聚动画
-                if (bgSvg && !bgSvg.classList.contains("started") && currentDisplay >= baseProgress * 0.1) {
+                // 显示进度达到 15% 时触发 logo 汇聚动画
+                if (bgSvg && !bgSvg.classList.contains("started") && currentDisplay >= 15) {
                     bgSvg.classList.add("started")
                 }
             }

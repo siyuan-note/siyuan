@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -65,6 +66,10 @@ var (
 	// embeddingErrNotified 标记本轮是否已向用户提示过嵌入失败，避免多个并发 worker 失败时重复弹窗。
 	// 每次 processPendingEmbeddings 开始时随 embeddingStop 一起重置。
 	embeddingErrNotified atomic.Bool
+
+	// embeddingIndexerRunning 标记后台索引器死循环是否已在运行，避免 fullReindexEmbedding 重复启动多个 goroutine。
+	// 启动时若嵌入未启用，StartEmbeddingIndexer 会直接 return，此标志保持 false；用户后续启用并触发重建时据此决定是否启动。
+	embeddingIndexerRunning atomic.Bool
 )
 
 func checkEmbeddingTable() bool {
@@ -78,6 +83,11 @@ func checkEmbeddingTable() bool {
 
 func StartEmbeddingIndexer() {
 	if !checkEmbeddingTable() || !isEmbeddingEnabled() {
+		return
+	}
+
+	// CAS 防止重复启动：若死循环已在运行（如重建按钮触发），直接返回，避免重复注册订阅者和启动多个 goroutine
+	if !embeddingIndexerRunning.CompareAndSwap(false, true) {
 		return
 	}
 
@@ -545,6 +555,95 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 func isEmbeddingEnabled() bool {
 	return nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
+}
+
+// ReindexEmbedding 清空嵌入向量表并触发后台索引器重新计算所有块。异步执行：只入队任务后立即返回。
+func ReindexEmbedding() {
+	task.AppendTask(task.DatabaseIndexEmbeddingFull, fullReindexEmbedding)
+}
+
+// fullReindexEmbedding 实际的重建逻辑，由任务队列调度执行。
+// 只 DELETE 数据行保留表结构（不能 DROP，DROP 会连带重建 blocks 等所有表），
+// 清空后所有块满足 e.id IS NULL，常驻索引器下一轮自动全量重嵌。
+func fullReindexEmbedding() {
+	if !isEmbeddingEnabled() {
+		logging.LogWarnf("embedding not enabled, skip reindex")
+		return
+	}
+	if !checkEmbeddingTable() {
+		logging.LogWarnf("block_embeddings table not available, skip reindex")
+		return
+	}
+	if err := sql.Exec("DELETE FROM block_embeddings"); err != nil {
+		logging.LogErrorf("clear block_embeddings failed: %s", err)
+		return
+	}
+	logging.LogInfof("embedding vectors cleared, indexer will re-embed all blocks")
+
+	// 若后台索引器死循环未运行（用户启动内核时嵌入未启用、随后才开启并点重建），这里补启动。
+	// StartEmbeddingIndexer 内部用 CAS 保证只启动一个死循环。已运行则 Publish 唤醒立即补齐，不必等 30s 兜底轮询。
+	if !embeddingIndexerRunning.Load() {
+		go StartEmbeddingIndexer()
+	} else {
+		eventbus.Publish(eventbus.EvtEmbeddingDirty, "")
+	}
+}
+
+// EmbeddingStat 嵌入索引进度统计，供设置页展示。
+type EmbeddingStat struct {
+	Total   int  `json:"total"`   // blocks 表总块数（分母）
+	Indexed int  `json:"indexed"` // 有效向量数（length(embedding)>0）
+	Pending int  `json:"pending"` // 待索引块数（blocks 中无对应 block_embeddings 行的）
+	Failed  int  `json:"failed"`  // 失败块数（fail_count>0）
+	Ignored int  `json:"ignored"` // 被忽略块数（被 embeddingignore 匹配或内容长度超限，fail_count=0 且 length(embedding)=0）
+	Enabled bool `json:"enabled"` // 是否已启用嵌入
+}
+
+// GetEmbeddingStat 查询嵌入索引进度统计。表不存在或未启用时返回零值统计。
+func GetEmbeddingStat() (ret *EmbeddingStat) {
+	ret = &EmbeddingStat{Enabled: isEmbeddingEnabled()}
+	if !checkEmbeddingTable() {
+		return
+	}
+
+	// 一条 SQL 同时算 total 和 pending（pending = blocks 中没有对应嵌入行的）
+	// COALESCE 处理 LEFT JOIN 的 NULL；用带 ok 的安全断言，避免 driver 返回类型差异导致 panic
+	rows, err := sql.QueryNoLimit("SELECT COUNT(*) AS total, SUM(CASE WHEN e.id IS NULL THEN 1 ELSE 0 END) AS pending FROM blocks b LEFT JOIN block_embeddings e ON b.id = e.id")
+	if err != nil || 1 > len(rows) {
+		logging.LogErrorf("query embedding total/pending stat failed: %s", err)
+		return
+	}
+	if total, ok := rows[0]["total"].(int64); ok {
+		ret.Total = int(total)
+	}
+	if pending, ok := rows[0]["pending"].(int64); ok {
+		ret.Pending = int(pending)
+	}
+
+	// 已索引（有效向量）
+	rows, err = sql.QueryNoLimit("SELECT COUNT(*) AS c FROM block_embeddings WHERE length(embedding) > 0")
+	if err == nil && 0 < len(rows) {
+		if c, ok := rows[0]["c"].(int64); ok {
+			ret.Indexed = int(c)
+		}
+	}
+
+	// 失败块（含失败重试中 + 永久失败，统一计入让用户感知）
+	rows, err = sql.QueryNoLimit("SELECT COUNT(*) AS c FROM block_embeddings WHERE fail_count > 0")
+	if err == nil && 0 < len(rows) {
+		if c, ok := rows[0]["c"].(int64); ok {
+			ret.Failed = int(c)
+		}
+	}
+
+	// 被忽略块（embeddingignore 匹配或内容长度超限被跳过：空 embedding 且从未失败）
+	rows, err = sql.QueryNoLimit("SELECT COUNT(*) AS c FROM block_embeddings WHERE fail_count = 0 AND length(embedding) = 0")
+	if err == nil && 0 < len(rows) {
+		if c, ok := rows[0]["c"].(int64); ok {
+			ret.Ignored = int(c)
+		}
+	}
+	return
 }
 
 func embeddingKey() string {

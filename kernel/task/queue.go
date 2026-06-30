@@ -216,6 +216,7 @@ const (
 	ReloadUI                        = "task.reload.ui"                     // 重载 UI
 	AssetContentDatabaseIndexFull   = "task.asset.database.index.full"     // 资源文件数据库重建索引
 	AssetContentDatabaseIndexCommit = "task.asset.database.index.commit"   // 资源文件数据库索引提交
+	DatabaseIndexEmbeddingFull      = "task.database.index.embedding.full" // 嵌入向量重建索引
 	CacheVirtualBlockRef            = "task.cache.virtualBlockRef"         // 缓存虚拟块引用
 	ReloadAttributeView             = "task.reload.attributeView"          // 重新加载属性视图
 	ReloadProtyle                   = "task.reload.protyle"                // 重新加载编辑器
@@ -240,6 +241,7 @@ var uniqueActions = []string{
 	HistoryDatabaseIndexCommit,
 	AssetContentDatabaseIndexFull,
 	AssetContentDatabaseIndexCommit,
+	DatabaseIndexEmbeddingFull,
 	ReloadAttributeView,
 	ReloadProtyle,
 	ReloadTag,

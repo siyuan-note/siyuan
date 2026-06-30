@@ -359,6 +359,12 @@ func QueryNoLimit(stmt string) (ret []map[string]any, err error) {
 	return queryRawStmt(stmt, math.MaxInt)
 }
 
+// QueryNoLimitArgs 与 QueryNoLimit 一致，但支持参数化查询（stmt 中用 ? 占位，args 顺序填入）。
+// 用于 embedding 索引器按 fail_count/last_tried 调度时的带参 SELECT。
+func QueryNoLimitArgs(stmt string, args ...any) (ret []map[string]any, err error) {
+	return queryRawStmtArgs(stmt, args, math.MaxInt)
+}
+
 func Query(stmt string, limit int) (ret []map[string]any, err error) {
 	originalStmt := stmt
 	// Kernel API `/api/query/sql` support `||` operator https://github.com/siyuan-note/siyuan/issues/9662
@@ -503,6 +509,47 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]any, err error) {
 		if strings.Contains(err.Error(), "syntax error") {
 			return
 		}
+		return
+	}
+	defer rows.Close()
+
+	cols, err := rows.Columns()
+	if err != nil || nil == cols {
+		return
+	}
+
+	noLimit := !containsLimitClause(stmt)
+	var count int
+	for rows.Next() {
+		columns := make([]any, len(cols))
+		columnPointers := make([]any, len(cols))
+		for i := range columns {
+			columnPointers[i] = &columns[i]
+		}
+
+		if err = rows.Scan(columnPointers...); err != nil {
+			return
+		}
+
+		m := make(map[string]any)
+		for i, colName := range cols {
+			val := columnPointers[i].(*any)
+			m[colName] = *val
+		}
+
+		ret = append(ret, m)
+		count++
+		if noLimit && limit < count {
+			break
+		}
+	}
+	return
+}
+
+// queryRawStmtArgs 与 queryRawStmt 一致，但走带参数的 query，避免 SQL 拼接注入与时间格式问题。
+func queryRawStmtArgs(stmt string, args []any, limit int) (ret []map[string]any, err error) {
+	rows, err := query(stmt, args...)
+	if err != nil {
 		return
 	}
 	defer rows.Close()

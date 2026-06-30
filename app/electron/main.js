@@ -764,11 +764,17 @@ const initKernel = (workspace, port, lang, safeMode) => {
                 resolve(false);
             } else {
                 let progressing = false;
+                const bootShowStart = Date.now();
                 while (!progressing) {
                     try {
                         const progressResult = await net.fetch(getServer() + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
                         if (progressData.data.progress >= 100) {
+                            // 保证启动动画的最小展示时长，启动过快时补足差值再进入主窗口
+                            const elapsed = Date.now() - bootShowStart;
+                            if (elapsed < 2500) {
+                                await sleep(2500 - elapsed);
+                            }
                             resolve(true);
                             progressing = true;
                         } else {

@@ -12,7 +12,7 @@
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">
     <div class="b3-dialog__scrim" style="background-color: #1e1e1e"></div>
-    <img style="position: absolute;width: 36vh;" src="../../icon.png">
+    <img style="position: absolute;width: 24vh;" src="../../icon.svg">
     <button onclick="window.location.reload()" id="loadingRefresh"
             style="display: none;position: absolute;bottom: 16px;background: transparent;border: 1px solid #4285f4;color: #4285f4;border-radius: 6px;line-height: 20px;padding: 4px 8px;">
         Click to Refresh<br>点　击　刷　新

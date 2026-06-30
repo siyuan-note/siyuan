@@ -16,18 +16,49 @@
             font-size: 12px;
             font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
         }
+
+        /* 底部进度区，预留安全区域防止移动端手势条遮挡 */
+        #progressWrap {
+            position: absolute;
+            bottom: env(safe-area-inset-bottom);
+            width: 100%;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #progressTrack {
+            position: absolute;
+            height: 2px;
+            background-color: #2a2c2f;
+            width: 100%;
+            top: 0;
+        }
+
+        #progress {
+            position: absolute;
+            height: 2px;
+            background-color: #3b3e43;
+            box-shadow: 0 0 8px rgba(59, 62, 67, 0.6);
+            transition: width 2s cubic-bezier(0, 0, 0.2, 1);
+            top: 0;
+            width: 0;
+        }
+
+        #details {
+            color: #9aa0a6;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            padding: 8px;
+            height: 16px;
+            line-height: 16px;
+        }
     </style>
 </head>
 <body>
-<div id="bg" style="width: 100%;display: flex;justify-content: space-around;height: 100%;">
-    <img style="width:36vh;align-self: center;" src="icon.png"/>
-</div>
-<div style="position: absolute;bottom: 0;width: 100%;">
-    <div style="position: absolute;height: 1px;background-color: #3b3e43;width: 100%;top:0"></div>
-    <div id="progress"
-         style="position: absolute;height: 1px;background-color: #d23f31;transition: width 50ms cubic-bezier(0, 0, 0.2, 1);top:0"></div>
-    <div id="details"
-         style="color: #9aa0a6;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;padding: 8px;height: 16px;line-height: 16px;"></div>
+<div id="progressWrap">
+    <div id="progressTrack"></div>
+    <div id="progress"></div>
+    <div id="details"></div>
 </div>
 <script>
     const getSearch = (key) => {
@@ -48,6 +79,11 @@
     (async () => {
         const v = getSearch('v')
         document.getElementById('details').textContent = "v" + v + ' Booting kernel...'
+        // 随机起始基数（15~25），等待内核 HTTP 就绪前先平滑填充到此值
+        const baseProgress = 15 + Math.random() * 10
+        requestAnimationFrame(() => {
+            document.getElementById('progress').style.width = baseProgress + '%'
+        })
     })()
 </script>
 </body>

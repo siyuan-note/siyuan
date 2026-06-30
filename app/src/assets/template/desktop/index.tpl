@@ -14,7 +14,7 @@
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">
     <div class="b3-dialog__scrim" style="background-color: #1e1e1e"></div>
-    <img style="position: absolute;width: 36vh;" src="../../icon.png">
+    <img style="position: absolute;width: 24vh;" src="../../icon.svg">
 </div>
 <div id="toolbar" class="toolbar fn__flex"></div>
 <div class="fn__flex-1 fn__flex">

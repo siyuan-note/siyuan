@@ -129,9 +129,10 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 1. **Comments:** Wrap code comments at 120 characters
 2. **Comments:** Describe what the code does, not what it replaced — don't reference the old implementation in comments
 3. **Comments:** Write comments in Chinese
-4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
-5. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
-6. **Go:** Format with `gofmt` after editing
+4. **Chinese punctuation:** Use Chinese punctuation (，。：；！？「」…) for Chinese content — comments, user guide, `.md` docs, etc. — never ASCII punctuation
+5. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
+6. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
+7. **Go:** Format with `gofmt` after editing
 
 ---
 

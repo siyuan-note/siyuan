@@ -95,6 +95,8 @@ func initDatabase(forceRebuild bool) {
 	if !forceRebuild {
 		// 检查数据库结构版本，如果版本不一致的话说明改过表结构，需要重建
 		if util.DatabaseVer == getDatabaseVer() {
+			// 老库版本一致但缺少新加的列时，做幂等迁移（不升 DatabaseVer，避免全库重建丢失已嵌入向量）
+			migrateBlockEmbeddingsSchema()
 			recoverIndexQueue()
 			return
 		}
@@ -234,7 +236,7 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [block_embeddings] failed: %s", err)
 	}
-	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT)")
+	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [block_embeddings] failed: %s", err)
 	}
@@ -1425,6 +1427,56 @@ func Exec(stmt string, args ...any) error {
 	}
 	_, err := db.Exec(stmt, args...)
 	return err
+}
+
+// migrateBlockEmbeddingsSchema 为 block_embeddings 幂等补充失败重试相关的列。
+// 不升 DatabaseVer（避免全库重建丢失已嵌入向量）；列已存在时跳过，老行自动取默认值 0。
+func migrateBlockEmbeddingsSchema() {
+	if nil == db {
+		return
+	}
+
+	// PRAGMA table_info 返回每列的定义，name 字段即列名
+	rows, err := db.Query("PRAGMA table_info(block_embeddings)")
+	if err != nil {
+		logging.LogErrorf("check block_embeddings columns failed: %s", err)
+		return
+	}
+	defer rows.Close()
+
+	existing := map[string]bool{}
+	for rows.Next() {
+		var cid int
+		var name, ctype string
+		var notnull, pk int
+		var dfltValue any
+		if err = rows.Scan(&cid, &name, &ctype, &notnull, &dfltValue, &pk); err != nil {
+			logging.LogErrorf("scan block_embeddings column info failed: %s", err)
+			return
+		}
+		existing[name] = true
+	}
+
+	// 表不存在（首次启动还没建）时 existing 为空，跳过；待 initDBTables 建表
+	if 0 == len(existing) {
+		return
+	}
+
+	addColumns := []string{
+		"ALTER TABLE block_embeddings ADD COLUMN fail_count INTEGER NOT NULL DEFAULT 0",
+		"ALTER TABLE block_embeddings ADD COLUMN last_tried INTEGER NOT NULL DEFAULT 0",
+	}
+	// SQLite 的 ALTER TABLE ADD COLUMN 无法在单条语句里加多列，逐条执行；列已存在会报错，忽略
+	if !existing["fail_count"] {
+		if _, err = db.Exec(addColumns[0]); err != nil {
+			logging.LogErrorf("add column [fail_count] failed: %s", err)
+		}
+	}
+	if !existing["last_tried"] {
+		if _, err = db.Exec(addColumns[1]); err != nil {
+			logging.LogErrorf("add column [last_tried] failed: %s", err)
+		}
+	}
 }
 
 func beginTx() (tx *sql.Tx, err error) {

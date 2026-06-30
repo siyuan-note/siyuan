@@ -3,6 +3,7 @@
 > Spec baseline: `2` (current across all files).
 > Verified against samples: `20200825162036-4dx365o.sy` (formatting elements), `20200905090211-2vixtlf.sy` (block types).
 > All conclusions are based on real samples and the Lute / SiYuan kernel source. Fields marked `【inferred】` were not directly observed in the samples — re-verify against a real sample before generating them.
+> Companion document: [`WORKSPACE.md`](./WORKSPACE.md) covers the overall on-disk layout of the workspace (how notebooks, parent/child documents, and assets are organized); this document focuses on the **internal** JSON structure of a `.sy` file.
 
 ## 0. In one sentence
 
@@ -15,7 +16,7 @@ A `.sy` file is a Lute AST tree serialized to JSON. The root node is always `Nod
 SiYuan offers three official paths to mutate data: **HTTP API, MCP, and CLI**. **Prefer them by default.** The kernel handles AST serialization, block-ID allocation, and synchronization of two indexes: the block-tree index (`blocktree.db`, the block-ID → file-path map that block refs and breadcrumbs depend on) and the full-text search index (`siyuan.db` + FTS5). Writing the files directly bypasses all of this and easily leaves the indexes out of sync.
 
 **Only read/write `.sy` as JSON when the official paths are inconvenient.** Applicable scenarios:
-- Bulk offline migration (cold-init a workspace, import external data)
+- Bulk offline migration (cold-init a workspace, import external data; for the workspace's on-disk layout see [`WORKSPACE.md`](./WORKSPACE.md))
 - Read-only statistics, analysis, custom export / format conversion
 - Repairing low-level structural issues (legacy files, illegal nodes)
 - Programmatic scaffolding / template generation
@@ -59,7 +60,7 @@ Division of labor among the four paths:
 | `Properties` | ✅ | Document-level IAL — see §8 |
 | `Children` | ✅ | Array of body child blocks; must contain at least one block |
 
-> ⚠️ The file path strictly corresponds to the root ID: `data/<box>/<...>/<rootID>.sy`. Changing the root ID means renaming the file — don't change it casually.
+> ⚠️ The file path strictly corresponds to the root ID: `data/<box>/<...>/<rootID>.sy`. Changing the root ID means renaming the file — don't change it casually. For the full file-system layout see [`WORKSPACE.md`](./WORKSPACE.md).
 
 ---
 

@@ -50,6 +50,11 @@
       border-bottom: 0;
     }
 
+    // 去掉按钮与其紧邻的下方区块之间的分隔线，让二者视觉连成整体（如“重建索引”与“索引进度”）
+    .config-item.config-item--no-border {
+      border-bottom: 0;
+    }
+
     .b3-label__text {
       font-size: 13px !important;
     }

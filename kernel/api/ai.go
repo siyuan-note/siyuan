@@ -155,3 +155,17 @@ func listModels(c *gin.Context) {
 	}
 	ret.Data = result
 }
+
+// embeddingStat 返回嵌入索引进度统计，供设置页展示进度条与各项计数。
+func embeddingStat(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	ret.Data = model.GetEmbeddingStat()
+}
+
+// reindexEmbedding 清空嵌入向量表并触发后台索引器重新计算所有块，异步执行。
+func reindexEmbedding(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	model.ReindexEmbedding()
+}

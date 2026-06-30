@@ -236,7 +236,7 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [block_embeddings] failed: %s", err)
 	}
-	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0)")
+	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0, ignored_type INTEGER NOT NULL DEFAULT 0)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [block_embeddings] failed: %s", err)
 	}
@@ -1429,7 +1429,7 @@ func Exec(stmt string, args ...any) error {
 	return err
 }
 
-// migrateBlockEmbeddingsSchema 为 block_embeddings 幂等补充失败重试相关的列。
+// migrateBlockEmbeddingsSchema 为 block_embeddings 幂等补充失败重试与忽略类型相关的列。
 // 不升 DatabaseVer（避免全库重建丢失已嵌入向量）；列已存在时跳过，老行自动取默认值 0。
 func migrateBlockEmbeddingsSchema() {
 	if nil == db {
@@ -1465,18 +1465,20 @@ func migrateBlockEmbeddingsSchema() {
 	addColumns := []string{
 		"ALTER TABLE block_embeddings ADD COLUMN fail_count INTEGER NOT NULL DEFAULT 0",
 		"ALTER TABLE block_embeddings ADD COLUMN last_tried INTEGER NOT NULL DEFAULT 0",
+		"ALTER TABLE block_embeddings ADD COLUMN ignored_type INTEGER NOT NULL DEFAULT 0",
 	}
 	// SQLite 的 ALTER TABLE ADD COLUMN 无法在单条语句里加多列，逐条执行；列已存在会报错，忽略
-	if !existing["fail_count"] {
-		if _, err = db.Exec(addColumns[0]); err != nil {
-			logging.LogErrorf("add column [fail_count] failed: %s", err)
+	addColumn := func(name, ddl string) {
+		if existing[name] {
+			return
+		}
+		if _, err = db.Exec(ddl); err != nil {
+			logging.LogErrorf("add column [%s] failed: %s", name, err)
 		}
 	}
-	if !existing["last_tried"] {
-		if _, err = db.Exec(addColumns[1]); err != nil {
-			logging.LogErrorf("add column [last_tried] failed: %s", err)
-		}
-	}
+	addColumn("fail_count", addColumns[0])
+	addColumn("last_tried", addColumns[1])
+	addColumn("ignored_type", addColumns[2])
 }
 
 func beginTx() (tx *sql.Tx, err error) {

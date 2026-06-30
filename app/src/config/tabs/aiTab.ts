@@ -153,8 +153,6 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         label: window.siyuan.languages.rebuildEmbeddingIndex,
         icon: "iconRefresh",
         afterMount: (root) => {
-            // 去掉按钮容器的底部分隔线，让“重建索引”与下方的索引进度视觉连成一个整体
-            root.querySelector("#rebuildEmbeddingIndex")?.closest(".config-item")?.classList.add("config-item--no-border");
             root.querySelector("#rebuildEmbeddingIndex")?.addEventListener("click", () => {
                 confirmDialog(window.siyuan.languages.rebuildEmbeddingIndex,
                     window.siyuan.languages.rebuildEmbeddingIndexConfirmTip, () => {

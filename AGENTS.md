@@ -120,6 +120,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 3. **Frontend verification:** Do not use `npx webpack` or `pnpm dev` to verify changes; after changes, run `cd app && pnpm run lint` to check code style
 4. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
 5. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
+6. **User guide:** When editing the user guide, follow `SY-FORMAT.md`
 
 ---
 

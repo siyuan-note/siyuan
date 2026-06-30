@@ -3,6 +3,12 @@ name: Upload to AUR
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v3.7.0)'
+        required: true
+        type: string
 
 # https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
 
@@ -14,7 +20,12 @@ jobs:
       - name: Check tag aka check release type
         id: checktag
         run: |
-          if [[ "${{ github.ref }}" == *"dev"* ]]; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${{ github.ref }}"
+          fi
+          if [[ "$VERSION" == *"dev"* ]]; then
             echo "Skip the workflow as the tag contains 'dev'"
             echo "skip=true" >> $GITHUB_OUTPUT
           else
@@ -25,11 +36,21 @@ jobs:
 
       - name: Extract tag name
         id: get_version
-        run: echo "TAG_VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG_VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          fi
 
       - name: Extra tag name without v
         id: get_version_without_v
-        run: echo "TAG_VERSION_WITHOUT_V=$(echo '${{ github.event.release.tag_name }}' | sed 's/^v//')" >> $GITHUB_OUTPUT
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG_VERSION_WITHOUT_V=$(echo '${{ github.event.inputs.version }}' | sed 's/^v//')" >> $GITHUB_OUTPUT
+          else
+            echo "TAG_VERSION_WITHOUT_V=$(echo '${{ github.event.release.tag_name }}' | sed 's/^v//')" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create PKGBUILD
         run: |
@@ -63,23 +84,25 @@ jobs:
           }
 
           build() {
-              # Adjust .desktop so it will work autside of AppImage container
+              _desktop_file=\$(find squashfs-root -maxdepth 1 -name "*.desktop" -print -quit)
+              # Adjust .desktop so it will work outside of AppImage container
               sed -i \\
                   -e "s|Exec=AppRun|Exec=/opt/\${pkgname}/\${pkgname}.AppImage|" \\
                   -e "s+^Icon=.*+Icon=siyuan-bin+" \\
-                  "squashfs-root/siyuan.desktop"
+                  "\${_desktop_file}"
 
               # Fix permissions; .AppImage permissions are 700 for all directories
               chmod -R a-x+rX squashfs-root/usr
           }
 
           package() {
+              _desktop_file=\$(find squashfs-root -maxdepth 1 -name "*.desktop" -print -quit)
               # AppImage
               install -Dm755 "\${srcdir}/\${_pkgname}" "\${pkgdir}/opt/\${pkgname}/\${pkgname}.AppImage"
               install -Dm644 "\${srcdir}/squashfs-root/LICENSE" "\${pkgdir}/opt/\${pkgname}/LICENSE"
 
               # Desktop file
-              install -Dm644 "\${srcdir}/squashfs-root/siyuan.desktop" \\
+              install -Dm644 "\${srcdir}/\${_desktop_file}" \\
                       "\${pkgdir}/usr/share/applications/siyuan.desktop"
 
               # Icon images

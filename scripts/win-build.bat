@@ -49,8 +49,12 @@ if "%TARGET%"=="amd64" (
 ) else if "%TARGET%"=="arm64" (
     set BUILD_ARM64=1
 ) else if "%TARGET%"=="appx-amd64" (
+    REM appx 阶段依赖 electron-builder 产出的 win-unpacked 目录，需连带构建 amd64 electron
+    set BUILD_AMD64=1
     set BUILD_APPX_AMD64=1
 ) else if "%TARGET%"=="appx-arm64" (
+    REM appx 阶段依赖 electron-builder 产出的 win-arm64-unpacked 目录，需连带构建 arm64 electron
+    set BUILD_ARM64=1
     set BUILD_APPX_ARM64=1
 ) else (
     REM all: build everything

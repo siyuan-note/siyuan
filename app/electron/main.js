@@ -78,6 +78,8 @@ app.commandLine.appendSwitch("auto-detect", "false");
 app.commandLine.appendSwitch("no-proxy-server");
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
 app.commandLine.appendSwitch("xdg-portal-required-version", "4");
+// 本地 HTTPS 页面加载 HTTP 外链图时，禁止自动升级为 HTTPS
+app.commandLine.appendSwitch("disable-features", "AutoupgradeMixedContent");
 
 // Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");

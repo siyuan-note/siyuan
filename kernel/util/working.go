@@ -183,13 +183,14 @@ func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, 
 		ServerPort = FixedPort
 	}
 
-	msStoreFilePath := filepath.Join(WorkingDir, "ms-store")
-	ISMicrosoftStore = gulu.File.IsExist(msStoreFilePath)
-
 	UserAgent = UserAgent + " " + Container + "/" + runtime.GOOS
 	httpclient.SetUserAgent(UserAgent)
 
 	InitWorkspace(workspacePath, wdPath)
+
+	// 必须在 InitWorkspace 之后：此时 WorkingDir 才被 --wd 参数修正为真实工作目录（如 app\resources），否则会用进程 CWD 误判微软商店版标记文件
+	msStoreFilePath := filepath.Join(WorkingDir, "ms-store")
+	ISMicrosoftStore = gulu.File.IsExist(msStoreFilePath)
 
 	SSL = ssl
 	logging.SetLogPath(LogPath)

@@ -619,12 +619,15 @@ const initKernel = (workspace, port, lang, safeMode) => {
             backgroundColor: "#1e1e1e",
             resizable: false,
             icon: path.join(appDir, "stage", "icon-large.png"),
+            webPreferences: {
+                webSecurity: false,
+            },
         });
         let bootIndex = path.join(appDir, "app", "electron", "boot.html");
         if (isDevEnv) {
             bootIndex = path.join(appDir, "electron", "boot.html");
         }
-        bootWindow.loadFile(bootIndex, {query: {v: appVer}});
+        bootWindow.loadFile(bootIndex, {query: {v: appVer, port: kernelPort}});
         if (openAsHidden) {
             bootWindow.minimize();
         } else {
@@ -740,7 +743,6 @@ const initKernel = (workspace, port, lang, safeMode) => {
             try {
                 const apiResult = await net.fetch(getServer() + "/api/system/version");
                 apiData = await apiResult.json();
-                bootWindow.loadURL(getServer() + "/appearance/boot/index.html");
                 break;
             } catch (e) {
                 writeLog("get kernel version failed: " + e.message);

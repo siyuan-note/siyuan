@@ -59,6 +59,7 @@
 
     /* 菜单 */
     --b3-menu-background: var(--b3-theme-background);
+    --b3-menu-icon-color: rgba(0, 0, 0, .6);
 
     /* 提示 */
     --b3-tooltips-background: #312f35;

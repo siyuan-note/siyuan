@@ -400,7 +400,9 @@ func PruneInvalidColumnFilters(filters []*ViewFilter, validColumns map[string]bo
 			if 0 < len(children) {
 				f.Filters = children
 				ret = append(ret, f)
-			} else {
+			} else if 0 < len(f.Filters) {
+				// 仅当分组原本有子节点却被裁空时才算改动；原本就是空的分组丢弃不算改动，
+				// 否则无筛选条件的视图每次渲染都会误判为已改动而触发保存，干扰数据同步判断
 				changed = true // 分组变为空被丢弃
 			}
 			if childChanged {

@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Wysiłek rozumowania",
+  "reasoningEffortDefault": "Domyślny",
+  "reasoningEffortLow": "Niski",
+  "reasoningEffortMedium": "Średni",
+  "reasoningEffortHigh": "Wysoki",
   "embeddingIndexProgress": "Postęp indeksowania osadzania",
   "embeddingNotEnabledTip": "Włącz i skonfiguruj powyższy model osadzania, aby wyświetlić postęp indeksowania",
   "embeddingIndexed": "Zaindeksowane: ",

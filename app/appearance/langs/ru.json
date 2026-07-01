@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Усилие рассуждения",
+  "reasoningEffortDefault": "По умолчанию",
+  "reasoningEffortLow": "Низкое",
+  "reasoningEffortMedium": "Среднее",
+  "reasoningEffortHigh": "Высокое",
   "embeddingIndexProgress": "Прогресс индексации вложений",
   "embeddingNotEnabledTip": "Включите и настройте модель вложений выше, чтобы просмотреть прогресс индексации",
   "embeddingIndexed": "Индексировано: ",

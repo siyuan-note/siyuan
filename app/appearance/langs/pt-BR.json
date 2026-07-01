@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Esforço de raciocínio",
+  "reasoningEffortDefault": "Padrão",
+  "reasoningEffortLow": "Baixo",
+  "reasoningEffortMedium": "Médio",
+  "reasoningEffortHigh": "Alto",
   "embeddingIndexProgress": "Progresso da indexação de embedding",
   "embeddingNotEnabledTip": "Ative e configure o modelo de embedding acima para ver o progresso da indexação",
   "embeddingIndexed": "Indexados: ",

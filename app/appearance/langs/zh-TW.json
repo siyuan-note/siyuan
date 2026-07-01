@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "思考強度",
+  "reasoningEffortDefault": "預設",
+  "reasoningEffortLow": "低",
+  "reasoningEffortMedium": "中",
+  "reasoningEffortHigh": "高",
   "embeddingIndexProgress": "嵌入索引進度",
   "embeddingNotEnabledTip": "啟用並設定上方的嵌入模型後可查看索引進度",
   "embeddingIndexed": "已索引：",

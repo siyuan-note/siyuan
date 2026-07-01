@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "شدّة التفكير",
+  "reasoningEffortDefault": "افتراضي",
+  "reasoningEffortLow": "منخفض",
+  "reasoningEffortMedium": "متوسط",
+  "reasoningEffortHigh": "عالٍ",
   "embeddingIndexProgress": "تقدم فهرسة التضمين",
   "embeddingNotEnabledTip": "قم بتمكين وتكوين نموذج التضمين أعلاه لعرض تقدم الفهرسة",
   "embeddingIndexed": "مفهرس: ",

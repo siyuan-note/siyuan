@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "מאמץ חשיבה",
+  "reasoningEffortDefault": "ברירת מחדל",
+  "reasoningEffortLow": "נמוך",
+  "reasoningEffortMedium": "בינוני",
+  "reasoningEffortHigh": "גבוה",
   "embeddingIndexProgress": "התקדמות אינדקס שיבוץ",
   "embeddingNotEnabledTip": "הפעל והגדר את מודל השיבוץ לעיל כדי לצפות בהתקדמות האינדקס",
   "embeddingIndexed": "מאונדקס: ",

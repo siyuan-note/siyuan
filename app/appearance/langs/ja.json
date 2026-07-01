@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "思考の強さ",
+  "reasoningEffortDefault": "デフォルト",
+  "reasoningEffortLow": "低",
+  "reasoningEffortMedium": "中",
+  "reasoningEffortHigh": "高",
   "embeddingIndexProgress": "埋め込みインデックスの進捗",
   "embeddingNotEnabledTip": "上記の埋め込みモデルを有効化・設定するとインデックス進捗を確認できます",
   "embeddingIndexed": "インデックス済み：",

@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Esfuerzo de razonamiento",
+  "reasoningEffortDefault": "Predeterminado",
+  "reasoningEffortLow": "Bajo",
+  "reasoningEffortMedium": "Medio",
+  "reasoningEffortHigh": "Alto",
   "embeddingIndexProgress": "Progreso de indexación de incrustación",
   "embeddingNotEnabledTip": "Habilite y configure el modelo de incrustación anterior para ver el progreso de indexación",
   "embeddingIndexed": "Indexados: ",

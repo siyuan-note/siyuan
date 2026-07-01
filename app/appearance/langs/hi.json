@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "तर्क प्रयास",
+  "reasoningEffortDefault": "डिफ़ॉल्ट",
+  "reasoningEffortLow": "निम्न",
+  "reasoningEffortMedium": "मध्यम",
+  "reasoningEffortHigh": "उच्च",
   "embeddingIndexProgress": "एम्बेडिंग इंडेक्सिंग प्रगति",
   "embeddingNotEnabledTip": "इंडेक्सिंग प्रगति देखने के लिए ऊपर एम्बेडिंग मॉडल को सक्षम और कॉन्फ़िगर करें",
   "embeddingIndexed": "इंडेक्स किया गया: ",

@@ -34,14 +34,15 @@ import (
 )
 
 type agentChatReq struct {
-	SessionID     string               `json:"sessionID"`
-	Message       string               `json:"message"`
-	Language      string               `json:"language"`
-	References    []agent.Reference    `json:"references"`
-	EditorContext agent.EditorContext  `json:"editorContext"`
-	PluginActions []agent.PluginAction `json:"pluginActions"`
-	Model         string               `json:"model,omitempty"`
-	Regenerate    bool                 `json:"regenerate"`
+	SessionID       string               `json:"sessionID"`
+	Message         string               `json:"message"`
+	Language        string               `json:"language"`
+	References      []agent.Reference    `json:"references"`
+	EditorContext   agent.EditorContext  `json:"editorContext"`
+	PluginActions   []agent.PluginAction `json:"pluginActions"`
+	Model           string               `json:"model,omitempty"`
+	Regenerate      bool                 `json:"regenerate"`
+	ReasoningEffort string               `json:"reasoningEffort,omitempty"`
 }
 
 type runningSession struct {
@@ -98,7 +99,7 @@ func agentChat(c *gin.Context) {
 	app := c.GetHeader("X-SiYuan-App-ID")
 
 	ctx, cancel := context.WithCancel(c.Request.Context())
-	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries)
+	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort)
 
 	// 实例级互斥：同一 session 同时只允许一个活跃流。
 	// 检查+占用在同一把锁内（compare-and-set），失败时 cancel 释放刚启动的 goroutine 防泄漏。

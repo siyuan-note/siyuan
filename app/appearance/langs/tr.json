@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Akıl yürütme çabası",
+  "reasoningEffortDefault": "Varsayılan",
+  "reasoningEffortLow": "Düşük",
+  "reasoningEffortMedium": "Orta",
+  "reasoningEffortHigh": "Yüksek",
   "embeddingIndexProgress": "Gömme indeksleme ilerlemesi",
   "embeddingNotEnabledTip": "İndeksleme ilerlemesini görmek için yukarıdaki gömme modelini etkinleştirin ve yapılandırın",
   "embeddingIndexed": "İndekslendi: ",

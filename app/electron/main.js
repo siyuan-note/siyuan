@@ -813,11 +813,8 @@ const initKernel = (workspace, port, lang, safeMode) => {
                         const progressResult = await net.fetch(getServer() + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
                         if (progressData.data.progress >= 100) {
-                            // 保证启动动画的最小展示时长，启动过快时补足差值再进入主窗口
-                            const elapsed = Date.now() - bootShowStart;
-                            if (elapsed < 2500) {
-                                await sleep(2500 - elapsed);
-                            }
+                            // 内核完成后等待动画快进收尾（200ms）再进入主窗口
+                            await sleep(200);
                             resolve(true);
                             progressing = true;
                         } else {

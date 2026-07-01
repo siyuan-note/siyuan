@@ -214,6 +214,7 @@
         // 当前进度只增不减，避免内核首帧进度小于初始基数时进度条倒退回 0
         let currentDisplay = 0
         const bgSvg = document.querySelector("#bg svg")
+        let animStart = 0
         const setProgress = (target) => {
             if (target > currentDisplay) {
                 currentDisplay = target
@@ -221,6 +222,7 @@
                 // 显示进度达到 15% 时触发 logo 汇聚动画
                 if (bgSvg && !bgSvg.classList.contains("started") && currentDisplay >= 15) {
                     bgSvg.classList.add("started")
+                    animStart = Date.now()
                 }
             }
         }
@@ -243,6 +245,21 @@
                 if (progressData.progress >= 100) {
                     progressing = true
                     es.close()
+                    // 内核完成后尽快结束动画，把剩余动画快进到终态
+                    if (animStart > 0) {
+                        const animTotalMs = 3100
+                        const elapsed = Date.now() - animStart
+                        const remaining = animTotalMs - elapsed
+                        if (remaining > 0) {
+                            // 用极短的收尾时间（200ms）让动画快进到终态
+                            const rate = remaining / 200
+                            bgSvg.querySelectorAll(".streak, .logo path").forEach((el) => {
+                                el.getAnimations().forEach((a) => {
+                                    a.playbackRate = rate
+                                })
+                            })
+                        }
+                    }
                 }
             }
             es.onerror = () => {

@@ -406,50 +406,57 @@ func IsSensitivePath(p string) bool {
 	toCheckPathLower := filepath.Clean(strings.ToLower(p))
 	toCheckNameLower := filepath.Base(toCheckPathLower)
 
-	// 敏感目录前缀（UNIX 风格）
-	prefixes := []string{
-		"/.",
-		"/etc",
-		"/root",
-		"/var",
-		"/proc",
-		"/sys",
-		"/run",
-		"/bin",
-		"/boot",
-		"/dev",
-		"/lib",
-		"/srv",
-		"/tmp",
-		"/usr",
-		"/opt",
-		"/sbin",
-	}
-	for _, pre := range prefixes {
-		if strings.HasPrefix(toCheckPathLower, pre) {
-			return true
+	// 系统目录前缀检查仅对工作空间外的路径执行。
+	// 调用方传入的工作空间内路径（如 assets、export）都已用 IsSubPath(WorkspaceDir) 校验过，
+	// 工作空间不可能位于 /etc、/var/log 等系统敏感目录；而 iOS 等沙箱平台的合法数据路径恰好以
+	// /var 开头（/var/mobile/Containers/Data/Application/...），对工作空间内路径执行系统目录前缀
+	// 检查会把 iOS 上正常的 assets/export 文件误判为敏感路径，导致伺服返回 403。
+	if !gulu.File.IsSubPath(WorkspaceDir, p) {
+		// 敏感目录前缀（UNIX 风格）
+		prefixes := []string{
+			"/.",
+			"/etc",
+			"/root",
+			"/var",
+			"/proc",
+			"/sys",
+			"/run",
+			"/bin",
+			"/boot",
+			"/dev",
+			"/lib",
+			"/srv",
+			"/tmp",
+			"/usr",
+			"/opt",
+			"/sbin",
 		}
-	}
-
-	// Windows 常见敏感目录（小写比较）
-	winPrefixes := []string{
-		`c:\windows\system32`,
-		`c:\windows\system`,
-	}
-	for _, wp := range winPrefixes {
-		if strings.HasPrefix(toCheckPathLower, strings.ToLower(wp)) {
-			return true
+		for _, pre := range prefixes {
+			if strings.HasPrefix(toCheckPathLower, pre) {
+				return true
+			}
 		}
-	}
 
-	// Windows 开始启动菜单路径（小写比较）
-	startMenuPrefixes := []string{
-		strings.ToLower(filepath.Join(os.Getenv("APPDATA"), "Microsoft", "Windows", "Start Menu")),
-		strings.ToLower(filepath.Join(os.Getenv("ProgramData"), "Microsoft", "Windows", "Start Menu")),
-	}
-	for _, sp := range startMenuPrefixes {
-		if strings.HasPrefix(toCheckPathLower, sp) {
-			return true
+		// Windows 常见敏感目录（小写比较）
+		winPrefixes := []string{
+			`c:\windows\system32`,
+			`c:\windows\system`,
+		}
+		for _, wp := range winPrefixes {
+			if strings.HasPrefix(toCheckPathLower, strings.ToLower(wp)) {
+				return true
+			}
+		}
+
+		// Windows 开始启动菜单路径（小写比较）
+		startMenuPrefixes := []string{
+			strings.ToLower(filepath.Join(os.Getenv("APPDATA"), "Microsoft", "Windows", "Start Menu")),
+			strings.ToLower(filepath.Join(os.Getenv("ProgramData"), "Microsoft", "Windows", "Start Menu")),
+		}
+		for _, sp := range startMenuPrefixes {
+			if strings.HasPrefix(toCheckPathLower, sp) {
+				return true
+			}
 		}
 	}
 

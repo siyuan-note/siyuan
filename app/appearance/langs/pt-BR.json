@@ -979,6 +979,8 @@
   "rtl": "Direita para Esquerda (RTL)",
   "ltr": "Esquerda para Direita (LTR)",
   "rtlTip": "Renderizar conteúdo da direita para a esquerda",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "Altura",
   "deactivateUser": "Desativar Conta",
   "deactivateUserTip": "<ul class='fn__list'><li>Uma vez que a conta é desativada, não pode ser recuperada, por favor, não tente desativar à toa</li><li>O nome de usuário será preenchido com <code>someone101</code> (o número seguinte é o número do usuário), a senha será redefinida por um número aleatório</li><li>Limpar o apelido do usuário, autoetiqueta, URL, perfil, avatar, link do site, endereço de e-mail e outras informações</li><li>Todos os interruptores de configuração de privacidade serão restaurados para o estado público padrão</li><li>Desvincular contas de redes sociais de terceiros, telefones</li><li><strong>Nome de usuário, número de telefone, conta de terceiros vinculada não poderão ser usados novamente no futuro</strong></li><li>Status do usuário definido como desativado, login proibido</li></ul>",

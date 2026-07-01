@@ -68,6 +68,7 @@ import {showMessage} from "../../dialog/message";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
+import {applyAutoDirection, clearManualOverride} from "../util/autoDirection";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -2426,6 +2427,8 @@ export class Gutter {
                         } else {
                             e.style.textAlign = "left";
                         }
+                        e.dataset.manualTextDirection = "true";
+                        delete e.dataset.autoTextDirection;
                     });
                 }
             }, {
@@ -2442,6 +2445,8 @@ export class Gutter {
                         } else {
                             e.style.textAlign = "center";
                         }
+                        e.dataset.manualTextDirection = "true";
+                        delete e.dataset.autoTextDirection;
                     });
                 }
             }, {
@@ -2458,6 +2463,8 @@ export class Gutter {
                         } else {
                             e.style.textAlign = "right";
                         }
+                        e.dataset.manualTextDirection = "true";
+                        delete e.dataset.autoTextDirection;
                     });
                 }
             }, {
@@ -2467,6 +2474,8 @@ export class Gutter {
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         e.style.textAlign = "justify";
+                        e.dataset.manualTextDirection = "true";
+                        delete e.dataset.autoTextDirection;
                     });
                 }
             }, {
@@ -2487,6 +2496,8 @@ export class Gutter {
                         } else {
                             e.style.direction = "ltr";
                         }
+                        e.dataset.manualTextDirection = "true";
+                        delete e.dataset.autoTextDirection;
                     });
                 }
             }, {
@@ -2504,6 +2515,8 @@ export class Gutter {
                         } else {
                             e.style.direction = "rtl";
                         }
+                        e.dataset.manualTextDirection = "true";
+                        delete e.dataset.autoTextDirection;
                     });
                 }
             }, {
@@ -2516,6 +2529,7 @@ export class Gutter {
                 label: window.siyuan.languages.clearFontStyle,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                        clearManualOverride(e);
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "";
                         } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
@@ -2523,6 +2537,9 @@ export class Gutter {
                         } else {
                             e.style.textAlign = "";
                             e.style.direction = "";
+                        }
+                        if (window.siyuan?.config?.editor?.autoTextDirection) {
+                            requestAnimationFrame(() => applyAutoDirection(e));
                         }
                     });
                 }

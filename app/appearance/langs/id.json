@@ -979,6 +979,8 @@
   "rtl": "Kanan ke Kiri (RTL)",
   "ltr": "Kiri ke Kanan (LTR)",
   "rtlTip": "Render konten dari kanan ke kiri",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "Tinggi",
   "deactivateUser": "Nonaktifkan Akun",
   "deactivateUserTip": "<ul class='fn__list'><li>Setelah akun dinonaktifkan, tidak dapat dipulihkan, harap jangan mencoba dengan sembarangan</li><li>Nama pengguna akan diisi dengan <code>someone101</code> (angka berikut adalah nomor pengguna), kata sandi akan diatur ulang dengan angka acak</li><li>Hapus nama panggilan pengguna, label mandiri, URL, profil, avatar, tautan situs, alamat surat, dan informasi lainnya</li><li>Semua sakelar pengaturan privasi akan dikembalikan ke status publik default</li><li>Lepas ikatan akun media sosial pihak ketiga, ponsel</li><li><strong>Nama pengguna, nomor ponsel, akun pihak ketiga yang terikat tidak akan dapat digunakan lagi di masa mendatang</strong></li><li>Status pengguna diatur ke dinonaktifkan, login dilarang</li></ul>",

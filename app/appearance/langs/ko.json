@@ -979,6 +979,8 @@
   "rtl": "오른쪽에서 왼쪽으로 (RTL)",
   "ltr": "왼쪽에서 오른쪽으로 (LTR)",
   "rtlTip": "콘텐츠를 오른쪽에서 왼쪽으로 렌더링",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "높이",
   "deactivateUser": "계정 비활성화",
   "deactivateUserTip": "<ul class='fn__list'><li>계정이 비활성화되면 복구할 수 없으므로 주의하세요</li><li>사용자 이름은 <code>someone101</code>(뒤의 숫자는 사용자 번호)로 채워지고 비밀번호는 난수로 재설정됩니다</li><li>사용자의 닉네임, 셀프 라벨, URL, 프로필, 아바타, 사이트 링크, 우편 주소 및 기타 정보를 지웁니다</li><li >모든 개인 정보 설정 스위치는 기본 공개 상태로 복원됩니다</li><li>타사 소셜 계정, 휴대전화 연결 해제</li><li><strong>사용자 이름, 휴대전화 번호, 연결된 타사 계정은 향후 다시 사용할 수 없습니다</strong></li><li>사용자 상태가 비활성화로 설정되고 로그인이 금지됩니다</li></ul>",

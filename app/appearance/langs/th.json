@@ -979,6 +979,8 @@
   "rtl": "ขวาไปซ้าย",
   "ltr": "ซ้ายไปขวา",
   "rtlTip": "แสดงขวาไปซ้าย",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "ความสูง",
   "deactivateUser": "ปิดบัญชี",
   "deactivateUserTip": "<ul class='fn__list'><li>เมื่อปิดใช้งานบัญชีแล้วจะไม่สามารถกู้คืนได้ โปรดอย่าลองเล่น</li><li>ชื่อผู้ใช้จะถูกแทนที่ด้วย <code>someone101</code> (ตัวเลขคือหมายเลขผู้ใช้) รหัสผ่านจะถูกรีเซ็ตด้วยตัวเลขสุ่ม</li><li>ล้างชื่อเล่น ป้ายกำกับ URL โปรไฟล์ อวตาร ลิงก์ไซต์ ที่อยู่ไปรษณีย์ และข้อมูลอื่นๆ</li><li>สวิตช์การตั้งค่าความเป็นส่วนตัวทั้งหมดจะถูกคืนค่าเป็นสถานะสาธารณะเริ่มต้น</li><li>ยกเลิกการผูกบัญชีโซเชียลของบุคคลที่สามและหมายเลขโทรศัพท์</li><li><strong>ชื่อผู้ใช้ หมายเลขโทรศัพท์ และบัญชีบุคคลที่สามที่ผูกไว้จะไม่สามารถใช้ได้อีกในอนาคต</strong></li><li>สถานะผู้ใช้จะถูกตั้งเป็นปิดใช้งาน ห้ามเข้าสู่ระบบ</li></ul>",

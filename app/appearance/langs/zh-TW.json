@@ -979,6 +979,8 @@
   "rtl": "從右到左（RTL）",
   "ltr": "從左到右（LTR）",
   "rtlTip": "將內容以從右到左的方式進行渲染",
+  "autoTextDirection": "自动检测每个块的文字方向",
+  "autoTextDirectionTip": "根据首个强字符自动为每个文本块应用 RTL 或 LTR 方向。手动设置的块方向会覆盖此设置。",
   "height": "高度",
   "deactivateUser": "註銷賬號",
   "deactivateUserTip": "<ul class='fn__list'><li>賬號一旦停用就無法恢復，請不要隨意嘗試</li><li>用戶名會被 <code>someone101</code> 填充（後面的數字是用戶編號），密碼會被隨機數重置</li><li>清空用戶暱稱、自我標籤、URL、簡介、頭像、站點連接、郵寄地址等資訊</li><li>所有隱私設置開關將恢復預設的公開狀態</li><li>解綁關聯的第三方社交賬號、手機</li><li>用戶名、手機號、綁定的第三方賬號以後將不能再次被使用</li><li>用戶狀態被置為停用，禁止登錄</li></ul>",

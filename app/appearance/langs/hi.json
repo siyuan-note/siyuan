@@ -979,6 +979,8 @@
   "rtl": "दाएं से बाएं (RTL)",
   "ltr": "बाएं से दाएं (LTR)",
   "rtlTip": "सामग्री दाएं से बाएं रेंडर करें",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "ऊंचाई",
   "deactivateUser": "खाता निष्क्रिय करें",
   "deactivateUserTip": "<ul class='fn__list'><li>एक बार खाता निष्क्रिय हो जाने पर, इसे पुनर्प्राप्त नहीं किया जा सकता, कृपया इसे मनमाने ढंग से न करें</li><li>उपयोगकर्ता नाम <code>someone101</code> से भरा जाएगा (निम्नलिखित संख्या उपयोगकर्ता संख्या है), पासवर्ड एक यादृच्छिक संख्या द्वारा रीसेट किया जाएगा</li><li>उपयोगकर्ता का उपनाम, स्व-लेबल, URL, प्रोफ़ाइल, अवतार, साइट लिंक, मेलिंग पता और अन्य जानकारी साफ़ करें</li><li>सभी गोपनीयता सेटिंग स्विच डिफ़ॉल्ट सार्वजनिक स्थिति में बहाल हो जाएंगे</li><li>अनबाउंड तृतीय-पक्ष सामाजिक खाते, मोबाइल फोन</li><li><strong>उपयोगकर्ता नाम, मोबाइल फोन नंबर, बाउंड तृतीय-पक्ष खाता भविष्य में फिर से उपयोग नहीं किया जा सकेगा</strong></li><li>उपयोगकर्ता स्थिति अक्षम पर सेट है, लॉगिन निषिद्ध है</li></ul>",

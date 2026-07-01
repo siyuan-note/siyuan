@@ -979,6 +979,8 @@
   "rtl": "Sağdan sola (RTL)",
   "ltr": "Soldan sağa (LTR)",
   "rtlTip": "İçeriği sağdan sola göster",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "Yükseklik",
   "deactivateUser": "Hesabı devre dışı bırak",
   "deactivateUserTip": "<ul class='fn__list'><li>Hesap devre dışı bırakıldığında geri alınamaz, lütfen rastgele deneme</li><li>Kullanıcı adı <code>someone101</code> (numara kullanıcı kimliğidir) olarak değiştirilir, şifre rastgele oluşturulur</li><li>Kullanıcı takma adı, profil bilgisi, site bağlantısı, adresi vb. temizlenir</li><li>Tüm gizlilik ayarları varsayılan genel duruma döner</li><li>Bağlı üçüncü taraf hesaplar ve telefon numaraları kaldırılır</li><li><strong>Kullanıcı adı, telefon numarası ve bağlı hesaplar tekrar kullanılamaz</strong></li><li>Kullanıcı durumu devre dışı olarak ayarlanır, giriş yasaklanır</li></ul>",

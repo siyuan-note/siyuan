@@ -4,6 +4,7 @@ import {setInlineStyle} from "../../util/assets";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {resize} from "../../protyle/util/resize";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
+import {clearAutoDirectionMarker} from "../../protyle/util/autoDirection";
 
 const applyEditorConfig = (data: Config.IEditor) => {
     window.siyuan.config.editor = data;
@@ -26,6 +27,15 @@ const applyEditorConfig = (data: Config.IEditor) => {
     });
 
     void setInlineStyle();
+
+    if (!data.autoTextDirection) {
+        getAllEditor().forEach((editorItem) => {
+            const wysiwyg = editorItem.protyle.wysiwyg.element;
+            wysiwyg.querySelectorAll("[data-auto-text-direction]").forEach((block: HTMLElement) => {
+                clearAutoDirectionMarker(block);
+            });
+        });
+    }
 };
 
 /** 编辑器命名空间：设置面板注册项 save、设置面板外入口共用 */

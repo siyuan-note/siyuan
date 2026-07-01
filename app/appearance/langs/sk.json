@@ -979,6 +979,8 @@
   "rtl": "Sprava doľava (RTL)",
   "ltr": "Zľava doprava (LTR)",
   "rtlTip": "Vykresľovať obsah sprava doľava",
+  "autoTextDirection": "Auto-detect text direction per block",
+  "autoTextDirectionTip": "Automatically applies RTL or LTR direction to each text block based on its first strong character. Manual block direction overrides this setting.",
   "height": "Výška",
   "deactivateUser": "Deaktivovať účet",
   "deactivateUserTip": "Upozornenie: Deaktivácia je trvalá a zmaže všetky osobné údaje!",

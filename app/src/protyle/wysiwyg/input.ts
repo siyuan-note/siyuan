@@ -8,6 +8,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling, isNotEdit
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
+import {applyAutoDirection} from "../util/autoDirection";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
@@ -313,6 +314,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     hideElements(["gutter"], protyle);
     updateInput(html, protyle, id);
+    requestAnimationFrame(() => {
+        applyAutoDirection(blockElement);
+    });
 };
 
 const updateInput = (html: string, protyle: IProtyle, id: string) => {

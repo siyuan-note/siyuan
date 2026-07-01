@@ -434,8 +434,15 @@ func ResolveReplayDuplicateIds(tx *Transaction) {
 		for _, op := range ops {
 			// 记录本操作的 ID 是否被换新（在改 op.ID 之前判断，否则 replacements 的 key 是 oldID 查不到）
 			_, idReplaced := replacements[op.ID]
-			if newID, ok := replacements[op.ID]; ok {
-				op.ID = newID
+			// 仅 insert 操作替换 op.ID。delete 操作声明的 ID 是待删除的旧块本身，若换为新 ID，
+			// doDelete 会找不到节点而静默跳过，导致旧块残留并在重放后产生重复块。
+			// 典型场景：列表转段落后撤销——undo 先 delete 扁平化出的子块，再 insert 原列表
+			// （HTML 内联同一批子块 ID），这些子块会被前置 delete 清理，本不该参与冲突替换。
+			// https://github.com/siyuan-note/siyuan/issues/18020
+			if "insert" == op.Action {
+				if newID, ok := replacements[op.ID]; ok {
+					op.ID = newID
+				}
 			}
 			if newID, ok := replacements[op.ParentID]; ok {
 				op.ParentID = newID

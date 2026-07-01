@@ -120,6 +120,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 3. **Frontend verification:** Do not use `npx webpack` or `pnpm dev` to verify changes; after changes, run `cd app && pnpm run lint` to check code style
 4. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
 5. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
+6. **User guide:** When editing the user guide, follow `SY-FORMAT.md`
 
 ---
 
@@ -128,9 +129,10 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 1. **Comments:** Wrap code comments at 120 characters
 2. **Comments:** Describe what the code does, not what it replaced — don't reference the old implementation in comments
 3. **Comments:** Write comments in Chinese
-4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
-5. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
-6. **Go:** Format with `gofmt` after editing
+4. **Punctuation:** Use language-appropriate punctuation (e.g. Chinese punctuation ，。：；！？「」 for Chinese, not ASCII); do not hard-code it in code — put it in the i18n language files so each locale renders its own. Applies to comments, user guide, `.md` docs, etc.
+5. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
+6. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
+7. **Go:** Format with `gofmt` after editing
 
 ---
 

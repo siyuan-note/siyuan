@@ -208,23 +208,25 @@ const (
 	DatabaseIndexCommit = "task.database.index.commit" // 数据库索引提交
 	DatabaseIndexRef    = "task.database.index.ref"    // 数据库索引引用
 
-	OCRImage                        = "task.ocr.image"                     // 图片 OCR 提取文本
-	HistoryGenerateFile             = "task.history.generateFile"          // 生成文件历史
-	HistoryDatabaseIndexFull        = "task.history.database.index.full"   // 历史数据库重建索引
-	HistoryDatabaseIndexCommit      = "task.history.database.index.commit" // 历史数据库索引提交
-	DatabaseIndexEmbedBlock         = "task.database.index.embedBlock"     // 数据库索引嵌入块
-	ReloadUI                        = "task.reload.ui"                     // 重载 UI
-	AssetContentDatabaseIndexFull   = "task.asset.database.index.full"     // 资源文件数据库重建索引
-	AssetContentDatabaseIndexCommit = "task.asset.database.index.commit"   // 资源文件数据库索引提交
-	CacheVirtualBlockRef            = "task.cache.virtualBlockRef"         // 缓存虚拟块引用
-	ReloadAttributeView             = "task.reload.attributeView"          // 重新加载属性视图
-	ReloadProtyle                   = "task.reload.protyle"                // 重新加载编辑器
-	ReloadTag                       = "task.reload.tag"                    // 重新加载标签面板
-	ReloadFiletree                  = "task.reload.filetree"               // 重新加载文档树面板
-	SetRefDynamicText               = "task.ref.setDynamicText"            // 设置引用的动态锚文本
-	SetDefRefCount                  = "task.def.setRefCount"               // 设置定义的引用计数
-	UpdateIDs                       = "task.update.ids"                    // 更新 ID
-	PushMsg                         = "task.push.msg"                      // 推送消息
+	OCRImage                          = "task.ocr.image"                            // 图片 OCR 提取文本
+	HistoryGenerateFile               = "task.history.generateFile"                 // 生成文件历史
+	HistoryDatabaseIndexFull          = "task.history.database.index.full"          // 历史数据库重建索引
+	HistoryDatabaseIndexCommit        = "task.history.database.index.commit"        // 历史数据库索引提交
+	DatabaseIndexEmbedBlock           = "task.database.index.embedBlock"            // 数据库索引嵌入块
+	ReloadUI                          = "task.reload.ui"                            // 重载 UI
+	AssetContentDatabaseIndexFull     = "task.asset.database.index.full"            // 资源文件数据库重建索引
+	AssetContentDatabaseIndexCommit   = "task.asset.database.index.commit"          // 资源文件数据库索引提交
+	DatabaseIndexEmbeddingFull        = "task.database.index.embedding.full"        // 嵌入向量重建索引
+	DatabaseIndexEmbeddingRetryFailed = "task.database.index.embedding.retryFailed" // 嵌入向量重试失败块
+	CacheVirtualBlockRef              = "task.cache.virtualBlockRef"                // 缓存虚拟块引用
+	ReloadAttributeView               = "task.reload.attributeView"                 // 重新加载属性视图
+	ReloadProtyle                     = "task.reload.protyle"                       // 重新加载编辑器
+	ReloadTag                         = "task.reload.tag"                           // 重新加载标签面板
+	ReloadFiletree                    = "task.reload.filetree"                      // 重新加载文档树面板
+	SetRefDynamicText                 = "task.ref.setDynamicText"                   // 设置引用的动态锚文本
+	SetDefRefCount                    = "task.def.setRefCount"                      // 设置定义的引用计数
+	UpdateIDs                         = "task.update.ids"                           // 更新 ID
+	PushMsg                           = "task.push.msg"                             // 推送消息
 )
 
 // uniqueActions 描述了唯一的任务，即队列中只能存在一个在执行的任务。
@@ -240,6 +242,8 @@ var uniqueActions = []string{
 	HistoryDatabaseIndexCommit,
 	AssetContentDatabaseIndexFull,
 	AssetContentDatabaseIndexCommit,
+	DatabaseIndexEmbeddingFull,
+	DatabaseIndexEmbeddingRetryFailed,
 	ReloadAttributeView,
 	ReloadProtyle,
 	ReloadTag,

@@ -57,6 +57,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Create content: document.create (notebook + hPath) → block.append/prepend/insert (dataType "markdown").
 - Modify: block.update replaces ONE block's content with new markdown — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
 - Organize: document.move (full document), document.rename (title), block.move (single content block), document.delete.
+- Inbox (cloud-synced clippings, messages, and audio/video/file attachments; requires subscription): inbox.list (paged, summaries only) → inbox.get (read full content to judge how to file it) → inbox.convert (move one or many into local documents under a notebook, auto-deleting the cloud originals on success). Failed conversions are left in the inbox for retry. If a request fails with an auth/subscription error, report it honestly — do not retry.
 - Attributes: attr.get/set on any block. Database/attribute views: database.item_add (rows), database.key_add (columns), database.render (view). Create database blocks via database tools, never via the file tool.
 - Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 
@@ -144,6 +145,7 @@ var toolSignatureKeys = map[string][]string{
 	"database":  {"id", "keyID", "itemID", "itemIDs", "keyword"},
 	"ref":       {"id", "keyword"},
 	"notebook":  {"id", "name"},
+	"inbox":     {"id", "ids", "page"},
 	"tag":       {"label", "old", "new", "keyword"},
 	"bookmark":  {"label", "old", "new"},
 	"dailynote": {"notebook"},

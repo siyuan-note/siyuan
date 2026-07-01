@@ -35,6 +35,113 @@ export const getProvidersBlockKeywords = (): string[] => [
     window.siyuan.languages.selectModel,
 ];
 
+export const getEmbeddingStatsKeywords = (): string[] => [
+    window.siyuan.languages.embeddingIndexProgress,
+    window.siyuan.languages.rebuildEmbeddingIndex,
+    window.siyuan.languages.rebuildEmbeddingIndexTip,
+];
+
+// genEmbeddingStatsHtml 生成嵌入索引进度区块。容器留空，由 mountEmbeddingStatsBlock 轮询填充。
+export const genEmbeddingStatsHtml = (): string => `<div class="b3-label config-item" id="aiEmbeddingStatsBlock">
+    <div class="fn__block">
+        <div class="config-name">${window.siyuan.languages.embeddingIndexProgress}</div>
+        <div class="b3-label__text fn__none" id="aiEmbeddingStatsDisabled">${window.siyuan.languages.embeddingNotEnabledTip}</div>
+        <div id="aiEmbeddingStatsContent" class="fn__none">
+            <div class="fn__hr--small"></div>
+            <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color: var(--b3-theme-surface-lighter);" id="aiEmbeddingProgressBar">
+                <div id="aiEmbeddingProgressFill" style="width: 0%;transition: var(--b3-transition);background-color: var(--b3-theme-primary);height: 8px;"></div>
+            </div>
+            <div id="aiEmbeddingStatsNum" style="font-size: 13px;color: var(--b3-theme-on-surface);margin-top: 8px;"></div>
+            <a id="aiEmbeddingRetryFailed" class="fn__none b3-link" style="display: block;margin-top: 4px;font-size: 12px;">${window.siyuan.languages.retryFailedEmbedding}</a>
+        </div>
+    </div>
+</div>`;
+
+// mountEmbeddingStatsBlock 轮询 /api/ai/embeddingStat 刷新进度条与统计数字。设置页关闭时清理定时器。
+export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
+    const block = root.querySelector("#aiEmbeddingStatsBlock");
+    if (!block) {
+        return;
+    }
+
+    const render = () => {
+        fetchPost("/api/ai/embeddingStat", {}, (response) => {
+            const stat = response.data as {
+                total: number, indexed: number, pending: number, failed: number, ignoredByLen: number, ignoredByConfig: number, enabled: boolean,
+            };
+            const contentEl = block.querySelector("#aiEmbeddingStatsContent") as HTMLElement;
+            const disabledEl = block.querySelector("#aiEmbeddingStatsDisabled") as HTMLElement;
+            if (!stat.enabled) {
+                // 未启用：隐藏进度区，显示提示
+                contentEl.classList.add("fn__none");
+                disabledEl.classList.remove("fn__none");
+                return;
+            }
+            contentEl.classList.remove("fn__none");
+            disabledEl.classList.add("fn__none");
+
+            const total = stat.total || 0;
+            const indexed = stat.indexed || 0;
+            const pending = stat.pending || 0;
+            // 进度条分母排除被忽略的块（长度忽略 + 配置忽略），它们永远不会被索引，否则进度条到不了 100%
+            const ignored = (stat.ignoredByLen || 0) + (stat.ignoredByConfig || 0);
+            const effectiveTotal = Math.max(0, total - ignored);
+            const percent = effectiveTotal > 0 ? Math.min(100, indexed / effectiveTotal * 100) : 0;
+            const fillEl = block.querySelector("#aiEmbeddingProgressFill") as HTMLElement;
+            fillEl.style.width = `${percent}%`;
+
+            const done = indexed >= effectiveTotal && pending === 0;
+            if (done) {
+                // 完成：静态条
+                fillEl.style.backgroundImage = "";
+                fillEl.style.animation = "";
+            } else {
+                // 索引中：条状动画
+                fillEl.style.backgroundImage = "linear-gradient(-45deg, rgba(255,255,255,0.2) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.2) 75%, transparent 75%, transparent)";
+                fillEl.style.animation = "stripMove 450ms linear infinite";
+                fillEl.style.backgroundSize = "50px 50px";
+            }
+
+            const numEl = block.querySelector("#aiEmbeddingStatsNum");
+            // 每个统计项独立一行，避免单行过长被截断
+            numEl.innerHTML = `<div>${window.siyuan.languages.embeddingIndexed}<b>${indexed}</b> / ${total}</div>
+                <div>${window.siyuan.languages.embeddingPending}<b>${pending}</b></div>
+                <div>${window.siyuan.languages.embeddingFailed}<b>${stat.failed || 0}</b></div>
+                <div>${window.siyuan.languages.embeddingIgnoredByLen}<b>${stat.ignoredByLen || 0}</b></div>
+                <div>${window.siyuan.languages.embeddingIgnoredByConfig}<b>${stat.ignoredByConfig || 0}</b></div>`;
+
+            // 有失败块时显示“重试失败”链接
+            const retryEl = block.querySelector("#aiEmbeddingRetryFailed") as HTMLElement;
+            if (retryEl) {
+                if (stat.failed > 0) {
+                    retryEl.classList.remove("fn__none");
+                } else {
+                    retryEl.classList.add("fn__none");
+                }
+            }
+        });
+    };
+
+    // “重试失败”点击：删除失败块行让其回到主循环重嵌，无需确认框（操作轻，只删空向量行）
+    block.querySelector("#aiEmbeddingRetryFailed")?.addEventListener("click", () => {
+        fetchPost("/api/ai/retryFailedEmbedding", {}, () => {
+            showMessage(window.siyuan.languages.retryFailedEmbeddingStarted);
+        });
+    });
+
+    render();
+    const timer = window.setInterval(render, 3000);
+    // block 从 DOM 移除（设置页关闭/切换）时清理定时器，避免内存泄漏
+    const cleanup = () => {
+        if (!document.contains(block)) {
+            window.clearInterval(timer);
+            return;
+        }
+        window.requestAnimationFrame(cleanup);
+    };
+    window.requestAnimationFrame(cleanup);
+};
+
 export const genProvidersBlockHtml = (): string => `<div class="b3-label config-item" id="aiProvidersBlock">
     <div class="b3-label__text">${window.siyuan.languages.apiProviderTip}</div>
     <div class="fn__hr--small"></div>

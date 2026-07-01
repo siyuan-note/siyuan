@@ -1,4 +1,7 @@
 import type {SettingTabBuilder} from "../setting/builder";
+import {confirmDialog} from "../../dialog/confirmDialog";
+import {showMessage} from "../../dialog/message";
+import {fetchPost} from "../../util/fetch";
 import {
     genProvidersBlockHtml,
     getProvidersBlockKeywords,
@@ -9,6 +12,9 @@ import {
     genMcpServersBlockHtml,
     getMcpServersBlockKeywords,
     mountMcpServersBlock,
+    genEmbeddingStatsHtml,
+    getEmbeddingStatsKeywords,
+    mountEmbeddingStatsBlock,
 } from "./aiUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
@@ -137,6 +143,33 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.apiTimeoutTip,
         min: 1,
         unit: "s",
+    });
+
+    // 独立的嵌入索引重建按钮，不与全局重建索引耦合
+    group.button({
+        id: "rebuildEmbeddingIndex",
+        title: window.siyuan.languages.rebuildEmbeddingIndex,
+        desc: window.siyuan.languages.rebuildEmbeddingIndexTip,
+        label: window.siyuan.languages.rebuildEmbeddingIndex,
+        icon: "iconRefresh",
+        afterMount: (root) => {
+            root.querySelector("#rebuildEmbeddingIndex")?.addEventListener("click", () => {
+                confirmDialog(window.siyuan.languages.rebuildEmbeddingIndex,
+                    window.siyuan.languages.rebuildEmbeddingIndexConfirmTip, () => {
+                    fetchPost("/api/ai/reindexEmbedding", {}, () => {
+                        showMessage(window.siyuan.languages.rebuildEmbeddingIndexStarted);
+                    });
+                });
+            });
+        },
+    });
+
+    // 嵌入索引进度条 + 统计数字（只读展示，slot 注入）
+    group.slot({
+        key: "embeddingStats",
+        keywords: getEmbeddingStatsKeywords(),
+        html: genEmbeddingStatsHtml,
+        afterMount: mountEmbeddingStatsBlock,
     });
 };
 

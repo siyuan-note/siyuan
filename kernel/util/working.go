@@ -243,8 +243,10 @@ func GetBootProgress() int32 {
 }
 
 func SetBooted() {
-	setBootDetails("Finishing boot...")
+	// 先置进度为 100 再写 details，保证前端轮询/SSE 读到 progress>=100 时一定满足跳转条件，
+	// 避免 "先写 details 后写 progress" 造成的 "Finishing boot... 但进度未满" 竞态窗口
 	bootProgress.Store(100)
+	setBootDetails("Finishing boot...")
 	logging.LogInfof("kernel booted")
 }
 

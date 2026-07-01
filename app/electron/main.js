@@ -489,14 +489,27 @@ const initMainWindow = () => {
     }
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
-    // set proxy
+    // 加载主界面。setProxy 用超时兜底包装：Electron 在某些系统代理配置下 session.setProxy 可能永久
+    // pending（既不 resolve 也不 reject），会导致 loadURL 永不执行，主窗口卡在启动页无法显示。
+    // 这里无论 setProxy 是否完成，最多等待 5 秒后强制加载主界面。
+    const loadMainURL = () => {
+        currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + Date.now());
+    };
     net.fetch(getServer() + "/api/system/getNetwork", {method: "POST"}).then((response) => {
         return response.json();
     }).then((response) => {
-        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
-            // 加载主界面
-            currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + Date.now());
+        const setProxyDone = setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents);
+        Promise.race([
+            Promise.resolve(setProxyDone),
+            new Promise((resolve) => setTimeout(resolve, 5000)), // setProxy 永久 pending 时的超时兜底
+        ]).then(loadMainURL).catch(() => {
+            writeLog("setProxy failed, load main UI without proxy");
+            loadMainURL();
         });
+    }).catch((e) => {
+        // getNetwork 失败也要继续加载主界面，避免主窗口不加载导致卡在启动页
+        writeLog("getNetwork failed, load main UI without proxy: " + e.message);
+        loadMainURL();
     });
 
     // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
@@ -583,7 +596,19 @@ const initMainWindow = () => {
     workspaces.push({
         browserWindow: currentWindow,
     });
+    // loadURL 后设置超时兜底：前端 app bundle 加载或初始化异常导致 siyuan-ready-to-show 迟迟不发时，
+    // 强制销毁 boot 窗口并显示主窗口，避免永久卡在启动页
+    const readyToShowTimeout = setTimeout(() => {
+        if (bootWindow && !bootWindow.isDestroyed()) {
+            if (!currentWindow.isDestroyed()) {
+                writeLog("siyuan-ready-to-show timeout, force showing main window");
+                currentWindow.show();
+            }
+            bootWindow.destroy();
+        }
+    }, 60000);
     ipcMain.once("siyuan-ready-to-show", () => {
+        clearTimeout(readyToShowTimeout); // 正常收到信号则取消超时兜底
         if (isOpenAsHidden()) {
             currentWindow.minimize();
         } else {
@@ -769,7 +794,21 @@ const initKernel = (workspace, port, lang, safeMode) => {
             } else {
                 let progressing = false;
                 const bootShowStart = Date.now();
+                // 启动超时兜底，防止内核异常时永久卡在 boot 轮询。数据同步、首次全量索引重建、
+                // 数据库版本变更触发的全表重建都发生在 SetBooted() 之前，会计入此循环，故给足余量
+                const bootTimeout = 300000;
                 while (!progressing) {
+                    if (Date.now() - bootShowStart > bootTimeout) {
+                        writeLog("boot progress timeout after " + bootTimeout + "ms, exiting boot");
+                        showErrorWindow("启动超时", "Boot timeout",
+                            "<div>内核启动超时，请查看 工作空间/temp/siyuan.log 获取详细报错信息，或尝试重启思源。</div>" +
+                            "<div>Kernel boot timed out. Please check workspace/temp/siyuan.log for details, or try restarting SiYuan.</div>");
+                        net.fetch(getServer() + "/api/system/exit", {method: "POST"});
+                        bootWindow.destroy();
+                        resolve(false);
+                        progressing = true;
+                        break;
+                    }
                     try {
                         const progressResult = await net.fetch(getServer() + "/api/system/bootProgress");
                         const progressData = await progressResult.json();

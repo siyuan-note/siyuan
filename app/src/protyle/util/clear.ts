@@ -1,4 +1,5 @@
 import {updateHeader} from "../render/av/row";
+import {resetAVRowSelect} from "../render/av/virtualScroll";
 import {Constants} from "../../constants";
 
 export const clearBlockElement = (element: Element, keepRefcount = false) => {
@@ -25,9 +26,16 @@ export const clearSelect = (types: ("av" | "img" | "cell" | "row" | "galleryItem
         });
     }
     if (types.includes("row")) {
+        const clearedBodies = new Set<HTMLElement>();
         element.querySelectorAll(".av__row--select").forEach((item: HTMLElement) => {
             item.classList.remove("av__row--select");
             item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+            const bodyEl = item.parentElement as HTMLElement;
+            if (bodyEl && !clearedBodies.has(bodyEl)) {
+                // 同步清空虚拟滚动选中快照，确保 updateHeader 计数正确
+                resetAVRowSelect(bodyEl, []);
+                clearedBodies.add(bodyEl);
+            }
             updateHeader(item);
         });
     }
@@ -37,10 +45,16 @@ export const clearSelect = (types: ("av" | "img" | "cell" | "row" | "galleryItem
         });
     }
     if (types.includes("av")) {
+        const clearedBodies = new Set<HTMLElement>();
         element.querySelectorAll(" .av__cell--select, .av__cell--active, .av__row--select, .av__gallery-item--select").forEach((item: HTMLElement) => {
             if (item.classList.contains("av__row--select")) {
                 item.classList.remove("av__row--select");
                 item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
+                const bodyEl = item.parentElement as HTMLElement;
+                if (bodyEl && !clearedBodies.has(bodyEl)) {
+                    resetAVRowSelect(bodyEl, []);
+                    clearedBodies.add(bodyEl);
+                }
                 updateHeader(item);
             } else {
                 item.querySelector(".av__drag-fill")?.remove();

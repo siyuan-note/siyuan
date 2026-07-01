@@ -27,14 +27,15 @@
 <div id="empty" class="b3-list--mobile"></div>
 <div id="sidebar" class="side-panel fn__flex-column">
     <div class="toolbar toolbar--border" style="-webkit-user-select: none">
-        <svg data-type="sidebar-file-tab" class="toolbar__icon toolbar__icon--active"><use xlink:href="#iconFiles"></use></svg>
-        <svg data-type="sidebar-outline-tab" class="toolbar__icon"><use xlink:href="#iconOutline"></use></svg>
-        <svg data-type="sidebar-bookmark-tab" class="toolbar__icon"><use xlink:href="#iconBookmark"></use></svg>
-        <svg data-type="sidebar-tag-tab" class="toolbar__icon"><use xlink:href="#iconTag"></use></svg>
-        <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
-        <svg data-type="sidebar-inbox-tab" class="toolbar__icon"><use xlink:href="#iconInbox"></use></svg>
-        <svg data-menu="true" data-type="sidebar-plugin-tab" class="toolbar__icon"><use xlink:href="#iconPlugin"></use></svg>
-        <span class="fn__flex-1"></span>
+        <div class="toolbar__scroll">
+            <svg data-type="sidebar-file-tab" class="toolbar__icon toolbar__icon--active"><use xlink:href="#iconFiles"></use></svg>
+            <svg data-type="sidebar-outline-tab" class="toolbar__icon"><use xlink:href="#iconOutline"></use></svg>
+            <svg data-type="sidebar-bookmark-tab" class="toolbar__icon"><use xlink:href="#iconBookmark"></use></svg>
+            <svg data-type="sidebar-tag-tab" class="toolbar__icon"><use xlink:href="#iconTag"></use></svg>
+            <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
+            <svg data-type="sidebar-inbox-tab" class="toolbar__icon"><use xlink:href="#iconInbox"></use></svg>
+            <svg data-menu="true" data-type="sidebar-plugin-tab" class="toolbar__icon fn__none"><use xlink:href="#iconPlugin"></use></svg>
+        </div>
         <svg class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
     </div>
     <div class="fn__flex-1 b3-list--mobile">

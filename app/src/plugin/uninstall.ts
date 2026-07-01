@@ -83,6 +83,12 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
+            /// #if MOBILE
+            // 移动端卸载插件后，若无任何插件 dock 则隐藏插件入口图标
+            if (app.plugins.every(p => Object.keys(p.docks).length === 0)) {
+                document.querySelector('#sidebar [data-type="sidebar-plugin-tab"]')?.classList.add("fn__none");
+            }
+            /// #endif
             // rm icons
             document.querySelector(`svg[data-name="${plugin.name}"]`)?.remove();
             // rm protyle toolbar

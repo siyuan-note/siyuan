@@ -82,6 +82,7 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
 
             const total = stat.total || 0;
             const indexed = stat.indexed || 0;
+            const pending = stat.pending || 0;
             // 进度条分母排除被忽略的块（长度忽略 + 配置忽略），它们永远不会被索引，否则进度条到不了 100%
             const ignored = (stat.ignoredByLen || 0) + (stat.ignoredByConfig || 0);
             const effectiveTotal = Math.max(0, total - ignored);
@@ -104,7 +105,7 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             const numEl = block.querySelector("#aiEmbeddingStatsNum");
             // 每个统计项独立一行，避免单行过长被截断
             numEl.innerHTML = `<div>${window.siyuan.languages.embeddingIndexed}<b>${indexed}</b> / ${total}</div>
-                <div>${window.siyuan.languages.embeddingPending}<b>${stat.pending || 0}</b></div>
+                <div>${window.siyuan.languages.embeddingPending}<b>${pending}</b></div>
                 <div>${window.siyuan.languages.embeddingFailed}<b>${stat.failed || 0}</b></div>
                 <div>${window.siyuan.languages.embeddingIgnoredByLen}<b>${stat.ignoredByLen || 0}</b></div>
                 <div>${window.siyuan.languages.embeddingIgnoredByConfig}<b>${stat.ignoredByConfig || 0}</b></div>`;

@@ -165,6 +165,22 @@
   &--all {
     transform: translateY(-200vh);
   }
+
+  // 窄屏下 dock 图标过多时左侧可横向滚动，关闭按钮固定在右侧始终可触达
+  & > .toolbar--border > .toolbar__scroll {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    scrollbar-width: none;
+  }
 }
 
 .side-mask {

@@ -438,7 +438,7 @@ func ResolveReplayDuplicateIds(tx *Transaction) {
 			// doDelete 会找不到节点而静默跳过，导致旧块残留并在重放后产生重复块。
 			// 典型场景：列表转段落后撤销——undo 先 delete 扁平化出的子块，再 insert 原列表
 			// （HTML 内联同一批子块 ID），这些子块会被前置 delete 清理，本不该参与冲突替换。
-			// https://github.com/siyuan-note/siyuan/issues/18020
+			// https://github.com/siyuan-note/siyuan/issues/18012
 			if "insert" == op.Action {
 				if newID, ok := replacements[op.ID]; ok {
 					op.ID = newID

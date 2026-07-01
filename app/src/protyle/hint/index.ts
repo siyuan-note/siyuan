@@ -799,20 +799,89 @@ ${genHintItemHTML(item)}
                         editableElement.textContent = textContent;
                         newHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
                     }
+                    // 列表项内创建列表时保留空段落，避免形成 li>list 非法结构 https://github.com/siyuan-note/siyuan/issues/17890
+                    const tempCheck = document.createElement("div");
+                    tempCheck.innerHTML = newHTML;
+                    const keepEmptyInLi = hasClosestByClassName(nodeElement, "li") &&
+                        tempCheck.firstElementChild?.getAttribute("data-type") === "NodeList";
+                    if (keepEmptyInLi) {
+                        // 保留空段落时给新 NodeList 生成新 ID，避免与段落 ID 冲突
+                        const newListId = Lute.NewNodeID();
+                        tempCheck.firstElementChild.setAttribute("data-node-id", newListId);
+                        newHTML = tempCheck.innerHTML;
+                    }
                     nodeElement.insertAdjacentHTML("afterend", newHTML);
                     nodeElement = nodeElement.nextElementSibling as HTMLElement;
-                    nodeElement.previousElementSibling.remove();
-                    // https://github.com/siyuan-note/siyuan/issues/6864
-                    if (nodeElement.getAttribute("data-type") === "NodeTable") {
-                        nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
-                            item.style.minWidth = "60px";
-                        });
+                    if (!keepEmptyInLi) {
+                        nodeElement.previousElementSibling.remove();
+                        // https://github.com/siyuan-note/siyuan/issues/6864
+                        if (nodeElement.getAttribute("data-type") === "NodeTable") {
+                            nodeElement.querySelectorAll("colgroup col").forEach((item: HTMLElement) => {
+                                item.style.minWidth = "60px";
+                            });
+                        }
+                        updateTransaction(protyle, nodeElement, html);
+                    } else {
+                        // 保留空段落：原段落清空内容，新列表用 insert 操作
+                        editableElement.textContent = "";
+                        transaction(protyle, [{
+                            action: "update",
+                            id: id,
+                            data: nodeElement.previousElementSibling.outerHTML
+                        }, {
+                            action: "insert",
+                            id: nodeElement.getAttribute("data-node-id"),
+                            data: nodeElement.outerHTML,
+                            previousID: id
+                        }], [{
+                            action: "update",
+                            id: id,
+                            data: html
+                        }, {
+                            action: "delete",
+                            id: nodeElement.getAttribute("data-node-id")
+                        }]);
                     }
-                    updateTransaction(protyle, nodeElement, html);
                 } else {
                     let newHTML = protyle.lute.SpinBlockDOM(textContent);
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
+                    }
+                    // 列表项内创建列表时保留空段落，避免 ID 冲突和 li>list 非法结构 https://github.com/siyuan-note/siyuan/issues/17890
+                    const keepEmptyInLi2 = hasClosestByClassName(nodeElement, "li") &&
+                        (() => {
+                            const tc = document.createElement("div");
+                            tc.innerHTML = newHTML;
+                            return tc.firstElementChild?.getAttribute("data-type") === "NodeList";
+                        })();
+                    if (keepEmptyInLi2) {
+                        const newListId = Lute.NewNodeID();
+                        const tc = document.createElement("div");
+                        tc.innerHTML = newHTML;
+                        tc.firstElementChild.setAttribute("data-node-id", newListId);
+                        newHTML = tc.innerHTML;
+                        editableElement.innerHTML = "";
+                        nodeElement.insertAdjacentHTML("afterend", newHTML);
+                        const newListEl = nodeElement.nextElementSibling as HTMLElement;
+                        transaction(protyle, [{
+                            action: "update",
+                            id: id,
+                            data: nodeElement.outerHTML
+                        }, {
+                            action: "insert",
+                            id: newListId,
+                            data: newListEl.outerHTML,
+                            previousID: id
+                        }], [{
+                            action: "update",
+                            id: id,
+                            data: html
+                        }, {
+                            action: "delete",
+                            id: newListId
+                        }]);
+                        focusBlock(newListEl);
+                        return;
                     }
                     const oldHTML = nodeElement.outerHTML;
                     let foldData;

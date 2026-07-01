@@ -78,6 +78,7 @@
         flex: 1;
         padding: 16px 0;
         max-height: none;
+        background-color: var(--b3-theme-surface);
       }
 
       &__item {
@@ -124,8 +125,7 @@
       &__separator {
         margin: 0;
         height: 16px;
-        background-color: var(--b3-menu-background);
-        border-bottom: .5px solid var(--b3-theme-background-light);
+        background-color: transparent;
       }
 
       &__label {

@@ -70,6 +70,39 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         const rowHeight = state.rowHeight || currentRows[0].offsetHeight;
         state.rowHeight = rowHeight;
         const firstTop = currentRows[0].getBoundingClientRect().top;
+        // 大跨度跳转（如 Ctrl+Home）后渲染窗口与视口脱钩：spacer 把现存行整体顶出视口，
+        // 渐进式 trim 无法回填（firstVisibleIndex 取不到、回填分支依赖连续滚动方向）。
+        // 此处用 spacer 下沿（即 renderedStart 行的实际位置）反推视口应显示的起始行，
+        // 与 renderedStart 偏差超过一屏时整体重置渲染窗口，不依赖滚动方向与连续性。
+        if (spacerElement && state.renderedStart > 0) {
+            const viewportStartTop = Math.max(elementRect.top, blockRect.top);
+            const renderedStartTop = spacerElement.getBoundingClientRect().bottom;
+            const rowsPerViewport = Math.ceil(viewportHeight / Math.max(rowHeight, 1));
+            // renderedStartTop 远在视口下方，说明视口正落在 spacer 空白区，顶部行未渲染
+            if (renderedStartTop - viewportStartTop > rowHeight * rowsPerViewport) {
+                currentRows.forEach(row => row.remove());
+                spacerElement.remove();
+                const newEnd = Math.min(rowsPerViewport - 1, dataRows.length - 1);
+                let rowsHTML = "";
+                const viewType = blockElement.getAttribute("data-av-type") as TAVView;
+                for (let i = 0; i <= newEnd; i++) {
+                    rowsHTML += getRowHTML({
+                        data: state.view,
+                        row: dataRows[i],
+                        rowIndex: i,
+                        pinIndex: state.pinIndex,
+                        type: viewType
+                    });
+                }
+                if (bottomElement && bottomElement.isConnected) {
+                    bottomElement.insertAdjacentHTML("beforebegin", rowsHTML);
+                }
+                state.renderedStart = 0;
+                state.renderedEnd = newEnd;
+                state.topSpacerHeight = 0;
+                return;
+            }
+        }
         let foundFirstVisible = false;
         for (let i = 0; i < currentRows.length; i++) {
             const rect = currentRows[i].getBoundingClientRect();

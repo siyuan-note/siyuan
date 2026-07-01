@@ -121,7 +121,7 @@ export class AgentChat extends Model {
     // 推理努力度按钮（iconBrain + 当前值），仅实例记忆，刷新后回到默认 medium。
     private reasoningEffortBtn: HTMLElement;
     private reasoningEffortLabel: HTMLElement;
-    private selectedReasoningEffort = "medium";
+    private selectedReasoningEffort = "";
     private userScrolledUp = false;
     private programmaticScroll = false;
     private stickResizeObserver: ResizeObserver | null = null;
@@ -454,11 +454,11 @@ export class AgentChat extends Model {
     // 根据当前选中值刷新按钮上的文字（默认/低/中/高）。
     private updateReasoningEffortLabel() {
         const L = window.siyuan.languages;
-        let label = L.reasoningEffortMedium || "Medium";
-        if (this.selectedReasoningEffort === "") {
-            label = L.reasoningEffortDefault || "Default";
-        } else if (this.selectedReasoningEffort === "low") {
+        let label = L.reasoningEffortDefault || "Default";
+        if (this.selectedReasoningEffort === "low") {
             label = L.reasoningEffortLow || "Low";
+        } else if (this.selectedReasoningEffort === "medium") {
+            label = L.reasoningEffortMedium || "Medium";
         } else if (this.selectedReasoningEffort === "high") {
             label = L.reasoningEffortHigh || "High";
         }

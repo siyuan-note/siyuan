@@ -65,14 +65,30 @@ func executeTool(tc openai.ToolCall, sessionID string) (string, bool) {
 }
 
 func convertSchema(schema tools.ToolSchema) any {
+	// 根级 anyOf 常见于 Zod 生成的 schema，取第一个 object 变体展开。
+	if schema.Type == "" && len(schema.AnyOf) > 0 {
+		for _, variant := range schema.AnyOf {
+			if variant.Type == "object" || len(variant.Properties) > 0 {
+				return convertSchema(variant)
+			}
+		}
+	}
+
 	props := make(map[string]any)
 	for name, prop := range schema.Properties {
 		props[name] = convertProperty(prop)
 	}
 
+	schemaType := schema.Type
+	if schemaType == "" && len(props) > 0 {
+		schemaType = "object"
+	}
+
 	schemaMap := map[string]any{
-		"type":       schema.Type,
 		"properties": props,
+	}
+	if schemaType != "" {
+		schemaMap["type"] = schemaType
 	}
 	if len(schema.Required) > 0 {
 		reqVals := make([]any, len(schema.Required))
@@ -85,8 +101,16 @@ func convertSchema(schema tools.ToolSchema) any {
 }
 
 func convertProperty(prop tools.Property) map[string]any {
-	p := map[string]any{
-		"type": prop.Type,
+	// Zod 可选字段常生成 anyOf: [{type: T}, {type: null}]，简化为单一类型即可。
+	if prop.Type == "" && len(prop.AnyOf) > 0 {
+		if simplified := simplifyNullUnionProp(prop); simplified != nil {
+			return simplified
+		}
+	}
+
+	p := map[string]any{}
+	if prop.Type != "" {
+		p["type"] = prop.Type
 	}
 	if prop.Description != "" {
 		p["description"] = prop.Description
@@ -115,7 +139,52 @@ func convertProperty(prop tools.Property) map[string]any {
 		}
 		p["required"] = reqVals
 	}
+	if len(prop.AnyOf) > 0 {
+		p["anyOf"] = convertPropArray(prop.AnyOf)
+	}
+	if len(prop.OneOf) > 0 {
+		p["oneOf"] = convertPropArray(prop.OneOf)
+	}
+	if len(prop.AllOf) > 0 {
+		p["allOf"] = convertPropArray(prop.AllOf)
+	}
 	return p
+}
+
+// simplifyNullUnionProp 将 anyOf: [T, null] 形式的 Zod 可选字段简化为 T。
+func simplifyNullUnionProp(prop tools.Property) map[string]any {
+	var candidate *tools.Property
+	for i := range prop.AnyOf {
+		p := &prop.AnyOf[i]
+		if p.Type == "null" {
+			continue
+		}
+		if len(p.OneOf) > 0 || len(p.AnyOf) > 0 || len(p.AllOf) > 0 {
+			return nil
+		}
+		if candidate != nil {
+			return nil
+		}
+		candidate = p
+	}
+	if candidate == nil {
+		return nil
+	}
+	result := convertProperty(*candidate)
+	if prop.Description != "" {
+		if _, ok := result["description"]; !ok {
+			result["description"] = prop.Description
+		}
+	}
+	return result
+}
+
+func convertPropArray(props []tools.Property) []any {
+	result := make([]any, len(props))
+	for i, prop := range props {
+		result[i] = convertProperty(prop)
+	}
+	return result
 }
 
 func resultToString(result tools.CallToolResult) string {

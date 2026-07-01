@@ -64,9 +64,3 @@ export const setPosition = (element: HTMLElement, left: number, top: number, tar
         }
     }
 };
-
-export const clearPositionState = (element: HTMLElement) => {
-    delete element.dataset.positionTop;
-    delete element.dataset.positionBottom;
-    delete element.dataset.positionX;
-};

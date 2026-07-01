@@ -20,6 +20,7 @@ import {getColIconByType, getColNameByType} from "./col";
 import {unicode2Emoji} from "../../../emoji";
 import {escapeAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
+import {resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
 
 export const getRowHTML = (options: {
     data: IAVView
@@ -220,6 +221,7 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
         return;
     }
     const useElement = checkElement.querySelector("use");
+    const bodyElement = hasClosestByClassName(rowElement, "av__body") as HTMLElement;
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
         if ("#iconCheck" === useElement.getAttribute("xlink:href") || type === "unselectAll") {
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
@@ -229,22 +231,41 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
                     rowItemElement.classList.remove("av__row--select");
                 }
             });
+            // 全不选：清空选中快照，避免被 trim 掉的行回填后仍带选中态
+            if (bodyElement) {
+                resetAVRowSelect(bodyElement, []);
+            }
         } else {
+            const allRowIds: string[] = [];
             rowElement.parentElement.querySelectorAll(".av__firstcol").forEach(item => {
                 item.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                 const rowItemElement = hasClosestByClassName(item, "av__row");
                 if (rowItemElement) {
                     rowItemElement.classList.add("av__row--select");
+                    const id = rowItemElement.getAttribute("data-id");
+                    if (id) {
+                        allRowIds.push(id);
+                    }
                 }
             });
+            if (bodyElement) {
+                resetAVRowSelect(bodyElement, allRowIds);
+            }
         }
     } else {
+        const rowId = rowElement.getAttribute("data-id");
         if (type === "select" || (useElement.getAttribute("xlink:href") === "#iconUncheck" && type === "toggle")) {
             rowElement.classList.add("av__row--select");
             useElement.setAttribute("xlink:href", "#iconCheck");
+            if (bodyElement && rowId) {
+                updateAVRowSelect(bodyElement, rowId, true);
+            }
         } else if (type === "unselect" || (useElement.getAttribute("xlink:href") === "#iconCheck" && type === "toggle")) {
             rowElement.classList.remove("av__row--select");
             useElement.setAttribute("xlink:href", "#iconUncheck");
+            if (bodyElement && rowId) {
+                updateAVRowSelect(bodyElement, rowId, false);
+            }
         }
     }
     focusBlock(hasClosestBlock(rowElement) as HTMLElement);

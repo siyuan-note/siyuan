@@ -234,6 +234,16 @@ func TestPruneInvalidColumnFilters(t *testing.T) {
 	if len(got) != 0 || !changed {
 		t.Fatalf("fully-invalid root should be dropped")
 	}
+
+	// 原本就是空的根组（无筛选条件视图的合法状态）不应报告 changed，否则会误触发保存
+	emptyRoot := group(FilterCombinationAnd) // Filters 为 nil
+	got, changed = PruneInvalidColumnFilters([]*ViewFilter{emptyRoot}, valid)
+	if changed {
+		t.Fatalf("originally empty group should not report changed")
+	}
+	if len(got) != 0 {
+		t.Fatalf("empty group should be pruned, got %d", len(got))
+	}
 }
 
 func TestRemapFilterColumns(t *testing.T) {

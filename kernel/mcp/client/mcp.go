@@ -44,14 +44,19 @@ type Connection struct {
 }
 
 var (
-	mcpOnce  sync.Once
-	mcpConns []Connection
+	mcpMu      sync.Mutex
+	mcpConns   []Connection
+	mcpServers []conf.MCPServer
 )
 
 func EnsureMCPConnected(servers []conf.MCPServer) {
-	mcpOnce.Do(func() {
-		mcpConns = connectServers(servers)
-	})
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
+	mcpServers = servers
+	if len(mcpConns) > 0 {
+		return
+	}
+	mcpConns = connectServers(servers)
 }
 
 // serverTimeout 归一化服务器配置的超时（秒），未配置或非法时回退到默认值。
@@ -79,8 +84,9 @@ func (h *headerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 }
 
 func DisconnectMCP() {
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
 	closeConnections(mcpConns)
-	mcpOnce = sync.Once{}
 	mcpConns = nil
 }
 
@@ -125,7 +131,7 @@ func connectServers(servers []conf.MCPServer) []Connection {
 				Description: desc,
 				InputSchema: convertMCPSchema(tool.InputSchema),
 				Source:      "mcp",
-				Handler:     mcpToolHandler(session, tool.Name, serverTimeout(server)),
+				Handler:     mcpToolHandler(server.Name, tool.Name, serverTimeout(server)),
 			})
 			registered++
 		}
@@ -226,15 +232,15 @@ func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession,
 	return session, nil, nil
 }
 
-func mcpToolHandler(session *mcp.ClientSession, toolName string, timeout time.Duration) func(args map[string]interface{}) (tools.CallToolResult, error) {
+func mcpToolHandler(serverName, toolName string, timeout time.Duration) func(args map[string]interface{}) (tools.CallToolResult, error) {
 	return func(args map[string]interface{}) (tools.CallToolResult, error) {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-
-		result, err := session.CallTool(ctx, &mcp.CallToolParams{
-			Name:      toolName,
-			Arguments: args,
-		})
+		result, err := callMCPTool(serverName, toolName, timeout, args)
+		if err != nil && isReconnectableError(err) {
+			logging.LogWarnf("mcp: server [%s] tool [%s] disconnected (%s), reconnecting", serverName, toolName, err)
+			if reconnectMCP() {
+				result, err = callMCPTool(serverName, toolName, timeout, args)
+			}
+		}
 		if err != nil {
 			return tools.CallToolResult{
 				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("mcp tool error: %s", err.Error())}},
@@ -259,6 +265,67 @@ func mcpToolHandler(session *mcp.ClientSession, toolName string, timeout time.Du
 		}
 		return syr, nil
 	}
+}
+
+func callMCPTool(serverName, toolName string, timeout time.Duration, args map[string]interface{}) (*mcp.CallToolResult, error) {
+	session := getMCPSession(serverName)
+	if session == nil {
+		return nil, fmt.Errorf("mcp server [%s] not connected", serverName)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	return session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      toolName,
+		Arguments: args,
+	})
+}
+
+func getMCPSession(serverName string) *mcp.ClientSession {
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
+	for _, conn := range mcpConns {
+		if conn.ServerName == serverName {
+			return conn.Session
+		}
+	}
+	return nil
+}
+
+// reconnectMCP 关闭现有连接并重新注册工具。
+func reconnectMCP() bool {
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
+	if len(mcpServers) == 0 {
+		return false
+	}
+	closeConnections(mcpConns)
+	mcpConns = connectServers(mcpServers)
+	for _, conn := range mcpConns {
+		if conn.Session != nil {
+			logging.LogInfof("mcp: reconnected server [%s]", conn.ServerName)
+			return true
+		}
+	}
+	return false
+}
+
+// isReconnectableError 判断 MCP 调用失败是否可能因连接断开，值得尝试重连。
+func isReconnectableError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	if strings.Contains(msg, "401") || strings.Contains(msg, "403") ||
+		strings.Contains(msg, "invalid_token") || strings.Contains(msg, "unauthorized") {
+		return false
+	}
+	return strings.Contains(msg, "connection closed") ||
+		strings.Contains(msg, "client is closing") ||
+		strings.Contains(msg, "standalone sse") ||
+		strings.Contains(msg, "session missing") ||
+		strings.Contains(msg, "not connected")
 }
 
 func sanitize(s string) string {

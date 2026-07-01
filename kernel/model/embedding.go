@@ -176,8 +176,8 @@ func processPendingEmbeddings() {
 
 			var texts []string
 			var blocks []map[string]any
-			anySubmitted := false   // 本轮是否向 workCh 提交过 job
-			backoffSkipped := 0     // 因未到退避时间被跳过的块数（这类块状态不变，下轮还会被捞出）
+			anySubmitted := false                      // 本轮是否向 workCh 提交过 job
+			backoffSkipped := 0                        // 因未到退避时间被跳过的块数（这类块状态不变，下轮还会被捞出）
 			minRemaining := int64(embeddingBackoffMax) // 这些块中最近的剩余等待秒数（embeddingBackoffMax 单位为秒）
 			for _, row := range results {
 				id, _ := row["id"].(string)
@@ -259,6 +259,7 @@ func processPendingEmbeddings() {
 // stmtPendingBlocks 捞取待嵌入块，分两类：
 //  1. 从未尝试过（e.id IS NULL）；
 //  2. 失败过、未达永久失败阈值、且距上次尝试已超过退避间隔（e.last_tried < ?）。
+//
 // 参数顺序：?1=maxFailCount，?2=now-backoff（仅作 fail_count>0 块的粗筛下界，精确退避由 Go 侧按每块 fail_count 计算）。
 const stmtPendingBlocks = "SELECT b.id, b.root_id, b.box, b.path, b.content, b.updated, " +
 	"COALESCE(e.fail_count, 0) AS fail_count, COALESCE(e.last_tried, 0) AS last_tried " +
@@ -597,6 +598,36 @@ func fullReindexEmbedding() {
 		go StartEmbeddingIndexer()
 	} else {
 		eventbus.Publish(eventbus.EvtEmbeddingDirty, "")
+	}
+}
+
+// RetryFailedEmbedding 删除所有失败块的行，使其立即回到主循环重嵌。异步执行：只入队任务后立即返回。
+// 与 ReindexEmbedding 的区别：只删 fail_count>0 的失败块（embedding 为空，无有效向量），已成功的向量不动。
+func RetryFailedEmbedding() {
+	task.AppendTask(task.DatabaseIndexEmbeddingRetryFailed, retryFailedEmbedding)
+}
+
+// retryFailedEmbedding 实际的重试逻辑，由任务队列调度执行。
+// 失败块的 embedding 为空（失败时写 []byte{}），删除不丢有效向量；删行后块重新满足 pending 查询的 e.id IS NULL。
+func retryFailedEmbedding() {
+	if !isEmbeddingEnabled() {
+		logging.LogWarnf("embedding not enabled, skip retry failed")
+		return
+	}
+	if !checkEmbeddingTable() {
+		logging.LogWarnf("block_embeddings table not available, skip retry failed")
+		return
+	}
+	if err := sql.Exec("DELETE FROM block_embeddings WHERE fail_count > 0"); err != nil {
+		logging.LogErrorf("delete failed embedding rows failed: %s", err)
+		return
+	}
+	logging.LogInfof("failed embedding rows cleared, indexer will retry these blocks")
+	// 唤醒常驻索引器立即补齐
+	if embeddingIndexerRunning.Load() {
+		eventbus.Publish(eventbus.EvtEmbeddingDirty, "")
+	} else {
+		go StartEmbeddingIndexer()
 	}
 }
 

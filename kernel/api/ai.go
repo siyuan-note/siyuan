@@ -169,3 +169,10 @@ func reindexEmbedding(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 	model.ReindexEmbedding()
 }
+
+// retryFailedEmbedding 删除失败块的行，使其立即回到主循环重嵌，已成功向量不动，异步执行。
+func retryFailedEmbedding(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	model.RetryFailedEmbedding()
+}

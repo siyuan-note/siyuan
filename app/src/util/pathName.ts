@@ -73,9 +73,8 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
 
 export const parseUriInfo = (): ISiYuanUriBlockInfo => {
     const searchParams = new URLSearchParams(window.location.search);
-    const PWAURL = searchParams.get("url");
-    if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
-        const dataInfo = parseSiYuanUriInfo(PWAURL);
+    if (searchParams.has("url")) {
+        const dataInfo = parseSiYuanUriInfo(searchParams.get("url"));
         if (dataInfo != null) {
             window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
             return dataInfo;

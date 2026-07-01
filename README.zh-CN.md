@@ -113,7 +113,7 @@
 - JavaScript/CSS 代码片段
 - Android/iOS/鸿蒙 App
 - Docker 部署
-- [API](API.zh-CN.md)
+- [API](docs/API.zh-CN.md)
 - 社区集市
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)。

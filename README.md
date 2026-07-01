@@ -110,7 +110,7 @@ Most features are free, even for commercial use.
 - JavaScript/CSS snippet
 - Android/iOS/HarmonyOS App
 - Docker deployment
-- [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+- [API](https://github.com/siyuan-note/siyuan/blob/master/docs/API.md)
 - Community marketplace
 
 Some features are only available to paid members, for more details please refer to [Pricing](https://b3log.org/siyuan/en/pricing.html).

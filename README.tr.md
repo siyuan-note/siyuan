@@ -110,7 +110,7 @@ Daha fazla bilgi için [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)�
 - JavaScript/CSS kod parçacıkları
 - Android / iOS / HarmonyOS uygulamaları
 - Docker dağıtımı
-- [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+- [API](https://github.com/siyuan-note/siyuan/blob/master/docs/API.md)
 - Topluluk pazaryeri
 
 Bazı özellikler yalnızca ücretli üyeler için geçerlidir. Detaylar için [Fiyatlandırma](https://b3log.org/siyuan/en/pricing.html) sayfasına göz atabilirsin.

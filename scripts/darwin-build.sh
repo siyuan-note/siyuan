@@ -63,7 +63,7 @@ echo 'Building Kernel'
 cd "$PROJECT_ROOT/kernel"
 go version
 export GO111MODULE=on
-export GOPROXY=https://mirrors.aliyun.com/goproxy/,https://goproxy.cn,direct
+export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
 export GOOS=darwin
 

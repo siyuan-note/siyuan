@@ -6,11 +6,13 @@ import {bindSettingSaveDelegation} from "./setting/save";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
 import {focusByRange} from "../protyle/util/selection";
+import {renderReadme} from "./bazaar";
+import {fetchSyncPost} from "../util/fetch";
 /// #endif
-import type {TSettingTab} from "./setting/tabs";
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
+import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 
 /// #if !MOBILE
@@ -78,5 +80,39 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
     popMenu();
     /// #else
     return openSettingDialog(app, tab);
+    /// #endif
+};
+
+export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemName: string) => {
+    /// #if !MOBILE
+    let getResourcesUrl: string;
+    switch (bazaarType) {
+        case "templates":
+            getResourcesUrl = "/api/bazaar/getBazaarTemplate";
+            break;
+        case "icons":
+            getResourcesUrl = "/api/bazaar/getBazaarIcon";
+            break;
+        case "widgets":
+            getResourcesUrl = "/api/bazaar/getBazaarWidget";
+            break;
+        case "themes":
+            getResourcesUrl = "/api/bazaar/getBazaarTheme";
+            break;
+        case "plugins":
+            getResourcesUrl = "/api/bazaar/getBazaarPlugin";
+            break;
+        default:
+            return;
+    }
+
+    const response = await fetchSyncPost(getResourcesUrl, {frontend: "all", keyword: itemName});
+    if (response.code !== 0) return;
+
+    const resource = (response.data.packages as IBazaarItem[]).find((item: IBazaarItem) => item.name === itemName);
+    if (!resource) return;
+
+    openSettingDialog(app, "bazaar");
+    renderReadme(bazaarType, "bazaar", resource);
     /// #endif
 };

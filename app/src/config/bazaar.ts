@@ -53,6 +53,14 @@ export const mountBazaarTab = (root: HTMLElement, keywords?: string, app?: App) 
     }
 };
 
+/**
+ * 渲染集市 README
+ */
+export const renderReadme = (bazaarType: TBazaarType, from: "downloaded" | "updated" | "bazaar", data: IBazaarItem) => {
+    if (bazaar.element == null) return;
+    bazaar._renderReadme(bazaarType, from, data);
+};
+
 const bazaar = {
     element: undefined as Element,
     genHTML() {

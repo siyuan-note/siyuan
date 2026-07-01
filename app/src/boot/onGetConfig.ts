@@ -27,7 +27,7 @@ import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";
 import {correctHotkey} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
-import {processSiYuanUri} from "../editor/openLink";
+import {processSiYuanUri} from "../util/uri";
 import {getAllEditor} from "../layout/getAll";
 
 export const onGetConfig = (isStart: boolean, app: App) => {

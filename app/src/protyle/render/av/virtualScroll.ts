@@ -337,6 +337,21 @@ export const resetAVRowSelect = (bodyEl: HTMLElement, rowIds: string[]): void =>
     state.selectedRowIds = new Set(rowIds);
 };
 
+// 返回某 body 的选中统计，供虚拟滚动场景下 updateHeader 显示真实计数。
+// 虚拟滚动时 DOM 内只有渲染窗口的行，直接查 DOM 会低估选中数；此处改用 selectedRowIds 快照与
+// 已加载分页行总数（state.view.rows）计算。非虚拟滚动（无 state）时返回 null 表示回退到 DOM 计数。
+export const getAVSelectStat = (bodyEl: HTMLElement): { selectCount: number, loadedCount: number } | null => {
+    const state = bodyStates.get(bodyEl);
+    if (!state || !state.selectedRowIds) {
+        return null;
+    }
+    const dataRows = state.view ? ((state.view as IAVTable).rows || (state.view as IAVKanban).cards || []) : [];
+    return {
+        selectCount: state.selectedRowIds.size,
+        loadedCount: dataRows.length,
+    };
+};
+
 export const trimAVRows = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     if (blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true" || trimPending.has(blockElement)) {
         return;

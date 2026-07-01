@@ -278,7 +278,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                     checked: true
                 }
             };
-        } else if (colType === "date") {
+        } else if (["date", "created", "updated"].includes(colType)) {
             let values = value.split("→");
             if (values.length !== 2) {
                 values = value.split("-");
@@ -291,7 +291,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             if (isNaN(dateObj1.valueOf())) {
                 cellValue = {
                     type: colType,
-                    date: {
+                    [colType]: {
                         content: null,
                         isNotEmpty: false,
                         content2: null,
@@ -304,7 +304,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
             } else {
                 cellValue = {
                     type: colType,
-                    date: {
+                    [colType]: {
                         content: dateObj1.valueOf(),
                         isNotEmpty: true,
                         content2: dateObj2.valueOf() || 0,

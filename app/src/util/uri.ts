@@ -6,8 +6,8 @@ import {Constants} from "../constants";
 /// #if !MOBILE
 import {openFile, openFileById} from "../editor/util";
 /// #endif
-import {fetchPost} from "../util/fetch";
-import {checkFold} from "../util/noRelyPCFunction";
+import {fetchPost} from "./fetch";
+import {checkFold} from "./noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
 
 import type {App} from "../index";
@@ -102,7 +102,12 @@ const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
     const [, _type, _name, target] = uriObj.pathname.split("/");
     if (!_type || !_name) return false;
     const resourceType = _type as TBazaarType;
-    const resourceName = decodeURIComponent(_name);
+    let resourceName: string;
+    try {
+        resourceName = decodeURIComponent(_name);
+    } catch {
+        return false;
+    }
     switch (target) {
         case "readme":
             // siyuan://bazaar/plugins/plugin-sample/readme

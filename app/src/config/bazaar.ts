@@ -56,9 +56,9 @@ export const mountBazaarTab = (root: HTMLElement, keywords?: string, app?: App) 
 /**
  * 渲染集市 README
  */
-export const renderReadme = (bazaarType: TBazaarType, isDownload: boolean, data: IBazaarItem) => {
+export const renderReadme = (bazaarType: TBazaarType, from: "downloaded" | "updated" | "bazaar", data: IBazaarItem) => {
     if (bazaar.element == null) return;
-    bazaar._renderReadme(bazaarType, isDownload, data);
+    bazaar._renderReadme(bazaarType, from, data);
 };
 
 const bazaar = {

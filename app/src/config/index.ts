@@ -6,13 +6,12 @@ import {bindSettingSaveDelegation} from "./setting/save";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
 import {focusByRange} from "../protyle/util/selection";
+import {renderReadme} from "./bazaar";
+import {fetchSyncPost} from "../util/fetch";
 /// #endif
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
-import {renderReadme} from "./bazaar";
-import {fetchSyncPost} from "../util/fetch";
-/// #endif
 import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 
@@ -116,7 +115,7 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
     openSettingDialog(app, "bazaar");
 
     setTimeout(() => {
-        renderReadme(bazaarType, resource.installed, resource);
+        renderReadme(bazaarType, "bazaar", resource);
     });
     /// #endif
 };

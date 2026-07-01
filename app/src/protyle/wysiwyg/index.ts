@@ -9,6 +9,7 @@ import {
 } from "../util/hasClosest";
 import {
     focusBlock,
+    focusByOffset,
     focusByRange,
     focusByWbr,
     focusSideBlock,
@@ -2710,12 +2711,28 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
+        // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词触发 compositionend 时浏览器会把光标移出可编辑单元格）
+        let compositionRange: { cell: HTMLElement; offset: number };
         this.element.addEventListener("compositionstart", (event) => {
             isComposition = true;
             // 微软双拼由于 focusByRange 导致无法输入文字，因此不再 keydown 中记录了，但 keyup 会记录拼音字符，因此使用 isComposition 阻止 keyup 记录。
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
+            // 记录组合开始时光标所在的可编辑单元格与偏移，供取消组合时恢复光标
+            if (nodeElement) {
+                const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+                if (startCell) {
+                    compositionRange = {
+                        cell: startCell,
+                        offset: getSelectionOffset(startCell as HTMLElement, nodeElement, range).start,
+                    };
+                } else {
+                    compositionRange = undefined;
+                }
+            } else {
+                compositionRange = undefined;
+            }
             if (!isMac() && nodeElement) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
@@ -2739,8 +2756,23 @@ export class WYSIWYG {
             } else {
                 const id = blockElement.getAttribute("data-node-id");
                 if (protyle.wysiwyg.lastHTMLs[id]) {
+                    // https://github.com/siyuan-note/siyuan/issues/4604
                     updateTransaction(protyle, blockElement, protyle.wysiwyg.lastHTMLs[id]);
                 }
+                // https://github.com/siyuan-note/siyuan/issues/17584
+                if (compositionRange) {
+                    const selection = getSelection();
+                    if (selection.rangeCount > 0) {
+                        const afterRange = selection.getRangeAt(0);
+                        const currentCell = hasClosestByTag(afterRange.startContainer, "TD") || hasClosestByTag(afterRange.startContainer, "TH");
+                        if (!currentCell || currentCell !== compositionRange.cell) {
+                            focusByOffset(compositionRange.cell, compositionRange.offset, compositionRange.offset);
+                        }
+                    } else {
+                        focusByOffset(compositionRange.cell, compositionRange.offset, compositionRange.offset);
+                    }
+                }
+                compositionRange = undefined;
             }
         });
 

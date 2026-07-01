@@ -63,6 +63,14 @@ func initDatabase(forceRebuild bool) {
 		}
 	}
 	if !forceRebuild {
+		// 校验块树表是否可用，避免因上次重建被中断导致数据库文件存在但表缺失
+		var table string
+		if err := db.QueryRow("SELECT name FROM sqlite_master WHERE type = ? AND name = ?", "table", "blocktrees").Scan(&table); nil != err {
+			logging.LogWarnf("blocktrees table missing or unreadable [%s], will rebuild blocktree database", err)
+			forceRebuild = true
+		}
+	}
+	if !forceRebuild {
 		return
 	}
 

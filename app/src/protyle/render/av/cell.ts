@@ -176,7 +176,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
         type: colType,
     };
     if (colType === "number") {
-        if (["date", "created", "updated"].includes(colType)) {
+        if (["date", "created", "updated"].includes(value.type)) {
             newValue.number = {
                 content: value[value.type as "date"].content,
                 isNotEmpty: value[value.type as "date"].isNotEmpty

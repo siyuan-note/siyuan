@@ -6,7 +6,7 @@ import {
     getSbChildBlockCount,
     getTopAloneElement
 } from "../wysiwyg/getBlock";
-import {hideDragTip, showDragTip, transparentImgSrc} from "./dragTip";
+import {hideCaretLine, hideDragTip, showCaretLine, showDragTip, transparentImgSrc} from "./dragTip";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1125,7 +1125,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 source.contains(targetLi) ||                                        // 拖到子孙中
                                 (!isChild && isBottom && source === targetLi.nextElementSibling) ||  // 底部同级：源原本就在目标后面
                                 (!isChild && !isBottom && source === targetLi.previousElementSibling)); // 顶部同级：源原本就在目标前面
-                            if (isNoOpDrop) {
+                            // Ctrl(复制)/Shift(嵌入)/Alt(引用) 走各自的 drop 分支，不进此移动 no-op；此处仅纯移动需拦截
+                            if (isNoOpDrop && !event.ctrlKey && !event.shiftKey && !event.altKey) {
                                 dragoverElement = undefined;
                                 return;
                             }
@@ -1153,6 +1154,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                             return targetElement === prevSibling || targetElement === nextSibling;
                                         };
                                         if (checkSiblings(current)) {
+                                            // 源列表本身是文档顶层块、目标是其顶层紧邻块时，属合法顶层重排
+                                            // （moveTo 会为新位置新建合法列表包装），不拦截
+                                            if (current.parentElement === editorElement) {
+                                                break;
+                                            }
                                             dragoverElement = undefined;
                                             return;
                                         }
@@ -1183,7 +1189,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
 
-                    if (isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                    // 非列表项源（如段落）拖到子列表首项上方间隙：列表只能包含列表项，段落无法成为 .li 的同级，
+                    // 而该间隙的语义实为"插入到父列表项内容末尾（子列表之前）"，故锚点改为父列表项，
+                    // 将段落作为父列表项内容插到子列表之前。命中后需跳过下方 isChild/sibling 链，避免重复插入。
+                    let liGapIntercepted = false;
+                    if (!isListItemSource && !isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
+                        const parentLi = targetElement.parentElement?.parentElement;
+                        if (targetClass.some((c: string) => c.indexOf("dragover__top--sibling") === 0) &&
+                            parentLi?.classList.contains("li")) {
+                            const contentLi = parentLi as HTMLElement;
+                            const contentBlocks = Array.from(contentLi.children).filter(
+                                c => c.hasAttribute("data-node-id") && !c.classList.contains("list"));
+                            const anchorBlock = contentBlocks.length > 0 ? contentBlocks[contentBlocks.length - 1] : null;
+                            if (anchorBlock) {
+                                // 插到最后一个内容块之后：moveTo 会把段落放在子列表之前，形成列表项内容
+                                dragSame(protyle, sourceElements, anchorBlock, true, event.ctrlKey);
+                            } else {
+                                dragSame(protyle, sourceElements, contentLi, isBottom, event.ctrlKey);
+                            }
+                            liGapIntercepted = true;
+                        }
+                    }
+
+                    if (!liGapIntercepted && isChild && targetElement.getAttribute("data-type") === "NodeListItem") {
                         const nestedList = Array.from(targetElement.children).find(c => c.classList.contains("list"));
                         let nestedTarget: Element;
                         if (nestedList) {
@@ -1499,18 +1527,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         htmlTarget.style.setProperty("--drag-line-bg",
             `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
         highlightByLevel(editorElement, htmlTarget);
-        // Update drag tip to show specific insertion position
+        // 提示文案：修饰键显示对应操作，无修饰键显示插入位置
         const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
-        if (isChild) {
-            showDragTip(window.siyuan.dragTitle || "",
-                window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText),
-                event.clientX, event.clientY);
+        let action: string;
+        if (event.altKey) {
+            action = window.siyuan.languages.dragTipRef;
+        } else if (event.shiftKey) {
+            action = window.siyuan.languages.dragTipEmbed;
+        } else if (event.ctrlKey) {
+            action = window.siyuan.languages.duplicate;
+        } else if (isChild) {
+            action = window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText);
         } else {
             const key = position === "bottom" ? "dragTipListItemAfter" : "dragTipListItemBefore";
-            showDragTip(window.siyuan.dragTitle || "",
-                window.siyuan.languages[key].replace("${x}", targetText),
-                event.clientX, event.clientY);
+            action = window.siyuan.languages[key].replace("${x}", targetText);
         }
+        showDragTip(window.siyuan.dragTitle || "", action, event.clientX, event.clientY);
     };
     // 缓存当前目标的文本和列布局判断，避免优化路径每次 dragover 重复计算
     let cachedTargetText = "";
@@ -1550,14 +1582,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 isAvTarget ? window.siyuan.languages.addToDatabase :
                     (event.altKey ? window.siyuan.languages.dragTip2Heading : window.siyuan.languages.dragTipRef),
                 event.clientX, event.clientY);
-        } else if (gutterType && !isAvSubType) {
+        } else if (gutterType && !isAvSubType && !(event.altKey && isInEmbedBlock(event.target))) {
             // 普通块（段落/标题/列表/引用/AV块等，排除 AV 行/列/视图/卡片）拖入编辑器
+            // Alt 拖到嵌入块上不支持插入引用，跳过提示
             let action: string;
             if (isAvTarget) {
                 // 拖到数据库视图：绑定为记录
                 action = window.siyuan.languages.addToDatabase;
+            } else if (event.ctrlKey) {
+                // Ctrl=创建副本
+                action = window.siyuan.languages.duplicate;
             } else if (event.altKey) {
-                // 编辑器内重排：Alt=插入引用，Shift=嵌入块，默认=移动
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
                 action = window.siyuan.languages.dragTipEmbed;
@@ -1598,23 +1633,40 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
-        if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
-            const targetAssetElement = hasClosestBlock(event.target);
-            if (targetAssetElement) {
-                targetAssetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
-                targetAssetElement.removeAttribute("select-start");
-                targetAssetElement.removeAttribute("select-end");
+        if (event.altKey && fileTreeIds.indexOf("-") === -1) {
+            // Alt=插入引用（行级）：走光标定位语义，清除全部拖拽指示。
+            // 复用 cleanupDragIndicators 以覆盖列表专属指示类（--sibling/--child）与 --drag-* 变量，
+            // 否则按 Alt 时列表指示线会冻结在原处不动（仅清通用类不足以移除列表指示）。
+            // 注意：保留源块 .protyle-wysiwyg--select 不移除——该类仅在 dragstart 添加一次，
+            // 移除后永不恢复；松开修饰键回到普通拖拽时，no-op 守卫需靠它识别源块，
+            // 否则源项可被"移动"回自身原位。引用语义不依赖该类（用 gutterTypes[2] 的 id）。
+            cleanupDragIndicators(editorElement);
+            editorElement.querySelectorAll("[select-start], [select-end]").forEach((item: HTMLElement) => {
+                item.removeAttribute("select-start");
+                item.removeAttribute("select-end");
+            });
+            // 绘制行级竖线指示：定位到光标位置（最后一个块下方是新建块，不显示竖线）
+            if (event.y <= protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
+                const range = getRangeByPoint(event.clientX, event.clientY);
+                if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+                    const rect = range.getBoundingClientRect();
+                    if (rect.height > 0) {
+                        showCaretLine(rect.left, rect.top, rect.height);
+                    }
+                }
             } else {
-                // https://github.com/siyuan-note/siyuan/issues/14177
-                editorElement.querySelectorAll(".dragover__top, .protyle-wysiwyg--select, .dragover__bottom, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
-                    item.removeAttribute("select-start");
-                    item.removeAttribute("select-end");
-                });
+                // 最后一个块下方：新建块，显示水平插入线
+                hideCaretLine();
+                const lastBlock = protyle.wysiwyg.element.lastElementChild as HTMLElement;
+                if (lastBlock && lastBlock.hasAttribute("data-node-id")) {
+                    lastBlock.classList.add("dragover__bottom");
+                }
             }
             event.preventDefault();
             return;
         }
+        // 非 Alt 路径：清除可能残留的 Alt 竖线指示
+        hideCaretLine();
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
         targetElement = hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||
@@ -1785,6 +1837,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideDragTip();
             return;
         }
+        // 不允许拖拽到嵌入块中（嵌入块本身或其内部任意内容均不可作为拖拽目标）
+        // 例外：嵌入块是文档首块/末块且光标在其顶/底边外时，允许作为"嵌入块上/下方"落点（before/afterend 插入）
+        if (targetElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+            if (editorElement.firstElementChild === targetElement &&
+                event.clientY < targetElement.getBoundingClientRect().top) {
+                point.className = "dragover__top";
+            } else if (editorElement.lastElementChild === targetElement &&
+                event.clientY > targetElement.getBoundingClientRect().bottom) {
+                point.className = "dragover__bottom";
+            } else {
+                clearDragoverElement(dragoverElement);
+                return;
+            }
+        } else if (isInEmbedBlock(targetElement)) {
+            clearDragoverElement(dragoverElement);
+            return;
+        }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
@@ -1838,6 +1907,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             return targetElement === prevSibling || targetElement === nextSibling;
                         };
                         if (checkSiblings(current)) {
+                            // 源列表本身是文档顶层块、目标是其顶层紧邻块时，属合法顶层重排
+                            // （moveTo 会为新位置新建合法列表包装），不拦截
+                            if (current.parentElement === editorElement) {
+                                break;
+                            }
                             cleanupDragIndicators(editorElement);
                             hideDragTip();
                             return;
@@ -1929,6 +2003,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.getAttribute("data-type") === "NodeAttributeView" && hasClosestByTag(event.target, "TD")) {
                 return;
             }
+            // 拖到自身/子孙且为纯移动（无修饰键）时为无效移动：松开 Ctrl/Shift/Alt 后恢复成"拖拽自身"状态，不显示移动指示线
+            // Ctrl(复制)/Shift(嵌入)/Alt(引用) 允许落在源自身位置（创建副本/嵌入块/引用），不拦截
+            const isSelfFast = !event.ctrlKey && !event.shiftKey && !event.altKey && gutterTypes[2]?.split(",").some((item: string) =>
+                item && hasClosestByAttribute(targetElement as HTMLElement, "data-node-id", item));
+            if (isSelfFast && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
+                hideDragTip();
+                return;
+            }
             if (point.className && !liTarget && !targetElement.classList.contains("sb")) {
                 // 列表项拖拽不触发横向超级块，列表边缘不显示插入指示
                 if (!(gutterTypes[0] === "nodelistitem" && targetElement.classList.contains("list") &&
@@ -1942,7 +2024,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
                     }
                     // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
                         const isFront = point.className === "dragover__top" || point.className === "dragover__left";
                         const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
                         if ((isFront || isBack) && displayText) {
@@ -2013,7 +2095,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     addDragover(targetElement);
                     const sbFirstBlock = targetElement.querySelector("[data-node-id]") as HTMLElement;
                     const sbText = getContenteditableElement(sbFirstBlock)?.textContent?.trim() || "";
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
                         const key = isSbLeftEdge
                             ? window.siyuan.languages.dragTipMoveTargetFront
                             : window.siyuan.languages.dragTipMoveTargetBack;
@@ -2032,7 +2114,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement.classList.add("dragover__left");
                 addDragover(targetElement);
                 // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                     showDragTip(window.siyuan.dragTitle || "",
                         window.siyuan.languages.dragTipMoveTargetFront.replace("${x}", cachedTargetText),
                         event.clientX, event.clientY);
@@ -2042,7 +2124,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement.classList.add("dragover__right");
                 addDragover(targetElement);
                 // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                     showDragTip(window.siyuan.dragTitle || "",
                         window.siyuan.languages.dragTipMoveTargetBack.replace("${x}", cachedTargetText),
                         event.clientX, event.clientY);
@@ -2056,7 +2138,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement.classList.add("dragover__bottom");
                     addDragover(targetElement);
                     // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
                             (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetBack : window.siyuan.languages.dragTipMoveTargetBelow).replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);
@@ -2065,7 +2147,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement.classList.add("dragover__top");
                     addDragover(targetElement);
                     // 默认移动时，更新下半为带目标名的位置文案（超级块本身跳过）
-                    if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
+                    if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb") && cachedTargetText) {
                         showDragTip(window.siyuan.dragTitle || "",
                             (cachedIsCol ? window.siyuan.languages.dragTipMoveTargetFront : window.siyuan.languages.dragTipMoveTargetAbove).replace("${x}", cachedTargetText),
                             event.clientX, event.clientY);
@@ -2108,12 +2190,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return true;
                 }
             });
-            if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
-                clearDragoverElement(dragoverElement);
-                return;
-            }
-            if (isInEmbedBlock(targetElement)) {
-                // 不允许托入嵌入块
+            if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0] && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+                // 拖到自身/子孙且为纯移动时无操作；Ctrl(复制)/Shift(嵌入)/Alt(引用) 允许落在源自身位置（创建副本/嵌入块/引用），不拦截
                 clearDragoverElement(dragoverElement);
                 return;
             }
@@ -2162,7 +2240,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             highlightColColumn(targetElement as HTMLElement);
         }
         // 默认移动（无修饰键、非 AV 目标、普通块源）时，更新下半为带目标名的位置文案
-        if (!event.altKey && !event.shiftKey && gutterType && !isAvSubType && targetElement && !isAvTarget && point.className) {
+        if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && targetElement && !isAvTarget && point.className) {
             const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
             const isFront = point.className === "dragover__top" || point.className === "dragover__left";
             const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";

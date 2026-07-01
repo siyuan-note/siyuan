@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM node:21 AS node-build
+FROM --platform=$BUILDPLATFORM node:22 AS node-build
 
 ARG NPM_REGISTRY=
 
@@ -19,7 +19,8 @@ RUN <<EORUN
 pnpm run build
 node scripts/trimChangelogs.js
 mkdir /artifacts
-mv appearance stage guide changelogs /artifacts/
+mv appearance stage guide /artifacts/
+if [ -d changelogs ]; then mv changelogs /artifacts/; fi
 EORUN
 
 FROM golang:1.25-alpine AS go-build

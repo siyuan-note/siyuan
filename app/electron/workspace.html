@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SiYuan</title>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="window.css">
+    <style>
+        /* workspace.html 独有样式，公共样式在 window.css 中 */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .wsPanel {
+            flex: none;
+            width: 300px;
+            border-right: 1px solid #e0e0e0;
+            padding: 24px;
+            overflow-y: auto;
+            text-align: left;
+            box-sizing: border-box;
+            background-color: #f6f6f6;
+        }
+
+        .wsTitle {
+            font-size: 16px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, .6);
+            margin-bottom: 16px;
+        }
+
+        .ws-item {
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-radius: 6px;
+            cursor: default;
+        }
+
+        .ws-item:hover {
+            background: #dfe0e1;
+        }
+
+        .ws-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ws-name {
+            font-size: 16px;
+            color: #222;
+            line-height: 1.5;
+        }
+
+        .ws-path {
+            font-size: 12px;
+            color: rgba(0, 0, 0, .6);
+            word-break: break-all;
+            line-height: 1.5;
+        }
+
+        .right {
+            flex: 1;
+            padding: 0 32px;
+        }
+
+        .ws-open {
+            width: auto;
+            padding: 2px 12px;
+            color: rgba(0, 0, 0, .6);
+            background-color: transparent;
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 120ms ease;
+        }
+
+        .ws-item:hover .ws-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .ws-open:hover, .ws-open:focus {
+            color: #222;
+            background-color: rgba(0, 0, 0, .06);
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .4);
+        }
+
+        .ws-open:active {
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .4);
+        }
+
+        .missing-tip {
+            font-size: 18px;
+            color: #222;
+            text-align: left;
+            padding: 0 24px;
+            line-height: 1.6;
+        }
+
+        .missing-path {
+            font-size: 14px;
+            color: rgba(0, 0, 0, .6);
+            margin-top: 8px;
+            word-break: break-all;
+        }
+
+        code {
+            word-break: break-all;
+        }
+
+        /* 安全模式分支（渲染进程崩溃恢复）独有样式 */
+        .crash-tip {
+            font-size: 18px;
+            color: #222;
+            text-align: left;
+            padding: 0 24px;
+            line-height: 1.6;
+        }
+
+        .crash-log {
+            font-size: 12px;
+            color: rgba(0, 0, 0, .6);
+            background-color: rgba(0, 0, 0, .04);
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin: 12px 0 0;
+            max-height: 160px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .crash-actions {
+            display: flex;
+            gap: 16px;
+            padding: 24px 0;
+            flex-wrap: wrap;
+        }
+
+        .crash-actions .b3-button {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .b3-button--safe {
+            color: #fff;
+            background-color: #3575f0;
+        }
+
+        .b3-button--safe:hover {
+            background-color: #2c66e0;
+        }
+
+        /* 次操作按钮：透明背景 + 描边，与主操作（安全模式）形成对比 */
+        .b3-button--outline {
+            color: rgba(0, 0, 0, .75);
+            background-color: transparent;
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .25);
+        }
+
+        .b3-button--outline:hover, .b3-button--outline:focus {
+            color: #222;
+            background-color: rgba(0, 0, 0, .06);
+            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .4);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .wsPanel {
+                background-color: #2c2c2c;
+                border-right: 1px solid #363636;
+            }
+
+            .wsTitle {
+                color: #9aa0a6;
+            }
+
+            .ws-item:hover {
+                background: rgba(255, 255, 255, .075);
+            }
+
+            .ws-name {
+                color: #dadada;
+            }
+
+            .ws-path {
+                color: #9aa0a6;
+            }
+
+            .ws-open {
+                color: #9aa0a6;
+                background-color: transparent;
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .25);
+            }
+
+            .ws-open:hover, .ws-open:focus {
+                color: #dadada;
+                background-color: rgba(255, 255, 255, .075);
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .4);
+            }
+
+            .ws-open:active {
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .4);
+            }
+
+            .missing-tip {
+                color: #dadada;
+            }
+
+            .missing-path {
+                color: #9aa0a6;
+            }
+
+            .crash-tip {
+                color: #dadada;
+            }
+
+            .crash-log {
+                color: #9aa0a6;
+                background-color: rgba(255, 255, 255, .05);
+            }
+
+            .b3-button--outline {
+                color: #9aa0a6;
+                background-color: transparent;
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .25);
+            }
+
+            .b3-button--outline:hover, .b3-button--outline:focus {
+                color: #dadada;
+                background-color: rgba(255, 255, 255, .075);
+                box-shadow: inset 0 0 0 0.6px rgba(255, 255, 255, .4);
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="layout" class="layout">
+    <div class="wsPanel">
+        <div class="wsTitle" data-i18n="wsTitle"></div>
+        <div class="wsList"></div>
+    </div>
+    <div class="fn__flex-column right">
+        <div class="fn__flex-1"></div>
+        <img class="icon">
+        <h2 data-i18n="title"></h2>
+        <div class="slogan" data-i18n="slogan"></div>
+        <div class="fn__flex-1"></div>
+        <div class="missing-tip">
+            <div data-i18n="missingTip"></div>
+            <div class="missing-path"><code class="missing"></code></div>
+        </div>
+        <div class="crash-tip fn__none">
+            <div data-i18n="crashTip"></div>
+            <pre class="crash-log"></pre>
+            <div class="crash-actions">
+                <button class="b3-button b3-button--safe safeMode" data-i18n="safeModeBtn"></button>
+                <button class="b3-button b3-button--outline normal" data-i18n="normalBtn"></button>
+            </div>
+        </div>
+        <div class="fn__flex-1"></div>
+        <div class="notice fn__none emptyHint">
+            <span data-i18n="emptyHint"></span>
+        </div>
+        <label class="b3-label">
+            <div>
+                <span data-i18n="selectPath"></span>
+                <div class="b3-label__text" data-i18n="selectPathDesc"></div>
+            </div>
+            <div class="fn__flex-1"></div>
+            <button class="b3-button fn__flex-center choosePath" data-i18n="selectBtn"></button>
+        </label>
+        <label class="b3-label">
+            <div>
+                <span data-i18n="lang"></span>
+                <div class="b3-label__text" data-i18n-html="langDesc"></div>
+            </div>
+            <div class="fn__flex-1"></div>
+            <select class="b3-select lang">
+                <option value="ar">العربية</option>
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="he">עברית</option>
+                <option value="hi">हिन्दी</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="it">Italiano</option>
+                <option value="ja">日本語</option>
+                <option value="ko">한국어</option>
+                <option value="nl">Nederlands</option>
+                <option value="pl">Polski</option>
+                <option value="pt-BR">Português (Brasil)</option>
+                <option value="ru">Русский</option>
+                <option value="sk">Slovenčina</option>
+                <option value="th">ไทย</option>
+                <option value="tr">Türkçe</option>
+                <option value="uk">Українська</option>
+                <option value="zh-TW">繁體中文</option>
+                <option value="zh-CN">简体中文</option>
+            </select>
+        </label>
+        <div class="fn__flex-1"></div>
+        <div class="feedback">
+            <span>❤️ <a data-i18n-href="feedbackUrl" target="_blank" data-i18n="feedback"></a></span>
+            <span>🏘️ <a data-i18n-href="communityUrl" target="_blank" data-i18n="community"></a></span>
+            <span>🔖 <a data-i18n-href="downloadUrl" target="_blank" class="version"></a></span>
+        </div>
+        <div class="fn__flex-1"></div>
+    </div>
+</div>
+<svg class="svg" id="min" viewBox="0 0 32 32">
+    <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
+</svg>
+<svg class="svg" id="close" viewBox="0 0 32 32">
+    <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
+</svg>
+<div class="drag"></div>
+<script src="window.js"></script>
+<script>
+    const path = require("path")
+    const {ipcRenderer} = require("electron")
+
+    // 渲染可用工作空间列表
+    const wsRaw = decodeURIComponent(getSearch("workspaces"))
+    const wsList = wsRaw.split("\n").filter(item => "" !== item.trim())
+    let langData = applyLang(currentLang)
+    const renderWsList = () => {
+        const root = document.querySelector(".wsList")
+        root.innerHTML = ""
+        wsList.forEach(p => {
+            const div = document.createElement("div")
+            div.className = "ws-item"
+            const text = document.createElement("div")
+            text.className = "ws-text"
+            const name = document.createElement("div")
+            name.className = "ws-name"
+            name.textContent = path.basename(p)
+            const wsPath = document.createElement("div")
+            wsPath.className = "ws-path"
+            wsPath.textContent = p
+            text.appendChild(name)
+            text.appendChild(wsPath)
+            const btn = document.createElement("button")
+            btn.className = "b3-button ws-open"
+            btn.textContent = langData.open
+            btn.dataset.path = p
+            btn.addEventListener("click", () => {
+                ipcRenderer.send("siyuan-select-workspace", {
+                    workspace: p,
+                    lang: currentLang,
+                })
+            })
+            div.appendChild(text)
+            div.appendChild(btn)
+            root.appendChild(div)
+        })
+    }
+
+    const langSelect = document.querySelector(".lang")
+    langSelect.value = currentLang
+    document.querySelector(".version").textContent = `v${getSearch("v")}`
+    document.querySelector(".icon").src = decodeURIComponent(`${getSearch("icon")}`)
+    document.querySelector(".missing").textContent = decodeURIComponent(getSearch("missing"))
+
+    langSelect.addEventListener("change", (event) => {
+        langData = applyLang(event.target.value)
+        // 重新渲染列表项按钮文案
+        renderWsList()
+    })
+
+    initWindowChrome()
+
+    // 渲染进程崩溃恢复：显示安全模式选择，隐藏工作空间选择相关 UI
+    const isCrash = "1" === getSearch("crash")
+    const crashWorkspace = decodeURIComponent(getSearch("workspace"))
+    if (isCrash) {
+        document.querySelector(".wsPanel").classList.add("fn__none")
+        document.querySelector(".missing-tip").classList.add("fn__none")
+        document.querySelectorAll(".b3-label").forEach(item => item.classList.add("fn__none"))
+        const crashLogEl = document.querySelector(".crash-log")
+        const crashInfo = decodeURIComponent(getSearch("crashInfo"))
+        if (crashInfo) {
+            crashLogEl.textContent = crashInfo
+        } else {
+            crashLogEl.classList.add("fn__none")
+        }
+        document.querySelector(".crash-tip").classList.remove("fn__none")
+        document.querySelector(".safeMode").addEventListener("click", () => {
+            ipcRenderer.send("siyuan-select-workspace", {
+                workspace: crashWorkspace,
+                lang: currentLang,
+                safeMode: true,
+            })
+        })
+        document.querySelector(".normal").addEventListener("click", () => {
+            ipcRenderer.send("siyuan-select-workspace", {
+                workspace: crashWorkspace,
+                lang: currentLang,
+                safeMode: false,
+            })
+        })
+    } else if (0 < wsList.length) {
+        // 存在可用工作空间时渲染左列列表
+        renderWsList()
+    } else {
+        // 没有可用工作空间时隐藏左列，显示右列空提示
+        document.querySelector(".wsPanel").classList.add("fn__none")
+        document.querySelector(".emptyHint").classList.remove("fn__none")
+    }
+
+    document.querySelector(".choosePath").addEventListener("click", async () => {
+        const initPath = await chooseWorkspacePath(langData)
+        if (null === initPath) {
+            return
+        }
+        ipcRenderer.send("siyuan-select-workspace", {
+            workspace: initPath,
+            lang: currentLang,
+        })
+    })
+</script>
+</body>
+</html>

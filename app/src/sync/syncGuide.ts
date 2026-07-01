@@ -157,15 +157,19 @@ export const syncGuide = (app?: App) => {
         return;
     }
     if (window.siyuan.config.sync.provider === 0 && needSubscribe()) {
+        /// #if !MOBILE
         if (app) {
             openSetting(app, "sync");
         }
+        /// #endif
         showMessage(window.siyuan.languages._kernel[29].replaceAll("${accountServer}", getCloudURL("")));
         return;
     } else if (!isPaidUser()) {
+        /// #if !MOBILE
         if (app) {
             openSetting(app, "sync");
         }
+        /// #endif
         showMessage(window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL("")));
         return;
     }

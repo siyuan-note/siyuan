@@ -167,47 +167,67 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
     if (!header || !body || !expandIcon || !contractIcon) { return; }
     header.addEventListener("click", () => {
-        const isExpanded = body.classList.toggle("agent-chat__thinking-body--expanded");
-        expandIcon.classList.toggle("fn__none", isExpanded);
-        contractIcon.classList.toggle("fn__none", !isExpanded);
+        el.setAttribute("data-user-interacted", "true");
+        const isExpanded = body.classList.contains("agent-chat__thinking-body--expanded");
+        const isDone = el.classList.contains("agent-chat__msg--thinking-done");
+        if (isDone) {
+            // 思考完成后：两态 toggle（折叠↔完全展开），不经过预览中间态。
+            if (isExpanded) {
+                body.classList.remove("agent-chat__thinking-body--expanded");
+                expandIcon.classList.remove("fn__none");
+                contractIcon.classList.add("fn__none");
+            } else {
+                body.classList.remove("agent-chat__thinking-body--preview");
+                body.classList.add("agent-chat__thinking-body--expanded");
+                expandIcon.classList.add("fn__none");
+                contractIcon.classList.remove("fn__none");
+            }
+        } else {
+            // 流式中：三态循环（完全折叠 → 预览 → 完全展开 → 完全折叠）。
+            const isPreview = body.classList.contains("agent-chat__thinking-body--preview");
+            if (isExpanded) {
+                body.classList.remove("agent-chat__thinking-body--expanded");
+                expandIcon.classList.remove("fn__none");
+                contractIcon.classList.add("fn__none");
+            } else if (isPreview) {
+                body.classList.remove("agent-chat__thinking-body--preview");
+                body.classList.add("agent-chat__thinking-body--expanded");
+                expandIcon.classList.add("fn__none");
+                contractIcon.classList.remove("fn__none");
+            } else {
+                body.classList.add("agent-chat__thinking-body--preview");
+            }
+        }
     });
 };
 
 // 为容器内所有代码块（pre）和公式块（div[data-subtype=math]）注入复制按钮。
 export const addCopyButtons = (container: HTMLElement): void => {
-    // 代码块：复制 code 文本。
-    container.querySelectorAll("pre").forEach((pre) => {
-        if (pre.querySelector(".agent-chat__copy-btn")) {
-            return;
-        }
-        const btn = createCopyButton(() => {
-            const code = pre.querySelector("code");
-            return (code?.textContent || "").trimEnd().replace(/\n$/, "");
+    // 代码块复制 code 文本；公式块复制 data-content（KaTeX 渲染前的原始 LaTeX）。
+    const targets: Array<{ selector: string; getText: (el: HTMLElement) => string }> = [
+        {selector: "pre", getText: (el) => (el.querySelector("code")?.textContent || "").trimEnd().replace(/\n$/, "")},
+        {selector: '[data-subtype="math"]', getText: (el) => el.getAttribute("data-content") || ""}
+    ];
+    targets.forEach(({selector, getText}) => {
+        container.querySelectorAll<HTMLElement>(selector).forEach((block) => {
+            if (block.querySelector(".protyle-icon")) {
+                return;
+            }
+            const wrap = document.createElement("div");
+            wrap.className = "protyle-icons";
+            wrap.appendChild(createCopyButton(() => getText(block)));
+            block.appendChild(wrap);
         });
-        const wrap = document.createElement("div");
-        wrap.className = "agent-chat__copy-wrap";
-        wrap.appendChild(btn);
-        pre.appendChild(wrap);
-    });
-    // 公式块：复制 data-content（KaTeX 渲染前的原始 LaTeX）。
-    container.querySelectorAll<HTMLDivElement>('[data-subtype="math"]').forEach((mathBlock) => {
-        if (mathBlock.querySelector(".agent-chat__copy-btn")) {
-            return;
-        }
-        const btn = createCopyButton(() => mathBlock.getAttribute("data-content") || "");
-        const wrap = document.createElement("div");
-        wrap.className = "agent-chat__copy-wrap";
-        wrap.appendChild(btn);
-        mathBlock.appendChild(wrap);
     });
 };
 
 // 构建单个复制按钮，getText 返回要复制的文本。
 const createCopyButton = (getText: () => string): HTMLElement => {
     const btn = document.createElement("span");
-    btn.className = "agent-chat__copy-btn";
+    btn.className = "protyle-icon protyle-icon--only ariaLabel";
     btn.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
     btn.setAttribute("aria-label", window.siyuan.languages.copy);
+    btn.setAttribute("data-position", "4north");
     btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const text = getText();

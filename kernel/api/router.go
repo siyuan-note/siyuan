@@ -384,7 +384,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/template/renderSprig", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renderSprig)
 
 	ginServer.Handle("POST", "/api/transactions", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performTransactions)
-	ginServer.Handle("POST", "/api/transactions/undoState", model.CheckAuth, model.CheckReadonly, undoState)
+	ginServer.Handle("POST", "/api/transactions/undoState", model.CheckAuth, undoState)
 	ginServer.Handle("POST", "/api/transactions/undo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performUndo)
 	ginServer.Handle("POST", "/api/transactions/redo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performRedo)
 	ginServer.Handle("POST", "/api/transactions/clearHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearHistory)
@@ -535,6 +535,8 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckAdminRole, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckAdminRole, chatGPTWithAction)
+	ginServer.Handle("POST", "/api/ai/testModel", model.CheckAuth, model.CheckAdminRole, testModel)
+	ginServer.Handle("POST", "/api/ai/listModels", model.CheckAuth, model.CheckAdminRole, listModels)
 	ginServer.Handle("POST", "/api/ai/agent/chat", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChat)
 	ginServer.Handle("POST", "/api/ai/agent/confirm", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatConfirm)
 	ginServer.Handle("POST", "/api/ai/agent/question", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatQuestion)

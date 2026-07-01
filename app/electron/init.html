@@ -4,276 +4,19 @@
     <title>SiYuan</title>
     <meta charset="UTF-8">
     <meta name="color-scheme" content="light dark">
-    <style>
-        body {
-            margin: 0;
-            background-color: #fff;
-            text-align: center;
-            color: #222;
-            font-size: 16px;
-            font-family: BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", arial, "Microsoft Yahei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Twemoji Mozilla", "Android Emoji", "EmojiSymbols";
-        }
-
-        .fn__flex-column {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            margin: 0 auto;
-            min-height: 100vh;
-            box-sizing: border-box;
-            padding: 0 calc((100vw - 608px) * 0.3);
-        }
-
-        .fn__flex-1 {
-            flex: 1;
-            min-height: 32px;
-            flex-shrink: 0;
-            min-width: 8px;
-        }
-
-        h2 {
-            margin: 0 0 16px 0;
-            font-size: 28px;
-        }
-
-        .b3-select {
-            border-radius: 6px;
-            color: #222;
-            height: 28px;
-            width: 96px;
-            border: 0;
-            padding: 4px 26px 4px 8px;
-            box-sizing: border-box;
-            line-height: 20px;
-            transition: box-shadow 120ms 0ms cubic-bezier(0, 0, 0.2, 1), background-color 0.2s cubic-bezier(0, 0, 0.2, 1) 0ms;
-            font-size: 14px;
-            box-shadow: inset 0 0 0 0.6px rgba(0, 0, 0, .6);
-            background: url("data:image/svg+xml;utf8,<svg fill='rgba(0, 0, 0, .4)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #fff;
-            appearance: none;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .b3-select:focus {
-            box-shadow: inset 0 0 0 1px #3575f0, 0 0 0 3px rgba(53, 117, 240, .12);
-        }
-
-        .b3-button {
-            cursor: pointer;
-            color: #fff;
-            border-radius: 6px;
-            line-height: 20px;
-            padding: 4px 8px;
-            background-color: #3575f0;
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: box-shadow 280ms ease;
-            border: 0;
-            box-sizing: border-box;
-            text-align: center;
-            width: 96px;
-        }
-
-        .b3-button:hover, .b3-button:focus {
-            text-decoration: none;
-            box-shadow: 0 1px 2px 0 rgb(0 0 0 / .3), 0 1px 3px 1px rgb(0 0 0 /.15);
-        }
-
-        .b3-button:active {
-            box-shadow: 0 2px 3px 1px rgb(0 0 0 / .3), 0 2px 4px 2px rgb(0 0 0 /.15);
-        }
-
-        .b3-label {
-            padding: 16px 24px 0;
-            margin-bottom: 16px;
-            display: flex;
-            text-align: left;
-            box-shadow: 0 15px 0 0 #fff, 0 16px 0 0 #e0e0e0;
-        }
-
-        .b3-label__text {
-            color: rgba(0, 0, 0, .6);
-            font-size: 14px;
-            margin-top: 4px;
-            overflow: hidden;
-            line-height: 1.65;
-        }
-
-        .fn__flex-center {
-            align-self: center;
-        }
-
-        .svg {
-            position: fixed;
-            right: 32px;
-            top: 0;
-            width: 13px;
-            fill: rgba(0, 0, 0, .6);
-            padding: 9.5px;
-            cursor: pointer;
-            z-index: 1;
-        }
-
-        .svg:hover {
-            background: #dfe0e1;
-            fill: #222;
-        }
-
-        #close {
-            right: 0;
-            width: 10px;
-            padding: 11px 11px;
-        }
-
-        #close:hover {
-            background-color: #d23f31;
-            fill: #fff;
-        }
-
-        a {
-            text-decoration: none;
-            color: #3575f0;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        .fn__none {
-            display: none !important;
-        }
-
-        .slogan {
-            color: rgba(0, 0, 0, .6);
-            font-size: 15px;
-        }
-
-        .notice {
-            font-size: 14px;
-            color: rgba(0, 0, 0, .6);
-        }
-
-        .icon {
-            width: 96px;
-            margin: 0 auto 16px;
-        }
-
-        kbd {
-            font: 75% SFMono-Regular, Consolas, "Liberation Mono";
-            line-height: 1;
-            border-radius: 6px;
-            padding: 2px 4px;
-            color: rgba(0, 0, 0, .6);
-            vertical-align: middle;
-            background-color: #f6f6f6;
-            border: solid 1px #e0e0e0;
-            box-shadow: inset 0 -1px 0 #e0e0e0;
-        }
-
-        .feedback {
-            display: flex;
-            justify-content: space-around;
-            font-size: 14px
-        }
-
-        .drag {
-            -webkit-app-region: drag;
-            height: 32px;
-            cursor: pointer;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 64px;
-        }
-
-        .darwin #min,
-        .darwin #close {
-            display: none;
-        }
-
-        .darwin .drag {
-            right: 0;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #1e1e1e;
-                color: #dadada;
-            }
-
-            .b3-select {
-                color: #dadada;
-                box-shadow: inset 0 0 0 0.6px #9aa0a6;
-                background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #1e1e1e;
-            }
-
-            .b3-select:focus {
-                box-shadow: inset 0 0 0 1px #3573f0, 0 0 0 3px rgba(53, 115, 240, .24);
-            }
-
-            .b3-button {
-                background-color: #3573f0;
-            }
-
-            .b3-button:hover, .b3-button:focus {
-                box-shadow: 0 1px 2px 0 rgb(0 0 0 / .3), 0 1px 3px 1px rgb(255 255 255 /.15);
-            }
-
-            .b3-button:active {
-                box-shadow: 0 2px 3px 1px rgb(0 0 0 / .3), 0 2px 4px 2px rgb(255 255 255 /.15);
-            }
-
-            .b3-label {
-                box-shadow: 0 15px 0 0 #1e1e1e, 0 16px 0 0 #363636;
-            }
-
-            .b3-label__text {
-                color: #9aa0a6;
-            }
-
-            .svg {
-                fill: #9aa0a6;
-            }
-
-            .svg:hover {
-                background: rgba(255, 255, 255, .075);
-                fill: #dadada;
-            }
-
-            a {
-                color: #3573f0;
-            }
-
-            .slogan {
-                color: #9aa0a6;
-            }
-
-            .notice {
-                color: #9aa0a6;
-            }
-
-            kbd {
-                color: #9aa0a6;
-                background-color: #262626;
-                border: solid 1px rgba(230, 230, 230, .06);
-                box-shadow: inset 0 -1px 0 rgba(230, 230, 230, .06);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="window.css">
 </head>
 <body>
-<div id="zhCN" class="fn__flex-column">
+<div id="layout" class="fn__flex-column">
     <div class="fn__flex-1"></div>
     <img class="icon">
-    <h2>思源笔记</h2>
-    <div class="slogan">重构你的思维</div>
+    <h2 data-i18n="title"></h2>
+    <div class="slogan" data-i18n="slogan"></div>
     <div class="fn__flex-1"></div>
     <label class="b3-label">
         <div>
-            🌐 外观语言
-            <div class="b3-label__text">用户界面语言，后续可以在 <kbd>设置</kbd> - <kbd>外观</kbd> 中进行切换</div>
+            <span data-i18n="lang"></span>
+            <div class="b3-label__text" data-i18n-html="langDesc"></div>
         </div>
         <div class="fn__flex-1"></div>
         <select class="b3-select lang">
@@ -302,79 +45,20 @@
     </label>
     <label class="b3-label">
         <div>
-            🗂️ 工作空间
-            <div class="b3-label__text"> 工作空间用于存放数据，后续可以在顶栏左上角的主菜单中进行切换</div>
+            <span data-i18n="workspace"></span>
+            <div class="b3-label__text" data-i18n="workspaceDesc"></div>
         </div>
         <div class="fn__flex-1"></div>
-        <button class="b3-button fn__flex-center choosePath">选择</button>
+        <button class="b3-button fn__flex-center choosePath" data-i18n="selectBtn"></button>
     </label>
     <div class="fn__flex-1"></div>
     <div class="fn__flex-1 notice">
-        <span>⚠️ 请勿使用第三方同步盘同步数据，否则会导致运行异常和数据损坏</span>
+        <span data-i18n="notice"></span>
     </div>
     <div class="feedback">
-        <span>❤️ <a href="https://ld246.com/article/1649901726096" target="_blank">求助反馈建议</a></span>
-        <span>🏘️ <a href="https://ld246.com/article/1640266171309" target="_blank">用户社区汇总</a></span>
-        <span>🔖 <a href="https://b3log.org/siyuan/download.html" target="_blank" class="version"></a></span>
-    </div>
-    <div class="fn__flex-1"></div>
-</div>
-<div class="fn__none fn__flex-column" id="enUS">
-    <div class="fn__flex-1"></div>
-    <img class="icon">
-    <h2>SiYuan</h2>
-    <div class="slogan">Refactor your thinking</div>
-    <div class="fn__flex-1"></div>
-    <label class="b3-label">
-        <div>
-            🌐 Language
-            <div class="b3-label__text">User interface language, which can be switched later in <kbd>Settings</kbd> -
-                <kbd>Appearance</kbd>
-            </div>
-        </div>
-        <div class="fn__flex-1"></div>
-        <select class="b3-select lang">
-            <option value="ar">العربية</option>
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="he">עברית</option>
-            <option value="hi">हिन्दी</option>
-            <option value="id">Bahasa Indonesia</option>
-            <option value="it">Italiano</option>
-            <option value="ja">日本語</option>
-            <option value="ko">한국어</option>
-            <option value="nl">Nederlands</option>
-            <option value="pl">Polski</option>
-            <option value="pt-BR">Português (Brasil)</option>
-            <option value="ru">Русский</option>
-            <option value="sk">Slovenčina</option>
-            <option value="th">ไทย</option>
-            <option value="tr">Türkçe</option>
-            <option value="uk">Українська</option>
-            <option value="zh-TW">繁體中文</option>
-            <option value="zh-CN">简体中文</option>
-        </select>
-    </label>
-    <label class="b3-label">
-        <div>
-            🗂️ Workspace
-            <div class="b3-label__text">The workspace is used to store data, which can be switched later in the top bar
-                menu later
-            </div>
-        </div>
-        <div class="fn__flex-1"></div>
-        <button class="b3-button fn__flex-center choosePath">Select</button>
-    </label>
-    <div class="fn__flex-1"></div>
-    <div class="fn__flex-1 notice">
-        <span>⚠️ Do not use a third-party sync disk to sync data, otherwise it will cause abnormal operation and data damage</span>
-    </div>
-    <div class="feedback">
-        <span>❤️ <a href="https://liuyun.io/article/1686530886208" target="_blank">Support and Feedback</a></span>
-        <span>🏘️ <a href="https://liuyun.io/article/1687779743723" target="_blank">User community summary</a></span>
-        <span>🔖 <a href="https://b3log.org/siyuan/en/download.html" target="_blank" class="version"></a></span>
+        <span>❤️ <a data-i18n-href="feedbackUrl" target="_blank" data-i18n="feedback"></a></span>
+        <span>🏘️ <a data-i18n-href="communityUrl" target="_blank" data-i18n="community"></a></span>
+        <span>🔖 <a data-i18n-href="downloadUrl" target="_blank" class="version"></a></span>
     </div>
     <div class="fn__flex-1"></div>
 </div>
@@ -385,274 +69,33 @@
     <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
 </svg>
 <div class="drag"></div>
+<script src="window.js"></script>
 <script>
-    const isChinese = (lang) => {
-        return 'zh-CN' === lang || 'zh-TW' === lang
-    }
+    // 初始化启动
+    const langSelect = document.querySelector(".lang")
+    langSelect.value = currentLang
+    let langData = applyLang(currentLang)
 
-    const getSearch = (key) => {
-        if (window.location.search.indexOf('?') === -1) {
-            return ''
-        }
-        let value = ''
-        const data = window.location.search.split('?')[1].split('&')
-        data.find(item => {
-            const keyValue = item.split('=')
-            if (keyValue[0] === key) {
-                value = keyValue[1]
-                return true
-            }
-        })
-        return value
-    }
+    document.querySelector(".version").textContent = `v${getSearch("v")}`
+    document.querySelector(".icon").src = decodeURIComponent(`${getSearch("icon")}`)
 
-    let currentLang = decodeURIComponent(getSearch('lang'))
-    const setLang = (lang) => {
-        if (isChinese(lang)) {
-            document.title = `思源笔记 v${getSearch('v')}`
-            document.getElementById('zhCN').classList.remove('fn__none')
-            document.getElementById('enUS').classList.add('fn__none')
-        } else {
-            document.title = `SiYuan v${getSearch('v')}`
-            document.getElementById('zhCN').classList.add('fn__none')
-            document.getElementById('enUS').classList.remove('fn__none')
-        }
-        currentLang = lang
-    }
-    setLang(currentLang)
-
-    document.querySelectorAll('.version').forEach(item => {
-        item.textContent = `v${getSearch('v')}`
+    langSelect.addEventListener("change", (event) => {
+        langData = applyLang(event.target.value)
     })
 
-    document.querySelectorAll('.icon').forEach(item => {
-        item.src = decodeURIComponent(`${getSearch('icon')}`)
-    })
+    initWindowChrome()
 
-    document.querySelectorAll('.lang').forEach(item => {
-        item.value = currentLang
-        item.addEventListener('change', () => {
-            document.querySelectorAll('.lang').forEach(item1 => {
-                item1.value = item.value
-            })
-            setLang(item.value)
+    document.querySelector(".choosePath").addEventListener("click", async () => {
+        const {ipcRenderer} = require("electron")
+        const initPath = await chooseWorkspacePath(langData)
+        if (null === initPath) {
+            return
+        }
+        ipcRenderer.send("siyuan-first-init", {
+            workspace: initPath,
+            lang: langSelect.value,
         })
     })
-
-    if (process.platform === 'darwin') {
-        document.body.classList.add('darwin');
-    }
-
-    document.getElementById('close').addEventListener('click', () => {
-        const {ipcRenderer} = require('electron')
-        ipcRenderer.send('siyuan-first-quit')
-    })
-    document.getElementById('min').addEventListener('click', () => {
-        const {ipcRenderer} = require('electron')
-        ipcRenderer.send("siyuan-cmd", "minimize");
-    })
-
-    document.querySelectorAll('.choosePath').forEach((item) => {
-        item.addEventListener('click', async () => {
-            const path = require('path')
-            const fs = require('fs')
-
-            let defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "SiYuan")
-            if ("darwin" === process.platform) {
-                // Change the initial workspace path to ~/Library/Application Support/SiYuan on macOS https://github.com/siyuan-note/siyuan/issues/17095
-                defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "Library", "Application Support", "SiYuan")
-            }
-            if (!fs.existsSync(defaultWorkspace)) {
-                fs.mkdirSync(defaultWorkspace, {mode: 0o755, recursive: true})
-            }
-
-            const {ipcRenderer} = require('electron')
-            const result = await ipcRenderer.invoke("siyuan-get", {
-                cmd: "showOpenDialog",
-                defaultPath: defaultWorkspace,
-                properties: ['openDirectory', 'createDirectory'],
-            });
-
-            if (result.canceled) {
-                return
-            }
-            const initPath = result.filePaths[0]
-
-            if (isPartitionRootPath(initPath)) {
-                let msg = '⚠️ Do not create the workspace in the partition root path, please create a new folder as the workspace'
-                if (isChinese(currentLang)) {
-                    msg = '⚠️ 请勿在分区根路径上创建工作空间，请新建一个文件夹作为工作空间'
-                }
-                alert(msg)
-                return
-            }
-
-            if (!isWorkspaceDir(initPath) && !isEmptyDir(initPath)) {
-                let msg = '⚠️ This folder contains other files, please create a new folder as the workspace'
-                if (isChinese(currentLang)) {
-                    msg = '⚠️ 该文件夹包含了其他文件，请新建一个文件夹作为工作空间'
-                }
-                alert(msg)
-                return
-            }
-
-            if (isICloudPath(initPath)) {
-                let msg = '⚠️ This folder is under the iCloud sync path, please change another path'
-                if (isChinese(currentLang)) {
-                    msg = '⚠️ 该文件夹位于 iCloud 同步路径下，请更换其他路径'
-                }
-                alert(msg)
-                return
-            }
-
-            if (isCloudDrivePath(initPath)) {
-                let msg = '⚠️ The folder path can not contain onedrive, dropbox, google drive, pcloud, nutstore, baidunetdisk, weiyun,坚果云,百度网盘 and 腾讯微云, etc., please change another path'
-                if (isChinese(currentLang)) {
-                    msg = '⚠️ 文件夹路径不能包含 onedrive、dropbox、google drive、pcloud、nutstore、baidunetdisk、weiyun、坚果云、百度网盘和腾讯微云等字样，请更换其他路径'
-                }
-                alert(msg)
-                return
-            }
-            let msg = '⚠️ Please confirm that the workspace is not set under the path of a third-party sync disk, otherwise it will cause data damage (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.), continue?'
-            if (isChinese(currentLang)) {
-                msg = '⚠️ 请确认没有将工作空间设置在第三方同步盘路径下，否则会造成数据损坏（iCloud/OneDrive/Dropbox/Google Drive/坚果云/百度网盘/腾讯微云等），是否继续？'
-            }
-            if (!confirm(msg)) {
-                return
-            }
-            if (!fs.existsSync(initPath)) {
-                fs.mkdirSync(initPath, {mode: 0o755, recursive: true})
-            }
-            ipcRenderer.send('siyuan-first-init', {
-                workspace: initPath,
-                lang: document.querySelector('.lang').value
-            })
-        })
-    })
-
-    const isPartitionRootPath = (absPath) => {
-        const path = require('path')
-        const parsedPath = path.parse(absPath)
-        return parsedPath.root === absPath
-    }
-
-    const isEmptyDir = (absPath) => {
-        const fs = require('fs')
-        let files;
-        try {
-            files = fs.readdirSync(absPath).filter(file => file !== '.DS_Store')
-        } catch (err) {
-            return false
-        }
-        return 0 === files.length
-    }
-
-    const isWorkspaceDir = (absPath) => {
-        const path = require('path');
-        const fs = require('fs');
-        const conf = path.join(absPath, 'conf', 'conf.json');
-        let data;
-        try {
-            data = fs.readFileSync(conf, 'utf8');
-        } catch (err) {
-            return false;
-        }
-        return data.includes('kernelVersion');
-    }
-
-    const isCloudDrivePath = (absPath) => {
-        const absPathLower = absPath.toLowerCase()
-        return -1 < absPathLower.indexOf("onedrive") || -1 < absPathLower.indexOf("dropbox") ||
-            -1 < absPathLower.indexOf("google drive") || -1 < absPathLower.indexOf("pcloud") ||
-            -1 < absPathLower.indexOf("坚果云") || -1 < absPathLower.indexOf("nutstore") ||
-            -1 < absPathLower.indexOf("百度网盘") || -1 < absPathLower.indexOf("baidunetdisk") ||
-            -1 < absPathLower.indexOf("腾讯微云") || -1 < absPathLower.indexOf("weiyun");
-    }
-
-    const isICloudPath = (absPath) => {
-        const os = require('os')
-        if ('darwin' !== os.platform()) {
-            return false
-        }
-
-        // macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
-        const path = require('path')
-        const homePath = decodeURIComponent(getSearch('home'))
-        const absPathLower = absPath.toLowerCase()
-        const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
-        if (!simpleCheckIcloudPath(absPath, homePath)) {
-            // 简单判断无法通过则复杂验证
-            const allFiles = walk(iCloudRoot)
-            for (const file of allFiles) {
-                if (-1 < absPathLower.indexOf(file.toLowerCase())) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    // 简单判断 iCloud 同步目录
-    // 不允许 为桌面 文档 和 iCloud 文件夹 和软链接
-    const simpleCheckIcloudPath = (absPath, homePath) => {
-        const fs = require('fs')
-        let stat = fs.lstatSync(absPath)
-        if (stat.isSymbolicLink()) {
-            return false
-        }
-
-        const path = require('path')
-        const absPathLower = absPath.toLowerCase()
-        const iCloudRoot = path.join(homePath, 'Library', 'Mobile Documents')
-        if (absPathLower.startsWith(iCloudRoot.toLowerCase())) {
-            return false
-        }
-
-        const documentsRoot = path.join(homePath, 'Documents')
-        if (absPathLower.startsWith(documentsRoot.toLowerCase())) {
-            return false
-        }
-
-        const desktopRoot = path.join(homePath, 'Desktop')
-        if (absPathLower.startsWith(desktopRoot.toLowerCase())) {
-            return false
-        }
-        return true
-    }
-
-    const walk = (dir, files = []) => {
-        let dirFiles;
-        const fs = require('fs')
-        try {
-            if (!fs.existsSync(dir)) {
-                console.log("dir [" + dir + "] not exists")
-                return files
-            }
-            dirFiles = fs.readdirSync(dir)
-        } catch (e) {
-            console.error("read dir [" + dir + "] failed: ", e)
-            return files
-        }
-
-        const path = require('path')
-        for (const f of dirFiles) {
-            let stat = fs.lstatSync(dir + path.sep + f)
-            if (stat.isSymbolicLink()) {
-                files.push(fs.readlinkSync(dir + path.sep + f))
-                continue
-            }
-            if (stat.isDirectory()) {
-                // 如果已经遍历过则不再遍历
-                if (files.includes(dir + path.sep + f)) {
-                    continue
-                }
-                files.push(dir + path.sep + f)
-                walk(dir + path.sep + f, files)
-            }
-        }
-        return files
-    }
-
 </script>
 </body>
 </html>

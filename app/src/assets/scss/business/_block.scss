@@ -56,7 +56,7 @@
     flex-shrink: 0;
 
     &--menu {
-      background-color: var(--b3-menu-background);
+      background-color: var(--b3-theme-surface);
     }
 
     &:hover .block__icon:not([disabled]) {

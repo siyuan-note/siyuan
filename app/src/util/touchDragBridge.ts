@@ -26,6 +26,11 @@ const handleManualTouchStart = (e: TouchEvent) => {
     if (e.touches.length !== 1) return;
 
     const target = e.target as HTMLElement;
+    // 原生 <select> 下拉层由 WebView 以系统 overlay 绘制，合成 mousedown 会干扰其触摸序列导致下拉层闪退
+    // https://github.com/siyuan-note/siyuan/issues/17953
+    if (target.tagName === "SELECT" || target.tagName === "OPTION" || target.closest("select")) {
+        return;
+    }
     // All areas with manual mousedown/mousemove/mouseup drag/resize operations
     if (!target.closest(".dock") &&
         !target.closest(".b3-dialog") &&
@@ -286,8 +291,8 @@ const handleDragStart = (e: TouchEvent) => {
         isDragging: false,
         draggableElement: draggable,
         editorElement: null,
-        // File tree and gallery items need long-press to avoid conflict with scroll
-        requireLongPress: draggable.closest(".sy__file") !== null || draggable.closest(".av__gallery-item") !== null,
+        // File tree, gallery items and list actions need long-press to avoid conflict with scroll
+        requireLongPress: draggable.closest(".sy__file") !== null || draggable.closest(".av__gallery-item") !== null || draggable.closest(".protyle-action") !== null,
         touchStartTime: Date.now(),
         longPressCancelled: false,
     };
@@ -306,7 +311,7 @@ const handleDragMove = (e: TouchEvent) => {
             return;
         }
 
-        // File tree and gallery items: must hold still for 300ms, then drag.
+        // File tree, gallery items and list actions: must hold still for 300ms, then drag.
         // Moving before 400ms is a scroll — cancel drag entirely.
         if (dragState.requireLongPress) {
             if (dragState.longPressCancelled) {

@@ -5,7 +5,7 @@ import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
 import {getDocDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
-import {newFile} from "../../util/newFile";
+import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {MenuItem} from "../../menus/Menu";
 import {showMessage} from "../../dialog/message";
@@ -244,13 +244,7 @@ export class Files extends Model {
                         const pathString = target.parentElement.getAttribute("data-path");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile({
-                                    app: options.app,
-                                    notebookId,
-                                    currentPath: pathString,
-                                    useSavePath: false,
-                                    listDocTree: true,
-                                });
+                                newFileInTree(options.app, notebookId, pathString);
                             } else if (type === "more-root") {
                                 initNavigationMenu(options.app, target.parentElement).popup({
                                     x: event.clientX,
@@ -649,6 +643,7 @@ export class Files extends Model {
                     const toDocOptions: {
                         targetNoteBook: string;
                         pushMode: number;
+                        toTop?: boolean;
                         srcHeadingID?: string;
                         srcListItemID?: string;
                         targetPath?: string;
@@ -665,7 +660,10 @@ export class Files extends Model {
                         if (newElement.previousElementSibling) {
                             toDocOptions.previousPath = newElement.previousElementSibling.getAttribute("data-path");
                         } else {
-                            toDocOptions.targetPath = newElement.parentElement.previousElementSibling.getAttribute("data-path");
+                            // 拖到第一个子文档上方，作为父文档的第一个子文档 https://github.com/siyuan-note/siyuan/issues/17797
+                            const parentLi = newElement.parentElement.previousElementSibling as HTMLElement;
+                            toDocOptions.targetPath = parentLi.getAttribute("data-path");
+                            toDocOptions.toTop = true;
                         }
                     }
                     if (gutterTypes[0] === "nodeheading") {
@@ -920,8 +918,10 @@ export class Files extends Model {
             } else {
                 const hiddenElement = liElement.querySelector(".fn__hidden");
                 if (hiddenElement) {
+                    // 原先无子文档：显示展开箭头
                     hiddenElement.classList.remove("fn__hidden");
-                } else {
+                } else if (liElement.querySelector(".b3-list-item__arrow--open")) {
+                    // 父文档已展开：刷新子列表
                     this.getLeaf(liElement, notebookId, true);
                 }
                 break;
@@ -1295,13 +1295,7 @@ data-type="navigation-root" data-path="/">
             app: Constants.SIYUAN_APPID,
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
-                newFile({
-                    app: this.app,
-                    notebookId,
-                    currentPath: "/",
-                    useSavePath: false,
-                    listDocTree: true,
-                });
+                newFileInTree(this.app, notebookId, "/");
                 return;
             }
             this.onLsHTML(response.data);
@@ -1414,7 +1408,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     </span>
     <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
-    <span class="b3-list-item__text ariaLabel" data-position="parentE"
+    <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>

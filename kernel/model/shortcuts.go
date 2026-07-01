@@ -23,6 +23,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -202,10 +203,17 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	return
 }
 
+var consumeShorthandsLock = sync.Mutex{}
+
 func consumeShorthands() {
 	if !util.IsMobileContainer() {
 		return
 	}
+
+	// 消费速记涉及读取临时文件、创建/追加文档、删除临时文件等非原子操作，
+	// 启动同步、同步流程、定时任务都可能并发调用，这里串行化避免重复消费或丢失
+	consumeShorthandsLock.Lock()
+	defer consumeShorthandsLock.Unlock()
 
 	defer logging.Recover()
 
@@ -258,9 +266,5 @@ func consumeShorthands() {
 }
 
 func AutoConsumeShorthandsJob() {
-	if Conf.Sync.Enabled {
-		return
-	}
-
 	consumeShorthands()
 }

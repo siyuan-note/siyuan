@@ -2,12 +2,13 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName,
-    hasTopClosestByClassName, isInEmbedBlock,
+    hasTopClosestByClassName,
+    isInEmbedBlock,
 } from "../../protyle/util/hasClosest";
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur} from "./keyboardToolbar";
-import {isChromeBrowser, isIPhone} from "../../protyle/util/compatibility";
+import {isChromeBrowser, isInAndroid, isInHarmony, isIPhone} from "../../protyle/util/compatibility";
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
@@ -42,19 +43,29 @@ const clearLongPress = () => {
     }
 };
 
+export const handleTouchUp = () => {
+    if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
+        clearLongPress();
+    }
+};
+
 export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
     const editor = getCurrentEditor();
+    if (!isInHarmony() && !isInAndroid()) {
+        handleTouchUp();
+    }
     if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {
-                clearLongPress();
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;
             }
             // 多选模式
+            window.getSelection()?.removeAllRanges();
+            activeBlur();
             const blockElement = hasClosestBlock(target);
             if (blockElement) {
                 // 本次按压已在按住期间触发多选，松手时不切换选中态，仅消费该手势
@@ -85,9 +96,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
             event.preventDefault();
             return;
         }
-        clearLongPress();
     }
-
     if (typeof yDiff === "undefined" && window.siyuan.mobile.editor?.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {
@@ -252,8 +261,7 @@ export const handleTouchStart = (event: TouchEvent) => {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
             longPressTimer = window.setTimeout(() => {
-                // 清空系统文本选区，避免原生长按选中的残留
-                window.getSelection().removeAllRanges();
+                window.getSelection()?.removeAllRanges();
                 activeBlur();
                 editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
             }, Constants.TIMEOUT_MULTIPLE_SELECT);

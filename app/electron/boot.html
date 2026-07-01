@@ -16,18 +16,128 @@
             font-size: 12px;
             font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
         }
+
+        #bg {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            height: 100%;
+        }
+
+        #bg svg {
+            width: 24vh;
+            height: 24vh;
+            align-self: center;
+        }
+
+        /* 斜向发光光带：内核进度到 15% 时由 .started 触发，从屏幕四周汇聚飞向 logo 区域，到位后淡出 */
+        #bg svg .streak {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        #bg svg.started .streak {
+            animation: bootStreakConverge 2.5s cubic-bezier(0.33, 0, 0.2, 1) var(--delay, 0s) forwards,
+                       bootStreakFade 0.85s ease 2.2s forwards;
+        }
+
+        @keyframes bootStreakConverge {
+            0% {
+                opacity: 0;
+                transform: translate(var(--dx, 0), var(--dy, 0));
+            }
+            20% {
+                opacity: 0.9;
+            }
+            100% {
+                opacity: 0.9;
+                transform: translate(0, 0);
+            }
+        }
+
+        @keyframes bootStreakFade {
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* logo 碎片成型：光带汇聚末期柔和浮现，之后静止 */
+        #bg svg .logo path {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+            transform: scale(0.94);
+        }
+
+        #bg svg.started .logo path {
+            animation: bootLogoForm 1s cubic-bezier(0.22, 1, 0.36, 1) 2.1s forwards;
+        }
+
+        @keyframes bootLogoForm {
+            0% {
+                opacity: 0;
+                transform: scale(0.94);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* 底部进度区，预留安全区域防止移动端手势条遮挡 */
+        #progressWrap {
+            position: absolute;
+            bottom: env(safe-area-inset-bottom);
+            width: 100%;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #progressTrack {
+            position: absolute;
+            height: 2px;
+            background-color: #2a2c2f;
+            width: 100%;
+            top: 0;
+        }
+
+        #progress {
+            position: absolute;
+            height: 2px;
+            background-color: #3b3e43;
+            box-shadow: 0 0 8px rgba(59, 62, 67, 0.6);
+            transition: width 0.6s cubic-bezier(0, 0, 0.2, 1);
+            top: 0;
+            width: 0;
+        }
+
+        #details {
+            color: #9aa0a6;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            padding: 8px;
+            height: 16px;
+            line-height: 16px;
+        }
     </style>
 </head>
 <body>
-<div id="bg" style="width: 100%;display: flex;justify-content: space-around;height: 100%;">
-    <img style="width:36vh;align-self: center;" src="icon.png"/>
+<div id="bg">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+        <g class="streaks"></g>
+        <g class="logo">
+            <path fill="#d23f31" d="M37.052 371.676l269.857-269.857v550.507l-269.857 269.857z"></path>
+            <path fill="#3b3e43" d="M306.909 101.818l205.091 205.091v550.507l-205.091-205.091z"></path>
+            <path fill="#d23f31" d="M512 306.909l205.091-205.091v550.507l-205.091 205.091z"></path>
+            <path fill="#3b3e43" d="M717.091 101.818l269.857 269.857v550.507l-269.857-269.857z"></path>
+        </g>
+    </svg>
 </div>
-<div style="position: absolute;bottom: 0;width: 100%;">
-    <div style="position: absolute;height: 1px;background-color: #3b3e43;width: 100%;top:0"></div>
-    <div id="progress"
-         style="position: absolute;height: 1px;background-color: #d23f31;transition: width 50ms cubic-bezier(0, 0, 0.2, 1);top:0"></div>
-    <div id="details"
-         style="color: #9aa0a6;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;padding: 8px;height: 16px;line-height: 16px;"></div>
+<div id="progressWrap">
+    <div id="progressTrack"></div>
+    <div id="progress"></div>
+    <div id="details"></div>
 </div>
 <script>
     const getSearch = (key) => {
@@ -47,7 +157,104 @@
     }
     (async () => {
         const v = getSearch('v')
-        document.getElementById('details').textContent = "v" + v + ' Booting kernel...'
+        const port = getSearch('port') || '6806'
+        const progressEl = document.getElementById('progress')
+        const detailsEl = document.getElementById('details')
+        detailsEl.textContent = "v" + v + ' Booting kernel...'
+
+        // 随机起始基数（15~25），等待内核进度时先平滑填充到此值
+        const baseProgress = 15 + Math.random() * 10
+
+        // 生成斜向发光光带，沿 logo 折页的斜边排布，汇聚到位时勾勒出 logo 形状
+        const streaksG = document.querySelector("#bg svg .streaks");
+        if (streaksG) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const edges = [
+                {x1: 37, y1: 372, x2: 307, y2: 102, color: "#d23f31"},
+                {x1: 37, y1: 922, x2: 307, y2: 652, color: "#d23f31"},
+                {x1: 307, y1: 102, x2: 512, y2: 307, color: "#3b3e43"},
+                {x1: 307, y1: 652, x2: 512, y2: 857, color: "#3b3e43"},
+                {x1: 512, y1: 307, x2: 717, y2: 102, color: "#d23f31"},
+                {x1: 512, y1: 857, x2: 717, y2: 652, color: "#d23f31"},
+                {x1: 717, y1: 102, x2: 987, y2: 372, color: "#3b3e43"},
+                {x1: 717, y1: 652, x2: 987, y2: 922, color: "#3b3e43"},
+            ];
+            const perEdge = 12;
+            edges.forEach((e) => {
+                for (let i = 0; i < perEdge; i++) {
+                    const t = (i + 0.5) / perEdge + (Math.random() - 0.5) * 0.08;
+                    const ex = e.x1 + (e.x2 - e.x1) * t;
+                    const ey = e.y1 + (e.y2 - e.y1) * t;
+                    const len = 60 + Math.random() * 80;
+                    const ux = (e.x2 - e.x1);
+                    const uy = (e.y2 - e.y1);
+                    const ul = Math.sqrt(ux * ux + uy * uy);
+                    const sx = ex - ux / ul * len;
+                    const sy = ey - uy / ul * len;
+                    const line = document.createElementNS(svgNS, "line");
+                    line.setAttribute("x1", sx);
+                    line.setAttribute("y1", sy);
+                    line.setAttribute("x2", ex);
+                    line.setAttribute("y2", ey);
+                    line.setAttribute("stroke", e.color);
+                    line.setAttribute("stroke-width", 3 + Math.random() * 3);
+                    line.setAttribute("stroke-linecap", "round");
+                    line.setAttribute("class", "streak");
+                    line.style.filter = "drop-shadow(0 0 4px rgba(210,63,49,.5))";
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 600 + Math.random() * 800;
+                    line.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+                    line.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+                    line.style.setProperty("--delay", (Math.random() * 0.6) + "s");
+                    streaksG.appendChild(line);
+                }
+            });
+        }
+
+        // 当前进度只增不减，避免内核首帧进度小于初始基数时进度条倒退回 0
+        let currentDisplay = 0
+        const bgSvg = document.querySelector("#bg svg")
+        const setProgress = (target) => {
+            if (target > currentDisplay) {
+                currentDisplay = target
+                progressEl.style.width = target + '%'
+                // 显示进度达到 15% 时触发 logo 汇聚动画
+                if (bgSvg && !bgSvg.classList.contains("started") && currentDisplay >= 15) {
+                    bgSvg.classList.add("started")
+                }
+            }
+        }
+        // 先平滑填充到随机基数，延迟两帧确保浏览器先渲染 width:0 再触发过渡
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setProgress(baseProgress)
+            })
+        })
+
+        let progressing = false
+        const subscribe = () => {
+            const es = new EventSource('http://127.0.0.1:' + port + '/api/system/bootProgressSSE')
+            es.onmessage = (event) => {
+                const progressData = JSON.parse(event.data)
+                // 内核进度按比例映射到 baseProgress~100 区间，从当前显示值继续递增
+                const display = baseProgress + progressData.progress * (100 - baseProgress) / 100
+                setProgress(display)
+                detailsEl.textContent = progressData.details
+                if (progressData.progress >= 100) {
+                    progressing = true
+                    es.close()
+                }
+            }
+            es.onerror = () => {
+                es.close()
+                // 内核启动早期 HTTP 服务可能尚未就绪，EventSource 原生重连间隔较长（约 3s），
+                // 这里主动短延迟重连，保持与原轮询一致的快速重试语义
+                if (!progressing) {
+                    setTimeout(subscribe, 100)
+                }
+            }
+        }
+        subscribe()
     })()
 </script>
 </body>

@@ -58,6 +58,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Modify: block.update replaces ONE block's content with new markdown — it does NOT create or append new blocks. To both modify and add, call block.update first, then block.append/prepend/insert as separate calls.
 - Organize: document.move (full document), document.rename (title), block.move (single content block), document.delete.
 - Attributes: attr.get/set on any block. Database/attribute views: database.item_add (rows), database.key_add (columns), database.render (view). Create database blocks via database tools, never via the file tool.
+- Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 
 ## Response Guidelines
 - Reply in the user's language. When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
@@ -66,6 +67,20 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Use markdown; for code blocks always specify the language (e.g. python, go); use $...$ for inline and $...$ for block formulas.
 - Refer to the product as "SiYuan", never "SiYuan Note".
 - Do not fabricate. If unknown or not found in the notes, say so honestly and search/verify before claiming facts.
+
+## Formatting
+- Inline formatting uses standard markdown: **bold**, *italic*, ~~strikethrough~~, ==mark==, and "code" (backticks).
+- For text styling that markdown cannot express (color, background, font size), use SiYuan text marks.
+  The syntax requires a leading data-type="text" attribute — WITHOUT it the HTML is escaped and shown as literal text:
+  - Text color:      <span data-type="text" style="color: #ff0000;">red text</span>
+  - Background:      <span data-type="text" style="background-color: #ffff00;">highlighted</span>
+  - Font size:       <span data-type="text" style="font-size: 18px;">larger text</span>
+  - Multiple CSS props: <span data-type="text" style="color: #ff0000; font-size: 18px;">red and large</span>
+- To also apply a markdown mark (bold/italic), list multiple types in data-type (note: this is about marking types, not CSS):
+  <span data-type="text strong" style="color: #ff0000;">bold red</span> (text + bold)
+  <span data-type="text em" style="background-color: #ffff00;">italic highlighted</span>
+- NEVER write a bare <span style="..."> without data-type — it will render as escaped literal text.
+- Prefer standard markdown (such as **bold**) when no color/size is needed.
 
 ## SiYuan User Guide
 SiYuan has a built-in user guide notebook documenting all features. IDs by language: 简体中文 "20210808180117-czj9bvb", 繁體中文 "20211226090932-5lcq56f", 日本語 "20240530133126-axarxgx", others "20210808180117-6v0mkxr".
@@ -108,8 +123,13 @@ const (
 )
 
 // toolSignatureKeys 列出各工具里真正"区分一次调用"的关键参数。
-// 这些参数会并入死循环签名，避免 agent 对不同 url/query/sql 的合法连续调用被误判；
+// 这些参数会并入死循环签名，避免 agent 对不同 url/query/id 的合法连续调用被误判；
 // 同时对同一参数反复调用（真死循环）仍能正确触发终止。
+//
+// 选键原则：只纳入稳定的"目标标识符"类参数（id/ids/path/label/name/keyword/notebook/url 等），
+// 不纳入易变的"内容值"类参数（data/markdown/content/value/memo/title 等）。
+// 此外，object/array 类参数（如 attr 的 attrs、block 的 items）经 fmt.Sprint 字符串化后
+// 顺序不稳定（map 迭代无序），会削弱签名稳定性，故一律排除。
 var toolSignatureKeys = map[string][]string{
 	"web_fetch":    {"url", "format"},
 	"web_search":   {"query"},
@@ -117,10 +137,28 @@ var toolSignatureKeys = map[string][]string{
 	"sql":          {"sql", "stmt"},
 	"search":       {"query", "keyword"},
 	"outline":      {"id", "doc_id"},
-	"system":       {"action"},
-	"workspace":    {"action"},
-	"sync":         {"action"},
-	"todo_write":   {"todos"},
+
+	"attr":      {"id", "ids"},
+	"block":     {"id", "ids", "parentID", "nextID", "previousID"},
+	"document":  {"id", "path", "notebook", "keyword"},
+	"database":  {"id", "keyID", "itemID", "itemIDs", "keyword"},
+	"ref":       {"id", "keyword"},
+	"notebook":  {"id", "name"},
+	"tag":       {"label", "old", "new", "keyword"},
+	"bookmark":  {"label", "old", "new"},
+	"dailynote": {"notebook"},
+	"template":  {"id", "path", "name", "keyword"},
+	"history":   {"path", "notebook", "query"},
+	"repo":      {"id", "left", "right", "name", "keyword"},
+	"asset":     {"id", "path"},
+	"import":    {"notebook", "path"},
+	"export":    {"id"},
+	"skill":     {"name", "url"},
+
+	"system":     {"action"},
+	"workspace":  {"action"},
+	"sync":       {"action"},
+	"todo_write": {"todos"},
 }
 
 // buildDoomSignature 用 toolName + action + 关键参数构造死循环签名。
@@ -187,9 +225,12 @@ func FrontendToolResult(callID string, result string, isError bool) {
 }
 
 func sendEvent(ch chan<- AgentEvent, ev AgentEvent) {
+	// 仍用非阻塞发送，避免 SSE 消费端卡住时拖死 agent 主循环；缓冲已加大以降低背压概率。
+	// 仅在确实丢弃（背压）时记日志，便于诊断长会话偶发丢字。
 	select {
 	case ch <- ev:
 	default:
+		logging.LogWarnf("agent event dropped (type=%s): SSE consumer too slow", ev.Type)
 	}
 }
 
@@ -314,7 +355,7 @@ type agentCheckpoint struct {
 }
 
 func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
-	ch := make(chan AgentEvent, 100)
+	ch := make(chan AgentEvent, 256)
 
 	go func() {
 		defer close(ch)
@@ -329,6 +370,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.MCP.Servers)
 		}
 
+		// 变量（非敏感）在用户消息注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
+		// 在此统一解析一次，后续 checkpoint 与消息重建均使用解析后的值，保证全链路一致。
+		userMessage = kernelModel.Conf.Variables.Resolve(userMessage)
+
 		tools := convertMCPToolsToOpenAI()
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
@@ -339,7 +384,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var doomLoop doomLoopTracker
 		var compactCount int
 		var snapshotIDs []string
+		snapshotCreated := false // 整个 AgentChat 过程最多打一次自动快照，避免多轮工具调用时每轮都打
 		var roundsSinceCheckpoint int
+		var pendingCheckpoints sync.WaitGroup // 跟踪挂起的中途异步 checkpoint，保证最终落盘前全部完成
+		// finalCheckpoint 先等待所有挂起的中途异步 checkpoint 完成，再做最终的同步落盘，
+		// 确保旧的异步数据不会在最终 checkpoint 之后写入而覆盖新数据。
+		finalCheckpoint := func() {
+			pendingCheckpoints.Wait()
+			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+		}
 
 		if sessionID != "" {
 			if cp := loadCheckpoint(sessionID); cp != nil {
@@ -423,7 +476,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				}
 				logging.LogErrorf("agent API request failed: %s", streamErr.Error())
 				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
-				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+				finalCheckpoint()
 				return
 			}
 
@@ -443,7 +496,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					if content != "" || reasoningBuilder.String() != "" {
 						checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
 					}
-					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+					finalCheckpoint()
 					stream.Close()
 					return
 				}
@@ -533,7 +586,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				checkpointMsgs = append(checkpointMsgs, checkpointMsg)
 				assistantIdx := len(checkpointMsgs) - 1
 
-				snapshotCreated := false
 				for i, tc := range aggregatedToolCalls {
 					args := parsedArgs[i]
 					action := ""
@@ -586,7 +638,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								})
 								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: cancelMsg})
 							}
-							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+							finalCheckpoint()
 							return
 						case <-time.After(confirmTimeout):
 							confirmChannelsMu.Lock()
@@ -643,7 +695,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								})
 								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: abortMsg})
 							}
-							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+							finalCheckpoint()
 							return
 						}
 						snapshotIDs = append(snapshotIDs, id)
@@ -710,13 +762,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				if doomLoop.count >= doomLoopStopThreshold {
 					errMsg := "Repetitive tool calls detected: '" + doomLoop.prevName + "' called " + fmt.Sprintf("%d", doomLoop.count) + " times with the same action. Operation terminated."
 					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
-					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+					finalCheckpoint()
 					return
 				}
 
 				roundsSinceCheckpoint++
 				if roundsSinceCheckpoint >= 3 {
-					saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+					// 流式中途的兜底 checkpoint 改为异步写盘，避免随会话增长的全文件重写阻塞 agent 主循环。
+					// 出错/取消/done 时的 checkpoint 仍为同步调用，确保最终状态可靠落盘。
+					saveCheckpointAsync(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow, &pendingCheckpoints)
 					roundsSinceCheckpoint = 0
 				}
 				continue
@@ -726,7 +780,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			if content != "" {
 				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
 			}
-			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+			finalCheckpoint()
 			if content == "" {
 				content = " "
 			}
@@ -742,7 +796,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		}
 
 		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
-		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
+		finalCheckpoint()
 		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
 	}()
 
@@ -954,7 +1008,7 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 
 	sb.WriteString("\n\n")
 	sb.WriteString("## Skill Management\n")
-	sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"remove\", \"rename\" (name + new_name), \"list\".")
+	sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"install\" (download & install a skill from a remote source — pass url; accepts 'owner/repo' shorthand like Tencent/WeChatReading, a full GitHub URL, a raw SKILL.md URL, or a release zip URL; installed globally), \"remove\", \"rename\" (name + new_name), \"list\". When the user says \"install xxx skill\" or pastes a command like \"npx skills add owner/repo -g\", extract the owner/repo and call skill.install.")
 
 	sb.WriteString("\n\nReply in ")
 	sb.WriteString(util.I18nTerm(language, "_label"))
@@ -1228,11 +1282,46 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 	return entries
 }
 
+// checkpointMu 串行化对 session.json 的 read-modify-write，避免同步与异步 checkpoint 并发写时丢数据。
+var checkpointMu sync.Mutex
+
 func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
 	if sessionID == "" || !isValidSessionID(sessionID) {
 		return
 	}
+	checkpointMu.Lock()
+	defer checkpointMu.Unlock()
+	writeCheckpointLocked(sessionID, messages, promptTokens, completionTokens, startTime, snapshotIDs, alwaysAllow)
+}
 
+// saveCheckpointAsync 在独立 goroutine 中执行写盘，不阻塞 agent 主循环（用于流式中途的兜底 checkpoint）。
+// messages 会被深拷贝，避免与主循环的 append 产生数据竞争；写盘仍经 checkpointMu 串行化。
+// wg 用于在最终落盘（saveCheckpoint）前等待所有挂起的中途 checkpoint 完成，避免旧数据覆盖新数据。
+func saveCheckpointAsync(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool, wg *sync.WaitGroup) {
+	if sessionID == "" || !isValidSessionID(sessionID) {
+		return
+	}
+	// 深拷贝 messages：主循环会持续 append/替换 checkpointMsgs，异步读需隔离。
+	snap := make([]AgentMessage, len(messages))
+	copy(snap, messages)
+	snapshotIDsCopy := append([]string(nil), snapshotIDs...)
+	var alwaysAllowCopy map[string]bool
+	if alwaysAllow != nil {
+		alwaysAllowCopy = make(map[string]bool, len(alwaysAllow))
+		for k, v := range alwaysAllow {
+			alwaysAllowCopy[k] = v
+		}
+	}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		checkpointMu.Lock()
+		defer checkpointMu.Unlock()
+		writeCheckpointLocked(sessionID, snap, promptTokens, completionTokens, startTime, snapshotIDsCopy, alwaysAllowCopy)
+	}()
+}
+
+func writeCheckpointLocked(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
 	cp := agentCheckpoint{
 		ID:               sessionID,
 		Title:            "AI Agent",

@@ -466,6 +466,11 @@ export const bindEditEvent = (options: {
                     blockID: options.blockID
                 });
                 (options.menuElement.querySelector('[data-type="addOption"]') as HTMLInputElement).focus();
+                // 添加选项后面板增高，需按首次锚点重新定位（sticky 锁底部，顶部上移避免溢出视口）
+                const prevTop = parseFloat(options.menuElement.dataset.positionTop);
+                if (!isNaN(prevTop)) {
+                    setPosition(options.menuElement, parseFloat(options.menuElement.dataset.positionX), prevTop, 0, 0, true);
+                }
             }
         });
     }

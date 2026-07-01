@@ -15,7 +15,8 @@ import {getLute} from "../../../protyle/render/setLute";
 import {setPanelFocus} from "../../util";
 import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
-import {fetchPost} from "../../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../../util/fetch";
+import {Constants} from "../../../constants";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
@@ -56,7 +57,7 @@ type SessionEntry =
     timestamp?: number
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string })
-    | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string })
+    | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string; answers?: string[] })
     | (EntryBase & { type: "snapshot"; snapshotID: string })
     | (EntryBase & { type: "rollback"; snapshotID: string });
 
@@ -227,15 +228,15 @@ export class AgentChat extends Model {
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
             '<span class="fn__flex-1"></span>' +
-            '<span class="agent-chat__tokens fn__none" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
+            '<span class="agent-chat__tokens fn__none b3-button b3-button--icon b3-button--cancel" aria-label="' + (L.tokenUsage || "Context Usage") + '">' +
             '<svg viewBox="0 0 24 24">' +
             '<circle class="agent-chat__tokens-track" cx="12" cy="12" r="9" stroke-width="3"></circle>' +
             '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
             "</svg>" +
             "</span>" +
-            '<select class="agent-chat__model-select b3-select" tabindex="0"></select>' +
-            '<button class="agent-chat__send b3-button b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
-            '<button class="agent-chat__stop b3-button b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
+            '<select class="b3-select b3-select--noborder" tabindex="0"></select>' +
+            '<button class="agent-chat__send b3-button b3-button--icon b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
+            '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
             '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
@@ -249,7 +250,7 @@ export class AgentChat extends Model {
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
-        this.modelSelect = panel.querySelector(".agent-chat__model-select") as HTMLSelectElement;
+        this.modelSelect = panel.querySelector(".b3-select") as HTMLSelectElement;
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             if (this.programmaticScroll) {
@@ -281,6 +282,8 @@ export class AgentChat extends Model {
             // 内容变化时刷新发送按钮可用性（含用户输入、IME、程序化 clear 等所有 doc 变更）。
             this.updateSendButtonState();
         });
+        // 支持从编辑器块标或文档面板拖拽块到输入框，效果等同于 @ 引用。
+        this.bindComposerDragDrop();
         this.sessionPanel = new AgentSessionPanel(
             this.sessionMenuBtn,
             this.parent.panelElement,
@@ -327,6 +330,65 @@ export class AgentChat extends Model {
         }
     }
 
+    // 绑定输入框的块拖拽：从编辑器块标或文档面板拖拽块到输入框，插入 @ 引用（mention chip）。
+    // 与 @ 搜索的 label 来源一致——用 getRefText API 按 block ID 查询引用文本。
+    private bindComposerDragDrop() {
+        this.composerHost.addEventListener("dragover", (e: DragEvent) => {
+            if (!e.dataTransfer) { return; }
+            // 仅接受块标拖拽（SIYUAN_DROP_GUTTER）和文档面板拖拽（SIYUAN_DROP_FILE）。
+            let canDrop = false;
+            for (const type of e.dataTransfer.types) {
+                if (type.startsWith(Constants.SIYUAN_DROP_GUTTER) || type === Constants.SIYUAN_DROP_FILE) {
+                    canDrop = true;
+                    break;
+                }
+            }
+            if (canDrop) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "copy";
+            }
+        });
+        this.composerHost.addEventListener("drop", async (e: DragEvent) => {
+            if (!e.dataTransfer || !this.composer) { return; }
+            const blockIds: string[] = [];
+            // 块标拖拽：从 MIME type key 提取所有 block ID（gutterTypes[2]）。
+            for (const type of e.dataTransfer.types) {
+                if (type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                    const gutterTypes = type.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
+                    const ids = (gutterTypes[2] || "").split(",").filter(Boolean);
+                    blockIds.push(...ids);
+                    break;
+                }
+            }
+            // 文档面板拖拽：数据值是逗号分隔的 doc ID，全部收集。
+            if (blockIds.length === 0) {
+                const fileData = e.dataTransfer.getData(Constants.SIYUAN_DROP_FILE);
+                if (fileData) {
+                    blockIds.push(...fileData.split(",").filter(Boolean));
+                }
+            }
+            if (blockIds.length === 0) { return; }
+            e.preventDefault();
+            e.stopPropagation();
+            // 用 getRefText API 并行获取每个块的引用文本作为 label（与 @ 搜索一致），
+            // 失败时回退到 blockId。
+            const mentions: Array<{id: string; label: string}> = [];
+            await Promise.all(blockIds.map(async (id) => {
+                let label = id;
+                try {
+                    const resp = await fetchSyncPost("/api/block/getRefText", {id});
+                    if (resp && resp.data) {
+                        label = resp.data;
+                    }
+                } catch {
+                    label = id;
+                }
+                mentions.push({id, label});
+            }));
+            this.composer.insertMentions(mentions);
+        });
+    }
+
     // 从 window.siyuan.config.ai 重新计算可用模型列表，幂等可重复调用。
     // 与后端 HasAnyProvider()/GetModel() 判定一致：provider 需 enabled 且 apiKey 非空，model 需 enabled。
     // 零模型时显式置空 selectedModel（避免 undefined 透传到后端），失效选择自动重置。
@@ -365,10 +427,10 @@ export class AgentChat extends Model {
             const placeholder = window.siyuan.languages.noModelConfigured || "No model configured";
             html = '<option value="" selected>' + escapeHtml(placeholder) + "</option>";
             this.modelSelect.innerHTML = html;
-            this.modelSelect.classList.add("agent-chat__model-select--empty");
+            this.modelSelect.disabled = true;
             return;
         }
-        this.modelSelect.classList.remove("agent-chat__model-select--empty");
+        this.modelSelect.disabled = false;
         for (const o of this.modelOptions) {
             html += '<option value="' + escapeHtml(o.id) + '">' + escapeHtml(o.name) + "</option>";
         }
@@ -569,10 +631,12 @@ export class AgentChat extends Model {
         });
         this.newSessionBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
+            setPanelFocus(this.parent.panelElement);
             this.createSession();
         });
         this.sessionMenuBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
+            setPanelFocus(this.parent.panelElement);
             this.sessionPanel.toggle();
         });
 
@@ -604,7 +668,7 @@ export class AgentChat extends Model {
             if (t.closest(".agent-session-popup")) {
                 return;
             }
-            if (t.closest(".agent-chat__model-select")) {
+            if (t.closest(".b3-select")) {
                 return;
             }
             if (this.composer) {
@@ -617,35 +681,9 @@ export class AgentChat extends Model {
     }
 
     private async initSessions() {
-        const list = await SessionStore.init();
-        if (list.length > 0) {
-            list.sort((a, b) => b.createdAt - a.createdAt);
-            const last = list[0];
-            const session = await SessionStore.load(last.id);
-            if (session) {
-                this.sessionId = session.id;
-                this.sessionCreatedAt = session.createdAt || Date.now();
-                this.sessionTitle = session.title;
-                this.entries = this.buildEntriesFromSession(session);
-                this.hasTitled = session.titled !== false;
-                this.contextTokens = session.contextTokens ?? 0;
-                this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
-                this.contextCachedTokens = session.contextCachedTokens ?? 0;
-                this.contextLimit = session.contextLimit ?? 0;
-                if (session.model) {
-                    this.applySessionModelIfValid(session.model);
-                }
-                if (this.composer) {
-                    this.composer.restoreHistory(session.messageHistory || []);
-                }
-                this.titleElement.textContent = session.title;
-                this.updateTokenDisplay();
-                this.renderLoadedSession(session);
-                this.rebuildNavMarkers();
-                this.scrollToBottom(true);
-                return;
-            }
-        }
+        // 启动时始终进入新会话界面（欢迎页），不自动加载上次会话内容。
+        // 历史会话仍可通过会话面板点击切换查看。
+        await SessionStore.init();
         this.sessionId = SessionStore.newSessionId();
         this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;
@@ -988,7 +1026,8 @@ export class AgentChat extends Model {
         id?: string;
         questionID: string;
         questions: Array<Record<string, unknown>>;
-        status?: string
+        status?: string;
+        answers?: string[];
     }) {
         const L = window.siyuan.languages;
         const el = document.createElement("div");
@@ -1010,6 +1049,19 @@ export class AgentChat extends Model {
         el.querySelectorAll("input").forEach((inp) => {
             (inp as HTMLInputElement).disabled = true;
         });
+        // 恢复已提交的选中状态（answers 中存的是选项 value）。
+        if (entry.answers && entry.answers.length > 0) {
+            el.querySelectorAll("input[type=radio], input[type=checkbox]").forEach((inp) => {
+                (inp as HTMLInputElement).checked = entry.answers!.includes((inp as HTMLInputElement).value);
+            });
+            const customInput = el.querySelector(".agent-chat__question-custom") as HTMLInputElement | null;
+            if (customInput) {
+                const customAnswer = entry.answers.find(a => el.querySelector('input[value="' + a + '"]') === null);
+                if (customAnswer) {
+                    customInput.value = customAnswer;
+                }
+            }
+        }
         this.messagesContainer.appendChild(el);
     }
 
@@ -1087,7 +1139,8 @@ export class AgentChat extends Model {
                         id?: string;
                         questionID: string;
                         questions: Array<Record<string, unknown>>;
-                        status?: string
+                        status?: string;
+                        answers?: string[];
                     });
                     break;
                 case "snapshot":
@@ -1292,7 +1345,7 @@ export class AgentChat extends Model {
     }
 
     // Capture a read-only snapshot of the user's editor to inject into the system prompt.
-    // Strategy: scan ALL editors. Prefer one that (a) is visible and (b) has selected blocks; 
+    // Strategy: scan ALL editors. Prefer one that (a) is visible and (b) has selected blocks;
     // this directly targets "user selected blocks here" regardless of which window has focus.
     // Falls back to the editor hosting the DOM selection, then the most-recently-activated tab.
     private captureEditorContext(): IEditorContext | undefined {
@@ -1491,6 +1544,10 @@ export class AgentChat extends Model {
                     break;
                 case "error":
                     this.flushTokenUpdate();
+                    // 中断时同样需把已收到的纯文本 body 富渲染（与正常结束的 finalizeStreamingBody 一致）。
+                    if (this.currentContent) {
+                        this.finalizeStreamingBody(this.currentContent, Date.now());
+                    }
                     this.requestStartTime = 0;
                     this.appendError(event.message);
                     this.setStreaming(false);
@@ -1518,6 +1575,9 @@ export class AgentChat extends Model {
         } catch (e) {
             console.error("agent SSE event handler error:", e, event);
             this.flushTokenUpdate();
+            if (this.currentContent) {
+                this.finalizeStreamingBody(this.currentContent, Date.now());
+            }
             this.requestStartTime = 0;
             this.setStreaming(false);
         }
@@ -1525,6 +1585,9 @@ export class AgentChat extends Model {
 
     private async handleError(err: Error) {
         this.flushTokenUpdate();
+        if (this.currentContent) {
+            this.finalizeStreamingBody(this.currentContent, Date.now());
+        }
         this.requestStartTime = 0;
         this.appendError(err.message);
         this.setStreaming(false);
@@ -1535,6 +1598,9 @@ export class AgentChat extends Model {
     // 否则回退到普通错误卡。userEntryId 用于在"未配置"时回滚刚追加的 user 消息（避免留下空对话）。
     private async handleConfigError(err: Error, userEntryId?: string) {
         this.flushTokenUpdate();
+        if (this.currentContent) {
+            this.finalizeStreamingBody(this.currentContent, Date.now());
+        }
         this.requestStartTime = 0;
         const configMsg = window.siyuan.languages._kernel[193] || "";
         const isConfigError = !!configMsg && err.message === configMsg;
@@ -1623,6 +1689,7 @@ export class AgentChat extends Model {
     }
 
     private pendingTokenUpdate = false;
+    private pendingReasoningUpdate = false;
     private rafId = 0;
 
     private appendToken(token: string) {
@@ -1637,9 +1704,20 @@ export class AgentChat extends Model {
                 chatEl.className = "agent-chat__thinking-chat b3-typography agent-chat__thinking-chat--streaming";
                 thinkBody.appendChild(chatEl);
             }
-            chatEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-            postRender(chatEl, this.app);
-            this.scrollToBottom();
+            if (!this.pendingTokenUpdate) {
+                this.pendingTokenUpdate = true;
+                // 用 RAF 合并更新（与普通 AI 消息一致），减少重建频率。
+                // 流式期间用 textContent 写纯文本，富渲染推迟到完成时，避免每帧重解析整段 markdown。
+                this.rafId = requestAnimationFrame(() => {
+                    this.pendingTokenUpdate = false;
+                    chatEl.textContent = this.currentContent;
+                    const body = chatEl.closest(".agent-chat__thinking-body") as HTMLElement | null;
+                    if (body) {
+                        body.scrollTop = body.scrollHeight;
+                    }
+                    this.scrollToBottom();
+                });
+            }
             return;
         }
 
@@ -1649,13 +1727,13 @@ export class AgentChat extends Model {
 
         if (!this.pendingTokenUpdate) {
             this.pendingTokenUpdate = true;
+            // 流式期间只用 textContent 写入纯文本，跳过 Lute 解析与 postRender 富渲染。
+            // 富渲染（高亮/公式/图表）推迟到 finishResponse 一次性完成，避免每帧 O(n²) 重建。
             this.rafId = requestAnimationFrame(() => {
                 this.pendingTokenUpdate = false;
                 const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
                 if (bodyEl) {
-                    bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-                    postRender(bodyEl, this.app);
-                    void bodyEl.offsetHeight; // force reflow
+                    bodyEl.textContent = this.currentContent;
                     this.scrollToBottom();
                 }
             });
@@ -1666,10 +1744,20 @@ export class AgentChat extends Model {
         if (this.pendingTokenUpdate) {
             this.pendingTokenUpdate = false;
             cancelAnimationFrame(this.rafId);
+            // 思考卡片流式：更新 chatEl 并滚到底部（与 appendToken 思考分支一致）。
+            // 与 appendToken 一致用 textContent，富渲染由 finishResponse 完成时统一处理。
+            const thinkChat = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-chat--streaming") as HTMLElement;
+            if (thinkChat) {
+                thinkChat.textContent = this.currentContent;
+                const thinkBody = thinkChat.parentElement;
+                if (thinkBody) {
+                    thinkBody.scrollTop = thinkBody.scrollHeight;
+                }
+                return;
+            }
             const bodyEl = this.currentAIElement?.querySelector(".agent-chat__body") as HTMLElement;
             if (bodyEl) {
-                bodyEl.innerHTML = this.lute.ProtylePreviewStr("", this.currentContent) || escapeHtml(this.currentContent);
-                postRender(bodyEl, this.app);
+                bodyEl.textContent = this.currentContent;
             }
         }
     }
@@ -1824,7 +1912,7 @@ export class AgentChat extends Model {
             existingCard.remove();
         }
 
-        const bodyHTML = '<div class="agent-chat__thinking-body">' +
+        const bodyHTML = '<div class="agent-chat__thinking-body agent-chat__thinking-body--preview">' +
             detailLines +
             "</div>";
 
@@ -1860,21 +1948,28 @@ export class AgentChat extends Model {
             return;
         }
         const thinking = thinkingElems[thinkingElems.length - 1];
-        let reasoningEl: HTMLElement;
+        // 新轮次立即创建 reasoning 元素（保证多轮顺序），文本内容用 RAF 合并追加（减少 reflow）。
         if (isNewRound) {
-            reasoningEl = document.createElement("div");
+            const reasoningEl = document.createElement("div");
             reasoningEl.className = "agent-chat__thinking-reasoning-text";
             thinking.appendChild(reasoningEl);
-        } else {
-            const allReasoning = thinking.querySelectorAll(".agent-chat__thinking-reasoning-text");
-            reasoningEl = allReasoning[allReasoning.length - 1] as HTMLElement;
-            if (!reasoningEl) {
-                reasoningEl = document.createElement("div");
-                reasoningEl.className = "agent-chat__thinking-reasoning-text";
-                thinking.appendChild(reasoningEl);
-            }
         }
-        reasoningEl.textContent += token;
+        if (!this.pendingReasoningUpdate) {
+            this.pendingReasoningUpdate = true;
+            requestAnimationFrame(() => {
+                this.pendingReasoningUpdate = false;
+                const allReasoning = thinking.querySelectorAll(".agent-chat__thinking-reasoning-text");
+                const reasoningEl = allReasoning[allReasoning.length - 1] as HTMLElement;
+                if (reasoningEl) {
+                    reasoningEl.textContent = this.currentThinkingReasoningContent;
+                    // 预览态固定高度，滚到底部让最新 reasoning 内容可见。
+                    const body = reasoningEl.closest(".agent-chat__thinking-body") as HTMLElement | null;
+                    if (body) {
+                        body.scrollTop = body.scrollHeight;
+                    }
+                }
+            });
+        }
     }
 
     private addCopyButton(el: HTMLElement, contentOverride?: string, timestamp?: number) {
@@ -1992,11 +2087,37 @@ export class AgentChat extends Model {
         );
     }
 
+    // 流式结束时把 currentAIElement 的 body 从纯文本一次性转为富渲染（Lute + postRender）。
+    // 由 finishResponse（正常结束）与 error 路径（中断）共用，保证流式期轻渲染后仍得到完整富文本。
+    private finalizeStreamingBody(content: string, ts: number) {
+        if (!this.currentAIElement) {
+            return;
+        }
+        const bodyEl = this.currentAIElement.querySelector(".agent-chat__body") as HTMLElement;
+        if (!bodyEl) {
+            return;
+        }
+        bodyEl.classList.remove("agent-chat__body--streaming");
+        if (content) {
+            // 富渲染只在此处执行一次，避免流式期间每帧 O(n²) 重建带来的卡顿。
+            bodyEl.innerHTML = this.lute.ProtylePreviewStr("", content) || escapeHtml(content);
+            postRender(bodyEl, this.app);
+            this.addCopyButton(this.currentAIElement, undefined, ts);
+            this.scrollToBottom(true);
+        }
+    }
+
     private async finishResponse() {
+        // 思考结束前先记录最后一张未完成的思考卡片，折叠后用于定位滚动锚点。
+        const activeThinkCard = this.messagesContainer.querySelector(
+            ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+        ) as HTMLElement | null;
         this.finishActiveThinking();
         const savedContent = this.currentContent;
         const savedFullContent = this.fullContent;
         const ts = Date.now();
+        // 流式结束：把 body 从流式期的纯文本转为一次性完整富渲染（Lute + postRender）。
+        // 场景一：内容在流式期间落到了思考卡片里（currentAIElement 仍为空），需新建普通 AI 消息承载。
         if (!this.currentAIElement && savedContent) {
             const thinkBody = this.messagesContainer.querySelector(".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done) .agent-chat__thinking-body");
             if (thinkBody) {
@@ -2016,14 +2137,15 @@ export class AgentChat extends Model {
             this.currentContent = savedContent;
             this.fullContent = savedFullContent;
             this.addCopyButton(el, undefined, ts);
-            this.scrollToBottom(true);
-        }
-        // 流式结束：移除普通 AI 消息的 streaming 状态。
-        if (this.currentAIElement) {
-            const bodyEl = this.currentAIElement.querySelector(".agent-chat__body") as HTMLElement;
-            if (bodyEl) {
-                bodyEl.classList.remove("agent-chat__body--streaming");
+            // 思考结束场景：定位到思考卡片下方（卡片贴顶、正文向下展开），而非直接滚到对话最底部。
+            if (activeThinkCard) {
+                this.scrollToThinkingCardBelow(activeThinkCard);
+            } else {
+                this.scrollToBottom(true);
             }
+        } else if (this.currentAIElement) {
+            // 场景二：普通流式元素（createAIMessagePlaceholder 创建，body 仍是纯文本），一次性富渲染。
+            this.finalizeStreamingBody(savedContent, ts);
         }
         this.flushThinkingStep();
         if (this.pendingConfirms.length > 0) {
@@ -2189,7 +2311,20 @@ export class AgentChat extends Model {
                 });
             });
         });
-        this.insertBeforeAI(el);
+        // 快照应在执行区域之前：有确认卡片时插到确认卡片前，否则查找活跃的思考卡片
+        const confirmCards = this.messagesContainer.querySelectorAll(".agent-chat__msg--confirm");
+        if (confirmCards.length > 0) {
+            this.messagesContainer.insertBefore(el, confirmCards[confirmCards.length - 1]);
+        } else {
+            const activeThinking = this.messagesContainer.querySelector(
+                ".agent-chat__msg--thinking:not(.agent-chat__msg--thinking-done)"
+            );
+            if (activeThinking) {
+                this.messagesContainer.insertBefore(el, activeThinking);
+            } else {
+                this.insertBeforeAI(el);
+            }
+        }
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
     }
@@ -2422,6 +2557,9 @@ export class AgentChat extends Model {
                 wasChecked = input.checked;
             });
             option.addEventListener("click", (e) => {
+                if (el.classList.contains("agent-chat__msg--confirmed")) {
+                    return;
+                }
                 if (input.type === "radio" && wasChecked) {
                     e.preventDefault();
                     input.checked = false;
@@ -2451,6 +2589,10 @@ export class AgentChat extends Model {
                 if (actions) {
                     (actions as HTMLElement).innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentQuestionSubmitted || "Submitted") + "</span>";
                 }
+                // 提交后禁用所有输入，不可再修改。
+                el.querySelectorAll("input").forEach((inp) => {
+                    (inp as HTMLInputElement).disabled = true;
+                });
                 this.postQuestionAnswer(questionID, answers);
             });
         }
@@ -2483,10 +2625,11 @@ export class AgentChat extends Model {
             console.error("agent question request error:", e);
         }
         const entry = this.entries.find(e => e.type === "question" && e.questionID === questionID) as {
-            status?: string
+            status?: string; answers?: string[]
         } | undefined;
         if (entry) {
             entry.status = "submitted";
+            entry.answers = answers;
         }
         await this.saveSession();
     }
@@ -2823,6 +2966,11 @@ export class AgentChat extends Model {
                     streamingChat.remove();
                 }
             }
+            // 用户未手动操作且仍在预览态 → 思考完成后自动折叠（尊重用户已展开/折叠的最终状态）。
+            if (!el.hasAttribute("data-user-interacted")) {
+                const body = el.querySelector(".agent-chat__thinking-body");
+                body?.classList.remove("agent-chat__thinking-body--preview");
+            }
             el.classList.add("agent-chat__msg--thinking-done");
             if (doneText) {
                 const textEl = el.querySelector(".agent-chat__thinking-text");
@@ -2846,10 +2994,8 @@ export class AgentChat extends Model {
         const disabled = this.isStreaming || this.modelOptions.length === 0 || !this.hasComposerInput();
         if (disabled) {
             this.sendBtn.setAttribute("disabled", "disabled");
-            this.sendBtn.classList.add("agent-chat__send--disabled");
         } else {
             this.sendBtn.removeAttribute("disabled");
-            this.sendBtn.classList.remove("agent-chat__send--disabled");
         }
         if (this.composerHost) {
             // 复用流式时已有的禁用态样式（灰显 + 阻止交互）。
@@ -2867,11 +3013,37 @@ export class AgentChat extends Model {
         return this.composer.getSendData().text.length > 0;
     }
 
+    // 思考结束后定位到思考卡片下方：让折叠后的思考卡片底部贴近容器视口顶部，
+    // 其下方留出空间承载即将/已开始流式的正文。delay 用于等待卡片折叠的 max-height 过渡（约 0.2s）完成。
+    private scrollToThinkingCardBelow(card: HTMLElement, delay = 220) {
+        const align = () => {
+            if (!card.isConnected) {
+                return;
+            }
+            // 用 getBoundingClientRect 计算卡片底部相对滚动容器的偏移，
+            // 避免依赖 offsetParent 是否为滚动容器（定位祖先可能不是 messagesContainer）。
+            const containerRect = this.messagesContainer.getBoundingClientRect();
+            const cardRect = card.getBoundingClientRect();
+            // 卡片底部在文档中的位置 - 容器顶部在文档中的位置 + 当前已滚动量 = 卡片底部的 scrollTop 目标值。
+            const target = this.messagesContainer.scrollTop + (cardRect.bottom - containerRect.top) + 8;
+            const max = this.messagesContainer.scrollHeight - this.messagesContainer.clientHeight;
+            this.programmaticScroll = true;
+            this.messagesContainer.scrollTop = Math.min(target, max);
+            requestAnimationFrame(() => {
+                this.programmaticScroll = false;
+            });
+        };
+        if (delay > 0) {
+            window.setTimeout(align, delay);
+        } else {
+            align();
+        }
+    }
+
     private scrollToBottom(force = false, smooth = false) {
         if (!force && this.userScrolledUp) {
             return;
-        }
-        // Guard with a flag so the resulting scroll event can be told apart from
+        }        // Guard with a flag so the resulting scroll event can be told apart from
         // a user-driven scroll. Without this, the programmatic stick-to-bottom
         // write itself trips the scroll handler and, while streaming, flips
         // userScrolledUp on transiently (scrollHeight keeps growing) which

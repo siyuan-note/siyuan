@@ -1,272 +1,259 @@
 
 .agent-chat__title {
-    font-size: 14px;
-    color: var(--b3-theme-on-background);
+  font-size: 14px;
+  color: var(--b3-theme-on-background);
 }
 
 .agent-chat__tokens {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 24px;
-    height: 24px;
-    border-radius: var(--b3-border-radius);
-    cursor: pointer;
-    color: var(--b3-theme-on-surface-light);
+  // 圆环轨道（背景灰圈）。用比 hover 背景更深的灰，避免悬浮时轨道被吃掉。
+  .agent-chat__tokens-track {
+    fill: none;
+    stroke: var(--b3-scroll-color);
+  }
 
-    &:hover {
-        background: var(--b3-list-hover);
-    }
-
-    svg {
-        width: 18px;
-        height: 18px;
-    }
-
-    // 圆环轨道（背景灰圈）。用比 hover 背景更深的灰，避免悬浮时轨道被吃掉。
-    .agent-chat__tokens-track {
-        fill: none;
-        stroke: var(--b3-scroll-color);
-    }
-
-    // 圆环弧度（按占用率描边），统一主色，rotate -90 让起点在顶部。
-    .agent-chat__tokens-arc {
-        fill: none;
-        stroke: var(--b3-theme-primary);
-        stroke-linecap: round;
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
-    }
+  // 圆环弧度（按占用率描边），统一主色，rotate -90 让起点在顶部。
+  .agent-chat__tokens-arc {
+    fill: none;
+    stroke: var(--b3-theme-primary);
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+  }
 }
 
 .agent-chat__messages-wrap {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    position: relative;
-    display: flex;
-    flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .agent-chat__messages {
-    overflow-y: auto;
-    padding: 12px 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    user-select: text;
-    transition: var(--b3-transition);
+  overflow-y: auto;
+  // scrollbar-gutter 预留滚动条槽位，避免出现/消失滚动条时内容横向抖动；
+  // 右侧 padding 相应减去滚动条宽度（10px），保证与 input-area（margin 16px）内容左右对齐。
+  scrollbar-gutter: stable;
+  padding: 12px 6px 12px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  user-select: text;
+  transition: var(--b3-transition);
 }
 
 .agent-chat__messages--switching {
-    opacity: 0;
+  opacity: 0;
 }
 
 .agent-chat__scroll-bottom {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--b3-theme-background);
-    border: 1px solid var(--b3-border-color);
-    box-shadow: var(--b3-tooltips-shadow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    visibility: hidden;
-    transition: var(--b3-transition);
-    z-index: 5;
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--b3-theme-background);
+  border: 1px solid var(--b3-border-color);
+  box-shadow: var(--b3-tooltips-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--b3-transition);
+  z-index: 5;
 
-    svg {
-        width: 14px;
-        height: 14px;
-    }
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 
-    &--visible {
-        opacity: 1;
-        visibility: visible;
-    }
+  &--visible {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 .agent-welcome {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 16px 24px;
-    gap: 12px;
-    margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px 24px;
+  gap: 12px;
+  margin: auto;
 }
 
 .agent-welcome__icon {
-    font-size: 48px;
-    line-height: 1;
+  font-size: 48px;
+  line-height: 1;
 }
 
 .agent-welcome__title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--b3-theme-on-surface);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--b3-theme-on-surface);
 }
 
 .agent-welcome__greeting {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--b3-theme-on-surface);
-    margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--b3-theme-on-surface);
+  margin-bottom: 4px;
 }
 
 .agent-welcome__desc {
-    font-size: 14px;
-    color: var(--b3-theme-on-surface-light);
-    max-width: 280px;
-    line-height: 1.5;
+  font-size: 14px;
+  color: var(--b3-theme-on-surface-light);
+  max-width: 280px;
+  line-height: 1.5;
 }
 
 .agent-welcome__examples {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    max-width: 300px;
-    margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 8px;
 }
 
 .agent-welcome__example {
-    padding: 8px 12px;
-    background: var(--b3-theme-surface);
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
-    font-size: 13px;
-    color: var(--b3-theme-on-surface);
-    cursor: pointer;
-    text-align: left;
-    transition: var(--b3-transition);
+  padding: 8px 12px;
+  background: var(--b3-theme-surface);
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius);
+  font-size: 13px;
+  color: var(--b3-theme-on-surface);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--b3-transition);
 }
 
 .agent-welcome__example:hover {
-    background: var(--b3-theme-surface-light);
-    border-color: var(--b3-theme-primary);
+  background: var(--b3-theme-surface-light);
+  border-color: var(--b3-theme-primary);
 }
 
 // 无模型提示块：引导用户去 设置 - 人工智能 配置。
 .agent-welcome__no-model {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    max-width: 320px;
-    margin-top: 12px;
-    padding: 20px 16px;
-    background: var(--b3-theme-surface);
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  margin-top: 12px;
+  padding: 20px 16px;
+  background: var(--b3-theme-surface);
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius);
+  text-align: center;
 }
 
 .agent-welcome__no-model-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--b3-theme-on-surface);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--b3-theme-on-surface);
 }
 
 .agent-welcome__no-model-tip {
-    font-size: 13px;
-    color: var(--b3-theme-on-surface-light);
-    line-height: 1.5;
+  font-size: 13px;
+  color: var(--b3-theme-on-surface-light);
+  line-height: 1.5;
 }
 
 // 未配置模型时的「去配置」按钮：复用 b3-button 主色实心样式，仅微调尺寸。
 .agent-welcome__go-setting {
-    margin-top: 4px;
-    padding: 4px 14px;
-    font-size: 13px;
+  margin-top: 4px;
+  padding: 4px 14px;
+  font-size: 13px;
 }
 
 .agent-chat__msg {
-    display: flex;
-    flex-direction: column;
-    max-width: 100%;
-    user-select: text;
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  user-select: text;
 }
 
 .agent-chat__msg--user {
-    align-items: flex-end;
+  align-items: flex-end;
 }
 
 .agent-chat__msg--user .agent-chat__body,
 .agent-chat__msg--ai .agent-chat__body {
-    min-width: 0;
-    width: 100%;
-    background: transparent;
-    border: none;
-    color: var(--b3-theme-on-background);
-    border-radius: 0;
-    word-break: break-word;
-    line-height: 1.5;
+  min-width: 0;
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--b3-theme-on-background);
+  border-radius: 0;
+  word-break: break-word;
+  line-height: 1.5;
 }
 
 .agent-chat__msg--user .agent-chat__body {
-    border-radius: var(--b3-border-radius-b);
-    background: var(--b3-theme-surface);
-    padding: 8px 12px;
-    width: auto;
-    max-width: 80%;
-    box-sizing: border-box;
+  border-radius: var(--b3-border-radius-b);
+  background: var(--b3-theme-surface);
+  padding: 8px 12px;
+  width: auto;
+  max-width: 80%;
+  box-sizing: border-box;
 }
 
 .agent-chat__msg-meta {
-    font-size: 13px;
-    color: var(--b3-theme-on-surface-light);
-    align-self: center;
+  font-size: 13px;
+  color: var(--b3-theme-on-surface-light);
+  align-self: center;
 }
 
 .agent-chat__msg-time--ai {
-    flex-shrink: 0;
-    opacity: 0.6;
+  flex-shrink: 0;
+  opacity: 0.6;
 }
 
 .agent-chat__msg--ai {
-    align-items: flex-start;
+  align-items: flex-start;
 }
 
 .agent-chat__msg-actions {
-    align-self: flex-end;
-    display: flex;
-    gap: 4px;
-    width: 100%;
-    justify-content: flex-end;
-    opacity: 0;
-    transition: var(--b3-transition);
+  align-self: flex-end;
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: var(--b3-transition);
 }
 
 .agent-chat__msg--ai:hover .agent-chat__msg-actions,
 .agent-chat__msg--user:hover .agent-chat__msg-actions {
-    opacity: 1;
+  opacity: 1;
 }
 
 .agent-chat__msg--user .agent-chat__msg-actions {
-    width: auto;
-    justify-content: flex-end;
+  width: auto;
+  justify-content: flex-end;
 }
 
 .agent-chat__body--streaming {
-    min-height: 20px;
+  min-height: 20px;
+  // 流式期 body 是纯文本（textContent），需保留换行与空白，富渲染在结束后才进行。
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .agent-chat__body {
-    user-select: text;
+  user-select: text;
 
-    .code-block {
-        position: relative;
-    }
+  .code-block {
+    position: relative;
+  }
 }
 
 // 覆盖 b3-typography 的基础字号：b3-typography 默认用 --b3-font-size-editor（跟随编辑器字号，默认 16px），
@@ -274,883 +261,734 @@
 // 排版（行高、段落间距等）仍沿用 b3-typography 全局规范。
 .agent-chat__body.b3-typography,
 .agent-chat__thinking-chat.b3-typography {
-    font-size: var(--b3-font-size);
+  font-size: var(--b3-font-size);
 }
 
 // 消息正文复用全局 b3-typography 排版（与导出预览/编辑器预览一致），
 // 仅保留 AgentChat 特有的代码块增强：hover 显示语言标签 + 复制按钮。
 // pre 需 position:relative 作为复制按钮（absolute）和语言标签（::before）的定位上下文。
 .agent-chat__body--mirror pre {
-    position: relative;
-    // 左右 padding 统一变量，::before 语言标签用同值 left 保证左对齐代码正文。
-    padding: 8px var(--agent-code-pad, 8px);
-    margin: 0.5em 0;
-    border: 0;
-    border-radius: var(--b3-border-radius);
-    background-color: var(--b3-protyle-code-background);
-    overflow: auto;
+  position: relative;
+  // 左右 padding 统一变量，::before 语言标签用同值 left 保证左对齐代码正文。
+  padding: 8px var(--agent-code-pad, 8px);
+  margin: 0.5em 0;
+  border: 0;
+  border-radius: var(--b3-border-radius);
+  background-color: var(--b3-protyle-code-background);
+  overflow: auto;
 
-    // 覆盖 hljs 主题的 .hljs padding（其特异性 0,1,0 高于 pre code），用 !important 确保对齐语言标签。
-    code.hljs,
-    code {
-        padding: 0 !important;
-        background: none !important;
-        display: block;
-    }
+  // 覆盖 hljs 主题的 .hljs padding（其特异性 0,1,0 高于 pre code），用 !important 确保对齐语言标签。
+  code.hljs,
+  code {
+    padding: 0 !important;
+    background: none !important;
+    display: block;
+  }
 }
 
 // 有语言标签的代码块顶部留空间，避免 ::before 语言标签与正文重叠。
 .agent-chat__body--mirror pre[data-language] {
-    padding-top: 24px;
+  padding-top: 24px;
 }
 
 .agent-chat__body--mirror pre[data-language]::before {
-    content: attr(data-language);
-    position: absolute;
-    top: 4px;
-    left: var(--agent-code-pad, 8px);
-    font-size: 12px;
-    color: var(--b3-theme-on-surface-light);
+  content: attr(data-language);
+  position: absolute;
+  top: 4px;
+  left: var(--agent-code-pad, 8px);
+  font-size: 12px;
+  color: var(--b3-theme-on-surface-light);
 }
 
-.agent-chat__copy-wrap {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    z-index: 1;
-    opacity: 0;
-    transition: var(--b3-transition);
+.agent-chat__body .protyle-icons {
+  display: flex;
 }
 
-.agent-chat__copy-btn {
-    width: 22px;
-    height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--b3-border-radius);
-    color: var(--b3-theme-on-surface);
-    cursor: pointer;
-
-    svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    &:hover, &:focus-visible {
-        background-color: var(--b3-theme-surface-lighter);
-    }
-}
-
-pre:hover .agent-chat__copy-wrap,
-[data-subtype="math"]:hover .agent-chat__copy-wrap {
-    opacity: .86;
-}
-
-// 公式块：position:relative 作为复制按钮定位上下文。
-[data-subtype="math"] {
-    position: relative;
+// hover 显隐：对齐原 agent-chat__copy-wrap 行为，opacity 渐显。
+.agent-chat__body pre:hover .protyle-icons,
+.agent-chat__body [data-subtype="math"]:hover .protyle-icons {
+  opacity: .86;
 }
 
 .agent-chat__msg--error .agent-chat__body {
-    display: flex; align-items: center; gap: 6px;
-    color: var(--b3-theme-error);
-    background: var(--b3-theme-error-light);
-    word-break: break-word;
-    padding: 4px 0;
-    border-radius: var(--b3-border-radius);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--b3-theme-error);
+  background: var(--b3-theme-error-light);
+  word-break: break-word;
+  padding: 4px 0;
+  border-radius: var(--b3-border-radius);
 }
 
 .agent-chat__error-icon {
-    width: 14px; height: 14px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .agent-chat__snapshot-body {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--b3-theme-on-surface-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--b3-theme-on-surface-light);
 }
 
 .agent-chat__snapshot-icon {
-    flex-shrink: 0;
+  flex-shrink: 0;
 
-    svg {
-        display: block;
-        width: 14px;
-        height: 14px;
-    }
+  svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .agent-chat__snapshot-text {
-    flex: 1;
+  flex: 1;
 }
 
 .agent-chat__snapshot-rollback {
-    flex-shrink: 0;
-    color: var(--b3-theme-on-surface-light);
+  flex-shrink: 0;
+  color: var(--b3-theme-on-surface-light);
 
-    svg {
-        width: 14px;
-        height: 14px;
-    }
+  svg {
+    width: 14px;
+    height: 14px;
+  }
 
-    &:hover, &:focus-visible {
-        background: var(--b3-list-hover);
-    }
+  &:hover, &:focus-visible {
+    background: var(--b3-list-hover);
+  }
 }
 
 .agent-chat__msg--tool {
-    align-items: stretch;
+  align-items: stretch;
 }
 
 .agent-chat__tool-card,
 .agent-chat__confirm-card,
 .agent-chat__question-card,
 .agent-chat__tool-card--todo {
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
-    overflow: hidden;
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius);
+  overflow: hidden;
 }
 
-.agent-chat__tool-card { font-size: 13px; }
+.agent-chat__tool-card {
+  font-size: 13px;
+}
 
 .agent-chat__msg--thinking {
-    align-items: stretch;
+  align-items: stretch;
 }
 
 .agent-chat__msg--retry {
-    align-items: stretch;
+  align-items: stretch;
 }
 
 .agent-chat__thinking-card {
-    border: none;
-    border-radius: var(--b3-border-radius);
+  border: none;
+  border-radius: var(--b3-border-radius);
 }
 
 .agent-chat__msg--thinking-done {
-    opacity: 0.6;
+  opacity: 0.6;
 }
 
 .agent-chat__thinking-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 0;
-    cursor: pointer;
-    color: var(--b3-theme-on-surface-light);
-    user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  cursor: pointer;
+  color: var(--b3-theme-on-surface-light);
+  user-select: none;
 }
 
 .agent-chat__thinking-text {
-    flex: 1;
+  flex: 1;
 }
 
 .agent-chat__thinking-arrow {
-    flex-shrink: 0;
-    color: var(--b3-theme-on-surface-light);
+  flex-shrink: 0;
+  color: var(--b3-theme-on-surface-light);
 
-    svg {
-        display: block;
-        width: 14px;
-        height: 14px;
-    }
+  svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
 }
 
 .agent-chat__thinking-body {
-    max-height: 0;
-    overflow: hidden;
-    contain: layout paint;
-    border-top: 1px solid transparent;
-    padding: 0;
-    transition: max-height .2s cubic-bezier(0, 0, .2, 1), padding .2s cubic-bezier(0, 0, .2, 1), border-color .2s cubic-bezier(0, 0, .2, 1);
+  max-height: 0;
+  overflow: hidden;
+  contain: layout paint;
+  border-top: 1px solid transparent;
+  padding: 0;
+  transition: max-height .2s cubic-bezier(0, 0, .2, 1), padding .2s cubic-bezier(0, 0, .2, 1), border-color .2s cubic-bezier(0, 0, .2, 1);
 
-    & > *:last-child {
-        margin-bottom: 0;
-    }
+  & > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.agent-chat__thinking-body--preview {
+  max-height: 120px;
+  overflow-y: auto;
+  contain: none;  // 覆盖 base 的 contain:layout paint，该值会阻止 JS 设置 scrollTop 生效
+
+  // 隐藏滚动条，保持预览态视觉干净（内容通过 JS 自动滚到底部）。
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .agent-chat__thinking-body--expanded {
-    max-height: 2000px;
-    padding: 8px 0;
-    border-top-color: var(--b3-border-color);
+  max-height: 2000px;
+  padding: 8px 0;
+  border-top-color: var(--b3-border-color);
 }
 
 .agent-chat__thinking-reasoning-text {
-    color: var(--b3-theme-on-surface);
-    line-height: 1.5;
-    margin-bottom: 8px;
-    white-space: pre-wrap;
-    word-break: break-word;
+  color: var(--b3-theme-on-surface);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .agent-chat__thinking-chat {
-    color: var(--b3-theme-on-surface);
-    line-height: 1.5;
-    margin-bottom: 8px;
-    border: none;
-    border-radius: 0;
+  color: var(--b3-theme-on-surface);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  border: none;
+  border-radius: 0;
 
-    &:last-child {
-        margin-bottom: 0;
-    }
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .agent-chat__thinking-chat--streaming {
-    min-height: 20px;
+  min-height: 20px;
+  // 流式期是纯文本（textContent），保留换行；富渲染在结束后进行。
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .agent-chat__thinking-summary {
-    font-size: 12px;
-    color: var(--b3-theme-on-surface-light);
+  font-size: 12px;
+  color: var(--b3-theme-on-surface-light);
 }
 
 .agent-chat__thinking-tools-line {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 4px 8px;
-    margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin-bottom: 8px;
 }
 
 .agent-chat__thinking-tool {
-    font-size: 12px;
-    color: var(--b3-theme-on-surface-light);
-    white-space: nowrap;
+  font-size: 12px;
+  color: var(--b3-theme-on-surface-light);
+  white-space: nowrap;
 }
 
 .agent-chat__confirm-card {
-    font-size: 13px;
+  font-size: 13px;
 }
 
 .agent-chat__confirm-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    color: var(--b3-theme-on-background);
-    line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  color: var(--b3-theme-on-background);
+  line-height: 1.5;
 
-    .agent-chat__confirm-icon {
-        width: 14px;
-        height: 14px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-}
-
-.agent-chat__confirm-args {
-    margin: 0;
-    padding: 4px 8px;
-    background: var(--b3-theme-surface);
-    color: var(--b3-theme-on-surface);
-    font-size: 12px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 120px;
-    overflow-y: auto;
-    border-top: 1px solid var(--b3-border-color);
-}
-
-.agent-chat__confirm-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 8px 12px;
-    border-top: 1px solid var(--b3-border-color);
-}
-
-.agent-chat__confirm-done {
-    padding: 4px 8px;
-    font-size: 12px;
-    color: var(--b3-theme-on-surface-light);
-    font-style: italic;
-}
-
-.agent-chat__msg--confirmed {
-    opacity: 0.7;
-}
-
-.agent-chat__tool-icon {
+  .agent-chat__confirm-icon {
     width: 14px;
     height: 14px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+
+.agent-chat__confirm-args {
+  margin: 0;
+  padding: 4px 8px;
+  background: var(--b3-theme-surface);
+  color: var(--b3-theme-on-surface);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 120px;
+  overflow-y: auto;
+  border-top: 1px solid var(--b3-border-color);
+}
+
+.agent-chat__confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--b3-border-color);
+}
+
+.agent-chat__confirm-done {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--b3-theme-on-surface-light);
+  font-style: italic;
+}
+
+.agent-chat__msg--confirmed {
+  opacity: 0.7;
+}
+
+.agent-chat__tool-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .agent-chat__tool-title {
-    font-weight: 500;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .agent-chat__input-area {
-    background: var(--b3-theme-background);
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius-b);
-    margin: 0 16px 12px;
-    padding: 8px;
-    flex-shrink: 0;
+  background: var(--b3-theme-background);
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius-b);
+  margin: 0 16px 12px;
+  padding: 8px;
+  flex-shrink: 0;
 }
 
 .agent-chat__composer-host {
-    min-height: 40px;
-    max-height: 120px;
-    overflow-y: auto;
-    cursor: text;
+  min-height: 40px;
+  max-height: 120px;
+  overflow-y: auto;
+  cursor: text;
 }
 
 .agent-chat__composer-host--disabled {
-    pointer-events: none;
-    opacity: 0.5;
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .agent-chat__buttons {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.agent-chat__send svg,
-.agent-chat__stop svg {
-    width: 18px;
-    height: 18px;
-    // 抵消 .b3-button svg 的 margin-right: 4px，让图标在 24×24 正方形背景中真正居中。
-    margin-right: 0;
-}
-
-// 发送/停止按钮：与上下文用量圆环保持一致的 24×24 正方形背景，hover 同色。
-.agent-chat__send,
+// 停止按钮：常显悬浮背景色，图标主色填充。
 .agent-chat__stop {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    flex-shrink: 0;
-    border-radius: var(--b3-border-radius);
-
-    &:hover {
-        background: var(--b3-list-hover);
-    }
-}
-
-// 模型选择器：原生 select，复用 b3-select 基础样式，此处只补充尺寸约束。
-// height 与 line-height 一致以保证文字垂直居中（b3-select 默认 28/20，这里压到 24/24）。
-.agent-chat__model-select {
-    max-width: 160px;
-    font-size: 13px;
-    height: 24px;
-    line-height: 24px;
-    padding: 0 22px 0 8px;
-    cursor: pointer;
-}
-
-// 无可用模型时的占位态：灰色文案 + 可点击打开设置（不展开下拉）。
-.agent-chat__model-select--empty {
-    color: var(--b3-theme-on-surface-light);
-    cursor: pointer;
-
-    // 隐藏下拉箭头（原生 + b3-select 背景图），提示这是可点击的占位而非下拉选择。
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--b3-menu-background);
-    padding: 1px 8px 0; // 去箭头后回收右侧 padding；顶部 1px 修正垂直居中
-
-    &:hover {
-        background-color: var(--b3-theme-surface);
-    }
-}
-
-// 无可用模型时禁用发送按钮：半透明 + 禁止光标，从源头阻止无效请求。
-.agent-chat__send--disabled,
-.agent-chat__send[disabled] {
-    opacity: .5;
-    cursor: not-allowed;
-    pointer-events: none;
+  background: var(--b3-list-hover);
+  color: var(--b3-theme-primary);
 }
 
 // token 分类明细弹层：hover 底部 tokens 数字时弹出，复用 b3-menu 基础样式。
 .agent-token-popup {
-    position: fixed;
-    width: 280px;
-    padding: 8px 0;
+  position: fixed;
+  width: 280px;
+  padding: 8px 0;
 
-    .b3-menu__items {
-        display: flex;
-        flex-direction: column;
-    }
+  .b3-menu__items {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 // 总数行（第一行）：加粗，与其他分类区分。
 .agent-token-popup__total {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 14px;
-    font-weight: 600;
-    color: var(--b3-theme-on-background);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 14px;
+  font-weight: 600;
+  color: var(--b3-theme-on-background);
 }
 
 // 各分类行：两端对齐，左标签右百分比。
 .agent-token-popup__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 3px 14px;
-    font-size: 13px;
-    color: var(--b3-theme-on-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 14px;
+  font-size: 13px;
+  color: var(--b3-theme-on-surface);
 }
 
 .agent-token-popup__label {
-    flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .agent-token-popup__value {
-    margin-left: 12px;
-    flex-shrink: 0;
-    color: var(--b3-theme-on-surface-light);
+  margin-left: 12px;
+  flex-shrink: 0;
+  color: var(--b3-theme-on-surface-light);
 }
 
 // 总数行与分类之间、分类与缓存命中之间的分隔线。
 .agent-token-popup__divider {
-    height: 1px;
-    margin: 4px 10px;
-    background: var(--b3-border-color);
+  height: 1px;
+  margin: 4px 10px;
+  background: var(--b3-border-color);
 }
 
 // 第一行下方的上下文占用横条：总长 = 模型上限，填充宽度 = 已用占比，
 // 填充色统一主色（与底部圆环一致）；未填充为轨道灰。
 .agent-token-popup__bar {
-    height: 4px;
-    margin: 6px 10px 4px;
-    border-radius: 2px;
-    background: var(--b3-border-color);
-    overflow: hidden;
+  height: 4px;
+  margin: 6px 10px 4px;
+  border-radius: 2px;
+  background: var(--b3-border-color);
+  overflow: hidden;
 
-    & > span {
-        display: block;
-        height: 100%;
-        border-radius: 2px;
-        background: var(--b3-theme-primary);
-    }
+  & > span {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    background: var(--b3-theme-primary);
+  }
 }
 
 .agent-session-popup {
-    position: fixed;
-    width: 280px;
-    max-height: 360px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-
-    .b3-menu__items {
-        flex: 1;
-        min-height: 0;
-    }
-
-    .b3-menu__item:hover {
-        background: var(--b3-list-hover);
-    }
-
-    .b3-menu__label {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+  width: 280px;
+  max-height: 360px;
+  display: flex;
+  flex-direction: column;
 }
 
 .agent-session-popup__search {
-    width: calc(100% - 16px);
-    margin: 0 8px 4px;
-    box-sizing: border-box;
-    flex-shrink: 0;
+  margin: 0 8px 4px;
 }
 
-.agent-session-popup__actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
+// 会话条目"更多"按钮的子菜单定位：使用 position: fixed（默认），位置由 JS 动态计算。
+.agent-session-more {
+  position: relative;
 
-.agent-session-popup__delete {
-    width: 12px;
-    height: 12px;
-    color: var(--b3-theme-error);
-
-    &:hover, &:focus-visible {
-        opacity: 0.7;
-    }
-}
-
-.agent-session-popup__rename {
-    width: 12px;
-    height: 12px;
-
-    &:hover, &:focus-visible {
-        opacity: 0.7;
-    }
-}
-
-.agent-session-popup__rename-input {
-    flex: 1;
-    font-size: 13px;
-    padding: 2px 4px;
-    border: 1px solid var(--b3-theme-primary);
-    border-radius: var(--b3-border-radius);
-    outline: none;
-    background: var(--b3-theme-background);
-    color: var(--b3-theme-on-background);
+  .b3-menu__submenu {
+    white-space: nowrap;
+  }
 }
 
 // Todo list styles
 
 .agent-chat__todo-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--b3-theme-on-surface);
-    border-bottom: 1px solid var(--b3-border-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--b3-theme-on-surface);
+  border-bottom: 1px solid var(--b3-border-color);
 }
 
 .agent-chat__todo-items {
-    padding: 4px 0;
+  padding: 4px 0;
 }
 
 .agent-chat__todo-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--b3-theme-on-surface);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--b3-theme-on-surface);
 }
 
 .agent-chat__todo-item--completed {
-    color: var(--b3-theme-on-surface-light);
-    text-decoration: line-through;
+  color: var(--b3-theme-on-surface-light);
+  text-decoration: line-through;
 }
 
 .agent-chat__todo-item--in-progress {
-    color: var(--b3-theme-primary);
+  color: var(--b3-theme-primary);
 }
 
 .agent-chat__todo-item--pending {
-    color: var(--b3-theme-on-surface);
+  color: var(--b3-theme-on-surface);
 }
 
 .agent-chat__todo-item--cancelled {
-    color: var(--b3-theme-on-surface-light);
-    text-decoration: line-through;
+  color: var(--b3-theme-on-surface-light);
+  text-decoration: line-through;
 }
 
 .agent-chat__todo-status {
-    flex-shrink: 0;
-    width: 14px;
-    height: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 // Question card styles
 .agent-chat__question-card {
-    font-size: 13px;
+  font-size: 13px;
 }
 
 .agent-chat__question-item {
-    padding: 12px;
-    + .agent-chat__question-item {
-        border-top: 1px solid var(--b3-border-color);
-    }
+  padding: 12px;
+
+  + .agent-chat__question-item {
+    border-top: 1px solid var(--b3-border-color);
+  }
 }
 
 .agent-chat__question-header {
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--b3-theme-on-background);
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--b3-theme-on-background);
 }
 
 .agent-chat__question-text {
-    margin-bottom: 10px;
-    color: var(--b3-theme-on-surface);
-    line-height: 1.5;
+  margin-bottom: 10px;
+  color: var(--b3-theme-on-surface);
+  line-height: 1.5;
 }
 
 .agent-chat__question-options {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .agent-chat__question-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: var(--b3-border-radius);
-    cursor: pointer;
-    transition: var(--b3-transition);
-    &:hover, &:focus-visible { background: var(--b3-theme-surface-light); }
-    input { flex-shrink: 0; }
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--b3-border-radius);
+  cursor: pointer;
+  transition: var(--b3-transition);
+
+  &:hover, &:focus-visible {
+    background: var(--b3-theme-surface-light);
+  }
+
+  input {
+    flex-shrink: 0;
+  }
 }
 
 .agent-chat__question-option-label {
-    font-weight: 500;
-    white-space: nowrap;
-    color: var(--b3-theme-on-surface);
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--b3-theme-on-surface);
 }
 
 .agent-chat__question-option-desc {
-    font-size: 12px;
-    color: var(--b3-theme-on-surface-light);
-    line-height: 1.5;
+  font-size: 12px;
+  color: var(--b3-theme-on-surface-light);
+  line-height: 1.5;
 }
 
 .agent-chat__question-custom {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 4px 8px;
-    margin-top: 8px;
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
-    font-size: 13px;
-    outline: none;
-    background: var(--b3-theme-background);
-    color: var(--b3-theme-on-background);
-    &::placeholder { color: var(--b3-theme-on-surface-light); }
-    &:focus { border-color: var(--b3-theme-primary); }
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  margin-top: 8px;
+  border: 1px solid var(--b3-border-color);
+  border-radius: var(--b3-border-radius);
+  font-size: 13px;
+  outline: none;
+  background: var(--b3-theme-background);
+  color: var(--b3-theme-on-background);
+
+  &::placeholder {
+    color: var(--b3-theme-on-surface-light);
+  }
+
+  &:focus {
+    border-color: var(--b3-theme-primary);
+  }
 }
 
 .agent-chat__question-submit {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    padding: 8px 12px;
-    border-top: 1px solid var(--b3-border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--b3-border-color);
 }
 
 .agent-chat__preview-notice {
-    font-size: 12px;
-    text-align: center;
-    padding: 4px 12px;
-    color: var(--b3-card-warning-color);
-    background: var(--b3-card-warning-background);
-    flex-shrink: 0;
+  font-size: 12px;
+  text-align: center;
+  padding: 4px 12px;
+  color: var(--b3-card-warning-color);
+  background: var(--b3-card-warning-background);
+  flex-shrink: 0;
 }
 
 .agent-chat__nav-rail {
-    position: absolute;
-    right: 4px;
-    top: 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--nav-gap, 3px);
-    z-index: 10;
-    border: 1px solid transparent;
-    border-radius: var(--b3-border-radius-b);
-    padding: 6px 4px 6px 12px;
-    transition: background 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out, gap 200ms ease-out;
+  position: absolute;
+  right: 4px;
+  top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--nav-gap, 3px);
+  z-index: 10;
+  border: 1px solid transparent;
+  border-radius: var(--b3-border-radius-b);
+  padding: 6px 4px 6px 12px;
+  transition: background 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out, gap 200ms ease-out;
 }
 
 .agent-chat__nav-rail-marker {
-    box-sizing: content-box;
-    width: 10px;
-    height: 2px;
-    padding-left: 10px;
-    background-clip: content-box;
-    background-color: var(--b3-theme-on-surface);
-    opacity: 0.3;
-    cursor: pointer;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    font-size: 12px;
-    line-height: 20px;
-    color: transparent;
-    border-radius: var(--b3-border-radius-b);
-    transition: width 200ms ease-out, height 200ms ease-out,
-                opacity 200ms ease-out, padding 200ms ease-out,
-                background 200ms ease-out, color 200ms ease-out,
-                line-height 200ms ease-out, border-radius 200ms ease-out;
+  box-sizing: content-box;
+  width: 10px;
+  height: 2px;
+  padding-left: 10px;
+  background-clip: content-box;
+  background-color: var(--b3-theme-on-surface);
+  opacity: 0.3;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  line-height: 20px;
+  color: transparent;
+  border-radius: var(--b3-border-radius-b);
+  transition: width 200ms ease-out, height 200ms ease-out,
+  opacity 200ms ease-out, padding 200ms ease-out,
+  background 200ms ease-out, color 200ms ease-out,
+  line-height 200ms ease-out, border-radius 200ms ease-out;
 }
 
 .agent-chat__nav-rail-marker--active {
-    background-color: var(--b3-theme-primary);
-    opacity: 0.7;
+  background-color: var(--b3-theme-primary);
+  opacity: 0.7;
 }
 
 .agent-chat__nav-rail--expanded {
-    background: var(--b3-menu-background);
-    box-shadow: var(--b3-dialog-shadow);
-    border: 1px solid var(--b3-theme-surface-lighter);
-    gap: 0;
-    padding: 8px;
-    overflow: hidden;
+  background: var(--b3-menu-background);
+  box-shadow: var(--b3-dialog-shadow);
+  border: 1px solid var(--b3-theme-surface-lighter);
+  gap: 0;
+  padding: 8px;
+  overflow: hidden;
 
-    .agent-chat__nav-rail-marker {
-        width: 160px;
-        height: 28px;
-        line-height: 28px;
-        opacity: 1;
-        padding: 0 8px;
-        margin: 1px 0;
-        background: transparent;
-        background-clip: padding-box;
-        color: var(--b3-theme-on-background);
-        border-radius: var(--b3-border-radius);
-        transition: none;
+  .agent-chat__nav-rail-marker {
+    width: 160px;
+    height: 28px;
+    line-height: 28px;
+    opacity: 1;
+    padding: 0 8px;
+    margin: 1px 0;
+    background: transparent;
+    background-clip: padding-box;
+    color: var(--b3-theme-on-background);
+    border-radius: var(--b3-border-radius);
+    transition: none;
 
-        &:hover {
-            background: var(--b3-list-hover);
-            color: var(--b3-theme-on-background);
-        }
+    &:hover {
+      background: var(--b3-list-hover);
+      color: var(--b3-theme-on-background);
     }
+  }
 
-    .agent-chat__nav-rail-marker--active {
-        background: var(--b3-list-hover);
-    }
+  .agent-chat__nav-rail-marker--active {
+    background: var(--b3-list-hover);
+  }
 }
 
 .agent-chat__msg--jumped .agent-chat__body {
-    animation: agent-msg-jump 1.5s ease-out;
+  animation: agent-msg-jump 1.5s ease-out;
 }
 
 @keyframes agent-msg-jump {
-    20% { background-color: var(--b3-theme-primary-lightest); }
+  20% {
+    background-color: var(--b3-theme-primary-lightest);
+  }
 }
 
 .agent-chat__msg--mirror {
-    justify-content: center;
+  justify-content: center;
 }
 
 .agent-chat__body--mirror {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--b3-theme-on-surface-light);
-    font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--b3-theme-on-surface-light);
+  font-size: 14px;
 }
 
 .agent-chat__mirror-spinner {
-    width: 10px;
-    height: 10px;
-    border: 2px solid var(--b3-theme-on-surface-light);
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: agent-mirror-spin 0.8s linear infinite;
-    flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--b3-theme-on-surface-light);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: agent-mirror-spin 0.8s linear infinite;
+  flex-shrink: 0;
 }
 
 @keyframes agent-mirror-spin {
-    to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .agent-composer__pm {
-    outline: none;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--b3-theme-on-background);
-    min-height: 24px;
-    max-height: 120px;
-    overflow-y: auto;
+  outline: none;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--b3-theme-on-background);
+  min-height: 24px;
+  max-height: 120px;
+  overflow-y: auto;
 }
 
 .agent-composer__pm p {
-    margin: 0;
+  margin: 0;
 }
 
 .agent-composer__pm p.is-editor-empty:first-child::before {
-    content: attr(data-placeholder);
-    color: var(--b3-theme-on-surface-light);
-    pointer-events: none;
-    float: left;
-    height: 0;
+  content: attr(data-placeholder);
+  color: var(--b3-theme-on-surface-light);
+  pointer-events: none;
+  float: left;
+  height: 0;
 }
 
 .agent-mention-chip {
-    display: inline;
-    padding: 1px 4px;
-    margin: 0 2px;
-    background: var(--b3-theme-primary-lightest);
-    color: var(--b3-theme-primary);
-    border-radius: var(--b3-border-radius);
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
-    user-select: all;
-}
-
-.agent-mention-menu {
-    position: fixed;
-    z-index: 9999;
-    min-width: 240px;
-    max-width: 360px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: var(--b3-theme-background);
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius-b);
-    box-shadow: var(--b3-dialog-shadow);
-}
-
-.agent-mention-menu__item {
-    padding: 6px 12px;
-    font-size: 13px;
-    color: var(--b3-theme-on-background);
-    cursor: pointer;
-    line-height: 1.4;
-}
-
-.agent-mention-menu__first {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    overflow: hidden;
-}
-
-.agent-mention-menu__icon {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-    color: var(--b3-theme-on-surface-light);
-}
-
-.agent-mention-menu__text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.agent-mention-menu__hpath {
-    font-size: 12px;
-    color: var(--b3-theme-on-surface-light);
-    margin-top: 2px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.agent-mention-menu__item:hover,
-.agent-mention-menu__item--active {
-    background: var(--b3-theme-primary-lightest);
-    color: var(--b3-theme-primary);
+  display: inline;
+  padding: 1px 4px;
+  margin: 0 2px;
+  background: var(--b3-theme-primary-lightest);
+  color: var(--b3-theme-primary);
+  border-radius: var(--b3-border-radius);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  user-select: all;
 }

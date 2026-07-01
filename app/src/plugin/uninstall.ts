@@ -1,7 +1,7 @@
 import {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
-import {getAllEditor, getAllModels} from "../layout/getAll";
+import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
 import {setTabPosition} from "../layout/tabUtil";
 /// #endif
@@ -10,6 +10,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {getAllEditor} from "../layout/getAll";
 import {unregisterAction} from "../layout/dock/agent/frontendActions";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {

@@ -169,6 +169,14 @@
     font-size: 12px;
   }
 
+  &--icon {
+    padding: 4px 6px;
+
+    svg {
+      margin-right: 0;
+    }
+  }
+
   &:disabled {
     opacity: .38;
     cursor: not-allowed;

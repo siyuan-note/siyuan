@@ -389,7 +389,7 @@ func exportNotebookMd(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
 		return
 	}
-	zipPath := model.ExportNotebookMarkdown(notebook)
+	zipPath := model.ExportNotebookMarkdownWithOptions(notebook, model.ParseExportOptions(arg))
 	ret.Data = map[string]any{
 		"name": path.Base(zipPath),
 		"zip":  zipPath,
@@ -411,7 +411,7 @@ func exportMds(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 
-	name, zipPath := model.ExportPandocConvertZip(ids, "", ".md")
+	name, zipPath := model.ExportPandocConvertZipWithOptions(ids, "", ".md", model.ParseExportOptions(arg))
 	ret.Data = map[string]any{
 		"name": name,
 		"zip":  zipPath,
@@ -431,7 +431,7 @@ func exportMd(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
-	name, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".md")
+	name, zipPath := model.ExportPandocConvertZipWithOptions([]string{id}, "", ".md", model.ParseExportOptions(arg))
 	ret.Data = map[string]any{
 		"name": name,
 		"zip":  zipPath,

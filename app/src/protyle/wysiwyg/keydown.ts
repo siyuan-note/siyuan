@@ -67,7 +67,7 @@ import {countBlockWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {beforePaste, pasteAsPlainText} from "../util/paste";
 import {preventScroll} from "../scroll/preventScroll";
-import {getSavePath, newFileBySelect} from "../../util/newFile";
+import {getRefCreateSavePath, newFileBySelect} from "../../util/newFile";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -108,7 +108,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         if (protyle.disabled ||
-            (!protyle.selectElement.classList.contains("fn__none") && protyle.selectElement.style.backgroundColor === "")) {
+            (!protyle.selectElement.classList.contains("fn__none") && !protyle.selectElement.getAttribute("data-empty"))) {
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -1252,8 +1252,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         newFileBySelect(protyle, selectText, nodeElement, response.data, protyle.notebookId);
                     });
                 } else {
-                    getSavePath(protyle.path, protyle.notebookId, (pathString, targetNotebookId) => {
-                        newFileBySelect(protyle, selectText, nodeElement, pathString, targetNotebookId);
+                    getRefCreateSavePath(protyle.notebookId, protyle.path, (targetNotebookId, hPath) => {
+                        newFileBySelect(protyle, selectText, nodeElement, hPath, targetNotebookId);
                     });
                 }
             }

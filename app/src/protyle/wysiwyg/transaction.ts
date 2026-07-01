@@ -392,11 +392,19 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         if (range && item.contains(range.startContainer)) {
             isRangeBlock = true;
         }
+        // 表格出现滚动条，更新块后需还原横向滚动位置 https://github.com/siyuan-note/siyuan/issues/3650
+        let tableScrollLeft: number;
+        if (item.classList.contains("table")) {
+            tableScrollLeft = (item.firstElementChild as HTMLElement).scrollLeft;
+        }
         item.insertAdjacentHTML("afterend",
             // 图标撤销后无法渲染
             item.getAttribute("data-subtype") === "echarts" ? protyle.lute.SpinBlockDOM(operation.data) : operation.data);
         item = item.nextElementSibling;
         item.previousElementSibling.remove();
+        if (tableScrollLeft > 0) {
+            (item.firstElementChild as HTMLElement).scrollLeft = tableScrollLeft;
+        }
 
         const wbrElement = item.querySelector("wbr");
         if (isRangeBlock && isUndo) {

@@ -1721,6 +1721,149 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjust
 		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar)
 }
 
+// ExportOptions 为单次导出提供的临时选项，缺省字段（nil）使用全局 Conf.Export 的值。
+// 通用部分可被各导出格式复用，Markdown 专属部分仅 Markdown 导出使用。
+// 用于「导出 Markdown 参数对话框」https://github.com/siyuan-note/siyuan/issues/17031
+type ExportOptions struct {
+	// 通用部分（PDF/Word/HTML/Markdown 均读取）
+	AddTitle              *bool   `json:"addTitle"`              // 是否添加文档标题
+	InlineMemo            *bool   `json:"inlineMemo"`            // 是否导出行级备注
+	BlockRefMode          *int    `json:"blockRefMode"`          // 内容块引用导出模式
+	BlockEmbedMode        *int    `json:"blockEmbedMode"`        // 内容块嵌入导出模式
+	FileAnnotationRefMode *int    `json:"fileAnnotationRefMode"` // 文件标注引用导出模式
+	BlockRefTextLeft      *string `json:"blockRefTextLeft"`      // 块引锚文本左侧符号
+	BlockRefTextRight     *string `json:"blockRefTextRight"`     // 块引锚文本右侧符号
+	TagOpenMarker         *string `json:"tagOpenMarker"`         // 标签开始标记符
+	TagCloseMarker        *string `json:"tagCloseMarker"`        // 标签结束标记符
+	// Markdown 专属部分
+	IncludeSubDocs     *bool `json:"includeSubDocs"`     // 是否包含子文档
+	IncludeRelatedDocs *bool `json:"includeRelatedDocs"` // 是否包含关联文档
+	MarkdownYFM        *bool `json:"markdownYFM"`        // 是否添加 YAML Front Matter
+	RemoveAssetsID     *bool `json:"removeAssetsID"`     // 是否移除资源文件名中的 ID
+}
+
+// applyExportOptions 临时用 opts 覆盖 Conf.Export，返回还原函数（务必 defer 调用）。
+// 用于「导出 Markdown 参数对话框」#17031，导出过程串行执行，覆盖期间无并发风险。
+func applyExportOptions(opts *ExportOptions) func() {
+	snapshot := *Conf.Export // 值拷贝保存原状
+	if nil != opts {
+		if nil != opts.AddTitle {
+			Conf.Export.AddTitle = *opts.AddTitle
+		}
+		if nil != opts.InlineMemo {
+			Conf.Export.InlineMemo = *opts.InlineMemo
+		}
+		if nil != opts.BlockRefMode {
+			Conf.Export.BlockRefMode = *opts.BlockRefMode
+		}
+		if nil != opts.BlockEmbedMode {
+			Conf.Export.BlockEmbedMode = *opts.BlockEmbedMode
+		}
+		if nil != opts.FileAnnotationRefMode {
+			Conf.Export.FileAnnotationRefMode = *opts.FileAnnotationRefMode
+		}
+		if nil != opts.BlockRefTextLeft {
+			Conf.Export.BlockRefTextLeft = *opts.BlockRefTextLeft
+		}
+		if nil != opts.BlockRefTextRight {
+			Conf.Export.BlockRefTextRight = *opts.BlockRefTextRight
+		}
+		if nil != opts.TagOpenMarker {
+			Conf.Export.TagOpenMarker = *opts.TagOpenMarker
+		}
+		if nil != opts.TagCloseMarker {
+			Conf.Export.TagCloseMarker = *opts.TagCloseMarker
+		}
+		if nil != opts.IncludeSubDocs {
+			Conf.Export.IncludeSubDocs = *opts.IncludeSubDocs
+		}
+		if nil != opts.IncludeRelatedDocs {
+			Conf.Export.IncludeRelatedDocs = *opts.IncludeRelatedDocs
+		}
+		if nil != opts.MarkdownYFM {
+			Conf.Export.MarkdownYFM = *opts.MarkdownYFM
+		}
+		if nil != opts.RemoveAssetsID {
+			Conf.Export.RemoveAssetsID = *opts.RemoveAssetsID
+		}
+	}
+	return func() { *Conf.Export = snapshot }
+}
+
+// ExportPandocConvertZipWithOptions 在 ExportPandocConvertZip 基础上接受单次导出选项 #17031。
+func ExportPandocConvertZipWithOptions(ids []string, pandocTo, ext string, opts *ExportOptions) (name, zipPath string) {
+	restore := applyExportOptions(opts)
+	defer restore()
+	return ExportPandocConvertZip(ids, pandocTo, ext)
+}
+
+// ExportNotebookMarkdownWithOptions 在 ExportNotebookMarkdown 基础上接受单次导出选项 #17031。
+func ExportNotebookMarkdownWithOptions(boxID string, opts *ExportOptions) (zipPath string) {
+	restore := applyExportOptions(opts)
+	defer restore()
+	return ExportNotebookMarkdown(boxID)
+}
+
+// ParseExportOptions 从 JSON 请求参数中解析导出选项，未传入的字段保持 nil（沿用全局配置）#17031。
+func ParseExportOptions(arg map[string]any) (opts *ExportOptions) {
+	opts = &ExportOptions{}
+	// 通用部分
+	if nil != arg["addTitle"] {
+		v := arg["addTitle"].(bool)
+		opts.AddTitle = &v
+	}
+	if nil != arg["inlineMemo"] {
+		v := arg["inlineMemo"].(bool)
+		opts.InlineMemo = &v
+	}
+	if nil != arg["blockRefMode"] {
+		v := int(arg["blockRefMode"].(float64))
+		opts.BlockRefMode = &v
+	}
+	if nil != arg["blockEmbedMode"] {
+		v := int(arg["blockEmbedMode"].(float64))
+		opts.BlockEmbedMode = &v
+	}
+	if nil != arg["fileAnnotationRefMode"] {
+		v := int(arg["fileAnnotationRefMode"].(float64))
+		opts.FileAnnotationRefMode = &v
+	}
+	if nil != arg["blockRefTextLeft"] {
+		v := arg["blockRefTextLeft"].(string)
+		opts.BlockRefTextLeft = &v
+	}
+	if nil != arg["blockRefTextRight"] {
+		v := arg["blockRefTextRight"].(string)
+		opts.BlockRefTextRight = &v
+	}
+	if nil != arg["tagOpenMarker"] {
+		v := arg["tagOpenMarker"].(string)
+		opts.TagOpenMarker = &v
+	}
+	if nil != arg["tagCloseMarker"] {
+		v := arg["tagCloseMarker"].(string)
+		opts.TagCloseMarker = &v
+	}
+	// Markdown 专属部分
+	if nil != arg["includeSubDocs"] {
+		v := arg["includeSubDocs"].(bool)
+		opts.IncludeSubDocs = &v
+	}
+	if nil != arg["includeRelatedDocs"] {
+		v := arg["includeRelatedDocs"].(bool)
+		opts.IncludeRelatedDocs = &v
+	}
+	if nil != arg["markdownYFM"] {
+		v := arg["markdownYFM"].(bool)
+		opts.MarkdownYFM = &v
+	}
+	if nil != arg["removeAssetsID"] {
+		v := arg["removeAssetsID"].(bool)
+		opts.RemoveAssetsID = &v
+	}
+	return
+}
+
 func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
 	block := treenode.GetBlockTree(ids[0])
 	box := Conf.Box(block.BoxID)

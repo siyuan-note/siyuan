@@ -93,6 +93,72 @@ func NewOpenAIClient(apiKey, apiBaseURL string) *openai.Client {
 	return openai.NewClientWithConfig(config)
 }
 
+// TestModel 测试模型可用性。优先调用 ListModels（GET /v1/models）拉取可用模型清单，
+// 校验 model 是否在其中；若该端点不可用（部分 OpenAI 兼容服务未实现），则回退到极简 Chat Completion。
+// 返回值：available 为可用模型清单（仅 ListModels 成功时填充），matched 表示 model 是否可用，
+// err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
+func TestModel(apiKey, apiBaseURL, model string, timeout int) (available []string, matched bool, err error) {
+	if 1 > timeout {
+		timeout = 30
+	}
+	client := NewOpenAIClient(apiKey, apiBaseURL)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	defer cancel()
+
+	// 优先校验模型是否在可用清单中
+	list, listErr := client.ListModels(ctx)
+	if nil == listErr {
+		model = strings.TrimSpace(model)
+		target := strings.ToLower(model)
+		for _, m := range list.Models {
+			available = append(available, m.ID)
+			if strings.ToLower(m.ID) == target {
+				matched = true
+			}
+		}
+		return
+	}
+
+	// ListModels 不可用时回退到极简 Chat Completion 验证连通性与鉴权
+	logging.LogInfof("list models failed [%s], fallback to chat completion: %s", apiBaseURL, listErr)
+	_, err = client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+		Model: model,
+		Messages: []openai.ChatCompletionMessage{{
+			Role:    "user",
+			Content: "1",
+		}},
+		MaxCompletionTokens: 1,
+	})
+	if nil != err {
+		logging.LogErrorf("test model [%s] failed: %s", model, err)
+		return
+	}
+	matched = true
+	available = nil
+	return
+}
+
+// ListAvailableModels 拉取 Provider 的可用模型清单（GET /v1/models），仅返回模型 ID 列表。
+// 用于填充前端模型名称下拉框。不支持该端点的服务会返回错误，由调用方回退为手动输入。
+func ListAvailableModels(apiKey, apiBaseURL string, timeout int) (models []string, err error) {
+	if 1 > timeout {
+		timeout = 30
+	}
+	client := NewOpenAIClient(apiKey, apiBaseURL)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	defer cancel()
+
+	list, err := client.ListModels(ctx)
+	if nil != err {
+		logging.LogErrorf("list models [%s] failed: %s", apiBaseURL, err)
+		return
+	}
+	for _, m := range list.Models {
+		models = append(models, m.ID)
+	}
+	return
+}
+
 func IsNetworkError(err error) bool {
 	msg := strings.ToLower(err.Error())
 	return strings.Contains(msg, "actively refused") ||

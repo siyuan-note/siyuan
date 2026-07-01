@@ -17,8 +17,8 @@
     --b3-theme-on-primary: #fff;
     --b3-theme-on-secondary: #fff;
     --b3-theme-on-background: #222;
-    --b3-theme-on-surface: rgba(0, 0, 0, .6);
-    --b3-theme-on-surface-light: rgba(0, 0, 0, .4);
+    --b3-theme-on-surface: #5f6368;
+    --b3-theme-on-surface-light: rgba(95, 99, 104, .68);
     --b3-theme-on-error: #fff;
 
     /* 字体 */

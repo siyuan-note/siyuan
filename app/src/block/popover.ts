@@ -271,6 +271,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     if ((target.id && target.tagName !== "svg" && (target.id.startsWith("minder_node") || target.id.startsWith("kity_") || target.id.startsWith("node_")))
         || target.classList.contains("counter")
         || target.tagName === "circle"
+        || target.closest('.protyle-icon[data-action="openFloat"]')
     ) {
         // gutter & mindmap & 文件树上的数字 & 关系图节点不处理
         return false;

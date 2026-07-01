@@ -5,6 +5,7 @@ on:
     tags:
       - '*-alpha*'
       - '*-beta*'
+      - '*-rc*'
   workflow_dispatch:
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
@@ -16,7 +17,6 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     outputs:
-      release_version: ${{ steps.release_info.outputs.release_version }}
       release_title: ${{ steps.release_info.outputs.release_title }}
       version: ${{ steps.version.outputs.value }}
       packageManager: ${{ steps.packageManager.outputs.value }}
@@ -56,7 +56,6 @@ jobs:
       - name: Gather Release Information
         id: release_info
         run: |
-          echo "release_version=${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
           echo "release_title=SiYuan v${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
           changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ github.repository }})
           changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ github.repository }})
@@ -71,7 +70,7 @@ jobs:
   build:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
-    needs: [prepare, build_android]
+    needs: [prepare]
     strategy:
       matrix:
         config:
@@ -130,7 +129,7 @@ jobs:
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
           cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: false
+          cache: true
       - run: go version
 
       - name: Set up goversioninfo
@@ -153,32 +152,29 @@ jobs:
         run: npm install -g ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('app/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
+
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Install Electron Binary
+        run: pnpm run install:electron
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Building UI
         run: pnpm run build
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
-      - name: Remove Build Directory
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
-        shell: bash
-
-      - name: Remove Kernel Directory for Linux
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-linux"
-        shell: bash
-
-      - name: Remove Kernel Directory for Windows
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel"
-        shell: bash
-
-      - name: Remove Kernel Directory for macOS
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin"
-        shell: bash
-
-      - name: Remove Kernel Directory for macOS ARM64
-        run: rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel-darwin-arm64"
+      - name: Clean Build and Kernel Directories
+        run: |
+          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
+          rm -rf "${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/kernel"*
         shell: bash
 
       - name: Generate Icon Resource and Properties/Version Info For Windows
@@ -225,9 +221,8 @@ jobs:
   build_android:
     runs-on: ubuntu-latest
     name: ubuntu build android.apk
-    # 串行在桌面 build 之前:Android 链路(gomobile/NDK/Gradle)较脆弱,失败时
-    # 直接跳过桌面 build,避免浪费桌面端的 CI 时间。执行顺序:
-    # prepare -> build_android -> build -> create_release
+    # Android and desktop builds run in parallel, both depend on prepare.
+    # create_release aggregates all artifacts once both jobs succeed.
     needs: prepare
     steps:
       - name: Checkout code
@@ -240,7 +235,7 @@ jobs:
         with:
           go-version-file: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.mod
           cache-dependency-path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/go.sum
-          cache: false
+          cache: true
       - run: go version
 
       - name: Set up Node
@@ -251,6 +246,13 @@ jobs:
       - name: Install Node pnpm
         run: npm install -g ${{ needs.prepare.outputs.packageManager }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Cache pnpm store
+        uses: actions/cache@v5
+        with:
+          path: ~/.pnpm-store
+          key: pnpm-${{ runner.os }}-${{ hashFiles('app/pnpm-lock.yaml') }}
+          restore-keys: pnpm-${{ runner.os }}-
 
       - name: Install Node Dependencies
         run: pnpm install --no-frozen-lockfile
@@ -329,7 +331,8 @@ jobs:
           cp ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel/kernel.aar \
              ${{ github.workspace }}/siyuan-android/app/libs/kernel.aar
           cd ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-          zip -r app.zip appearance guide stage changelogs
+          node scripts/trimChangelogs.js
+          zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs)
           mkdir -p ${{ github.workspace }}/siyuan-android/app/src/main/assets
           cp app.zip ${{ github.workspace }}/siyuan-android/app/src/main/assets/app.zip
 
@@ -357,19 +360,21 @@ jobs:
       - name: Building Android App
         # local.properties 被 siyuan-android 的 .gitignore 忽略,CI 里需现场生成,
         # 否则 Gradle 报 "SDK location not found";gradlew 也需显式加可执行权限。
+        # 产物重命名为带版本号的固定名,确保下载文件名正确(GitHub Release 的下载名
+        # 取决于上传时的本地文件名,# 语法只改显示标签)。
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           chmod +x ./gradlew
           ./gradlew assembleOfficialRelease
           cd app/build/outputs/apk/official/release
-          mv siyuan-*-official-release.apk siyuan-android.apk
+          mv siyuan-*-official-release.apk siyuan-${{ needs.prepare.outputs.version }}.apk
         working-directory: ${{ github.workspace }}/siyuan-android
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: siyuan-android
-          path: ${{ github.workspace }}/siyuan-android/app/build/outputs/apk/official/release/siyuan-android.apk
+          path: ${{ github.workspace }}/siyuan-android/app/build/outputs/apk/official/release/siyuan-${{ needs.prepare.outputs.version }}.apk
 
   create_release:
     name: Create Release
@@ -395,13 +400,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           VERSION=${{ needs.prepare.outputs.version }}
-          REL_VER=${{ needs.prepare.outputs.release_version }}
           gh release upload ${{ github.ref_name }} \
-            "siyuan-linux/siyuan-${VERSION}-linux.AppImage#siyuan-${REL_VER}-linux.AppImage" \
-            "siyuan-linux/siyuan-${VERSION}-linux.tar.gz#siyuan-${REL_VER}-linux.tar.gz" \
-            "siyuan-linux/siyuan-${VERSION}-linux.deb#siyuan-${REL_VER}-linux.deb" \
-            "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${REL_VER}-linux.rpm" \
-            "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${REL_VER}-mac.dmg" \
-            "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${REL_VER}-mac-arm64.dmg" \
-            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${REL_VER}-win.exe" \
-            "siyuan-android/siyuan-android.apk#siyuan-${REL_VER}.apk"
+            "siyuan-linux/siyuan-${VERSION}-linux.AppImage#siyuan-${VERSION}-linux.AppImage" \
+            "siyuan-linux/siyuan-${VERSION}-linux.tar.gz#siyuan-${VERSION}-linux.tar.gz" \
+            "siyuan-linux/siyuan-${VERSION}-linux.deb#siyuan-${VERSION}-linux.deb" \
+            "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${VERSION}-linux.rpm" \
+            "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${VERSION}-mac.dmg" \
+            "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${VERSION}-mac-arm64.dmg" \
+            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${VERSION}-win.exe" \
+            "siyuan-android/siyuan-${VERSION}.apk#siyuan-${VERSION}.apk"

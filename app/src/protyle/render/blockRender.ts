@@ -103,12 +103,23 @@ const renderEmbed = (blocks: {
         rotateElement.classList.remove("fn__rotate");
     }
     let html = "";
-    blocks.forEach((blocksItem) => {
+    blocks.forEach((blocksItem, index) => {
         let breadcrumbHTML = "";
         if (blocksItem.blockPaths.length !== 0) {
             breadcrumbHTML = genBreadcrumb(blocksItem.blockPaths, true);
         }
-        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${breadcrumbHTML}${blocksItem.block.content}</div>`;
+        let popover = "";
+        if (index !== 0) {
+            popover = `<div class="protyle-icons"><span data-id="${blocksItem.block.id}" data-action="openFloat" aria-label="${window.siyuan.languages.refPopover}" data-position="4north" class="ariaLabel protyle-icon protyle-icon--last protyle-icon--first"><svg><use xlink:href="#iconPictureInPicture"></use></svg></span></div>`;
+        } else {
+            const popoverElement = item.querySelectorAll(".protyle-icon")[2];
+            if (popoverElement) {
+                popoverElement.setAttribute("data-id", blocksItem.block.id);
+            }
+        }
+        html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">
+${popover}${breadcrumbHTML}${blocksItem.block.content}
+</div>`;
     });
     if (blocks.length > 0) {
         item.firstElementChild.insertAdjacentHTML("afterend", html);

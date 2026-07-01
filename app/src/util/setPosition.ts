@@ -20,14 +20,22 @@ export const setPosition = (element: HTMLElement, left: number, top: number, tar
     }
 
     if (sticky) {
-        // 粘滞定位：同一锚点（top 不变）下，锁定底部边缘
-        // 菜单内容变化导致高度增减时，底部不动、顶部上下移动（向上撑开/向下收缩），避免位置跳动和底部溢出
+        // 粘滞定位：同一锚点（top 不变）下保持稳定
+        // - 下方有空间时优先向下展开（用首次锚点 top，底部随高度自然延伸）
+        // - 下方放不下时才向上撑开（锁定底部边缘，顶部上移）
+        // 由此菜单高度增减时既不跳动也不溢出
         const lockedBottom = element.dataset.positionBottom;
         const lockedX = element.dataset.positionX;
         const sameAnchor = element.dataset.positionTop === String(top);
         if (sameAnchor && lockedBottom !== undefined) {
-            const newTop = parseFloat(lockedBottom) - rect.height;
-            element.style.top = (newTop >= topBarHeight ? newTop : topBarHeight) + "px";
+            if (top + rect.height <= window.innerHeight) {
+                // 下方放得下：向下展开，回到首次锚点
+                element.style.top = top + "px";
+            } else {
+                // 下方放不下：向上撑开，锁定底部边缘
+                const newTop = parseFloat(lockedBottom) - rect.height;
+                element.style.top = (newTop >= topBarHeight ? newTop : topBarHeight) + "px";
+            }
         }
         if (sameAnchor && lockedX !== undefined) {
             element.style.left = lockedX + "px";

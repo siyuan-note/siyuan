@@ -130,36 +130,17 @@ func InitConf() {
 		if data, err := os.ReadFile(confPath); err != nil {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		} else {
-			if conf.NeedsAIMigration(data) {
-				if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
-					logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
-				} else {
-					Conf.AI = conf.MigrateAI(data)
-					if nil != Conf.Search && Conf.Search.HanSensitive == nil {
-						Conf.Search.SetHanSensitive(true)
-					}
-					if nil != Conf.AI {
-						Conf.AI.DecryptAPIKeys()
-					}
-					if nil != Conf.Secrets {
-						Conf.Secrets.Decrypt()
-					}
-					Conf.Save()
-					logging.LogInfof("migrated AI config [%s]", confPath)
-				}
-			} else if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
-				logging.LogErrorf("parse conf [%s] failed: %s", confPath, err)
+			// 解析失败时保留已成功写入的字段；未导出字段（m、userLock）与未触及的导出字段保持 NewAppConf() 初值。
+			if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
+				logging.LogWarnf("parse conf failed, parsed fields retained: %s", err)
 			} else {
 				logging.LogInfof("loaded conf [%s]", confPath)
-				if nil != Conf.Search && Conf.Search.HanSensitive == nil {
-					Conf.Search.SetHanSensitive(true)
-				}
-				if nil != Conf.AI {
-					Conf.AI.DecryptAPIKeys()
-				}
-				if nil != Conf.Secrets {
-					Conf.Secrets.Decrypt()
-				}
+			}
+
+			if conf.NeedsAIMigration(data) {
+				Conf.AI = conf.MigrateAI(data)
+				Conf.Save()
+				logging.LogInfof("migrated AI config [%s]", confPath)
 			}
 		}
 	}
@@ -556,6 +537,9 @@ func InitConf() {
 	if 1 > Conf.Search.BacklinkMentionKeywordsLimit {
 		Conf.Search.BacklinkMentionKeywordsLimit = 512
 	}
+	if nil == Conf.Search.HanSensitive {
+		Conf.Search.SetHanSensitive(true)
+	}
 	sql.SetHanSensitive(Conf.Search.HanSensitiveVal())
 
 	if nil == Conf.Stat {
@@ -610,11 +594,15 @@ func InitConf() {
 
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
+	} else {
+		Conf.AI.DecryptAPIKeys()
 	}
 	Conf.AI.Normalize()
 
 	if nil == Conf.Secrets {
 		Conf.Secrets = conf.NewSecrets()
+	} else {
+		Conf.Secrets.Decrypt()
 	}
 
 	if nil == Conf.Variables {
@@ -678,6 +666,24 @@ func InitConf() {
 	}
 
 	Conf.Save()
+
+	// 安全模式：渲染进程崩溃恢复后由桌面端主进程通过 --safe-mode 注入。
+	// safeMode 是纯运行时状态，不随 conf.json 持久化（Save 时会被排除），故每次启动都按 util.SafeMode 重新赋值。
+	Conf.System.SafeMode = util.SafeMode
+	if util.SafeMode {
+		// 直接覆盖外观、集市、代码片段相关配置并持久化，禁用代码片段、插件、自定义主题与图标，以排除扩展导致再次崩溃的可能。
+		// 注意：这是破坏性操作，会覆盖用户原有配置，后续不会自动恢复。
+		Conf.Appearance.ThemeLight = "daylight"
+		Conf.Appearance.ThemeDark = "midnight"
+		Conf.Appearance.Icon = "litheness"
+		Conf.Appearance.ThemeJS = false
+		Conf.Bazaar.PetalDisabled = true
+		Conf.Snippet.EnabledCSS = false
+		Conf.Snippet.EnabledJS = false
+		Conf.Save()
+		logging.LogInfof("booted in safe mode")
+	}
+
 	logging.SetLogLevel(Conf.LogLevel)
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
@@ -955,6 +961,12 @@ func (conf *AppConf) Save() {
 		Conf.Secrets.Encrypt()
 		defer Conf.Secrets.Decrypt()
 	}
+
+	// safeMode 是纯运行时状态（由 --safe-mode 注入），不随 conf.json 持久化，避免跨启动残留。
+	// 序列化写盘时临时清零，写完恢复内存值（供 getConf 等运行时读取）。
+	safeMode := Conf.System.SafeMode
+	Conf.System.SafeMode = false
+	defer func() { Conf.System.SafeMode = safeMode }()
 
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")

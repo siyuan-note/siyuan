@@ -95,7 +95,7 @@ const syncSettingSearch = (dialogElement: HTMLElement, app: App) => {
 };
 
 export const initSettingSearch = (element: HTMLElement, app: App) => {
-    const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
+    const inputElement = element.querySelector(".config__tab-head .b3-text-field") as HTMLInputElement;
     if (!isPhablet()) {
         inputElement.focus();
     } else {

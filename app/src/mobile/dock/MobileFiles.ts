@@ -14,7 +14,7 @@ import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
-import {newFile} from "../../util/newFile";
+import {newFileInTree} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
@@ -184,13 +184,7 @@ export class MobileFiles extends Model {
                         const notebookId = ulElement.getAttribute("data-url");
                         if (!window.siyuan.config.readonly) {
                             if (type === "new") {
-                                newFile({
-                                    app,
-                                    notebookId,
-                                    currentPath: pathString,
-                                    useSavePath: false,
-                                    listDocTree: true,
-                                });
+                                newFileInTree(app, notebookId, pathString);
                             } else if (type === "more-root") {
                                 initNavigationMenu(app, target.parentElement);
                                 window.siyuan.menus.menu.fullscreen("bottom");
@@ -527,6 +521,9 @@ export class MobileFiles extends Model {
                 case "li2doc":
                     this.selectItem(data.data.box.id, data.data.path);
                     break;
+                case "reloadDocInfo":
+                    this.updateDocInfo(data);
+                    break;
                 case "renamenotebook":
                     this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
                     break;
@@ -585,11 +582,25 @@ export class MobileFiles extends Model {
             } else {
                 const hiddenElement = liElement.querySelector(".fn__hidden");
                 if (hiddenElement) {
+                    // 原先无子文档：显示展开箭头
                     hiddenElement.classList.remove("fn__hidden");
-                } else {
+                } else if (liElement.querySelector(".b3-list-item__arrow--open")) {
+                    // 父文档已展开：刷新子列表
                     this.getLeaf(liElement, notebookId, true);
                 }
                 break;
+            }
+        }
+    }
+
+    private updateDocInfo(data: IWebSocketData) {
+        const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
+        if (liElement) {
+            liElement.setAttribute("data-count", data.data.subFileCount);
+            if (data.data.subFileCount === 0) {
+                liElement.querySelector(".b3-list-item__toggle")?.classList.add("fn__hidden");
+            } else {
+                liElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
             }
         }
     }
@@ -959,13 +970,7 @@ export class MobileFiles extends Model {
             app: Constants.SIYUAN_APPID,
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
-                newFile({
-                    app: this.app,
-                    notebookId,
-                    currentPath: "/",
-                    useSavePath: false,
-                    listDocTree: true,
-                });
+                newFileInTree(this.app, notebookId, "/");
                 return;
             }
             this.onLsHTML(response.data);
@@ -1063,7 +1068,7 @@ export class MobileFiles extends Model {
         }
         const paddingLeft = (item.path.split("/").length - 1) * 20;
         const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
-        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-type="navigation-file" 
+        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-count="${item.subFileCount}" data-type="navigation-file" 
 class="b3-list-item" data-path="${item.path}" style="--file-toggle-width:${paddingLeft + 20}px" >
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>

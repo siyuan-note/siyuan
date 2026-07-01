@@ -120,6 +120,7 @@
 
       .config__tab-head {
         flex-shrink: 0;
+        margin: 0 8px 8px 8px;
       }
 
       .config__tab-scroll {
@@ -134,12 +135,7 @@
         display: flex;
         align-items: center;
         height: 32px;
-        padding: 0 12px;
         margin-bottom: 8px;
-      }
-
-      .b3-form__icon {
-        margin: 0 8px 8px;
       }
 
       .b3-list-item {
@@ -311,6 +307,8 @@
     &__panel {
       height: 100%;
       overflow: auto;
+      padding-bottom: 16px;
+      box-sizing: border-box;
     }
 
     &__title {
@@ -425,6 +423,12 @@
 }
 
 #configAccountPayment {
+  @media (max-width: 750px) {
+    .config-wrap > .fn__space {
+      display: block;
+    }
+  }
+
   .ft__on-surface svg {
     width: 16px !important;
     height: 16px !important;

@@ -250,7 +250,7 @@ func Serve(fastMode bool, cookieKey string) {
 	}
 
 	if "" != certPath {
-		if err = util.ServeMultiplexed(ln, httpHandler, certPath, keyPath, util.HttpServer); err != nil {
+		if _, _, err = util.ServeMultiplexed(ln, httpHandler, certPath, keyPath, util.HttpServer, nil); err != nil {
 			if errors.Is(err, http.ErrServerClosed) || errors.Is(err, cmux.ErrListenerClosed) {
 				return
 			}

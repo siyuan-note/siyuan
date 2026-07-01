@@ -16,6 +16,7 @@ import {isOnlyMeta, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/
 import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {mergePathSegments} from "./mergePathSegments";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     /// #if !BROWSER
@@ -776,16 +777,7 @@ export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = fa
  * @returns 规范化后的相对路径（使用 /），若路径非法则返回替换后的合法路径
  */
 export const normalizeStoragePath = (storageName: string): string | null => {
-    const parts = storageName.replace(/\\/g, "/").split("/");
-    const resolved: string[] = [];
-    for (const part of parts) {
-        if (part === "..") {
-            if (resolved.length > 0) {
-                resolved.pop();
-            }
-        } else if (part && part !== ".") {
-            resolved.push(part);
-        }
-    }
-    return resolved.length > 0 ? resolved.join("/") : storageName.replace(/[\/\\]+/g, "");
+    const segments = storageName.replace(/\\/g, "/").split("/");
+    const merged = mergePathSegments([], segments);
+    return merged.length > 0 ? merged.join("/") : storageName.replace(/[\/\\]+/g, "");
 };

@@ -6,7 +6,7 @@
 		"id": "20260612191136-feqbi1x",
 		"title": "命令行接口",
 		"type": "doc",
-		"updated": "20260618123536"
+		"updated": "20260628052056"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan [全局标志] \u0026lt;命令\u0026gt; [参数]"
+					"TextMarkTextContent": "siyuan [全局标志] &lt;命令&gt; [参数]"
 				},
 				{
 					"Type": "NodeText",
@@ -91,7 +91,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;安装目录\u0026gt;/resources/kernel/SiYuan-Kernel"
+					"TextMarkTextContent": "&lt;安装目录&gt;/resources/kernel/SiYuan-Kernel"
 				},
 				{
 					"Type": "NodeText",
@@ -278,7 +278,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "ln -s \u003c安装目录\u003e/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan\n"
+									"Data": "ln -s <安装目录>/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -615,7 +615,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
+					"Data": ">"
 				},
 				{
 					"ID": "20260618123536-4th77fq",
@@ -1013,7 +1013,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "document list/create/move"
+									"TextMarkTextContent": "document list/move"
 								},
 								{
 									"Type": "NodeText",
@@ -2083,6 +2083,123 @@
 							]
 						}
 					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "notebook set-icon"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--icon"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "设置笔记本图标"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "notebook random-icon"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​["
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--id"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​]"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "从内置 emoji 随机设置笔记本图标"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -2105,7 +2222,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan notebook list\nsiyuan notebook create --name \"我的笔记本\"\nsiyuan notebook remove --id notebook-id\nsiyuan notebook rename --id notebook-id --name \"新名称\"\nsiyuan notebook open --id notebook-id\nsiyuan notebook close --id notebook-id\n"
+					"Data": "siyuan notebook list\nsiyuan notebook create --name \"我的笔记本\"\nsiyuan notebook remove --id notebook-id\nsiyuan notebook rename --id notebook-id --name \"新名称\"\nsiyuan notebook open --id notebook-id\nsiyuan notebook close --id notebook-id\nsiyuan notebook set-icon --id notebook-id --icon \"1f4ca\"\nsiyuan notebook random-icon --id notebook-id\nsiyuan notebook random-icon\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -2230,13 +2347,54 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "--notebook"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2245,7 +2403,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -2293,22 +2455,71 @@
 									"Data": "​"
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "--notebook --title"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--hpath"
+									"TextMarkTextContent": "--notebook"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--title"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2317,7 +2528,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -2527,13 +2742,71 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id --notebook"
+									"TextMarkTextContent": "--id"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--notebook"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -2542,7 +2815,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -2700,7 +2977,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;keyword\u0026gt;"
+									"TextMarkTextContent": "&lt;keyword&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -2741,7 +3018,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/文件夹\"\n\nsiyuan document create --notebook notebook-id --title \"新文档\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --hpath \"/文件夹\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --markdown \"# 标题\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新标题\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\nsiyuan document search \"关键词\"\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/目标文件夹\"\n"
+					"Data": "siyuan document list --notebook notebook-id\nsiyuan document list --notebook notebook-id --hpath \"/文件夹\"\n\nsiyuan document create --notebook notebook-id --title \"新文档\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --path \"/文件夹\"\nsiyuan document create --notebook notebook-id --title \"新文档\" --markdown \"# 标题\"\n\nsiyuan document get --id doc-id\nsiyuan document remove --id doc-id\nsiyuan document rename --id doc-id --title \"新标题\"\nsiyuan document duplicate --id doc-id\nsiyuan document info --id doc-id\nsiyuan document search \"关键词\"\n\nsiyuan document move --id doc-id --notebook target-nb\nsiyuan document move --id doc-id --notebook target-nb --hpath \"/目标文件夹\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -3768,7 +4045,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新标题\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表项\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"\u003e 引用\"\n\nsiyuan block update --id block-id --data \"修改后内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新标题\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表项\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"> 引用\"\n\nsiyuan block update --id block-id --data \"修改后内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -4033,7 +4310,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;query\u0026gt;"
+									"TextMarkTextContent": "&lt;query&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -4621,7 +4898,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;statement\u0026gt;"
+									"TextMarkTextContent": "&lt;statement&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -5608,13 +5885,71 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--file --notebook"
+									"TextMarkTextContent": "--file"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--notebook"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -5623,7 +5958,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -5671,13 +6010,71 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--file --notebook"
+									"TextMarkTextContent": "--file"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--notebook"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--path"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -5686,7 +6083,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -5985,7 +6386,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;query\u0026gt;"
+									"TextMarkTextContent": "&lt;query&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -6787,7 +7188,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;keyword\u0026gt;"
+									"TextMarkTextContent": "&lt;keyword&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -6887,6 +7288,10 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "--id"
@@ -6894,6 +7299,31 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--output"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -8811,7 +9241,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;keyword\u0026gt;"
+									"TextMarkTextContent": "&lt;keyword&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -8863,9 +9293,13 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id"
+									"TextMarkTextContent": "--av"
 								},
 								{
 									"Type": "NodeText",
@@ -8917,13 +9351,29 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id"
+									"TextMarkTextContent": "--av"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -8932,7 +9382,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -8941,7 +9407,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -8950,16 +9432,36 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--page-size"
+									"TextMarkTextContent": "--size"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -9007,9 +9509,13 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id"
+									"TextMarkTextContent": "--av"
 								},
 								{
 									"Type": "NodeText",
@@ -9097,16 +9603,28 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id"
+									"TextMarkTextContent": "--av"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -9154,13 +9672,63 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id --name --type"
+									"TextMarkTextContent": "--av"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--type"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9169,7 +9737,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9178,7 +9762,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -9226,13 +9814,46 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id --key"
+									"TextMarkTextContent": "--av"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--key"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9241,7 +9862,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -9289,13 +9914,29 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id"
+									"TextMarkTextContent": "--av"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9304,7 +9945,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9313,7 +9970,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9322,7 +9995,48 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--group"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9331,7 +10045,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9340,7 +10070,23 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​] ["
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -9349,7 +10095,11 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​]"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -9397,9 +10147,30 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id --items id1,id2,..."
+									"TextMarkTextContent": "--av"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--ids"
 								},
 								{
 									"Type": "NodeText",
@@ -9451,9 +10222,64 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--id --key --item --value"
+									"TextMarkTextContent": "--av"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--key"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--item"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--value"
 								},
 								{
 									"Type": "NodeText",
@@ -9670,7 +10496,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan database search \"关键词\"\nsiyuan database get --id db-id\nsiyuan database render --id db-id --view view-id --query \"筛选\" --page 1 --page-size 50\nsiyuan database keys --id db-id\n\nsiyuan database key add --id db-id --name \"状态\" --type select\nsiyuan database key add --id db-id --name \"金额\" --type number --icon 1f4b0\nsiyuan database key add --id db-id --name \"备注\" --type text --prev previous-key-id\nsiyuan database key remove --id db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --id db-id\n\nsiyuan database item add --id db-id\nsiyuan database item add --id db-id --block block-id --content \"文本\"\nsiyuan database item add --id db-id --view view-id --previous prev-id\nsiyuan database item remove --id db-id --items \"item1,item2\"\nsiyuan database item update --id db-id --key key-id --item item-id --value '{\"content\": \"新值\"}'\n"
+					"Data": "siyuan database search \"关键词\"\nsiyuan database get --av db-id\nsiyuan database render --av db-id --view view-id --query \"筛选\" --page 1 --size 50\nsiyuan database keys --av db-id\n\nsiyuan database key add --av db-id --name \"状态\" --type select\nsiyuan database key add --av db-id --name \"金额\" --type number --icon 1f4b0\nsiyuan database key add --av db-id --name \"备注\" --type text --prev previous-key-id\nsiyuan database key remove --av db-id --key key-id --remove-relation-dest\n\nsiyuan database unused\nsiyuan database clean\nsiyuan database clean --av db-id\n\nsiyuan database item add --av db-id\nsiyuan database item add --av db-id --block block-id --content \"文本\"\nsiyuan database item add --av db-id --view view-id --previous prev-id\nsiyuan database item remove --av db-id --ids \"item1,item2\"\nsiyuan database item update --av db-id --key key-id --item item-id --value '{\"content\": \"新值\"}'\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -10622,7 +11448,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+									"TextMarkTextContent": "&lt;path&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -10676,7 +11502,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+									"TextMarkTextContent": "&lt;path&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -10728,13 +11554,42 @@
 									"Data": "​"
 								},
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;path\u0026gt; --file \u0026lt;local-path\u0026gt;"
+									"TextMarkTextContent": "&lt;path&gt;"
 								},
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--file"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "]"
 								}
 							]
 						},
@@ -10784,7 +11639,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+									"TextMarkTextContent": "&lt;path&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -10838,7 +11693,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;old\u0026gt; \u0026lt;new\u0026gt;"
+									"TextMarkTextContent": "&lt;old&gt; &lt;new&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -10892,7 +11747,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;src\u0026gt; \u0026lt;dst\u0026gt;"
+									"TextMarkTextContent": "&lt;src&gt; &lt;dst&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -11027,7 +11882,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+									"TextMarkTextContent": "&lt;path&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -11099,7 +11954,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;path\u0026gt;"
+									"TextMarkTextContent": "&lt;path&gt;"
 								},
 								{
 									"Type": "NodeText",

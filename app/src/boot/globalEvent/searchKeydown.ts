@@ -4,7 +4,7 @@ import * as path from "path";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
-import {newFileByName} from "../../util/newFile";
+import {newFile} from "../../util/newFile";
 import {App} from "../../index";
 import {Dialog} from "../../dialog";
 import {getAllModels} from "../../layout/getAll";
@@ -62,7 +62,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
     if (searchType === "doc" && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
         if (config.method === 0) {
-            newFileByName(app, searchInputElement.value);
+            newFile(app, searchInputElement.value);
         }
         return true;
     }
@@ -90,7 +90,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (currentList.getAttribute("data-type") === "search-new") {
         if (event.key === "Enter" && config.method === 0) {
-            newFileByName(app, searchInputElement.value);
+            newFile(app, searchInputElement.value);
             return true;
         }
         return false;

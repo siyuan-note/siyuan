@@ -157,6 +157,10 @@ func BootSyncData() {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	if 1 == code {
+		// 启动同步成功后消费本地速记临时文件，避免移动端开启云同步时需手动触发同步才能刷新闪念速记
+		consumeShorthands()
+	}
 	return
 }
 

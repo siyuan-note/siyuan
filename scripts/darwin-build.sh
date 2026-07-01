@@ -55,6 +55,7 @@ echo
 echo 'Building UI'
 cd "$PROJECT_ROOT/app"
 pnpm install
+pnpm run install:electron
 pnpm run build
 
 echo
@@ -62,7 +63,7 @@ echo 'Building Kernel'
 cd "$PROJECT_ROOT/kernel"
 go version
 export GO111MODULE=on
-export GOPROXY=https://mirrors.aliyun.com/goproxy/
+export GOPROXY=https://mirrors.aliyun.com/goproxy/,https://goproxy.cn,direct
 export CGO_ENABLED=1
 export GOOS=darwin
 

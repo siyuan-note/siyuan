@@ -90,8 +90,7 @@
       color: var(--b3-theme-on-surface);
     }
 
-    // 悬浮时显示固定尺寸的圆角背景（排除框线与+号，它们有自己的样式）
-    // 用 ::before 而非直接设 button 背景，避免受 padding/svg 尺寸影响导致宽高不一致
+    // 悬浮时显示正方形圆角背景（排除框线与+号，它们有自己的样式），居中于块标 button
     &:not(.protyle-gutters__line):not(.protyle-gutters__plus)::before {
       content: '';
       position: absolute;
@@ -199,6 +198,11 @@
   position: fixed;
   background-color: var(--b3-theme-primary-lightest);
   z-index: 3; // 需大于 database header and footer
+
+  // 划选未超过一个块时不显示矩形
+  &[data-empty="true"] {
+    display: none;
+  }
 }
 
 .protyle-breadcrumb {

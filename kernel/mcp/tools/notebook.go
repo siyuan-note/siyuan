@@ -28,13 +28,14 @@ import (
 
 var NotebookTool = &Tool{
 	Name:        "notebook",
-	Description: "Notebook management. Actions: list(), open(id), close(id), create(name), rename(id, name), remove(id).",
+	Description: "Notebook management. Actions: list(), open(id), close(id), create(name), rename(id, name), remove(id), set_icon(id, icon), random_icon(id?).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"list", "open", "close", "create", "rename", "remove"}},
-			"id":     {Type: "string", Description: "Notebook ID (for open, close, rename, remove)"},
+			"action": {Type: "string", Description: "Operation", Enum: []string{"list", "open", "close", "create", "rename", "remove", "set_icon", "random_icon"}},
+			"id":     {Type: "string", Description: "Notebook ID (for open, close, rename, remove, set_icon, random_icon)"},
 			"name":   {Type: "string", Description: "Notebook name (for create, rename)"},
+			"icon":   {Type: "string", Description: "Notebook icon (for set_icon). Emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\""},
 		},
 		Required: []string{"action"},
 	},
@@ -60,9 +61,13 @@ func notebookHandler(args map[string]interface{}) (CallToolResult, error) {
 		return notebookRename(args)
 	case "remove":
 		return notebookRemove(args)
+	case "set_icon":
+		return notebookSetIcon(args)
+	case "random_icon":
+		return notebookRandomIcon(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, open, close, create, rename, remove]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, open, close, create, rename, remove, set_icon, random_icon]"}},
 		IsError: true,
 	}, nil
 }
@@ -174,4 +179,73 @@ func notebookClose(args map[string]interface{}) (CallToolResult, error) {
 	sql.FlushQueue()
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook closed: " + id}}}, nil
+}
+
+func notebookSetIcon(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	icon, _ := args["icon"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+
+	// 校验笔记本存在，避免对一个不存在的 id 静默写入图标。
+	exists := false
+	if notebooks, err := model.ListNotebooks(); err == nil {
+		for _, nb := range notebooks {
+			if nb.ID == id {
+				exists = true
+				break
+			}
+		}
+	}
+	if !exists {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook not found: " + id}}, IsError: true}, nil
+	}
+
+	// icon 取值格式与 attr 工具一致；SetBoxIcon 内部对自定义图片名做 XSS 过滤。
+	model.SetBoxIcon(id, icon)
+	util.PushReloadFiletree()
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook icon set: " + id + " -> " + icon}}}, nil
+}
+
+func notebookRandomIcon(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+
+	notebooks, err := model.ListNotebooks()
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "list notebooks failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	// 目标范围：传 id 仅换该笔记本；不传 id 则对全部笔记本各随机换一个。
+	targets := notebooks
+	if id != "" {
+		var found bool
+		for _, nb := range notebooks {
+			if nb.ID == id {
+				targets = []*model.Box{nb}
+				found = true
+				break
+			}
+		}
+		if !found {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook not found: " + id}}, IsError: true}, nil
+		}
+	}
+	if len(targets) == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no notebooks to update"}}, IsError: true}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Randomized icons for %d notebook(s):\n", len(targets)))
+	for _, nb := range targets {
+		oldIcon := nb.Icon
+		newIcon := randomEmoji()
+		model.SetBoxIcon(nb.ID, newIcon)
+		sb.WriteString(fmt.Sprintf("- %s (id: %s): %s -> %s\n", nb.Name, nb.ID, oldIcon, newIcon))
+	}
+
+	util.PushReloadFiletree()
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

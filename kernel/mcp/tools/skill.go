@@ -20,18 +20,20 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var SkillTool = &Tool{
 	Name:        "skill",
-	Description: "Skill operations: load(name), save(name, content), remove(name), rename(name, new_name), list().\n\n" + skillListDesc(),
+	Description: "Skill operations: load(name), save(name, content), install(url), remove(name), rename(name, new_name), list().\n\n" + skillListDesc(),
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":   {Type: "string", Description: "Operation", Enum: []string{"load", "save", "remove", "rename", "list"}},
+			"action":   {Type: "string", Description: "Operation", Enum: []string{"load", "save", "install", "remove", "rename", "list"}},
 			"name":     {Type: "string", Description: "Skill name (directory name)"},
 			"content":  {Type: "string", Description: "SKILL.md full content with YAML frontmatter (for save)"},
+			"url":      {Type: "string", Description: "Skill source for install: 'owner/repo' shorthand (e.g. Tencent/WeChatReading), a full GitHub URL, a raw SKILL.md URL, or a release zip URL"},
 			"new_name": {Type: "string", Description: "New skill name (for rename)"},
 		},
 		Required: []string{"action"},
@@ -50,6 +52,8 @@ func skillHandler(args map[string]interface{}) (CallToolResult, error) {
 		return skillLoad(args)
 	case "save":
 		return skillSave(args)
+	case "install":
+		return skillInstall(args)
 	case "remove":
 		return skillRemove(args)
 	case "rename":
@@ -58,7 +62,7 @@ func skillHandler(args map[string]interface{}) (CallToolResult, error) {
 		return skillList(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [load, save, remove, rename, list]"}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [load, save, install, remove, rename, list]"}},
 		IsError: true,
 	}, nil
 }
@@ -79,6 +83,9 @@ func skillLoad(args map[string]interface{}) (CallToolResult, error) {
 			IsError: true,
 		}, nil
 	}
+
+	// 变量（非敏感）在技能正文注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
+	content = model.Conf.Variables.Resolve(content)
 
 	result := "<skill_content name=\"" + name + "\">\n\n" + content + "\n\n</skill_content>"
 	return CallToolResult{
@@ -111,6 +118,37 @@ func skillSave(args map[string]interface{}) (CallToolResult, error) {
 
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "skill saved: " + name}},
+	}, nil
+}
+
+func skillInstall(args map[string]interface{}) (CallToolResult, error) {
+	rawURL, _ := args["url"].(string)
+	if rawURL == "" {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "url is required for install (owner/repo shorthand, GitHub URL, raw SKILL.md URL, or release zip URL)"}},
+			IsError: true,
+		}, nil
+	}
+
+	result, err := util.InstallSkill(rawURL)
+	if err != nil {
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "install failed: " + err.Error()}},
+			IsError: true,
+		}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("installed %d skill(s):\n", len(result.Names)))
+	for i, name := range result.Names {
+		desc := ""
+		if i < len(result.Descriptions) {
+			desc = result.Descriptions[i]
+		}
+		sb.WriteString("- **" + name + "**: " + desc + "\n")
+	}
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: sb.String()}},
 	}, nil
 }
 

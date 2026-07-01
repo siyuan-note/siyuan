@@ -129,6 +129,11 @@ export const showTooltip = (
     }
     messageElement.style.top = top + "px";
     messageElement.style.left = Math.max(0, left) + "px";
+    // 与 data-position 同套风格：触发元素可用 data-delay 指定悬浮延迟（毫秒），未设置时沿用 SCSS 默认值
+    const tooltipDelay = target.getAttribute("data-delay");
+    if (tooltipDelay) {
+        messageElement.style.animationDelay = tooltipDelay + "ms";
+    }
 };
 
 export const hideTooltip = () => {

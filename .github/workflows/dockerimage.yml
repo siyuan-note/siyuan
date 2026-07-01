@@ -1,15 +1,13 @@
 name: Release Docker Image
 
 on:
-  workflow_dispatch:
-    inputs:
-      image_tag:
-        description: '镜像标签，留空则使用 package.json 中的版本号。务必注意：请确认选择了正确的分支。完整输入示例：3.0.11-rc0 '
-        required: true
-        default: ''
   push:
     branches:
       - master
+    tags:
+      - '*-alpha*'
+      - '*-beta*'
+      - '*-rc*'
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
@@ -66,11 +64,10 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USER }}
           password: ${{ secrets.DOCKER_HUB_PWD }}
 
-      - name: Build the Docker image use Workflow Dispatch inputs' version
-        if: ${{ github.event_name == 'workflow_dispatch' && !github.event.inputs.image_tag == '' }}
+      - name: Build and push Docker image
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ github.event.inputs.image_tag }} .
-      - name: Build the Docker image use package_json version
-        if: ${{ github.event_name == 'push' || github.event.inputs.image_tag == '' }}
-        run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .
+          LATEST_FLAG=""
+          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            LATEST_FLAG="-t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest"
+          fi
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 $LATEST_FLAG -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .

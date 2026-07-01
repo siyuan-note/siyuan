@@ -127,6 +127,12 @@ func getChangelog(c *gin.Context) {
 		return
 	}
 
+	if !util.IsReleaseVer(util.Ver) {
+		model.Conf.ShowChangelog = false
+		model.Conf.Save()
+		return
+	}
+
 	verDir := filepath.Join(changelogsDir, "v"+util.Ver)
 	changelogPath := filepath.Join(verDir, "v"+util.Ver+"."+model.Conf.Lang+".md")
 	if !gulu.File.IsExist(changelogPath) {
@@ -144,6 +150,7 @@ func getChangelog(c *gin.Context) {
 	}
 
 	model.Conf.ShowChangelog = false
+	model.Conf.Save()
 	luteEngine := lute.New()
 	htmlContent := luteEngine.MarkdownStr("", string(contentData))
 	htmlContent = util.LinkTarget(htmlContent, "")

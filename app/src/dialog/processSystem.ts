@@ -388,16 +388,23 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     if (data.id !== bazaarSideElement.getAttribute("data-repourl")) {
         return;
     }
-    const btnElement = bazaarSideElement.querySelector('[data-type="install"]') as HTMLElement;
-    if (btnElement) {
-        if (data.percent >= 1) {
-            btnElement.parentElement.classList.add("fn__none");
-            btnElement.parentElement.nextElementSibling.classList.add("fn__none");
-        } else {
-            btnElement.classList.add("b3-button--progress");
-            btnElement.parentElement.nextElementSibling.firstElementChild.classList.add("b3-button--progress");
-            btnElement.innerHTML = `<span style="width: ${data.percent * 100}%"></span>`;
-            btnElement.parentElement.nextElementSibling.firstElementChild.innerHTML = `<span style="width: ${data.percent * 100}%"></span>`;
+    const installBtnElement = bazaarSideElement.querySelector('[data-type="install"]') as HTMLElement;
+    const updateBtnElement = bazaarSideElement.querySelector('[data-type="install-t"]') as HTMLElement;
+    if (!installBtnElement && !updateBtnElement) {
+        return;
+    }
+    const progressHTML = `<span style="width: ${data.percent * 100}%"></span>`;
+    if (data.percent >= 1) {
+        installBtnElement?.parentElement.classList.add("fn__none");
+        updateBtnElement?.parentElement.classList.add("fn__none");
+    } else {
+        if (installBtnElement) {
+            installBtnElement.classList.add("b3-button--progress");
+            installBtnElement.innerHTML = progressHTML;
+        }
+        if (updateBtnElement) {
+            updateBtnElement.classList.add("b3-button--progress");
+            updateBtnElement.innerHTML = progressHTML;
         }
     }
 };

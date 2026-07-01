@@ -13,6 +13,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasC
 import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr, escapeHtml} from "../util/escape";
+import {formatCount} from "../util/number";
 import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
@@ -135,10 +136,7 @@ const bazaar = {
             <div class="fn__space"></div>
             <button data-type="myWidget" class="b3-button b3-button--outline">${window.siyuan.languages.widget}</button>
             <div class="fn__space"></div>
-            <div class="b3-form__icon">
-                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input fn__block" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            </div>
+            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center" style="margin-right: 8px">
@@ -165,10 +163,7 @@ const bazaar = {
                 <option value="1">${window.siyuan.languages.themeDark}</option>
             </select>
             <div class="fn__space"></div>
-            <div class="b3-form__icon">
-                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input fn__block" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            </div>
+            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
@@ -188,10 +183,7 @@ const bazaar = {
                 <option ${localSort.template === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <div class="b3-form__icon">
-                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input fn__block" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            </div>
+            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
@@ -211,10 +203,7 @@ const bazaar = {
                 <option ${localSort.plugin === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <div class="b3-form__icon">
-                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input fn__block" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            </div>
+            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
@@ -234,10 +223,7 @@ const bazaar = {
                 <option ${localSort.icon === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <div class="b3-form__icon">
-                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input fn__block" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            </div>
+            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
@@ -257,10 +243,7 @@ const bazaar = {
                 <option ${localSort.widget === "3" ? "selected" : ""} value="3">${window.siyuan.languages.sortByDownloadsAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <div class="b3-form__icon">
-                <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input class="b3-text-field b3-form__icon-input fn__block" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            </div>
+            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
@@ -311,7 +294,7 @@ const bazaar = {
             <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space--small"></span>
-                ${item.downloads}
+                ${formatCount(item.downloads)}
             </span>
             <span class="fn__space--small"></span>
             <span class="block__icon block__icon--show block__icon--text">
@@ -596,17 +579,17 @@ type="checkbox">
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconStar"></use></svg>
         <span class="fn__space"></span>
-        <a href="${data.repoURL}/stargazers" target="_blank" title="Stars">${data.stars}</a>
+        <a href="${data.repoURL}/stargazers" target="_blank" title="Stars">${formatCount(data.stars)}</a>
         <span class="fn__space"></span>
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconGitHubI"></use></svg>
         <span class="fn__space"></span>
-        <a href="${data.repoURL}/issues" target="_blank" title="Open issues">${data.openIssues}</a>
+        <a href="${data.repoURL}/issues" target="_blank" title="Open issues">${formatCount(data.openIssues)}</a>
         <span class="fn__space"></span>
         <span class="fn__space"></span>
         <svg class="svg ft__on-surface fn__flex-center"><use xlink:href="#iconDownload"></use></svg>
         <span class="fn__space"></span>
-        ${data.downloads}
+        ${formatCount(data.downloads)}
     </div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
@@ -760,7 +743,7 @@ type="checkbox">
                             widgets: "/api/bazaar/installBazaarWidget",
                         };
                         fetchPost(installAPI[pkgType], {
-                            keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-form__icon-input`) as HTMLInputElement).value,
+                            keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,
                             repoURL: pkgItem.repoURL,
                             packageName: pkgItem.name,
                             repoHash: pkgItem.repoHash,
@@ -825,7 +808,7 @@ type="checkbox">
                                 target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 16px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
                             }
                             fetchPost(installAPI[pkgType], {
-                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-form__icon-input`) as HTMLInputElement).value,
+                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,
                                 repoURL: pkgItem.repoURL,
                                 packageName: pkgItem.name,
                                 repoHash: pkgItem.repoHash,
@@ -859,7 +842,7 @@ type="checkbox">
                         confirmDialog("⚠️ " + window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
                             fetchPost(uninstallAPI[pkgType], {
                                 packageName,
-                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-form__icon-input`) as HTMLInputElement).value,
+                                keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,
                                 frontend: getFrontend()
                             }, response => {
                                 this._genMyHTML(pkgType, app);
@@ -1037,7 +1020,7 @@ type="checkbox">
             }
         });
 
-        bazaar.element.querySelectorAll(".config-bazaar__panel .b3-form__icon > .b3-text-field").forEach((inputElement: HTMLInputElement) => {
+        bazaar.element.querySelectorAll(".config-bazaar__panel .b3-text-field").forEach((inputElement: HTMLInputElement) => {
             inputElement.addEventListener("keydown", (event) => {
                 if (event.isComposing) {
                     return;
@@ -1074,7 +1057,7 @@ type="checkbox">
                             bazaar._data.plugins = response.data.packages;
                         });
                     } else if (type === "downloaded") {
-                        this._genMyHTML(bazaar._myType2Type(inputElement.parentElement.parentElement.querySelector(".b3-button:not(.b3-button--outline)").getAttribute("data-type")), app);
+                        this._genMyHTML(bazaar._myType2Type(inputElement.parentElement.querySelector(".b3-button:not(.b3-button--outline)").getAttribute("data-type")), app);
                     }
                     event.preventDefault();
                     return;

@@ -632,6 +632,11 @@ const addAttrViewColAnimation = (options: {
             } else {
                 previousElement = item.querySelector(".av__cell").previousElementSibling;
             }
+            // 分组视图下空分组或被虚拟滚动裁剪的行内可能找不到锚点单元格，此时跳过该行，
+            // 避免在 null 上调用 insertAdjacentHTML 抛出异常而中断整轮遍历 https://github.com/siyuan-note/siyuan/issues/18014
+            if (!previousElement) {
+                return;
+            }
             let html = "";
             if (item.classList.contains("av__row--header")) {
                 html = `<div class="av__cell av__cell--header" draggable="true" data-icon="${options.icon || ""}" data-col-id="${options.id}" data-dtype="${options.type}" data-wrap="false" style="width: 200px;">

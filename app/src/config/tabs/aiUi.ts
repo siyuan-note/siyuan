@@ -51,7 +51,8 @@ export const genEmbeddingStatsHtml = (): string => `<div class="b3-label config-
             <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color: var(--b3-theme-surface-lighter);" id="aiEmbeddingProgressBar">
                 <div id="aiEmbeddingProgressFill" style="width: 0%;transition: var(--b3-transition);background-color: var(--b3-theme-primary);height: 8px;"></div>
             </div>
-            <div class="b3-label__text" id="aiEmbeddingStatsNum"></div>
+            <div id="aiEmbeddingStatsNum" style="font-size: 13px;color: var(--b3-theme-on-surface);margin-top: 8px;"></div>
+            <a id="aiEmbeddingRetryFailed" class="fn__none b3-link" style="display: block;margin-top: 4px;font-size: 12px;">${window.siyuan.languages.retryFailedEmbedding}</a>
         </div>
     </div>
 </div>`;
@@ -81,11 +82,14 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
 
             const total = stat.total || 0;
             const indexed = stat.indexed || 0;
-            const percent = total > 0 ? Math.min(100, indexed / total * 100) : 0;
+            // 进度条分母排除被忽略的块（长度忽略 + 配置忽略），它们永远不会被索引，否则进度条到不了 100%
+            const ignored = (stat.ignoredByLen || 0) + (stat.ignoredByConfig || 0);
+            const effectiveTotal = Math.max(0, total - ignored);
+            const percent = effectiveTotal > 0 ? Math.min(100, indexed / effectiveTotal * 100) : 0;
             const fillEl = block.querySelector("#aiEmbeddingProgressFill") as HTMLElement;
             fillEl.style.width = `${percent}%`;
 
-            const done = indexed >= total && pending === 0;
+            const done = indexed >= effectiveTotal && pending === 0;
             if (done) {
                 // 完成：静态条
                 fillEl.style.backgroundImage = "";
@@ -98,13 +102,31 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             }
 
             const numEl = block.querySelector("#aiEmbeddingStatsNum");
-            numEl.innerHTML = `${window.siyuan.languages.embeddingIndexed}<b>${indexed}</b> / ${total}
-                <span class="fn__space"></span>${window.siyuan.languages.embeddingPending}<b>${stat.pending || 0}</b>
-                <span class="fn__space"></span>${window.siyuan.languages.embeddingFailed}<b>${stat.failed || 0}</b>
-                <span class="fn__space"></span>${window.siyuan.languages.embeddingIgnoredByLen}<b>${stat.ignoredByLen || 0}</b>
-                <span class="fn__space"></span>${window.siyuan.languages.embeddingIgnoredByConfig}<b>${stat.ignoredByConfig || 0}</b>`;
+            // 每个统计项独立一行，避免单行过长被截断
+            numEl.innerHTML = `<div>${window.siyuan.languages.embeddingIndexed}<b>${indexed}</b> / ${total}</div>
+                <div>${window.siyuan.languages.embeddingPending}<b>${stat.pending || 0}</b></div>
+                <div>${window.siyuan.languages.embeddingFailed}<b>${stat.failed || 0}</b></div>
+                <div>${window.siyuan.languages.embeddingIgnoredByLen}<b>${stat.ignoredByLen || 0}</b></div>
+                <div>${window.siyuan.languages.embeddingIgnoredByConfig}<b>${stat.ignoredByConfig || 0}</b></div>`;
+
+            // 有失败块时显示“重试失败”链接
+            const retryEl = block.querySelector("#aiEmbeddingRetryFailed") as HTMLElement;
+            if (retryEl) {
+                if (stat.failed > 0) {
+                    retryEl.classList.remove("fn__none");
+                } else {
+                    retryEl.classList.add("fn__none");
+                }
+            }
         });
     };
+
+    // “重试失败”点击：删除失败块行让其回到主循环重嵌，无需确认框（操作轻，只删空向量行）
+    block.querySelector("#aiEmbeddingRetryFailed")?.addEventListener("click", () => {
+        fetchPost("/api/ai/retryFailedEmbedding", {}, () => {
+            showMessage(window.siyuan.languages.retryFailedEmbeddingStarted);
+        });
+    });
 
     render();
     const timer = window.setInterval(render, 3000);

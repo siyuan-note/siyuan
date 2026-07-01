@@ -368,10 +368,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     if (avType === "table") {
         if (!rowElement.classList.contains("av__row--select")) {
             clearSelect(["row"], blockElement);
-            // clearSelect 清空了所有行选中，同步清空虚拟滚动选中快照
-            blockElement.querySelectorAll(".av__body").forEach((bodyEl: HTMLElement) => {
-                resetAVRowSelect(bodyEl, []);
-            });
         }
         clearSelect(["cell"], blockElement);
         rowElement.classList.add("av__row--select");

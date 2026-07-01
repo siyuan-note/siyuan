@@ -246,11 +246,19 @@
                     progressing = true
                     es.close()
                     if (navigator.userAgent.indexOf('Electron') === -1) {
-                        // 保证启动动画的最小展示时长，启动过快时补足差值再跳转
+                        // 内核完成后尽快结束动画，把剩余动画快进到终态（200ms 收尾）
+                        const animTotalMs = 2500
                         const elapsed = Date.now() - bootShowStart
-                        const minDuration = 2500
-                        if (elapsed < minDuration) {
-                            setTimeout(redirect, minDuration - elapsed)
+                        const remaining = animTotalMs - elapsed
+                        const bootSvg = document.querySelector("#bg svg")
+                        if (remaining > 0 && bootSvg) {
+                            const rate = remaining / 200
+                            bootSvg.querySelectorAll(".streak, .logo path").forEach((el) => {
+                                el.getAnimations().forEach((a) => {
+                                    a.playbackRate = rate
+                                })
+                            })
+                            setTimeout(redirect, 200)
                         } else {
                             redirect()
                         }

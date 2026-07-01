@@ -113,9 +113,6 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
     if (!resource) return;
 
     openSettingDialog(app, "bazaar");
-
-    setTimeout(() => {
-        renderReadme(bazaarType, "bazaar", resource);
-    });
+    renderReadme(bazaarType, "bazaar", resource);
     /// #endif
 };

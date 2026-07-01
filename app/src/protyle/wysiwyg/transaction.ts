@@ -1569,7 +1569,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
 export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: string) => {
     const id = element.getAttribute("data-node-id");
     const newHTML = element.outerHTML;
-    if (newHTML === oldHTML) {
+    if (newHTML === oldHTML.replace("<wbr>", "")) {
         return;
     }
     element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");

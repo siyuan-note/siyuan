@@ -601,6 +601,39 @@
   margin-top: 8px;
 }
 
+// 思考强度按钮：iconBrain 图标 + 当前值文字，外观与旁边的模型 .b3-select--noborder 对齐。
+.agent-chat__reasoning-effort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: var(--b3-border-radius);
+  line-height: 20px;
+  font-size: 14px;
+  color: var(--b3-theme-on-background);
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color .2s cubic-bezier(0, 0, .2, 1) 0ms;
+
+  &:hover,
+  &:focus {
+    background-color: var(--b3-list-hover);
+  }
+
+  svg {
+    height: 14px;
+    width: 14px;
+    flex-shrink: 0;
+  }
+
+  .agent-chat__reasoning-effort-label {
+    white-space: nowrap;
+  }
+}
+
 // 停止按钮：常显悬浮背景色，图标主色填充。
 .agent-chat__stop {
   background: var(--b3-list-hover);

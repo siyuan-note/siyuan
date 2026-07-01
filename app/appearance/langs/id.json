@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Upaya penalaran",
+  "reasoningEffortDefault": "Bawaan",
+  "reasoningEffortLow": "Rendah",
+  "reasoningEffortMedium": "Sedang",
+  "reasoningEffortHigh": "Tinggi",
   "embeddingIndexProgress": "Kemajuan pengindeksan embedding",
   "embeddingNotEnabledTip": "Aktifkan dan konfigurasikan model embedding di atas untuk melihat kemajuan pengindeksan",
   "embeddingIndexed": "Terindeks: ",

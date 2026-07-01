@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Redeneerinspanning",
+  "reasoningEffortDefault": "Standaard",
+  "reasoningEffortLow": "Laag",
+  "reasoningEffortMedium": "Gemiddeld",
+  "reasoningEffortHigh": "Hoog",
   "embeddingIndexProgress": "Voortgang embedding-indexering",
   "embeddingNotEnabledTip": "Schakel het bovenstaande embedding-model in en configureer het om de indexeringsvoortgang te bekijken",
   "embeddingIndexed": "Geïndexeerd: ",

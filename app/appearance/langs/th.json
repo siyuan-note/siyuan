@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "ความพยายามในการให้เหตุผล",
+  "reasoningEffortDefault": "ค่าเริ่มต้น",
+  "reasoningEffortLow": "ต่ำ",
+  "reasoningEffortMedium": "ปานกลาง",
+  "reasoningEffortHigh": "สูง",
   "embeddingIndexProgress": "ความคืบหน้าการทำดัชนีการฝัง",
   "embeddingNotEnabledTip": "เปิดใช้งานและกำหนดค่าโมเดลการฝังด้านบนเพื่อดูความคืบหน้าการทำดัชนี",
   "embeddingIndexed": "ทำดัชนีแล้ว: ",

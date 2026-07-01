@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Überlegungsanstrengung",
+  "reasoningEffortDefault": "Standard",
+  "reasoningEffortLow": "Niedrig",
+  "reasoningEffortMedium": "Mittel",
+  "reasoningEffortHigh": "Hoch",
   "embeddingIndexProgress": "Fortschritt der Einbettungsindexierung",
   "embeddingNotEnabledTip": "Aktivieren und konfigurieren Sie das Einbettungsmodell oben, um den Indexierungsfortschritt anzuzeigen",
   "embeddingIndexed": "Indexiert: ",

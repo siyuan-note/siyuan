@@ -1,4 +1,9 @@
 {
+  "reasoningEffortTooltip": "Úsilie úvahy",
+  "reasoningEffortDefault": "Predvolené",
+  "reasoningEffortLow": "Nízke",
+  "reasoningEffortMedium": "Stredné",
+  "reasoningEffortHigh": "Vysoké",
   "embeddingIndexProgress": "Priebeh indexácie embeddingov",
   "embeddingNotEnabledTip": "Povoľte a nakonfigurujte vyššie uvedený model embeddingov pre zobrazenie priebehu indexácie",
   "embeddingIndexed": "Indexované: ",

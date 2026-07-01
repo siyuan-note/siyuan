@@ -81,6 +81,7 @@ export async function fetchAgentSSE(
     signal?: AbortSignal,
     sessionID?: string,
     model?: string,
+    reasoningEffort?: string,
     regenerate?: boolean,
     editorContext?: IEditorContext,
     pluginActions?: Array<{name: string; description: string}>,
@@ -89,6 +90,7 @@ export async function fetchAgentSSE(
         const body: Record<string, unknown> = {message: message, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
         if (model) { body.model = model; }
+        if (reasoningEffort) { body.reasoningEffort = reasoningEffort; }
         if (regenerate) { body.regenerate = regenerate; }
         if (editorContext) { body.editorContext = editorContext; }
         if (pluginActions && pluginActions.length > 0) { body.pluginActions = pluginActions; }

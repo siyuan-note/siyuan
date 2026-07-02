@@ -1,4 +1,10 @@
 {
+  "notifications": "Notifications",
+  "notificationsMsgPushTip": "Configure which messages are pushed here; once turned off, the message will no longer be displayed",
+  "msgDocTreeMaxList": "Document panel expansion limit",
+  "msgTagMaxList": "Tag panel expansion limit",
+  "msgWorkspaceNotSSD": "Workspace is not on a solid-state drive",
+  "msgBrowserCompatibility": "Browser compatibility notice",
   "reasoningEffortTooltip": "Reasoning effort",
   "reasoningEffortDefault": "Default",
   "reasoningEffortLow": "Low",

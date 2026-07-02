@@ -1108,7 +1108,9 @@ func listDocsByPath(c *gin.Context) {
 			if nil != arg["app"] {
 				app = arg["app"].(string)
 			}
-			util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+			if nil == util.NotificationsCfg || !util.NotificationsCfg.MsgDocTreeMaxListDisabled {
+				util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+			}
 		}
 	}
 

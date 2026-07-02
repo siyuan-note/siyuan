@@ -1,4 +1,10 @@
 {
+  "notifications": "Notifikasi",
+  "notificationsMsgPushTip": "Konfigurasi di sini pesan apa yang ditampilkan; setelah dinonaktifkan, pesan tidak akan ditampilkan lagi",
+  "msgDocTreeMaxList": "Batas ekspansi panel dokumen",
+  "msgTagMaxList": "Batas ekspansi panel tag",
+  "msgWorkspaceNotSSD": "Ruang kerja tidak berada pada solid-state drive",
+  "msgBrowserCompatibility": "Pemberitahuan kompatibilitas peramban",
   "reasoningEffortTooltip": "Upaya penalaran",
   "reasoningEffortDefault": "Bawaan",
   "reasoningEffortLow": "Rendah",

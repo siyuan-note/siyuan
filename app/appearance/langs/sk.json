@@ -1,4 +1,10 @@
 {
+  "notifications": "Oznámenia",
+  "notificationsMsgPushTip": "Nastavte tu, ktoré správy sa majú zobraziť; po vypnutí sa správa už nezobrazí",
+  "msgDocTreeMaxList": "Limit rozbalenia panela dokumentov",
+  "msgTagMaxList": "Limit rozbalenia panela značiek",
+  "msgWorkspaceNotSSD": "Pracovný priestor sa nenachádza na disku SSD",
+  "msgBrowserCompatibility": "Oznámenie o kompatibilite prehliadača",
   "reasoningEffortTooltip": "Úsilie úvahy",
   "reasoningEffortDefault": "Predvolené",
   "reasoningEffortLow": "Nízke",

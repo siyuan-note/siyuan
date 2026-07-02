@@ -1,4 +1,10 @@
 {
+  "notifications": "सूचनाएँ",
+  "notificationsMsgPushTip": "यहाँ कॉन्फ़िगर करें कि कौन से संदेश दिखाए जाएँ; बंद करने पर संदेश अब और नहीं दिखेगा",
+  "msgDocTreeMaxList": "दस्तावेज़ पैनल विस्तार सीमा",
+  "msgTagMaxList": "टैग पैनल विस्तार सीमा",
+  "msgWorkspaceNotSSD": "कार्यक्षेत्र ठोस-अवस्था ड्राइव पर नहीं है",
+  "msgBrowserCompatibility": "ब्राउज़र संगतता सूचना",
   "reasoningEffortTooltip": "तर्क प्रयास",
   "reasoningEffortDefault": "डिफ़ॉल्ट",
   "reasoningEffortLow": "निम्न",

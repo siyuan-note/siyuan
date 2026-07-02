@@ -1,4 +1,10 @@
 {
+  "notifications": "Уведомления",
+  "notificationsMsgPushTip": "Здесь настраиваются сообщения для отображения; после отключения сообщение больше не будет показываться",
+  "msgDocTreeMaxList": "Предел развёртывания панели документов",
+  "msgTagMaxList": "Предел развёртывания панели тегов",
+  "msgWorkspaceNotSSD": "Рабочая область не расположена на твердотельном накопителе",
+  "msgBrowserCompatibility": "Уведомление о совместимости браузера",
   "reasoningEffortTooltip": "Усилие рассуждения",
   "reasoningEffortDefault": "По умолчанию",
   "reasoningEffortLow": "Низкое",

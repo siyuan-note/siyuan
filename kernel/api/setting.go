@@ -626,6 +626,13 @@ func setAppearance(c *gin.Context) {
 
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
+	if nil == util.StatusBarCfg {
+		util.StatusBarCfg = &util.StatusBar{}
+	}
+	util.NotificationsCfg = model.Conf.Appearance.Notifications
+	if nil == util.NotificationsCfg {
+		util.NotificationsCfg = &util.Notifications{}
+	}
 	model.Conf.Lang = util.LangToBCP47(appearance.Lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()

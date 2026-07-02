@@ -1,4 +1,10 @@
 {
+  "notifications": "Сповіщення",
+  "notificationsMsgPushTip": "Тут налаштовуються повідомлення для показу; після вимкнення повідомлення більше не показуватиметься",
+  "msgDocTreeMaxList": "Межа розгортання панелі документів",
+  "msgTagMaxList": "Межа розгортання панелі тегів",
+  "msgWorkspaceNotSSD": "Робочий простір не розташований на твердотільному накопичувачі",
+  "msgBrowserCompatibility": "Повідомлення про сумісність браузера",
   "reasoningEffortTooltip": "Зусилля міркування",
   "reasoningEffortDefault": "Типово",
   "reasoningEffortLow": "Низьке",

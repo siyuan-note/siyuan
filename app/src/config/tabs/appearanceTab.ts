@@ -524,10 +524,10 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
 };
 
 const NOTIFICATIONS_ITEMS: { field: keyof Config.IAppearanceNotifications; labelKey: "msgDocTreeMaxList" | "msgTagMaxList" | "msgWorkspaceNotSSD" | "msgBrowserCompatibility" }[] = [
-    {field: "docTreeMaxListEnabled", labelKey: "msgDocTreeMaxList"},
-    {field: "tagMaxListEnabled", labelKey: "msgTagMaxList"},
-    {field: "workspaceNotSSDEnabled", labelKey: "msgWorkspaceNotSSD"},
-    {field: "browserCompatibilityEnabled", labelKey: "msgBrowserCompatibility"},
+    {field: "docTreeMaxList", labelKey: "msgDocTreeMaxList"},
+    {field: "tagMaxList", labelKey: "msgTagMaxList"},
+    {field: "workspaceNotSSD", labelKey: "msgWorkspaceNotSSD"},
+    {field: "browserCompatibility", labelKey: "msgBrowserCompatibility"},
 ];
 
 const genNotificationsDialogHtml = (): string => {
@@ -546,10 +546,10 @@ const genNotificationsDialogHtml = (): string => {
 
 const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotifications => {
     return {
-        docTreeMaxListEnabled: (root.querySelector("#docTreeMaxListEnabled") as HTMLInputElement).checked,
-        tagMaxListEnabled: (root.querySelector("#tagMaxListEnabled") as HTMLInputElement).checked,
-        workspaceNotSSDEnabled: (root.querySelector("#workspaceNotSSDEnabled") as HTMLInputElement).checked,
-        browserCompatibilityEnabled: (root.querySelector("#browserCompatibilityEnabled") as HTMLInputElement).checked,
+        docTreeMaxList: (root.querySelector("#docTreeMaxList") as HTMLInputElement).checked,
+        tagMaxList: (root.querySelector("#tagMaxList") as HTMLInputElement).checked,
+        workspaceNotSSD: (root.querySelector("#workspaceNotSSD") as HTMLInputElement).checked,
+        browserCompatibility: (root.querySelector("#browserCompatibility") as HTMLInputElement).checked,
     };
 };
 

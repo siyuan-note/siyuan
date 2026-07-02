@@ -29,19 +29,19 @@ var StatusBarCfg *StatusBar
 // Notifications 外观通知开关配置。https://github.com/siyuan-note/siyuan/issues/17797
 // Appearance.Notifications 为 nil 时表示旧配置尚未迁移，整体按默认启用处理。
 type Notifications struct {
-	DocTreeMaxListEnabled       bool `json:"docTreeMaxListEnabled"`       // 文档面板展开上限提示，默认启用
-	TagMaxListEnabled           bool `json:"tagMaxListEnabled"`           // 标签面板展开上限提示，默认启用
-	WorkspaceNotSSDEnabled      bool `json:"workspaceNotSSDEnabled"`      // 工作空间未放置在固态硬盘警告，默认启用
-	BrowserCompatibilityEnabled bool `json:"browserCompatibilityEnabled"` // 浏览器兼容性提示，默认启用
+	DocTreeMaxList       bool `json:"docTreeMaxList"`       // 文档面板展开上限提示，默认启用
+	TagMaxList           bool `json:"tagMaxList"`           // 标签面板展开上限提示，默认启用
+	WorkspaceNotSSD      bool `json:"workspaceNotSSD"`      // 工作空间未放置在固态硬盘警告，默认启用
+	BrowserCompatibility bool `json:"browserCompatibility"` // 浏览器兼容性提示，默认启用
 }
 
 // NewNotifications 创建默认全部启用的通知配置。新增内置通知时在此统一调整默认值，避免多处分散。
 func NewNotifications() *Notifications {
 	return &Notifications{
-		DocTreeMaxListEnabled:       true,
-		TagMaxListEnabled:           true,
-		WorkspaceNotSSDEnabled:      true,
-		BrowserCompatibilityEnabled: true,
+		DocTreeMaxList:       true,
+		TagMaxList:           true,
+		WorkspaceNotSSD:      true,
+		BrowserCompatibility: true,
 	}
 }
 

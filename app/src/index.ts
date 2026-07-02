@@ -260,7 +260,7 @@ export class App {
                         initMessage();
                         /// #if BROWSER && !MOBILE
                         if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()
-                            && window.siyuan.config.appearance.notifications?.browserCompatibilityEnabled !== false) {
+                            && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
                             showMessage(window.siyuan.languages.useChrome, 0, "error");
                         }
                         /// #endif

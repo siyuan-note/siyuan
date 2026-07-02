@@ -309,10 +309,10 @@ declare namespace Config {
      * 外观通知开关配置。Appearance.Notifications 为 undefined 时表示旧配置尚未迁移，整体按默认启用处理。
      */
     export interface IAppearanceNotifications {
-        docTreeMaxListEnabled: boolean;
-        tagMaxListEnabled: boolean;
-        workspaceNotSSDEnabled: boolean;
-        browserCompatibilityEnabled: boolean;
+        docTreeMaxList: boolean;
+        tagMaxList: boolean;
+        workspaceNotSSD: boolean;
+        browserCompatibility: boolean;
     }
 
     /**

@@ -264,7 +264,7 @@ func InitConf() {
 	}
 	util.StatusBarCfg = Conf.Appearance.StatusBar
 	if nil == Conf.Appearance.Notifications {
-		Conf.Appearance.Notifications = &util.Notifications{}
+		Conf.Appearance.Notifications = util.NewNotifications()
 	}
 	util.NotificationsCfg = Conf.Appearance.Notifications
 	if nil == Conf.FileTree {

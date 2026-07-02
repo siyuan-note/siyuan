@@ -629,10 +629,11 @@ func setAppearance(c *gin.Context) {
 	if nil == util.StatusBarCfg {
 		util.StatusBarCfg = &util.StatusBar{}
 	}
-	util.NotificationsCfg = model.Conf.Appearance.Notifications
-	if nil == util.NotificationsCfg {
-		util.NotificationsCfg = &util.Notifications{}
+	if nil == model.Conf.Appearance.Notifications {
+		// 旧配置未迁移，按默认全部启用处理
+		model.Conf.Appearance.Notifications = util.NewNotifications()
 	}
+	util.NotificationsCfg = model.Conf.Appearance.Notifications
 	model.Conf.Lang = util.LangToBCP47(appearance.Lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()

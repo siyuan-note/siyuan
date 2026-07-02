@@ -601,36 +601,26 @@
   margin-top: 8px;
 }
 
-// 思考强度按钮：iconBrain 图标 + 当前值文字，外观与旁边的模型 .b3-select--noborder 对齐。
+// 思考强度：iconBrain 图标嵌入原生 select 左侧，与旁边的模型 select 外观一致。
 .agent-chat__reasoning-effort {
+  position: relative;
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 28px;
-  padding: 4px 8px;
-  box-sizing: border-box;
-  border: 0;
-  border-radius: var(--b3-border-radius);
-  line-height: 20px;
-  font-size: 14px;
-  color: var(--b3-theme-on-background);
-  background-color: transparent;
-  cursor: pointer;
-  transition: background-color .2s cubic-bezier(0, 0, .2, 1) 0ms;
 
-  &:hover,
-  &:focus {
-    background-color: var(--b3-list-hover);
-  }
-
-  svg {
+  // iconBrain 绝对定位到 select 左内侧，不拦截 select 点击。
+  & > svg {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
     height: 14px;
     width: 14px;
-    flex-shrink: 0;
+    color: var(--b3-theme-on-surface);
+    pointer-events: none;
   }
 
-  .agent-chat__reasoning-effort-label {
-    white-space: nowrap;
+  // 文字右移让出图标空间（b3-select 原始左 padding 为 8px）。
+  .agent-chat__reasoning-effort-select {
+    padding-left: 26px;
   }
 }
 

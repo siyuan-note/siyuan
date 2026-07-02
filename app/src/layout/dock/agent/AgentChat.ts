@@ -10,7 +10,6 @@ import {listActions, lookupAction} from "./frontendActions";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../../tabUtil";
-import {MenuItem} from "../../../menus/Menu";
 import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
 import {getLute} from "../../../protyle/render/setLute";
 import {setPanelFocus} from "../../util";
@@ -118,9 +117,8 @@ export class AgentChat extends Model {
     private modelSelect: HTMLSelectElement;
     private selectedModel: string;
     private modelOptions: Array<{ id: string; name: string }> = [];
-    // 推理努力度按钮（iconBrain + 当前值），仅实例记忆，刷新后回到默认 medium。
-    private reasoningEffortBtn: HTMLElement;
-    private reasoningEffortLabel: HTMLElement;
+    // 推理努力度（iconBrain + 原生 select），仅实例记忆，刷新后回到默认。
+    private reasoningEffortSelect: HTMLSelectElement;
     private selectedReasoningEffort = "";
     private userScrolledUp = false;
     private programmaticScroll = false;
@@ -240,7 +238,7 @@ export class AgentChat extends Model {
             "</svg>" +
             "</span>" +
             '<select class="b3-select b3-select--noborder" tabindex="0"></select>' +
-            '<button class="agent-chat__reasoning-effort b3-tooltips b3-tooltips__n" aria-label="' + (L.reasoningEffortTooltip || "Reasoning effort") + '"><svg><use xlink:href="#iconBrain"></use></svg><span class="agent-chat__reasoning-effort-label"></span></button>' +
+            '<span class="agent-chat__reasoning-effort b3-tooltips b3-tooltips__n" aria-label="' + (L.reasoningEffortTooltip || "Reasoning effort") + '"><select class="b3-select b3-select--noborder agent-chat__reasoning-effort-select" tabindex="0"></select><svg><use xlink:href="#iconBrain"></use></svg></span>' +
             '<button class="agent-chat__send b3-button b3-button--icon b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
@@ -257,9 +255,8 @@ export class AgentChat extends Model {
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
         this.modelSelect = panel.querySelector(".b3-select") as HTMLSelectElement;
-        this.reasoningEffortBtn = panel.querySelector(".agent-chat__reasoning-effort") as HTMLElement;
-        this.reasoningEffortLabel = panel.querySelector(".agent-chat__reasoning-effort-label") as HTMLElement;
-        this.updateReasoningEffortLabel();
+        this.reasoningEffortSelect = panel.querySelector(".agent-chat__reasoning-effort-select") as HTMLSelectElement;
+        this.initReasoningEffortSelect();
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             if (this.programmaticScroll) {
@@ -452,48 +449,22 @@ export class AgentChat extends Model {
     }
 
     // 根据当前选中值刷新按钮上的文字（默认/低/中/高）。
-    private updateReasoningEffortLabel() {
+    // 初始化思考强度原生 select：填充 4 个选项并绑定 change，模式与 initModelSelect 一致。
+    private initReasoningEffortSelect() {
         const L = window.siyuan.languages;
-        let label = L.reasoningEffortDefault || "Default";
-        if (this.selectedReasoningEffort === "low") {
-            label = L.reasoningEffortLow || "Low";
-        } else if (this.selectedReasoningEffort === "medium") {
-            label = L.reasoningEffortMedium || "Medium";
-        } else if (this.selectedReasoningEffort === "high") {
-            label = L.reasoningEffortHigh || "High";
-        }
-        this.reasoningEffortLabel.textContent = label;
-    }
-
-    // 弹出思考强度单选菜单，参照 topBar 主题切换的 toggle 弹层模式（全局 Menu 单例 + data-name 幂等）。
-    private showReasoningEffortMenu(target: HTMLElement) {
-        const L = window.siyuan.languages;
-        const menuName = "agent-reasoning-effort";
-        if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-            window.siyuan.menus.menu.element.getAttribute("data-name") === menuName) {
-            window.siyuan.menus.menu.remove();
-            return;
-        }
-        window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.setAttribute("data-name", menuName);
         const options: Array<{ value: string; label: string }> = [
             {value: "", label: L.reasoningEffortDefault || "Default"},
             {value: "low", label: L.reasoningEffortLow || "Low"},
             {value: "medium", label: L.reasoningEffortMedium || "Medium"},
             {value: "high", label: L.reasoningEffortHigh || "High"},
         ];
-        for (const opt of options) {
-            window.siyuan.menus.menu.append(new MenuItem({
-                label: opt.label,
-                current: this.selectedReasoningEffort === opt.value,
-                click: () => {
-                    this.selectedReasoningEffort = opt.value;
-                    this.updateReasoningEffortLabel();
-                }
-            }).element);
-        }
-        const rect = target.getBoundingClientRect();
-        window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
+        this.reasoningEffortSelect.innerHTML = options
+            .map(o => '<option value="' + escapeHtml(o.value) + '">' + escapeHtml(o.label) + "</option>")
+            .join("");
+        this.reasoningEffortSelect.value = this.selectedReasoningEffort;
+        this.reasoningEffortSelect.addEventListener("change", () => {
+            this.selectedReasoningEffort = this.reasoningEffortSelect.value;
+        });
     }
 
     // 校验会话持久化的 model ID 是否仍存在于当前配置中。有效则赋值并刷新 label，无效则保持当前选择。
@@ -675,10 +646,6 @@ export class AgentChat extends Model {
             } else {
                 this.showTokenBreakdownPopup();
             }
-        });
-        this.reasoningEffortBtn.addEventListener("click", (e: MouseEvent) => {
-            e.stopPropagation();
-            this.showReasoningEffortMenu(e.currentTarget as HTMLElement);
         });
         this.sendBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();

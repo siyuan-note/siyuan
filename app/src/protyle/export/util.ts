@@ -10,7 +10,7 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
-import {isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
+import {saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
 
 export const afterExport = (exportPath: string, msgId: string) => {
@@ -90,14 +90,13 @@ export const exportImage = (id: string) => {
             item.textContent = (index + 1).toString();
         });
         setTimeout(() => {
-            addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image").then(async () => {
-                let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));
-                if (isIPhone() || isSafari()) {
-                    await window.htmlToImage.toBlob(contentElement);
-                    await window.htmlToImage.toBlob(contentElement);
-                    await window.htmlToImage.toBlob(contentElement);
-                    blob = await window.htmlToImage.toBlob(contentElement);
-                }
+            // modern-screenshot is used instead of html-to-image because the latter clones every
+            // node and copies its full computed style one property at a time, which is O(nodes) with
+            // a huge constant on WebKit/WKWebView (~15s for a mid-size doc on iOS vs ~3s on desktop).
+            // modern-screenshot caches default styles per tag and only writes differing properties,
+            // and it renders correctly in a single pass, so the old 3x Safari re-render hack is gone.
+            addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js`, "protyleModernScreenshot").then(async () => {
+                const blob = await window.modernScreenshot.domToBlob(contentElement, {type: "image/png"});
                 const formData = new FormData();
                 formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
                 formData.append("type", "image/png");

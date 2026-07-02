@@ -94,12 +94,14 @@ export class Asset extends Model {
 
     private render(isInit = true) {
         const type = this.path.substr(this.path.lastIndexOf(".")).toLowerCase().split("?")[0];
+        // 对资源路径进行 HTML 转义后再拼入 src 属性，避免路径中包含 " 等字符导致属性逃逸引发 XSS
+        const src = Lute.EscapeHTMLStr(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path);
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><img src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></div>`;
+            this.element.innerHTML = `<div class="asset"><img src="${src}"></div>`;
         } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><audio controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></audio></div>`;
+            this.element.innerHTML = `<div class="asset"><audio controls="controls" src="${src}"></audio></div>`;
         } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><video controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></video></div>`;
+            this.element.innerHTML = `<div class="asset"><video controls="controls" src="${src}"></video></div>`;
         } else if (type === ".pdf") {
             /// #if !MOBILE
             if (!isInit) {

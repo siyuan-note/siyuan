@@ -433,8 +433,8 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	}
 	queryVec := vectors[0]
 
-	boxFilter := buildBoxesFilter(boxes, "be.")
-	pathFilter := buildPathsFilter(paths, "be.")
+	boxFilter, boxArgs := buildBoxesFilter(boxes, "be.")
+	pathFilter, pathArgs := buildPathsFilter(paths, "be.")
 	typeFilter := buildTypeFilter(types, subTypes, "b.")
 	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types)
 	hasTypeFilter := 0 < len(types)
@@ -453,17 +453,20 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 	for {
 		var q string
+		var args []any
 		if hasFilter {
 			q = fmt.Sprintf("SELECT be.rowid, be.id, be.embedding FROM block_embeddings be JOIN blocks b ON be.id = b.id WHERE be.embedding IS NOT NULL AND length(be.embedding) > 0 AND be.rowid > %d", cursor)
 			if hasTypeFilter {
 				q += " AND " + typeFilter
 			}
 			q += boxFilter + pathFilter
+			// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入
+			args = append(append([]any{}, boxArgs...), pathArgs...)
 			q += fmt.Sprintf(" ORDER BY be.rowid LIMIT %d", scanSize)
 		} else {
 			q = fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
 		}
-		rows, qErr := sql.QueryNoLimit(q)
+		rows, qErr := sql.QueryNoLimitArgs(q, args...)
 		if qErr != nil {
 			logging.LogErrorf("query embeddings for search failed: %s", qErr)
 			break

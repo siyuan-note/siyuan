@@ -449,10 +449,15 @@ func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string,
 		for _, p := range pathsArg.([]any) {
 			path := p.(string)
 			box := strings.TrimSpace(strings.Split(path, "/")[0])
+			path = strings.TrimSpace(strings.TrimPrefix(path, box))
+			// 入口校验：拒绝带 SQL 元字符的非法笔记本 ID 与文档路径，阻止 SQL 注入。
+			// 与既有静默去重风格一致，对非法整条丢弃而非中断请求。
+			if !model.IsValidSearchBoxPath(box, path) {
+				continue
+			}
 			if "" != box {
 				boxes = append(boxes, box)
 			}
-			path = strings.TrimSpace(strings.TrimPrefix(path, box))
 			if "" != path {
 				paths = append(paths, path)
 			}

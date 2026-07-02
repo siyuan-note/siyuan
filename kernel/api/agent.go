@@ -85,7 +85,7 @@ func agentChat(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClient(selectedProvider.APIKey, selectedProvider.BaseURL)
+	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
 
 	confirmTimeout := time.Duration(model.Conf.AI.Agent.ConfirmTimeout) * time.Second
 	if confirmTimeout <= 0 {
@@ -267,7 +267,7 @@ func agentChatTitle(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClient(selectedProvider.APIKey, selectedProvider.BaseURL)
+	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
 
 	title := agent.GenerateTitle(client, selectedModel.Name, req.Message, req.Language)
 	ret := gulu.Ret.NewResult()

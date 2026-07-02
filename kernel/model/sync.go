@@ -144,7 +144,7 @@ func BootSyncData() {
 	lockSync()
 	defer unlockSync()
 
-	util.IncBootProgress(3, "Syncing data from the cloud...")
+	util.IncBootProgress(3, Conf.Language(307))
 	BootSyncSucc = 0
 	logging.LogInfof("sync before boot")
 
@@ -287,7 +287,7 @@ func incReindex(upserts, removes []string) (upsertRootIDs, removeRootIDs []strin
 	upsertRootIDs = []string{}
 	removeRootIDs = []string{}
 
-	util.IncBootProgress(3, "Sync reindexing...")
+	util.IncBootProgress(3, Conf.Language(308))
 	removeRootIDs = removeIndexes(removes) // 先执行 remove，否则移动文档时 upsert 会被忽略，导致未被索引
 	upsertRootIDs = upsertIndexes(upserts)
 

@@ -2037,6 +2037,16 @@
     "295": "Questa funzione è disponibile solo con l'acquisto di [abbonamento annuale] (se hai già acquistato, aggiorna o accedi nuovamente in Impostazioni - Account e Sincronizzazione - Account)",
     "296": "Ricostruzione dell'indice di ricerca...",
     "297": "L'output ha raggiunto il limite massimo di token",
-    "298": "Hai già utilizzato un abbonamento di prova gratuita. Non è possibile ripetere la prova."
+    "298": "Hai già utilizzato un abbonamento di prova gratuita. Non è possibile ripetere la prova.",
+    "299": "Avvio del kernel...",
+    "300": "Finalizzazione dell'avvio...",
+    "301": "Inizializzazione del database...",
+    "302": "Inizializzazione dell'aspetto...",
+    "303": "Elenco dei file...",
+    "304": "Risoluzione dei riferimenti...",
+    "305": "Indicizzazione dei riferimenti...",
+    "306": "Indicizzazione del riferimento %s",
+    "307": "Sincronizzazione dei dati dal cloud...",
+    "308": "Reindicizzazione della sincronizzazione..."
   }
 }

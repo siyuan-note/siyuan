@@ -121,7 +121,7 @@ func InitWorkspace(workspacePath, wdPath string) {
 }
 
 func Boot() {
-	IncBootProgress(3, "Booting kernel...")
+	IncBootProgress(3, BootL10n(299, "Booting kernel..."))
 
 	// 由标准库 flag 解析 os.Args，再走统一的 BootWithFlags。
 	workspacePath := flag.String("workspace", "", "dir path of the workspace, default to ~/SiYuan/")
@@ -218,6 +218,21 @@ func SetBootDetails(details string) {
 	setBootDetails(details)
 }
 
+// BootL10n 返回启动进度文案的本地化字符串。
+//
+// 按当前界面语言（util.Lang，来自 conf.json）查 util.Langs 中 _kernel 块的整数键，
+// 依次回退到英文、再回退到调用方传入的 fallback 英文文案。
+// 这样在首启 InitConf() 尚未加载完语言文件时也能显示原文，不会出现空串。
+func BootL10n(num int, fallback string) string {
+	if s := Langs[Lang][num]; "" != s {
+		return s
+	}
+	if s := Langs["en"][num]; "" != s {
+		return s
+	}
+	return fallback
+}
+
 func IncBootProgress(progress int32, details string) {
 	if 100 <= bootProgress.Load() {
 		return
@@ -246,7 +261,7 @@ func SetBooted() {
 	// 先置进度为 100 再写 details，保证前端轮询/SSE 读到 progress>=100 时一定满足跳转条件，
 	// 避免 "先写 details 后写 progress" 造成的 "Finishing boot... 但进度未满" 竞态窗口
 	bootProgress.Store(100)
-	setBootDetails("Finishing boot...")
+	setBootDetails(BootL10n(300, "Finishing boot..."))
 	logging.LogInfof("kernel booted")
 }
 

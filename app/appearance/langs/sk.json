@@ -2037,6 +2037,16 @@
     "295": "Táto funkcia vyžaduje nákup [Ročné predplatné] (ak ste už kúpili, obnovte alebo sa znova prihláste v [Nastavenia - Účet a Synchronizácia - Účet])",
     "296": "Obnovuje sa index vyhľadávania...",
     "297": "Výstup dosiahol limit maximálneho počtu tokenov",
-    "298": "Už ste využili bezplatné skúšobné predplatné. Opakované skúšobné predplatné nie je podporované."
+    "298": "Už ste využili bezplatné skúšobné predplatné. Opakované skúšobné predplatné nie je podporované.",
+    "299": "Spúšťanie jadra...",
+    "300": "Dokončovanie spúšťania...",
+    "301": "Inicializácia databázy...",
+    "302": "Inicializácia vzhľadu...",
+    "303": "Vypisovanie zoznamu súborov...",
+    "304": "Riešenie odkazov...",
+    "305": "Indexovanie odkazov...",
+    "306": "Indexovanie odkazu %s",
+    "307": "Synchronizácia údajov z cloudu...",
+    "308": "Preindexovanie synchronizácie..."
   }
 }

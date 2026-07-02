@@ -2037,6 +2037,16 @@
     "295": "Este recurso requer a compra de [Assinatura Anual] (se já comprou, por favor atualize ou faça login novamente em Configurações - Conta e Sincronização - Conta)",
     "296": "Reconstruindo o índice de busca...",
     "297": "A saída atingiu o limite máximo de tokens",
-    "298": "Você já usou uma assinatura de teste gratuita. Assinaturas de teste duplicadas não são suportadas."
+    "298": "Você já usou uma assinatura de teste gratuita. Assinaturas de teste duplicadas não são suportadas.",
+    "299": "Iniciando o kernel...",
+    "300": "Finalizando a inicialização...",
+    "301": "Inicializando o banco de dados...",
+    "302": "Inicializando a aparência...",
+    "303": "Listando arquivos...",
+    "304": "Resolvendo referências...",
+    "305": "Indexando referências...",
+    "306": "Indexando referência %s",
+    "307": "Sincronizando dados da nuvem...",
+    "308": "Reindexando a sincronização..."
   }
 }

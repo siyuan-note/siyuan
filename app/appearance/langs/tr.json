@@ -2037,6 +2037,16 @@
     "295": "Bu özellik için [Yıllık Abonelik] gereklidir (zaten satın aldıysan Ayarlar - Hesap ve Senkronizasyon - Hesap kısmından yenile veya tekrar giriş yap)",
     "296": "Arama dizini yeniden oluşturuluyor...",
     "297": "Çıktı, maksimum tamamlama token sınırına ulaştı",
-    "298": "Ücretsiz deneme aboneliğini zaten kullandınız. Yinelenen deneme abonelikleri desteklenmez."
+    "298": "Ücretsiz deneme aboneliğini zaten kullandınız. Yinelenen deneme abonelikleri desteklenmez.",
+    "299": "Çekirdek başlatılıyor...",
+    "300": "Başlatma tamamlanıyor...",
+    "301": "Veritabanı başlatılıyor...",
+    "302": "Görünüm başlatılıyor...",
+    "303": "Dosyalar listeleniyor...",
+    "304": "Referanslar çözümleniyor...",
+    "305": "Referanslar indeksleniyor...",
+    "306": "Referans indeksleniyor %s",
+    "307": "Veriler buluttan senkronize ediliyor...",
+    "308": "Senkronizasyon yeniden indeksleniyor..."
   }
 }

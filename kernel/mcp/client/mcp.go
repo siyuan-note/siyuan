@@ -331,25 +331,33 @@ func reconnectMCP() bool {
 	}
 	closeConnections(mcpConns)
 	mcpConns = nil
+	mcpConnecting = true
 	mcpMu.Unlock()
 
 	conns := connectServers(mcpServers)
 	mcpMu.Lock()
-	defer mcpMu.Unlock()
+	mcpConnecting = false
+	if mcpDisconnected {
+		mcpDisconnected = false
+		mcpMu.Unlock()
+		closeConnections(conns)
+		return false
+	}
 	mcpConns = conns
 	for _, conn := range mcpConns {
 		if conn.Session != nil {
 			logging.LogInfof("mcp: reconnected server [%s]", conn.ServerName)
+			mcpMu.Unlock()
 			return true
 		}
 	}
+	mcpMu.Unlock()
 	return false
 }
 
 // ReconnectMCPAsync 用最新的 server 配置异步重连，不阻塞调用方（如 setAI 配置保存）。
 // 适用于配置变更（开关切换、编辑、增删 server）后让连接立即跟上，而非等下次 Agent 请求。
 func ReconnectMCPAsync(servers []conf.MCPServer) {
-	logging.LogInfof("mcp: ReconnectMCPAsync triggered, %d servers", len(servers))
 	mcpMu.Lock()
 	mcpServers = servers
 	mcpConnecting = true
@@ -363,14 +371,13 @@ func ReconnectMCPAsync(servers []conf.MCPServer) {
 		mcpMu.Lock()
 		mcpConnecting = false
 		if mcpDisconnected {
-			logging.LogInfof("mcp: reconnect result discarded (disconnected during connect)")
+			// 连接期间被 DisconnectMCP 要求放弃，丢弃结果并关闭刚建好的连接避免泄漏。
 			mcpDisconnected = false
 			mcpMu.Unlock()
 			closeConnections(conns)
 			return
 		}
 		mcpConns = conns
-		logging.LogInfof("mcp: reconnect done, %d conns", len(conns))
 		mcpMu.Unlock()
 	}()
 }

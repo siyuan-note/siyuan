@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "Подключено",
+  "mcpStatusConnecting": "Подключение",
+  "mcpStatusFailed": "Ошибка подключения",
+  "mcpStatusDisabled": "Отключено",
+  "mcpStatusTools": "${x} инструментов",
   "notifications": "Уведомления",
   "notificationsMsgPushTip": "Здесь настраиваются сообщения для отображения; после отключения сообщение больше не будет показываться",
   "msgDocTreeMaxList": "Предел развёртывания панели документов",

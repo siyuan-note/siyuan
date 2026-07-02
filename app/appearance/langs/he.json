@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "מחובר",
+  "mcpStatusConnecting": "מתחבר",
+  "mcpStatusFailed": "חיבור נכשל",
+  "mcpStatusDisabled": "מושבת",
+  "mcpStatusTools": "${x} כלים",
   "notifications": "הודעות",
   "notificationsMsgPushTip": "הגדר כאן אילו הודעות יוצגו; לאחר כיבוי, ההודעה לא תוצג עוד",
   "msgDocTreeMaxList": "מגבלת הרחבת לוח המסמכים",

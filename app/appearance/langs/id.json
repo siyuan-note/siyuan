@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "Terhubung",
+  "mcpStatusConnecting": "Menghubungkan",
+  "mcpStatusFailed": "Koneksi gagal",
+  "mcpStatusDisabled": "Dinonaktifkan",
+  "mcpStatusTools": "${x} alat",
   "notifications": "Notifikasi",
   "notificationsMsgPushTip": "Konfigurasi di sini pesan apa yang ditampilkan; setelah dinonaktifkan, pesan tidak akan ditampilkan lagi",
   "msgDocTreeMaxList": "Batas ekspansi panel dokumen",

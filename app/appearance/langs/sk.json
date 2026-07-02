@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "Pripojené",
+  "mcpStatusConnecting": "Pripája sa",
+  "mcpStatusFailed": "Pripojenie zlyhalo",
+  "mcpStatusDisabled": "Zakázané",
+  "mcpStatusTools": "${x} nástrojov",
   "notifications": "Oznámenia",
   "notificationsMsgPushTip": "Nastavte tu, ktoré správy sa majú zobraziť; po vypnutí sa správa už nezobrazí",
   "msgDocTreeMaxList": "Limit rozbalenia panela dokumentov",

@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "已連接",
+  "mcpStatusConnecting": "連接中",
+  "mcpStatusFailed": "連接失敗",
+  "mcpStatusDisabled": "未啟用",
+  "mcpStatusTools": "${x} 個工具",
   "notifications": "通知",
   "notificationsMsgPushTip": "在這裡設定需要推送顯示的訊息，關閉後該訊息將不再顯示",
   "msgDocTreeMaxList": "文件面板展開上限",

@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "Connesso",
+  "mcpStatusConnecting": "Connessione in corso",
+  "mcpStatusFailed": "Connessione fallita",
+  "mcpStatusDisabled": "Disattivato",
+  "mcpStatusTools": "${x} strumenti",
   "notifications": "Notifiche",
   "notificationsMsgPushTip": "Configura qui quali messaggi mostrare; una volta disattivati, il messaggio non verrà più visualizzato",
   "msgDocTreeMaxList": "Limite di espansione del pannello documenti",

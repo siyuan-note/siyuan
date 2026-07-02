@@ -70,8 +70,17 @@ func checkIndex() {
 		fixIndexMu.Lock()
 		defer fixIndexMu.Unlock()
 
-		fixIndexPipeline()
+		runFixIndexPipeline()
 	})
+}
+
+// runFixIndexPipeline 执行索引订正流水线并完成收尾（清除脏标志、记录订正时间）。
+// 调用方需持有 fixIndexMu。
+func runFixIndexPipeline() {
+	fixIndexPipeline()
+	// 收尾：清除脏标志并记录订正时间，避免在冷却期内被 AutoFixIndex 重复触发
+	util.MarkIndexClean()
+	lastFixedAt = time.Now()
 }
 
 // fixIndexPipeline 执行索引订正流水线。
@@ -129,9 +138,7 @@ func AutoFixIndex() {
 	}
 
 	logging.LogInfof("start auto fixing index on idle...")
-	fixIndexPipeline()
-	util.MarkIndexClean()
-	lastFixedAt = time.Now()
+	runFixIndexPipeline()
 	logging.LogInfof("finish auto fixing index on idle")
 }
 

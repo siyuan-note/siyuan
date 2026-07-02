@@ -275,6 +275,11 @@ let previousClientX: number;
 const sideMaskElement = document.querySelector(".side-mask") as HTMLElement;
 export const handleTouchMove = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
+    // 位移超过阈值说明是滑动而非长按，取消进入多选的定时器
+    if (clientX && clientY &&
+        (Math.abs(clientX - event.touches[0].clientX) >= 5 || Math.abs(clientY - event.touches[0].clientY) >= 5)) {
+        clearLongPress();
+    }
     if (!clientX || !clientY ||
         target.tagName === "AUDIO" ||
         document.getElementById("dragGhost") ||
@@ -302,10 +307,6 @@ export const handleTouchMove = (event: TouchEvent) => {
 
     xDiff = Math.floor(clientX - event.touches[0].clientX);
     yDiff = Math.floor(clientY - event.touches[0].clientY);
-    // 位移超过阈值说明是滑动而非长按，取消进入多选的定时器
-    if (Math.abs(xDiff) >= 5 || Math.abs(yDiff) >= 5) {
-        clearLongPress();
-    }
     if (!firstDirection) {
         firstDirection = xDiff > 0 ? "toLeft" : "toRight";
     }

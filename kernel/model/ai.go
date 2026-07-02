@@ -107,7 +107,7 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 		gpt = &CloudGPT{}
 	} else {
 		gpt = &OpenAIGPT{
-			c:                   util.NewOpenAIClient(prov.APIKey, prov.BaseURL),
+			c:                   util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name),
 			m:                   m,
 			timeout:             prov.RequestTimeout,
 			maxCompletionTokens: editing.MaxCompletionTokens,

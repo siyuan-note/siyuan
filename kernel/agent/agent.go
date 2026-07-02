@@ -487,10 +487,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			var contentBuilder strings.Builder
 			var reasoningBuilder strings.Builder
 			var aggregatedToolCalls []openai.ToolCall
-			// thinkSplitter 解析部分模型（如 MINIMAX、DeepSeek-V3、Qwen3、GLM 等）
-			// 将推理内容以 <think>...</think> 文本标签混在 delta.content 中返回的情况，
-			// 把标签内文本分流为 reasoning、标签外文本才作为 content。
-			splitter := newThinkSplitter()
 
 			for {
 				resp, recvErr := stream.Recv()
@@ -518,16 +514,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 				for _, choice := range resp.Choices {
 					if choice.Delta.Content != "" {
-						// 解析 <think>...</think> 标签：标签内归 reasoning，标签外归 content。
-						r, c := splitter.Feed(choice.Delta.Content)
-						if c != "" {
-							contentBuilder.WriteString(c)
-							sendEvent(ch, AgentEvent{Type: "content", Token: c})
-						}
-						if r != "" {
-							reasoningBuilder.WriteString(r)
-							sendEvent(ch, AgentEvent{Type: "reasoning", Token: r})
-						}
+						contentBuilder.WriteString(choice.Delta.Content)
+						sendEvent(ch, AgentEvent{Type: "content", Token: choice.Delta.Content})
 					}
 
 					if choice.Delta.ReasoningContent != "" {
@@ -568,18 +556,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			}
 
 			stream.Close()
-
-			// 流结束时冲刷 splitter 残留缓冲（如模型输出了半个标签就中断），避免丢字。
-			if r, c := splitter.Flush(); r != "" || c != "" {
-				if c != "" {
-					contentBuilder.WriteString(c)
-					sendEvent(ch, AgentEvent{Type: "content", Token: c})
-				}
-				if r != "" {
-					reasoningBuilder.WriteString(r)
-					sendEvent(ch, AgentEvent{Type: "reasoning", Token: r})
-				}
-			}
 
 			if len(aggregatedToolCalls) > 0 {
 				filtered := make([]openai.ToolCall, 0, len(aggregatedToolCalls))
@@ -849,9 +825,7 @@ func GenerateTitle(client *openai.Client, model string, userMsg string, language
 		}
 		return userMsg
 	}
-	// 部分模型（MINIMAX 等）在非流式响应中也会把推理内容以 <think>...</think> 标签
-	// 混在 content 中返回，剥离后再用作标题，避免标题以 <think> 开头。
-	title := strings.TrimSpace(stripThinkTags(resp.Choices[0].Message.Content))
+	title := strings.TrimSpace(resp.Choices[0].Message.Content)
 	if title == "" {
 		runes := []rune(userMsg)
 		if len(runes) > 30 {

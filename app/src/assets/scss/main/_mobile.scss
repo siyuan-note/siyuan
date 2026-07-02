@@ -463,6 +463,8 @@
 
     & > div {
       margin-right: 0;
+      // 桌面端拖拽后子块带内联 calc(%) 宽度，移动端垂直堆叠时需重置以铺满
+      width: auto !important;
     }
   }
 }

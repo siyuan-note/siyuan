@@ -201,7 +201,7 @@ func getEmbeddingHTTPClient() *http.Client {
 	return embeddingHTTPClient
 }
 
-func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout int) (ret [][]float32, err error) {
+func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, dimensions, timeout int) (ret [][]float32, err error) {
 	if 1 > len(texts) {
 		return
 	}
@@ -215,8 +215,9 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout i
 	defer cancel()
 
 	resp, err := client.CreateEmbeddings(ctx, openai.EmbeddingRequestStrings{
-		Input: texts,
-		Model: openai.EmbeddingModel(model),
+		Input:      texts,
+		Model:      openai.EmbeddingModel(model),
+		Dimensions: dimensions, // 0 时因 omitempty 不发送，等同于用模型默认维度
 	})
 	if err != nil {
 		logging.LogErrorf("create embeddings failed: %s", err)

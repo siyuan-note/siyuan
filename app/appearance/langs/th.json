@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "เชื่อมต่อแล้ว",
+  "mcpStatusConnecting": "กำลังเชื่อมต่อ",
+  "mcpStatusFailed": "การเชื่อมต่อล้มเหลว",
+  "mcpStatusDisabled": "ปิดใช้งาน",
+  "mcpStatusTools": "${x} เครื่องมือ",
   "notifications": "การแจ้งเตือน",
   "notificationsMsgPushTip": "กำหนดค่าที่นี่ว่าจะให้แสดงข้อความใด เมื่อปิดแล้ว ข้อความจะไม่แสดงอีก",
   "msgDocTreeMaxList": "ขีดจำกัดการขยายของพาเนลเอกสาร",

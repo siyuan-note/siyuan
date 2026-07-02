@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "Bağlandı",
+  "mcpStatusConnecting": "Bağlanıyor",
+  "mcpStatusFailed": "Bağlantı başarısız",
+  "mcpStatusDisabled": "Devre dışı",
+  "mcpStatusTools": "${x} araç",
   "notifications": "Bildirimler",
   "notificationsMsgPushTip": "Burada hangi mesajların gösterileceğini yapılandırın; kapatıldığında mesaj artık gösterilmez",
   "msgDocTreeMaxList": "Belge paneli genişletme sınırı",

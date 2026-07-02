@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "متصل",
+  "mcpStatusConnecting": "جارِ الاتصال",
+  "mcpStatusFailed": "فشل الاتصال",
+  "mcpStatusDisabled": "معطّل",
+  "mcpStatusTools": "${x} أدوات",
   "notifications": "الإشعارات",
   "notificationsMsgPushTip": "قم بتكوين الرسائل التي سيتم عرضها هنا؛ بمجرد إيقاف تشغيلها، لن تظهر الرسالة بعد الآن",
   "msgDocTreeMaxList": "حد توسيع لوحة المستندات",

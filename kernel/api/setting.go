@@ -24,6 +24,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -202,6 +203,11 @@ func setAI(c *gin.Context) {
 
 	model.Conf.AI.Normalize()
 	model.Conf.Save()
+
+	// MCP 配置可能变更（开关切换、编辑、增删 server），异步重连让连接立即跟上。
+	if model.Conf.AI.MCP != nil {
+		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers)
+	}
 
 	ret.Data = model.Conf.AI
 }

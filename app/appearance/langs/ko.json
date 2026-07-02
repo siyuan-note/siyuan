@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "연결됨",
+  "mcpStatusConnecting": "연결 중",
+  "mcpStatusFailed": "연결 실패",
+  "mcpStatusDisabled": "비활성화",
+  "mcpStatusTools": "도구 ${x}개",
   "notifications": "알림",
   "notificationsMsgPushTip": "여기에서 표시할 메시지를 설정합니다. 끄면 해당 메시지가 더 이상 표시되지 않습니다",
   "msgDocTreeMaxList": "문서 패널 펼침 한도",

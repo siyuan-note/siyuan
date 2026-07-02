@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "接続済み",
+  "mcpStatusConnecting": "接続中",
+  "mcpStatusFailed": "接続失敗",
+  "mcpStatusDisabled": "無効",
+  "mcpStatusTools": "${x} 個のツール",
   "notifications": "通知",
   "notificationsMsgPushTip": "ここでプッシュ表示するメッセージを設定します。オフにするとそのメッセージは表示されなくなります",
   "msgDocTreeMaxList": "ドキュメントパネルの展開上限",

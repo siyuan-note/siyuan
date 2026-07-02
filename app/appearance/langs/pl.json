@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "Połączono",
+  "mcpStatusConnecting": "Łączenie",
+  "mcpStatusFailed": "Połączenie nie powiodło się",
+  "mcpStatusDisabled": "Wyłączone",
+  "mcpStatusTools": "${x} narzędzi",
   "notifications": "Powiadomienia",
   "notificationsMsgPushTip": "Skonfiguruj tutaj, które komunikaty mają być wyświetlane; po wyłączeniu komunikat nie będzie już wyświetlany",
   "msgDocTreeMaxList": "Limit rozwinięcia panelu dokumentów",

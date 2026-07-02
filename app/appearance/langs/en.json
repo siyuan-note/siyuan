@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "Connected",
+  "mcpStatusConnecting": "Connecting",
+  "mcpStatusFailed": "Connection failed",
+  "mcpStatusDisabled": "Disabled",
+  "mcpStatusTools": "${x} tools",
   "notifications": "Notifications",
   "notificationsMsgPushTip": "Configure which messages are pushed here; once turned off, the message will no longer be displayed",
   "msgDocTreeMaxList": "Document panel expansion limit",

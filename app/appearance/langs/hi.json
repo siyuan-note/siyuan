@@ -1,4 +1,9 @@
 {
+  "mcpStatusConnected": "कनेक्टेड",
+  "mcpStatusConnecting": "कनेक्ट हो रहा है",
+  "mcpStatusFailed": "कनेक्शन विफल",
+  "mcpStatusDisabled": "अक्षम",
+  "mcpStatusTools": "${x} टूल्स",
   "notifications": "सूचनाएँ",
   "notificationsMsgPushTip": "यहाँ कॉन्फ़िगर करें कि कौन से संदेश दिखाए जाएँ; बंद करने पर संदेश अब और नहीं दिखेगा",
   "msgDocTreeMaxList": "दस्तावेज़ पैनल विस्तार सीमा",

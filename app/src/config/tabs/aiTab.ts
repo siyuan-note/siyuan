@@ -125,7 +125,7 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
     });
     group.textBlock("ai.embedding.baseURL", {
         title: window.siyuan.languages.apiBaseURL,
-        desc: window.siyuan.languages.apiBaseURLTip,
+        desc: window.siyuan.languages.apiBaseURLEmbeddingTip,
         mode: "input-text",
     });
     group.textBlock("ai.embedding.apiKey", {

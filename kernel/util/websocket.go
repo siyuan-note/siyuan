@@ -551,9 +551,9 @@ func ClosePublishServiceSessions() {
 }
 
 var (
-	// lastActivityNs 记录最近一次用户活动（前端发送 WebSocket cmd）的纳秒时间戳。
+	// lastActivityNs 记录最近一次用户写操作（前端发送 /api/transactions* 请求）的纳秒时间戳。
 	lastActivityNs atomic.Int64
-	// indexFixDirty 标记索引可能已脏（上次订正后用户又有新活动），需要再次订正。
+	// indexFixDirty 标记索引可能已脏（上次订正后用户又有新的写操作），需要再次订正。
 	indexFixDirty atomic.Bool
 )
 
@@ -563,7 +563,7 @@ func init() {
 }
 
 // RefreshActivity 刷新用户最近活动时间，并标记索引可能已脏（需要订正）。
-// 在 server.HandleMessage 收到前端任何 cmd 时调用。
+// 在 model.Activity 中间件中，对 /api/transactions* 写操作请求调用。
 func RefreshActivity() {
 	lastActivityNs.Store(time.Now().UnixNano())
 	indexFixDirty.Store(true)

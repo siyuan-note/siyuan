@@ -1,4 +1,10 @@
 {
+  "notifications": "Bildirimler",
+  "notificationsMsgPushTip": "Burada hangi mesajların gösterileceğini yapılandırın; kapatıldığında mesaj artık gösterilmez",
+  "msgDocTreeMaxList": "Belge paneli genişletme sınırı",
+  "msgTagMaxList": "Etiket paneli genişletme sınırı",
+  "msgWorkspaceNotSSD": "Çalışma alanı bir katı hal sürücüsü üzerinde değil",
+  "msgBrowserCompatibility": "Tarayıcı uyumluluk bildirimi",
   "reasoningEffortTooltip": "Akıl yürütme çabası",
   "reasoningEffortDefault": "Varsayılan",
   "reasoningEffortLow": "Düşük",

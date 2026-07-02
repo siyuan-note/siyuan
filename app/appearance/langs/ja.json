@@ -1,4 +1,10 @@
 {
+  "notifications": "通知",
+  "notificationsMsgPushTip": "ここでプッシュ表示するメッセージを設定します。オフにするとそのメッセージは表示されなくなります",
+  "msgDocTreeMaxList": "ドキュメントパネルの展開上限",
+  "msgTagMaxList": "タグパネルの展開上限",
+  "msgWorkspaceNotSSD": "ワークスペースがソリッドステートドライブに配置されていません",
+  "msgBrowserCompatibility": "ブラウザの互換性に関する通知",
   "reasoningEffortTooltip": "思考の強さ",
   "reasoningEffortDefault": "デフォルト",
   "reasoningEffortLow": "低",

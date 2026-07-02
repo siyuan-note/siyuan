@@ -266,7 +266,9 @@ func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags)
 		*tmp = append(*tmp, tag)
 		countTag(tag, &total)
 		if Conf.FileTree.MaxListCount < total && !ignoreMaxListHintArg {
-			util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
+			if nil == util.NotificationsCfg || !util.NotificationsCfg.MsgTagMaxListDisabled {
+				util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
+			}
 			break
 		}
 	}

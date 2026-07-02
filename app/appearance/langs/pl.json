@@ -1,4 +1,10 @@
 {
+  "notifications": "Powiadomienia",
+  "notificationsMsgPushTip": "Skonfiguruj tutaj, które komunikaty mają być wyświetlane; po wyłączeniu komunikat nie będzie już wyświetlany",
+  "msgDocTreeMaxList": "Limit rozwinięcia panelu dokumentów",
+  "msgTagMaxList": "Limit rozwinięcia panelu tagów",
+  "msgWorkspaceNotSSD": "Obszar roboczy nie znajduje się na dysku SSD",
+  "msgBrowserCompatibility": "Powiadomienie o zgodności przeglądarki",
   "reasoningEffortTooltip": "Wysiłek rozumowania",
   "reasoningEffortDefault": "Domyślny",
   "reasoningEffortLow": "Niski",

@@ -1,4 +1,10 @@
 {
+  "notifications": "הודעות",
+  "notificationsMsgPushTip": "הגדר כאן אילו הודעות יוצגו; לאחר כיבוי, ההודעה לא תוצג עוד",
+  "msgDocTreeMaxList": "מגבלת הרחבת לוח המסמכים",
+  "msgTagMaxList": "מגבלת הרחבת לוח התגיות",
+  "msgWorkspaceNotSSD": "סביבת העבודה אינה ממוקמת בכונן מצב מוצק",
+  "msgBrowserCompatibility": "הודעת תאימות דפדפן",
   "reasoningEffortTooltip": "מאמץ חשיבה",
   "reasoningEffortDefault": "ברירת מחדל",
   "reasoningEffortLow": "נמוך",

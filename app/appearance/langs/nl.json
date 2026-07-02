@@ -1,4 +1,10 @@
 {
+  "notifications": "Meldingen",
+  "notificationsMsgPushTip": "Configureer hier welke berichten worden weergegeven; na uitschakelen wordt het bericht niet meer weergegeven",
+  "msgDocTreeMaxList": "Uitvouwlimiet van het documentpaneel",
+  "msgTagMaxList": "Uitvouwlimiet van het tagpaneel",
+  "msgWorkspaceNotSSD": "Werkruimte bevindt zich niet op een solid-state drive",
+  "msgBrowserCompatibility": "Melding browsercompatibiliteit",
   "reasoningEffortTooltip": "Redeneerinspanning",
   "reasoningEffortDefault": "Standaard",
   "reasoningEffortLow": "Laag",

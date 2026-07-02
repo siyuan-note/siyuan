@@ -1,4 +1,10 @@
 {
+  "notifications": "Benachrichtigungen",
+  "notificationsMsgPushTip": "Konfigurieren Sie hier, welche Meldungen angezeigt werden; nach dem Deaktivieren wird die Meldung nicht mehr angezeigt",
+  "msgDocTreeMaxList": "Erweiterungslimit des Dokument-Panels",
+  "msgTagMaxList": "Erweiterungslimit des Tag-Panels",
+  "msgWorkspaceNotSSD": "Arbeitsbereich befindet sich nicht auf einer Festkörperlaufwerk",
+  "msgBrowserCompatibility": "Hinweis zur Browserkompatibilität",
   "reasoningEffortTooltip": "Überlegungsanstrengung",
   "reasoningEffortDefault": "Standard",
   "reasoningEffortLow": "Niedrig",

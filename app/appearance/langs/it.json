@@ -1,4 +1,10 @@
 {
+  "notifications": "Notifiche",
+  "notificationsMsgPushTip": "Configura qui quali messaggi mostrare; una volta disattivati, il messaggio non verrà più visualizzato",
+  "msgDocTreeMaxList": "Limite di espansione del pannello documenti",
+  "msgTagMaxList": "Limite di espansione del pannello tag",
+  "msgWorkspaceNotSSD": "Lo spazio di lavoro non si trova su un'unità a stato solido",
+  "msgBrowserCompatibility": "Avviso di compatibilità del browser",
   "reasoningEffortTooltip": "Sforzo di ragionamento",
   "reasoningEffortDefault": "Predefinito",
   "reasoningEffortLow": "Basso",

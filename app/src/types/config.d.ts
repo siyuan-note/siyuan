@@ -295,6 +295,7 @@ declare namespace Config {
          */
         themeVer: string;
         statusBar: IAppearanceStatusBar;
+        notifications: IAppearanceNotifications;
     }
 
     export interface IAppearanceStatusBar {
@@ -302,6 +303,14 @@ declare namespace Config {
         msgTaskHistoryDatabaseIndexCommitDisabled: boolean;
         msgTaskAssetDatabaseIndexCommitDisabled: boolean;
         msgTaskHistoryGenerateFileDisabled: boolean;
+    }
+
+    /** 外观通知开关配置 */
+    export interface IAppearanceNotifications {
+        msgDocTreeMaxListDisabled: boolean;
+        msgTagMaxListDisabled: boolean;
+        msgWorkspaceNotSSDDisabled: boolean;
+        msgBrowserCompatibilityDisabled: boolean;
     }
 
     /**

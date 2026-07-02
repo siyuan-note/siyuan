@@ -381,6 +381,26 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             icon: "iconSettings",
         });
     });
+    group.stack({
+        key: "notifications",
+        keywords: [
+            window.siyuan.languages.notifications,
+            window.siyuan.languages.notificationsMsgPushTip,
+            window.siyuan.languages.msgDocTreeMaxList,
+            window.siyuan.languages.msgTagMaxList,
+            window.siyuan.languages.msgWorkspaceNotSSD,
+            window.siyuan.languages.msgBrowserCompatibility,
+        ],
+        afterMount: mountAppearanceSetNotifications,
+    }, (stack) => {
+        stack.title(window.siyuan.languages.notifications);
+        stack.button({
+            id: "notificationsSetting",
+            label: window.siyuan.languages.config,
+            icon: "iconSettings",
+        });
+        stack.desc(window.siyuan.languages.notificationsMsgPushTip);
+    });
     const desktopModeControl = controlBoolean("desktopMode", {
         readConfig: () => desktopModeCookie.read(),
     });
@@ -497,6 +517,53 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
                 fetchPost("/api/setting/setAppearance", {
                     ...window.siyuan.config.appearance,
                     statusBar
+                });
+            }
+        });
+    });
+};
+
+const NOTIFICATIONS_ITEMS: { key: keyof Config.IAppearanceNotifications; labelKey: "msgDocTreeMaxList" | "msgTagMaxList" | "msgWorkspaceNotSSD" | "msgBrowserCompatibility" }[] = [
+    {key: "msgDocTreeMaxListDisabled", labelKey: "msgDocTreeMaxList"},
+    {key: "msgTagMaxListDisabled", labelKey: "msgTagMaxList"},
+    {key: "msgWorkspaceNotSSDDisabled", labelKey: "msgWorkspaceNotSSD"},
+    {key: "msgBrowserCompatibilityDisabled", labelKey: "msgBrowserCompatibility"},
+];
+
+const genNotificationsDialogHtml = (): string => {
+    const notifications = window.siyuan.config.appearance.notifications;
+    const listItems = NOTIFICATIONS_ITEMS.map(({key, labelKey}) =>
+        genListSwitchItemHtml(key, window.siyuan.languages[labelKey], notifications && !notifications[key])
+    ).join("");
+    return `<div class="fn__hr"></div>
+<div class="b3-label">
+    ${window.siyuan.languages.notificationsMsgPushTip}
+    <div class="fn__hr"></div>
+    <div class="b3-list b3-list--background">${listItems}</div>
+</div>`;
+};
+
+const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotifications =>
+    NOTIFICATIONS_ITEMS.reduce((acc, {key}) => {
+        acc[key] = !(root.querySelector(`#${CSS.escape(key)}`) as HTMLInputElement).checked;
+        return acc;
+    }, {} as Config.IAppearanceNotifications);
+
+const mountAppearanceSetNotifications = (root: HTMLElement) => {
+    root.querySelector("#notificationsSetting")?.addEventListener("click", () => {
+        const dialog = new Dialog({
+            height: "80vh",
+            width: isMobile() ? "92vw" : "360px",
+            title: "🔔 " + window.siyuan.languages.notifications,
+            content: genNotificationsDialogHtml(),
+            destroyCallback() {
+                const notifications = readNotificationsFromDialog(dialog.element);
+                if (objEquals(notifications, window.siyuan.config.appearance.notifications)) {
+                    return;
+                }
+                fetchPost("/api/setting/setAppearance", {
+                    ...window.siyuan.config.appearance,
+                    notifications
                 });
             }
         });

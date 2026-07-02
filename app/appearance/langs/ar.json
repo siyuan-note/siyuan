@@ -1,4 +1,10 @@
 {
+  "notifications": "الإشعارات",
+  "notificationsMsgPushTip": "قم بتكوين الرسائل التي سيتم عرضها هنا؛ بمجرد إيقاف تشغيلها، لن تظهر الرسالة بعد الآن",
+  "msgDocTreeMaxList": "حد توسيع لوحة المستندات",
+  "msgTagMaxList": "حد توسيع لوحة الوسوم",
+  "msgWorkspaceNotSSD": "مساحة العمل غير موجودة على محرك أقراص الحالة الصلبة",
+  "msgBrowserCompatibility": "إشعار توافق المتصفح",
   "reasoningEffortTooltip": "شدّة التفكير",
   "reasoningEffortDefault": "افتراضي",
   "reasoningEffortLow": "منخفض",

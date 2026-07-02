@@ -1,4 +1,10 @@
 {
+  "notifications": "通知",
+  "notificationsMsgPushTip": "在这里配置需要推送显示的消息，关闭后该消息将不再显示",
+  "msgDocTreeMaxList": "文档面板展开上限",
+  "msgTagMaxList": "标签面板展开上限",
+  "msgWorkspaceNotSSD": "工作空间未放置在固态硬盘",
+  "msgBrowserCompatibility": "浏览器兼容性提示",
   "reasoningEffortTooltip": "思考强度",
   "reasoningEffortDefault": "默认",
   "reasoningEffortLow": "低",

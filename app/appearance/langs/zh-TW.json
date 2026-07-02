@@ -1,4 +1,10 @@
 {
+  "notifications": "通知",
+  "notificationsMsgPushTip": "在這裡設定需要推送顯示的訊息，關閉後該訊息將不再顯示",
+  "msgDocTreeMaxList": "文件面板展開上限",
+  "msgTagMaxList": "標籤面板展開上限",
+  "msgWorkspaceNotSSD": "工作空間未放置在固態硬碟",
+  "msgBrowserCompatibility": "瀏覽器相容性提示",
   "reasoningEffortTooltip": "思考強度",
   "reasoningEffortDefault": "預設",
   "reasoningEffortLow": "低",

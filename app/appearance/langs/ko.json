@@ -1,4 +1,10 @@
 {
+  "notifications": "알림",
+  "notificationsMsgPushTip": "여기에서 표시할 메시지를 설정합니다. 끄면 해당 메시지가 더 이상 표시되지 않습니다",
+  "msgDocTreeMaxList": "문서 패널 펼침 한도",
+  "msgTagMaxList": "태그 패널 펼침 한도",
+  "msgWorkspaceNotSSD": "워크스페이스가 솔리드 스테이트 드라이브에 없습니다",
+  "msgBrowserCompatibility": "브라우저 호환성 알림",
   "reasoningEffortTooltip": "추론 노력",
   "reasoningEffortDefault": "기본",
   "reasoningEffortLow": "낮음",

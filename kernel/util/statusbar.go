@@ -25,3 +25,13 @@ type StatusBar struct {
 }
 
 var StatusBarCfg *StatusBar
+
+// Notifications 外观通知开关配置。https://github.com/siyuan-note/siyuan/issues/17797
+type Notifications struct {
+	MsgDocTreeMaxListDisabled       bool `json:"msgDocTreeMaxListDisabled"`
+	MsgTagMaxListDisabled           bool `json:"msgTagMaxListDisabled"`
+	MsgWorkspaceNotSSDDisabled      bool `json:"msgWorkspaceNotSSDDisabled"`
+	MsgBrowserCompatibilityDisabled bool `json:"msgBrowserCompatibilityDisabled"`
+}
+
+var NotificationsCfg *Notifications

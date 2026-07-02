@@ -45,6 +45,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/mcp"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -236,6 +237,12 @@ func Serve(fastMode bool, cookieKey string) {
 	util.HttpServing = true
 
 	go util.HookUILoaded()
+
+	// 启动后自动连接已配置的 MCP server，让用户首次使用 AI Agent 时工具已就绪。
+	// EnsureMCPConnected 是异步的，不阻塞 HTTP 监听；内置 mcpConnecting 标志防止重复连接。
+	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
+		go mcpclient.EnsureMCPConnected(model.Conf.AI.MCP.Servers)
+	}
 
 	go func() {
 		time.Sleep(1 * time.Second)

@@ -247,6 +247,10 @@ func getCriteria(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	data := model.GetCriteria()
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		data = model.FilterCriteriaByPublishAccess(c, publishAccess, data)
+	}
 	ret.Data = data
 }
 

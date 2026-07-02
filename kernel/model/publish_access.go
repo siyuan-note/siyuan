@@ -871,3 +871,64 @@ func FilterRecentDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	}
 	return
 }
+
+func FilterCriteriaByPublishAccess(c *gin.Context, publishAccess PublishAccess, criteria []*Criterion) (ret []*Criterion) {
+	ret = []*Criterion{}
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	// IDPath 元素可能是笔记本 ID、文档 ID，或 "笔记本ID/文档ID[.sy]" 路径串，这里统一解析出文档 ID
+	blockIDs := map[string]struct{}{}
+	for _, criterion := range criteria {
+		for _, p := range criterion.IDPath {
+			p = strings.TrimSpace(p)
+			if p == "" {
+				continue
+			}
+			// 路径形式取末段并去掉 .sy 后缀
+			id := strings.TrimSuffix(path.Base(p), ".sy")
+			if id != "" && id != "." && id != "/" {
+				blockIDs[id] = struct{}{}
+			}
+		}
+	}
+	blockIDsSlice := make([]string, 0, len(blockIDs))
+	for id := range blockIDs {
+		blockIDsSlice = append(blockIDsSlice, id)
+	}
+	blockTrees := treenode.GetBlockTrees(blockIDsSlice)
+	for _, criterion := range criteria {
+		accessible := false
+		for _, p := range criterion.IDPath {
+			p = strings.TrimSpace(p)
+			if p == "" {
+				continue
+			}
+			id := strings.TrimSuffix(path.Base(p), ".sy")
+			if id == "" || id == "." || id == "/" {
+				continue
+			}
+			bt := blockTrees[id]
+			if bt == nil {
+				// 关联的文档不存在，视为不可访问
+				accessible = false
+				break
+			}
+			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) || (passwordID != "" && !CheckPublishAuthCookie(c, passwordID, password)) {
+				accessible = false
+				break
+			}
+			accessible = true
+		}
+		if !accessible {
+			// 若 IDPath 全部不可访问（或引用了不可见文档），整条丢弃，避免泄露 HPath
+			continue
+		}
+
+		// 复制一份后再清空搜索/替换关键字，避免污染缓存
+		cloned := *criterion
+		cloned.K = ""
+		cloned.R = ""
+		ret = append(ret, &cloned)
+	}
+	return
+}

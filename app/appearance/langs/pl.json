@@ -743,6 +743,8 @@
   "apiProxyTip": "Proxy sieciowe, które inicjuje zapytanie, np. <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "Nazwa modelu",
   "apiModelTip": "Parametr <code class='fn__code'>model</code> przekazywany podczas żądania API, służący do określenia używanego modelu",
+  "apiDimensions": "Wymiary",
+  "apiDimensionsTip": "Parametr <code class='fn__code'>dimensions</code> przekazywany podczas żądania API, określający wymiary wektora wyjściowego. Obsługiwany tylko przez text-embedding-3 i nowsze modele. 0 = użyj wartości domyślnej modelu",
   "apiMaxTokens": "Maksymalna liczba tokenów",
   "apiMaxTokensTip": "Parametr <code class='fn__code'>max_completion_tokens</code> przekazywany podczas żądania API, ogranicza maksymalną liczbę tokenów na odpowiedź. Ustaw 0, aby wyłączyć limit",
   "apiTemperature": "Temperatura",

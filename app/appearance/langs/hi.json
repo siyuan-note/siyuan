@@ -743,6 +743,8 @@
   "apiProxyTip": "अनुरोध शुरू करने वाला नेटवर्क प्रॉक्सी, जैसे <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "मॉडल नाम",
   "apiModelTip": "API अनुरोध करते समय पारित <code class='fn__code'>model</code> पैरामीटर, उपयोग में लाने वाला मॉडल निर्दिष्ट करने के लिए",
+  "apiDimensions": "आयाम",
+  "apiDimensionsTip": "API अनुरोध करते समय पारित <code class='fn__code'>dimensions</code> पैरामीटर, आउटपुट वेक्टर आयाम निर्दिष्ट करने के लिए। केवल text-embedding-3 और बाद के मॉडलों द्वारा समर्थित। 0 = मॉडल डिफ़ॉल्ट का उपयोग करें",
   "apiMaxTokens": "टोकन की अधिकतम संख्या",
   "apiMaxTokensTip": "API अनुरोध करते समय पारित <code class='fn__code'>max_completion_tokens</code> पैरामीटर, प्रति प्रतिक्रिया अधिकतम टोकन सीमित करने के लिए। बिना सीमा के लिए 0 पर सेट करें",
   "apiTemperature": "तापमान",

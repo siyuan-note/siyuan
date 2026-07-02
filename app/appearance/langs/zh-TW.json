@@ -743,6 +743,8 @@
   "apiProxyTip": "發起請求的網絡代理，如 <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "模型名稱",
   "apiModelTip": "請求 API 時傳入的 <code class='fn__code'>model</code> 參數，用於指定使用的模型",
+  "apiDimensions": "維度",
+  "apiDimensionsTip": "請求 API 時傳遞的 <code class='fn__code'>dimensions</code> 參數，用於指定輸出向量維度。僅 text-embedding-3 及以上模型支援。設為 0 使用模型預設值",
   "apiMaxTokens": "最大 Token 數",
   "apiMaxTokensTip": "請求 API 時傳入的 <code class='fn__code'>max_completion_tokens</code> 參數，用於限制單次回應的最大 token 數，設定為 0 表示不限制",
   "apiTemperature": "溫度",

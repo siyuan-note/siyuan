@@ -146,7 +146,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
     const modelElement = hasClosestByAttribute(target, "id", "model", true);
     if (modelElement) {
-        if (isXScroll && firstDirection === "toRight" && !lastClientX && !hasClosestByClassName(target, "protyle-wysiwyg", true)) {
+        if (isXScroll && firstDirection === "toRight" && !lastClientX && !hasClosestByClassName(target, "protyle-wysiwyg", true) &&
+            // 划选文字时不触发关闭面板
+            (getSelection().rangeCount === 0 || getSelection().toString() === "")) {
             closeModel();
         }
         return;

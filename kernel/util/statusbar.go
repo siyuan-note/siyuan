@@ -26,7 +26,7 @@ type StatusBar struct {
 
 var StatusBarCfg *StatusBar
 
-// Notifications 外观通知开关配置。https://github.com/siyuan-note/siyuan/issues/17797
+// Notifications 外观通知开关配置。https://github.com/siyuan-note/siyuan/issues/11109
 type Notifications struct {
 	MsgDocTreeMaxListDisabled       bool `json:"msgDocTreeMaxListDisabled"`
 	MsgTagMaxListDisabled           bool `json:"msgTagMaxListDisabled"`

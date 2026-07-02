@@ -743,6 +743,8 @@
   "apiProxyTip": "הפרוקסי רשת המוזמן, כמו <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "שם המודל",
   "apiModelTip": "פרמטר <code class='fn__code'>model</code> שמועבר בבקשת ה-API, משמש לציון המודל לשימוש",
+  "apiDimensions": "ממדים",
+  "apiDimensionsTip": "The <code class='fn__code'>dimensions</code> parameter passed when requesting the API, used to specify the output vector dimensions. Only supported by text-embedding-3 and later models. Set to 0 to use the model default",
   "apiMaxTokens": "מספר המקסימום של טוקנים",
   "apiMaxTokensTip": "פרמטר <code class='fn__code'>max_completion_tokens</code> שמועבר בבקשת ה-API, מגביל את מספר הטוקנים המרבי לתגובה. הגדר ל-0 לביטול ההגבלה",
   "apiTemperature": "חום",

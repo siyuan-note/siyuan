@@ -44,19 +44,44 @@ type Connection struct {
 }
 
 var (
-	mcpMu      sync.Mutex
-	mcpConns   []Connection
-	mcpServers []conf.MCPServer
+	mcpMu         sync.Mutex
+	mcpConns      []Connection
+	mcpServers    []conf.MCPServer
+	mcpConnecting bool // 是否有后台连接 goroutine 正在进行，防止重复启动
 )
 
+// EnsureMCPConnected 确保 MCP server 已连接。
+// 首次调用时在后台异步连接，立即返回不阻塞调用方（如 Agent 请求路径）。
+// 连接完成前发起的 Agent 请求本轮可能看不到 MCP 工具，下轮即可用。
+// 后续调用若已连接则直接返回；若后台连接仍在进行则也直接返回，等其完成。
 func EnsureMCPConnected(servers []conf.MCPServer) {
 	mcpMu.Lock()
-	defer mcpMu.Unlock()
 	mcpServers = servers
-	if len(mcpConns) > 0 {
+	if len(mcpConns) > 0 || mcpConnecting {
+		mcpMu.Unlock()
 		return
 	}
-	mcpConns = connectServers(servers)
+	mcpConnecting = true
+	mcpMu.Unlock()
+
+	// 后台连接：耗时操作（握手 + 拉取工具列表）不阻塞调用方。
+	go func() {
+		conns := connectServers(servers)
+		mcpMu.Lock()
+		// 若连接期间被 DisconnectMCP 清空，则丢弃本次结果，避免断开后又被覆盖。
+		if mcpConns == nil && len(conns) > 0 {
+			// 仍需关闭刚建好的连接，避免泄漏。
+			mcpMu.Unlock()
+			closeConnections(conns)
+			mcpMu.Lock()
+			mcpConnecting = false
+			mcpMu.Unlock()
+			return
+		}
+		mcpConns = conns
+		mcpConnecting = false
+		mcpMu.Unlock()
+	}()
 }
 
 // serverTimeout 归一化服务器配置的超时（秒），未配置或非法时回退到默认值。
@@ -88,6 +113,8 @@ func DisconnectMCP() {
 	defer mcpMu.Unlock()
 	closeConnections(mcpConns)
 	mcpConns = nil
+	// 若后台仍有连接 goroutine 在进行，标记其结果应被丢弃（写回时检查 mcpConns==nil）。
+	mcpConnecting = false
 }
 
 func connectServers(servers []conf.MCPServer) []Connection {
@@ -296,12 +323,19 @@ func getMCPSession(serverName string) *mcp.ClientSession {
 // reconnectMCP 关闭现有连接并重新注册工具。
 func reconnectMCP() bool {
 	mcpMu.Lock()
-	defer mcpMu.Unlock()
-	if len(mcpServers) == 0 {
+	// 后台首次连接仍在进行时，重连无意义（连接尚未就绪，工具调用本不会到达这里）。
+	if mcpConnecting || len(mcpServers) == 0 {
+		mcpMu.Unlock()
 		return false
 	}
 	closeConnections(mcpConns)
-	mcpConns = connectServers(mcpServers)
+	mcpConns = nil
+	mcpMu.Unlock()
+
+	conns := connectServers(mcpServers)
+	mcpMu.Lock()
+	defer mcpMu.Unlock()
+	mcpConns = conns
 	for _, conn := range mcpConns {
 		if conn.Session != nil {
 			logging.LogInfof("mcp: reconnected server [%s]", conn.ServerName)

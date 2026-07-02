@@ -56,12 +56,13 @@ type Editing struct {
 }
 
 type Embedding struct {
-	ID      string `json:"id"`
-	Enabled bool   `json:"enabled"`
-	APIKey  string `json:"apiKey"`
-	BaseURL string `json:"baseURL"`
-	Name    string `json:"name"`
-	Timeout int    `json:"timeout"`
+	ID         string `json:"id"`
+	Enabled    bool   `json:"enabled"`
+	APIKey     string `json:"apiKey"`
+	BaseURL    string `json:"baseURL"`
+	Name       string `json:"name"`
+	Timeout    int    `json:"timeout"`
+	Dimensions int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
 }
 
 type Provider struct {
@@ -358,6 +359,9 @@ func (ai *AI) Normalize() {
 	}
 	if ai.Embedding.Timeout < 1 {
 		ai.Embedding.Timeout = 30
+	}
+	if ai.Embedding.Dimensions < 0 {
+		ai.Embedding.Dimensions = 0 // 负值非法，归零表示用模型默认维度
 	}
 	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
 		ai.Embedding.ID = ast.NewNodeID()

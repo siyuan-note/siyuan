@@ -164,6 +164,7 @@ declare namespace Config {
         apiKey: string;
         name: string;
         timeout: number;
+        dimensions: number;
     }
 
     /**

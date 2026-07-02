@@ -601,6 +601,29 @@
   margin-top: 8px;
 }
 
+// 思考强度：iconBrain 图标嵌入原生 select 左侧，与旁边的模型 select 外观一致。
+.agent-chat__reasoning-effort {
+  position: relative;
+  display: inline-flex;
+
+  // iconBrain 绝对定位到 select 左内侧，不拦截 select 点击。
+  & > svg {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 14px;
+    width: 14px;
+    color: var(--b3-theme-on-surface);
+    pointer-events: none;
+  }
+
+  // 文字右移让出图标空间（b3-select 原始左 padding 为 8px）。
+  .agent-chat__reasoning-effort-select {
+    padding-left: 26px;
+  }
+}
+
 // 停止按钮：常显悬浮背景色，图标主色填充。
 .agent-chat__stop {
   background: var(--b3-list-hover);

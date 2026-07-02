@@ -17,7 +17,10 @@
 package util
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"sync"
@@ -91,6 +94,87 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, m
 func NewOpenAIClient(apiKey, apiBaseURL string) *openai.Client {
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBaseURL
+	return openai.NewClientWithConfig(config)
+}
+
+// builtinExtraBody 是「模型名前缀 → 额外请求参数」的内置适配清单。
+// 仅收录参数语义为「纯输出格式开关」的模型（不改变思考行为、无副作用），
+// 让这类模型从源头把推理内容拆到 reasoning_content 字段，而非以 <think> 标签混在 content 中。
+// 其他模型由 agent.thinkSplitter 兜底解析 <think> 标签。
+var builtinExtraBody = map[string]map[string]any{
+	// MiniMax：开启 reasoning_split 后，thinking 内容拆到 reasoning_content 字段，
+	// 不改变是否思考、无流式要求。覆盖 MiniMax-M* 和 abab* 两个命名族。
+	"minimax-m": {"reasoning_split": true},
+	"abab-":     {"reasoning_split": true},
+}
+
+// ExtraBodyForModel 按模型名大小写不敏感匹配内置清单，返回需注入的额外请求参数；无匹配返回 nil。
+func ExtraBodyForModel(model string) map[string]any {
+	lower := strings.ToLower(model)
+	for prefix, extra := range builtinExtraBody {
+		if strings.HasPrefix(lower, prefix) {
+			return extra
+		}
+	}
+	return nil
+}
+
+// extraBodyTransport 包装一个 HTTPDoer，在 chat/completions 请求体中注入额外字段。
+// 利用 go-openai 在 client 层暴露的 HTTPDoer 扩展点（Chat 路径不支持 withExtraBody），
+// 对流式与非流式 chat 请求都生效；非 chat 请求原样透传。
+type extraBodyTransport struct {
+	base      openai.HTTPDoer
+	extraBody map[string]any
+}
+
+func (t *extraBodyTransport) Do(req *http.Request) (*http.Response, error) {
+	if len(t.extraBody) == 0 || req.Method != http.MethodPost || !strings.Contains(req.URL.Path, "chat/completions") {
+		return t.base.Do(req)
+	}
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return t.base.Do(req)
+	}
+	if err = req.Body.Close(); err != nil {
+		return t.base.Do(req)
+	}
+
+	var payload map[string]any
+	if err = json.Unmarshal(body, &payload); err != nil {
+		// 请求体解析失败，用原始 body 透传，绝不破坏请求。
+		req.Body = io.NopCloser(bytes.NewReader(body))
+		req.ContentLength = int64(len(body))
+		return t.base.Do(req)
+	}
+
+	for k, v := range t.extraBody {
+		payload[k] = v
+	}
+
+	merged, err := json.Marshal(payload)
+	if err != nil {
+		req.Body = io.NopCloser(bytes.NewReader(body))
+		req.ContentLength = int64(len(body))
+		return t.base.Do(req)
+	}
+
+	req.Body = io.NopCloser(bytes.NewReader(merged))
+	req.ContentLength = int64(len(merged))
+	return t.base.Do(req)
+}
+
+// NewOpenAIClientWithModel 创建 OpenAI client，并按模型名匹配内置清单注入额外请求参数。
+// 绝大多数模型无匹配，走 NewOpenAIClient 老路径（不包中间件，零开销）；
+// 命中清单的模型（如 MiniMax）会注入厂商专属参数（如 reasoning_split）。
+func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
+	extra := ExtraBodyForModel(model)
+	if len(extra) == 0 {
+		return NewOpenAIClient(apiKey, apiBaseURL)
+	}
+	config := openai.DefaultConfig(apiKey)
+	config.BaseURL = apiBaseURL
+	config.HTTPClient = &extraBodyTransport{base: &http.Client{}, extraBody: extra}
 	return openai.NewClientWithConfig(config)
 }
 
@@ -201,7 +285,7 @@ func getEmbeddingHTTPClient() *http.Client {
 	return embeddingHTTPClient
 }
 
-func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout int) (ret [][]float32, err error) {
+func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, dimensions, timeout int) (ret [][]float32, err error) {
 	if 1 > len(texts) {
 		return
 	}
@@ -215,8 +299,9 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout i
 	defer cancel()
 
 	resp, err := client.CreateEmbeddings(ctx, openai.EmbeddingRequestStrings{
-		Input: texts,
-		Model: openai.EmbeddingModel(model),
+		Input:      texts,
+		Model:      openai.EmbeddingModel(model),
+		Dimensions: dimensions, // 0 时因 omitempty 不发送，等同于用模型默认维度
 	})
 	if err != nil {
 		logging.LogErrorf("create embeddings failed: %s", err)

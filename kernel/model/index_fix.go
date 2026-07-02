@@ -43,6 +43,18 @@ import (
 
 var (
 	checkIndexOnce = sync.Once{}
+
+	// fixIndexMu 保证 checkIndex 与 AutoFixIndex 互斥，不会并发跑同一套订正。
+	fixIndexMu sync.Mutex
+	// lastFixedAt 记录上次订正完成时间，用于 AutoFixIndex 的冷却期判断。
+	lastFixedAt time.Time
+)
+
+const (
+	// idleFixThreshold 为用户空闲超过该阈值后才允许触发空闲订正。
+	idleFixThreshold = 7 * time.Minute
+	// fixCooldown 为上次订正后至少间隔该时长才允许下一次空闲订正。
+	fixCooldown = 120 * time.Minute
 )
 
 // checkIndex 自动校验数据库索引，仅在数据同步执行完成后执行一次。
@@ -54,28 +66,80 @@ func checkIndex() {
 			return
 		}
 
-		logging.LogInfof("start checking index...")
+		// 阻塞式获取锁：若 AutoFixIndex 正在跑则等其完成，确保唯一一次校验不会与之并发
+		fixIndexMu.Lock()
+		defer fixIndexMu.Unlock()
 
-		removeDuplicateDatabaseIndex()
-		sql.FlushQueue()
-
-		resetDuplicateBlocksOnFileSys()
-		sql.FlushQueue()
-
-		fixBlockTreeByFileSys()
-		sql.FlushQueue()
-
-		fixDatabaseIndexByBlockTree()
-		sql.FlushQueue()
-
-		removeDuplicateDatabaseRefs()
-
-		// 后面要加任务的话记得修改推送任务栏的进度 util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 1, 5))
-
-		debug.FreeOSMemory()
-		util.PushStatusBar(Conf.Language(185))
-		logging.LogInfof("finish checking index")
+		runFixIndexPipeline()
 	})
+}
+
+// runFixIndexPipeline 执行索引订正流水线并完成收尾（清除脏标志、记录订正时间）。
+// 调用方需持有 fixIndexMu。
+func runFixIndexPipeline() {
+	fixIndexPipeline()
+	// 收尾：清除脏标志并记录订正时间，避免在冷却期内被 AutoFixIndex 重复触发
+	util.MarkIndexClean()
+	lastFixedAt = time.Now()
+}
+
+// fixIndexPipeline 执行索引订正流水线。
+// 由 checkIndex（同步后一次性）与 AutoFixIndex（空闲触发）共用，调用方负责加 fixIndexMu 互斥锁。
+func fixIndexPipeline() {
+	logging.LogInfof("start fixing index...")
+
+	removeDuplicateDatabaseIndex()
+	sql.FlushQueue()
+
+	resetDuplicateBlocksOnFileSys()
+	sql.FlushQueue()
+
+	fixBlockTreeByFileSys()
+	sql.FlushQueue()
+
+	fixDatabaseIndexByBlockTree()
+	sql.FlushQueue()
+
+	removeDuplicateDatabaseRefs()
+
+	// 后面要加任务的话记得修改推送任务栏的进度 util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 1, 5))
+
+	debug.FreeOSMemory()
+	util.PushStatusBar(Conf.Language(185))
+	logging.LogInfof("finish fixing index")
+}
+
+// AutoFixIndex 在用户空闲且存在未订正变更时，自动订正索引。由 cron 每分钟调用。
+// 触发需同时满足：空闲达 idleFixThreshold、存在未订正变更（dirty）、冷却期已过。
+func AutoFixIndex() {
+	defer logging.Recover()
+
+	if util.IsMobileContainer() {
+		return
+	}
+	if !util.IsIdle(idleFixThreshold) {
+		return
+	}
+	if !util.IsIndexFixDirty() {
+		return
+	}
+	if !lastFixedAt.IsZero() && time.Since(lastFixedAt) < fixCooldown {
+		return
+	}
+	// TryLock 非阻塞：若 checkIndex 正在跑或上次还没跑完，直接跳过，不堆积 goroutine
+	if !fixIndexMu.TryLock() {
+		return
+	}
+	defer fixIndexMu.Unlock()
+
+	// double-check：拿到锁后再确认一次确实空闲，避免在等待锁期间用户又开始操作
+	if !util.IsIdle(idleFixThreshold) {
+		return
+	}
+
+	logging.LogInfof("start auto fixing index on idle...")
+	runFixIndexPipeline()
+	logging.LogInfof("finish auto fixing index on idle")
 }
 
 // removeDuplicateDatabaseRefs 删除重复的数据库引用关系。

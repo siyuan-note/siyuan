@@ -137,7 +137,7 @@ func indexBox(boxID string) {
 		return
 	}
 
-	util.SetBootDetails("Listing files...")
+	util.SetBootDetails(Conf.Language(303))
 	files := box.ListFiles("/")
 	boxLen := len(Conf.GetOpenedBoxes())
 	if 1 > boxLen {
@@ -224,9 +224,9 @@ func indexBox(boxID string) {
 
 func IndexRefs() {
 	start := time.Now()
-	util.SetBootDetails("Resolving refs...")
+	util.SetBootDetails(Conf.Language(304))
 	util.PushStatusBar(Conf.Language(54))
-	util.SetBootDetails("Indexing refs...")
+	util.SetBootDetails(Conf.Language(305))
 
 	var defBlockIDs []string
 	luteEngine := util.NewLute()
@@ -279,7 +279,7 @@ func IndexRefs() {
 				continue
 			}
 
-			util.IncBootProgress(bootProgressPart, "Indexing ref "+defTree.ID)
+			util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(306), defTree.ID))
 			sql.UpdateRefsTreeQueue(defTree)
 			if 1 < i && 0 == i%64 {
 				util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))

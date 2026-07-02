@@ -356,7 +356,7 @@ type agentCheckpoint struct {
 	ContextLimit          int            `json:"contextLimit,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -461,6 +461,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
 				Temperature:         float32(temperature),
 				MaxCompletionTokens: maxCompletionTokens,
+				// 推理模型努力度（low/medium/high），空串因 omitempty 不发送，非推理模型忽略该参数。
+				ReasoningEffort: reasoningEffort,
 			}
 
 			stream, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, ch)

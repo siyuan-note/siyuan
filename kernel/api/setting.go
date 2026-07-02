@@ -24,6 +24,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -202,6 +203,11 @@ func setAI(c *gin.Context) {
 
 	model.Conf.AI.Normalize()
 	model.Conf.Save()
+
+	// MCP 配置可能变更（开关切换、编辑、增删 server），异步重连让连接立即跟上。
+	if model.Conf.AI.MCP != nil {
+		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers)
+	}
 
 	ret.Data = model.Conf.AI
 }
@@ -626,6 +632,14 @@ func setAppearance(c *gin.Context) {
 
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
+	if nil == util.StatusBarCfg {
+		util.StatusBarCfg = &util.StatusBar{}
+	}
+	if nil == model.Conf.Appearance.Notifications {
+		// 旧配置未迁移，按默认全部启用处理
+		model.Conf.Appearance.Notifications = util.NewNotifications()
+	}
+	util.NotificationsCfg = model.Conf.Appearance.Notifications
 	model.Conf.Lang = util.LangToBCP47(appearance.Lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()

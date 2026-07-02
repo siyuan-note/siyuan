@@ -1182,33 +1182,33 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	switch method {
 	case 1: // 查询语法
 		typeFilter := buildTypeFilter(types, subTypes)
-		boxFilter := buildBoxesFilter(boxes)
-		pathFilter := buildPathsFilter(paths)
+		boxFilter, boxArgs := buildBoxesFilter(boxes)
+		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
 			blocks, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		} else {
-			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 		}
 	case 2: // SQL
 		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen, page, pageSize)
 	case 3: // 正则表达式
 		typeFilter := buildTypeFilter(types, subTypes)
-		boxFilter := buildBoxesFilter(boxes)
-		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		boxFilter, boxArgs := buildBoxesFilter(boxes)
+		pathFilter, pathArgs := buildPathsFilter(paths)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 	default: // 关键字
 		typeFilter := buildTypeFilter(types, subTypes)
-		boxFilter := buildBoxesFilter(boxes)
-		pathFilter := buildPathsFilter(paths)
+		boxFilter, boxArgs := buildBoxesFilter(boxes)
+		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
 			blocks, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		} else {
 			if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
 				query = stringQuery(query)
-				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 			} else {
 				docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
-				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 			}
 		}
 	}
@@ -1332,9 +1332,38 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	return
 }
 
-func buildBoxesFilter(boxes []string, alias ...string) string {
+// IsValidSearchBoxPath 校验搜索入参中的笔记本 ID 与文档路径，阻止 SQL 元字符进入语句拼接。
+// box 必须是合法的节点 ID；docPath 为空表示仅限定笔记本范围；否则须为以 "/" 开头、
+// 由节点 ID 段组成的文档路径（如 "/20210808180117-6v0mkxr.sy" 或子树目录 "/20210808180117-6v0mkxr"）。
+func IsValidSearchBoxPath(box, docPath string) bool {
+	if !ast.IsNodeIDPattern(box) {
+		return false
+	}
+	if "" == docPath || "/" == docPath {
+		return true
+	}
+	if !strings.HasPrefix(docPath, "/") {
+		return false
+	}
+	segments := strings.Split(strings.TrimPrefix(docPath, "/"), "/")
+	for i, segment := range segments {
+		id := segment
+		if i == len(segments)-1 {
+			// 末段允许带 ".sy" 后缀（具体文档）或不带（子树目录范围）
+			id = strings.TrimSuffix(id, ".sy")
+		}
+		if !ast.IsNodeIDPattern(id) {
+			return false
+		}
+	}
+	return true
+}
+
+// buildBoxesFilter 构造笔记本过滤子句，box 值通过绑定参数传递，避免 SQL 拼接注入。
+// 返回的 args 顺序与 clause 中 "?" 的出现顺序一致。
+func buildBoxesFilter(boxes []string, alias ...string) (clause string, args []any) {
 	if 0 == len(boxes) {
-		return ""
+		return
 	}
 	prefix := ""
 	if 0 < len(alias) && "" != alias[0] {
@@ -1343,18 +1372,22 @@ func buildBoxesFilter(boxes []string, alias ...string) string {
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, box := range boxes {
-		builder.WriteString(fmt.Sprintf("%sbox = '%s'", prefix, box))
+		builder.WriteString(fmt.Sprintf("%sbox = ?", prefix))
+		args = append(args, box)
 		if i < len(boxes)-1 {
 			builder.WriteString(" OR ")
 		}
 	}
 	builder.WriteString(")")
-	return builder.String()
+	clause = builder.String()
+	return
 }
 
-func buildPathsFilter(paths []string, alias ...string) string {
+// buildPathsFilter 构造文档路径过滤子句，path 前缀通过绑定参数传递，避免 SQL 拼接注入。
+// 返回的 args 顺序与 clause 中 "?" 的出现顺序一致。
+func buildPathsFilter(paths []string, alias ...string) (clause string, args []any) {
 	if 0 == len(paths) {
-		return ""
+		return
 	}
 	prefix := ""
 	if 0 < len(alias) && "" != alias[0] {
@@ -1363,13 +1396,15 @@ func buildPathsFilter(paths []string, alias ...string) string {
 	builder := bytes.Buffer{}
 	builder.WriteString(" AND (")
 	for i, path := range paths {
-		builder.WriteString(fmt.Sprintf("%spath LIKE '%s%%'", prefix, path))
+		builder.WriteString(fmt.Sprintf("%spath LIKE ?", prefix))
+		args = append(args, path+"%")
 		if i < len(paths)-1 {
 			builder.WriteString(" OR ")
 		}
 	}
 	builder.WriteString(")")
-	return builder.String()
+	clause = builder.String()
+	return
 }
 
 func buildOrderBy(query string, method, orderBy int) string {
@@ -1680,7 +1715,7 @@ func extractID(content string) (ret string) {
 	return
 }
 
-func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
@@ -1690,21 +1725,24 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter
 		return
 	}
 
-	blocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize)
+	// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入
+	args := append(append([]any{}, boxArgs...), pathArgs...)
+	blocks := sql.SelectBlocksRegexArgs(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize, args...)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
 
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter)
+	matchedBlockCount, matchedRootCount = fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter)
 	return
 }
 
-func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
+func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter + ignoreFilter
 	stmt += boxFilter + pathFilter
-	result, _ := sql.QueryNoLimit(stmt)
+	args := append(append([]any{}, boxArgs...), pathArgs...)
+	result, _ := sql.QueryNoLimitArgs(stmt, args...)
 	if 1 > len(result) {
 		return
 	}
@@ -1713,7 +1751,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreF
 	return
 }
 
-func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts"
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
@@ -1728,23 +1766,26 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 	stmt += ") AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
+	// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入；绕开 sqlparser 以保留 "?" 占位
+	args := append(append([]any{}, boxArgs...), pathArgs...)
+	blocks := sql.SelectBlocksRawStmtArgs(stmt, args, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
 
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter)
+	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTS(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter)
 	return
 }
 
-func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
+func fullTextSearchCountByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts"
 
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter
-	result, _ := sql.QueryNoLimit(stmt)
+	args := append(append([]any{}, boxArgs...), pathArgs...)
+	result, _ := sql.QueryNoLimitArgs(stmt, args...)
 	if 1 > len(result) {
 		return
 	}
@@ -1753,7 +1794,7 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 	return
 }
 
-func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = strings.ReplaceAll(query, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	keywords := strings.Split(query, " ")
 	contentField := columnConcat()
@@ -1768,6 +1809,9 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 		}
 	}
 	orderByLike += ")"
+	// box/path 过滤子句在下方 dMatchStmt 与 selectStmt 中各出现一次，绑定参数需按出现顺序收集两份。
+	// 第一份对应 CTE 内的 WHERE
+	args := append(append([]any{}, boxArgs...), pathArgs...)
 	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent" +
 		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
@@ -1781,6 +1825,8 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
 		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + likeFilter + ")))"
+	// 第二份对应外层 SELECT 的 WHERE
+	args = append(args, append(append([]any{}, boxArgs...), pathArgs...)...)
 	if strings.Contains(orderBy, "ORDER BY rank DESC") {
 		orderBy = buildOrderBy(query, 0, 0)
 		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort ASC, ", 1)
@@ -1792,7 +1838,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 	} else {
 		selectStmt += " " + orderBy
 	}
-	result, _ := sql.QueryNoLimit(selectStmt)
+	result, _ := sql.QueryNoLimitArgs(selectStmt, args...)
 	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
 		matchedRootCount = int(result[0]["docs"].(int64))

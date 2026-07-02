@@ -45,6 +45,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/mcp"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -140,6 +141,7 @@ func Serve(fastMode bool, cookieKey string) {
 		model.ControlConcurrency, // 请求串行化 Concurrency control when requesting the kernel API https://github.com/siyuan-note/siyuan/issues/9939
 		model.Timing,
 		model.Recover,
+		model.Activity,   // 记录用户活动时间，用于 AutoFixIndex 的空闲判断
 		corsMiddleware(), // 后端服务支持 CORS 预检请求验证 https://github.com/siyuan-note/siyuan/pull/5593
 		jwtMiddleware,    // 解析 JWT https://github.com/siyuan-note/siyuan/issues/11364
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac"})),
@@ -236,6 +238,12 @@ func Serve(fastMode bool, cookieKey string) {
 	util.HttpServing = true
 
 	go util.HookUILoaded()
+
+	// 启动后自动连接已配置的 MCP server，让用户首次使用 AI Agent 时工具已就绪。
+	// EnsureMCPConnected 是异步的，不阻塞 HTTP 监听；内置 mcpConnecting 标志防止重复连接。
+	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
+		go mcpclient.EnsureMCPConnected(model.Conf.AI.MCP.Servers)
+	}
 
 	go func() {
 		time.Sleep(1 * time.Second)
@@ -418,6 +426,18 @@ func serveSnippets(ginServer *gin.Engine) {
 
 		// 没有在配置文件中命中时在文件系统上查找
 		filePath = filepath.Join(util.SnippetsPath, filePath)
+
+		// 限制只能访问 snippets 目录内的文件，并拦截敏感路径，避免通过路径穿越读取工作空间内的敏感文件
+		if !gulu.File.IsSubPath(util.SnippetsPath, filePath) {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+		if util.IsSensitivePath(filePath) {
+			logging.LogErrorf("refuse to serve sensitive snippet file [%s]", c.Request.URL.Path)
+			c.Status(http.StatusForbidden)
+			return
+		}
+
 		c.File(filePath)
 	})
 }

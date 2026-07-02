@@ -1222,10 +1222,38 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 		return
 	}
 	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
+	htmlBlock2Media(ret)
 	htmlBlock2Inline(ret)
 	parse.TextMarks2Inlines(ret) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
+}
+
+// htmlBlock2Media 将导入标准 Markdown 时被识别为 HTML 块的 <audio>/<video> 还原为音频/视频块。
+// 导入 Markdown 使用的是 NewStdLute，未启用 ProtyleWYSIWYG，故 lute 不会把 <audio>/<video> 解析为
+// NodeAudio/NodeVideo，而是兜底为 NodeHTMLBlock，这里在解析后做一次修正。
+// Improve Markdown import to parse audio/video tags https://github.com/siyuan-note/siyuan/issues/17985
+func htmlBlock2Media(tree *parse.Tree) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeHTMLBlock != n.Type {
+			return ast.WalkContinue
+		}
+
+		tokens := bytes.TrimSpace(n.Tokens)
+		tokens, _ = bytes.CutPrefix(tokens, []byte("<div>"))
+		tokens, _ = bytes.CutSuffix(tokens, []byte("</div>"))
+		tokens = bytes.TrimSpace(tokens)
+
+		lower := bytes.ToLower(tokens)
+		if bytes.HasPrefix(lower, []byte("<audio")) && bytes.HasSuffix(tokens, []byte(">")) {
+			n.Type = ast.NodeAudio
+			n.Tokens = tokens
+		} else if bytes.HasPrefix(lower, []byte("<video")) && bytes.HasSuffix(tokens, []byte(">")) {
+			n.Type = ast.NodeVideo
+			n.Tokens = tokens
+		}
+		return ast.WalkContinue
+	})
 }
 
 func processHTMLBlockSvgImg(n *ast.Node, assetDirPath string) {

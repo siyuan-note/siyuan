@@ -125,7 +125,7 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
     });
     group.textBlock("ai.embedding.baseURL", {
         title: window.siyuan.languages.apiBaseURL,
-        desc: window.siyuan.languages.apiBaseURLTip,
+        desc: window.siyuan.languages.apiBaseURLEmbeddingTip,
         mode: "input-text",
     });
     group.textBlock("ai.embedding.apiKey", {
@@ -137,6 +137,11 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.apiModel,
         desc: window.siyuan.languages.apiModelTip,
         mode: "input-text",
+    });
+    group.number("ai.embedding.dimensions", {
+        title: window.siyuan.languages.apiDimensions,
+        desc: window.siyuan.languages.apiDimensionsTip,
+        min: 0,
     });
     group.number("ai.embedding.timeout", {
         title: window.siyuan.languages.apiTimeout,

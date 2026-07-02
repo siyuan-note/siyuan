@@ -259,7 +259,8 @@ export class App {
                         setTitle("", true);
                         initMessage();
                         /// #if BROWSER && !MOBILE
-                        if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()) {
+                        if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()
+                            && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
                             showMessage(window.siyuan.languages.useChrome, 0, "error");
                         }
                         /// #endif
@@ -293,6 +294,15 @@ window.showKeyboardToolbar = () => {
     // 防止 Pad 端报错
 };
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
+// 移动端容器（Android/鸿蒙）启用桌面模式时，原生壳默认禁用 WebView 自身键盘行为、等待 JS 调用
+// showKeyboard 弹键盘，而桌面 bundle 不会调用它，导致键盘无法弹出。这里把键盘控制权交还给
+// WebView 自身管理（与平板走桌面 bundle 时的行为一致）
+// On-screen keyboard pops up when using desktop mode on HarmonyOS and Android https://github.com/siyuan-note/siyuan/issues/18028
+if (window.JSAndroid?.setWebViewFocusable) {
+    window.JSAndroid.setWebViewFocusable(true);
+} else if (window.JSHarmony?.setWebViewFocusable) {
+    window.JSHarmony.setWebViewFocusable(true);
+}
 /// #else
 ipcRenderer.send(Constants.SIYUAN_READY_TO_SHOW);
 /// #endif

@@ -147,6 +147,9 @@ func processPendingEmbeddings() {
 			defer workersWg.Done()
 			for job := range workCh {
 				if embeddingStop.Load() {
+					// 本轮已熔断（其它 worker 处理失败触发），这些积压 job 里的块不能直接丢弃，
+					// 否则它们仍为 e.id IS NULL，下轮被反复捞出却永远不被写行。按失败处理写占位行。
+					recordFailedEmbedding(job.blocks, "round stopped due to earlier failure in this round")
 					continue
 				}
 				doEmbedAndStore(job.texts, job.blocks)
@@ -300,31 +303,42 @@ func decodeVector(b []byte) []float32 {
 	return unsafe.Slice((*float32)(unsafe.Pointer(&b[0])), len(b)/embeddingVectorDim)
 }
 
+// recordFailedEmbedding 把一批块标记为失败（fail_count+1，写空 embedding），并熔断本轮 + 提示用户。
+// 用于 API 调用出错或返回向量数与输入不匹配时的统一失败处理。
+func recordFailedEmbedding(blocks []map[string]any, reason string) {
+	embeddingStop.Store(true)
+	logging.LogErrorf("create embeddings failed (%s), stop this round", reason)
+	// 多个 worker 可能并发失败，用 CAS 保证本轮只向用户提示一次
+	if embeddingErrNotified.CompareAndSwap(false, true) {
+		util.PushErrMsg("Embedding request failed, indexing paused. Please check AI embedding config.", 5000)
+	}
+
+	now := time.Now().Unix()
+	for _, row := range blocks {
+		id, _ := row["id"].(string)
+		rootID, _ := row["root_id"].(string)
+		box, _ := row["box"].(string)
+		path, _ := row["path"].(string)
+		updated, _ := row["updated"].(string)
+		// 先确保占位行存在（INSERT OR IGNORE 不覆盖已有行），再累加失败计数
+		sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
+			id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
+		sql.Exec("UPDATE block_embeddings SET fail_count = fail_count + 1, last_tried = ?, embedding = ?, model = ?, content_len = 0, ignored_type = 0 WHERE id = ?",
+			now, []byte{}, embeddingModel(), id)
+	}
+}
+
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
-	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
+	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingDimensions(), embeddingTimeout())
 	if err != nil {
 		// 任何 API 错误（含模型不存在/鉴权失败/限流/网络异常）都熔断本轮，避免连接风暴
-		embeddingStop.Store(true)
-		logging.LogErrorf("create embeddings failed, stop this round: %s", err)
-		// 多个 worker 可能并发失败，用 CAS 保证本轮只向用户提示一次
-		if embeddingErrNotified.CompareAndSwap(false, true) {
-			util.PushErrMsg("Embedding request failed, indexing paused. Please check AI embedding config.", 5000)
-		}
+		recordFailedEmbedding(blocks, err.Error())
+		return
+	}
 
-		// 失败块记录 fail_count/last_tried，使其进入按各自退避节奏的重试队列，而非被反复无界重试
-		now := time.Now().Unix()
-		for _, row := range blocks {
-			id, _ := row["id"].(string)
-			rootID, _ := row["root_id"].(string)
-			box, _ := row["box"].(string)
-			path, _ := row["path"].(string)
-			updated, _ := row["updated"].(string)
-			// 先确保占位行存在（INSERT OR IGNORE 不覆盖已有行），再累加失败计数
-			sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
-				id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
-			sql.Exec("UPDATE block_embeddings SET fail_count = fail_count + 1, last_tried = ?, embedding = ?, model = ?, content_len = 0, ignored_type = 0 WHERE id = ?",
-				now, []byte{}, embeddingModel(), id)
-		}
+	// 部分 OpenAI 兼容 API 会对重复输入去重，返回少于输入数量的向量。此时无法对齐，整批按失败处理，避免越界 panic
+	if len(vectors) != len(blocks) {
+		recordFailedEmbedding(blocks, fmt.Sprintf("count mismatch: requested %d but got %d", len(blocks), len(vectors)))
 		return
 	}
 
@@ -359,16 +373,15 @@ func getEmbeddingIgnoreMatcher() *ignore.GitIgnore {
 		return embeddingIgnoreMatcher
 	}
 
-	embeddingIgnoreLoaded = true
 	embeddingIgnorePath := filepath.Join(util.DataDir, ".siyuan", "embeddingignore")
 	if !gulu.File.IsExist(embeddingIgnorePath) {
-		return nil
+		return nil // 文件不存在时不置 loaded 标志，允许用户后续创建后重新加载
 	}
 
 	data, err := os.ReadFile(embeddingIgnorePath)
 	if err != nil {
 		logging.LogErrorf("read embeddingignore [%s] failed: %s", embeddingIgnorePath, err)
-		return nil
+		return nil // 读取失败时也不置标志，下次调用会重试
 	}
 
 	dataStr := string(data)
@@ -376,6 +389,7 @@ func getEmbeddingIgnoreMatcher() *ignore.GitIgnore {
 	lines := strings.Split(dataStr, "\n")
 
 	embeddingIgnoreMatcher = ignore.CompileIgnoreLines(lines...)
+	embeddingIgnoreLoaded = true // 成功加载后才置标志，避免文件后建却永不加载
 	return embeddingIgnoreMatcher
 }
 
@@ -426,15 +440,15 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		return
 	}
 
-	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
+	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingDimensions(), embeddingTimeout())
 	if err != nil || 1 > len(vectors) {
 		logging.LogErrorf("get query embedding failed")
 		return
 	}
 	queryVec := vectors[0]
 
-	boxFilter := buildBoxesFilter(boxes, "be.")
-	pathFilter := buildPathsFilter(paths, "be.")
+	boxFilter, boxArgs := buildBoxesFilter(boxes, "be.")
+	pathFilter, pathArgs := buildPathsFilter(paths, "be.")
 	typeFilter := buildTypeFilter(types, subTypes, "b.")
 	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types)
 	hasTypeFilter := 0 < len(types)
@@ -453,17 +467,20 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 	for {
 		var q string
+		var args []any
 		if hasFilter {
 			q = fmt.Sprintf("SELECT be.rowid, be.id, be.embedding FROM block_embeddings be JOIN blocks b ON be.id = b.id WHERE be.embedding IS NOT NULL AND length(be.embedding) > 0 AND be.rowid > %d", cursor)
 			if hasTypeFilter {
 				q += " AND " + typeFilter
 			}
 			q += boxFilter + pathFilter
+			// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入
+			args = append(append([]any{}, boxArgs...), pathArgs...)
 			q += fmt.Sprintf(" ORDER BY be.rowid LIMIT %d", scanSize)
 		} else {
 			q = fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
 		}
-		rows, qErr := sql.QueryNoLimit(q)
+		rows, qErr := sql.QueryNoLimitArgs(q, args...)
 		if qErr != nil {
 			logging.LogErrorf("query embeddings for search failed: %s", qErr)
 			break
@@ -717,6 +734,15 @@ func embeddingTimeout() int {
 		return Conf.AI.Embedding.Timeout
 	}
 	return 30
+}
+
+// embeddingDimensions 返回配置的输出向量维度。0 表示用模型默认维度（不传 dimensions 参数给 API），
+// 仅 text-embedding-3 及以上模型支持自定义维度。文档向量与查询向量必须用相同维度，否则相似度计算会维度不匹配。
+func embeddingDimensions() int {
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && 0 < Conf.AI.Embedding.Dimensions {
+		return Conf.AI.Embedding.Dimensions
+	}
+	return 0
 }
 
 func embeddingModel() string {

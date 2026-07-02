@@ -80,7 +80,7 @@ func initDatabase(forceRebuild bool) {
 	disableCache()
 	defer enableCache()
 
-	util.IncBootProgress(2, "Initializing database...")
+	util.IncBootProgress(2, util.BootL10n(301, "Initializing database..."))
 
 	if forceRebuild {
 		ClearQueue()

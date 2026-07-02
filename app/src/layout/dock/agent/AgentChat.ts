@@ -117,6 +117,9 @@ export class AgentChat extends Model {
     private modelSelect: HTMLSelectElement;
     private selectedModel: string;
     private modelOptions: Array<{ id: string; name: string }> = [];
+    // 推理努力度（iconBrain + 原生 select），仅实例记忆，刷新后回到默认。
+    private reasoningEffortSelect: HTMLSelectElement;
+    private selectedReasoningEffort = "";
     private userScrolledUp = false;
     private programmaticScroll = false;
     private stickResizeObserver: ResizeObserver | null = null;
@@ -235,6 +238,7 @@ export class AgentChat extends Model {
             "</svg>" +
             "</span>" +
             '<select class="b3-select b3-select--noborder" tabindex="0"></select>' +
+            '<span class="agent-chat__reasoning-effort b3-tooltips b3-tooltips__n" aria-label="' + (L.reasoningEffortTooltip || "Reasoning effort") + '"><select class="b3-select b3-select--noborder agent-chat__reasoning-effort-select" tabindex="0"></select><svg><use xlink:href="#iconBrain"></use></svg></span>' +
             '<button class="agent-chat__send b3-button b3-button--icon b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
@@ -251,6 +255,8 @@ export class AgentChat extends Model {
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
         this.modelSelect = panel.querySelector(".b3-select") as HTMLSelectElement;
+        this.reasoningEffortSelect = panel.querySelector(".agent-chat__reasoning-effort-select") as HTMLSelectElement;
+        this.initReasoningEffortSelect();
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
             if (this.programmaticScroll) {
@@ -442,6 +448,25 @@ export class AgentChat extends Model {
         return this.selectedModel;
     }
 
+    // 根据当前选中值刷新按钮上的文字（默认/低/中/高）。
+    // 初始化思考强度原生 select：填充 4 个选项并绑定 change，模式与 initModelSelect 一致。
+    private initReasoningEffortSelect() {
+        const L = window.siyuan.languages;
+        const options: Array<{ value: string; label: string }> = [
+            {value: "", label: L.reasoningEffortDefault || "Default"},
+            {value: "low", label: L.reasoningEffortLow || "Low"},
+            {value: "medium", label: L.reasoningEffortMedium || "Medium"},
+            {value: "high", label: L.reasoningEffortHigh || "High"},
+        ];
+        this.reasoningEffortSelect.innerHTML = options
+            .map(o => '<option value="' + escapeHtml(o.value) + '">' + escapeHtml(o.label) + "</option>")
+            .join("");
+        this.reasoningEffortSelect.value = this.selectedReasoningEffort;
+        this.reasoningEffortSelect.addEventListener("change", () => {
+            this.selectedReasoningEffort = this.reasoningEffortSelect.value;
+        });
+    }
+
     // 校验会话持久化的 model ID 是否仍存在于当前配置中。有效则赋值并刷新 label，无效则保持当前选择。
     // 避免加载旧会话时把已删除模型的 stale ID 透传给后端导致静默失败。
     private applySessionModelIfValid(modelId?: string) {
@@ -496,7 +521,8 @@ export class AgentChat extends Model {
                         },
                         this.abortController.signal,
                         this.sessionId,
-                        this.getSelectedModel());
+                        this.getSelectedModel(),
+                        this.selectedReasoningEffort);
                 }
             });
         });
@@ -1317,6 +1343,7 @@ export class AgentChat extends Model {
             this.abortController.signal,
             this.sessionId,
             this.getSelectedModel(),
+            this.selectedReasoningEffort,
             undefined,
             editorContext,
             pluginActions,
@@ -2083,6 +2110,7 @@ export class AgentChat extends Model {
             this.abortController.signal,
             this.sessionId,
             this.getSelectedModel(),
+            this.selectedReasoningEffort,
             true,
         );
     }

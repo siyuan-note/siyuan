@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -161,6 +162,13 @@ func embeddingStat(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 	ret.Data = model.GetEmbeddingStat()
+}
+
+// mcpStatus 返回所有已配置 MCP server 的连接状态，供设置页轮询展示。
+func mcpStatus(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	ret.Data = mcpclient.MCPStatus()
 }
 
 // reindexEmbedding 清空嵌入向量表并触发后台索引器重新计算所有块，异步执行。

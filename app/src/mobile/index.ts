@@ -158,7 +158,8 @@ class App {
                     if (!isInMobileApp()) {
                         if (isChromeBrowser()) {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
-                        } else if (!window.siyuan.config.readonly && !window.siyuan.isPublish) {
+                        } else if (!window.siyuan.config.readonly && !window.siyuan.isPublish
+                            && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
                             showMessage(window.siyuan.languages.useChrome, 0, "error");
                         }
                     }

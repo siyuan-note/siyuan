@@ -69,8 +69,14 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             const stat = response.data as {
                 total: number, indexed: number, pending: number, failed: number, ignoredByLen: number, ignoredByConfig: number, enabled: boolean,
             };
-            const contentEl = block.querySelector("#aiEmbeddingStatsContent") as HTMLElement;
-            const disabledEl = block.querySelector("#aiEmbeddingStatsDisabled") as HTMLElement;
+            if (!stat) {
+                return;
+            }
+            const contentEl = block.querySelector("#aiEmbeddingStatsContent");
+            const disabledEl = block.querySelector("#aiEmbeddingStatsDisabled");
+            if (!contentEl || !disabledEl) {
+                return;
+            }
             if (!stat.enabled) {
                 // 未启用：隐藏进度区，显示提示
                 contentEl.classList.add("fn__none");
@@ -88,6 +94,9 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             const effectiveTotal = Math.max(0, total - ignored);
             const percent = effectiveTotal > 0 ? Math.min(100, indexed / effectiveTotal * 100) : 0;
             const fillEl = block.querySelector("#aiEmbeddingProgressFill") as HTMLElement;
+            if (!fillEl) {
+                return;
+            }
             fillEl.style.width = `${percent}%`;
 
             const done = indexed >= effectiveTotal && pending === 0;
@@ -103,6 +112,9 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             }
 
             const numEl = block.querySelector("#aiEmbeddingStatsNum");
+            if (!numEl) {
+                return;
+            }
             // 每个统计项独立一行，避免单行过长被截断
             numEl.innerHTML = `<div>${window.siyuan.languages.embeddingIndexed}<b>${indexed}</b> / ${total}</div>
                 <div>${window.siyuan.languages.embeddingPending}<b>${pending}</b></div>
@@ -823,6 +835,11 @@ export const mountModelPickerBlock = (root: HTMLElement, group: "editing" | "age
 };
 
 export const getMcpServersBlockKeywords = (): string[] => [
+    window.siyuan.languages.mcpStatusConnected,
+    window.siyuan.languages.mcpStatusConnecting,
+    window.siyuan.languages.mcpStatusFailed,
+    window.siyuan.languages.mcpStatusDisabled,
+    window.siyuan.languages.mcpStatusTools,
     window.siyuan.languages.aiMcpServersTip,
     window.siyuan.languages.addAiMcpServer,
     window.siyuan.languages.aiMcpServerSettings,
@@ -842,7 +859,11 @@ export const getMcpServersBlockKeywords = (): string[] => [
 ];
 
 export const genMcpServersBlockHtml = (): string => `<div class="b3-label config-item" id="aiMcpServersBlock">
-    <div class="b3-label__text">${window.siyuan.languages.aiMcpServersTip}</div>
+    <div class="fn__flex" style="align-items:center;">
+        <span class="b3-label__text">${window.siyuan.languages.aiMcpServersTip}</span>
+        <span class="fn__flex-1"></span>
+        <span id="aiMcpStatusSummary" class="b3-label__text ft__on-surface fn__none"></span>
+    </div>
     <div class="fn__hr--small"></div>
     <div id="aiMcpServerList"></div>
     <div class="fn__hr"></div>
@@ -860,6 +881,79 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
         return;
     }
     renderMcpServerList(root);
+
+    // 轮询 MCP 连接状态，刷新每个 server 名称旁的状态圆点颜色、tooltip，以及标题右侧的汇总。
+    const renderMcpStatus = () => {
+        fetchPost("/api/ai/mcpStatus", {}, (response) => {
+            const items = response.data as Array<{name: string; status: string; tools: number}>;
+            if (!items) {
+                return;
+            }
+            const colorMap: Record<string, string> = {
+                connected: "#65b84f",
+                connecting: "#d97706",
+                failed: "#d23f31",
+                disabled: "var(--b3-theme-on-surface-light)",
+            };
+            let connectedCount = 0;
+            let totalTools = 0;
+            for (const item of items) {
+                if (item.status === "connected") {
+                    connectedCount++;
+                    totalTools += item.tools;
+                }
+                const dotWrap = block.querySelector<HTMLElement>(`[data-mcp-status-name="${CSS.escape(item.name)}"]`);
+                if (!dotWrap) {
+                    continue;
+                }
+                const dot = dotWrap.firstElementChild as HTMLElement;
+                if (dot) {
+                    dot.style.backgroundColor = colorMap[item.status] || colorMap.disabled;
+                }
+                // 每个 server 行上显示其工具数（仅已连接且有工具时）。
+                const toolsEl = block.querySelector<HTMLElement>(`[data-mcp-tools-count="${CSS.escape(item.name)}"]`);
+                if (toolsEl) {
+                    toolsEl.textContent = item.status === "connected" && item.tools > 0 ? window.siyuan.languages.mcpStatusTools.replace("${x}", String(item.tools)) : "";
+                }
+                let label: string;
+                switch (item.status) {
+                    case "connected":
+                        label = window.siyuan.languages.mcpStatusConnected;
+                        break;
+                    case "connecting":
+                        label = window.siyuan.languages.mcpStatusConnecting;
+                        break;
+                    case "failed":
+                        label = window.siyuan.languages.mcpStatusFailed;
+                        break;
+                    default:
+                        label = window.siyuan.languages.mcpStatusDisabled;
+                }
+                dotWrap.setAttribute("aria-label", label);
+            }
+            // 标题右侧汇总：已连接 server 数 + 总工具数。
+            const summaryEl = block.querySelector<HTMLElement>("#aiMcpStatusSummary");
+            if (summaryEl) {
+                if (connectedCount > 0) {
+                    summaryEl.textContent = window.siyuan.languages.mcpStatusConnected + " " + connectedCount + "/" + items.length + " · " + window.siyuan.languages.mcpStatusTools.replace("${x}", String(totalTools));
+                    summaryEl.classList.remove("fn__none");
+                } else {
+                    summaryEl.classList.add("fn__none");
+                }
+            }
+        });
+    };
+    renderMcpStatus();
+    const statusTimer = window.setInterval(renderMcpStatus, 3000);
+    // 设置页关闭/切换时清理定时器，避免内存泄漏（与 embedding 轮询清理模式一致）。
+    const cleanupStatus = () => {
+        if (!document.contains(block)) {
+            window.clearInterval(statusTimer);
+            return;
+        }
+        window.requestAnimationFrame(cleanupStatus);
+    };
+    window.requestAnimationFrame(cleanupStatus);
 
     const getMcpServerName = (el: HTMLElement): string | undefined => {
         return el.closest<HTMLElement>("[data-mcp-server-name]")?.dataset.mcpServerName;
@@ -933,7 +1027,9 @@ const renderMcpServerList = (root: HTMLElement) => {
     }
     const serversHtml = servers.map((server) => {
         return `<div class="b3-list-item b3-list-item--narrow${hideActionClass}" data-type="aiMcpServer" data-mcp-server-name="${Lute.EscapeHTMLStr(server.name)}">
+    <span class="mcp-status-dot b3-tooltips b3-tooltips__n" data-mcp-status-name="${Lute.EscapeHTMLStr(server.name)}" aria-label="${server.enabled ? window.siyuan.languages.mcpStatusConnecting : window.siyuan.languages.mcpStatusDisabled}" style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;margin-right:4px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:${server.enabled ? "#d97706" : "var(--b3-theme-on-surface-light)"};"></span></span>
     <span class="b3-list-item__text">${Lute.EscapeHTMLStr(server.name)}</span>
+    <span class="ft__on-surface fn__flex-center" data-mcp-tools-count="${Lute.EscapeHTMLStr(server.name)}" style="font-size:12px;margin-right:8px;"></span>
     <span data-type="deleteAiMcpServer" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.delete}">
         <svg><use xlink:href="#iconTrashcan"></use></svg>
     </span>

@@ -49,7 +49,7 @@ const (
 	IsInsider = false
 )
 
-// IsReleaseVer 判断是否为正式版（不含 beta、rc 等预发布标识）。
+// IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。
 func IsReleaseVer(ver string) bool {
 	v := "v" + strings.TrimPrefix(ver, "v")
 	return semver.IsValid(v) && semver.Prerelease(v) == ""

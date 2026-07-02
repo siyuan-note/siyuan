@@ -121,7 +121,7 @@ func logBootInfo() {
 				WaitForUILoaded()
 				time.Sleep(3 * time.Second)
 			}
-			if nil == NotificationsCfg || !NotificationsCfg.MsgWorkspaceNotSSDDisabled {
+			if nil == NotificationsCfg || NotificationsCfg.WorkspaceNotSSDEnabled {
 				PushErrMsg(Langs[Lang][278], 15000)
 			}
 		}

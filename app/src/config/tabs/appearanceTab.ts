@@ -523,17 +523,18 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
     });
 };
 
-const NOTIFICATIONS_ITEMS: { key: keyof Config.IAppearanceNotifications; labelKey: "msgDocTreeMaxList" | "msgTagMaxList" | "msgWorkspaceNotSSD" | "msgBrowserCompatibility" }[] = [
-    {key: "msgDocTreeMaxListDisabled", labelKey: "msgDocTreeMaxList"},
-    {key: "msgTagMaxListDisabled", labelKey: "msgTagMaxList"},
-    {key: "msgWorkspaceNotSSDDisabled", labelKey: "msgWorkspaceNotSSD"},
-    {key: "msgBrowserCompatibilityDisabled", labelKey: "msgBrowserCompatibility"},
+const NOTIFICATIONS_ITEMS: { field: keyof Config.IAppearanceNotifications; labelKey: "msgDocTreeMaxList" | "msgTagMaxList" | "msgWorkspaceNotSSD" | "msgBrowserCompatibility" }[] = [
+    {field: "docTreeMaxListEnabled", labelKey: "msgDocTreeMaxList"},
+    {field: "tagMaxListEnabled", labelKey: "msgTagMaxList"},
+    {field: "workspaceNotSSDEnabled", labelKey: "msgWorkspaceNotSSD"},
+    {field: "browserCompatibilityEnabled", labelKey: "msgBrowserCompatibility"},
 ];
 
 const genNotificationsDialogHtml = (): string => {
     const notifications = window.siyuan.config.appearance.notifications;
-    const listItems = NOTIFICATIONS_ITEMS.map(({key, labelKey}) =>
-        genListSwitchItemHtml(key, window.siyuan.languages[labelKey], notifications && !notifications[key])
+    // 默认启用：字段为 undefined（旧配置未迁移）或 true 时开关勾选
+    const listItems = NOTIFICATIONS_ITEMS.map(({field, labelKey}) =>
+        genListSwitchItemHtml(field, window.siyuan.languages[labelKey], notifications?.[field] !== false)
     ).join("");
     return `<div class="fn__hr"></div>
 <div class="b3-label">
@@ -543,11 +544,14 @@ const genNotificationsDialogHtml = (): string => {
 </div>`;
 };
 
-const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotifications =>
-    NOTIFICATIONS_ITEMS.reduce((acc, {key}) => {
-        acc[key] = !(root.querySelector(`#${CSS.escape(key)}`) as HTMLInputElement).checked;
-        return acc;
-    }, {} as Config.IAppearanceNotifications);
+const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotifications => {
+    return {
+        docTreeMaxListEnabled: (root.querySelector("#docTreeMaxListEnabled") as HTMLInputElement).checked,
+        tagMaxListEnabled: (root.querySelector("#tagMaxListEnabled") as HTMLInputElement).checked,
+        workspaceNotSSDEnabled: (root.querySelector("#workspaceNotSSDEnabled") as HTMLInputElement).checked,
+        browserCompatibilityEnabled: (root.querySelector("#browserCompatibilityEnabled") as HTMLInputElement).checked,
+    };
+};
 
 const mountAppearanceSetNotifications = (root: HTMLElement) => {
     root.querySelector("#notificationsSetting")?.addEventListener("click", () => {

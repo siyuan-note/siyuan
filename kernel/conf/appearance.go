@@ -54,7 +54,7 @@ func NewAppearance() *Appearance {
 		HideToolbar:         true,
 		HideStatusBar:       false,
 		StatusBar:           &util.StatusBar{},
-		Notifications:       &util.Notifications{},
+		Notifications:       util.NewNotifications(),
 	}
 }
 

@@ -19,6 +19,7 @@ package util
 import (
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -547,4 +548,38 @@ func ClosePublishServiceSessions() {
 		session.CloseWithMsg([]byte("  close websocket: publish service closed"))
 		RemovePushChan(session)
 	}
+}
+
+var (
+	// lastActivityNs 记录最近一次用户活动（前端发送 WebSocket cmd）的纳秒时间戳。
+	lastActivityNs atomic.Int64
+	// indexFixDirty 标记索引可能已脏（上次订正后用户又有新活动），需要再次订正。
+	indexFixDirty atomic.Bool
+)
+
+func init() {
+	// 初始化为启动时间，避免启动瞬间被判定为空闲
+	lastActivityNs.Store(time.Now().UnixNano())
+}
+
+// RefreshActivity 刷新用户最近活动时间，并标记索引可能已脏（需要订正）。
+// 在 server.HandleMessage 收到前端任何 cmd 时调用。
+func RefreshActivity() {
+	lastActivityNs.Store(time.Now().UnixNano())
+	indexFixDirty.Store(true)
+}
+
+// MarkIndexClean 标记索引已订正完成，清除脏标志。订正流水线结束后调用。
+func MarkIndexClean() {
+	indexFixDirty.Store(false)
+}
+
+// IsIdle 自上次用户活动以来是否已超过 idleThreshold。
+func IsIdle(idleThreshold time.Duration) bool {
+	return time.Since(time.Unix(0, lastActivityNs.Load())) >= idleThreshold
+}
+
+// IsIndexFixDirty 返回是否存在未订正的变更（上次订正后有新用户活动）。
+func IsIndexFixDirty() bool {
+	return indexFixDirty.Load()
 }

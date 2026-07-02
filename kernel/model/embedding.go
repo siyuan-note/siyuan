@@ -147,6 +147,9 @@ func processPendingEmbeddings() {
 			defer workersWg.Done()
 			for job := range workCh {
 				if embeddingStop.Load() {
+					// 本轮已熔断（其它 worker 处理失败触发），这些积压 job 里的块不能直接丢弃，
+					// 否则它们仍为 e.id IS NULL，下轮被反复捞出却永远不被写行。按失败处理写占位行。
+					recordFailedEmbedding(job.blocks, "round stopped due to earlier failure in this round")
 					continue
 				}
 				doEmbedAndStore(job.texts, job.blocks)

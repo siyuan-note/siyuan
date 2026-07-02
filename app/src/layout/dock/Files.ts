@@ -660,7 +660,7 @@ export class Files extends Model {
                         if (newElement.previousElementSibling) {
                             toDocOptions.previousPath = newElement.previousElementSibling.getAttribute("data-path");
                         } else {
-                            // 拖到第一个子文档上方，作为父文档的第一个子文档 https://github.com/siyuan-note/siyuan/issues/17797
+                            // 拖到第一个子文档上方，作为父文档的第一个子文档
                             const parentLi = newElement.parentElement.previousElementSibling as HTMLElement;
                             toDocOptions.targetPath = parentLi.getAttribute("data-path");
                             toDocOptions.toTop = true;

@@ -32,7 +32,7 @@ import (
 )
 
 func InitAppearance() {
-	util.SetBootDetails("Initializing appearance...")
+	util.SetBootDetails(Conf.Language(302))
 	if err := os.Mkdir(util.AppearancePath, 0755); err != nil && !os.IsExist(err) {
 		logging.LogErrorf("create appearance folder [%s] failed: %s", util.AppearancePath, err)
 		util.ReportFileSysFatalError(err)

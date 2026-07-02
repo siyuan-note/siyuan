@@ -2037,6 +2037,16 @@
     "295": "Ta funkcja jest dostępna tylko po zakupie [rocznej subskrypcji] (jeśli już kupiłeś, odśwież lub zaloguj się ponownie w Ustawienia - Konto i Synchronizacja - Konto)",
     "296": "Ponowne tworzenie indeksu wyszukiwania...",
     "297": "Wyjście osiągnęło limit maksymalnej liczby tokenów",
-    "298": "Już skorzystałeś z bezpłatnej subskrypcji próbnej. Powtarzanie subskrypcji próbnej nie jest obsługiwane."
+    "298": "Już skorzystałeś z bezpłatnej subskrypcji próbnej. Powtarzanie subskrypcji próbnej nie jest obsługiwane.",
+    "299": "Uruchamianie jądra...",
+    "300": "Kończenie uruchamiania...",
+    "301": "Inicjowanie bazy danych...",
+    "302": "Inicjowanie wyglądu...",
+    "303": "Wyświetlanie listy plików...",
+    "304": "Rozwiązywanie odwołań...",
+    "305": "Indeksowanie odwołań...",
+    "306": "Indeksowanie odwołania %s",
+    "307": "Synchronizowanie danych z chmury...",
+    "308": "Ponowne indeksowanie synchronizacji..."
   }
 }

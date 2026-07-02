@@ -2037,6 +2037,16 @@
     "295": "Deze functie vereist de aankoop van een [Jaarabonnement] (als u al gekocht heeft, vernieuw of log opnieuw in via [Instellingen - Account en synchronisatie - Account])",
     "296": "Zoekindex opnieuw opbouwen...",
     "297": "De uitvoer heeft de limiet voor max. tokens bereikt",
-    "298": "U hebt al een gratis proefabonnement gebruikt. Herhaalde proefabonnementen worden niet ondersteund."
+    "298": "U hebt al een gratis proefabonnement gebruikt. Herhaalde proefabonnementen worden niet ondersteund.",
+    "299": "Kernel wordt opgestart...",
+    "300": "Opstarten voltooien...",
+    "301": "Database wordt geïnitialiseerd...",
+    "302": "Uiterlijk wordt geïnitialiseerd...",
+    "303": "Bestanden worden weergegeven...",
+    "304": "Referenties worden opgelost...",
+    "305": "Referenties worden geïndexeerd...",
+    "306": "Referentie wordt geïndexeerd %s",
+    "307": "Gegevens worden gesynchroniseerd vanuit de cloud...",
+    "308": "Synchronisatie opnieuw indexeren..."
   }
 }

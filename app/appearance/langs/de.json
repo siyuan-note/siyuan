@@ -2037,6 +2037,16 @@
     "295": "Diese Funktion erfordert den Kauf eines [Jahresabonnements] (wenn Sie bereits gekauft haben, aktualisieren oder erneut anmelden in Einstellungen - Konto & Synchronisierung - Konto)",
     "296": "Suchindex wird neu aufgebaut...",
     "297": "Die Ausgabe hat das Limit für die maximale Token-Anzahl erreicht",
-    "298": "Du hast bereits ein kostenloses Testabonnement genutzt. Ein wiederholtes Testabonnement wird nicht unterstützt."
+    "298": "Du hast bereits ein kostenloses Testabonnement genutzt. Ein wiederholtes Testabonnement wird nicht unterstützt.",
+    "299": "Kernel wird gestartet...",
+    "300": "Start wird abgeschlossen...",
+    "301": "Datenbank wird initialisiert...",
+    "302": "Erscheinungsbild wird initialisiert...",
+    "303": "Dateien werden aufgelistet...",
+    "304": "Referenzen werden aufgelöst...",
+    "305": "Referenzen werden indiziert...",
+    "306": "Referenz wird indiziert %s",
+    "307": "Daten werden aus der Cloud synchronisiert...",
+    "308": "Synchronisation wird neu indiziert..."
   }
 }

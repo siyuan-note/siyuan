@@ -2037,6 +2037,16 @@
     "295": "Fitur ini memerlukan pembelian [Langganan Tahunan] (jika Anda sudah membeli, harap segarkan atau masuk lagi di Pengaturan - Akun & Sinkronisasi - Akun)",
     "296": "Membangun ulang indeks pencarian...",
     "297": "Output telah mencapai batas token penyelesaian maksimum",
-    "298": "Anda sudah pernah menggunakan langganan uji coba gratis. Langganan uji coba berulang tidak didukung."
+    "298": "Anda sudah pernah menggunakan langganan uji coba gratis. Langganan uji coba berulang tidak didukung.",
+    "299": "Memulai kernel...",
+    "300": "Menyelesaikan proses mulai...",
+    "301": "Menginisialisasi basis data...",
+    "302": "Menginisialisasi tampilan...",
+    "303": "Mendaftar berkas...",
+    "304": "Menyelesaikan referensi...",
+    "305": "Mengindeks referensi...",
+    "306": "Mengindeks referensi %s",
+    "307": "Menyinkronkan data dari awan...",
+    "308": "Mengindeks ulang sinkronisasi..."
   }
 }

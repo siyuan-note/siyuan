@@ -69,8 +69,14 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             const stat = response.data as {
                 total: number, indexed: number, pending: number, failed: number, ignoredByLen: number, ignoredByConfig: number, enabled: boolean,
             };
-            const contentEl = block.querySelector("#aiEmbeddingStatsContent") as HTMLElement;
-            const disabledEl = block.querySelector("#aiEmbeddingStatsDisabled") as HTMLElement;
+            if (!stat) {
+                return;
+            }
+            const contentEl = block.querySelector("#aiEmbeddingStatsContent");
+            const disabledEl = block.querySelector("#aiEmbeddingStatsDisabled");
+            if (!contentEl || !disabledEl) {
+                return;
+            }
             if (!stat.enabled) {
                 // 未启用：隐藏进度区，显示提示
                 contentEl.classList.add("fn__none");
@@ -88,6 +94,9 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             const effectiveTotal = Math.max(0, total - ignored);
             const percent = effectiveTotal > 0 ? Math.min(100, indexed / effectiveTotal * 100) : 0;
             const fillEl = block.querySelector("#aiEmbeddingProgressFill") as HTMLElement;
+            if (!fillEl) {
+                return;
+            }
             fillEl.style.width = `${percent}%`;
 
             const done = indexed >= effectiveTotal && pending === 0;
@@ -103,6 +112,9 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
             }
 
             const numEl = block.querySelector("#aiEmbeddingStatsNum");
+            if (!numEl) {
+                return;
+            }
             // 每个统计项独立一行，避免单行过长被截断
             numEl.innerHTML = `<div>${window.siyuan.languages.embeddingIndexed}<b>${indexed}</b> / ${total}</div>
                 <div>${window.siyuan.languages.embeddingPending}<b>${pending}</b></div>

@@ -97,8 +97,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
             return;
         }
     }
-    const currentEditor = getCurrentEditor();
-    if (typeof yDiff === "undefined" && currentEditor?.protyle.options.render.gutter) {
+    if (typeof yDiff === "undefined" && editor?.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {
             if (nodeElement.classList.contains("list") || nodeElement.classList.contains("li")) {
@@ -107,10 +106,10 @@ export const handleTouchEnd = (event: TouchEvent) => {
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                currentEditor.protyle.gutter.render(currentEditor.protyle, embedElement);
+                editor.protyle.gutter.render(editor.protyle, embedElement);
                 return;
             }
-            currentEditor.protyle.gutter.render(currentEditor.protyle, nodeElement, target);
+            editor.protyle.gutter.render(editor.protyle, nodeElement, target);
         }
     }
     isFirstMove = true;
@@ -301,7 +300,8 @@ export const handleTouchMove = (event: TouchEvent) => {
     if (getSelection().rangeCount > 0) {
         // 选中后扩选的情况
         const range = getSelection().getRangeAt(0);
-        if (range.toString() !== "" && window.siyuan.mobile.editor.protyle.wysiwyg.element.contains(range.startContainer)) {
+        const currentEditor = getCurrentEditor();
+        if (range.toString() !== "" && currentEditor?.protyle.wysiwyg.element.contains(range.startContainer)) {
             return;
         }
     }

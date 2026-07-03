@@ -17,11 +17,6 @@ var (
 	AttributeViewBlocksLock = sync.Mutex{}
 )
 
-func GetAvBlocks(avID string) []string {
-	avBlocks := GetBlockRels()
-	return avBlocks[avID]
-}
-
 func GetBlockRels() (ret map[string][]string) {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()

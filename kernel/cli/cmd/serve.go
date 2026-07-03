@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -30,15 +31,15 @@ import (
 
 // serve 子命令自己的 flag 值。--workspace 复用 rootCmd 的 persistent flag，不再重复声明。
 var (
-	serveWdPath          string
-	servePort            string
-	serveReadOnly        string
-	serveAccessAuthCode  string
-	serveLang            string
-	serveMode            string
-	serveSSL             bool
-	serveAttachUI        bool
-	serveSafeMode        bool
+	serveWdPath         string
+	servePort           string
+	serveReadOnly       string
+	serveAccessAuthCode string
+	serveLang           string
+	serveMode           string
+	serveSSL            bool
+	serveAttachUI       bool
+	serveSafeMode       bool
 )
 
 var serveCmd = &cobra.Command{
@@ -47,6 +48,12 @@ var serveCmd = &cobra.Command{
 	Long:  "Start kernel HTTP server. All serving-related options below are passed to the kernel boot.",
 	// 这些 flag 由 cobra 解析（见 init），serve -h 可直接列出全部参数。
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// serve 绕过 root 的初始化，但 --log-level 需在 BootWithFlags（含 logBootInfo 等启动日志）之前应用，
+		// 否则命令行指定的级别会被丢弃；同时记入 util.CLILogLevel，使随后的 model.InitConf 不再用 conf.json 覆盖。
+		if "" != logLevel {
+			logging.SetLogLevel(logLevel)
+			util.CLILogLevel = logLevel
+		}
 		return nil // bypass root's init — BootWithFlags() handles it
 	},
 	Run: func(cmd *cobra.Command, args []string) {

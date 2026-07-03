@@ -1297,20 +1297,27 @@ export class WYSIWYG {
             } else if (event.clientX < mostLeft) {
                 fromOutsideX = mostLeft + 10;
             }
+            const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
             // 起点落在 padding 外或块间空白（target 为 wysiwyg 容器本身）时，需用 elementFromPoint 定位起始块
             if (fromOutsideX !== undefined || target.classList.contains("protyle-wysiwyg")) {
                 const startX = fromOutsideX !== undefined ? fromOutsideX : event.clientX;
-                // 块间缝隙可能大于固定偏移量，需沿 y 轴循环探测直到命中块
+                // 块间缝隙或 wysiwyg padding 较大（如打字机模式）时，需沿 y 轴循环探测直到命中块
                 nodeElement = hasClosestBlock(document.elementFromPoint(startX, event.clientY)) as HTMLElement;
                 if (!nodeElement) {
-                    let probeY = event.clientY;
-                    // 步长 8px，上限 96px（约 6 个普通行高），避免在超大空白块上无限循环
-                    while (!nodeElement && probeY < event.clientY + 96) {
-                        probeY += 8;
-                        const probeElement = document.elementFromPoint(startX, probeY);
-                        if (probeElement && !probeElement.classList.contains("protyle-wysiwyg")) {
-                            nodeElement = hasClosestBlock(probeElement) as HTMLElement;
+                    const probe = (step: number, limit: number) => {
+                        let probeY = event.clientY;
+                        while (!nodeElement && (step > 0 ? probeY < limit : probeY > limit)) {
+                            probeY += step;
+                            const probeElement = document.elementFromPoint(startX, probeY);
+                            if (probeElement && !probeElement.classList.contains("protyle-wysiwyg")) {
+                                nodeElement = hasClosestBlock(probeElement) as HTMLElement;
+                            }
                         }
+                    };
+                    if (event.clientY > lastRect.bottom) {
+                        probe(-8, wysiwygRect.top);
+                    } else {
+                        probe(8, lastRect.bottom);
                     }
                 }
             }
@@ -1521,7 +1528,7 @@ export class WYSIWYG {
                 }
                 if (moveEvent.clientY <= selectStartY && !firstBlockElement &&
                     // https://github.com/siyuan-note/siyuan/issues/7580
-                    moveEvent.clientY < protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
+                    moveEvent.clientY < lastRect.bottom) {
                     firstBlockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
                     if (firstBlockElement.classList.contains("protyle-breadcrumb__bar")) {
                         firstBlockElement = firstBlockElement.nextElementSibling as HTMLElement;

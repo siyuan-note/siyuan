@@ -221,11 +221,24 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 		ReloadFiletree()
 	}
 
-	go func() {
-		sql.FlushQueue()
-		refreshDynamicRefText(node, tree)
-	}()
+	if attrsAffectRefText(nameValues) {
+		go func() {
+			sql.FlushQueue()
+			refreshDynamicRefText(node, tree)
+		}()
+	}
 	return
+}
+
+// attrsAffectRefText 判断本次属性变更是否可能影响引用处的动态锚文本。
+func attrsAffectRefText(nameValues map[string]string) bool {
+	for name := range nameValues {
+		switch strings.ToLower(name) {
+		case "name", "title":
+			return true
+		}
+	}
+	return false
 }
 
 func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {

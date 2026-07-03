@@ -2119,21 +2119,19 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 				return ast.WalkSkipChildren
 			}
 
-			changed = true
 			if "d" == subtype {
-				refText = strings.TrimSpace(getNodeRefText(defNode))
-				if "" == refText {
-					refText = n.TextMarkBlockRefID
+				newRefText := strings.TrimSpace(getNodeRefText(defNode))
+				if "" == newRefText {
+					newRefText = n.TextMarkBlockRefID
 				}
-				treenode.SetDynamicBlockRefText(n, refText)
+				if strings.TrimSpace(refText) == newRefText {
+					return ast.WalkContinue
+				}
+				treenode.SetDynamicBlockRefText(n, newRefText)
+				changed = true
+				refText = newRefText
+				defNodes = append(defNodes, &changedDefNode{id: defID, refText: refText, refType: "ref-" + subtype})
 			}
-			defNodes = append(defNodes, &changedDefNode{id: defID, refText: refText, refType: "ref-" + subtype})
-			return ast.WalkContinue
-		} else if treenode.IsEmbedBlockRef(n) {
-			defID := treenode.GetEmbedBlockRef(n)
-			changed = true
-			defNodes = append(defNodes, &changedDefNode{id: defID, refType: "embed"})
-			return ast.WalkContinue
 		}
 		return ast.WalkContinue
 	})

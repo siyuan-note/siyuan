@@ -246,9 +246,14 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		return
 	}
 
-	cachedData, ok := cache.GetTreeData(tree.ID)
-	if ok {
+	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
+	if cachedData, ok := cache.GetTreeData(tree.ID); ok {
 		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
+			return
+		}
+	} else {
+		if diskData, readErr := filelock.ReadFile(filePath); nil == readErr && len(diskData) == len(data) && bytes.Equal(diskData, data) {
+			cache.SetTreeData(tree.ID, data)
 			return
 		}
 	}

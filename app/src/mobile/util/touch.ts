@@ -97,19 +97,20 @@ export const handleTouchEnd = (event: TouchEvent) => {
             return;
         }
     }
-    if (typeof yDiff === "undefined" && window.siyuan.mobile.editor?.protyle.options.render.gutter) {
+    const currentEditor = getCurrentEditor();
+    if (typeof yDiff === "undefined" && currentEditor?.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {
-            if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
+            if (nodeElement.classList.contains("list") || nodeElement.classList.contains("li")) {
                 // 光标在列表下部应显示右侧的元素，而不是列表本身。放在 windowEvent 中的 mousemove 下处理
                 return;
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                window.siyuan.mobile.editor.protyle.gutter.render(window.siyuan.mobile.editor.protyle, embedElement);
+                currentEditor.protyle.gutter.render(currentEditor.protyle, embedElement);
                 return;
             }
-            window.siyuan.mobile.editor.protyle.gutter.render(window.siyuan.mobile.editor.protyle, nodeElement, target);
+            currentEditor.protyle.gutter.render(currentEditor.protyle, nodeElement, target);
         }
     }
     isFirstMove = true;

@@ -272,6 +272,9 @@ export class AgentSessionPanel {
             this.finishRename(id, input.value, input, titleEl);
         });
         input.addEventListener("keydown", (e: KeyboardEvent) => {
+            if (e.isComposing) {
+                return;
+            }
             if (e.key === "Enter") {
                 input.blur();
             }

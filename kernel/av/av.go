@@ -659,9 +659,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	}
 
 	avJSONPath := GetAttributeViewDataPath(av.ID)
-	if err = filelock.WriteFile(avJSONPath, data); err != nil {
-		logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
-		return
+	if err = util.WriteFileByMmap(avJSONPath, data); nil != err {
+		if err = filelock.WriteFile(avJSONPath, data); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
+			return
+		}
 	}
 
 	cache.SetAVData(av.ID, data)

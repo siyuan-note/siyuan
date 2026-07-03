@@ -93,7 +93,7 @@ var MobileOSVer string
 // DatabaseVer 数据库版本。
 // 格式：yyyyMMddHHmm。修改表结构时需要更新此值，启动时会检测版本变化，
 // 若不一致则自动移除旧数据库文件并重建表结构，同时触发全量重建索引。
-const DatabaseVer = "202606122207"
+const DatabaseVer = "202607031200"
 
 func logBootInfo() {
 	plat := GetOSPlatform()

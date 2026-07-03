@@ -688,7 +688,11 @@ func InitConf() {
 		logging.LogInfof("booted in safe mode")
 	}
 
-	logging.SetLogLevel(Conf.LogLevel)
+	// CLI 子命令通过 --log-level 显式指定日志级别时（util.CLILogLevel 非空），优先使用命令行级别，
+	// 不再用 conf.json 的 system.logLevel 覆盖，使命令行参数在初始化早期即生效。
+	if "" == util.CLILogLevel {
+		logging.SetLogLevel(Conf.LogLevel)
+	}
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 

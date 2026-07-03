@@ -35,6 +35,7 @@ var (
 	workspacePath string
 	outputFormat  string
 	dryRun        bool
+	logLevel      string
 )
 
 var rootCmd = &cobra.Command{
@@ -93,6 +94,14 @@ var rootCmd = &cobra.Command{
 		logging.SetLogPath(filepath.Join(util.TempDir, "siyuan-cli.log"))
 		logging.SetLogToStdout(false)
 
+		// CLI 默认按 logging 包默认级别（Debug）启动，InitConf 末尾会用 conf.json 的 system.logLevel 覆盖。
+		// 若用户通过 --log-level 显式指定，则在此处提前应用，并把标志记入 util，使 InitConf 不再覆盖，
+		// 从而让命令行级别在初始化早期即生效，避免 InitConf 之前的大段 Info/Debug 日志被写入 siyuan-cli.log。
+		if "" != logLevel {
+			logging.SetLogLevel(logLevel)
+			util.CLILogLevel = logLevel
+		}
+
 		model.InitConf()
 		sql.InitDatabase(false)
 		sql.InitHistoryDatabase(false)
@@ -144,6 +153,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&workspacePath, "workspace", "w", "", "workspace path")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "format", "f", "table", "output format: table | json")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "dry run mode: validate and print what would happen without making changes")
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "", "log level: off | trace | debug | info | warn | error | fatal (defaults to conf.json system.logLevel)")
 }
 
 func Execute() error {

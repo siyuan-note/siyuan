@@ -42,6 +42,10 @@ import (
 
 var DisabledFeatures []string
 
+// CLILogLevel 在 CLI 子命令通过 --log-level 显式指定日志级别时被设置，model.InitConf 末尾据此跳过对
+// logging.SetLogLevel 的覆盖，使命令行参数优先于 conf.json 的 system.logLevel。
+var CLILogLevel string
+
 func DisableFeature(feature string) {
 	DisabledFeatures = append(DisabledFeatures, feature)
 	DisabledFeatures = gulu.Str.RemoveDuplicatedElem(DisabledFeatures)

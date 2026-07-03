@@ -6,8 +6,10 @@ import {bindSettingSaveDelegation} from "./setting/save";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
 import {focusByRange} from "../protyle/util/selection";
-import {renderReadme} from "./bazaar";
+import {bazaar, renderReadme} from "./bazaar";
 import {fetchSyncPost} from "../util/fetch";
+import {getFrontend} from "../util/functions";
+import {showMessage} from "../dialog/message";
 /// #endif
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
@@ -83,36 +85,50 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
     /// #endif
 };
 
-export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemName: string) => {
+export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemName: string, from: "bazaar" | "downloaded") => {
     /// #if !MOBILE
+    if (!window.siyuan.config.bazaar.trust) {
+        openSettingDialog(app, "bazaar");
+        return;
+    }
+
+    const isDownloaded = from === "downloaded";
     let getResourcesUrl: string;
     switch (bazaarType) {
         case "templates":
-            getResourcesUrl = "/api/bazaar/getBazaarTemplate";
+            getResourcesUrl = isDownloaded ? "/api/bazaar/getInstalledTemplate" : "/api/bazaar/getBazaarTemplate";
             break;
         case "icons":
-            getResourcesUrl = "/api/bazaar/getBazaarIcon";
+            getResourcesUrl = isDownloaded ? "/api/bazaar/getInstalledIcon" : "/api/bazaar/getBazaarIcon";
             break;
         case "widgets":
-            getResourcesUrl = "/api/bazaar/getBazaarWidget";
+            getResourcesUrl = isDownloaded ? "/api/bazaar/getInstalledWidget" : "/api/bazaar/getBazaarWidget";
             break;
         case "themes":
-            getResourcesUrl = "/api/bazaar/getBazaarTheme";
+            getResourcesUrl = isDownloaded ? "/api/bazaar/getInstalledTheme" : "/api/bazaar/getBazaarTheme";
             break;
         case "plugins":
-            getResourcesUrl = "/api/bazaar/getBazaarPlugin";
+            getResourcesUrl = isDownloaded ? "/api/bazaar/getInstalledPlugin" : "/api/bazaar/getBazaarPlugin";
             break;
         default:
             return;
     }
 
-    const response = await fetchSyncPost(getResourcesUrl, {frontend: "all", keyword: itemName});
+    const response = await fetchSyncPost(getResourcesUrl, {
+        frontend: getFrontend(),
+        // 完整包名作 keyword 可缩小请求响应列表；最终仍按 name 精确匹配
+        keyword: itemName,
+    });
     if (response.code !== 0) return;
 
     const resource = (response.data.packages as IBazaarItem[]).find((item: IBazaarItem) => item.name === itemName);
-    if (!resource) return;
+    if (!resource) {
+        showMessage(`Package not found: ${itemName}`);
+        return;
+    }
 
     openSettingDialog(app, "bazaar");
-    renderReadme(bazaarType, "bazaar", resource);
+    bazaar.switchBazaarTab(app, bazaarType, from);
+    renderReadme(bazaarType, from, resource);
     /// #endif
 };

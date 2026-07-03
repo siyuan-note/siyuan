@@ -61,7 +61,7 @@ export const renderReadme = (bazaarType: TBazaarType, from: "downloaded" | "upda
     bazaar._renderReadme(bazaarType, from, data);
 };
 
-const bazaar = {
+export const bazaar = {
     element: undefined as Element,
     genHTML() {
         if (!window.siyuan.config.bazaar.trust) {
@@ -400,8 +400,10 @@ const bazaar = {
             this._getUpdate();
         }
         const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
+        const myType = bazaar._type2myType(bazaarType);
+        const typeBtn = contentElement.previousElementSibling.querySelector(`[data-type="${myType}"]`) as HTMLElement;
         if (contentElement.getAttribute("data-loading") === "true" ||
-            contentElement.previousElementSibling.querySelector(`[data-type="my${bazaarType.replace(bazaarType[0], bazaarType[0].toUpperCase()).substring(0, bazaarType.length - 1)}"]`).classList.contains("b3-button--outline")) {
+            typeBtn?.classList.contains("b3-button--outline")) {
             return;
         }
         contentElement.setAttribute("data-loading", "true");
@@ -421,6 +423,10 @@ const bazaar = {
             keyword: (contentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement)?.value || "",
         }, response => {
             contentElement.removeAttribute("data-loading");
+            const activeBtn = contentElement.previousElementSibling.querySelector(".b3-button:not(.b3-button--outline)") as HTMLElement;
+            if (activeBtn?.getAttribute("data-type") !== myType) {
+                return;
+            }
             let html = "";
             const counterElement = contentElement.previousElementSibling.querySelector(".counter");
             if (response.data.packages.length === 0) {
@@ -483,8 +489,10 @@ type="checkbox">
                 checkElement.classList.add("fn__none");
             }
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
-            if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
-                const repoURL = bazaar.element.querySelector("#configBazaarReadme .item__side")?.getAttribute("data-repourl");
+            const sideElement = bazaar.element.querySelector("#configBazaarReadme.config-bazaar__readme--show .item__side");
+            // 仅刷新「已下载」详情，避免通过 URI 打开的在线详情被本地数据覆盖
+            if (sideElement?.getAttribute("data-from") === "downloaded") {
+                const repoURL = sideElement.getAttribute("data-repourl");
                 bazaar._data.downloaded.find((i) => {
                     if (i.repoURL === repoURL) {
                         bazaar._renderReadme(bazaarType, "downloaded", i);
@@ -509,6 +517,23 @@ type="checkbox">
             plugins: [] as IBazaarItem[],
         }
     },
+    _upsertReadmeData(bazaarType: TBazaarType, from: "downloaded" | "updated" | "bazaar", data: IBazaarItem) {
+        const upsert = (list: IBazaarItem[]) => {
+            const index = list.findIndex((item) => item.repoURL === data.repoURL);
+            if (index >= 0) {
+                list[index] = data;
+            } else {
+                list.push(data);
+            }
+        };
+        if (from === "downloaded") {
+            upsert(bazaar._data.downloaded);
+        } else if (from === "updated") {
+            upsert(bazaar._data.update[bazaarType]);
+        } else {
+            upsert(bazaar._data[bazaarType]);
+        }
+    },
     _renderReadme(bazaarType: TBazaarType, from: "downloaded" | "updated" | "bazaar", data: IBazaarItem) {
         const readmeElement = bazaar.element.querySelector("#configBazaarReadme") as HTMLElement;
         const urls = data.repoURL.split("/");
@@ -523,8 +548,9 @@ type="checkbox">
         if (!(bazaarType in navTitles)) {
             return;
         }
+        bazaar._upsertReadmeData(bazaarType, from, data);
         const isDownload = from === "downloaded";
-        readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-repourl="${escapeAttr(data.repoURL)}">
+        readmeElement.innerHTML = ` <div class="item__side" data-from="${from}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(data.repoURL)}">
     <div class="fn__flex">
         <div style="padding-right: 8px" class="block__icon block__icon--show ariaLabel" data-position="north" data-type="goBack" aria-label="${window.siyuan.languages.back}">
             <svg><use xlink:href="#iconLeft"></use></svg>
@@ -631,6 +657,80 @@ type="checkbox">
     _type2tabType(type: TBazaarType) {
         return type.slice(0, -1);
     },
+    _type2myType(type: TBazaarType) {
+        const tab = bazaar._type2tabType(type);
+        return "my" + tab.charAt(0).toUpperCase() + tab.slice(1);
+    },
+    _initBazaarPanel(app: App, bazaarType: TBazaarType, panel: HTMLElement) {
+        if (panel.getAttribute("data-init")) {
+            return;
+        }
+        switch (bazaar._type2tabType(bazaarType)) {
+            case "template":
+                fetchPost("/api/bazaar/getBazaarTemplate", {}, response => {
+                    bazaar._onBazaar(response, "templates");
+                    bazaar._data.templates = response.data.packages;
+                });
+                break;
+            case "icon":
+                fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
+                    bazaar._onBazaar(response, "icons");
+                    bazaar._data.icons = response.data.packages;
+                });
+                break;
+            case "widget":
+                fetchPost("/api/bazaar/getBazaarWidget", {}, response => {
+                    bazaar._onBazaar(response, "widgets");
+                    bazaar._data.widgets = response.data.packages;
+                });
+                break;
+            case "theme":
+                fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
+                    bazaar._onBazaar(response, "themes");
+                    bazaar._data.themes = response.data.packages;
+                });
+                break;
+            case "plugin":
+                fetchPost("/api/bazaar/getBazaarPlugin", {
+                    frontend: getFrontend()
+                }, response => {
+                    bazaar._onBazaar(response, "plugins");
+                    bazaar._data.plugins = response.data.packages;
+                });
+                break;
+        }
+        panel.setAttribute("data-init", "true");
+    },
+    /** 切换集市顶部 Tab */
+    switchBazaarTab(app: App, bazaarType: TBazaarType, from: "downloaded" | "updated" | "bazaar") {
+        if (!bazaar.element) {
+            return;
+        }
+        const layoutTabType = from === "bazaar" ? bazaar._type2tabType(bazaarType) : "downloaded";
+        const focusItem = bazaar.element.querySelector(`.layout-tab-bar .item[data-type="${layoutTabType}"]`);
+        const currentFocus = bazaar.element.querySelector(".layout-tab-bar .item--focus");
+        if (focusItem && focusItem !== currentFocus) {
+            currentFocus?.classList.remove("item--focus");
+            focusItem.classList.add("item--focus");
+        }
+        bazaar.element.querySelectorAll(".config-bazaar__panel").forEach((panel) => {
+            const panelType = panel.getAttribute("data-type");
+            const isActive = panelType === layoutTabType;
+            panel.classList.toggle("fn__none", !isActive);
+            if (isActive && from === "bazaar") {
+                bazaar._initBazaarPanel(app, bazaarType, panel as HTMLElement);
+            }
+        });
+        if (from === "downloaded") {
+            const myType = bazaar._type2myType(bazaarType);
+            const titleBar = bazaar.element.querySelector('.config-bazaar__panel[data-type="downloaded"] .config-bazaar__title');
+            titleBar?.querySelectorAll(".b3-button").forEach((btn) => {
+                btn.classList.toggle("b3-button--outline", btn.getAttribute("data-type") !== myType);
+            });
+            bazaar.element.querySelector("#configBazaarDownloaded")?.removeAttribute("data-loading");
+            bazaar._genMyHTML(bazaarType, app, false);
+        }
+    },
     bindEvent(app: App) {
         if (!window.siyuan.config.bazaar.trust) {
             bazaar.element.querySelector("button").addEventListener("click", () => {
@@ -653,11 +753,20 @@ type="checkbox">
             let pkgItem: IBazaarItem;
             if (repoElement) {
                 const repo = repoElement.getAttribute("data-repourl");
-                let sideForm;
                 if (repoElement.classList.contains("item__side")) {
-                    sideForm = repoElement.getAttribute("data-from");
-                }
-                if (hasClosestByAttribute(repoElement, "data-type", "downloaded-update") || sideForm === "updated") {
+                    const sideForm = repoElement.getAttribute("data-from");
+                    const sidePackageType = repoElement.getAttribute("data-package-type") as TBazaarType;
+                    if (sidePackageType && sideForm === "downloaded") {
+                        pkgType = sidePackageType;
+                        pkgItem = bazaar._data.downloaded.find((i) => i.repoURL === repo);
+                    } else if (sidePackageType && sideForm === "updated") {
+                        pkgType = sidePackageType;
+                        pkgItem = bazaar._data.update[sidePackageType]?.find((i) => i.repoURL === repo);
+                    } else if (sidePackageType && sideForm === "bazaar") {
+                        pkgType = sidePackageType;
+                        pkgItem = bazaar._data[sidePackageType]?.find((i) => i.repoURL === repo);
+                    }
+                } else if (hasClosestByAttribute(repoElement, "data-type", "downloaded-update")) {
                     for (const bazaarType of ["plugins", "themes", "icons", "templates", "widgets"] as TBazaarType[]) {
                         const item = bazaar._data.update[bazaarType]?.find((i) => i.repoURL === repo);
                         if (item) {
@@ -666,7 +775,7 @@ type="checkbox">
                             break;
                         }
                     }
-                } else if (hasClosestByAttribute(repoElement, "id", "configBazaarDownloaded") || sideForm === "downloaded") {
+                } else if (hasClosestByAttribute(repoElement, "id", "configBazaarDownloaded")) {
                     const activeBtn = bazaar.element.querySelector("#configBazaarDownloaded")?.previousElementSibling?.querySelector(".b3-button:not(.b3-button--outline)") as HTMLElement;
                     if (activeBtn?.getAttribute("data-type")) {
                         const activeBazaarType = bazaar._myType2Type(activeBtn.getAttribute("data-type"));
@@ -972,36 +1081,8 @@ type="checkbox">
                     bazaar.element.querySelectorAll(".config-bazaar__panel").forEach(item => {
                         if (type === item.getAttribute("data-type")) {
                             item.classList.remove("fn__none");
-                            if (!item.getAttribute("data-init")) {
-                                if (type === "template") {
-                                    fetchPost("/api/bazaar/getBazaarTemplate", {}, response => {
-                                        bazaar._onBazaar(response, "templates");
-                                        bazaar._data.templates = response.data.packages;
-                                    });
-                                } else if (type === "icon") {
-                                    fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
-                                        bazaar._onBazaar(response, "icons");
-                                        bazaar._data.icons = response.data.packages;
-                                    });
-                                } else if (type === "widget") {
-                                    fetchPost("/api/bazaar/getBazaarWidget", {}, response => {
-                                        bazaar._onBazaar(response, "widgets");
-                                        bazaar._data.widgets = response.data.packages;
-                                    });
-                                } else if (type === "theme") {
-                                    fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
-                                        bazaar._onBazaar(response, "themes");
-                                        bazaar._data.themes = response.data.packages;
-                                    });
-                                } else if (type === "plugin") {
-                                    fetchPost("/api/bazaar/getBazaarPlugin", {
-                                        frontend: getFrontend()
-                                    }, response => {
-                                        bazaar._onBazaar(response, "plugins");
-                                        bazaar._data.plugins = response.data.packages;
-                                    });
-                                }
-                                item.setAttribute("data-init", "true");
+                            if (type !== "downloaded") {
+                                bazaar._initBazaarPanel(app, (type + "s") as TBazaarType, item as HTMLElement);
                             }
                         } else {
                             item.classList.add("fn__none");

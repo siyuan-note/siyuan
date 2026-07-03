@@ -12,6 +12,8 @@ import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
 import {initTouchDragBridge} from "../../util/touchDragBridge";
+import {isWindow} from "../../util/functions";
+import {getDockByType} from "../../layout/tabUtil";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -64,6 +66,47 @@ export const initWindowEvent = (app: App) => {
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (event.dataTransfer.types.includes("text/plain")) {
             return;
+        }
+        // 拖拽标题/列表项块标时，按浮窗模型控制文档树所在浮动 dock 的显隐：
+        // 鼠标在边缘触发区或面板内则展开，离开则收起 https://github.com/siyuan-note/siyuan/issues/18043
+        if (!isWindow() &&
+            (!window.siyuan.layout.leftDock.pin || !window.siyuan.layout.rightDock.pin || !window.siyuan.layout.bottomDock.pin)) {
+            const fileDock = getDockByType("file");
+            // 文档树所在 dock 为浮动且文档树图标激活时才处理
+            if (fileDock && !fileDock.pin &&
+                document.querySelector('.dock__items > .dock__item--active[data-type="file"]')) {
+                let gutterBlockType = "";
+                for (const itemType of event.dataTransfer.types) {
+                    if (itemType.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                        gutterBlockType = itemType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)[0];
+                        break;
+                    }
+                }
+                if (["nodeheading", "nodelistitem"].includes(gutterBlockType)) {
+                    const statusHeight = document.getElementById("status")?.clientHeight || 0;
+                    const inYRange = event.clientY > document.getElementById("toolbar")?.clientHeight || 0
+                        && event.clientY < window.innerHeight - statusHeight;
+                    // 通过 dock 容器类名判断位置，避免访问私有属性 position
+                    const dockElement = fileDock.layout.element;
+                    let onEdge = false;
+                    if (dockElement.classList.contains("layout__dockl")) {
+                        onEdge = inYRange &&
+                            (fileDock.elements[0].clientWidth > 0 ? event.clientX < Math.max((document.getElementById("dockLeft")?.clientWidth || 0) + 1, 16) : event.clientX < 8);
+                    } else if (dockElement.classList.contains("layout__dockr")) {
+                        onEdge = inYRange &&
+                            (fileDock.elements[0].clientWidth > 0 ? event.clientX > window.innerWidth - Math.max((document.getElementById("dockRight")?.clientWidth || 0) - 2, 16) : event.clientX > window.innerWidth - 8);
+                    } else if (dockElement.classList.contains("layout__dockb")) {
+                        onEdge = event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - statusHeight);
+                    }
+                    const rect = dockElement.getBoundingClientRect();
+                    if (onEdge ||
+                        (event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom)) {
+                        fileDock.showDock();
+                    } else {
+                        fileDock.hideDock();
+                    }
+                }
+            }
         }
         const fileElement = hasClosestByClassName(event.target, "sy__file");
         const protyleElement = hasClosestByClassName(event.target, "protyle", true);

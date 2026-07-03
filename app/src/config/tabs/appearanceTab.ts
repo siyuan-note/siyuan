@@ -56,8 +56,8 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     group.range("editor.fontSize", {
         title: window.siyuan.languages.editorFontSize,
         desc: window.siyuan.languages.fontSizeTip,
-        min: 12,
-        max: 48,
+        min: 9,
+        max: 72,
         step: 1,
         save: (value) => editorConfigApi.patch("editor.fontSize", value),
     });

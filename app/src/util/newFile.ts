@@ -15,6 +15,14 @@ import {openMobileFileById} from "../mobile/editor";
 import {App} from "../index";
 import {NewDocTargetByHPath, NewDocTargetSubDoc, getNewDocTargetFromSavePath, getNewDocTargetFromTree} from "./parseNewDocTarget";
 
+export const getBlockRefAnchorText = (title: string) => {
+    const trimmed = (title || "").trim();
+    if (!trimmed) {
+        return window.siyuan.languages._kernel[16];
+    }
+    return trimmed.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen);
+};
+
 type NewDocRequest = {
     app: App;
     notebookId: string;
@@ -81,7 +89,7 @@ export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeEleme
         path: hPath,
         notebook: targetNotebookId
     }, (idResponse) => {
-        const refText = newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen);
+        const refText = getBlockRefAnchorText(newFileName);
         if (idResponse.data && idResponse.data.length > 0) {
             const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",

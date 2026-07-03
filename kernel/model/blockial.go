@@ -231,6 +231,13 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 }
 
 // attrsAffectRefText 判断本次属性变更是否可能影响引用处的动态锚文本。
+//
+// 动态锚文本（ref-d）由定义块的 name（命名）或 title（文档标题）派生而来，
+// 仅当这两个属性发生变化时才需要调用 refreshDynamicRefText 去刷新引用方文档；
+// 其他属性（如锁定状态、滚动位置、自定义属性等）不影响锚文本，跳过刷新可避免
+// 对引用方文档的无意义落盘和历史记录生成（详见 https://github.com/siyuan-note/siyuan/issues/18058）。
+//
+// 注意：若后续动态锚文本的派生规则扩展到其他属性，需同步在本函数的白名单中补齐。
 func attrsAffectRefText(nameValues map[string]string) bool {
 	for name := range nameValues {
 		switch strings.ToLower(name) {

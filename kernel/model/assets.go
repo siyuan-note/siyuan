@@ -93,6 +93,9 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 	if filelock.IsHidden(assetAbsPath) {
 		return
 	}
+	if util.IsOfficeTempFile(assetAbsPath) {
+		return
+	}
 	if strings.HasSuffix(assetAbsPath, ".tmp") {
 		return
 	}
@@ -116,6 +119,9 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 		return
 	}
 	if filelock.IsHidden(assetAbsPath) {
+		return
+	}
+	if util.IsOfficeTempFile(assetAbsPath) {
 		return
 	}
 	if strings.HasSuffix(assetAbsPath, ".tmp") {

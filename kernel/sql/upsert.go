@@ -43,9 +43,14 @@ func init() {
 }
 
 const (
-	BlocksInsert                   = "INSERT INTO blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
-	BlocksFTSInsert = "INSERT INTO blocks_fts (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
-	BlocksPlaceholder              = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+	BlocksInsert      = "INSERT INTO blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
+	BlocksPlaceholder = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+
+	// blocks_fts 采用 external content 模式（content='blocks'），写入时必须显式提供 rowid，
+	// 该 rowid 取自 blocks 表的隐式 rowid，否则 FTS rowid 与 blocks rowid 脱钩会导致
+	// snippet/highlight 回表取错行、按 rowid 删除静默失效。首列即为 rowid。
+	BlocksFTSInsert      = "INSERT INTO blocks_fts (rowid, id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES %s"
+	BlocksFTSPlaceholder = "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
 	SpansInsert      = "INSERT INTO spans (id, block_id, root_id, box, path, content, markdown, type, ial) VALUES %s"
 	SpansPlaceholder = "(?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -122,8 +127,48 @@ func insertBlocks0(tx *sql.Tx, bulk []*Block, context map[string]any) (err error
 	// 使用下面的 EvtSQLInsertBlocksFTS 就可以了
 	//eventbus.Publish(eventbus.EvtSQLInsertBlocks, context, current, total, len(bulk), evtHash)
 
-	stmt = fmt.Sprintf(BlocksFTSInsert, strings.Join(valueStrings, ","))
-	if err = prepareExecInsertTx(tx, stmt, valueArgs); err != nil {
+	// external content 模式下，FTS 行必须使用 blocks 的 rowid。刚插入的 blocks 行在同一事务内可见，
+	// 这里按 id 反查 rowid，再用与 bulk 顺序对齐的 rowid 拼装 FTS 写入参数。
+	blockRowIDs, err := queryBlockRowIDsTx(tx, bulk)
+	if err != nil {
+		return
+	}
+	ftsValueStrings := make([]string, 0, len(bulk))
+	ftsValueArgs := make([]any, 0, len(bulk)*strings.Count(BlocksFTSPlaceholder, "?"))
+	for _, b := range bulk {
+		rowID, ok := blockRowIDs[b.ID]
+		if !ok {
+			// 理论上不会发生（刚插入即反查），防御性处理避免错位
+			logging.LogErrorf("query block rowid failed after insert: id=%s not found", b.ID)
+			err = fmt.Errorf("block rowid not found after insert: %s", b.ID)
+			return
+		}
+		ftsValueStrings = append(ftsValueStrings, BlocksFTSPlaceholder)
+		ftsValueArgs = append(ftsValueArgs, rowID)
+		ftsValueArgs = append(ftsValueArgs, any(b.ID))
+		ftsValueArgs = append(ftsValueArgs, any(b.ParentID))
+		ftsValueArgs = append(ftsValueArgs, any(b.RootID))
+		ftsValueArgs = append(ftsValueArgs, any(b.Hash))
+		ftsValueArgs = append(ftsValueArgs, any(b.Box))
+		ftsValueArgs = append(ftsValueArgs, any(b.Path))
+		ftsValueArgs = append(ftsValueArgs, any(b.HPath))
+		ftsValueArgs = append(ftsValueArgs, any(b.Name))
+		ftsValueArgs = append(ftsValueArgs, any(b.Alias))
+		ftsValueArgs = append(ftsValueArgs, any(b.Memo))
+		ftsValueArgs = append(ftsValueArgs, any(b.Tag))
+		ftsValueArgs = append(ftsValueArgs, any(b.Content))
+		ftsValueArgs = append(ftsValueArgs, any(b.FContent))
+		ftsValueArgs = append(ftsValueArgs, any(b.Markdown))
+		ftsValueArgs = append(ftsValueArgs, any(b.Length))
+		ftsValueArgs = append(ftsValueArgs, any(b.Type))
+		ftsValueArgs = append(ftsValueArgs, any(b.SubType))
+		ftsValueArgs = append(ftsValueArgs, any(b.IAL))
+		ftsValueArgs = append(ftsValueArgs, any(b.Sort))
+		ftsValueArgs = append(ftsValueArgs, any(b.Created))
+		ftsValueArgs = append(ftsValueArgs, any(b.Updated))
+	}
+	stmt = fmt.Sprintf(BlocksFTSInsert, strings.Join(ftsValueStrings, ","))
+	if err = prepareExecInsertTx(tx, stmt, ftsValueArgs); err != nil {
 		return
 	}
 	hashBuf.WriteString("fts")

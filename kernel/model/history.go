@@ -810,6 +810,9 @@ func recentModifiedAssets() (ret []string) {
 		if filelock.IsHidden(absPath) {
 			return false
 		}
+		if util.IsOfficeTempFile(absPath) {
+			return false
+		}
 		return true
 	})
 

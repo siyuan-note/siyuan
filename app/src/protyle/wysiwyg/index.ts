@@ -1321,8 +1321,8 @@ export class WYSIWYG {
                     }
                 }
             }
-            // 落点是否在缝隙/padding（nodeElement 为落点下方的块），滚动后该相对关系不变，于 mousedown 时记录一次
-            const startBelowPoint = !!nodeElement && nodeElement.getBoundingClientRect().top > y;
+            // 落点是否在块外（padding/缝隙），此时 nodeElement 为探测所得，向上划选的遍历终点应用落点 y 而非 nodeElement 边
+            const startOutsideBlock = fromOutsideX !== undefined || target.classList.contains("protyle-wysiwyg");
             if (!nodeElement) {
                 const breadElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
                 if (breadElement) {
@@ -1490,10 +1490,10 @@ export class WYSIWYG {
                 // 块选择判定用的右边界需落在内容区，避免矩形右边缘在 padding 内时选不中块
                 const selectRight = Math.max(newLeft + newWidth, mostLeft);
                 // 向上划选时以 nodeElement 的实时边作为遍历终点（兼容滚动 https://github.com/siyuan-note/siyuan/issues/14664）；
-                // 落点在缝隙时 nodeElement 为下方块，需用其 top（不含自身）避免误选下方块
+                // 落点在缝隙/padding 时 nodeElement 为探测所得的块，其边会超出落点 y 导致误选，故以落点 y 为终点
                 const startBlockRect = nodeElement.getBoundingClientRect();
                 const selectBottom = moveEvent.clientY <= selectStartY
-                    ? (startBelowPoint ? startBlockRect.top : startBlockRect.bottom)
+                    ? (startOutsideBlock ? y : startBlockRect.bottom)
                     : (newTop + newHeight);
                 // newLeft 落在 padding 内时 elementFromPoint 会命中 wysiwyg 容器，需钳制到内容区
                 const detectX = Math.max(mostLeft, Math.min(newLeft, mostRight));
@@ -1513,7 +1513,8 @@ export class WYSIWYG {
                     while (probeY < selectBottom) {
                         probeY += 8;
                         const probeElement = document.elementFromPoint(detectX, probeY);
-                        if (probeElement && !isContainer(probeElement)) {
+                        // 命中非容器元素或容器块（list/sb 等 hasClosestBlock 可识别）即采用
+                        if (probeElement && (!isContainer(probeElement) || hasClosestBlock(probeElement))) {
                             firstElement = probeElement;
                             break;
                         }

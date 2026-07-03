@@ -198,6 +198,7 @@
   position: fixed;
   background-color: var(--b3-theme-primary-lightest);
   z-index: 3; // 需大于 database header and footer
+  pointer-events: none; // 划选矩形不拦截鼠标事件，避免 elementFromPoint 命中自身
 
   // 划选未超过一个块时不显示矩形
   &[data-empty="true"] {

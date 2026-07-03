@@ -15,7 +15,7 @@ import {
     getSelectionPosition,
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
-import {newFileByRefHint, newFileInProtyle} from "../../util/newFile";
+import {getBlockRefAnchorText, newFileByRefHint, newFileInProtyle} from "../../util/newFile";
 import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -575,7 +575,7 @@ ${genHintItemHTML(item)}
                 protyle.toolbar.range = range;
                 const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
-                    color: `${id}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
+                    color: `${id}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${getBlockRefAnchorText(refIsS ? fileNames[0] : realFileName)}`
                 });
                 if (refElement[0]) {
                     protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
@@ -689,7 +689,7 @@ ${genHintItemHTML(item)}
             } else if (value === Constants.ZWSP + 4) {
                 // 新建文档
                 newFileInProtyle(protyle, (createDocId, createDocTitle) => {
-                    insertHTML(`<span data-type="block-ref" data-id="${createDocId}" data-subtype="d">${createDocTitle}</span>`, protyle);
+                    insertHTML(`<span data-type="block-ref" data-id="${createDocId}" data-subtype="d">${getBlockRefAnchorText(createDocTitle)}</span>`, protyle);
                 });
                 return;
             } else if (value === Constants.ZWSP + 6) {
@@ -698,10 +698,10 @@ ${genHintItemHTML(item)}
                 fetchPost("/api/filetree/createDoc", {
                     notebook: protyle.notebookId,
                     path: pathPosix().join(getDisplayName(protyle.path, false, true), newSubDocId + ".sy"),
-                    title: window.siyuan.languages.untitled,
+                    title: "",
                     md: ""
                 }, () => {
-                    insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${window.siyuan.languages.untitled}</span>`, protyle);
+                    insertHTML(`<span data-type="block-ref" data-id="${newSubDocId}" data-subtype="d">${getBlockRefAnchorText("")}</span>`, protyle);
                     /// #if MOBILE
                     openMobileFileById(protyle.app, newSubDocId, [Constants.CB_GET_CONTEXT, Constants.CB_GET_OPENNEW]);
                     /// #else

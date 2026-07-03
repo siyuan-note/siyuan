@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Penomoran judul",
+  "headingNumberTip": "Tampilkan nomor hierarkis di kiri blok judul",
   "encryptedNotebook": "Buku catatan terenkripsi",
   "enableEncryptedNotebook": "Aktifkan buku catatan terenkripsi",
   "encryptedNotebookTip": "Simpan konten sensitif dalam buku catatan terenkripsi. Kata sandi utama diperlukan untuk membuka dan melihat konten. Kata sandi tidak dapat dipulihkan jika dilupakan.",

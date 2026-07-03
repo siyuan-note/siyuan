@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Numérotation des titres",
+  "headingNumberTip": "Afficher les numéros hiérarchiques à gauche des blocs de titre",
   "encryptedNotebook": "Carnet chiffré",
   "enableEncryptedNotebook": "Activer le carnet chiffré",
   "encryptedNotebookTip": "Stockez les contenus sensibles dans un carnet chiffré. Le mot de passe maître est requis pour déverrouiller et afficher le contenu. Le mot de passe ne peut pas être récupéré en cas d'oubli.",

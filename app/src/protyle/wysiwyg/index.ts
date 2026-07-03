@@ -563,7 +563,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
-            protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
+            protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange", "protyle-wysiwyg--selecting");
             if (event.button === 2) {
                 // 右键
                 return;
@@ -1436,6 +1436,7 @@ export class WYSIWYG {
                     return;
                 }
                 protyle.selectElement.classList.remove("fn__none");
+                protyle.wysiwyg.element.classList.add("protyle-wysiwyg--selecting");
                 // 向左选择，遇到 gutter 就不会弹出 toolbar
                 hideElements(["gutter"], protyle);
                 const selectStartY = nodeElement.getBoundingClientRect().top;
@@ -1621,7 +1622,7 @@ export class WYSIWYG {
                 documentSelf.onselect = null;
                 // 多选表格单元格后，选择菜单中的居左，然后 shift+左 选中的文字无法显示选中背景，因此需移除
                 // 多选块后 shift+左 选中的文字无法显示选中背景，因此需移除
-                protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
+                protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange", "protyle-wysiwyg--selecting");
                 this.element.querySelectorAll("iframe").forEach(item => {
                     item.style.pointerEvents = "";
                 });

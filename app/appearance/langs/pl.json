@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Numeracja nagłówków",
+  "headingNumberTip": "Pokaż numery hierarchiczne po lewej stronie bloków nagłówka",
   "encryptedNotebook": "Zaszyfrowany notatnik",
   "enableEncryptedNotebook": "Włącz zaszyfrowany notatnik",
   "encryptedNotebookTip": "Przechowuj poufne treści w zaszyfrowanym notatniku. Odblokowanie i wyświetlenie treści wymaga głównego hasła. Hasła nie można odzyskać w przypadku zapomnienia.",

@@ -1,4 +1,6 @@
 {
+  "headingNumber": "מספור כותרות",
+  "headingNumberTip": "הצג מספרים היררכיים משמאל לבלוקי כותרת",
   "encryptedNotebook": "פנקס מוצפן",
   "enableEncryptedNotebook": "הפעל פנקס מוצפן",
   "encryptedNotebookTip": "אחסון תוכן רגיש בפנקס מוצפן. נדרשת סיסמה ראשית כדי לפתוח ולצפות בתוכן. לא ניתן לשחזר את הסיסמה במקרה של שכחה.",

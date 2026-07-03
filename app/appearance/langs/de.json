@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Überschriftennummerierung",
+  "headingNumberTip": "Hierarchische Nummern links neben Überschrift-Blöcken anzeigen",
   "encryptedNotebook": "Verschlüsseltes Notizbuch",
   "enableEncryptedNotebook": "Verschlüsseltes Notizbuch aktivieren",
   "encryptedNotebookTip": "Sensible Inhalte in einem verschlüsselten Notizbuch speichern. Zum Entsperren und Anzeigen der Inhalte ist das Master-Passwort erforderlich. Das Passwort kann bei Verlust nicht wiederhergestellt werden.",

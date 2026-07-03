@@ -44,6 +44,7 @@ type Editor struct {
 	KaTexMacros                     string         `json:"katexMacros"`                     // KeTex 宏定义
 	ReadOnly                        bool           `json:"readOnly"`                        // 只读模式
 	EmbedBlockBreadcrumb            bool           `json:"embedBlockBreadcrumb"`            // 嵌入块是否显示面包屑
+	HeadingNumber                   bool           `json:"headingNumber"`                   // 是否显示标题编号
 	ListLogicalOutdent              bool           `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
 	ListItemDotNumberClickFocus     bool           `json:"listItemDotNumberClickFocus"`     // 单击列表项标记聚焦
 	FloatWindowMode                 int            `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停，2：不触发浮窗
@@ -88,6 +89,7 @@ func NewEditor() *Editor {
 		KaTexMacros:                     "{}",
 		ReadOnly:                        false,
 		EmbedBlockBreadcrumb:            false,
+		HeadingNumber:                   false,
 		ListLogicalOutdent:              false,
 		ListItemDotNumberClickFocus:     true,
 		FloatWindowMode:                 0,

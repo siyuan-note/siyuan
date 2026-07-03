@@ -42,3 +42,4 @@ muslbin/
 
 # Workflows
 **/__pycache__
+.cache

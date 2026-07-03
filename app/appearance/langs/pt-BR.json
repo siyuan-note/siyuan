@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Numeração de títulos",
+  "headingNumberTip": "Mostrar números hierárquicos à esquerda dos blocos de título",
   "encryptedNotebook": "Caderno criptografado",
   "enableEncryptedNotebook": "Habilitar caderno criptografado",
   "encryptedNotebookTip": "Armazene conteúdos sensíveis em um caderno criptografado. A senha mestra é necessária para desbloquear e visualizar o conteúdo. A senha não pode ser recuperada se for esquecida.",

@@ -114,6 +114,10 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.embedBlockBreadcrumb,
         desc: window.siyuan.languages.embedBlockBreadcrumbTip,
     });
+    group.switch("editor.headingNumber", {
+        title: window.siyuan.languages.headingNumber,
+        desc: window.siyuan.languages.headingNumberTip,
+    });
     group.select("editor.headingEmbedMode", {
         title: window.siyuan.languages.headingEmbedMode,
         desc: window.siyuan.languages.headingEmbedModeTip,

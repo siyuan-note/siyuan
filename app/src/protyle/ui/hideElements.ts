@@ -1,5 +1,6 @@
 import {getAllEditor} from "../../layout/getAll";
 import {isIPhone} from "../util/compatibility";
+import {clearHeadingNumberGutter} from "../util/headingNumber";
 
 // "gutter", "toolbar", "select", "hint", "util", "dialog", "gutterOnly"
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
@@ -17,6 +18,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
         protyle.hint.element.classList.add("fn__none");
     }
     if (protyle.gutter && panels.includes("gutter")) {
+        clearHeadingNumberGutter(protyle.wysiwyg.element);
         protyle.gutter.element.classList.add("fn__none");
         protyle.gutter.element.innerHTML = "";
         // https://ld246.com/article/1651935412480
@@ -26,6 +28,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     }
     //  不能 remove("protyle-wysiwyg--hl") 否则打开页签的时候 "cb-get-hl" 高亮会被移除
     if (protyle.gutter && panels.includes("gutterOnly")) {
+        clearHeadingNumberGutter(protyle.wysiwyg.element);
         if (!isIPhone()) {
             protyle.gutter.element.classList.add("fn__none");
         }
@@ -84,6 +87,7 @@ export const hideAllElements = (types: string[]) => {
         });
     }
     if (types.includes("gutter")) {
+        clearHeadingNumberGutter();
         document.querySelectorAll(".protyle-gutters").forEach(item => {
             item.classList.add("fn__none");
             item.innerHTML = "";

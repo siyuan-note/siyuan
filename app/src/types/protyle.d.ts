@@ -540,6 +540,7 @@ interface IProtyle {
         mode?: number
         blockCount?: number
         action?: TProtyleAction[]
+        headingNumbers?: Record<string, string> | null
     },
     disabled: boolean,
     selectElement?: HTMLElement,

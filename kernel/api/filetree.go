@@ -1200,7 +1200,7 @@ func getDoc(c *gin.Context) {
 		highlight = highlightArg.(bool)
 	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err :=
+	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, err :=
 		model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
 	if errors.Is(err, model.ErrBlockNotFound) {
 		ret.Code = 3
@@ -1221,6 +1221,7 @@ func getDoc(c *gin.Context) {
 		newContent := model.FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
 		if newContent != content {
 			content = newContent
+			headingNumbers = map[string]string{}
 			scroll = false // 避免长页面可通过滚动无限刷出多个锁
 		}
 	}
@@ -1241,6 +1242,7 @@ func getDoc(c *gin.Context) {
 		"isSyncing":        isSyncing,
 		"isBacklinkExpand": isBacklinkExpand,
 		"keywords":         keywords,
+		"headingNumbers":   headingNumbers,
 		"reqId":            arg["reqId"],
 	}
 }

@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Numeración de encabezados",
+  "headingNumberTip": "Mostrar números jerárquicos a la izquierda de los bloques de encabezado",
   "encryptedNotebook": "Cuaderno cifrado",
   "enableEncryptedNotebook": "Habilitar cuaderno cifrado",
   "encryptedNotebookTip": "Almacene contenido confidencial en un cuaderno cifrado. Se requiere la contraseña maestra para desbloquear y ver el contenido. La contraseña no se puede recuperar si se olvida.",

@@ -1,4 +1,6 @@
 {
+  "headingNumber": "标题编号",
+  "headingNumberTip": "在标题块左侧显示层级编号",
   "encryptedNotebook": "加密笔记本",
   "enableEncryptedNotebook": "启用加密笔记本",
   "encryptedNotebookTip": "将敏感内容存入加密笔记本，需要主密码解锁后才能查看。忘记密码将无法恢复数据。",

@@ -482,6 +482,10 @@ declare namespace Config {
          */
         headingEmbedMode: number;
         /**
+         * 是否在编辑器中显示标题编号
+         */
+        headingNumber: boolean;
+        /**
          * Common emoji icons
          */
         emoji: string[];

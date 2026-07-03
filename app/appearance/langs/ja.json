@@ -1,4 +1,6 @@
 {
+  "headingNumber": "見出し番号",
+  "headingNumberTip": "見出しブロックの左側に階層番号を表示する",
   "encryptedNotebook": "暗号化ノートブック",
   "enableEncryptedNotebook": "暗号化ノートブックを有効化",
   "encryptedNotebookTip": "機密内容を暗号化ノートブックに保存します。内容を表示するにはマスターパスワードでロックを解除する必要があります。パスワードを忘れるとデータを復元できません。",

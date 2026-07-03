@@ -99,11 +99,16 @@ const getBlockTypeName = (type: string) => {
     return getLangByType(type);
 };
 
+const escapeCSSString = (value: string) => {
+    return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\a ");
+};
+
 export class Gutter {
     public element: HTMLElement;
     // 普通块标提示模板（含 ${x} 块类型占位符），反链面板使用 gutterTipBacklink
     private gutterTip: string;
     private gutterTipBacklink: string;
+    private headingNumberGutterId = "";
 
     constructor(protyle: IProtyle) {
         if (isMac()) {
@@ -600,6 +605,7 @@ export class Gutter {
             const hoverEl = lineEl || plusEl;
             if (hoverEl) {
                 window.clearTimeout(hidePlusTimeout);
+                this.markHeadingNumberGutter(protyle, hoverEl.getAttribute("data-node-id") || hoverEl.dataset.nodeId);
                 // 鼠标若仍在块标 button 几何范围内，视为块标 hover，不触发+号
                 // 避免框线::before 扩展区侵入块标导致误把点击块标弹菜单变成插入块
                 if (activeBlockButton) {
@@ -623,12 +629,19 @@ export class Gutter {
             }
             const type = buttonElement.getAttribute("data-type");
             const id = buttonElement.getAttribute("data-node-id");
+            this.markHeadingNumberGutter(protyle, id || buttonElement.getAttribute("data-fold-node-id"));
+            if (type === "fold") {
+                hideInsert();
+                return;
+            }
             // 情况C：非有效块标（折叠箭头、数据库行等）→ 隐藏框线与+号
-            if (type === "fold" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
+            if (type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
                 hideInsert();
                 return;
             }
             // 情况B：悬浮有效块标 → 显示框线（贴边），并预设+号位置（隐藏）
+            lineBefore.dataset.nodeId = id;
+            lineAfter.dataset.nodeId = id;
             plusBefore.dataset.nodeId = id;
             plusAfter.dataset.nodeId = id;
             activeBlockButton = buttonElement;
@@ -2765,6 +2778,7 @@ export class Gutter {
     }
 
     public render(protyle: IProtyle, element: Element, target?: Element) {
+        this.clearHeadingNumberGutter(protyle);
         // https://github.com/siyuan-note/siyuan/issues/4659
         if (protyle.title && protyle.title.element.getAttribute("data-render") !== "true") {
             return;
@@ -2780,6 +2794,7 @@ export class Gutter {
         let index = 0;
         let listItem;
         let hideParent = false;
+        let headingNumberGutterId = "";
         while (nodeElement) {
             let parentElement = hasClosestBlock(nodeElement.parentElement);
             if (!isInEmbedBlock(nodeElement)) {
@@ -2870,6 +2885,9 @@ export class Gutter {
                 if (protyle.options.backlinkData) {
                     popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
                 }
+                if (!headingNumberGutterId && type === "NodeHeading") {
+                    headingNumberGutterId = dataNodeId;
+                }
                 const buttonHTML = type ? `<button class="ariaLabel" data-delay="500" data-position="parentW" aria-label="${gutterTip}"
 data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
@@ -2882,7 +2900,7 @@ data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" d
                 if (type === "NodeListItem" && nodeElement.childElementCount > 3 || type === "NodeHeading") {
                     const fold = nodeElement.getAttribute("fold");
                     foldHTML = `<button class="ariaLabel" data-delay="500" data-position="parentW" aria-label="${window.siyuan.languages.fold}"
-data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold === "1" ? "" : "transform:rotate(90deg)"}"><use xlink:href="#iconPlay"></use></svg></button>`;
+data-type="fold" data-fold-node-id="${dataNodeId}" style="cursor:inherit;"><svg style="width: 10px;${fold && fold === "1" ? "" : "transform:rotate(90deg)"}"><use xlink:href="#iconPlay"></use></svg></button>`;
                 }
                 if (type === "NodeListItem" || type === "NodeList") {
                     listItem = nodeElement;
@@ -2944,10 +2962,12 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
         // 防止抖动 https://github.com/siyuan-note/siyuan/issues/4166
         if (match && this.element.childElementCount > 0) {
             this.element.classList.remove("fn__none");
+            this.markHeadingNumberGutter(protyle, headingNumberGutterId || nodeElement.getAttribute("data-node-id"));
             return;
         }
         this.element.innerHTML = html;
         this.element.classList.remove("fn__none");
+        this.markHeadingNumberGutter(protyle, headingNumberGutterId || nodeElement.getAttribute("data-node-id"));
         this.element.style.width = "";
         const contentTop = protyle.contentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
@@ -3002,5 +3022,44 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
         // 追加块标边缘的框线（悬浮块标显示）与+号（悬浮框线显示），默认隐藏，由 mousemove 定位
         // 双元素：框线贴块标边缘不移动（避免闪烁），+号独立定位在外偏位置，tooltip 基于+号元素对齐
         this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__line" data-type="gutterLineBefore" style="display:none"></button><button class="protyle-gutters__line" data-type="gutterLineAfter" style="display:none"></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusBefore" data-position="4west" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusAfter" data-position="4west" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
+    }
+
+    private clearHeadingNumberGutter(protyle: IProtyle) {
+        if (!this.headingNumberGutterId) {
+            return;
+        }
+        const id = escapeCSSString(this.headingNumberGutterId);
+        protyle.wysiwyg.element.querySelectorAll(
+            `[data-node-id="${id}"].protyle-wysiwyg--heading-number-gutter`
+        ).forEach(item => {
+            item.classList.remove("protyle-wysiwyg--heading-number-gutter");
+        });
+        this.headingNumberGutterId = "";
+    }
+
+    private markHeadingNumberGutter(protyle: IProtyle, id?: string) {
+        if (this.headingNumberGutterId === id) {
+            const escapedId = escapeCSSString(id);
+            const activeHeading = protyle.wysiwyg.element.querySelector(
+                `[data-node-id="${escapedId}"].protyle-wysiwyg--heading-number-gutter`
+            );
+            if (activeHeading) {
+                return;
+            }
+            this.headingNumberGutterId = "";
+        }
+        this.clearHeadingNumberGutter(protyle);
+        if (!id) {
+            return;
+        }
+        const escapedId = escapeCSSString(id);
+        const heading = protyle.wysiwyg.element.querySelector(
+            `[data-node-id="${escapedId}"][data-type="NodeHeading"][data-heading-number]`
+        );
+        if (!heading) {
+            return;
+        }
+        heading.classList.add("protyle-wysiwyg--heading-number-gutter");
+        this.headingNumberGutterId = id;
     }
 }

@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Kopnummering",
+  "headingNumberTip": "Hiërarchische nummers links van kopblokken weergeven",
   "encryptedNotebook": "Versleuteld notitieboek",
   "enableEncryptedNotebook": "Versleuteld notitieboek inschakelen",
   "encryptedNotebookTip": "Bewaar gevoelige inhoud in een versleuteld notitieboek. Het hoofdwachtwoord is vereist om de inhoud te ontgrendelen en te bekijken. Het wachtwoord kan niet worden hersteld indien vergeten.",

@@ -491,7 +491,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 }
 
 func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool) (
-	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, err error) {
+	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, headingNumbers map[string]string, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -609,6 +609,9 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 	}
 
 	blockCount = tree.DocBlockCount()
+	if Conf.Editor.HeadingNumber {
+		headingNumbers = HeadingNumbers(tree)
+	}
 	if ast.NodeDocument == node.Type {
 		parentID = node.ID
 		parent2ID = parentID

@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Başlık numaralandırma",
+  "headingNumberTip": "Başlık bloklarının solunda hiyerarşik numaraları göster",
   "encryptedNotebook": "Şifreli not defteri",
   "enableEncryptedNotebook": "Şifreli not defterini etkinleştir",
   "encryptedNotebookTip": "Hassas içeriği şifreli not defterinde saklayın. İçeriğin kilidini açmak ve görüntülemek için ana şifre gereklidir. Şifre unutulursa kurtarılamaz.",

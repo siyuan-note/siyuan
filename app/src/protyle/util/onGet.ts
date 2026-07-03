@@ -20,6 +20,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
+import {renderHeadingNumber} from "./headingNumber";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -92,6 +93,7 @@ export const onGet = (options: {
         setHTML({
             content: options.data.data.content,
             expand: options.data.data.isBacklinkExpand,
+            headingNumbers: options.data.data.headingNumbers,
             action: options.action,
             scrollAttr: options.scrollAttr,
             updateReadonly: options.updateReadonly,
@@ -119,6 +121,7 @@ export const onGet = (options: {
         setHTML({
             content: options.data.data.content,
             expand: options.data.data.isBacklinkExpand,
+            headingNumbers: options.data.data.headingNumbers,
             action: options.action,
             scrollAttr: options.scrollAttr,
             updateReadonly: options.updateReadonly,
@@ -135,6 +138,7 @@ const setHTML = (options: {
     action?: string[],
     isSyncing: boolean,
     expand: boolean,
+    headingNumbers?: Record<string, string> | null,
     updateReadonly?: boolean,
     scrollAttr?: IScrollAttr,
     scrollPosition?: ScrollLogicalPosition,
@@ -239,6 +243,7 @@ const setHTML = (options: {
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
+    renderHeadingNumber(protyle, options.headingNumbers);
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;
     }

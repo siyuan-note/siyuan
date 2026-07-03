@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Číslovanie nadpisov",
+  "headingNumberTip": "Zobraziť hierarchické čísla naľavo od blokov nadpisov",
   "encryptedNotebook": "Šifrovaný zápisník",
   "enableEncryptedNotebook": "Povoliť šifrovaný zápisník",
   "encryptedNotebookTip": "Uchovávajte citlivý obsah v šifrovanom zápisníku. Na odomknutie a zobrazenie obsahu je potrebné hlavné heslo. Heslo nie je možné obnoviť, ak sa zabudne.",

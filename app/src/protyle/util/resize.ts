@@ -7,6 +7,7 @@ import {lineNumberRender} from "../render/highlightRender";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {stickyRow} from "../render/av/row";
+import {renderHeadingNumber} from "./headingNumber";
 
 export const clearBeforeResizeTop = () => {
     /// #if !MOBILE
@@ -51,8 +52,10 @@ export const resize = (protyle: IProtyle) => {
     hideElements(["gutterOnly"], protyle);
     const abs = setPadding(protyle);
     const MIN_ABS = 4;
+    renderHeadingNumber(protyle);
     // 不能 clearTimeout，否则 split 时左侧无法 resize
     setTimeout(() => {
+        renderHeadingNumber(protyle);
         if (protyle.scroll && protyle.scroll.element.parentElement.getAttribute("style")) {
             protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(protyle.contentElement.clientHeight - 49, 200)}px`);
         }

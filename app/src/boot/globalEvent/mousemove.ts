@@ -2,6 +2,7 @@ import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
+import {clearHeadingNumberGutter} from "../../protyle/util/headingNumber";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let left = x + 34;
@@ -232,6 +233,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
     }
 
     if (!hasClosestByClassName(target, "protyle", true)) {
+        clearHeadingNumberGutter();
         document.querySelectorAll(".protyle-gutters").forEach(item => {
             item.classList.add("fn__none");
             item.innerHTML = "";

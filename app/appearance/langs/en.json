@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Heading number",
+  "headingNumberTip": "Display hierarchical numbers to the left of heading blocks",
   "encryptedNotebook": "Encrypted Notebook",
   "enableEncryptedNotebook": "Enable encrypted notebook",
   "encryptedNotebookTip": "Store sensitive content in an encrypted notebook. The master password is required to unlock and view the content. The password cannot be recovered if forgotten.",

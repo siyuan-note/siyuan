@@ -1,4 +1,6 @@
 {
+  "headingNumber": "Numerazione dei titoli",
+  "headingNumberTip": "Mostra i numeri gerarchici a sinistra dei blocchi titolo",
   "encryptedNotebook": "Blocco note crittografato",
   "enableEncryptedNotebook": "Abilita blocco note crittografato",
   "encryptedNotebookTip": "Conserva i contenuti sensibili in un blocco note crittografato. La password principale è necessaria per sbloccare e visualizzare il contenuto. La password non può essere recuperata in caso di smarrimento.",

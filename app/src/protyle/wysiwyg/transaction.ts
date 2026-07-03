@@ -13,6 +13,12 @@ import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {avRender, refreshAV} from "../render/av/render";
 import {removeFoldHeading} from "../util/heading";
+import {
+    cleanHeadingNumberHTML,
+    operationMayChangeHeadingNumber,
+    queueHeadingNumberRefresh,
+    renderHeadingNumber
+} from "../util/headingNumber";
 import {cancelSB, genEmptyElement, genSBElement, refreshSbResize} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
@@ -59,6 +65,28 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, []);
     }
+};
+
+const queueHeadingNumberRender = (protyle: IProtyle, operations: IOperation[]) => {
+    requestAnimationFrame(() => {
+        if (operations.some(operation => operationMayChangeHeadingNumber(operation, protyle.block.headingNumbers))) {
+            queueHeadingNumberRefresh(protyle);
+        } else {
+            renderHeadingNumber(protyle);
+        }
+    });
+};
+
+const cleanHeadingNumberOperationHTML = (operations?: IOperation[]) => {
+    operations?.forEach(operation => {
+        if (["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
+            typeof operation.data === "string") {
+            operation.data = cleanHeadingNumberHTML(operation.data);
+        }
+        if (["unfoldHeading"].includes(operation.action) && typeof operation.retData === "string") {
+            operation.retData = cleanHeadingNumberHTML(operation.retData);
+        }
+    });
 };
 
 // 用于执行操作，外加处理当前编辑器中块引用、嵌入块的更新
@@ -335,6 +363,7 @@ const promiseTransaction = (options: {
                 blockRender(protyle, item);
             }
         });
+        queueHeadingNumberRender(protyle, response.data[0].doOperations);
     });
 };
 
@@ -1021,6 +1050,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
     });
+    queueHeadingNumberRender(protyle, operations);
 };
 
 export const turnsIntoOneTransaction = async (options: {
@@ -1461,6 +1491,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     if (doOperations.length === 0) {
         return;
     }
+    cleanHeadingNumberOperationHTML(doOperations);
+    cleanHeadingNumberOperationHTML(undoOperations);
     if (!protyle) {
         // 文档树中点开属性->数据库后的变更操作 & 文档树添加到数据库
         fetchPost("/api/transactions", {
@@ -1574,8 +1606,9 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
 
 export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: string) => {
     const id = element.getAttribute("data-node-id");
-    const newHTML = element.outerHTML;
-    if (newHTML === oldHTML.replace("<wbr>", "")) {
+    const newHTML = cleanHeadingNumberHTML(element.outerHTML);
+    oldHTML = cleanHeadingNumberHTML(oldHTML.replace("<wbr>", ""));
+    if (newHTML === oldHTML) {
         return;
     }
     element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
@@ -1601,14 +1634,14 @@ export const updateBatchTransaction = (nodeElements: Element[], protyle: IProtyl
         undoOperations.push({
             action: "update",
             id,
-            data: element.outerHTML
+            data: cleanHeadingNumberHTML(element.outerHTML)
         });
         cb(element as HTMLElement);
         element.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         operations.push({
             action: "update",
             id,
-            data: element.outerHTML
+            data: cleanHeadingNumberHTML(element.outerHTML)
         });
     });
     transaction(protyle, operations, undoOperations);

@@ -110,12 +110,16 @@ const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
     }
     switch (target) {
         case "readme":
+        case "readme-installed": {
             // siyuan://bazaar/plugins/plugin-sample/readme
+            // siyuan://bazaar/plugins/plugin-sample/readme-installed
+            const from = target === "readme-installed" ? "downloaded" : "bazaar";
             (async () => {
                 const {openBazaarReadme} = await import("../config");
-                openBazaarReadme(app, resourceType, resourceName);
+                openBazaarReadme(app, resourceType, resourceName, from);
             })();
             return true;
+        }
         default:
             break;
     }

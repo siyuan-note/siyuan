@@ -33,7 +33,9 @@ const handleManualTouchStart = (e: TouchEvent) => {
     }
     // All areas with manual mousedown/mousemove/mouseup drag/resize operations
     if (!target.closest(".dock") &&
-        !target.closest(".b3-dialog") &&
+        // 弹窗内不能按整个 .b3-dialog 匹配，否则导致闪卡文本扩选失效 https://github.com/siyuan-note/siyuan/issues/18055
+        !(target.closest(".b3-dialog") &&  ["resize__move", "resize__rd", "resize__r", "resize__rt",
+            "resize__d", "resize__l", "resize__ld", "resize__lt", "resize__t"].some(cls => target.closest("." + cls))) &&
         !target.closest(".sy__outline") &&
         !target.closest(".layout__resize") &&
         !target.closest(".layout__resize--lr") &&

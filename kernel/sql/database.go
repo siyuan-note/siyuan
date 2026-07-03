@@ -251,7 +251,10 @@ func initFTSBlocks() (err error) {
 	if err != nil {
 		return
 	}
-	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, tokenize=\"" + ftsTokenize() + "\")")
+	// 采用 external content 模式：blocks_fts 不再物理存储列值，仅维护倒排索引，
+	// 原文由 content 指向的 blocks 表提供，按 content_rowid（blocks 的隐式 rowid）回表取值。
+	// 因此 FTS 行的 rowid 必须与 blocks 行的 rowid 严格一致，所有写路径需显式传 rowid。
+	_, err = db.Exec("CREATE VIRTUAL TABLE blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, content='blocks', content_rowid='rowid', tokenize=\"" + ftsTokenize() + "\")")
 	return
 }
 
@@ -260,7 +263,10 @@ func RebuildFTSIndex() (err error) {
 		return
 	}
 
-	stmt := "INSERT INTO blocks_fts (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) SELECT id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated FROM blocks"
+	// external content 模式下使用 'rebuild' 命令重建索引：
+	// FTS5 会扫描 blocks 表，并用 blocks 的 rowid 作为 FTS rowid，保证两者对齐。
+	// 不能再用 INSERT...SELECT FROM blocks，否则 FTS 会自分配 rowid 导致与 blocks 脱钩。
+	stmt := "INSERT INTO blocks_fts(blocks_fts) VALUES('rebuild')"
 	_, err = db.Exec(stmt)
 	return
 }
@@ -1107,11 +1113,13 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 }
 
 func deleteBlocksByBoxTx(tx *sql.Tx, box string) (err error) {
-	stmt := "DELETE FROM blocks WHERE box = ?"
+	// external content 模式下 FTS 行需按 rowid 删除，rowid 来自 blocks 表，
+	// 因此必须先删 FTS（此时 blocks 尚在），再删 blocks，否则子查询查不到 rowid。
+	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE box = ?)"
 	if err = execStmtTx(tx, stmt, box); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE box = ?"
+	stmt = "DELETE FROM blocks WHERE box = ?"
 	if err = execStmtTx(tx, stmt, box); err != nil {
 		return
 	}
@@ -1200,11 +1208,12 @@ func deleteFileAnnotationRefsByBoxTx(tx *sql.Tx, box string) (err error) {
 }
 
 func deleteByRootID(tx *sql.Tx, rootID string, context map[string]any) (err error) {
-	stmt := "DELETE FROM blocks WHERE root_id = ?"
+	// external content 模式下 FTS 行需按 rowid 删除，必须先删 FTS 再删 blocks。
+	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE root_id = ?)"
 	if err = execStmtTx(tx, stmt, rootID); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE root_id = ?"
+	stmt = "DELETE FROM blocks WHERE root_id = ?"
 	if err = execStmtTx(tx, stmt, rootID); err != nil {
 		return
 	}
@@ -1240,11 +1249,12 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]any) 
 
 	ids := strings.Join(rootIDs, "','")
 	ids = "('" + ids + "')"
-	stmt := "DELETE FROM blocks WHERE root_id IN " + ids
+	// external content 模式下 FTS 行需按 rowid 删除，必须先删 FTS 再删 blocks。
+	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE root_id IN " + ids + ")"
 	if err = execStmtTx(tx, stmt); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE root_id IN " + ids
+	stmt = "DELETE FROM blocks WHERE root_id IN " + ids
 	if err = execStmtTx(tx, stmt); err != nil {
 		return
 	}
@@ -1274,11 +1284,12 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]any) 
 }
 
 func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
-	stmt := "DELETE FROM blocks WHERE box = ? AND path LIKE ?"
+	// external content 模式下 FTS 行需按 rowid 删除，必须先删 FTS 再删 blocks。
+	stmt := "DELETE FROM blocks_fts WHERE rowid IN (SELECT rowid FROM blocks WHERE box = ? AND path LIKE ?)"
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE box = ? AND path LIKE ?"
+	stmt = "DELETE FROM blocks WHERE box = ? AND path LIKE ?"
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
 		return
 	}
@@ -1311,7 +1322,8 @@ func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err 
 	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+	// external content 模式下按 rowid 定位 FTS 行
+	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE rowid IN (SELECT rowid FROM blocks WHERE root_id = ?)"
 	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
@@ -1353,7 +1365,8 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 		return
 	}
 
-	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
+	// external content 模式下按 rowid 定位 FTS 行
+	stmt = "UPDATE blocks_fts SET hpath = ? WHERE rowid IN (SELECT rowid FROM blocks WHERE root_id = ?)"
 	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
 		return
 	}

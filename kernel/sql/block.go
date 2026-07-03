@@ -58,13 +58,67 @@ type Block struct {
 	Updated  string
 }
 
+// blockRowIDByBlockID 返回指定 block 的 blocks 表隐式 rowid。
+// external content 模式下，blocks_fts 的写操作需以此为定位键。
+func blockRowIDByBlockID(tx *sql.Tx, id string) (rowID int64, err error) {
+	stmt := "SELECT ROWID FROM blocks WHERE id = ?"
+	rows, err := tx.Query(stmt, id)
+	if err != nil {
+		logging.LogErrorf("query block rowid failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	if rows.Next() {
+		if err = rows.Scan(&rowID); err != nil {
+			logging.LogErrorf("scan block rowid failed: %s", err)
+			return
+		}
+	}
+	return
+}
+
+// queryBlockRowIDsTx 批量返回 ids 对应的 blocks rowid，按 id 索引。
+// 与 deleteBlocksByIDs 一致，采用字符串内插 IN 列表（ids 为内核生成的 block id，非用户输入）。
+func queryBlockRowIDsTx(tx *sql.Tx, blocks []*Block) (ret map[string]int64, err error) {
+	ret = map[string]int64{}
+	if 1 > len(blocks) {
+		return
+	}
+	var ids []string
+	for _, b := range blocks {
+		ids = append(ids, "\""+b.ID+"\"")
+	}
+	stmt := "SELECT id, ROWID FROM blocks WHERE id IN (" + strings.Join(ids, ",") + ")"
+	rows, err := tx.Query(stmt)
+	if err != nil {
+		logging.LogErrorf("query block rowids failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		var rowID int64
+		if err = rows.Scan(&id, &rowID); err != nil {
+			logging.LogErrorf("scan block rowid failed: %s", err)
+			return
+		}
+		ret[id] = rowID
+	}
+	return
+}
+
 func updateRootContent(tx *sql.Tx, content, updated, ialContent, id string) (err error) {
 	stmt := "UPDATE blocks SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
 	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
+	// external content 模式下按 rowid 定位 FTS 行
+	var rowID int64
+	if rowID, err = blockRowIDByBlockID(tx, id); err != nil {
+		return
+	}
+	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE rowid = ?"
+	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, rowID); err != nil {
 		return
 	}
 	removeBlockCache(id)
@@ -78,8 +132,14 @@ func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
 		tx.Rollback()
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
+	// external content 模式下按 rowid 定位 FTS 行
+	var rowID int64
+	if rowID, err = blockRowIDByBlockID(tx, block.ID); err != nil {
+		tx.Rollback()
+		return
+	}
+	stmt = "UPDATE blocks_fts SET content = ? WHERE rowid = ?"
+	if err = execStmtTx(tx, stmt, block.Content, rowID); err != nil {
 		tx.Rollback()
 		return
 	}
@@ -111,8 +171,14 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 		tx.Rollback()
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, id); err != nil {
+	// external content 模式下按 rowid 定位 FTS 行
+	var rowID int64
+	if rowID, err = blockRowIDByBlockID(tx, id); err != nil {
+		tx.Rollback()
+		return
+	}
+	stmt = "UPDATE blocks_fts SET content = ? WHERE rowid = ?"
+	if err = execStmtTx(tx, stmt, content, rowID); err != nil {
 		tx.Rollback()
 		return
 	}

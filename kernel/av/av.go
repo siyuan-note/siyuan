@@ -651,6 +651,13 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		return
 	}
 
+	// 缓存命中且字节相等时跳过落盘，避免无变更的重复写入
+	if cachedData, ok := cache.GetAVData(av.ID); ok {
+		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
+			return
+		}
+	}
+
 	avJSONPath := GetAttributeViewDataPath(av.ID)
 	if err = filelock.WriteFile(avJSONPath, data); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)

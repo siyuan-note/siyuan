@@ -36,6 +36,12 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+// IsOfficeTempFile 判断是否为 Office（Word/Excel/PowerPoint/WPS）打开文档时生成的临时文件。
+// 这些文件名以 `~$` 开头，且被宿主程序独占，尝试读取会触发 filelock 的致命错误，需跳过。
+func IsOfficeTempFile(assetAbsPath string) bool {
+	return strings.HasPrefix(filepath.Base(assetAbsPath), "~$")
+}
+
 func GetFilePathsByExts(dirPath string, exts []string) (ret []string) {
 	filelock.Walk(dirPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {

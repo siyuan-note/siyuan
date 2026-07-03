@@ -20,14 +20,61 @@
         #bg {
             width: 100%;
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
+            align-items: center;
             height: 100%;
+        }
+
+        .boot-stage {
+            position: relative;
+            width: 34vh;
+            height: 34vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-mask-image: radial-gradient(circle, #000 50%, transparent 100%);
+            mask-image: radial-gradient(circle, #000 50%, transparent 100%);
+        }
+
+        .boot-aura {
+            position: absolute;
+            width: 78%;
+            height: 78%;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(210, 63, 49, 0.16) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.5;
+            transform: scale(0.9);
+            animation: bootAuraGather 2.5s ease-out forwards, bootAuraBreathe 2.8s ease-in-out 2.5s infinite;
+        }
+
+        @keyframes bootAuraGather {
+            0% {
+                opacity: 0.35;
+                transform: scale(0.85);
+            }
+            100% {
+                opacity: 0.85;
+                transform: scale(1.08);
+            }
+        }
+
+        @keyframes bootAuraBreathe {
+            0%, 100% {
+                transform: scale(1.02);
+                opacity: 0.7;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.95;
+            }
         }
 
         #bg svg {
             width: 24vh;
             height: 24vh;
             align-self: center;
+            overflow: visible;
         }
 
         /* 斜向发光光带：从屏幕四周汇聚飞向 logo 区域，到位后淡出 */
@@ -35,8 +82,8 @@
             opacity: 0;
             transform-box: fill-box;
             transform-origin: center;
-            animation: bootStreakConverge 1.8s cubic-bezier(0.33, 0, 0.2, 1) var(--delay, 0s) forwards,
-                       bootStreakFade 0.6s ease 1.6s forwards;
+            animation: bootStreakConverge 2.5s cubic-bezier(0.33, 0, 0.2, 1) var(--delay, 0s) forwards,
+                       bootStreakFade 0.85s ease 2.2s forwards;
         }
 
         @keyframes bootStreakConverge {
@@ -59,23 +106,60 @@
             }
         }
 
-        /* logo 碎片成型：光带汇聚末期柔和浮现，之后静止 */
-        #bg svg .logo path {
-            opacity: 0;
-            transform-box: fill-box;
-            transform-origin: center;
-            transform: scale(0.94);
-            animation: bootLogoForm 1s cubic-bezier(0.22, 1, 0.36, 1) 1.5s forwards;
+        #bg svg .logo {
+            transform-origin: 512px 512px;
+            animation: bootLogoSettle 0.5s cubic-bezier(0.34, 1.25, 0.64, 1) 2.65s both;
         }
 
-        @keyframes bootLogoForm {
+        @keyframes bootLogoSettle {
+            0% {
+                transform: scale(1);
+            }
+            40% {
+                transform: scale(1.07);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* logo 碎片凝实：光带汇聚末期逐块亮起，之后静止 */
+        #bg svg .logo path {
+            opacity: 0;
+            animation: bootShardSolidify 0.55s cubic-bezier(0.22, 1.08, 0.36, 1) calc(var(--shard-delay, 0s) + 2.1s) forwards;
+        }
+
+        @keyframes bootShardSolidify {
             0% {
                 opacity: 0;
-                transform: scale(0.94);
+                filter: brightness(2);
+            }
+            35% {
+                opacity: 1;
+                filter: brightness(1.35);
             }
             100% {
                 opacity: 1;
-                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        #bg svg .snap-flash {
+            opacity: 0;
+            transform-box: fill-box;
+            transform-origin: center;
+            transform: scale(0);
+            animation: bootSnapFlash 0.5s ease-out calc(var(--shard-delay, 0s) + 2.16s) forwards;
+        }
+
+        @keyframes bootSnapFlash {
+            0% {
+                opacity: 0.65;
+                transform: scale(0.15);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(2.4);
             }
         }
 
@@ -118,15 +202,22 @@
 </head>
 <body>
 <div id="bg">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-        <g class="streaks"></g>
-        <g class="logo">
-            <path fill="#d23f31" d="M37.052 371.676l269.857-269.857v550.507l-269.857 269.857z"></path>
-            <path fill="#3b3e43" d="M306.909 101.818l205.091 205.091v550.507l-205.091-205.091z"></path>
-            <path fill="#d23f31" d="M512 306.909l205.091-205.091v550.507l-205.091 205.091z"></path>
-            <path fill="#3b3e43" d="M717.091 101.818l269.857 269.857v550.507l-269.857-269.857z"></path>
-        </g>
-    </svg>
+    <div class="boot-stage">
+        <div class="boot-aura" aria-hidden="true"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+            <g class="streaks"></g>
+            <g class="logo">
+                <path style="--shard-delay: 0s" fill="#d23f31" d="M37.052 371.676l269.857-269.857v550.507l-269.857 269.857z"></path>
+                <path style="--shard-delay: 0.08s" fill="#3b3e43" d="M306.909 101.818l205.091 205.091v550.507l-205.091-205.091z"></path>
+                <path style="--shard-delay: 0.16s" fill="#d23f31" d="M512 306.909l205.091-205.091v550.507l-205.091 205.091z"></path>
+                <path style="--shard-delay: 0.24s" fill="#3b3e43" d="M717.091 101.818l269.857 269.857v550.507l-269.857-269.857z"></path>
+            </g>
+            <circle class="snap-flash" style="--shard-delay: 0s" cx="172" cy="512" r="26" fill="rgba(210,63,49,.4)"></circle>
+            <circle class="snap-flash" style="--shard-delay: 0.08s" cx="409" cy="409" r="22" fill="rgba(106,110,116,.35)"></circle>
+            <circle class="snap-flash" style="--shard-delay: 0.16s" cx="614" cy="512" r="26" fill="rgba(210,63,49,.4)"></circle>
+            <circle class="snap-flash" style="--shard-delay: 0.24s" cx="851" cy="409" r="22" fill="rgba(106,110,116,.35)"></circle>
+        </svg>
+    </div>
 </div>
 <div id="progressWrap">
     <div id="progressTrack"></div>
@@ -247,13 +338,13 @@
                     es.close()
                     if (navigator.userAgent.indexOf('Electron') === -1) {
                         // 内核完成后尽快结束动画，把剩余动画快进到终态（200ms 收尾）
-                        const animTotalMs = 2500
+                        const animTotalMs = 3100
                         const elapsed = Date.now() - bootShowStart
                         const remaining = animTotalMs - elapsed
                         const bootSvg = document.querySelector("#bg svg")
                         if (remaining > 0 && bootSvg) {
                             const rate = remaining / 200
-                            bootSvg.querySelectorAll(".streak, .logo path").forEach((el) => {
+                            bootSvg.querySelectorAll(".streak, .logo path, .logo, .snap-flash").forEach((el) => {
                                 el.getAnimations().forEach((a) => {
                                     a.playbackRate = rate
                                 })

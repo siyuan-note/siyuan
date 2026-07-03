@@ -688,7 +688,11 @@ func InitConf() {
 		logging.LogInfof("booted in safe mode")
 	}
 
-	logging.SetLogLevel(Conf.LogLevel)
+	// CLI 子命令通过 --log-level 显式指定日志级别时（util.CLILogLevel 非空），优先使用命令行级别，
+	// 不再用 conf.json 的 system.logLevel 覆盖，使命令行参数在初始化早期即生效。
+	if "" == util.CLILogLevel {
+		logging.SetLogLevel(Conf.LogLevel)
+	}
 
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 
@@ -1240,6 +1244,7 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 	os.RemoveAll(filepath.Join(util.TempDir, "base64"))
+	os.RemoveAll(filepath.Join(util.TempDir, "ai"))
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")

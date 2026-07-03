@@ -56,6 +56,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -327,6 +328,22 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		if err = filelock.CopyNewtimes(from, to); nil != err {
 			logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 			return
+		}
+
+		if strings.HasPrefix(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
+			avID := strings.TrimSuffix(filepath.Base(file.Path), ".json")
+			cache.RemoveAVData(avID)
+			blockIDs := av.GetAvBlocks(avID)
+			var reloadRootIDs []string
+			for _, blockID := range blockIDs {
+				if bt := treenode.GetBlockTree(blockID); nil != bt {
+					reloadRootIDs = append(reloadRootIDs, blockID)
+				}
+			}
+			reloadRootIDs = gulu.Str.RemoveDuplicatedElem(reloadRootIDs)
+			for _, id := range reloadRootIDs {
+				ReloadProtyle(id)
+			}
 		}
 
 		msg := fmt.Sprintf(Conf.Language(286), to)

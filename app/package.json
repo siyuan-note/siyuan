@@ -21,6 +21,7 @@
     "gen:types": "tsc -d",
     "start": "cross-env NODE_ENV=development electron ./electron/main.js",
     "install:electron": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ node node_modules/electron/install.js",
+    "sign:dev": "node scripts/signDevElectron.js",
     "dist": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
     "dist-arm64": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --config electron-builder-arm64.yml --publish=never",
     "dist-darwin": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",

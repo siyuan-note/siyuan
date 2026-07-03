@@ -247,6 +247,13 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		return
 	}
 
+	cachedData, ok := cache.GetTreeData(tree.ID)
+	if ok {
+		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
+			return
+		}
+	}
+
 	if err = writeTreeByMmap(filePath, data); nil != err {
 		if err = writeTreeByWriteFile(filePath, data); nil != err {
 			return

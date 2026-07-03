@@ -71,7 +71,18 @@ if (!app.requestSingleInstanceLock()) {
     return;
 }
 
-app.setAsDefaultProtocolClient("siyuan");
+// 开发环境下 Windows 需显式传入 Electron 可执行文件路径和 main.js 路径，否则 siyuan:// 会被当作相对路径
+if (isDevEnv && process.defaultApp && process.argv.length >= 2) {
+    const mainScript = path.resolve(process.argv[1]);
+    if (process.platform === "win32") {
+        app.removeAsDefaultProtocolClient("siyuan", process.execPath, [mainScript]);
+        app.setAsDefaultProtocolClient("siyuan", process.execPath, [mainScript]);
+    } else {
+        app.setAsDefaultProtocolClient("siyuan");
+    }
+} else {
+    app.setAsDefaultProtocolClient("siyuan");
+}
 
 app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("auto-detect", "false");

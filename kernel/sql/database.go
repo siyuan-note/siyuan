@@ -1095,12 +1095,12 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		return
 	}
 
-	stmt = "DELETE FROM blocks WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
+	stmt = "DELETE FROM blocks_fts WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
 	if err = execStmtTx(tx, stmt); err != nil {
 		return
 	}
 
-	stmt = "DELETE FROM blocks_fts WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
+	stmt = "DELETE FROM blocks WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
 	if err = execStmtTx(tx, stmt); err != nil {
 		return
 	}
@@ -1322,11 +1322,6 @@ func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err 
 	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	// external content 模式下按 rowid 定位 FTS 行
-	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE rowid IN (SELECT rowid FROM blocks WHERE root_id = ?)"
-	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
-		return
-	}
 
 	stmt = "UPDATE spans SET box = ?, path = ? WHERE root_id = ?"
 	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.ID); err != nil {
@@ -1361,12 +1356,6 @@ func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err 
 
 func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
 	stmt := "UPDATE blocks SET hpath = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
-		return
-	}
-
-	// external content 模式下按 rowid 定位 FTS 行
-	stmt = "UPDATE blocks_fts SET hpath = ? WHERE rowid IN (SELECT rowid FROM blocks WHERE root_id = ?)"
 	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
 		return
 	}

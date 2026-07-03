@@ -19,6 +19,7 @@ package sql
 import (
 	"bytes"
 	"database/sql"
+	"fmt"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -68,11 +69,14 @@ func blockRowIDByBlockID(tx *sql.Tx, id string) (rowID int64, err error) {
 		return
 	}
 	defer rows.Close()
-	if rows.Next() {
-		if err = rows.Scan(&rowID); err != nil {
-			logging.LogErrorf("scan block rowid failed: %s", err)
-			return
-		}
+	if !rows.Next() {
+		logging.LogErrorf("query block rowid failed: id=%s not found", id)
+		err = fmt.Errorf("block rowid not found: %s", id)
+		return
+	}
+	if err = rows.Scan(&rowID); err != nil {
+		logging.LogErrorf("scan block rowid failed: %s", err)
+		return
 	}
 	return
 }
@@ -107,18 +111,20 @@ func queryBlockRowIDsTx(tx *sql.Tx, blocks []*Block) (ret map[string]int64, err 
 	return
 }
 
+// 下列局部更新索引列的路径（updateRootContent、updateBlockContent、indexNode）须先写 blocks_fts、再写 blocks，
+// 以便 FTS 删除旧 token 时仍能从 blocks 读到旧值。
+
 func updateRootContent(tx *sql.Tx, content, updated, ialContent, id string) (err error) {
-	stmt := "UPDATE blocks SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
-		return
-	}
-	// external content 模式下按 rowid 定位 FTS 行
 	var rowID int64
 	if rowID, err = blockRowIDByBlockID(tx, id); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE rowid = ?"
-	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, rowID); err != nil {
+	stmt := "UPDATE blocks_fts SET content = ?, fcontent = ?, ial = ? WHERE rowid = ?"
+	if err = execStmtTx(tx, stmt, content, content, ialContent, rowID); err != nil {
+		return
+	}
+	stmt = "UPDATE blocks SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
 		return
 	}
 	removeBlockCache(id)
@@ -127,19 +133,18 @@ func updateRootContent(tx *sql.Tx, content, updated, ialContent, id string) (err
 }
 
 func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
-	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
-		tx.Rollback()
-		return
-	}
-	// external content 模式下按 rowid 定位 FTS 行
 	var rowID int64
 	if rowID, err = blockRowIDByBlockID(tx, block.ID); err != nil {
 		tx.Rollback()
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ? WHERE rowid = ?"
+	stmt := "UPDATE blocks_fts SET content = ? WHERE rowid = ?"
 	if err = execStmtTx(tx, stmt, block.Content, rowID); err != nil {
+		tx.Rollback()
+		return
+	}
+	stmt = "UPDATE blocks SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
 		tx.Rollback()
 		return
 	}
@@ -166,19 +171,18 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 
 	content := NodeStaticContent(node, nil, true, indexAssetPath, true)
 	content = strings.ReplaceAll(content, editor.Zwsp, "")
-	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, id); err != nil {
-		tx.Rollback()
-		return
-	}
-	// external content 模式下按 rowid 定位 FTS 行
 	var rowID int64
 	if rowID, err = blockRowIDByBlockID(tx, id); err != nil {
 		tx.Rollback()
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ? WHERE rowid = ?"
+	stmt := "UPDATE blocks_fts SET content = ? WHERE rowid = ?"
 	if err = execStmtTx(tx, stmt, content, rowID); err != nil {
+		tx.Rollback()
+		return
+	}
+	stmt = "UPDATE blocks SET content = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, id); err != nil {
 		tx.Rollback()
 		return
 	}

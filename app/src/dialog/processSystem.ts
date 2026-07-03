@@ -88,7 +88,7 @@ export const setDefRefCount = (data: {
     /// #if MOBILE
     liElement = window.siyuan.mobile.docks.file.element.querySelector(`li[data-node-id="${data.rootID}"]`);
     /// #else
-    liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`);
+    liElement = (getDockByType("file")?.data["file"] as Files)?.element.querySelector(`li[data-node-id="${data.rootID}"]`);
     /// #endif
     if (liElement) {
         const counterElement = liElement.querySelector(".counter");

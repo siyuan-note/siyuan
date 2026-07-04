@@ -46,7 +46,7 @@
   - [包管理器](#包管理器)
   - [Docker 部署](#docker-部署)
   - [Unraid 部署](#unraid-部署)
-  - [TrueNAS 部署](#trueNAS-部署)
+  - [TrueNAS 部署](#truenas-部署)
   - [宝塔面板部署](#宝塔面板部署)
   - [小皮面板部署](#小皮面板部署)
   - [1Panel 面板部署](#1Panel-面板部署)

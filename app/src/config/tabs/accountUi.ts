@@ -67,13 +67,13 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
         afterMount: bindAccountPaymentEvent,
     });
     if (!isMobile()) {
-        group.switch("account.displayTitle", {
-            title: window.siyuan.languages.accountDisplayTitle,
-            save: (value) => patchSyncConfig("account.displayTitle", value),
-        });
         group.switch("account.displayVIP", {
             title: window.siyuan.languages.accountDisplayVIP,
             save: (value) => patchSyncConfig("account.displayVIP", value),
+        });
+        group.switch("account.displayTitle", {
+            title: window.siyuan.languages.accountDisplayTitle,
+            save: (value) => patchSyncConfig("account.displayTitle", value),
         });
     }
 };
@@ -506,32 +506,45 @@ export const onSetaccount = () => {
     if (!toolbarVIPEl) {
         return;
     }
-    if (!window.siyuan.user || window.siyuan.user.userSiYuanSubscriptionStatus === -1) {
-        toolbarVIPEl.innerHTML = window.siyuan.config.account.displayVIP ? genToolbarItemHTML(window.siyuan.languages.freeSub, genVIPIconHTML("ft__error")) : "";
-        return;
-    }
     const parts: string[] = [];
     if (window.siyuan.config.account.displayVIP) {
-        if (window.siyuan.user.userSiYuanProExpireTime === -1) {
-            parts.push(genToolbarItemHTML(window.siyuan.languages.account12, Constants.SIYUAN_IMAGE_VIP));
-        } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
-            if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
-                parts.push(genToolbarItemHTML(window.siyuan.languages.account3, genVIPIconHTML()));
-            } else {
-                parts.push(genToolbarItemHTML(window.siyuan.languages.account10, genVIPIconHTML("ft__secondary")));
+        if (!window.siyuan.user) {
+            // 未登录
+            parts.push(genToolbarItemHTML(window.siyuan.languages.freeSub, genVIPIconHTML("ft__error")));
+        } else {
+            const isOneTimePay = window.siyuan.user.userSiYuanOneTimePayStatus === 1;
+            if (window.siyuan.user.userSiYuanProExpireTime === -1) {
+                // 终身会员
+                parts.push(genToolbarItemHTML(window.siyuan.languages.account12, Constants.SIYUAN_IMAGE_VIP));
+            } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
+                // 订阅有效（未过期）
+                if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
+                    // 试用订阅
+                    parts.push(genToolbarItemHTML(window.siyuan.languages.account3, genVIPIconHTML()));
+                } else {
+                    // 付费订阅
+                    parts.push(genToolbarItemHTML(window.siyuan.languages.account10, genVIPIconHTML("ft__secondary")));
+                }
+            } else if (window.siyuan.user.userSiYuanSubscriptionStatus === 2 && !isOneTimePay) {
+                // 订阅过期
+                parts.push(genToolbarItemHTML(window.siyuan.languages.accountSubscriptionExpired, genVIPIconHTML("ft__error")));
+            } else if (window.siyuan.user.userSiYuanSubscriptionStatus === -1 && !isOneTimePay) {
+                // 未订阅过
+                parts.push(genToolbarItemHTML(window.siyuan.languages.freeSub, genVIPIconHTML("ft__error")));
             }
-        } else if (window.siyuan.user.userSiYuanSubscriptionStatus === 2) {
-            parts.push(genToolbarItemHTML(window.siyuan.languages.accountSubscriptionExpired, genVIPIconHTML("ft__error")));
-        }
-        if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
-            parts.push(genToolbarItemHTML(window.siyuan.languages.onepay, genVIPIconHTML("ft__success")));
+            if (isOneTimePay) {
+                // 功能特性已付费
+                parts.push(genToolbarItemHTML(window.siyuan.languages.onepay, genVIPIconHTML("ft__success")));
+            }
         }
     }
-    if (window.siyuan.config.account.displayTitle) {
+
+    if (window.siyuan.config.account.displayTitle && window.siyuan.user) {
         window.siyuan.user.userTitles.forEach(item => {
             parts.push(genToolbarItemHTML(`${item.name}：${item.desc}`, item.icon));
         });
     }
+
     toolbarVIPEl.innerHTML = parts.join("");
     /// #endif
 };

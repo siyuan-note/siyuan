@@ -2,10 +2,14 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/h
 
 export let keyboardLockUntil = 0;
 
-export const callMobileAppShowKeyboard = () => {
-    // 某些机型（比如鸿蒙 Pura X）在弹起键盘后会立即触发 activeBlur 导致键盘被关闭，所以在主动唤起键盘时锁定一段时间，禁止 activeBlur 关闭键盘
-    // 每次主动唤起键盘时，锁定接下来的 500ms 不允许通过 activeBlur 关闭
+export const armKeyboardLock = () => {
+    // 某些机型（比如鸿蒙 Pura X）在弹起键盘后会立即触发 activeBlur 导致键盘被关闭；移动端浏览器（比如三星键盘）在编辑器获得焦点后也会触发 resize，
+    // 进而立即关闭键盘。因此主动唤起键盘或点击可编辑区域时，锁定接下来的一段时间，禁止 activeBlur 关闭键盘
     keyboardLockUntil = Date.now() + 500;
+};
+
+export const callMobileAppShowKeyboard = () => {
+    armKeyboardLock();
 
     if (window.JSAndroid && window.JSAndroid.showKeyboard) {
         window.JSAndroid.showKeyboard();

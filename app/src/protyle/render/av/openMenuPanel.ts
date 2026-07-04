@@ -85,6 +85,8 @@ export const openMenuPanel = (options: {
         colData: IAVColumn,
     },
     cellElements?: HTMLElement[],   // for select & date & relation & asset
+    // 复用调用方已构造好的视图数据，跳过内部 fetch，避免与刚提交的事务产生读写时序竞争
+    data?: IAV,
     cb?: (avPanelElement: Element) => void
 }) => {
     let avPanelElement = document.querySelector(".av__panel");
@@ -96,14 +98,17 @@ export const openMenuPanel = (options: {
     const avPageSize = getPageSize(options.blockElement);
     // config/properties/sorts/filters/switcher 菜单只需要字段/视图元数据，不需要行数据，跳过行渲染以提升大体量视图下的响应速度
     const ignoreRows = ["config", "properties", "sorts", "filters", "switcher"].includes(options.type);
-    fetchPost("/api/av/renderAttributeView", {
+    const fetchPayload = {
         id: avID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
         pageSize: avPageSize.unGroupPageSize,
         groupPaging: avPageSize.groupPageSize,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
         ignoreRows,
-    }, (response) => {
+    };
+    // 接收视图数据并构建面板 DOM、绑定事件。fetch 回调与 options.data 复用两条路径都走这里
+    const renderData = (responseData: IAV) => {
+        const response = {data: responseData} as IWebSocketData;
         avPanelElement = document.querySelector(".av__panel");
         if (avPanelElement) {
             avPanelElement.remove();
@@ -1883,7 +1888,13 @@ export const openMenuPanel = (options: {
                 target = target.parentElement;
             }
         });
-    });
+    };
+    // 复用调用方传入的数据时直接渲染，跳过 fetch，避免与刚提交的事务产生读写竞争（拿到旧数据）
+    if (options.data) {
+        renderData(options.data);
+    } else {
+        fetchPost("/api/av/renderAttributeView", fetchPayload, response => renderData(response.data as IAV));
+    }
 };
 
 export const getPropertiesHTML = (fields: IAVColumn[]) => {

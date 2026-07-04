@@ -11,7 +11,7 @@ import {AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {getDockByType} from "../../tabUtil";
 import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
-import {getLute} from "../../../protyle/render/setLute";
+import {getAgentLute} from "../../../protyle/render/setLute";
 import {setPanelFocus} from "../../util";
 import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
@@ -140,7 +140,7 @@ export class AgentChat extends Model {
     constructor(app: App, tab: Tab) {
         super({app: app});
         this.parent = tab;
-        this.lute = getLute({
+        this.lute = getAgentLute({
             emojiSite: "/emojis",
             emojis: {}
         });

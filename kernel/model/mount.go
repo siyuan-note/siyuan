@@ -208,6 +208,10 @@ func unmount0(boxID string) {
 	boxConf.Closed = true
 	box.SaveConf(boxConf)
 	box.Unindex()
+	if boxConf.Encrypted {
+		// 加密笔记本关闭时清除其 DEK 缓存，恢复"已锁定"状态
+		ClearDEK(boxID)
+	}
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {
@@ -289,6 +293,12 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		if box.ID == boxID {
 			return true, nil
 		}
+	}
+
+	// 加密笔记本必须先通过 UnlockBox 解出 DEK，否则拒绝挂载。Mount 本身不接收密码，
+	// 前端流程为：先调 /api/notebook/unlockBox 解锁，再调 openNotebook 挂载。
+	if preConf := (&Box{ID: boxID}).GetConf(); preConf.Encrypted && !IsBoxUnlocked(boxID) {
+		return false, errors.New("encrypted notebook locked, please unlock it first")
 	}
 
 	box := &Box{ID: boxID}

@@ -24,37 +24,72 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// setKEKForTest 把指定 KEK 注入内存缓存，跳过 EnableEncryptedNotebook 的落盘流程，便于纯内存测试。
-func setKEKForTest(kek []byte) {
-	cachedKEKLock.Lock()
-	defer cachedKEKLock.Unlock()
-	cachedKEK = kek
+// setDEKForTest 把指定 DEK 直接注入 boxID 的缓存，绕过 UnlockBox 的 Argon2id 派生，便于纯内存测试。
+func setDEKForTest(boxID string, dek []byte) {
+	cachedDEKsLock.Lock()
+	defer cachedDEKsLock.Unlock()
+	cachedDEKs[boxID] = dek
 }
 
-// TestIsKEKUnlockedLifecycle 验证 KEK 缓存的存在/缺失状态。
-func TestIsKEKUnlockedLifecycle(t *testing.T) {
-	LockKEK() // 确保初始干净
-	if IsKEKUnlocked() {
-		t.Fatalf("KEK should not be available after LockKEK")
+// TestIsBoxUnlockedLifecycle 验证 DEK 缓存的存在/缺失状态。
+func TestIsBoxUnlockedLifecycle(t *testing.T) {
+	LockAllBoxes() // 确保初始干净
+	boxID := "lifecycle-test-box"
+	if IsBoxUnlocked(boxID) {
+		t.Fatalf("box should not be unlocked after LockAllBoxes")
 	}
-	kek, _ := util.GenerateDEK()
-	setKEKForTest(kek)
-	if !IsKEKUnlocked() {
-		t.Fatalf("KEK should be available after setKEKForTest")
+	dek, _ := util.GenerateDEK()
+	setDEKForTest(boxID, dek)
+	if !IsBoxUnlocked(boxID) {
+		t.Fatalf("box should be unlocked after setDEKForTest")
 	}
-	LockKEK()
-	if IsKEKUnlocked() {
-		t.Fatalf("KEK should be cleared after LockKEK")
+	LockBox(boxID)
+	if IsBoxUnlocked(boxID) {
+		t.Fatalf("box should be locked after LockBox")
 	}
 }
 
-// TestWrapUnwrapDEKRoundTrip 验证生成 DEK → 包络 → 解包 → 还原。
-func TestWrapUnwrapDEKRoundTrip(t *testing.T) {
-	kek, _ := util.GenerateDEK()
-	setKEKForTest(kek)
-	defer LockKEK()
+// TestLockAllBoxes 验证 LockAllBoxes 清空所有 DEK。
+func TestLockAllBoxes(t *testing.T) {
+	dek1, _ := util.GenerateDEK()
+	dek2, _ := util.GenerateDEK()
+	setDEKForTest("box-a", dek1)
+	setDEKForTest("box-b", dek2)
 
-	boxEnc, err := WrapNewDEK()
+	LockAllBoxes()
+	for _, id := range []string{"box-a", "box-b"} {
+		if IsBoxUnlocked(id) {
+			t.Fatalf("box %q should be locked after LockAllBoxes", id)
+		}
+	}
+}
+
+// TestGetDEKReturnsErrorAfterLock 验证 LockBox 后 GetDEK 报错。
+func TestGetDEKReturnsErrorAfterLock(t *testing.T) {
+	dek, _ := util.GenerateDEK()
+	boxID := "get-dek-test-box"
+	setDEKForTest(boxID, dek)
+
+	got, err := GetDEK(boxID)
+	if err != nil {
+		t.Fatalf("GetDEK before lock failed: %v", err)
+	}
+	if !bytes.Equal(dek, got) {
+		t.Fatalf("GetDEK returned wrong DEK")
+	}
+
+	LockBox(boxID)
+	if _, err := GetDEK(boxID); err == nil {
+		t.Fatalf("GetDEK should fail after LockBox")
+	}
+}
+
+// TestWrapNewDEKRoundTrip 验证用 KEK 生成 DEK → 包络 → 解包 → 还原。
+func TestWrapNewDEKRoundTrip(t *testing.T) {
+	kek, _ := util.GenerateDEK()
+	defer LockAllBoxes()
+
+	boxEnc, err := WrapNewDEK(kek)
 	if err != nil {
 		t.Fatalf("WrapNewDEK failed: %v", err)
 	}
@@ -62,8 +97,8 @@ func TestWrapUnwrapDEKRoundTrip(t *testing.T) {
 		t.Fatalf("BoxEncryption fields malformed: wrappedDEK=%d wrapNonce=%d", len(boxEnc.WrappedDEK), len(boxEnc.WrapNonce))
 	}
 
-	boxID := "test-box-123"
-	if err := UnwrapDEK(boxID, boxEnc); err != nil {
+	boxID := "wrap-roundtrip-box"
+	if err := UnwrapDEK(boxID, boxEnc, kek); err != nil {
 		t.Fatalf("UnwrapDEK failed: %v", err)
 	}
 	dek, err := GetDEK(boxID)
@@ -78,58 +113,30 @@ func TestWrapUnwrapDEKRoundTrip(t *testing.T) {
 // TestUnwrapDEKWithWrongKEK 验证用错误的 KEK 解包失败（GCM MAC 校验）。
 func TestUnwrapDEKWithWrongKEK(t *testing.T) {
 	kek1, _ := util.GenerateDEK()
-	setKEKForTest(kek1)
-	boxEnc, _ := WrapNewDEK()
+	boxEnc, _ := WrapNewDEK(kek1)
 
-	// 换一个错误的 KEK
 	kek2, _ := util.GenerateDEK()
-	setKEKForTest(kek2)
-	defer LockKEK()
+	defer LockAllBoxes()
 
-	if err := UnwrapDEK("wrong-kek-box", boxEnc); err == nil {
+	if err := UnwrapDEK("wrong-kek-box", boxEnc, kek2); err == nil {
 		t.Fatalf("UnwrapDEK with wrong KEK should fail")
 	}
 }
 
-// TestClearDEK 验证 ClearDEK 后 DEK 不可再取。
-func TestClearDEK(t *testing.T) {
+// TestWrapNewDEKProducesUniqueDEKs 验证两次调用 WrapNewDEK 生成不同的 DEK（随机性）。
+func TestWrapNewDEKProducesUniqueDEKs(t *testing.T) {
 	kek, _ := util.GenerateDEK()
-	setKEKForTest(kek)
-	defer LockKEK()
+	defer LockAllBoxes()
 
-	boxEnc, _ := WrapNewDEK()
-	boxID := "clear-test-box"
-	UnwrapDEK(boxID, boxEnc)
+	enc1, _ := WrapNewDEK(kek)
+	enc2, _ := WrapNewDEK(kek)
 
-	ClearDEK(boxID)
-	if _, err := GetDEK(boxID); err == nil {
-		t.Fatalf("GetDEK should fail after ClearDEK")
-	}
-}
-
-// TestLockKEKClearsAllDEKs 验证 LockKEK 同时清空所有 DEK。
-func TestLockKEKClearsAllDEKs(t *testing.T) {
-	kek, _ := util.GenerateDEK()
-	setKEKForTest(kek)
-
-	boxEnc1, _ := WrapNewDEK()
-	boxEnc2, _ := WrapNewDEK()
-	UnwrapDEK("box-a", boxEnc1)
-	UnwrapDEK("box-b", boxEnc2)
-
-	LockKEK()
-	for _, id := range []string{"box-a", "box-b"} {
-		if _, err := GetDEK(id); err == nil {
-			t.Fatalf("GetDEK(%q) should fail after LockKEK", id)
-		}
-	}
-}
-
-// TestWrapNewDEKRequiresKEK 验证 KEK 未缓存时 WrapNewDEK 报错。
-func TestWrapNewDEKRequiresKEK(t *testing.T) {
-	LockKEK()
-	if _, err := WrapNewDEK(); err == nil {
-		t.Fatalf("WrapNewDEK should fail when KEK not cached")
+	UnwrapDEK("uniq-box-1", enc1, kek)
+	UnwrapDEK("uniq-box-2", enc2, kek)
+	dek1, _ := GetDEK("uniq-box-1")
+	dek2, _ := GetDEK("uniq-box-2")
+	if bytes.Equal(dek1, dek2) {
+		t.Fatalf("two WrapNewDEK calls produced identical DEKs (not random?)")
 	}
 }
 
@@ -144,7 +151,6 @@ func TestBoxEncryptionRoundTripViaUtil(t *testing.T) {
 		WrapNonce:  wrapped[:12],
 	}
 
-	// 模拟 UnwrapDEK 的核心：用 KEK 解开
 	recoveredDEK, err := util.Decrypt(kek, boxEnc.WrappedDEK)
 	if err != nil {
 		t.Fatalf("Decrypt wrapped DEK failed: %v", err)

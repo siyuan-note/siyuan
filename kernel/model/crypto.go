@@ -28,15 +28,17 @@ import (
 // kekVerifierMagic 是写入 KEKVerifier 的固定魔数。启用时用 KEK 加密它，校验主密码时解密比对。
 var kekVerifierMagic = []byte("siyuan-enc-v1")
 
+// cachedDEKs 缓存已解锁加密笔记本的 DEK，按 boxID 索引。
+// KEK 不全局缓存（"严格每笔记本单独解锁"语义）：UnlockBox 临时派生 KEK 解出 DEK 后即丢弃 KEK，
+// 仅保留 per-box DEK 供后续读写加解密。
 var (
-	cachedKEK      []byte            // 主密码派生的 KEK，启用且解锁后驻留内存
-	cachedKEKLock  sync.RWMutex
-	cachedDEKs     = map[string][]byte{} // boxID → DEK
+	cachedDEKs     = map[string][]byte{}
 	cachedDEKsLock sync.RWMutex
 )
 
 // EnableEncryptedNotebook 启用加密笔记本功能：生成 MasterSalt、派生 KEK、写入校验值并持久化。
 // 重复调用（已启用）返回错误，避免覆盖现有加密笔记本的密钥参数。
+// KEK 不缓存——启用后用户需对每个加密笔记本单独调 UnlockBox 解锁。
 func EnableEncryptedNotebook(password string) error {
 	if len(password) == 0 {
 		return errors.New("password must not be empty")
@@ -58,7 +60,7 @@ func EnableEncryptedNotebook(password string) error {
 	}
 	kek := util.DeriveKey(password, salt, params)
 
-	// 用 KEK 加密固定魔数作为校验值，落盘后供后续 UnlockKEK 离线校验
+	// 用 KEK 加密固定魔数作为校验值，落盘后供后续 UnlockBox 离线校验
 	verifierCT, err := util.Encrypt(kek, kekVerifierMagic)
 	if err != nil {
 		return err
@@ -67,27 +69,21 @@ func EnableEncryptedNotebook(password string) error {
 	Conf.NotebookCrypto.Enabled = true
 	Conf.NotebookCrypto.MasterSalt = salt
 	Conf.NotebookCrypto.KDFParams = params
-	// Encrypt 返回 nonce||ciphertext，整段存为 KEKVerifier，nonce 从前 12 字节切出。
 	Conf.NotebookCrypto.KEKVerifier = verifierCT
 	Conf.NotebookCrypto.VerifierNonce = verifierCT[:12]
-
-	cachedKEKLock.Lock()
-	cachedKEK = kek
-	cachedKEKLock.Unlock()
 
 	Conf.Save()
 	return nil
 }
 
-// UnlockKEK 用主密码派生 KEK，校验通过后缓存到内存。
-// 校验方式：解 KEKVerifier，若能得到 kekVerifierMagic 则密码正确。
-func UnlockKEK(password string) error {
+// deriveKEK 从主密码派生 KEK 并校验。校验失败返回错误。KEK 仅在函数作用域内有效，调用方负责使用。
+func deriveKEK(password string) ([]byte, error) {
 	Conf.m.RLock()
 	nc := Conf.NotebookCrypto
 	Conf.m.RUnlock()
 
 	if !nc.Enabled {
-		return errors.New("encrypted notebook not enabled")
+		return nil, errors.New("encrypted notebook not enabled")
 	}
 	params := nc.KDFParams
 	if params.KeyLength == 0 {
@@ -97,57 +93,65 @@ func UnlockKEK(password string) error {
 
 	decrypted, err := util.Decrypt(kek, nc.KEKVerifier)
 	if err != nil {
-		return errors.New("incorrect password")
+		return nil, errors.New("incorrect password")
 	}
 	if string(decrypted) != string(kekVerifierMagic) {
-		return errors.New("incorrect password")
+		return nil, errors.New("incorrect password")
 	}
+	return kek, nil
+}
 
-	cachedKEKLock.Lock()
-	cachedKEK = kek
-	cachedKEKLock.Unlock()
+// UnlockBox 用主密码派生 KEK，解出该笔记本的 DEK 并缓存。KEK 用完即弃，不全局缓存。
+// 每次调用都跑一次 Argon2id（约 1 秒），严格满足"每笔记本单独解锁"语义。
+func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error {
+	if boxEnc == nil || len(boxEnc.WrappedDEK) == 0 {
+		return errors.New("no encrypted key material for box")
+	}
+	kek, err := deriveKEK(password)
+	if err != nil {
+		return err
+	}
+	dek, err := util.Decrypt(kek, boxEnc.WrappedDEK)
+	if err != nil {
+		return err
+	}
+	cachedDEKsLock.Lock()
+	cachedDEKs[boxID] = dek
+	cachedDEKsLock.Unlock()
 	return nil
 }
 
-// IsKEKUnlocked 返回 KEK 是否在内存（加密功能是否已解锁）。
-func IsKEKUnlocked() bool {
-	cachedKEKLock.RLock()
-	defer cachedKEKLock.RUnlock()
-	return len(cachedKEK) > 0
+// IsBoxUnlocked 返回该笔记本的 DEK 是否在内存（是否已解锁）。
+func IsBoxUnlocked(boxID string) bool {
+	cachedDEKsLock.RLock()
+	defer cachedDEKsLock.RUnlock()
+	_, ok := cachedDEKs[boxID]
+	return ok
 }
 
-// getKEK 取内存中的 KEK，未解锁时返回错误。
-func getKEK() ([]byte, error) {
-	cachedKEKLock.RLock()
-	defer cachedKEKLock.RUnlock()
-	if len(cachedKEK) == 0 {
-		return nil, errors.New("encrypted notebook locked, KEK unavailable")
-	}
-	return cachedKEK, nil
-}
-
-// LockKEK 清除内存中的 KEK 和所有已缓存的 DEK。Unmount 加密笔记本或全局锁定时调用。
-func LockKEK() {
-	cachedKEKLock.Lock()
-	zeroAndClear(cachedKEK)
-	cachedKEK = nil
-	cachedKEKLock.Unlock()
-
+// LockBox 清除指定笔记本的 DEK。Unmount 单个加密笔记本或手动锁定时调用。
+func LockBox(boxID string) {
 	cachedDEKsLock.Lock()
+	defer cachedDEKsLock.Unlock()
+	if dek, ok := cachedDEKs[boxID]; ok {
+		zeroAndClear(dek)
+		delete(cachedDEKs, boxID)
+	}
+}
+
+// LockAllBoxes 清除所有已缓存的 DEK。退出登录或全局锁定时调用。
+func LockAllBoxes() {
+	cachedDEKsLock.Lock()
+	defer cachedDEKsLock.Unlock()
 	for id, dek := range cachedDEKs {
 		zeroAndClear(dek)
 		delete(cachedDEKs, id)
 	}
-	cachedDEKsLock.Unlock()
 }
 
-// WrapNewDEK 为新加密笔记本生成随机 DEK，用 KEK 包络后返回 BoxEncryption 元数据。
-// 调用方负责把返回值写入 BoxConf.BoxCrypt 并 SaveConf。
-func WrapNewDEK() (*conf.BoxEncryption, error) {
-	kek, err := getKEK()
-	if err != nil {
-		return nil, err
-	}
+// WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。
+// KEK 由调用方临时派生（不来自全局缓存），调用方负责使用后丢弃。
+func WrapNewDEK(kek []byte) (*conf.BoxEncryption, error) {
 	dek, err := util.GenerateDEK()
 	if err != nil {
 		return nil, err
@@ -164,13 +168,10 @@ func WrapNewDEK() (*conf.BoxEncryption, error) {
 }
 
 // UnwrapDEK 从 BoxEncryption 解出 DEK 并缓存到内存，供后续 GetDEK 使用。
-func UnwrapDEK(boxID string, enc *conf.BoxEncryption) error {
+// 仅在 KEK 已通过 UnlockBox 缓存 DEK 的场景之外使用（如改密流程内部）。
+func UnwrapDEK(boxID string, enc *conf.BoxEncryption, kek []byte) error {
 	if enc == nil || len(enc.WrappedDEK) == 0 {
 		return errors.New("no encrypted key material for box")
-	}
-	kek, err := getKEK()
-	if err != nil {
-		return err
 	}
 	dek, err := util.Decrypt(kek, enc.WrappedDEK)
 	if err != nil {
@@ -195,20 +196,13 @@ func GetDEK(boxID string) ([]byte, error) {
 
 // ClearDEK 清除指定笔记本的 DEK。Unmount 单个加密笔记本时调用。
 func ClearDEK(boxID string) {
-	cachedDEKsLock.Lock()
-	defer cachedDEKsLock.Unlock()
-	if dek, ok := cachedDEKs[boxID]; ok {
-		zeroAndClear(dek)
-		delete(cachedDEKs, boxID)
-	}
+	LockBox(boxID)
 }
 
 // ChangeMasterPassword 改主密码：用旧密码校验后，用新密码派生新 KEK，
 // 重新加密 verifier，并把所有加密笔记本的 WrappedDEK 用新 KEK 重新包络后写回各自的 BoxConf。
 //
-// 注意：必须在所有加密笔记本都已 Unmount 的状态下调用（DEK 不在内存）。
-// 本函数会遍历磁盘上的加密笔记本，用旧 KEK 解开 WrappedDEK 再用新 KEK 重新 wrap，
-// 因此改密成本与加密笔记本数量、磁盘 IO 相关，但不涉及 .sy/assets 数据本身的重新加密。
+// 注意：必须在所有加密笔记本都已 Unmount 的状态下调用（DEK 不在内存），否则新旧 KEK 切换会让缓存与磁盘不一致。
 func ChangeMasterPassword(oldPassword, newPassword string) error {
 	if len(newPassword) == 0 {
 		return errors.New("new password must not be empty")
@@ -219,14 +213,10 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	dekCount := len(cachedDEKs)
 	cachedDEKsLock.RUnlock()
 	if dekCount > 0 {
-		return errors.New("cannot change master password while encrypted notebooks are mounted (DEKs in memory), unmount them first")
+		return errors.New("cannot change master password while encrypted notebooks are unlocked (DEKs in memory), lock them first")
 	}
 
-	// 用旧密码校验并取出旧 KEK
-	if err := UnlockKEK(oldPassword); err != nil {
-		return err
-	}
-	oldKEK, err := getKEK()
+	oldKEK, err := deriveKEK(oldPassword)
 	if err != nil {
 		return err
 	}
@@ -241,8 +231,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		return err
 	}
 
-	// 遍历所有笔记本，找到加密笔记本并用新 KEK 重新 wrap 其 WrappedDEK。
-	// 当前设计只有一个加密笔记本（EncryptedBoxID），但用 Encrypted 标志遍历更稳健，也为未来多笔记本预留。
+	// 遍历所有笔记本，找到加密笔记本并用新 KEK 重新 wrap 其 WrappedDEK
 	boxes, err := ListNotebooks()
 	if err != nil {
 		return err
@@ -252,13 +241,10 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
 			continue
 		}
-		// 用旧 KEK 解出 DEK 明文
 		dek, err := util.Decrypt(oldKEK, boxConf.BoxCrypt.WrappedDEK)
 		if err != nil {
-			// 解不开说明 WrappedDEK 与旧 KEK 不匹配（配置损坏或 KEK 已被其他流程改过），中断改密避免数据不可用
 			return errors.New("failed to unwrap DEK for box " + b.ID + " during password change: " + err.Error())
 		}
-		// 用新 KEK 重新 wrap
 		newWrapped, err := util.Encrypt(newKEK, dek)
 		if err != nil {
 			return err
@@ -271,20 +257,50 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	Conf.NotebookCrypto.KEKVerifier = newVerifier
 	Conf.NotebookCrypto.VerifierNonce = newVerifier[:12]
 
-	cachedKEKLock.Lock()
-	zeroAndClear(cachedKEK)
-	cachedKEK = newKEK
-	cachedKEKLock.Unlock()
-
 	Conf.Save()
 	return nil
 }
 
 // IsEncryptedBox 判断给定 boxID 是否为加密笔记本。
 func IsEncryptedBox(boxID string) bool {
+	box := &Box{ID: boxID}
+	boxConf := box.GetConf()
+	return boxConf != nil && boxConf.Encrypted
+}
+
+// CreateEncryptedBox 创建一个新的加密笔记本。可多次调用创建多个。
+// 前置：加密功能已启用。创建时需要主密码（临时派生 KEK 用于 wrap DEK，用完即弃）。
+// 创建后笔记本处于"已锁定"状态（DEK 未缓存），需调用方再调 UnlockBox + Mount 才能打开。
+func CreateEncryptedBox(name, password string) (id string, err error) {
 	Conf.m.RLock()
-	defer Conf.m.RUnlock()
-	return Conf.NotebookCrypto.Enabled && Conf.NotebookCrypto.EncryptedBoxID == boxID
+	enabled := Conf.NotebookCrypto.Enabled
+	Conf.m.RUnlock()
+	if !enabled {
+		return "", errors.New("encrypted notebook feature not enabled")
+	}
+
+	kek, err := deriveKEK(password)
+	if err != nil {
+		return "", err
+	}
+
+	enc, err := WrapNewDEK(kek)
+	if err != nil {
+		return "", err
+	}
+
+	id, err = CreateBox(name)
+	if err != nil {
+		return "", err
+	}
+
+	box := &Box{ID: id}
+	boxConf := box.GetConf()
+	boxConf.Encrypted = true
+	boxConf.BoxCrypt = enc
+	box.SaveConf(boxConf)
+	IncSync()
+	return id, nil
 }
 
 // zeroAndClear 把密钥字节清零后再置空，尽量减少密钥在内存中的残留时间。

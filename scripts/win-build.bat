@@ -113,7 +113,6 @@ if defined BUILD_AMD64 (
     if errorlevel 1 (
         exit /b %errorlevel%
     )
-    mklink /H "%PROJECT_ROOT%\app\kernel\siyuan.exe" "%PROJECT_ROOT%\app\kernel\SiYuan-Kernel.exe"
 )
 if defined BUILD_ARM64 (
     echo.
@@ -125,7 +124,6 @@ if defined BUILD_ARM64 (
     if errorlevel 1 (
         exit /b %errorlevel%
     )
-    mklink /H "%PROJECT_ROOT%\app\kernel-arm64\siyuan.exe" "%PROJECT_ROOT%\app\kernel-arm64\SiYuan-Kernel.exe"
 )
 
 if defined BUILD_AMD64 goto electron
@@ -193,6 +191,14 @@ if defined BUILD_APPX_ARM64 (
     rmdir /S /Q "%PROJECT_ROOT%\app\build\pre-appx" 1>nul
 )
 :skipappx
+
+REM 打包完成后再建硬链接，避免将 siyuan.exe 打进安装包
+if defined BUILD_AMD64 (
+    mklink /H "%PROJECT_ROOT%\app\kernel\siyuan.exe" "%PROJECT_ROOT%\app\kernel\SiYuan-Kernel.exe"
+)
+if defined BUILD_ARM64 (
+    mklink /H "%PROJECT_ROOT%\app\kernel-arm64\siyuan.exe" "%PROJECT_ROOT%\app\kernel-arm64\SiYuan-Kernel.exe"
+)
 
 echo.
 echo ==============================

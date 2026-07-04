@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Šifrovaný zápisník",
+  "enableEncryptedNotebook": "Povoliť šifrovaný zápisník",
+  "encryptedNotebookTip": "Uchovávajte citlivý obsah v šifrovanom zápisníku. Na odomknutie a zobrazenie obsahu je potrebné hlavné heslo. Heslo nie je možné obnoviť, ak sa zabudne.",
+  "encryptedNotebookEnabled": "Šifrovaný zápisník je povolený",
+  "encryptedNotebookCount": "Šifrované zápisníky: ${x}",
+  "setMasterPassword": "Nastaviť hlavné heslo",
+  "masterPassword": "Hlavné heslo",
+  "confirmMasterPassword": "Potvrdiť hlavné heslo",
+  "changeMasterPassword": "Zmeniť hlavné heslo",
+  "oldMasterPassword": "Staré hlavné heslo",
+  "newMasterPassword": "Nové hlavné heslo",
+  "encryptedNotebookRiskTip": "Šifrovaný obsah nie je možné obnoviť, ak sa stratí hlavné heslo. Uistite sa, že si ho zapamätáte.",
+  "newEncryptedNotebook": "Nový šifrovaný zápisník",
+  "unlockEncryptedNotebook": "Odomknúť \"${x}\"",
+  "unlocking": "Odomkýna sa...",
+  "incorrectMasterPassword": "Nesprávne hlavné heslo",
   "mcpStatusConnected": "Pripojené",
   "mcpStatusConnecting": "Pripája sa",
   "mcpStatusFailed": "Pripojenie zlyhalo",
@@ -2055,6 +2071,10 @@
     "305": "Indexovanie odkazov...",
     "306": "Indexovanie odkazu %s",
     "307": "Synchronizácia údajov z cloudu...",
-    "308": "Preindexovanie synchronizácie..."
+    "308": "Preindexovanie synchronizácie...",
+    "309": "Šifrovaný zápisník je zamknutý, najprv ho odomknite",
+    "310": "Funkcia šifrovaného zápisníka nie je povolená",
+    "311": "Nesprávne hlavné heslo",
+    "312": "Funkcia šifrovaného zápisníka je už povolená"
   }
 }

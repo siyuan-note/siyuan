@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Versleuteld notitieboek",
+  "enableEncryptedNotebook": "Versleuteld notitieboek inschakelen",
+  "encryptedNotebookTip": "Bewaar gevoelige inhoud in een versleuteld notitieboek. Het hoofdwachtwoord is vereist om de inhoud te ontgrendelen en te bekijken. Het wachtwoord kan niet worden hersteld indien vergeten.",
+  "encryptedNotebookEnabled": "Versleuteld notitieboek is ingeschakeld",
+  "encryptedNotebookCount": "Versleutelde notitieboeken: ${x}",
+  "setMasterPassword": "Hoofdwachtwoord instellen",
+  "masterPassword": "Hoofdwachtwoord",
+  "confirmMasterPassword": "Hoofdwachtwoord bevestigen",
+  "changeMasterPassword": "Hoofdwachtwoord wijzigen",
+  "oldMasterPassword": "Oud hoofdwachtwoord",
+  "newMasterPassword": "Nieuw hoofdwachtwoord",
+  "encryptedNotebookRiskTip": "De versleutelde inhoud kan niet worden hersteld als het hoofdwachtwoord verloren is. Zorg ervoor dat u het onthoudt.",
+  "newEncryptedNotebook": "Nieuw versleuteld notitieboek",
+  "unlockEncryptedNotebook": "\"${x}\" ontgrendelen",
+  "unlocking": "Ontgrendelen...",
+  "incorrectMasterPassword": "Onjuist hoofdwachtwoord",
   "mcpStatusConnected": "Verbonden",
   "mcpStatusConnecting": "Verbinding maken",
   "mcpStatusFailed": "Verbinding mislukt",
@@ -2055,6 +2071,10 @@
     "305": "Referenties worden geïndexeerd...",
     "306": "Referentie wordt geïndexeerd %s",
     "307": "Gegevens worden gesynchroniseerd vanuit de cloud...",
-    "308": "Synchronisatie opnieuw indexeren..."
+    "308": "Synchronisatie opnieuw indexeren...",
+    "309": "Versleuteld notitieboek is vergrendeld, ontgrendel het eerst",
+    "310": "Functie voor versleuteld notitieboek is niet ingeschakeld",
+    "311": "Onjuist hoofdwachtwoord",
+    "312": "Functie voor versleuteld notitieboek is al ingeschakeld"
   }
 }

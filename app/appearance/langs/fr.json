@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Carnet chiffré",
+  "enableEncryptedNotebook": "Activer le carnet chiffré",
+  "encryptedNotebookTip": "Stockez les contenus sensibles dans un carnet chiffré. Le mot de passe maître est requis pour déverrouiller et afficher le contenu. Le mot de passe ne peut pas être récupéré en cas d'oubli.",
+  "encryptedNotebookEnabled": "Le carnet chiffré est activé",
+  "encryptedNotebookCount": "Carnets chiffrés : ${x}",
+  "setMasterPassword": "Définir le mot de passe maître",
+  "masterPassword": "Mot de passe maître",
+  "confirmMasterPassword": "Confirmer le mot de passe maître",
+  "changeMasterPassword": "Changer le mot de passe maître",
+  "oldMasterPassword": "Ancien mot de passe maître",
+  "newMasterPassword": "Nouveau mot de passe maître",
+  "encryptedNotebookRiskTip": "Le contenu chiffré ne peut pas être récupéré si le mot de passe maître est perdu. Veuillez vous assurer de bien le mémoriser.",
+  "newEncryptedNotebook": "Nouveau carnet chiffré",
+  "unlockEncryptedNotebook": "Déverrouiller « ${x} »",
+  "unlocking": "Déverrouillage...",
+  "incorrectMasterPassword": "Mot de passe maître incorrect",
   "mcpStatusConnected": "Connecté",
   "mcpStatusConnecting": "Connexion en cours",
   "mcpStatusFailed": "Échec de la connexion",
@@ -2055,6 +2071,10 @@
     "305": "Indexation des références...",
     "306": "Indexation de la référence %s",
     "307": "Synchronisation des données depuis le cloud...",
-    "308": "Réindexation de la synchronisation..."
+    "308": "Réindexation de la synchronisation...",
+    "309": "Le carnet chiffré est verrouillé, veuillez le déverrouiller d'abord",
+    "310": "La fonctionnalité de carnet chiffré n'est pas activée",
+    "311": "Mot de passe maître incorrect",
+    "312": "La fonctionnalité de carnet chiffré est déjà activée"
   }
 }

@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "פנקס מוצפן",
+  "enableEncryptedNotebook": "הפעל פנקס מוצפן",
+  "encryptedNotebookTip": "אחסון תוכן רגיש בפנקס מוצפן. נדרשת סיסמה ראשית כדי לפתוח ולצפות בתוכן. לא ניתן לשחזר את הסיסמה במקרה של שכחה.",
+  "encryptedNotebookEnabled": "פנקס מוצפן מופעל",
+  "encryptedNotebookCount": "פנקסים מוצפנים: ${x}",
+  "setMasterPassword": "הגדר סיסמה ראשית",
+  "masterPassword": "סיסמה ראשית",
+  "confirmMasterPassword": "אישור סיסמה ראשית",
+  "changeMasterPassword": "שנה סיסמה ראשית",
+  "oldMasterPassword": "סיסמה ראשית ישנה",
+  "newMasterPassword": "סיסמה ראשית חדשה",
+  "encryptedNotebookRiskTip": "לא ניתן לשחזר את התוכן המוצפן אם הסיסמה הראשית אובדת. נא לוודא שאתם זוכרים אותה.",
+  "newEncryptedNotebook": "פנקס מוצפן חדש",
+  "unlockEncryptedNotebook": "פתיחת \"${x}\"",
+  "unlocking": "פותח...",
+  "incorrectMasterPassword": "סיסמה ראשית שגויה",
   "mcpStatusConnected": "מחובר",
   "mcpStatusConnecting": "מתחבר",
   "mcpStatusFailed": "חיבור נכשל",
@@ -2055,6 +2071,10 @@
     "305": "מבצע אינדקס להפניות...",
     "306": "מבצע אינדקס להפניה %s",
     "307": "מסנכרן נתונים מהענן...",
-    "308": "מבצע אינדקס מחדש לסנכרון..."
+    "308": "מבצע אינדקס מחדש לסנכרון...",
+    "309": "הפנקס המוצפן נעול, נא לפתוח אותו תחילה",
+    "310": "תכונת הפנקס המוצפן אינה מופעלת",
+    "311": "סיסמה ראשית שגויה",
+    "312": "תכונת הפנקס המוצפן כבר מופעלת"
   }
 }

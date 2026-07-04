@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Cuaderno cifrado",
+  "enableEncryptedNotebook": "Habilitar cuaderno cifrado",
+  "encryptedNotebookTip": "Almacene contenido confidencial en un cuaderno cifrado. Se requiere la contraseña maestra para desbloquear y ver el contenido. La contraseña no se puede recuperar si se olvida.",
+  "encryptedNotebookEnabled": "El cuaderno cifrado está habilitado",
+  "encryptedNotebookCount": "Cuadernos cifrados: ${x}",
+  "setMasterPassword": "Establecer contraseña maestra",
+  "masterPassword": "Contraseña maestra",
+  "confirmMasterPassword": "Confirmar contraseña maestra",
+  "changeMasterPassword": "Cambiar contraseña maestra",
+  "oldMasterPassword": "Contraseña maestra antigua",
+  "newMasterPassword": "Contraseña maestra nueva",
+  "encryptedNotebookRiskTip": "El contenido cifrado no se puede recuperar si se pierde la contraseña maestra. Asegúrese de recordarla.",
+  "newEncryptedNotebook": "Nuevo cuaderno cifrado",
+  "unlockEncryptedNotebook": "Desbloquear «${x}»",
+  "unlocking": "Desbloqueando...",
+  "incorrectMasterPassword": "Contraseña maestra incorrecta",
   "mcpStatusConnected": "Conectado",
   "mcpStatusConnecting": "Conectando",
   "mcpStatusFailed": "Conexión fallida",
@@ -2055,6 +2071,10 @@
     "305": "Indexando referencias...",
     "306": "Indexando referencia %s",
     "307": "Sincronizando datos desde la nube...",
-    "308": "Reindexando sincronización..."
+    "308": "Reindexando sincronización...",
+    "309": "El cuaderno cifrado está bloqueado, por favor desbloquéelo primero",
+    "310": "La función de cuaderno cifrado no está habilitada",
+    "311": "Contraseña maestra incorrecta",
+    "312": "La función de cuaderno cifrado ya está habilitada"
   }
 }

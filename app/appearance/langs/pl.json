@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Zaszyfrowany notatnik",
+  "enableEncryptedNotebook": "Włącz zaszyfrowany notatnik",
+  "encryptedNotebookTip": "Przechowuj poufne treści w zaszyfrowanym notatniku. Odblokowanie i wyświetlenie treści wymaga głównego hasła. Hasła nie można odzyskać w przypadku zapomnienia.",
+  "encryptedNotebookEnabled": "Zaszyfrowany notatnik jest włączony",
+  "encryptedNotebookCount": "Zaszyfrowane notatniki: ${x}",
+  "setMasterPassword": "Ustaw główne hasło",
+  "masterPassword": "Główne hasło",
+  "confirmMasterPassword": "Potwierdź główne hasło",
+  "changeMasterPassword": "Zmień główne hasło",
+  "oldMasterPassword": "Stare główne hasło",
+  "newMasterPassword": "Nowe główne hasło",
+  "encryptedNotebookRiskTip": "Zaszyfrowaną treść nie można odzyskać w przypadku utraty głównego hasła. Upewnij się, że je zapamiętasz.",
+  "newEncryptedNotebook": "Nowy zaszyfrowany notatnik",
+  "unlockEncryptedNotebook": "Odblokuj \"${x}\"",
+  "unlocking": "Odblokowywanie...",
+  "incorrectMasterPassword": "Nieprawidłowe główne hasło",
   "mcpStatusConnected": "Połączono",
   "mcpStatusConnecting": "Łączenie",
   "mcpStatusFailed": "Połączenie nie powiodło się",
@@ -2055,6 +2071,10 @@
     "305": "Indeksowanie odwołań...",
     "306": "Indeksowanie odwołania %s",
     "307": "Synchronizowanie danych z chmury...",
-    "308": "Ponowne indeksowanie synchronizacji..."
+    "308": "Ponowne indeksowanie synchronizacji...",
+    "309": "Zaszyfrowany notatnik jest zablokowany, najpierw go odblokuj",
+    "310": "Funkcja zaszyfrowanego notatnika nie jest włączona",
+    "311": "Nieprawidłowe główne hasło",
+    "312": "Funkcja zaszyfrowanego notatnika jest już włączona"
   }
 }

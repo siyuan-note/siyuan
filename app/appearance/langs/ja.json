@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "暗号化ノートブック",
+  "enableEncryptedNotebook": "暗号化ノートブックを有効化",
+  "encryptedNotebookTip": "機密内容を暗号化ノートブックに保存します。内容を表示するにはマスターパスワードでロックを解除する必要があります。パスワードを忘れるとデータを復元できません。",
+  "encryptedNotebookEnabled": "暗号化ノートブックは有効です",
+  "encryptedNotebookCount": "暗号化ノートブック：${x} 件",
+  "setMasterPassword": "マスターパスワードを設定",
+  "masterPassword": "マスターパスワード",
+  "confirmMasterPassword": "マスターパスワードを確認",
+  "changeMasterPassword": "マスターパスワードを変更",
+  "oldMasterPassword": "以前のマスターパスワード",
+  "newMasterPassword": "新しいマスターパスワード",
+  "encryptedNotebookRiskTip": "マスターパスワードを紛失すると暗号化内容を復元できません。必ず覚えておいてください。",
+  "newEncryptedNotebook": "新規暗号化ノートブック",
+  "unlockEncryptedNotebook": "「${x}」のロックを解除",
+  "unlocking": "ロック解除中……",
+  "incorrectMasterPassword": "マスターパスワードが正しくありません",
   "mcpStatusConnected": "接続済み",
   "mcpStatusConnecting": "接続中",
   "mcpStatusFailed": "接続失敗",
@@ -2055,6 +2071,10 @@
     "305": "参照をインデックスしています...",
     "306": "参照をインデックス中 %s",
     "307": "クラウドからデータを同期しています...",
-    "308": "同期の再インデックス中..."
+    "308": "同期の再インデックス中...",
+    "309": "暗号化ノートブックはロックされています。先にロックを解除してください",
+    "310": "暗号化ノートブック機能が有効になっていません",
+    "311": "マスターパスワードが正しくありません",
+    "312": "暗号化ノートブック機能はすでに有効です"
   }
 }

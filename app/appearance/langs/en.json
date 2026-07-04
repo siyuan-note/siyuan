@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Encrypted Notebook",
+  "enableEncryptedNotebook": "Enable encrypted notebook",
+  "encryptedNotebookTip": "Store sensitive content in an encrypted notebook. The master password is required to unlock and view the content. The password cannot be recovered if forgotten.",
+  "encryptedNotebookEnabled": "Encrypted notebook is enabled",
+  "encryptedNotebookCount": "Encrypted notebooks: ${x}",
+  "setMasterPassword": "Set master password",
+  "masterPassword": "Master password",
+  "confirmMasterPassword": "Confirm master password",
+  "changeMasterPassword": "Change master password",
+  "oldMasterPassword": "Old master password",
+  "newMasterPassword": "New master password",
+  "encryptedNotebookRiskTip": "The encrypted content cannot be recovered if the master password is lost. Please make sure you remember it.",
+  "newEncryptedNotebook": "New encrypted notebook",
+  "unlockEncryptedNotebook": "Unlock \"${x}\"",
+  "unlocking": "Unlocking...",
+  "incorrectMasterPassword": "Incorrect master password",
   "mcpStatusConnected": "Connected",
   "mcpStatusConnecting": "Connecting",
   "mcpStatusFailed": "Connection failed",
@@ -2055,6 +2071,10 @@
     "305": "Indexing refs...",
     "306": "Indexing ref %s",
     "307": "Syncing data from the cloud...",
-    "308": "Sync reindexing..."
+    "308": "Sync reindexing...",
+    "309": "Encrypted notebook is locked, please unlock it first",
+    "310": "Encrypted notebook feature is not enabled",
+    "311": "Incorrect master password",
+    "312": "Encrypted notebook feature is already enabled"
   }
 }

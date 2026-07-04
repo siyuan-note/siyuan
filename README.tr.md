@@ -379,6 +379,9 @@ Yerleşik CLI ile sunucu başlatmadan çalışma alanı verilerine doğrudan eri
 ```bash
 siyuan notebook list -w ~/SiYuan
 siyuan search "keyword" -w ~/SiYuan -f json
+# Varlık dosyalarının içinde ara (PDF/Word/Excel/txt vb.)
+siyuan search "ifade" --asset -w ~/SiYuan
+siyuan search "ifade" --asset --ext pdf --ext docx -w ~/SiYuan
 siyuan export md --id <block-id> -w ~/SiYuan
 ```
 
@@ -389,7 +392,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | Defterler ve Belgeler | `notebook`, `document`, `dailynote` — CRUD ve günlük notlar |
 | İçerik | `block`, `attr`, `outline` — blok okuma/yazma, nitelikler, ana hat |
 | Meta Veri | `tag`, `bookmark`, `template` — etiketler, yer imleri, şablon parçacıkları |
-| Sorgular | `search`, `sql` — tam metin ve SQL sorguları |
+| Sorgular | `search`, `sql` — tam metin, anlamsal, varlık içeriği ve SQL sorguları |
 | Referanslar | `ref` — geri bağlantılar ve bahsetmeler |
 | İçe/Dışa Aktarma | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, bulut gelen kutusu |
 | Veri Yönetimi | `repo`, `history`, `sync` — anlık görüntüler, sürümler, bulut senkronizasyonu |

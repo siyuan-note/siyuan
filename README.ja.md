@@ -378,6 +378,9 @@ services:
 ```bash
 siyuan notebook list -w ~/SiYuan
 siyuan search "keyword" -w ~/SiYuan -f json
+# アセットファイル内を検索（PDF/Word/Excel/txt など）
+siyuan search "フレーズ" --asset -w ~/SiYuan
+siyuan search "フレーズ" --asset --ext pdf --ext docx -w ~/SiYuan
 siyuan export md --id <block-id> -w ~/SiYuan
 ```
 
@@ -388,7 +391,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | ノートと文書 | `notebook`, `document`, `dailynote` — CRUD とデイリーノート |
 | コンテンツ | `block`, `attr`, `outline` — ブロックの読み書き、属性、アウトライン |
 | メタデータ | `tag`, `bookmark`, `template` — タグ、ブックマーク、テンプレートスニペット |
-| クエリ | `search`, `sql` — 全文検索と SQL |
+| クエリ | `search`, `sql` — 全文・セマンティック・アセット内・SQL 検索 |
 | 参照 | `ref` — バックリンクと言及 |
 | インポート/エクスポート | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, クラウド受信トレイ |
 | データ管理 | `repo`, `history`, `sync` — スナップショット、履歴、クラウド同期 |

@@ -605,6 +605,11 @@ func EncryptedDBPath(boxID string) string {
 	return filepath.Join(TempDir, "siyuan-encrypted-"+boxID+".db")
 }
 
+// EncryptedBlockTreeDBPath 返回加密笔记本的独立 SQLCipher blocktree db 文件路径。
+func EncryptedBlockTreeDBPath(boxID string) string {
+	return filepath.Join(TempDir, "siyuan-encrypted-"+boxID+"-blocktree.db")
+}
+
 func tryLockWorkspace() {
 	WorkspaceLock = flock.New(filepath.Join(WorkspaceDir, ".lock"))
 	ok, err := WorkspaceLock.TryLock()

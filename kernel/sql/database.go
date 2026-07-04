@@ -1423,6 +1423,37 @@ func query(query string, args ...any) (*sql.Rows, error) {
 	return db.Query(query, args...)
 }
 
+// queryRowForBox 按 box 路由查询单行。加密 box 用独立 db，否则用全局 db。boxID 为空走全局。
+func queryRowForBox(boxID, query string, args ...any) *sql.Row {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		logging.LogErrorf("statement is empty")
+		return nil
+	}
+	if boxDB := GetEncryptedDB(boxID); boxDB != nil {
+		return boxDB.QueryRow(query, args...)
+	}
+	if nil == db {
+		return nil
+	}
+	return db.QueryRow(query, args...)
+}
+
+// queryForBox 按 box 路由查询多行。加密 box 用独立 db，否则用全局 db。boxID 为空走全局。
+func queryForBox(boxID, query string, args ...any) (*sql.Rows, error) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return nil, errors.New("statement is empty")
+	}
+	if boxDB := GetEncryptedDB(boxID); boxDB != nil {
+		return boxDB.Query(query, args...)
+	}
+	if nil == db {
+		return nil, errors.New("database is nil")
+	}
+	return db.Query(query, args...)
+}
+
 func Exec(stmt string, args ...any) error {
 	stmt = strings.TrimSpace(stmt)
 	if "" == stmt {

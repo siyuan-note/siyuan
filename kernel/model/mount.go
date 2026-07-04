@@ -33,6 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -165,6 +166,7 @@ func RemoveBox(boxID string) (err error) {
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
 	if IsEncryptedBox(boxID) {
 		sql.RemoveEncryptedDBFile(boxID)
+		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 	}
 
 	if isUserGuide {

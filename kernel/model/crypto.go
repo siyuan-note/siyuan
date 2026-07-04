@@ -28,6 +28,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -127,6 +128,10 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 	if err = sql.OpenEncryptedDB(boxID, dek); err != nil {
 		return err
 	}
+	if err = treenode.OpenEncryptedBlockTreeDB(boxID, dek); err != nil {
+		sql.CloseEncryptedDB(boxID)
+		return err
+	}
 	cachedDEKs[boxID] = dek
 	return nil
 }
@@ -149,6 +154,7 @@ func LockBox(boxID string) {
 	}
 	cachedDEKsLock.Unlock()
 	sql.CloseEncryptedDB(boxID)
+	treenode.CloseEncryptedBlockTreeDB(boxID)
 	cache.ClearTreeCache()
 }
 
@@ -162,6 +168,7 @@ func LockAllBoxes() {
 	cachedDEKsLock.Unlock()
 	// 关闭所有已打开的加密 db 连接，清空树缓存避免明文残留
 	sql.CloseAllEncryptedDBs()
+	treenode.CloseAllEncryptedBlockTreeDBs()
 	cache.ClearTreeCache()
 }
 

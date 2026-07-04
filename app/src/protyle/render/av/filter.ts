@@ -491,7 +491,12 @@ const genInlineDateHTML = (filter: IAVFilter, valueType: TAVCol, path: string): 
     const isBetween = filter.operator === "Is between";
 
     // formatAbsDate 把时间戳格式化为 yyyy-MM-dd；空值/非法值返回 ""，避免 <input type="date"> 报 "Invalid Date"。
+    // 0 也视作空值：created/updated 类型的 content 经后端 int64 往返后 null 会变成 0，
+    // 否则 dayjs(0) 会渲染成 1970-01-01（与 date 类型 isNotEmpty:false 时的空白表现对齐）。
     const formatAbsDate = (timestamp: any): string => {
+        if (!timestamp) {
+            return "";
+        }
         const dayObj = dayjs(timestamp);
         return dayObj.isValid() ? dayObj.format("YYYY-MM-DD") : "";
     };

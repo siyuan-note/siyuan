@@ -70,6 +70,10 @@ func GenerateFileHistory() {
 
 	// 生成文档历史
 	for _, box := range Conf.GetOpenedBoxes() {
+		// 加密笔记本不生成历史（历史目录不加密，密文 .sy 写进去也无意义）
+		if IsEncryptedBox(box.ID) {
+			continue
+		}
 		box.generateDocHistory0()
 	}
 
@@ -857,6 +861,10 @@ func CreateDocHistory(id string) (err error) {
 }
 
 func generateTreeHistory(tree *parse.Tree, historyDir string) {
+	// 加密笔记本不生成历史
+	if IsEncryptedBox(tree.Box) {
+		return
+	}
 	historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
 	var err error
 	if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {

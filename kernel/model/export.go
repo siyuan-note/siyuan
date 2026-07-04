@@ -500,12 +500,20 @@ func ExportSystemLog() (zipPath string) {
 }
 
 func ExportNotebookSY(id string) (zipPath string) {
+	// 加密笔记本不支持导出，避免密文 .sy 流出后无法解读
+	if IsEncryptedBox(id) {
+		return
+	}
 	zipPath = exportBoxSYZip(id)
 	return
 }
 
 func ExportSYs(ids []string) (zipPath string) {
 	block := treenode.GetBlockTree(ids[0])
+	// 加密笔记本不支持导出
+	if nil != block && IsEncryptedBox(block.BoxID) {
+		return
+	}
 	box := Conf.Box(block.BoxID)
 	baseFolderName := path.Base(block.HPath)
 	if "." == baseFolderName {

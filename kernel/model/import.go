@@ -108,6 +108,11 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 }
 
 func ImportSY(zipPath, boxID, toPath string) (err error) {
+	// 加密笔记本不支持导入（导入的 .sy 是明文，落到加密目录会导致读取失败）
+	if IsEncryptedBox(boxID) {
+		err = errors.New("import to encrypted notebook is not supported")
+		return
+	}
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
@@ -769,6 +774,11 @@ func ImportData(zipPath string) (err error) {
 }
 
 func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
+	// 加密笔记本不支持导入
+	if IsEncryptedBox(boxID) {
+		err = errors.New("import to encrypted notebook is not supported")
+		return
+	}
 	util.PushEndlessProgress(Conf.Language(73))
 	defer func() {
 		util.PushClearProgress()

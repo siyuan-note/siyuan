@@ -4,6 +4,7 @@
   padding: 16px 16px 16px 24px;
   cursor: text;
   box-sizing: border-box;
+  // 移除三击无法选中整个 https://github.com/siyuan-note/siyuan/issues/8511
   user-select: auto;
   overflow-x: clip;
 

@@ -195,7 +195,7 @@ func searchAssetContentBySQL(stmt string, page, pageSize int) (ret []*AssetConte
 	stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(path) AS `assets` ")
 	stmt = removeLimitClause(stmt)
 	result, _ := sql.QueryAssetContentNoLimit(stmt)
-	if 1 > len(ret) {
+	if 1 > len(result) {
 		return
 	}
 

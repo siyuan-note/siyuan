@@ -16,7 +16,7 @@ import {
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
-import {mountHelp, newNotebook} from "../../util/mount";
+import {mountHelp, newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
 import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
@@ -109,9 +109,16 @@ export class Files extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "open") {
-                    fetchPost("/api/notebook/openNotebook", {
-                        notebook: target.getAttribute("data-url")
-                    });
+                    const notebookId = target.getAttribute("data-url");
+                    const liElement = target.closest("li");
+                    // 加密笔记本关闭（锁定）时点"打开"先弹解锁框，解锁成功后再挂载
+                    if (liElement && liElement.getAttribute("data-encrypted") === "true") {
+                        openEncryptedNotebook(app, notebookId, liElement.querySelector(".b3-list-item__text").textContent);
+                    } else {
+                        fetchPost("/api/notebook/openNotebook", {
+                            notebook: notebookId
+                        });
+                    }
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
@@ -931,10 +938,14 @@ export class Files extends Model {
 
     private genNotebook(item: INotebook) {
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
+        // 加密笔记本关闭（锁定）时用锁图标替换 emoji，提示需解锁；打开（解锁）后恢复正常 emoji
+        const iconContent = (item.encrypted && item.closed)
+            ? "<svg style=\"width:14px;height:14px\"><use xlink:href=\"#iconLock\"></use></svg>"
+            : unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${window.siyuan.languages.changeIcon}">${iconContent}</span>`;
         const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
-            return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action">
+            return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}>
     <span class="b3-list-item__toggle fn__hidden">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1428,6 +1439,13 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                 label: window.siyuan.languages.newNotebook,
                 click: () => {
                     newNotebook();
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconLock",
+                label: window.siyuan.languages.newEncryptedNotebook,
+                click: () => {
+                    newEncryptedNotebook();
                 }
             }).element);
         }

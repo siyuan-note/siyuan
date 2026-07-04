@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -293,6 +294,13 @@ func GetDEKIfUnlocked(boxID string) ([]byte, error) {
 // 路径形如 <DataDir>/<boxID>/...，切出紧跟在 DataDir 后的一段。
 // 若路径不在 DataDir 下或格式不符，返回空字符串。
 func extractBoxIDFromPath(absPath string) string {
+	return ExtractBoxIDFromAssetsPath(absPath)
+}
+
+// ExtractBoxIDFromAssetsPath 从 data 目录下的绝对路径（.sy 或 assets）反推 boxID。
+// 供 server/api 层判断 asset 是否属于加密笔记本。路径形如 <DataDir>/<boxID>/...；
+// 若不在 DataDir 下或 boxID 非合法 ID 模式，返回空串。
+func ExtractBoxIDFromAssetsPath(absPath string) string {
 	absPath = filepath.ToSlash(absPath)
 	dataDir := filepath.ToSlash(util.DataDir)
 	rel, err := filepath.Rel(dataDir, absPath)
@@ -309,6 +317,30 @@ func extractBoxIDFromPath(absPath string) string {
 		return ""
 	}
 	return boxID
+}
+
+// copyAssetDecryptIfEncrypted 把 srcPath 的 asset 复制到 destPath。
+// 若 srcPath 在已解锁的加密 box 下，读密文→解密→写明文到 destPath（导出目录）；
+// 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
+func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
+	boxID := ExtractBoxIDFromAssetsPath(srcPath)
+	if boxID != "" {
+		if dek, err := GetDEK(boxID); err == nil && dek != nil {
+			raw, readErr := filelock.ReadFile(srcPath)
+			if readErr != nil {
+				return readErr
+			}
+			plain, decErr := util.Decrypt(dek, raw)
+			if decErr != nil {
+				return decErr
+			}
+			if err := filelock.WriteFile(destPath, plain); err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+	return filelock.Copy(srcPath, destPath)
 }
 
 // CreateEncryptedBox 创建一个新的加密笔记本。可多次调用创建多个。

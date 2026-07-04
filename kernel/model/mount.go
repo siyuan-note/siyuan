@@ -151,7 +151,10 @@ func RemoveBox(boxID string) (err error) {
 			return
 		}
 
-		copyBoxAssetsToDataAssets(boxID)
+		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
+		if !IsEncryptedBox(boxID) {
+			copyBoxAssetsToDataAssets(boxID)
+		}
 	}
 
 	unmount0(boxID)

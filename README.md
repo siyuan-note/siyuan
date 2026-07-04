@@ -46,7 +46,7 @@
   - [Package Manager](#package-manager)
   - [Docker Hosting](#docker-hosting)
   - [Unraid Hosting](#unraid-hosting)
-  - [TrueNAS Hosting](#TrueNAS-hosting)
+  - [TrueNAS Hosting](#truenas-hosting)
   - [Insider Preview](#insider-preview)
 - [⌨️ Command-line Interface](#-command-line-interface)
 - [🏘️ Community](#️-community)

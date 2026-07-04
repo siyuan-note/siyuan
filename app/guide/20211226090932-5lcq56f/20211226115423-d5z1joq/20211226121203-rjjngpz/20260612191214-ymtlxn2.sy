@@ -6,7 +6,7 @@
 		"id": "20260612191214-ymtlxn2",
 		"title": "命令列",
 		"type": "doc",
-		"updated": "20260704120000"
+		"updated": "20260704130000"
 	},
 	"Children": [
 		{
@@ -4843,6 +4843,47 @@
 				{
 					"Type": "NodeCodeBlockCode",
 					"Data": "siyuan search \"關鍵字\" --asset\nsiyuan search \"關鍵字\" --asset --ext pdf --ext docx\nsiyuan search \"關鍵字\" --asset --method 3 --order-by 3\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260704130000-3c2a405",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260704130000-3c2a405",
+				"updated": "20260704130000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "加上 --get-asset 改為按路徑取得單一資源檔案的完整已索引內容（位置參數作為路徑，如 assets/report.pdf）。適合在 --asset 搜尋後取某個檔案的全文。"
+				}
+			]
+		},
+		{
+			"ID": "20260704130100-57e80f5",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260704130100-57e80f5",
+				"updated": "20260704130100"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan search \"assets/report.pdf\" --get-asset\nsiyuan search \"assets/report.pdf\" --get-asset --format json\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

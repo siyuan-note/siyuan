@@ -6,7 +6,7 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20260704120000"
+		"updated": "20260704130000"
 	},
 	"Children": [
 		{
@@ -4843,6 +4843,47 @@
 				{
 					"Type": "NodeCodeBlockCode",
 					"Data": "siyuan search \"キーワード\" --asset\nsiyuan search \"キーワード\" --asset --ext pdf --ext docx\nsiyuan search \"キーワード\" --asset --method 3 --order-by 3\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260704130000-82aecd4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260704130000-82aecd4",
+				"updated": "20260704130000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "--get-asset を付けると、パスで単一アセットファイルの全文インデックス内容を取得します（位置引数がパスとして扱われます、例: assets/report.pdf）。--asset 検索で見つけたファイルの全文を取得するのに便利です。"
+				}
+			]
+		},
+		{
+			"ID": "20260704130100-38c8c41",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260704130100-38c8c41",
+				"updated": "20260704130100"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan search \"assets/report.pdf\" --get-asset\nsiyuan search \"assets/report.pdf\" --get-asset --format json\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

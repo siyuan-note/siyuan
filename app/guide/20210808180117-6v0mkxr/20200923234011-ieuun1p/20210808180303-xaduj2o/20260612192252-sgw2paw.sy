@@ -6,7 +6,7 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20260704120000"
+		"updated": "20260704130000"
 	},
 	"Children": [
 		{
@@ -4843,6 +4843,47 @@
 				{
 					"Type": "NodeCodeBlockCode",
 					"Data": "siyuan search \"keyword\" --asset\nsiyuan search \"keyword\" --asset --ext pdf --ext docx\nsiyuan search \"keyword\" --asset --method 3 --order-by 3\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260704130000-d80a64e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260704130000-d80a64e",
+				"updated": "20260704130000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Add --get-asset to get the full indexed content of a single asset file by path (the positional argument is treated as the path, e.g. assets/report.pdf). Useful for retrieving the full text of a file found via --asset search."
+				}
+			]
+		},
+		{
+			"ID": "20260704130100-55c901d",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260704130100-55c901d",
+				"updated": "20260704130100"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan search \"assets/report.pdf\" --get-asset\nsiyuan search \"assets/report.pdf\" --get-asset --format json\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

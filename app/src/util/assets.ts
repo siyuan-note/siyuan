@@ -310,32 +310,37 @@ export const setMode = (modeElementValue: number) => {
     /// #endif
 };
 
-const rgba2hex = (rgba: string) => {
-    if (rgba.startsWith("#")) {
-        return rgba;
-    }
-    let a: any;
-    const rgb: any = rgba.replace(/\s/g, "").match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
-    const alpha = (rgb && rgb[4] || "").trim();
-    let hex = rgb ?
-        (rgb[1] | 1 << 8).toString(16).slice(1) +
-        (rgb[2] | 1 << 8).toString(16).slice(1) +
-        (rgb[3] | 1 << 8).toString(16).slice(1) : rgba;
+const padHex = (n: number) => (n | 256).toString(16).slice(1);
 
-    if (alpha !== "") {
-        a = alpha;
-    } else {
-        a = 0o1;
+const rgbaToHex = (rgba: string) => {
+    const rgb = rgba.replace(/\s/g, "").match(/^rgba?\((\d+),(\d+),(\d+)(?:,([^)]+))?\)$/i);
+    if (!rgb) {
+        return "";
     }
-    a = ((a * 255) | 1 << 8).toString(16).slice(1);
-    hex = hex + a;
-    return hex;
+    const alpha = rgb[4] !== undefined ? parseFloat(rgb[4]) : 1;
+    if (alpha === 0) {
+        return "";
+    }
+    return "#" +
+        padHex(parseInt(rgb[1], 10)) +
+        padHex(parseInt(rgb[2], 10)) +
+        padHex(parseInt(rgb[3], 10)) +
+        padHex(Math.round(alpha * 255));
+};
+
+const cssVarToRgba = (varName: string) => {
+    const probe = document.createElement("div");
+    probe.style.display = "none";
+    probe.style.backgroundColor = `var(${varName})`;
+    document.documentElement.appendChild(probe);
+    const rgba = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return rgba;
 };
 
 const updateMobileTheme = (OSTheme: string) => {
     if (isInMobileApp()) {
         setTimeout(() => {
-            const backgroundColor = rgba2hex(getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim());
             let mode = window.siyuan.config.appearance.mode;
             if (window.siyuan.config.appearance.modeOS) {
                 if (OSTheme === "dark") {
@@ -344,8 +349,11 @@ const updateMobileTheme = (OSTheme: string) => {
                     mode = 0;
                 }
             }
+            const fallback = mode === 0 ? "#ffffffff" : "#1e1e1eff";
+            const backgroundColor = rgbaToHex(cssVarToRgba("--b3-theme-background")) || fallback;
+            // 统一传 #RRGGBBAA：iOS 按 #RRGGBBAA 解析，Android / Harmony 将 #RRGGBBAA 转为 #AARRGGBB
             if (isInIOS()) {
-                window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1e1e")) + " " + mode);
+                window.webkit.messageHandlers.changeStatusBar.postMessage(backgroundColor + " " + mode);
             } else if (isInAndroid()) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
             } else if (isInHarmony()) {

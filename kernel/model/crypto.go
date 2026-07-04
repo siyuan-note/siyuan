@@ -27,6 +27,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -120,6 +121,10 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 	if err != nil {
 		return err
 	}
+	// 先打开加密 db，成功后再缓存 DEK（保证两者一致：DEK 在内存 ⟺ 加密 db 已打开）
+	if err = sql.OpenEncryptedDB(boxID, dek); err != nil {
+		return err
+	}
 	cachedDEKsLock.Lock()
 	cachedDEKs[boxID] = dek
 	cachedDEKsLock.Unlock()
@@ -134,7 +139,7 @@ func IsBoxUnlocked(boxID string) bool {
 	return ok
 }
 
-// LockBox 清除指定笔记本的 DEK。Unmount 单个加密笔记本或手动锁定时调用。
+// LockBox 清除指定笔记本的 DEK 并关闭其加密 db。Unmount 单个加密笔记本或手动锁定时调用。
 // 同时清除该笔记本的 TreeData 缓存，避免明文树数据在内存中残留。
 func LockBox(boxID string) {
 	cachedDEKsLock.Lock()
@@ -143,6 +148,7 @@ func LockBox(boxID string) {
 		delete(cachedDEKs, boxID)
 	}
 	cachedDEKsLock.Unlock()
+	sql.CloseEncryptedDB(boxID)
 	cache.ClearTreeCache()
 }
 

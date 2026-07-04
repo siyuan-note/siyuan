@@ -593,6 +593,12 @@ func IndexBlockTree(tree *parse.Tree) {
 	indexBlockTreeLock.Lock()
 	defer indexBlockTreeLock.Unlock()
 
+	if nil == db {
+		// 数据库可能在重建过程中被置空，此时直接返回避免空指针解引用
+		logging.LogErrorf("database is nil")
+		return
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		logging.LogErrorf("begin transaction failed: %s", err)
@@ -647,6 +653,12 @@ func UpsertBlockTree(tree *parse.Tree) {
 
 	indexBlockTreeLock.Lock()
 	defer indexBlockTreeLock.Unlock()
+
+	if nil == db {
+		// 数据库可能在重建过程中被置空，此时直接返回避免空指针解引用
+		logging.LogErrorf("database is nil")
+		return
+	}
 
 	tx, err := db.Begin()
 	if err != nil {

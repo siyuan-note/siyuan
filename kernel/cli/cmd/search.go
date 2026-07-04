@@ -50,6 +50,11 @@ var searchCmd = &cobra.Command{
 			return runAssetSearch(cmd, query, method, orderBy, page, pageSize)
 		}
 
+		// --get-asset 切换到按路径取单个资源文件全文模式
+		if getAssetMode, _ := cmd.Flags().GetBool("get-asset"); getAssetMode {
+			return runGetAsset(query)
+		}
+
 		notebooks, _ := cmd.Flags().GetStringArray("notebook")
 		paths, _ := cmd.Flags().GetStringArray("path")
 		typeFlags, _ := cmd.Flags().GetStringArray("type")
@@ -105,6 +110,29 @@ func runAssetSearch(cmd *cobra.Command, query string, method, orderBy, page, pag
 		fmt.Println(string(data))
 	default:
 		printAssetSearchResult(assetContents, matchedAssetCount, pageCount, page, pageSize)
+	}
+	return nil
+}
+
+func runGetAsset(path string) error {
+	a := model.GetAssetContentByPath(path)
+	if a == nil {
+		fmt.Println("No indexed content found for path:", path)
+		return nil
+	}
+
+	switch outputFormat {
+	case "json":
+		data, _ := json.MarshalIndent(a, "", "  ")
+		fmt.Println(string(data))
+	default:
+		fmt.Printf("ID:  %s\n", a.ID)
+		fmt.Printf("Name: %s\n", a.Name)
+		fmt.Printf("Ext:  %s\n", a.Ext)
+		fmt.Printf("Path: %s\n", a.Path)
+		fmt.Printf("Size: %s\n", a.HSize)
+		fmt.Println("\nContent:")
+		fmt.Println(a.Content)
 	}
 	return nil
 }
@@ -175,6 +203,7 @@ func stringSliceToMap(s []string) map[string]bool {
 
 func init() {
 	searchCmd.Flags().Bool("asset", false, "search asset file contents (PDF/Word/Excel/txt etc.) instead of blocks")
+	searchCmd.Flags().Bool("get-asset", false, "get the full indexed content of one asset file; the query argument is treated as the asset path, e.g. 'assets/foo.pdf'")
 	searchCmd.Flags().StringArray("ext", nil, "asset file extension filter, repeatable, e.g. --ext pdf --ext docx (asset mode only)")
 	searchCmd.Flags().StringArrayP("notebook", "n", nil, "notebook ID filter (repeatable)")
 	searchCmd.Flags().StringArray("path", nil, "path prefix filter (repeatable)")

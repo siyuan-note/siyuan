@@ -6,7 +6,7 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20260630155703"
+		"updated": "20260704120000"
 	},
 	"Children": [
 		{
@@ -4802,6 +4802,47 @@
 				{
 					"Type": "NodeCodeBlockCode",
 					"Data": "siyuan search \"キーワード\"\nsiyuan search \"キーワード\" --notebook box1 --notebook box2\nsiyuan search \"キーワード\" --path \"/ディレクトリ\"\nsiyuan search \"キーワード\" --type document --type heading\nsiyuan search \"キーワード\" --subtype o --subtype u\nsiyuan search \"キーワード\" --method 2\nsiyuan search \"キーワード\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"キーワード\" --group-by 1\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260704120000-f2bb53c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260704120000-f2bb53c",
+				"updated": "20260704120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "--asset を付けるとアセットファイル（PDF/Word/Excel/txt など）の内容インデックスを検索します。--ext で拡張子による絞り込みが可能（繰り返し可）。このモードの --method は 0-3 のみ対応、--order-by は 0 関連度降順、1 関連度昇順、2 更新昇順、3 更新降順です。"
+				}
+			]
+		},
+		{
+			"ID": "20260704120100-612c7e7",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260704120100-612c7e7",
+				"updated": "20260704120100"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan search \"キーワード\" --asset\nsiyuan search \"キーワード\" --asset --ext pdf --ext docx\nsiyuan search \"キーワード\" --asset --method 3 --order-by 3\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

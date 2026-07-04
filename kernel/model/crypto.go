@@ -18,9 +18,13 @@ package model
 
 import (
 	"errors"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -130,13 +134,15 @@ func IsBoxUnlocked(boxID string) bool {
 }
 
 // LockBox 清除指定笔记本的 DEK。Unmount 单个加密笔记本或手动锁定时调用。
+// 同时清除该笔记本的 TreeData 缓存，避免明文树数据在内存中残留。
 func LockBox(boxID string) {
 	cachedDEKsLock.Lock()
-	defer cachedDEKsLock.Unlock()
 	if dek, ok := cachedDEKs[boxID]; ok {
 		zeroAndClear(dek)
 		delete(cachedDEKs, boxID)
 	}
+	cachedDEKsLock.Unlock()
+	cache.ClearTreeCache()
 }
 
 // LockAllBoxes 清除所有已缓存的 DEK。退出登录或全局锁定时调用。
@@ -266,6 +272,43 @@ func IsEncryptedBox(boxID string) bool {
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	return boxConf != nil && boxConf.Encrypted
+}
+
+// GetDEKIfUnlocked 返回已解锁加密 box 的 DEK；非加密 box 或未解锁时返回 (nil, nil)。
+// 供 filesys.DEKProvider 注入用——对非加密 box 透明返回 nil，使 filesys 的加解密函数走"原样返回"分支。
+func GetDEKIfUnlocked(boxID string) ([]byte, error) {
+	if !IsEncryptedBox(boxID) {
+		return nil, nil
+	}
+	cachedDEKsLock.RLock()
+	defer cachedDEKsLock.RUnlock()
+	dek, ok := cachedDEKs[boxID]
+	if !ok {
+		return nil, nil // 已加密但未解锁
+	}
+	return dek, nil
+}
+
+// extractBoxIDFromPath 从 data 目录下的绝对路径反推 boxID。
+// 路径形如 <DataDir>/<boxID>/...，切出紧跟在 DataDir 后的一段。
+// 若路径不在 DataDir 下或格式不符，返回空字符串。
+func extractBoxIDFromPath(absPath string) string {
+	absPath = filepath.ToSlash(absPath)
+	dataDir := filepath.ToSlash(util.DataDir)
+	rel, err := filepath.Rel(dataDir, absPath)
+	if err != nil {
+		return ""
+	}
+	rel = filepath.ToSlash(rel)
+	if strings.HasPrefix(rel, "..") || rel == "." || rel == "" {
+		return ""
+	}
+	parts := strings.SplitN(rel, "/", 2)
+	boxID := parts[0]
+	if !ast.IsNodeIDPattern(boxID) {
+		return ""
+	}
+	return boxID
 }
 
 // CreateEncryptedBox 创建一个新的加密笔记本。可多次调用创建多个。

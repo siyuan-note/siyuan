@@ -21,12 +21,11 @@ import "github.com/siyuan-note/siyuan/kernel/util"
 // NotebookCrypto 维护加密笔记本的全局密钥管理参数，随 conf.json 持久化。
 // MasterSalt 与 KEKVerifier 设计为可明文存储：salt 不保密，verifier 本身是密文（用 KEK 加密的固定魔数）。
 type NotebookCrypto struct {
-	Enabled        bool             `json:"enabled"`        // 是否已启用加密笔记本功能
-	MasterSalt     []byte           `json:"masterSalt"`     // 主密码 Argon2id 派生的 salt，全局唯一
-	KDFParams      util.Argon2Params `json:"kdfParams"`     // Argon2id 参数，落盘以便跨平台一致派生
-	KEKVerifier    []byte           `json:"kekVerifier"`    // 用 KEK 经 AES-GCM 加密的固定魔数，用于离线校验主密码
-	VerifierNonce  []byte           `json:"verifierNonce"`  // verifier 的 GCM nonce（Encrypt 返回值的前 12 字节）
-	EncryptedBoxID string           `json:"encryptedBoxID"` // 当前唯一的加密笔记本 ID（UI 限制单笔记本）
+	Enabled       bool              `json:"enabled"`       // 是否已启用加密笔记本功能
+	MasterSalt    []byte            `json:"masterSalt"`    // 主密码 Argon2id 派生的 salt，全局唯一
+	KDFParams     util.Argon2Params `json:"kdfParams"`     // Argon2id 参数，落盘以便跨平台一致派生
+	KEKVerifier   []byte            `json:"kekVerifier"`   // 用 KEK 经 AES-GCM 加密的固定魔数，用于离线校验主密码
+	VerifierNonce []byte            `json:"verifierNonce"` // verifier 的 GCM nonce（Encrypt 返回值的前 12 字节）
 }
 
 // NewNotebookCrypto 创建带默认 Argon2id 参数的 NotebookCrypto。

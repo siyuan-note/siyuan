@@ -229,8 +229,10 @@ func DocIAL(absPath string) (ret map[string]string) {
 			}
 			plain, decErr := util.Decrypt(dek, raw)
 			if decErr != nil {
+				// 解密失败（可能文件损坏或密钥不匹配）：返回空 map 而非 nil，
+				// 避免 LoadTreeByData 的父文档补全逻辑把 nil 误判为"文档缺失"而凭空创建文档
 				logging.LogErrorf("decrypt doc [%s] for IAL failed: %s", absPath, decErr)
-				return nil
+				return map[string]string{}
 			}
 			iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, bytes.NewReader(plain), 512)
 			for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {

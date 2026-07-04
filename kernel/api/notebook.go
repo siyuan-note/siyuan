@@ -573,7 +573,8 @@ func lockBox(c *gin.Context) {
 		return
 	}
 
-	model.LockBox(notebook)
+	// Unmount 内部的 unmount0 会清 DEK + 关闭加密 db，无需单独 LockBox。
+	// 反过来若先 LockBox 会关闭 db，导致 Unmount 的 Unindex 操作无 db 可用。
 	model.Unmount(notebook)
 }
 

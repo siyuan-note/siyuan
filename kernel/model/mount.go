@@ -31,6 +31,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -160,6 +161,10 @@ func RemoveBox(boxID string) (err error) {
 	unmount0(boxID)
 	if err = filelock.Remove(localPath); err != nil {
 		return
+	}
+	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
+	if IsEncryptedBox(boxID) {
+		sql.RemoveEncryptedDBFile(boxID)
 	}
 
 	if isUserGuide {

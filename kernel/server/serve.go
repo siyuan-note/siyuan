@@ -773,6 +773,10 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 }
 
 func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool {
+	// 加密笔记本的资源是密文，imaging.Open 无法解析，跳过缩略图生成（由 serveEncryptedAsset 解密输出原图）
+	if model.IsEncryptedAssetPath(assetAbsPath) {
+		return false
+	}
 	if style := context.Query("style"); style == "thumb" && model.NeedGenerateAssetsThumbnail(assetAbsPath) { // 请求缩略图
 		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", requestPath)
 		if !gulu.File.IsExist(thumbnailPath) {

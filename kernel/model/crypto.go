@@ -121,13 +121,13 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 	if err != nil {
 		return err
 	}
-	// 先打开加密 db，成功后再缓存 DEK（保证两者一致：DEK 在内存 ⟺ 加密 db 已打开）
+	// 持锁保护"开 db + 缓存 DEK"的原子性，避免与并发的 LockBox 导致 db/DEK 不一致
+	cachedDEKsLock.Lock()
+	defer cachedDEKsLock.Unlock()
 	if err = sql.OpenEncryptedDB(boxID, dek); err != nil {
 		return err
 	}
-	cachedDEKsLock.Lock()
 	cachedDEKs[boxID] = dek
-	cachedDEKsLock.Unlock()
 	return nil
 }
 
@@ -152,14 +152,17 @@ func LockBox(boxID string) {
 	cache.ClearTreeCache()
 }
 
-// LockAllBoxes 清除所有已缓存的 DEK。退出登录或全局锁定时调用。
+// LockAllBoxes 清除所有已缓存的 DEK 并关闭所有加密 db。退出登录或全局锁定时调用。
 func LockAllBoxes() {
 	cachedDEKsLock.Lock()
-	defer cachedDEKsLock.Unlock()
 	for id, dek := range cachedDEKs {
 		zeroAndClear(dek)
 		delete(cachedDEKs, id)
 	}
+	cachedDEKsLock.Unlock()
+	// 关闭所有已打开的加密 db 连接，清空树缓存避免明文残留
+	sql.CloseAllEncryptedDBs()
+	cache.ClearTreeCache()
 }
 
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。
@@ -279,6 +282,13 @@ func IsEncryptedBox(boxID string) bool {
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	return boxConf != nil && boxConf.Encrypted
+}
+
+// IsEncryptedAssetPath 判断给定 asset 绝对路径是否属于加密笔记本。
+// 供 server 层在缩略图等场景判断是否需跳过密文文件的处理。
+func IsEncryptedAssetPath(absPath string) bool {
+	boxID := ExtractBoxIDFromAssetsPath(absPath)
+	return boxID != "" && IsEncryptedBox(boxID)
 }
 
 // GetDEKIfUnlocked 返回已解锁加密 box 的 DEK；非加密 box 或未解锁时返回 (nil, nil)。

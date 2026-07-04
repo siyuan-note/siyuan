@@ -1820,6 +1820,17 @@ func CloseEncryptedDB(boxID string) {
 	}
 }
 
+// CloseAllEncryptedDBs 关闭所有已打开的加密 db 连接。全局锁定（LockAllBoxes）时调用。
+func CloseAllEncryptedDBs() {
+	encryptedDBs.Range(func(key, value any) bool {
+		encryptedDBs.Delete(key)
+		if boxDB, ok := value.(*sql.DB); ok {
+			boxDB.Close()
+		}
+		return true
+	})
+}
+
 // GetEncryptedDB 返回加密 box 的 db 句柄；未打开返回 nil。
 func GetEncryptedDB(boxID string) *sql.DB {
 	if v, ok := encryptedDBs.Load(boxID); ok {

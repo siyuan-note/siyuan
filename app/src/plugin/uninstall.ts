@@ -21,7 +21,11 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             } catch (e) {
                 console.error(`plugin ${plugin.name} onunload error:`, e);
             }
-            plugin.kernel.destroy();
+            try {
+                plugin.kernel.destroy();
+            } catch (e) {
+                console.error(`plugin ${plugin.name} kernel destroy error:`, e);
+            }
             if (!isReload) {
                 try {
                     plugin.uninstall();

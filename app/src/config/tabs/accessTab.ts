@@ -327,6 +327,12 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("encryptedNotebook", window.siyuan.languages.encryptedNotebook);
     group.slot({
         key: "encryptedNotebookStatus",
+        keywords: [
+            window.siyuan.languages.encryptedNotebook,
+            window.siyuan.languages.enableEncryptedNotebook,
+            window.siyuan.languages.masterPassword,
+            window.siyuan.languages.changeMasterPassword,
+        ],
         html: () => `<div class="fn__flex b3-label config-item config-wrap">
     <div class="fn__flex-1 fn__flex-center">
         <div class="ft__on-surface ft__smaller" id="encryptedNotebookDesc">${window.siyuan.languages.encryptedNotebookTip}</div>

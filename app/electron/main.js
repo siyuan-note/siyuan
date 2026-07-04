@@ -531,6 +531,12 @@ const initMainWindow = () => {
             return;
         }
 
+        if (-1 < details.url.toLowerCase().indexOf("douyin")) {
+            // 抖音不移除 Referer，iframe 块内登录依赖 Referer 校验 https://github.com/siyuan-note/siyuan/issues/18070
+            cb({requestHeaders: details.requestHeaders});
+            return;
+        }
+
         if (-1 < details.url.toLowerCase().indexOf("youtube")) {
             // YouTube 设置 Referer https://github.com/siyuan-note/siyuan/issues/16319
             details.requestHeaders["Referer"] = "https://b3log.org/siyuan/";

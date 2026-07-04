@@ -391,7 +391,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | Meta Veri | `tag`, `bookmark`, `template` — etiketler, yer imleri, şablon parçacıkları |
 | Sorgular | `search`, `sql` — tam metin ve SQL sorguları |
 | Referanslar | `ref` — geri bağlantılar ve bahsetmeler |
-| İçe/Dışa Aktarma | `export`, `import` — Markdown, HTML, preview, Word, .sy.zip, Data |
+| İçe/Dışa Aktarma | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, bulut gelen kutusu |
 | Veri Yönetimi | `repo`, `history`, `sync` — anlık görüntüler, sürümler, bulut senkronizasyonu |
 | Araçlar | `asset`, `file` — kaynaklar ve dosya sistemi |
 | Veritabanı | `database` — öznitelik görünümü yönetimi |

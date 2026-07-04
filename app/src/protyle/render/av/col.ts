@@ -1,7 +1,7 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
-import {getDefaultOperatorByType, getEditableFilters} from "./filter";
+import {getDefaultOperatorByType, getEditableFilters, hasFilterForColumn} from "./filter";
 import {genCellValue} from "./cell";
 import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
@@ -855,33 +855,39 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             click() {
                 fetchPost("/api/av/renderAttributeView", {
                     id: avID,
+                    viewID,
+                    ignoreRows: true,
                 }, (response) => {
                     const avData = response.data as IAV;
-                    // 始终新建一个占位条件（允许同列多条件，支持“主键包含111 OR 主键包含222”等组合）
-                    const filter: IAVFilter = {
-                        column: colId,
-                        operator: getDefaultOperatorByType(type),
-                        value: genCellValue(type, ""),
-                    };
-                    // 深拷贝旧值用于 undo，撤销时恢复完整筛选状态而非清空全部
-                    const oldFilters = JSON.parse(JSON.stringify(avData.view.filters));
-                    getEditableFilters(avData).push(filter);
-                    transaction(protyle, [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: avData.view.filters,
-                        blockID: blockElement.getAttribute("data-node-id")
-                    }], [{
-                        action: "setAttrViewFilters",
-                        avID,
-                        data: oldFilters,
-                        blockID: blockElement.getAttribute("data-node-id")
-                    }]);
-                    // 打开筛选面板，用户在内联控件中编辑（替代原 setFilter 弹层）
+                    // 该字段还没有筛选条件时，创建它的默认筛选条件（其它字段的筛选不影响）；
+                    // 已有该字段筛选时直接打开总筛选配置面板，避免每次重复新建
+                    if (!hasFilterForColumn(avData.view.filters, colId)) {
+                        const filter: IAVFilter = {
+                            column: colId,
+                            operator: getDefaultOperatorByType(type),
+                            value: genCellValue(type, ""),
+                        };
+                        // 深拷贝旧值用于 undo，撤销时恢复完整筛选状态而非清空全部
+                        const oldFilters = JSON.parse(JSON.stringify(avData.view.filters));
+                        getEditableFilters(avData).push(filter);
+                        transaction(protyle, [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: avData.view.filters,
+                            blockID: blockElement.getAttribute("data-node-id")
+                        }], [{
+                            action: "setAttrViewFilters",
+                            avID,
+                            data: oldFilters,
+                            blockID: blockElement.getAttribute("data-node-id")
+                        }]);
+                    }
+                    // 打开总筛选配置面板，复用已含新筛选条件的 avData，避免 openMenuPanel 二次 fetch 与刚提交的事务竞争而读到旧数据
                     openMenuPanel({
                         protyle,
                         blockElement,
                         type: "filters",
+                        data: avData,
                     });
                 });
             }

@@ -390,7 +390,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | メタデータ | `tag`, `bookmark`, `template` — タグ、ブックマーク、テンプレートスニペット |
 | クエリ | `search`, `sql` — 全文検索と SQL |
 | 参照 | `ref` — バックリンクと言及 |
-| インポート/エクスポート | `export`, `import` — Markdown, HTML, preview, Word, .sy.zip, Data |
+| インポート/エクスポート | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, クラウド受信トレイ |
 | データ管理 | `repo`, `history`, `sync` — スナップショット、履歴、クラウド同期 |
 | ユーティリティ | `asset`, `file` — リソースとファイルシステム |
 | データベース | `database` — 属性ビュー管理 |

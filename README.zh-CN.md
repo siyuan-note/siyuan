@@ -492,7 +492,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | 元数据 | `tag`、`bookmark`、`template` — 标签、书签、模板片段 |
 | 查询 | `search`、`sql` — 全文和 SQL 查询 |
 | 引用 | `ref` — 反向链接和提及 |
-| 导入导出 | `export`、`import` — Markdown、HTML、preview、Word、.sy.zip、Data |
+| 导入导出 | `export`、`import`、`inbox` — Markdown、HTML、preview、Word、.sy.zip、Data、云端收集箱 |
 | 数据管理 | `repo`、`history`、`sync` — 快照、历史、云端同步 |
 | 工具 | `asset`、`file` — 资源与文件系统 |
 | 数据库 | `database` — 属性视图管理 |

@@ -391,7 +391,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | Metadata | `tag`, `bookmark`, `template` — tags, bookmarks, template snippets |
 | Queries | `search`, `sql` — full-text and SQL queries |
 | References | `ref` — backlinks and mentions |
-| Import/Export | `export`, `import` — Markdown, HTML, preview, Word, .sy.zip, Data |
+| Import/Export | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, cloud inbox |
 | Data Management | `repo`, `history`, `sync` — snapshots, versions, cloud sync |
 | Utilities | `asset`, `file` — resources and file system |
 | Database | `database` — attribute view management |

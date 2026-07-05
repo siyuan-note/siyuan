@@ -2147,8 +2147,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     return subMenus;
 };
 
-export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement,
-    range: Range, wholeTable = false) => {
+export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range) => {
     const otherMenus: IMenu[] = [];
     const colIndex = getColIndex(cellElement);
     if (cellElement.rowSpan > 1 || cellElement.colSpan > 1) {
@@ -2246,19 +2245,6 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             updateTableTitle(protyle, nodeElement);
         }
     });
-    // 对齐作用范围：单元格右键菜单/快捷键只作用于当前列；块标菜单作用于整表
-    let alignCells: HTMLElement[] = [cellElement];
-    if (wholeTable) {
-        // 整表对齐：取首行所有可见单元格作为列定位基准，跳过被合并隐藏的单元格
-        const tableElementForAlign = nodeElement.querySelector("table");
-        alignCells = [];
-        for (let i = 0; i < tableElementForAlign.rows[0].cells.length; i++) {
-            const c = tableElementForAlign.rows[0].cells[i] as HTMLElement;
-            if (!c.classList.contains("fn__none")) {
-                alignCells.push(c);
-            }
-        }
-    }
     otherMenus.push({id: "separator_1", type: "separator"});
     otherMenus.push({
         id: "alignLeft",
@@ -2266,7 +2252,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
         label: window.siyuan.languages.alignLeft,
         click: () => {
-            setTableAlign(protyle, alignCells, nodeElement, "left", range);
+            setTableAlign(protyle, [cellElement], nodeElement, "left", range);
         }
     });
     otherMenus.push({
@@ -2275,7 +2261,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         label: window.siyuan.languages.alignCenter,
         accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
         click: () => {
-            setTableAlign(protyle, alignCells, nodeElement, "center", range);
+            setTableAlign(protyle, [cellElement], nodeElement, "center", range);
         }
     });
     otherMenus.push({
@@ -2284,7 +2270,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         label: window.siyuan.languages.alignRight,
         accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
         click: () => {
-            setTableAlign(protyle, alignCells, nodeElement, "right", range);
+            setTableAlign(protyle, [cellElement], nodeElement, "right", range);
         }
     });
     otherMenus.push({
@@ -2292,7 +2278,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         icon: "",
         label: window.siyuan.languages.useDefaultAlign,
         click: () => {
-            setTableAlign(protyle, alignCells, nodeElement, "", range);
+            setTableAlign(protyle, [cellElement], nodeElement, "", range);
         }
     });
     const menus: IMenu[] = [];

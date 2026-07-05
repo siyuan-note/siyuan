@@ -1,0 +1,33 @@
+name: Lock closed issues and PRs
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天 UTC 00:00（北京时间 08:00）运行一次
+  workflow_dispatch: # 允许手动触发，便于首次启用时回扫历史
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/lock-threads@v6
+        with:
+          issue-inactive-days: "30"
+          issue-lock-reason: "resolved"
+          issue-comment: |
+            This issue has been automatically locked because it has been closed with no activity for 30 days.
+            该 issue 已因关闭后 30 天无新动态被自动锁定。
+
+            If you are facing a similar problem, please open a new issue and link back to this one for context.
+            如果你遇到类似问题，请新开一个 issue 并附上此 issue 的链接，请勿在此追加回复。
+          pr-inactive-days: "30"
+          pr-lock-reason: "resolved"
+          pr-comment: |
+            This pull request has been automatically locked because it has been closed with no activity for 30 days.
+            该 Pull Request 已因关闭后 30 天无新动态被自动锁定。
+
+            If you wish to continue this work, please open a new issue or pull request and link back to this one.
+            如需继续推进，请新开 issue 或 PR 并附上此链接。

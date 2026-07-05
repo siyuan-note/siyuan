@@ -92,3 +92,9 @@ Modify Go source code:
    `C.size_t(len(b))` to `C.socklen_t(len(b))`
 
 For other details, please refer to https://github.com/siyuan-note/siyuan/issues/13184
+
+## Issue workflow
+
+* Issues and pull requests that have been closed with no activity for 30 days are locked automatically to keep the tracker focused on open work.
+* If you run into a problem similar to a locked one, please open a new issue and link back to the original. Avoid replying on old, closed threads — that revives stale context and pings everyone who participated.
+* A new issue with a clear reproduction and a reference to the closed one is far easier to act on than a comment appended to a months-old thread.

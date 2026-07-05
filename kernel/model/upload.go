@@ -17,6 +17,7 @@
 package model
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"os"
@@ -107,7 +108,14 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			succMap[baseName] = strings.TrimPrefix(existAssetPath, "/")
 			f.Close()
 		} else {
-			fName = util.AssetName(fName, ast.NewNodeID())
+			blockID := ast.NewNodeID()
+			if IsEncryptedBox(bt.BoxID) {
+				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
+				fName = encryptedAssetName(util.Ext(fName), blockID)
+				writeAssetNameMapping(bt.BoxID, fName, baseName)
+			} else {
+				fName = util.AssetName(fName, blockID)
+			}
 			writePath := filepath.Join(assetsDirPath, fName)
 			if _, err = f.Seek(0, io.SeekStart); err != nil {
 				f.Close()
@@ -258,7 +266,13 @@ func Upload(c *gin.Context) {
 			if "" == lastID {
 				lastID = ast.NewNodeID()
 			}
-			fName = util.AssetName(fName, lastID)
+			if IsEncryptedBox(uploadBoxID) {
+				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
+				fName = encryptedAssetName(util.Ext(fName), lastID)
+				writeAssetNameMapping(uploadBoxID, fName, baseName)
+			} else {
+				fName = util.AssetName(fName, lastID)
+			}
 			writePath := filepath.Join(assetsDirPath, fName)
 			tmpDir := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))
 			if needUnzip2Dir {
@@ -389,4 +403,75 @@ func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
 		}
 	}
 	return filelock.WriteFileByReader(writePath, src)
+}
+
+// encryptedAssetName 生成加密 box 专用的无语义资源文件名：uuid-blockID.ext。
+// 原始语义文件名（如"合同.pdf"）通过 writeAssetNameMapping 存入加密映射，磁盘上只保留随机名。
+func encryptedAssetName(ext, blockID string) string {
+	return gulu.Rand.String(16) + "-" + blockID + ext
+}
+
+// assetNameMappingPath 返回加密 box 资源名映射文件路径 <boxID>/assets/.names.json。
+func assetNameMappingPath(boxID string) string {
+	return filepath.Join(util.DataDir, boxID, "assets", ".names.json")
+}
+
+// writeAssetNameMapping 把"磁盘文件名 -> 原始文件名"映射写入加密 box 的 .names.json（DEK 加密落盘）。
+func writeAssetNameMapping(boxID, diskName, originalName string) {
+	if boxID == "" || !IsEncryptedBox(boxID) {
+		return
+	}
+	mapping := readAssetNameMapping(boxID)
+	mapping[diskName] = originalName
+	data, err := json.Marshal(mapping)
+	if err != nil {
+		logging.LogErrorf("marshal asset name mapping failed: %s", err)
+		return
+	}
+	dek, err := GetDEK(boxID)
+	if err != nil || dek == nil {
+		logging.LogErrorf("get DEK for asset name mapping failed: %s", err)
+		return
+	}
+	enc, err := util.Encrypt(dek, data)
+	if err != nil {
+		logging.LogErrorf("encrypt asset name mapping failed: %s", err)
+		return
+	}
+	if err = filelock.WriteFile(assetNameMappingPath(boxID), enc); err != nil {
+		logging.LogErrorf("write asset name mapping failed: %s", err)
+	}
+}
+
+// readAssetNameMapping 读取加密 box 的资源名映射（DEK 解密）。未解锁或文件不存在时返回空 map。
+func readAssetNameMapping(boxID string) map[string]string {
+	ret := map[string]string{}
+	if boxID == "" || !IsEncryptedBox(boxID) {
+		return ret
+	}
+	p := assetNameMappingPath(boxID)
+	enc, err := filelock.ReadFile(p)
+	if err != nil {
+		return ret
+	}
+	dek, err := GetDEK(boxID)
+	if err != nil || dek == nil {
+		return ret
+	}
+	data, err := util.Decrypt(dek, enc)
+	if err != nil {
+		logging.LogErrorf("decrypt asset name mapping failed: %s", err)
+		return ret
+	}
+	if err = json.Unmarshal(data, &ret); err != nil {
+		logging.LogErrorf("unmarshal asset name mapping failed: %s", err)
+		return map[string]string{}
+	}
+	return ret
+}
+
+// LookupAssetOriginalName 查询加密 box 资源的原始文件名（供下载 Content-Disposition 等展示用）。
+// 未找到时返回空串。
+func LookupAssetOriginalName(boxID, diskName string) string {
+	return readAssetNameMapping(boxID)[diskName]
 }

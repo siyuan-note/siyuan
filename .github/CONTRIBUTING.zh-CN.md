@@ -45,8 +45,8 @@ NPM 镜像：
 ### 桌面端
 
 * `cd kernel`
-* Windows: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
-* Linux/macOS: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel"`
+* Windows: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Linux/macOS: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
 * Windows: `./SiYuan-Kernel.exe serve --mode=dev`
 * Linux/macOS: `./SiYuan-Kernel serve --mode=dev`
@@ -54,14 +54,14 @@ NPM 镜像：
 ### iOS
 
 * `cd kernel`
-* `gomobile bind -tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
+* `gomobile bind -tags "fts5 sqlcipher" -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
 * https://github.com/siyuan-note/siyuan-ios
 
 ### Android
 
 * `cd kernel`
 * `set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8`
-* `gomobile bind -tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
+* `gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 ### Harmony
@@ -95,6 +95,6 @@ NPM 镜像：
 
 ## Issue 流程
 
-* 已关闭且连续 30 天无新动态的 issue 和 PR 会被自动锁定，以保持 issue 列表聚焦在尚未解决的问题上。
-* 如果你遇到的问题与某个已锁定 issue 类似，请新开一个 issue 并附上原 issue 的链接，不要在已关闭的旧 issue 下追加回复——这会让过时的上下文重新浮现，并打扰所有历史参与者。
-* 一个带有清晰复现步骤并引用原 issue 的新 issue，远比在几个月前的讨论下追加一条评论更容易被处理。
+* 已关闭且连续 30 天无新动态的 issue 和 PR 会被自动锁定，以保持 issue 列表聚焦在尚未解决的问题上
+* 如果你遇到的问题与某个已锁定 issue 类似，请新开一个 issue 并附上原 issue 的链接，不要在已关闭的旧 issue 下追加回复——这会让过时的上下文重新浮现，并打扰所有历史参与者
+* 一个带有清晰复现步骤并引用原 issue 的新 issue，远比在几个月前的讨论下追加一条评论更容易被处理

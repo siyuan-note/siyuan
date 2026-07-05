@@ -16,10 +16,18 @@
 
 package model
 
-import "github.com/siyuan-note/siyuan/kernel/filesys"
+import (
+	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+)
 
 // init 把 GetDEKIfUnlocked 注入 filesys 包，让 filesys 的 .sy 读写插点能查询 box 的 DEK。
-// filesys 不能直接 import model（循环依赖），故通过此回调注入。
+// 同时把 AV 相关回调注入 av 包，让 AV 定义的笔记本级存储能查询 DEK 和已打开的加密 box。
+// filesys / av 不能直接 import model（循环依赖），故通过回调注入。
 func init() {
 	filesys.DEKProvider = GetDEKIfUnlocked
+	av.AVDEKProvider = GetDEKIfUnlocked
+	av.AVEncryptedBoxIDs = treenode.GetOpenedEncryptedBoxIDs
+	av.AVIsEncryptedBox = IsEncryptedBox
 }

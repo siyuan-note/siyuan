@@ -4,7 +4,7 @@ import {FileFilter, ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, getTopPaths, pathPosix, useShell} from "../util/pathName";
+import {getDisplayName, getNotebookName, getTopPaths, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
 import {showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
@@ -524,9 +524,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             label: window.siyuan.languages.attr,
             icon: "iconAttr",
             click() {
-                fetchPost("/api/block/getDocInfo", {
+                const docInfoParam: IObject = {
                     id
-                }, (response) => {
+                };
+                if (isEncryptedBox(notebookId)) {
+                    docInfoParam.notebook = notebookId;
+                }
+                fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                     openFileAttr(response.data.ial);
                 });
             }

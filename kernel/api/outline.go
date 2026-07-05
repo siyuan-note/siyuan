@@ -49,7 +49,13 @@ func getDocOutline(c *gin.Context) {
 		return
 	}
 
-	headings, err := model.Outline(rootID, preview)
+	var headings []*model.Path
+	var err error
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		headings, err = model.OutlineInBox(rootID, preview, notebook)
+	} else {
+		headings, err = model.Outline(rootID, preview)
+	}
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()

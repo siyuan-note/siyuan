@@ -1013,11 +1013,16 @@ func processEmbedHTML(htmlStr string) string {
 }
 
 func GetBlockKramdown(id, mode string) (ret string) {
+	return GetBlockKramdownInBox(id, mode, "")
+}
+
+// GetBlockKramdownInBox 与 GetBlockKramdown 一致，但按 boxID 路由 blocktree 查询。
+func GetBlockKramdownInBox(id, mode, boxID string) (ret string) {
 	if "" == id {
 		return
 	}
 
-	tree, err := LoadTreeByBlockID(id)
+	tree, err := loadTreeByBlockIDInBox(id, boxID)
 	if err != nil {
 		return
 	}
@@ -1027,6 +1032,11 @@ func GetBlockKramdown(id, mode string) (ret string) {
 }
 
 func GetBlockKramdowns(ids []string, mode string) (ret map[string]string) {
+	return GetBlockKramdownsInBox(ids, mode, "")
+}
+
+// GetBlockKramdownsInBox 与 GetBlockKramdowns 一致，但按 boxID 路由 blocktree 查询。
+func GetBlockKramdownsInBox(ids []string, mode, boxID string) (ret map[string]string) {
 	ret = make(map[string]string, len(ids))
 	if 0 == len(ids) {
 		return
@@ -1035,7 +1045,7 @@ func GetBlockKramdowns(ids []string, mode string) (ret map[string]string) {
 	luteEngine := NewLute()
 	for _, id := range ids {
 		// 节点会被移走，tree 不能共享，需重新加载
-		tree, err := LoadTreeByBlockID(id)
+		tree, err := loadTreeByBlockIDInBox(id, boxID)
 		if err != nil {
 			continue
 		}

@@ -14,6 +14,7 @@ import {focusBlock, focusByWbr} from "../../protyle/util/selection";
 import {openMobileFileById} from "../editor";
 import {Model} from "../../layout/Model";
 import {genUUID} from "../../util/genID";
+import {isEncryptedBox} from "../../util/pathName";
 
 export class MobileOutline extends Model {
     public tree: Tree;
@@ -183,10 +184,15 @@ export class MobileOutline extends Model {
             }
         });
 
-        fetchPost("/api/outline/getDocOutline", {
+        const outlineParam: IObject = {
             id: this.blockId,
             preview: this.isPreview
-        }, response => {
+        };
+        const mobileProtyle = window.siyuan.mobile.editor?.protyle;
+        if (mobileProtyle && mobileProtyle.block.rootID === this.blockId && isEncryptedBox(mobileProtyle.notebookId)) {
+            outlineParam.notebook = mobileProtyle.notebookId;
+        }
+        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
             this.update(response);
         });
     }
@@ -219,10 +225,15 @@ export class MobileOutline extends Model {
             if (previousElement) {
                 this.setCurrentById(previousElement.getAttribute("data-node-id"));
             } else {
-                fetchPost("/api/block/getBlockBreadcrumb", {
+                const breadcrumbParam: IObject = {
                     id: nodeElement.getAttribute("data-node-id"),
                     excludeTypes: []
-                }, (response) => {
+                };
+                const mobileProtyle = window.siyuan.mobile.editor?.protyle;
+                if (mobileProtyle && mobileProtyle.block.rootID === this.blockId && isEncryptedBox(mobileProtyle.notebookId)) {
+                    breadcrumbParam.notebook = mobileProtyle.notebookId;
+                }
+                fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
                     response.data.reverse().find((item: IBreadcrumb) => {
                         if (item.type === "NodeHeading") {
                             this.setCurrentById(item.id);
@@ -538,10 +549,15 @@ export class MobileOutline extends Model {
             });
         }
         if (needReload) {
-            fetchPost("/api/outline/getDocOutline", {
+            const outlineParam: IObject = {
                 id: this.blockId,
                 preview: this.isPreview
-            }, response => {
+            };
+            const mobileProtyle = window.siyuan.mobile.editor?.protyle;
+            if (mobileProtyle && mobileProtyle.block.rootID === this.blockId && isEncryptedBox(mobileProtyle.notebookId)) {
+                outlineParam.notebook = mobileProtyle.notebookId;
+            }
+            fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                 // 文档切换后不再更新原有推送 https://github.com/siyuan-note/siyuan/issues/13409
                 if (data.data.rootID !== this.blockId) {
                     return;

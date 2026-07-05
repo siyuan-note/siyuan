@@ -70,6 +70,7 @@ import {popSearch} from "../../mobile/menu/search";
 import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {isEncryptedBox} from "../../util/pathName";
 import {onGet} from "../util/onGet";
 import {clearTableCell, getTableRangeHTML, isIncludeCell, setTableAlign, updateTableTitle} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
@@ -107,6 +108,7 @@ import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
+import {isEncryptedBox} from "../../util/pathName";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2638,11 +2640,15 @@ export class WYSIWYG {
             if (!preventGetTopHTML && !protyle.scroll.element.classList.contains("fn__none")) {
                 if (event.deltaY < 0 && protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1" &&
                     (protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight || protyle.contentElement.scrollTop === 0)) {
-                    fetchPost("/api/filetree/getDoc", {
+                    const getDocParam: IObject = {
                         id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
                         mode: 1,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
-                    }, getResponse => {
+                    };
+                    if (isEncryptedBox(protyle.notebookId)) {
+                        getDocParam.notebook = protyle.notebookId;
+                    }
+                    fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                         preventGetTopHTML = false;
                         onGet({
                             data: getResponse,
@@ -2654,11 +2660,15 @@ export class WYSIWYG {
                 } else if (event.deltaY > 0 && protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
                     (protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight ||
                         protyle.contentElement.clientHeight + Math.ceil(protyle.contentElement.scrollTop) >= protyle.contentElement.scrollHeight)) {
-                    fetchPost("/api/filetree/getDoc", {
+                    const getDocParam: IObject = {
                         id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                         mode: 2,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
-                    }, getResponse => {
+                    };
+                    if (isEncryptedBox(protyle.notebookId)) {
+                        getDocParam.notebook = protyle.notebookId;
+                    }
+                    fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                         preventGetTopHTML = false;
                         onGet({
                             data: getResponse,
@@ -3217,10 +3227,14 @@ export class WYSIWYG {
                             /// #if !MOBILE
                             getAllModels().outline.forEach(item => {
                                 if (item.blockId === protyle.block.rootID) {
-                                    fetchPost("/api/outline/getDocOutline", {
+                                    const outlineParam: IObject = {
                                         id: item.blockId,
                                         preview: item.isPreview
-                                    }, response => {
+                                    };
+                                    if (isEncryptedBox(protyle.notebookId)) {
+                                        outlineParam.notebook = protyle.notebookId;
+                                    }
+                                    fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                                         item.update(response);
                                     });
                                 }

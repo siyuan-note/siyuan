@@ -506,7 +506,7 @@ func createEncryptedNotebook(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"notebook": model.Conf.Box(id),
+		"notebook": model.Conf.GetBox(id),
 	}
 }
 

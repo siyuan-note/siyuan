@@ -45,8 +45,8 @@ Note: In the development environment, the kernel process will not be automatical
 ### Desktop
 
 * `cd kernel`
-* Windows: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
-* Linux/macOS: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel"`
+* Windows: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Linux/macOS: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
 * Windows: `./SiYuan-Kernel.exe serve --mode=dev`
 * Linux/macOS: `./SiYuan-Kernel serve --mode=dev`
@@ -54,14 +54,14 @@ Note: In the development environment, the kernel process will not be automatical
 ### iOS
 
 * `cd kernel`
-* `gomobile bind -tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
+* `gomobile bind -tags "fts5 sqlcipher" -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
 * https://github.com/siyuan-note/siyuan-ios
 
 ### Android
 
 * `cd kernel`
 * `set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8`
-* `gomobile bind -tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
+* `gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 ### Harmony
@@ -95,6 +95,6 @@ For other details, please refer to https://github.com/siyuan-note/siyuan/issues/
 
 ## Issue workflow
 
-* Issues and pull requests that have been closed with no activity for 30 days are locked automatically to keep the tracker focused on open work.
-* If you run into a problem similar to a locked one, please open a new issue and link back to the original. Avoid replying on old, closed threads — that revives stale context and pings everyone who participated.
-* A new issue with a clear reproduction and a reference to the closed one is far easier to act on than a comment appended to a months-old thread.
+* Issues and pull requests that have been closed with no activity for 30 days are locked automatically to keep the tracker focused on open work
+* If you run into a problem similar to a locked one, please open a new issue and link back to the original — avoid replying on old, closed threads, as that revives stale context and pings everyone who participated
+* A new issue with a clear reproduction and a reference to the closed one is far easier to act on than a comment appended to a months-old thread

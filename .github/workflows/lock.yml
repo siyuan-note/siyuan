@@ -3,7 +3,7 @@ name: Lock closed issues and PRs
 on:
   schedule:
     - cron: "0 0 * * *" # 每天 UTC 00:00（北京时间 08:00）运行一次
-  workflow_dispatch: # 允许手动触发，便于首次启用时回扫历史
+  workflow_dispatch: # 允许手动触发
 
 permissions:
   issues: write

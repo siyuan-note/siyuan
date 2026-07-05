@@ -152,44 +152,6 @@ func SelectBlocksRawStmtInBox(stmt string, page, limit int, boxID string) (ret [
 	return
 }
 
-// QueryTagSpansByLabelInBox 按 label 在指定 box 的 db 里查标签。
-func QueryTagSpansByLabelInBox(label, boxID string) (ret []*Span) {
-	sqlStmt := "SELECT * FROM spans WHERE type LIKE '%tag%' AND content LIKE ?"
-	rows, err := queryForBox(boxID, sqlStmt, "%#"+label+"#%")
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var span Span
-		if err = rows.Scan(&span.ID, &span.BlockID, &span.RootID, &span.Box, &span.Path, &span.Content, &span.Markdown, &span.Type, &span.IAL); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		ret = append(ret, &span)
-	}
-	return
-}
-
-// QueryBookmarkBlocksInBox 在指定 box 的 db 里查书签块。
-func QueryBookmarkBlocksInBox(boxID string) (ret []*Block) {
-	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE '%bookmark=%'"
-	rows, err := queryForBox(boxID, sqlStmt)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		b := scanBlockRows(rows)
-		if b != nil {
-			ret = append(ret, b)
-		}
-	}
-	return
-}
-
 // QueryRefCountInBox 按 defBlockIDs 在指定 box 的 db 里查引用计数。
 func QueryRefCountInBox(defIDs []string, boxID string) (ret map[string]int) {
 	ret = map[string]int{}
@@ -436,6 +398,56 @@ func QueryRefsRecentInBox(onlyDoc bool, typeFilter string, ignoreLines []string,
 	for rows.Next() {
 		ref := scanRefRows(rows)
 		ret = append(ret, ref)
+	}
+	return
+}
+
+// QueryChildRefDefIDsByRootDefIDInBox 按 rootDefID 查子引用定义，按 boxID 路由。
+func QueryChildRefDefIDsByRootDefIDInBox(rootDefID, boxID string) (ret map[string][]string) {
+	ret = map[string][]string{}
+	rows, err := queryForBox(boxID, "SELECT block_id, def_block_id FROM refs WHERE def_block_root_id = ?", rootDefID)
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var defID, refID string
+		if err = rows.Scan(&defID, &refID); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		if nil == ret[defID] {
+			ret[defID] = []string{refID}
+		} else {
+			ret[defID] = append(ret[defID], refID)
+		}
+	}
+	return
+}
+
+// QueryRefIDsByDefIDInBox 按 defID 查引用 ID 列表，按 boxID 路由。
+func QueryRefIDsByDefIDInBox(defID string, containChildren bool, boxID string) (refIDs []string) {
+	refIDs = []string{}
+	var rows *sql.Rows
+	var err error
+	if containChildren {
+		rows, err = queryForBox(boxID, "SELECT DISTINCT block_id FROM refs WHERE def_block_root_id = ?", defID)
+	} else {
+		rows, err = queryForBox(boxID, "SELECT DISTINCT block_id FROM refs WHERE def_block_id = ?", defID)
+	}
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		refIDs = append(refIDs, id)
 	}
 	return
 }

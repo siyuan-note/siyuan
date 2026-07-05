@@ -32,11 +32,29 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
+
+	// 加密笔记本的 AV 定义存笔记本级路径，通过 blockID 反查 boxID 并预设归属
+	if "" != blockID {
+		bt := treenode.GetBlockTree(blockID)
+		if nil == bt {
+			// 全局 blocktree 找不到时，遍历已打开的加密 box
+			for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if encBT := treenode.GetBlockTreeInBox(blockID, encBoxID); nil != encBT {
+					bt = encBT
+					break
+				}
+			}
+		}
+		if nil != bt && IsEncryptedBox(bt.BoxID) {
+			av.SetAVBoxID(avID, bt.BoxID)
+		}
+	}
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
 		if !createIfNotExist {

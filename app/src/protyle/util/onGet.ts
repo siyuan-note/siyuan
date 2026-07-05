@@ -20,6 +20,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
+import {isEncryptedBox} from "../../util/pathName";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -103,9 +104,13 @@ export const onGet = (options: {
         return;
     }
 
-    fetchPost("/api/block/getDocInfo", {
+    const docInfoParam: IObject = {
         id: options.protyle.block.rootID
-    }, (response) => {
+    };
+    if (isEncryptedBox(options.protyle.notebookId)) {
+        docInfoParam.notebook = options.protyle.notebookId;
+    }
+    fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
         if (options.protyle.options.render.title) {
             // 页签没有打开
             options.protyle.title.render(options.protyle, response);
@@ -314,22 +319,30 @@ const setHTML = (options: {
         protyle.contentElement.scrollHeight > 0 && // 没有激活的页签 https://github.com/siyuan-note/siyuan/issues/5255
         !options.action.includes(Constants.CB_GET_FOCUSFIRST) && // 防止 eof 为true https://github.com/siyuan-note/siyuan/issues/5291
         protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
             mode: 2,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            getDocParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             onGet({data: getResponse, protyle, action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID]});
         });
     }
     // 动态滚动条拖拽到最后几个块时需多加载一点块 https://github.com/siyuan-note/siyuan/issues/16906
     if (options.action.includes(Constants.CB_GET_FOCUSFIRST) &&
         protyle.wysiwyg.element.getBoundingClientRect().top > protyle.breadcrumb.element.getBoundingClientRect().bottom) {
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
             mode: 1,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            getDocParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             onGet({
                 data: getResponse,
                 protyle,

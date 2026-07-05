@@ -23,7 +23,7 @@ import {
     updateTransaction
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
-import {getDocDisplayName} from "../util/pathName";
+import {getDocDisplayName, isEncryptedBox} from "../util/pathName";
 import {initMirror, refreshUndoButtons, syncMirrorFromBroadcast} from "./undo/globalUndo";
 /// #if !MOBILE
 import {updatePanelByEditor} from "../editor/util";
@@ -141,10 +141,14 @@ export class Protyle {
                                 /// #if !MOBILE
                                 getAllModels().outline.forEach(item => {
                                     if (item.blockId === data.data) {
-                                        fetchPost("/api/outline/getDocOutline", {
+                                        const outlineParam: IObject = {
                                             id: item.blockId,
                                             preview: item.isPreview
-                                        }, response => {
+                                        };
+                                        if (isEncryptedBox(this.protyle.notebookId)) {
+                                            outlineParam.notebook = this.protyle.notebookId;
+                                        }
+                                        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                                             item.update(response);
                                         });
                                     }
@@ -177,10 +181,14 @@ export class Protyle {
                         case "li2doc":
                             if (this.protyle.block.rootID === data.data.srcRootBlockID) {
                                 if (this.protyle.block.showAll && data.cmd === "heading2doc" && !this.protyle.options.backlinkData) {
-                                    fetchPost("/api/filetree/getDoc", {
+                                    const getDocParam: IObject = {
                                         id: this.protyle.block.rootID,
                                         size: window.siyuan.config.editor.dynamicLoadBlocks,
-                                    }, getResponse => {
+                                    };
+                                    if (isEncryptedBox(this.protyle.notebookId)) {
+                                        getDocParam.notebook = this.protyle.notebookId;
+                                    }
+                                    fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                                         onGet({data: getResponse, protyle: this.protyle});
                                     });
                                 } else {
@@ -382,14 +390,18 @@ export class Protyle {
     }
 
     private getDoc(mergedOptions: IProtyleOptions) {
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             id: mergedOptions.blockId,
             isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
             originalRefBlockIDs: mergedOptions.originalRefBlockIDs,
             // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
             mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
+        };
+        if (isEncryptedBox(this.protyle.notebookId)) {
+            getDocParam.notebook = this.protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             onGet({
                 data: getResponse,
                 protyle: this.protyle,

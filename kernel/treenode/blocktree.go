@@ -315,6 +315,7 @@ func ExistBlockTrees(ids []string) (ret map[string]bool) {
 		ret[id] = false
 	}
 
+	// 先查全局 blocktree
 	sqlStmt := "SELECT id FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
 	rows, err := query(sqlStmt)
 	if err != nil {
@@ -329,6 +330,31 @@ func ExistBlockTrees(ids []string) (ret map[string]bool) {
 			return
 		}
 		ret[id] = true
+	}
+
+	// 全局 blocktree 未命中的 id，遍历已打开的加密 box 查找
+	var missing []string
+	for id, found := range ret {
+		if !found {
+			missing = append(missing, id)
+		}
+	}
+	if len(missing) > 0 {
+		for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
+			if len(missing) == 0 {
+				break
+			}
+			encRet := ExistBlockTreesInBox(missing, encBoxID)
+			var stillMissing []string
+			for _, id := range missing {
+				if encRet[id] {
+					ret[id] = true
+				} else {
+					stillMissing = append(stillMissing, id)
+				}
+			}
+			missing = stillMissing
+		}
 	}
 	return
 }
@@ -842,6 +868,18 @@ func CloseAllEncryptedBlockTreeDBs() {
 	})
 }
 
+// GetOpenedEncryptedBoxIDs 返回所有已打开的加密 blocktree db 对应的 boxID。
+// 供 boxID 未知时遍历查找（如通用打开入口 openFileById）。
+func GetOpenedEncryptedBoxIDs() (ret []string) {
+	encryptedBlockTreeDBs.Range(func(key, value any) bool {
+		if boxID, ok := key.(string); ok {
+			ret = append(ret, boxID)
+		}
+		return true
+	})
+	return
+}
+
 // RemoveEncryptedBlockTreeDBFile 关闭连接并删除加密 blocktree db 文件。删笔记本时调用。
 func RemoveEncryptedBlockTreeDBFile(boxID string) {
 	CloseEncryptedBlockTreeDB(boxID)
@@ -962,6 +1000,33 @@ func ExistBlockTreeInBox(id, boxID string) bool {
 	row := queryRowForBox(boxID, sqlStmt, id)
 	var tmp any
 	return row.Scan(&tmp) == nil
+}
+
+// ExistBlockTreesInBox 按 ids 在指定 box 的 db 里批量查块是否存在。
+func ExistBlockTreesInBox(ids []string, boxID string) (ret map[string]bool) {
+	ret = map[string]bool{}
+	if 1 > len(ids) {
+		return
+	}
+	for _, id := range ids {
+		ret[id] = false
+	}
+	sqlStmt := "SELECT id FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
+	rows, err := queryForBox(boxID, sqlStmt)
+	if err != nil {
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret[id] = true
+	}
+	return
 }
 
 // GetBlockTreesByRootIDInBox 按 rootID 在指定 box 的 db 里查块树。

@@ -29,6 +29,7 @@ import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid, isInHarmony, isIPad, isMac, updateHotkeyTip} from "../util/compatibility";
+import {isEncryptedBox} from "../../util/pathName";
 import {resize} from "../util/resize";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
@@ -90,9 +91,13 @@ ${padHTML}
                 } else if (type === "doc") {
                     // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                     if (event.shiftKey) {
-                        fetchPost("/api/block/getDocInfo", {
+                        const docInfoParam: IObject = {
                             id: protyle.block.rootID
-                        }, (response) => {
+                        };
+                        if (isEncryptedBox(protyle.notebookId)) {
+                            docInfoParam.notebook = protyle.notebookId;
+                        }
+                        fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                             openFileAttr(response.data.ial, "bookmark", protyle);
                         });
                     } else {
@@ -129,11 +134,15 @@ ${padHTML}
                         zoomOut({protyle, id: protyle.options.blockId});
                         target.classList.remove("block__icon--active");
                     } else {
-                        fetchPost("/api/filetree/getDoc", {
+                        const getDocParam: IObject = {
                             id: protyle.options.blockId,
                             mode: 3,
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
-                        }, getResponse => {
+                        };
+                        if (isEncryptedBox(protyle.notebookId)) {
+                            getDocParam.notebook = protyle.notebookId;
+                        }
+                        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                             onGet({data: getResponse, protyle, action: [Constants.CB_GET_HL]});
                         });
                         target.classList.add("block__icon--active");
@@ -220,7 +229,11 @@ ${padHTML}
             return;
         }
         const id = blockElement.getAttribute("data-node-id");
-        fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes: []}, (response) => {
+        const breadcrumbParam: IObject = {id, excludeTypes: []};
+        if (isEncryptedBox(protyle.notebookId)) {
+            breadcrumbParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
             response.data.forEach((item: IBreadcrumb) => {
                 let isCurrent = false;
                 if (!protyle.block.showAll && item.id === protyle.block.parentID) {
@@ -624,7 +637,11 @@ ${padHTML}
             // 闪卡面包屑不能显示答案
             excludeTypes.push("NodeTextMark-mark");
         }
-        fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes}, (response) => {
+        const breadcrumbParam: IObject = {id, excludeTypes};
+        if (isEncryptedBox(protyle.notebookId)) {
+            breadcrumbParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
             let html = "";
             response.data.forEach((item: IBreadcrumb, index: number) => {
                 let isCurrent = false;

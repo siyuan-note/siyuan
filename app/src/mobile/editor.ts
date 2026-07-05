@@ -15,6 +15,7 @@ import {showMessage} from "../dialog/message";
 import {App} from "../index";
 import {initMirror} from "../protyle/undo/globalUndo";
 import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
+import {isEncryptedBox} from "../util/pathName";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -54,7 +55,11 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         }
     }
 
-    fetchPost("/api/block/getBlockInfo", {id}, (data) => {
+    const blockInfoParam: IObject = {id};
+    if (isEncryptedBox(window.siyuan.mobile.editor?.protyle?.notebookId)) {
+        blockInfoParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
+    }
+    fetchPost("/api/block/getBlockInfo", blockInfoParam, (data) => {
         if (data.code === 3) {
             showMessage(data.msg);
             return;
@@ -98,11 +103,15 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                     }
                 });
             } else {
-                fetchPost("/api/filetree/getDoc", {
+                const getDocParam: IObject = {
                     id,
                     size: action.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                     mode: action.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
-                }, getResponse => {
+                };
+                if (isEncryptedBox(window.siyuan.mobile.editor?.protyle?.notebookId)) {
+                    getDocParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
+                }
+                fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                     onGet({
                         data: getResponse,
                         protyle: window.siyuan.mobile.editor.protyle,

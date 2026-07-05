@@ -1,5 +1,5 @@
 import {fetchPost} from "../util/fetch";
-import {getDisplayName, getNotebookName} from "../util/pathName";
+import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
 import {showMessage} from "../dialog/message";
@@ -14,9 +14,13 @@ export const deleteFile = (notebookId: string, pathString: string) => {
         });
         return;
     }
-    fetchPost("/api/block/getDocInfo", {
+    const docInfoParam: IObject = {
         id: getDisplayName(pathString, true, true)
-    }, (response) => {
+    };
+    if (isEncryptedBox(notebookId)) {
+        docInfoParam.notebook = notebookId;
+    }
+    fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
         const fileName = escapeHtml(response.data.name);
         let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", fileName)}
 <div class="fn__hr"></div>

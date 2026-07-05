@@ -197,12 +197,26 @@ var (
 )
 
 func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
+	return LoadTreeByBlockIDWithReindexInBox(id, "")
+}
+
+// LoadTreeByBlockIDWithReindexInBox 与 LoadTreeByBlockIDWithReindex 一致，但按 boxID 路由 blocktree 查询。
+func LoadTreeByBlockIDWithReindexInBox(id, boxID string) (ret *parse.Tree, err error) {
 	if "" == id {
 		logging.LogWarnf("block id is empty")
 		return nil, ErrTreeNotFound
 	}
 
-	bt := treenode.GetBlockTree(id)
+	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt && "" == boxID {
+		// boxID 未知时（如通用打开入口），遍历所有已打开的加密 box 查找
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
+				bt = encBT
+				break
+			}
+		}
+	}
 	if nil == bt {
 		if task.ContainIndexTask() {
 			err = ErrIndexing
@@ -211,7 +225,7 @@ func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
 
 		// 尝试从文件系统加载并建立索引
 		err = indexTreeInFilesystem(id)
-		bt = treenode.GetBlockTree(id)
+		bt = treenode.GetBlockTreeInBox(id, boxID)
 		if nil == bt {
 			if "dev" == util.Mode {
 				logging.LogWarnf("block tree not found [id=%s], stack: [%s]", id, logging.ShortStack())
@@ -274,6 +288,15 @@ func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
 	}
 
 	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt && "" == boxID {
+		// boxID 未知时（如通用打开入口），遍历所有已打开的加密 box 查找
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
+				bt = encBT
+				break
+			}
+		}
+	}
 	if nil == bt {
 		if task.ContainIndexTask() {
 			err = ErrIndexing

@@ -36,7 +36,7 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 
 	btPathsMap := map[string]bool{}
 	sqlStmt := "SELECT path FROM blocktrees WHERE box_id = ?"
-	rows, err := db.Query(sqlStmt, boxID)
+	rows, err := queryForBox(boxID, sqlStmt, boxID)
 	if err != nil {
 		logging.LogErrorf("query block tree failed: %s", err)
 		return
@@ -62,7 +62,7 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 
 func removeBlockTreesByPath(boxID, path string) {
 	sqlStmt := "DELETE FROM blocktrees WHERE box_id = ? AND path = ?"
-	_, err := db.Exec(sqlStmt, boxID, path)
+	_, err := execForBox(boxID, sqlStmt, boxID, path)
 	if err != nil {
 		logging.LogErrorf("delete block tree failed: %s", err)
 	}
@@ -76,7 +76,7 @@ func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 
 	btPathsMap := map[string]bool{}
 	sqlStmt := "SELECT path FROM blocktrees WHERE box_id = ?"
-	rows, err := db.Query(sqlStmt, boxID)
+	rows, err := queryForBox(boxID, sqlStmt, boxID)
 	if err != nil {
 		logging.LogErrorf("query block tree failed: %s", err)
 		return

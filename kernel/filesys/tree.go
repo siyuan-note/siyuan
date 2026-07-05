@@ -49,6 +49,37 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 	}
 
 	bts := treenode.GetBlockTrees(ids)
+
+	// 全局 blocktree 未命中的 id，遍历已打开的加密 box 查找
+	foundSet := map[string]bool{}
+	for id := range bts {
+		foundSet[id] = true
+	}
+	var missing []string
+	for _, id := range ids {
+		if !foundSet[id] {
+			missing = append(missing, id)
+		}
+	}
+	if len(missing) > 0 {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if len(missing) == 0 {
+				break
+			}
+			encBTs := treenode.GetBlockTreesInBox(missing, encBoxID)
+			for id, bt := range encBTs {
+				bts[id] = bt
+			}
+			var stillMissing []string
+			for _, id := range missing {
+				if _, found := encBTs[id]; !found {
+					stillMissing = append(stillMissing, id)
+				}
+			}
+			missing = stillMissing
+		}
+	}
+
 	luteEngine := util.NewLute()
 	var boxIDs []string
 	var paths []string
@@ -220,9 +251,8 @@ func DocIAL(absPath string) (ret map[string]string) {
 	if boxID != "" && DEKProvider != nil {
 		if dek, err := DEKProvider(boxID); err == nil && dek != nil {
 			// 已解锁的加密 box：整体读密文 → 解密 → 流式解析
-			filelock.Lock(absPath)
+			// 注意：filelock.ReadFile 内部已加锁，不能在外面再 Lock/Unlock（会死锁）
 			raw, readErr := filelock.ReadFile(absPath)
-			filelock.Unlock(absPath)
 			if readErr != nil {
 				logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
 				return nil

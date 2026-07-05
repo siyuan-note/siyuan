@@ -342,7 +342,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 
 	// 仅重新索引该文档，不进行全量索引
 	// Reindex only the current document after rolling back the document https://github.com/siyuan-note/siyuan/issues/12320
-	sql.RemoveTreeQueue(rootID)
+	sql.RemoveTreeQueue(boxID, rootID)
 	if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
 		return
 	}

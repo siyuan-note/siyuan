@@ -313,7 +313,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 			treenode.RemoveBlockTreesByRootID(boxID, rootID)
 		}
 
-		sql.RemoveTreeQueue(rootID)
+		sql.RemoveTreeQueue(boxID, rootID)
 		if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
 			return
 		}

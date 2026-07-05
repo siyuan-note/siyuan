@@ -57,7 +57,7 @@ type dbQueueOperation struct {
 }
 
 // boxID 从 op 提取目标 boxID，供 beginTxForBox 路由到加密 db 或全局 db。
-// delete_id/delete_ids/delete_assets/index_node 无 box 上下文，返回空串 → 走全局 db。
+// delete_ids/delete_assets/index_node 无 box 上下文，返回空串 → 走全局 db。
 func (op *dbQueueOperation) boxID() string {
 	switch op.action {
 	case "index", "rename", "move":
@@ -68,7 +68,7 @@ func (op *dbQueueOperation) boxID() string {
 		if op.upsertTree != nil {
 			return op.upsertTree.Box
 		}
-	case "delete":
+	case "delete", "delete_id":
 		return op.removeTreeBox
 	case "delete_box", "delete_box_refs":
 		return op.box
@@ -471,11 +471,11 @@ func MoveTreeQueue(tree *parse.Tree) {
 	appendOperation(newOp)
 }
 
-func RemoveTreeQueue(rootID string) {
+func RemoveTreeQueue(boxID, rootID string) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	newOp := &dbQueueOperation{removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
+	newOp := &dbQueueOperation{removeTreeBox: boxID, removeTreeID: rootID, inQueueTime: time.Now(), action: "delete_id"}
 	for i, op := range operationQueue {
 		if "delete_id" == op.action && op.removeTreeID == rootID {
 			operationQueue[i] = newOp

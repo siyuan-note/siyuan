@@ -119,6 +119,12 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	filePath := filepath.Join(util.DataDir, box.ID, p)
 	ret = filesys.DocIAL(filePath)
 	if 1 > len(ret) {
+		// 加密笔记本的 .sy 解密失败（DEK 未缓存或 box 未解锁）时不应视为损坏，
+		// 否则文件会被 moveCorruptedData 移走导致数据丢失
+		if IsEncryptedBox(box.ID) {
+			logging.LogWarnf("properties not found in encrypted file [%s], skip moveCorruptedData", filePath)
+			return nil
+		}
 		logging.LogWarnf("properties not found in file [%s]", filePath)
 		box.moveCorruptedData(filePath)
 		return nil

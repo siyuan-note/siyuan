@@ -207,6 +207,10 @@ func resetDuplicateBlocksOnFileSys() {
 	blockIDs := map[string]bool{}
 	needRefreshUI := false
 	for _, box := range boxes {
+		// 关闭的加密笔记本无法解密 .sy，跳过（避免密文被当损坏移走）
+		if IsEncryptedBox(box.ID) && !IsBoxUnlocked(box.ID) {
+			continue
+		}
 		// 校验索引阶段自动删除历史遗留的笔记本 history 文件夹
 		legacyHistory := filepath.Join(util.DataDir, box.ID, ".siyuan", "history")
 		if gulu.File.IsDir(legacyHistory) {

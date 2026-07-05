@@ -5,6 +5,7 @@ import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {showTooltip} from "../../dialog/tooltip";
+import {isEncryptedBox} from "../../util/pathName";
 
 export class Scroll {
     public element: HTMLElement;
@@ -68,12 +69,16 @@ export class Scroll {
         }
         protyle.wysiwyg.element.setAttribute("data-top", protyle.wysiwyg.element.scrollTop.toString());
         protyle.contentElement.style.overflow = "hidden";
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             index: parseInt(this.inputElement.value),
             id: protyle.block.parentID,
             mode: 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            getDocParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             onGet({
                 data: getResponse,
                 protyle,

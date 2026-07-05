@@ -62,6 +62,7 @@ import {hideTooltip} from "../dialog/tooltip";
 import {base64ToURL} from "../util/image";
 import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
+import {isEncryptedBox} from "../util/pathName";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -981,10 +982,14 @@ export const zoomOut = (options: {
             pushBack();
         }
     }
-    fetchPost("/api/filetree/getDoc", {
+    const getDocParam: IObject = {
         id: options.id,
         size: options.id === options.protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
-    }, async (getResponse) => {
+    };
+    if (isEncryptedBox(options.protyle.notebookId)) {
+        getDocParam.notebook = options.protyle.notebookId;
+    }
+    fetchPost("/api/filetree/getDoc", getDocParam, async (getResponse) => {
         const action: TProtyleAction[] = [Constants.CB_GET_HTML];
         if (!options.isPushBack) {
             action.push(Constants.CB_GET_UNUNDO);
@@ -1028,10 +1033,14 @@ export const zoomOut = (options: {
                 }
                 focusBlock(showElement);
             } else if (!options.focusId) {
-                fetchPost("/api/filetree/getDoc", {
+                const getDocParam: IObject = {
                     id: options.protyle.block.rootID,
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getFocusResponse => {
+                };
+                if (isEncryptedBox(options.protyle.notebookId)) {
+                    getDocParam.notebook = options.protyle.notebookId;
+                }
+                fetchPost("/api/filetree/getDoc", getDocParam, getFocusResponse => {
                     onGet({
                         data: getFocusResponse,
                         protyle: options.protyle,
@@ -1040,11 +1049,15 @@ export const zoomOut = (options: {
                 });
                 return;
             } else if (options.id === options.protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来
-                fetchPost("/api/filetree/getDoc", {
+                const getDocParam: IObject = {
                     id: options.focusId,
                     mode: 3,
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getFocusResponse => {
+                };
+                if (isEncryptedBox(options.protyle.notebookId)) {
+                    getDocParam.notebook = options.protyle.notebookId;
+                }
+                fetchPost("/api/filetree/getDoc", getDocParam, getFocusResponse => {
                     onGet({
                         data: getFocusResponse,
                         protyle: options.protyle,

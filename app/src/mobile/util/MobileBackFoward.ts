@@ -13,6 +13,7 @@ import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
 import {setTitle} from "../../util/processTitle";
+import {isEncryptedBox} from "../../util/pathName";
 
 const forwardStack: IBackStack[] = [];
 
@@ -74,11 +75,15 @@ const focusStack = (backStack: IBackStack) => {
         return;
     }
 
-    fetchPost("/api/filetree/getDoc", {
+    const getDocParam: IObject = {
         id: backStack.id,
         startID: backStack.data.startId,
         endID: backStack.data.endId,
-    }, getResponse => {
+    };
+    if (isEncryptedBox(protyle.notebookId)) {
+        getDocParam.notebook = protyle.notebookId;
+    }
+    fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
         protyle.block.parentID = getResponse.data.parentID;
         protyle.block.parent2ID = getResponse.data.parent2ID;
         protyle.block.rootID = getResponse.data.rootID;

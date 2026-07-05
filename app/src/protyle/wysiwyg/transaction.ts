@@ -22,6 +22,7 @@ import {resize} from "../util/resize";
 import {processClonePHElement} from "../render/util";
 import {scrollCenter} from "../../util/highlightById";
 import {setFold} from "../util/blockFold";
+import {isEncryptedBox} from "../../util/pathName";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -1556,11 +1557,15 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             !protyle.scroll.element.classList.contains("fn__none") &&
             protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2    // https://github.com/siyuan-note/siyuan/issues/7785
         ) {
-            fetchPost("/api/filetree/getDoc", {
+            const getDocParam: IObject = {
                 id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                 mode: 2,
                 size: window.siyuan.config.editor.dynamicLoadBlocks,
-            }, getResponse => {
+            };
+            if (isEncryptedBox(protyle.notebookId)) {
+                getDocParam.notebook = protyle.notebookId;
+            }
+            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                 onGet({
                     data: getResponse,
                     protyle,

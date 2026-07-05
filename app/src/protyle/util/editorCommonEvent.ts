@@ -52,6 +52,7 @@ import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
+import {isEncryptedBox} from "../util/pathName";
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
@@ -1376,10 +1377,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
 
-                    fetchPost("/api/filetree/getDoc", {
+                    const getDocParam: IObject = {
                         id: protyle.block.id,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
-                    }, getResponse => {
+                    };
+                    if (isEncryptedBox(protyle.notebookId)) {
+                        getDocParam.notebook = protyle.notebookId;
+                    }
+                    fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                         onGet({data: getResponse, protyle});
                         /// #if !MOBILE
                         // 文档标题互转后，需更新大纲

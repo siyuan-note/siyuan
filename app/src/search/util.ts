@@ -1157,7 +1157,7 @@ export const getArticle = (options: {
             if (articleId !== options.id) {
                 return;
             }
-            fetchPost("/api/filetree/getDoc", {
+            const getDocParam: IObject = {
                 id: options.id,
                 query: options.value || null,
                 queryMethod: options.config?.method || null,
@@ -1167,7 +1167,11 @@ export const getArticle = (options: {
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
                 highlight: !isSupportCSSHL(),
-            }, getResponse => {
+            };
+            if (isEncryptedBox(options.edit.protyle.notebookId)) {
+                getDocParam.notebook = options.edit.protyle.notebookId;
+            }
+            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                 if (articleId !== options.id) {
                     return;
                 }

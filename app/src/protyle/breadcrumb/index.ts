@@ -29,6 +29,7 @@ import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid, isInHarmony, isIPad, isMac, updateHotkeyTip} from "../util/compatibility";
+import {isEncryptedBox} from "../../util/pathName";
 import {resize} from "../util/resize";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
@@ -129,11 +130,15 @@ ${padHTML}
                         zoomOut({protyle, id: protyle.options.blockId});
                         target.classList.remove("block__icon--active");
                     } else {
-                        fetchPost("/api/filetree/getDoc", {
+                        const getDocParam: IObject = {
                             id: protyle.options.blockId,
                             mode: 3,
                             size: window.siyuan.config.editor.dynamicLoadBlocks,
-                        }, getResponse => {
+                        };
+                        if (isEncryptedBox(protyle.notebookId)) {
+                            getDocParam.notebook = protyle.notebookId;
+                        }
+                        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                             onGet({data: getResponse, protyle, action: [Constants.CB_GET_HL]});
                         });
                         target.classList.add("block__icon--active");

@@ -31,6 +31,7 @@ import {Backlink} from "../../layout/dock/Backlink";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {setFold} from "../util/blockFold";
+import {isEncryptedBox} from "../../util/pathName";
 
 export const removeBlock = async (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
     protyle.observerLoad?.disconnect();
@@ -301,11 +302,15 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 !protyle.scroll.element.classList.contains("fn__none") &&
                 protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2
             ) {
-                fetchPost("/api/filetree/getDoc", {
+                const getDocParam: IObject = {
                     id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                     mode: 2,
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
+                };
+                if (isEncryptedBox(protyle.notebookId)) {
+                    getDocParam.notebook = protyle.notebookId;
+                }
+                fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                     onGet({
                         data: getResponse,
                         protyle,

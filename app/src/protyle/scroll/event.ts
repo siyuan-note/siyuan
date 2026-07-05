@@ -6,6 +6,7 @@ import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {stickyRow} from "../render/av/row";
 import {trimAVRowsSync} from "../render/av/virtualScroll";
+import {isEncryptedBox} from "../../util/pathName";
 
 let getIndexTimeout: number;
 const avScrollPending = new WeakSet<HTMLElement>();
@@ -91,11 +92,15 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
                 protyle.contentElement.style.overflow = "hidden";
                 protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
-                fetchPost("/api/filetree/getDoc", {
+                const getDocParam: IObject = {
                     id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
                     mode: 1,
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
+                };
+                if (isEncryptedBox(protyle.notebookId)) {
+                    getDocParam.notebook = protyle.notebookId;
+                }
+                fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                     protyle.contentElement.style.overflow = "";
                     protyle.contentElement.style.width = "";
                     onGet({
@@ -114,11 +119,15 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
                 return;
             }
             protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
-            fetchPost("/api/filetree/getDoc", {
+            const getDocParam: IObject = {
                 id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                 mode: 2,
                 size: window.siyuan.config.editor.dynamicLoadBlocks,
-            }, getResponse => {
+            };
+            if (isEncryptedBox(protyle.notebookId)) {
+                getDocParam.notebook = protyle.notebookId;
+            }
+            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                 onGet({
                     data: getResponse,
                     protyle,

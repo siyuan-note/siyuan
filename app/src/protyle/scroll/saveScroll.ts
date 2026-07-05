@@ -5,6 +5,7 @@ import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import {setStorageVal} from "../util/compatibility";
 import {isSupportCSSHL} from "../render/searchMarkRender";
+import {isEncryptedBox} from "../../util/pathName";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
@@ -76,7 +77,7 @@ export const getDocByScroll = (options: {
         }
     }
     if (options.scrollAttr?.zoomInId && options.scrollAttr?.rootId && options.scrollAttr.zoomInId !== options.scrollAttr.rootId) {
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             id: options.scrollAttr.zoomInId,
             size: Constants.SIZE_GET_MAX,
             query: options.protyle.query?.key,
@@ -84,16 +85,24 @@ export const getDocByScroll = (options: {
             queryTypes: options.protyle.query?.types,
             querySubTypes: options.protyle.query?.subTypes,
             highlight: !isSupportCSSHL(),
-        }, response => {
+        };
+        if (isEncryptedBox(options.protyle.notebookId)) {
+            getDocParam.notebook = options.protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, response => {
             if (response.code === 1) {
-                fetchPost("/api/filetree/getDoc", {
+                const getDocParam: IObject = {
                     id: options.scrollAttr.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
                     query: options.protyle.query?.key,
                     queryMethod: options.protyle.query?.method,
                     queryTypes: options.protyle.query?.types,
                     querySubTypes: options.protyle.query?.subTypes,
                     highlight: !isSupportCSSHL(),
-                }, response => {
+                };
+                if (isEncryptedBox(options.protyle.notebookId)) {
+                    getDocParam.notebook = options.protyle.notebookId;
+                }
+                fetchPost("/api/filetree/getDoc", getDocParam, response => {
                     onGet({
                         scrollPosition: options.mergedOptions?.scrollPosition,
                         data: response,
@@ -123,7 +132,7 @@ export const getDocByScroll = (options: {
         });
         return;
     }
-    fetchPost("/api/filetree/getDoc", {
+    const getDocParam: IObject = {
         id: options.scrollAttr?.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr?.startId,
         startID: options.scrollAttr?.startId,
         endID: options.scrollAttr?.endId,
@@ -132,7 +141,11 @@ export const getDocByScroll = (options: {
         queryTypes: options.protyle.query?.types,
         querySubTypes: options.protyle.query?.subTypes,
         highlight: !isSupportCSSHL(),
-    }, response => {
+    };
+    if (isEncryptedBox(options.protyle.notebookId)) {
+        getDocParam.notebook = options.protyle.notebookId;
+    }
+    fetchPost("/api/filetree/getDoc", getDocParam, response => {
         onGet({
             scrollPosition: options.mergedOptions?.scrollPosition,
             data: response,

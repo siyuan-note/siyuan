@@ -107,6 +107,7 @@ import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
+import {isEncryptedBox} from "../../util/pathName";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2638,11 +2639,15 @@ export class WYSIWYG {
             if (!preventGetTopHTML && !protyle.scroll.element.classList.contains("fn__none")) {
                 if (event.deltaY < 0 && protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1" &&
                     (protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight || protyle.contentElement.scrollTop === 0)) {
-                    fetchPost("/api/filetree/getDoc", {
+                    const getDocParam: IObject = {
                         id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
                         mode: 1,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
-                    }, getResponse => {
+                    };
+                    if (isEncryptedBox(protyle.notebookId)) {
+                        getDocParam.notebook = protyle.notebookId;
+                    }
+                    fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                         preventGetTopHTML = false;
                         onGet({
                             data: getResponse,
@@ -2654,11 +2659,15 @@ export class WYSIWYG {
                 } else if (event.deltaY > 0 && protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
                     (protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight ||
                         protyle.contentElement.clientHeight + Math.ceil(protyle.contentElement.scrollTop) >= protyle.contentElement.scrollHeight)) {
-                    fetchPost("/api/filetree/getDoc", {
+                    const getDocParam: IObject = {
                         id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
                         mode: 2,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
-                    }, getResponse => {
+                    };
+                    if (isEncryptedBox(protyle.notebookId)) {
+                        getDocParam.notebook = protyle.notebookId;
+                    }
+                    fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                         preventGetTopHTML = false;
                         onGet({
                             data: getResponse,

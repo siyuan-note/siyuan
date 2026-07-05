@@ -15,6 +15,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {getAllModels} from "../layout/getAll";
 import {App} from "../index";
 import {onGet} from "../protyle/util/onGet";
+import {isEncryptedBox} from "./pathName";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
@@ -155,11 +156,15 @@ const focusStack = async (app: App, stack: IBackStack) => {
         }
         // 动态加载导致内容移除 https://github.com/siyuan-note/siyuan/issues/10692
         if (!blockElement && !stack.zoomId && !stack.protyle.scroll.element.classList.contains("fn__none")) {
-            fetchPost("/api/filetree/getDoc", {
+            const getDocParam: IObject = {
                 id: stack.id,
                 mode: 3,
                 size: window.siyuan.config.editor.dynamicLoadBlocks,
-            }, getResponse => {
+            };
+            if (isEncryptedBox(stack.protyle.notebookId)) {
+                getDocParam.notebook = stack.protyle.notebookId;
+            }
+            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                 onGet({
                     data: getResponse,
                     protyle: stack.protyle,

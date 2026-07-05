@@ -409,6 +409,31 @@ func GetBlockTrees(ids []string) (ret map[string]*BlockTree) {
 		}
 		ret[block.ID] = &block
 	}
+
+	// 全局未命中的 id，遍历已打开的加密 box 查找
+	var missing []string
+	for _, id := range ids {
+		if _, ok := ret[id]; !ok {
+			missing = append(missing, id)
+		}
+	}
+	if len(missing) > 0 {
+		for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
+			if len(missing) == 0 {
+				break
+			}
+			encRet := GetBlockTreesInBox(missing, encBoxID)
+			var stillMissing []string
+			for _, id := range missing {
+				if bt, ok := encRet[id]; ok {
+					ret[id] = bt
+				} else {
+					stillMissing = append(stillMissing, id)
+				}
+			}
+			missing = stillMissing
+		}
+	}
 	return
 }
 

@@ -540,8 +540,14 @@
     }
 
     const init = async () => {
+        let isDark = false
         if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} ===1) {
             document.body.classList.add('dark')
+            isDark = true
+        }
+        // 同步外观到原生壳：让 iOS 顶/底条与认证页背景一致
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.changeStatusBar) {
+            window.webkit.messageHandlers.changeStatusBar.postMessage((isDark ? "#1e1e1e" : "#fff") + " " + (isDark ? 1 : 0))
         }
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             document.querySelector('.b3-button--white').remove()

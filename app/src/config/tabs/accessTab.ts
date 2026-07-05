@@ -1,5 +1,5 @@
 import type {SettingTabBuilder} from "../setting/builder";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {Constants} from "../../constants";
 import {isBrowser, isMobile} from "../../util/functions";
@@ -411,7 +411,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
         dialog.destroy();
         onCancel();
     });
-    confirmBtn.addEventListener("click", () => {
+    confirmBtn.addEventListener("click", async () => {
         const pwd1 = (inputs[0] as HTMLInputElement).value;
         const pwd2 = (inputs[1] as HTMLInputElement).value;
         if (!pwd1) {
@@ -426,14 +426,16 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
         const originalText = confirmBtn.textContent;
         confirmBtn.setAttribute("disabled", "disabled");
         confirmBtn.textContent = window.siyuan.languages.loading;
-        fetchPost("/api/notebook/enableEncryptedNotebooks", {password: pwd1}, () => {
+        const response = await fetchSyncPost("/api/notebook/enableEncryptedNotebooks", {password: pwd1});
+        if (response.code === 0) {
             showMessage(window.siyuan.languages.encryptedNotebookEnabled);
             dialog.destroy();
             onSuccess();
-        }, undefined, () => {
+        } else {
+            // fetchSyncPost 已通过 processMessage 弹出错误提示，这里只需恢复按钮
             confirmBtn.removeAttribute("disabled");
             confirmBtn.textContent = originalText;
-        });
+        }
     });
 };
 
@@ -458,7 +460,7 @@ const openChangeMasterPasswordDialog = () => {
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
     });
-    btnsElement[1].addEventListener("click", () => {
+    btnsElement[1].addEventListener("click", async () => {
         const oldPwd = (inputs[0] as HTMLInputElement).value;
         const newPwd = (inputs[1] as HTMLInputElement).value;
         const confirmPwd = (inputs[2] as HTMLInputElement).value;
@@ -474,15 +476,17 @@ const openChangeMasterPasswordDialog = () => {
         const originalText = confirmBtn.textContent;
         confirmBtn.setAttribute("disabled", "disabled");
         confirmBtn.textContent = window.siyuan.languages.loading;
-        fetchPost("/api/notebook/changeMasterPassword", {
+        const response = await fetchSyncPost("/api/notebook/changeMasterPassword", {
             oldPassword: oldPwd,
             newPassword: newPwd
-        }, () => {
+        });
+        if (response.code === 0) {
             showMessage(window.siyuan.languages.changeMasterPassword);
             dialog.destroy();
-        }, undefined, () => {
+        } else {
+            // fetchSyncPost 已通过 processMessage 弹出错误提示，这里只需恢复按钮
             confirmBtn.removeAttribute("disabled");
             confirmBtn.textContent = originalText;
-        });
+        }
     });
 };

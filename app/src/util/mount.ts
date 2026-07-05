@@ -1,7 +1,7 @@
 import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "./functions";
-import {fetchPost} from "./fetch";
+import {fetchPost, fetchSyncPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {getOpenNotebookCount} from "./pathName";
 import {replaceFileName, validateName} from "../editor/rename";
@@ -205,7 +205,7 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
     });
-    btnsElement[1].addEventListener("click", () => {
+    btnsElement[1].addEventListener("click", async () => {
         const password = inputElement.value;
         if (!password) {
             return false;
@@ -215,18 +215,19 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         unlockBtn.setAttribute("disabled", "disabled");
         unlockBtn.textContent = window.siyuan.languages.loading;
         // 先解锁（派生 KEK + 解 DEK + 打开加密 db，Argon2id 约耗时 1 秒），成功后再挂载
-        fetchPost("/api/notebook/unlockBox", {
+        const response = await fetchSyncPost("/api/notebook/unlockBox", {
             notebook: notebookId,
             password
-        }, () => {
+        });
+        if (response.code === 0) {
             fetchPost("/api/notebook/openNotebook", {
                 notebook: notebookId
             });
             dialog.destroy();
-        }, undefined, (err) => {
+        } else {
+            // fetchSyncPost 已通过 processMessage 弹出错误提示，这里只需恢复按钮
             unlockBtn.removeAttribute("disabled");
             unlockBtn.textContent = originalText;
-            showMessage(err.msg || window.siyuan.languages.incorrectMasterPassword);
-        });
+        }
     });
 };

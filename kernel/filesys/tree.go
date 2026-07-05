@@ -49,6 +49,37 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 	}
 
 	bts := treenode.GetBlockTrees(ids)
+
+	// 全局 blocktree 未命中的 id，遍历已打开的加密 box 查找
+	foundSet := map[string]bool{}
+	for id := range bts {
+		foundSet[id] = true
+	}
+	var missing []string
+	for _, id := range ids {
+		if !foundSet[id] {
+			missing = append(missing, id)
+		}
+	}
+	if len(missing) > 0 {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if len(missing) == 0 {
+				break
+			}
+			encBTs := treenode.GetBlockTreesInBox(missing, encBoxID)
+			for id, bt := range encBTs {
+				bts[id] = bt
+			}
+			var stillMissing []string
+			for _, id := range missing {
+				if _, found := encBTs[id]; !found {
+					stillMissing = append(stillMissing, id)
+				}
+			}
+			missing = stillMissing
+		}
+	}
+
 	luteEngine := util.NewLute()
 	var boxIDs []string
 	var paths []string

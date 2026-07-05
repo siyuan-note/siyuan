@@ -25,6 +25,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -406,7 +407,13 @@ func getDocInfo(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	info, err := model.GetDocInfo(id)
+	var info *model.BlockInfo
+	var err error
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		info, err = model.GetDocInfoInBox(id, notebook)
+	} else {
+		info, err = model.GetDocInfo(id)
+	}
 	if nil == info {
 		ret.Code = -1
 		if err != nil && !errors.Is(err, model.ErrTreeNotFound) {
@@ -726,7 +733,13 @@ func getBlockInfo(c *gin.Context) {
 	id := arg["id"].(string)
 
 	// 仅在此处使用带重建索引的加载函数，其他地方不要使用
-	tree, err := model.LoadTreeByBlockIDWithReindex(id)
+	var tree *parse.Tree
+	var err error
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		tree, err = model.LoadTreeByBlockIDWithReindexInBox(id, notebook)
+	} else {
+		tree, err = model.LoadTreeByBlockIDWithReindex(id)
+	}
 	if err != nil {
 		if errors.Is(err, model.ErrIndexing) {
 			ret.Code = 3
@@ -957,7 +970,12 @@ func getBlockKramdown(c *gin.Context) {
 		}
 	}
 
-	kramdown := model.GetBlockKramdown(id, mode)
+	var kramdown string
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		kramdown = model.GetBlockKramdownInBox(id, mode, notebook)
+	} else {
+		kramdown = model.GetBlockKramdown(id, mode)
+	}
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -1012,7 +1030,12 @@ func getBlockKramdowns(c *gin.Context) {
 		}
 	}
 
-	kramdowns := model.GetBlockKramdowns(ids, mode)
+	var kramdowns map[string]string
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		kramdowns = model.GetBlockKramdownsInBox(ids, mode, notebook)
+	} else {
+		kramdowns = model.GetBlockKramdowns(ids, mode)
+	}
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()

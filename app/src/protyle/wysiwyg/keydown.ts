@@ -49,7 +49,7 @@ import {fontEvent} from "../toolbar/Font";
 import {addSubList, listIndent, listOutdent, toggleTaskListItem} from "./list";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
 import {cancelSB, insertEmptyBlock, jumpToParent} from "../../block/util";
-import {isLocalPath} from "../../util/pathName";
+import {isEncryptedBox, isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
@@ -1209,9 +1209,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event) && !protyle.disabled) {
             if (selectText === "") {
-                fetchPost("/api/block/getDocInfo", {
+                const docInfoParam: IObject = {
                     id: protyle.block.rootID
-                }, (response) => {
+                };
+                if (isEncryptedBox(protyle.notebookId)) {
+                    docInfoParam.notebook = protyle.notebookId;
+                }
+                fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                     rename({
                         notebookId: protyle.notebookId,
                         path: protyle.path,

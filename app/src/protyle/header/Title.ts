@@ -17,7 +17,7 @@ import * as dayjs from "dayjs";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif
-import {getDocDisplayName} from "../../util/pathName";
+import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {nbsp2space} from "../util/normalizeText";
@@ -176,9 +176,13 @@ export class Title {
                     event.preventDefault();
                     event.stopPropagation();
                 } else if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {
-                    fetchPost("/api/block/getDocInfo", {
+                    const docInfoParam: IObject = {
                         id: protyle.block.rootID
-                    }, (response) => {
+                    };
+                    if (isEncryptedBox(protyle.notebookId)) {
+                        docInfoParam.notebook = protyle.notebookId;
+                    }
+                    fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                         openFileAttr(response.data.ial, "bookmark", protyle);
                     });
                     event.preventDefault();
@@ -193,9 +197,13 @@ export class Title {
             iconElement.addEventListener("click", (event) => {
                 // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                 if (event.shiftKey) {
-                    fetchPost("/api/block/getDocInfo", {
+                    const docInfoParam: IObject = {
                         id: protyle.block.rootID
-                    }, (response) => {
+                    };
+                    if (isEncryptedBox(protyle.notebookId)) {
+                        docInfoParam.notebook = protyle.notebookId;
+                    }
+                    fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                         openFileAttr(response.data.ial, "bookmark", protyle);
                     });
                 } else {
@@ -307,9 +315,13 @@ export class Title {
         this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & {
             target: HTMLElement
         }) => {
-            fetchPost("/api/block/getDocInfo", {
+            const docInfoParam: IObject = {
                 id: protyle.block.rootID
-            }, (response) => {
+            };
+            if (isEncryptedBox(protyle.notebookId)) {
+                docInfoParam.notebook = protyle.notebookId;
+            }
+            fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                 commonClick(event, protyle, response.data.ial);
             });
         });

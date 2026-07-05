@@ -104,9 +104,13 @@ export const onGet = (options: {
         return;
     }
 
-    fetchPost("/api/block/getDocInfo", {
+    const docInfoParam: IObject = {
         id: options.protyle.block.rootID
-    }, (response) => {
+    };
+    if (isEncryptedBox(options.protyle.notebookId)) {
+        docInfoParam.notebook = options.protyle.notebookId;
+    }
+    fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
         if (options.protyle.options.render.title) {
             // 页签没有打开
             options.protyle.title.render(options.protyle, response);

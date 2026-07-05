@@ -55,7 +55,11 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         }
     }
 
-    fetchPost("/api/block/getBlockInfo", {id}, (data) => {
+    const blockInfoParam: IObject = {id};
+    if (isEncryptedBox(window.siyuan.mobile.editor?.protyle?.notebookId)) {
+        blockInfoParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
+    }
+    fetchPost("/api/block/getBlockInfo", blockInfoParam, (data) => {
         if (data.code === 3) {
             showMessage(data.msg);
             return;

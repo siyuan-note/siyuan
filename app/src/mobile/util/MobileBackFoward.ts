@@ -44,9 +44,13 @@ const focusStack = (backStack: IBackStack) => {
     }
 
     if (backStack.id !== protyle.block.rootID) {
-        fetchPost("/api/block/getDocInfo", {
+        const docInfoParam: IObject = {
             id: backStack.id,
-        }, (response) => {
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            docInfoParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
             setTitle(response.data.name);
             protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
             protyle.background.render(response.data.ial, protyle.block.rootID);

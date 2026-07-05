@@ -40,7 +40,11 @@ const focusStack = async (app: App, stack: IBackStack) => {
             wnd = getWndByLayout(window.siyuan.layout.centerLayout);
         }
         if (wnd) {
-            const info = await fetchSyncPost("/api/block/getBlockInfo", {id: stack.id});
+            const blockInfoParam: IObject = {id: stack.id};
+            if (isEncryptedBox(stack.protyle.notebookId)) {
+                blockInfoParam.notebook = stack.protyle.notebookId;
+            }
+            const info = await fetchSyncPost("/api/block/getBlockInfo", blockInfoParam);
             if (info.code === 3) {
                 showMessage(info.msg);
                 return;

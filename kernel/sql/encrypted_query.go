@@ -440,6 +440,56 @@ func QueryRefsRecentInBox(onlyDoc bool, typeFilter string, ignoreLines []string,
 	return
 }
 
+// QueryChildRefDefIDsByRootDefIDInBox 按 rootDefID 查子引用定义，按 boxID 路由。
+func QueryChildRefDefIDsByRootDefIDInBox(rootDefID, boxID string) (ret map[string][]string) {
+	ret = map[string][]string{}
+	rows, err := queryForBox(boxID, "SELECT block_id, def_block_id FROM refs WHERE def_block_root_id = ?", rootDefID)
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var defID, refID string
+		if err = rows.Scan(&defID, &refID); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		if nil == ret[defID] {
+			ret[defID] = []string{refID}
+		} else {
+			ret[defID] = append(ret[defID], refID)
+		}
+	}
+	return
+}
+
+// QueryRefIDsByDefIDInBox 按 defID 查引用 ID 列表，按 boxID 路由。
+func QueryRefIDsByDefIDInBox(defID string, containChildren bool, boxID string) (refIDs []string) {
+	refIDs = []string{}
+	var rows *sql.Rows
+	var err error
+	if containChildren {
+		rows, err = queryForBox(boxID, "SELECT DISTINCT block_id FROM refs WHERE def_block_root_id = ?", defID)
+	} else {
+		rows, err = queryForBox(boxID, "SELECT DISTINCT block_id FROM refs WHERE def_block_id = ?", defID)
+	}
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		refIDs = append(refIDs, id)
+	}
+	return
+}
+
 // SelectBlocksRawStmtNoParseInBox 与 SelectBlocksRawStmtNoParse 一致，但按 boxID 路由。
 func SelectBlocksRawStmtNoParseInBox(stmt string, limit int, boxID string) (ret []*Block) {
 	rows, err := queryForBox(boxID, stmt)

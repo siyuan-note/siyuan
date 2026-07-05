@@ -54,9 +54,14 @@ type AttrView struct {
 }
 
 func GetDocInfo(blockID string) (ret *BlockInfo, err error) {
+	return GetDocInfoInBox(blockID, "")
+}
+
+// GetDocInfoInBox 与 GetDocInfo 一致，但按 boxID 路由 blocktree/refs 查询到加密 db 或全局 db。
+func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 	FlushTxQueue()
 
-	tree, err := LoadTreeByBlockID(blockID)
+	tree, err := loadTreeByBlockIDInBox(blockID, boxID)
 	if err != nil {
 		logging.LogErrorf("load tree by root id [%s] failed: %s", blockID, err)
 		return
@@ -69,7 +74,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo, err error) {
 	if 0 < len(scrollData) {
 		// scroll 属性值在持久化时会被 html.EscapeAttrVal() 进行 HTML 转义（如 " 变为 &quot;），
 		// 虽然 parse.IAL2Map() 中会调用 html.UnescapeAttrVal() 进行反转义，
-		// 但部分历史数据或某些路径下可能出现反转义不完整的情况，导致 JSON 解析失败，
+		// 但部分历史数据或某些历史路径下可能出现反转义不完整的情况，导致 JSON 解析失败，
 		// 这里做一次防御性反转义，确保 JSON 解析不会因为残留的 HTML 实体而报错
 		scrollData = util.UnescapeHTML(scrollData)
 		scroll := map[string]any{}
@@ -78,17 +83,17 @@ func GetDocInfo(blockID string) (ret *BlockInfo, err error) {
 			delete(ret.IAL, "scroll")
 		} else {
 			if zoomInId := scroll["zoomInId"]; nil != zoomInId {
-				if !treenode.ExistBlockTree(zoomInId.(string)) {
+				if !treenode.ExistBlockTreeInBox(zoomInId.(string), boxID) {
 					delete(ret.IAL, "scroll")
 				}
 			} else {
 				if startId := scroll["startId"]; nil != startId {
-					if !treenode.ExistBlockTree(startId.(string)) {
+					if !treenode.ExistBlockTreeInBox(startId.(string), boxID) {
 						delete(ret.IAL, "scroll")
 					}
 				}
 				if endId := scroll["endId"]; nil != endId {
-					if !treenode.ExistBlockTree(endId.(string)) {
+					if !treenode.ExistBlockTreeInBox(endId.(string), boxID) {
 						delete(ret.IAL, "scroll")
 					}
 				}
@@ -96,8 +101,8 @@ func GetDocInfo(blockID string) (ret *BlockInfo, err error) {
 		}
 	}
 
-	bt := treenode.GetBlockTree(blockID)
-	refDefs := queryBlockRefDefs(bt)
+	bt := treenode.GetBlockTreeInBox(blockID, boxID)
+	refDefs := queryBlockRefDefsInBox(bt, boxID)
 	buildBacklinkListItemRefs(refDefs)
 	var refIDs []string
 	for _, refDef := range refDefs {
@@ -381,6 +386,11 @@ func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[str
 }
 
 func queryBlockRefDefs(bt *treenode.BlockTree) (refDefs []*RefDefs) {
+	return queryBlockRefDefsInBox(bt, "")
+}
+
+// queryBlockRefDefsInBox 与 queryBlockRefDefs 一致，但按 boxID 路由到加密 db 或全局 db。
+func queryBlockRefDefsInBox(bt *treenode.BlockTree, boxID string) (refDefs []*RefDefs) {
 	refDefs = []*RefDefs{}
 	if nil == bt {
 		return
@@ -388,7 +398,7 @@ func queryBlockRefDefs(bt *treenode.BlockTree) (refDefs []*RefDefs) {
 
 	isDoc := bt.ID == bt.RootID
 	if isDoc {
-		refDefIDs := sql.QueryChildRefDefIDsByRootDefID(bt.RootID)
+		refDefIDs := sql.QueryChildRefDefIDsByRootDefIDInBox(bt.RootID, boxID)
 		for rID, dIDs := range refDefIDs {
 			var defIDs []string
 			for _, dID := range dIDs {
@@ -400,7 +410,7 @@ func queryBlockRefDefs(bt *treenode.BlockTree) (refDefs []*RefDefs) {
 			refDefs = append(refDefs, &RefDefs{RefID: rID, DefIDs: defIDs})
 		}
 	} else {
-		refIDs := sql.QueryRefIDsByDefID(bt.ID, false)
+		refIDs := sql.QueryRefIDsByDefIDInBox(bt.ID, false, boxID)
 		for _, refID := range refIDs {
 			refDefs = append(refDefs, &RefDefs{RefID: refID, DefIDs: []string{bt.ID}})
 		}

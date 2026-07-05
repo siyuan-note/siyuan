@@ -1151,9 +1151,13 @@ export const getArticle = (options: {
         }
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
-        fetchPost("/api/block/getDocInfo", {
+        const docInfoParam: IObject = {
             id: options.id,
-        }, (response) => {
+        };
+        if (isEncryptedBox(options.edit.protyle.notebookId)) {
+            docInfoParam.notebook = options.edit.protyle.notebookId;
+        }
+        fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
             if (articleId !== options.id) {
                 return;
             }

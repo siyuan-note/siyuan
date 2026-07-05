@@ -27,7 +27,7 @@ import {newDailyNote} from "../../util/mount";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {goBack, goForward} from "../../util/backForward";
-import {getDisplayName, getNotebookName} from "../../util/pathName";
+import {getDisplayName, getNotebookName, isEncryptedBox} from "../../util/pathName";
 import {openFileById} from "../../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../../layout/getAll";
 import {focusBlock, focusByRange} from "../../protyle/util/selection";
@@ -652,9 +652,13 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {
         window.siyuan.menus.menu.remove();
         if (isFile) {
-            fetchPost("/api/block/getDocInfo", {
+            const docInfoParam: IObject = {
                 id: liElements[0].getAttribute("data-node-id")
-            }, (response) => {
+            };
+            if (isEncryptedBox(notebookId)) {
+                docInfoParam.notebook = notebookId;
+            }
+            fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                 rename({
                     notebookId,
                     path: pathString,

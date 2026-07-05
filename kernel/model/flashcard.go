@@ -657,7 +657,7 @@ func getTreeSubTreeChildBlocks(rootID string) (treeBlockIDsMap map[string]bool, 
 		return
 	}
 
-	bts := treenode.GetBlockTreesByPathPrefix(strings.TrimSuffix(root.Path, ".sy"))
+	bts := treenode.GetBlockTreesByPathPrefix(root.BoxID, strings.TrimSuffix(root.Path, ".sy"))
 	for _, bt := range bts {
 		treeBlockIDsMap[bt.ID] = true
 		treeBlockIDs = append(treeBlockIDs, bt.ID)

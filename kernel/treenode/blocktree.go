@@ -475,9 +475,9 @@ func RemoveBlockTreesByRootID(boxID, rootID string) {
 	}
 }
 
-func CountBlockTreesByPathPrefix(pathPrefix string) (ret int) {
-	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE path LIKE ?"
-	err := queryRow(sqlStmt, pathPrefix+"%").Scan(&ret)
+func CountBlockTreesByPathPrefix(boxID, pathPrefix string) (ret int) {
+	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE path LIKE ? AND box_id = ?"
+	err := queryRowForBox(boxID, sqlStmt, pathPrefix+"%", boxID).Scan(&ret)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0
@@ -487,9 +487,9 @@ func CountBlockTreesByPathPrefix(pathPrefix string) (ret int) {
 	return
 }
 
-func GetBlockTreesByPathPrefix(pathPrefix string) (ret []*BlockTree) {
-	sqlStmt := "SELECT * FROM blocktrees WHERE path LIKE ?"
-	rows, err := query(sqlStmt, pathPrefix+"%")
+func GetBlockTreesByPathPrefix(boxID, pathPrefix string) (ret []*BlockTree) {
+	sqlStmt := "SELECT * FROM blocktrees WHERE path LIKE ? AND box_id = ?"
+	rows, err := queryForBox(boxID, sqlStmt, pathPrefix+"%", boxID)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return

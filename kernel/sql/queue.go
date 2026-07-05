@@ -156,7 +156,7 @@ func FlushQueue() {
 		}
 	}
 	if nil != renameTreeOp {
-		childCount := treenode.CountBlockTreesByPathPrefix(path.Dir(renameTreeOp.indexTree.Path))
+		childCount := treenode.CountBlockTreesByPathPrefix(renameTreeOp.indexTree.Box, path.Dir(renameTreeOp.indexTree.Path))
 		if 512 < childCount {
 			scale := math.Log(float64(childCount)/512.0+1.0) / math.Log(2.0)
 			secs := 1.0 * scale

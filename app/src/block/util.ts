@@ -49,7 +49,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
                 id,
             });
             if (range) {
-                getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>");
+                getContenteditableElement(nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
             }
             nodeElement.lastElementChild.remove();
             nodeElement.replaceWith(...nodeElement.children);

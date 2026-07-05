@@ -2075,6 +2075,7 @@
     "309": "El cuaderno cifrado está bloqueado, por favor desbloquéelo primero",
     "310": "La función de cuaderno cifrado no está habilitada",
     "311": "Contraseña maestra incorrecta",
-    "312": "La función de cuaderno cifrado ya está habilitada"
+    "312": "La función de cuaderno cifrado ya está habilitada",
+    "313": "No se admite mover documentos a través de los límites del cuaderno cifrado"
   }
 }

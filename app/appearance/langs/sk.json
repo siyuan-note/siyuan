@@ -2075,6 +2075,7 @@
     "309": "Šifrovaný zápisník je zamknutý, najprv ho odomknite",
     "310": "Funkcia šifrovaného zápisníka nie je povolená",
     "311": "Nesprávne hlavné heslo",
-    "312": "Funkcia šifrovaného zápisníka je už povolená"
+    "312": "Funkcia šifrovaného zápisníka je už povolená",
+    "313": "Presúvanie dokumentov cez hranice šifrovaného zápisníka nie je podporované"
   }
 }

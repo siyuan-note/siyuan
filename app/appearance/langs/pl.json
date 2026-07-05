@@ -2075,6 +2075,7 @@
     "309": "Zaszyfrowany notatnik jest zablokowany, najpierw go odblokuj",
     "310": "Funkcja zaszyfrowanego notatnika nie jest włączona",
     "311": "Nieprawidłowe główne hasło",
-    "312": "Funkcja zaszyfrowanego notatnika jest już włączona"
+    "312": "Funkcja zaszyfrowanego notatnika jest już włączona",
+    "313": "Przenoszenie dokumentów przez granice zaszyfrowanego notatnika nie jest obsługiwane"
   }
 }

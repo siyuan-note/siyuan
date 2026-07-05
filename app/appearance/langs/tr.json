@@ -2075,6 +2075,7 @@
     "309": "Şifreli not defteri kilitli, önce kilidini açın",
     "310": "Şifreli not defteri özelliği etkin değil",
     "311": "Yanlış ana şifre",
-    "312": "Şifreli not defteri özelliği zaten etkin"
+    "312": "Şifreli not defteri özelliği zaten etkin",
+    "313": "Şifreli not defteri sınırları boyunca belge taşıma desteklenmemektedir"
   }
 }

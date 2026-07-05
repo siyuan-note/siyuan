@@ -2075,6 +2075,7 @@
     "309": "Versleuteld notitieboek is vergrendeld, ontgrendel het eerst",
     "310": "Functie voor versleuteld notitieboek is niet ingeschakeld",
     "311": "Onjuist hoofdwachtwoord",
-    "312": "Functie voor versleuteld notitieboek is al ingeschakeld"
+    "312": "Functie voor versleuteld notitieboek is al ingeschakeld",
+    "313": "Het verplaatsen van documenten over versleutelde notitieboekgrenzen wordt niet ondersteund"
   }
 }

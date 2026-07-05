@@ -420,10 +420,17 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
+        // Argon2id 密钥派生约耗时 1 秒，期间禁用按钮并显示 loading，避免用户误以为卡住而重复点击
+        const originalText = confirmBtn.textContent;
+        confirmBtn.setAttribute("disabled", "disabled");
+        confirmBtn.textContent = window.siyuan.languages.loading;
         fetchPost("/api/notebook/enableEncryptedNotebooks", {password: pwd1}, () => {
             showMessage(window.siyuan.languages.encryptedNotebookEnabled);
             dialog.destroy();
             onSuccess();
+        }, undefined, () => {
+            confirmBtn.removeAttribute("disabled");
+            confirmBtn.textContent = originalText;
         });
     });
 };
@@ -460,12 +467,20 @@ const openChangeMasterPasswordDialog = () => {
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
+        // 改密需校验旧密码 + 重新派生 KEK + 重包络所有加密 box 的 DEK，耗时较长
+        const confirmBtn = btnsElement[1] as HTMLButtonElement;
+        const originalText = confirmBtn.textContent;
+        confirmBtn.setAttribute("disabled", "disabled");
+        confirmBtn.textContent = window.siyuan.languages.loading;
         fetchPost("/api/notebook/changeMasterPassword", {
             oldPassword: oldPwd,
             newPassword: newPwd
         }, () => {
             showMessage(window.siyuan.languages.changeMasterPassword);
             dialog.destroy();
+        }, undefined, () => {
+            confirmBtn.removeAttribute("disabled");
+            confirmBtn.textContent = originalText;
         });
     });
 };

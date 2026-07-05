@@ -210,8 +210,11 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         if (!password) {
             return false;
         }
-        btnsElement[1].setAttribute("disabled", "disabled");
-        // 先解锁（派生 KEK + 解 DEK + 打开加密 db），成功后再挂载
+        const unlockBtn = btnsElement[1] as HTMLButtonElement;
+        const originalText = unlockBtn.textContent;
+        unlockBtn.setAttribute("disabled", "disabled");
+        unlockBtn.textContent = window.siyuan.languages.loading;
+        // 先解锁（派生 KEK + 解 DEK + 打开加密 db，Argon2id 约耗时 1 秒），成功后再挂载
         fetchPost("/api/notebook/unlockBox", {
             notebook: notebookId,
             password
@@ -220,8 +223,9 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
                 notebook: notebookId
             });
             dialog.destroy();
-        }, (err) => {
-            btnsElement[1].removeAttribute("disabled");
+        }, undefined, (err) => {
+            unlockBtn.removeAttribute("disabled");
+            unlockBtn.textContent = originalText;
             showMessage(err.msg || window.siyuan.languages.incorrectMasterPassword);
         });
     });

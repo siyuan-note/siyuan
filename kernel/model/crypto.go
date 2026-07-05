@@ -50,12 +50,6 @@ func EnableEncryptedNotebook(password string) error {
 	if len(password) == 0 {
 		return errors.New("password must not be empty")
 	}
-	Conf.m.Lock()
-	defer Conf.m.Unlock()
-
-	if Conf.NotebookCrypto.Enabled {
-		return errors.New("encrypted notebook already enabled")
-	}
 
 	salt, err := util.GenerateSalt()
 	if err != nil {
@@ -73,12 +67,19 @@ func EnableEncryptedNotebook(password string) error {
 		return err
 	}
 
+	Conf.m.Lock()
+	if Conf.NotebookCrypto.Enabled {
+		Conf.m.Unlock()
+		return errors.New("encrypted notebook already enabled")
+	}
 	Conf.NotebookCrypto.Enabled = true
 	Conf.NotebookCrypto.MasterSalt = salt
 	Conf.NotebookCrypto.KDFParams = params
 	Conf.NotebookCrypto.KEKVerifier = verifierCT
 	Conf.NotebookCrypto.VerifierNonce = verifierCT[:12]
+	Conf.m.Unlock()
 
+	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
 	Conf.Save()
 	return nil
 }
@@ -245,9 +246,9 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	}
 
 	Conf.m.Lock()
-	defer Conf.m.Unlock()
-
 	nc := Conf.NotebookCrypto
+	Conf.m.Unlock()
+
 	newKEK := util.DeriveKey(newPassword, nc.MasterSalt, nc.KDFParams)
 	newVerifier, err := util.Encrypt(newKEK, kekVerifierMagic)
 	if err != nil {
@@ -277,9 +278,12 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		b.SaveConf(boxConf)
 	}
 
+	Conf.m.Lock()
 	Conf.NotebookCrypto.KEKVerifier = newVerifier
 	Conf.NotebookCrypto.VerifierNonce = newVerifier[:12]
+	Conf.m.Unlock()
 
+	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
 	Conf.Save()
 	return nil
 }

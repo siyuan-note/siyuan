@@ -89,7 +89,7 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 	kek, _ := util.GenerateDEK()
 	defer LockAllBoxes()
 
-	boxEnc, err := WrapNewDEK(kek)
+	boxEnc, _, err := WrapNewDEK(kek)
 	if err != nil {
 		t.Fatalf("WrapNewDEK failed: %v", err)
 	}
@@ -113,7 +113,7 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 // TestUnwrapDEKWithWrongKEK 验证用错误的 KEK 解包失败（GCM MAC 校验）。
 func TestUnwrapDEKWithWrongKEK(t *testing.T) {
 	kek1, _ := util.GenerateDEK()
-	boxEnc, _ := WrapNewDEK(kek1)
+	boxEnc, _, _ := WrapNewDEK(kek1)
 
 	kek2, _ := util.GenerateDEK()
 	defer LockAllBoxes()
@@ -128,15 +128,21 @@ func TestWrapNewDEKProducesUniqueDEKs(t *testing.T) {
 	kek, _ := util.GenerateDEK()
 	defer LockAllBoxes()
 
-	enc1, _ := WrapNewDEK(kek)
-	enc2, _ := WrapNewDEK(kek)
+	enc1, dek1, _ := WrapNewDEK(kek)
+	enc2, dek2, _ := WrapNewDEK(kek)
 
-	UnwrapDEK("uniq-box-1", enc1, kek)
-	UnwrapDEK("uniq-box-2", enc2, kek)
-	dek1, _ := GetDEK("uniq-box-1")
-	dek2, _ := GetDEK("uniq-box-2")
+	// WrapNewDEK 现在同时返回原始 DEK，可直接比对随机性
 	if bytes.Equal(dek1, dek2) {
 		t.Fatalf("two WrapNewDEK calls produced identical DEKs (not random?)")
+	}
+
+	// 同时验证包络后解包能还原出相同的 DEK
+	UnwrapDEK("uniq-box-1", enc1, kek)
+	UnwrapDEK("uniq-box-2", enc2, kek)
+	unwrappedDek1, _ := GetDEK("uniq-box-1")
+	unwrappedDek2, _ := GetDEK("uniq-box-2")
+	if !bytes.Equal(unwrappedDek1, dek1) || !bytes.Equal(unwrappedDek2, dek2) {
+		t.Fatalf("UnwrapDEK did not restore the original DEK")
 	}
 }
 

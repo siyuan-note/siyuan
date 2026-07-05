@@ -175,20 +175,21 @@ func LockAllBoxes() {
 
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。
 // KEK 由调用方临时派生（不来自全局缓存），调用方负责使用后丢弃。
-func WrapNewDEK(kek []byte) (*conf.BoxEncryption, error) {
+// 同时返回原始 DEK，供调用方在创建场景下直接开 db 缓存，省去再次 Argon2id 派生。
+func WrapNewDEK(kek []byte) (*conf.BoxEncryption, []byte, error) {
 	dek, err := util.GenerateDEK()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	wrapped, err := util.Encrypt(kek, dek)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return &conf.BoxEncryption{
 		WrappedDEK: wrapped,
 		WrapNonce:  wrapped[:12],
 		CreatedAt:  time.Now().UnixMilli(),
-	}, nil
+	}, dek, nil
 }
 
 // UnwrapDEK 从 BoxEncryption 解出 DEK 并缓存到内存，供后续 GetDEK 使用。
@@ -392,7 +393,7 @@ func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 
 // CreateEncryptedBox 创建一个新的加密笔记本。可多次调用创建多个。
 // 前置：加密功能已启用。创建时需要主密码（临时派生 KEK 用于 wrap DEK，用完即弃）。
-// 创建后笔记本处于"已锁定"状态（DEK 未缓存），需调用方再调 UnlockBox + Mount 才能打开。
+// 创建后直接用生成的 DEK 打开加密 db 并缓存（已解锁状态），调用方随后调 openNotebook 即可挂载。
 func CreateEncryptedBox(name, password string) (id string, err error) {
 	Conf.m.RLock()
 	enabled := Conf.NotebookCrypto.Enabled
@@ -406,7 +407,7 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		return "", err
 	}
 
-	enc, err := WrapNewDEK(kek)
+	enc, dek, err := WrapNewDEK(kek)
 	if err != nil {
 		return "", err
 	}
@@ -421,6 +422,19 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	boxConf.Encrypted = true
 	boxConf.BoxCrypt = enc
 	box.SaveConf(boxConf)
+
+	// 复用刚派生的 DEK 直接开 db + 缓存，省去再次 Argon2id 解锁
+	cachedDEKsLock.Lock()
+	defer cachedDEKsLock.Unlock()
+	if err = sql.OpenEncryptedDB(id, dek); err != nil {
+		return "", err
+	}
+	if err = treenode.OpenEncryptedBlockTreeDB(id, dek); err != nil {
+		sql.CloseEncryptedDB(id)
+		return "", err
+	}
+	cachedDEKs[id] = dek
+
 	IncSync()
 	return id, nil
 }

@@ -163,7 +163,7 @@ export const newEncryptedNotebook = () => {
         btnsElement[0].addEventListener("click", () => {
             dialog.destroy();
         });
-        btnsElement[1].addEventListener("click", () => {
+        btnsElement[1].addEventListener("click", async () => {
             const name = inputs[0].value;
             const password = inputs[1].value;
             if (!validateName(name)) {
@@ -173,14 +173,25 @@ export const newEncryptedNotebook = () => {
                 showMessage(window.siyuan.languages.masterPassword);
                 return false;
             }
-            fetchPost("/api/notebook/createEncryptedNotebook", {
+            // 创建含 KEK 派生 + 开加密 db，约耗时 1 秒
+            const confirmBtn = btnsElement[1] as HTMLButtonElement;
+            const originalText = confirmBtn.textContent;
+            confirmBtn.setAttribute("disabled", "disabled");
+            confirmBtn.textContent = window.siyuan.languages.loading;
+            const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
                 name: replaceFileName(name),
                 password
-            }, () => {
-                // 创建后是锁定状态，引导用户解锁
-                showMessage(window.siyuan.languages.encryptedNotebook, 3000);
             });
-            dialog.destroy();
+            if (response.code === 0) {
+                // 内核创建时已解锁（DEK 已缓存 + 加密 db 已打开），直接挂载
+                fetchPost("/api/notebook/openNotebook", {
+                    notebook: response.data.notebook.id
+                });
+                dialog.destroy();
+            } else {
+                confirmBtn.removeAttribute("disabled");
+                confirmBtn.textContent = originalText;
+            }
         });
     });
 };

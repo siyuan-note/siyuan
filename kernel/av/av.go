@@ -699,6 +699,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			return
 		}
 	}
+	// 确保目录存在（加密 box 的笔记本级 AV 目录可能尚不存在）
+	if err = os.MkdirAll(filepath.Dir(avJSONPath), 0755); nil != err {
+		logging.LogErrorf("create attribute view dir [%s] failed: %s", filepath.Dir(avJSONPath), err)
+		return
+	}
 	if err = util.WriteFileByMmap(avJSONPath, writeData); nil != err {
 		if err = filelock.WriteFile(avJSONPath, writeData); nil != err {
 			logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)

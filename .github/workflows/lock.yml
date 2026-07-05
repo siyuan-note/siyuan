@@ -2,16 +2,12 @@ name: Lock closed issues and PRs
 
 on:
   schedule:
-    - cron: "*/10 * * * *" # 每 10 分钟运行一次（临时高频，用于回扫历史存量，事后改回每日）
-  workflow_dispatch: # 允许手动触发，便于首次启用时回扫历史
+    - cron: "0 0 * * *" # 每天 UTC 00:00（北京时间 08:00）运行一次
+  workflow_dispatch: # 允许手动触发
 
 permissions:
   issues: write
   pull-requests: write
-
-concurrency:
-  group: lock-threads
-  cancel-in-progress: false # 不取消正在跑的，避免回扫中途中断
 
 jobs:
   lock:

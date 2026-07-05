@@ -126,6 +126,12 @@ func TimeFromID(id string) (ret string) {
 	return
 }
 
+// NodeIDByTime 根据指定时间生成符合块 ID 格式的字符串，算法与 ast.NewNodeID() 一致，
+// 仅时间源不同：用于让历史输入（如移动端速记暂存文件名时间戳）回填为块 ID。
+func NodeIDByTime(t time.Time) string {
+	return t.Format("20060102150405") + "-" + RandString(7)
+}
+
 func GetChildDocDepth(treeAbsPath string) (ret int) {
 	dir := strings.TrimSuffix(treeAbsPath, ".sy")
 	if !gulu.File.IsDir(dir) {

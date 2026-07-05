@@ -70,7 +70,7 @@ func EnableEncryptedNotebook(password string) error {
 	Conf.m.Lock()
 	if Conf.NotebookCrypto.Enabled {
 		Conf.m.Unlock()
-		return errors.New("encrypted notebook already enabled")
+		return errors.New(Conf.Language(312))
 	}
 	Conf.NotebookCrypto.Enabled = true
 	Conf.NotebookCrypto.MasterSalt = salt
@@ -91,7 +91,7 @@ func deriveKEK(password string) ([]byte, error) {
 	Conf.m.RUnlock()
 
 	if !nc.Enabled {
-		return nil, errors.New("encrypted notebook not enabled")
+		return nil, errors.New(Conf.Language(310))
 	}
 	params := nc.KDFParams
 	if params.KeyLength == 0 {
@@ -101,10 +101,10 @@ func deriveKEK(password string) ([]byte, error) {
 
 	decrypted, err := util.Decrypt(kek, nc.KEKVerifier)
 	if err != nil {
-		return nil, errors.New("incorrect password")
+		return nil, errors.New(Conf.Language(311))
 	}
 	if string(decrypted) != string(kekVerifierMagic) {
-		return nil, errors.New("incorrect password")
+		return nil, errors.New(Conf.Language(311))
 	}
 	return kek, nil
 }
@@ -398,7 +398,7 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	enabled := Conf.NotebookCrypto.Enabled
 	Conf.m.RUnlock()
 	if !enabled {
-		return "", errors.New("encrypted notebook feature not enabled")
+		return "", errors.New(Conf.Language(310))
 	}
 
 	kek, err := deriveKEK(password)

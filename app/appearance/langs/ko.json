@@ -8,6 +8,7 @@
   "masterPassword": "마스터 비밀번호",
   "confirmMasterPassword": "마스터 비밀번호 확인",
   "changeMasterPassword": "마스터 비밀번호 변경",
+  "changeMasterPasswordSuccessTip": "마스터 암호가 변경되었습니다",
   "oldMasterPassword": "이전 마스터 비밀번호",
   "newMasterPassword": "새 마스터 비밀번호",
   "encryptedNotebookRiskTip": "마스터 비밀번호를 잊어버리면 암호화 내용을 복구할 수 없습니다. 반드시 기억해 주세요.",

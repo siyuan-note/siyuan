@@ -8,6 +8,7 @@
   "masterPassword": "รหัสผ่านหลัก",
   "confirmMasterPassword": "ยืนยันรหัสผ่านหลัก",
   "changeMasterPassword": "เปลี่ยนรหัสผ่านหลัก",
+  "changeMasterPasswordSuccessTip": "เปลี่ยนรหัสผ่านหลักแล้ว",
   "oldMasterPassword": "รหัสผ่านหลักเดิม",
   "newMasterPassword": "รหัสผ่านหลักใหม่",
   "encryptedNotebookRiskTip": "ไม่สามารถกู้คืนเนื้อหาที่เข้ารหัสได้หากรหัสผ่านหลักสูญหาย โปรดตรวจสอบให้แน่ใจว่าคุณจำมันได้",

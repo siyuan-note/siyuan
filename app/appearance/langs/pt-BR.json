@@ -8,6 +8,7 @@
   "masterPassword": "Senha mestra",
   "confirmMasterPassword": "Confirmar senha mestra",
   "changeMasterPassword": "Alterar senha mestra",
+  "changeMasterPasswordSuccessTip": "Senha mestra alterada",
   "oldMasterPassword": "Senha mestra antiga",
   "newMasterPassword": "Nova senha mestra",
   "encryptedNotebookRiskTip": "O conteúdo criptografado não pode ser recuperado se a senha mestra for perdida. Certifique-se de lembrá-la.",

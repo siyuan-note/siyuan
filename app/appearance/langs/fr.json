@@ -8,6 +8,7 @@
   "masterPassword": "Mot de passe maître",
   "confirmMasterPassword": "Confirmer le mot de passe maître",
   "changeMasterPassword": "Changer le mot de passe maître",
+  "changeMasterPasswordSuccessTip": "Mot de passe maître modifié",
   "oldMasterPassword": "Ancien mot de passe maître",
   "newMasterPassword": "Nouveau mot de passe maître",
   "encryptedNotebookRiskTip": "Le contenu chiffré ne peut pas être récupéré si le mot de passe maître est perdu. Veuillez vous assurer de bien le mémoriser.",

@@ -8,6 +8,7 @@
   "masterPassword": "كلمة المرور الرئيسية",
   "confirmMasterPassword": "تأكيد كلمة المرور الرئيسية",
   "changeMasterPassword": "تغيير كلمة المرور الرئيسية",
+  "changeMasterPasswordSuccessTip": "تم تغيير كلمة المرور الرئيسية",
   "oldMasterPassword": "كلمة المرور الرئيسية القديمة",
   "newMasterPassword": "كلمة المرور الرئيسية الجديدة",
   "encryptedNotebookRiskTip": "لا يمكن استرداد المحتوى المشفر في حال فقدان كلمة المرور الرئيسية. يرجى التأكد من تذكرها.",

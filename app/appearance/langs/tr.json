@@ -8,6 +8,7 @@
   "masterPassword": "Ana şifre",
   "confirmMasterPassword": "Ana şifreyi onayla",
   "changeMasterPassword": "Ana şifreyi değiştir",
+  "changeMasterPasswordSuccessTip": "Ana parola değiştirildi",
   "oldMasterPassword": "Eski ana şifre",
   "newMasterPassword": "Yeni ana şifre",
   "encryptedNotebookRiskTip": "Ana şifre kaybolursa şifreli içerik kurtarılamaz. Lütfen hatırladığınızdan emin olun.",

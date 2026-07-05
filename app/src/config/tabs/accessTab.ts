@@ -481,7 +481,7 @@ const openChangeMasterPasswordDialog = () => {
             newPassword: newPwd
         });
         if (response.code === 0) {
-            showMessage(window.siyuan.languages.changeMasterPassword);
+            showMessage(window.siyuan.languages.changeMasterPasswordSuccessTip);
             dialog.destroy();
         } else {
             // fetchSyncPost 已通过 processMessage 弹出错误提示，这里只需恢复按钮

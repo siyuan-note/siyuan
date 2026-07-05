@@ -8,6 +8,7 @@
   "masterPassword": "主密码",
   "confirmMasterPassword": "确认主密码",
   "changeMasterPassword": "修改主密码",
+  "changeMasterPasswordSuccessTip": "修改主密码完毕",
   "oldMasterPassword": "旧主密码",
   "newMasterPassword": "新主密码",
   "encryptedNotebookRiskTip": "加密笔记本的内容在忘记主密码后无法恢复，请务必牢记主密码。",

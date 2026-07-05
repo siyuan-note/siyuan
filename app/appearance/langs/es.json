@@ -8,6 +8,7 @@
   "masterPassword": "Contraseña maestra",
   "confirmMasterPassword": "Confirmar contraseña maestra",
   "changeMasterPassword": "Cambiar contraseña maestra",
+  "changeMasterPasswordSuccessTip": "Contraseña maestra cambiada",
   "oldMasterPassword": "Contraseña maestra antigua",
   "newMasterPassword": "Contraseña maestra nueva",
   "encryptedNotebookRiskTip": "El contenido cifrado no se puede recuperar si se pierde la contraseña maestra. Asegúrese de recordarla.",

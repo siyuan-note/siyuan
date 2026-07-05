@@ -8,6 +8,7 @@
   "masterPassword": "मास्टर पासवर्ड",
   "confirmMasterPassword": "मास्टर पासवर्ड की पुष्टि करें",
   "changeMasterPassword": "मास्टर पासवर्ड बदलें",
+  "changeMasterPasswordSuccessTip": "मास्टर पासवर्ड बदला गया",
   "oldMasterPassword": "पुराना मास्टर पासवर्ड",
   "newMasterPassword": "नया मास्टर पासवर्ड",
   "encryptedNotebookRiskTip": "यदि मास्टर पासवर्ड खो जाता है तो एन्क्रिप्टेड सामग्री को पुनर्प्राप्त नहीं किया जा सकता। कृपया सुनिश्चित करें कि आप इसे याद रखें।",

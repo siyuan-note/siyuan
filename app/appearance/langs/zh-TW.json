@@ -8,6 +8,7 @@
   "masterPassword": "主密碼",
   "confirmMasterPassword": "確認主密碼",
   "changeMasterPassword": "修改主密碼",
+  "changeMasterPasswordSuccessTip": "修改主密碼完畢",
   "oldMasterPassword": "舊主密碼",
   "newMasterPassword": "新主密碼",
   "encryptedNotebookRiskTip": "加密筆記本的內容在忘記主密碼後無法恢復，請務必牢記主密碼。",

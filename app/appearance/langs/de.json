@@ -8,6 +8,7 @@
   "masterPassword": "Master-Passwort",
   "confirmMasterPassword": "Master-Passwort bestätigen",
   "changeMasterPassword": "Master-Passwort ändern",
+  "changeMasterPasswordSuccessTip": "Master-Passwort geändert",
   "oldMasterPassword": "Altes Master-Passwort",
   "newMasterPassword": "Neues Master-Passwort",
   "encryptedNotebookRiskTip": "Die verschlüsselten Inhalte können bei Verlust des Master-Passworts nicht wiederhergestellt werden. Bitte stellen Sie sicher, dass Sie es sich merken.",

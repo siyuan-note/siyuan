@@ -8,6 +8,7 @@
   "masterPassword": "Password principale",
   "confirmMasterPassword": "Conferma password principale",
   "changeMasterPassword": "Cambia password principale",
+  "changeMasterPasswordSuccessTip": "Password principale modificata",
   "oldMasterPassword": "Vecchia password principale",
   "newMasterPassword": "Nuova password principale",
   "encryptedNotebookRiskTip": "Il contenuto crittografato non può essere recuperato in caso di perdita della password principale. Assicurati di ricordarla.",

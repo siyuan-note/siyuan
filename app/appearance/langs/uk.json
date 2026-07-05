@@ -8,6 +8,7 @@
   "masterPassword": "Майстер-пароль",
   "confirmMasterPassword": "Підтвердьте майстер-пароль",
   "changeMasterPassword": "Змінити майстер-пароль",
+  "changeMasterPasswordSuccessTip": "Головний пароль змінено",
   "oldMasterPassword": "Старий майстер-пароль",
   "newMasterPassword": "Новий майстер-пароль",
   "encryptedNotebookRiskTip": "Зашифрований вміст неможливо відновити, якщо майстер-пароль втрачено. Будь ласка, переконайтеся, що ви його запам'ятали.",

@@ -8,6 +8,7 @@
   "masterPassword": "マスターパスワード",
   "confirmMasterPassword": "マスターパスワードを確認",
   "changeMasterPassword": "マスターパスワードを変更",
+  "changeMasterPasswordSuccessTip": "マスターパスワードの変更が完了しました",
   "oldMasterPassword": "以前のマスターパスワード",
   "newMasterPassword": "新しいマスターパスワード",
   "encryptedNotebookRiskTip": "マスターパスワードを紛失すると暗号化内容を復元できません。必ず覚えておいてください。",

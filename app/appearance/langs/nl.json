@@ -8,6 +8,7 @@
   "masterPassword": "Hoofdwachtwoord",
   "confirmMasterPassword": "Hoofdwachtwoord bevestigen",
   "changeMasterPassword": "Hoofdwachtwoord wijzigen",
+  "changeMasterPasswordSuccessTip": "Hoofdwachtwoord gewijzigd",
   "oldMasterPassword": "Oud hoofdwachtwoord",
   "newMasterPassword": "Nieuw hoofdwachtwoord",
   "encryptedNotebookRiskTip": "De versleutelde inhoud kan niet worden hersteld als het hoofdwachtwoord verloren is. Zorg ervoor dat u het onthoudt.",

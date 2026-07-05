@@ -8,6 +8,7 @@
   "masterPassword": "Kata sandi utama",
   "confirmMasterPassword": "Konfirmasi kata sandi utama",
   "changeMasterPassword": "Ubah kata sandi utama",
+  "changeMasterPasswordSuccessTip": "Kata sandi utama diubah",
   "oldMasterPassword": "Kata sandi utama lama",
   "newMasterPassword": "Kata sandi utama baru",
   "encryptedNotebookRiskTip": "Konten terenkripsi tidak dapat dipulihkan jika kata sandi utama hilang. Pastikan Anda mengingatnya.",

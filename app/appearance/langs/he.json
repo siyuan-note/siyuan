@@ -8,6 +8,7 @@
   "masterPassword": "סיסמה ראשית",
   "confirmMasterPassword": "אישור סיסמה ראשית",
   "changeMasterPassword": "שנה סיסמה ראשית",
+  "changeMasterPasswordSuccessTip": "הסיסמה הראשית שונתה",
   "oldMasterPassword": "סיסמה ראשית ישנה",
   "newMasterPassword": "סיסמה ראשית חדשה",
   "encryptedNotebookRiskTip": "לא ניתן לשחזר את התוכן המוצפן אם הסיסמה הראשית אובדת. נא לוודא שאתם זוכרים אותה.",

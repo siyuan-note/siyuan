@@ -52,7 +52,7 @@ import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
-import {isEncryptedBox} from "../util/pathName";
+import {isEncryptedBox} from "../../util/pathName";
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,

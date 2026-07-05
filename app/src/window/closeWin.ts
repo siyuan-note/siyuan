@@ -7,7 +7,11 @@ export const closeWindow = async (app: App) => {
         const plugin = app.plugins[i];
         try {
             await plugin.onunload();
-            await plugin.kernel.destroy();
+        } catch (e) {
+            console.error(e);
+        }
+        try {
+            await plugin.kernel?.destroy();
         } catch (e) {
             console.error(e);
         }

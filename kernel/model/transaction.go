@@ -1230,6 +1230,21 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	if nil == bt {
+		// 全局 blocktree 找不到时，遍历已打开的加密 box 查找
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			encBTs := treenode.GetBlockTreesInBox([]string{operation.ParentID, operation.PreviousID, operation.NextID}, encBoxID)
+			for _, b := range encBTs {
+				if "" != b.ID {
+					bt = b
+					break
+				}
+			}
+			if nil != bt {
+				break
+			}
+		}
+	}
+	if nil == bt {
 		logging.LogWarnf("not found block tree [%s, %s, %s]", operation.ParentID, operation.PreviousID, operation.NextID)
 		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
 		return
@@ -2029,6 +2044,15 @@ func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.T
 func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 	var rootID, box, p string
 	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		// 全局 blocktree 找不到时，遍历已打开的加密 box 查找
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
+				bt = encBT
+				break
+			}
+		}
+	}
 	if nil == bt {
 		return nil, ErrBlockNotFound
 	}

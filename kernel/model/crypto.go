@@ -146,7 +146,7 @@ func IsBoxUnlocked(boxID string) bool {
 }
 
 // LockBox 清除指定笔记本的 DEK 并关闭其加密 db。Unmount 单个加密笔记本或手动锁定时调用。
-// 同时清除该笔记本的 TreeData 缓存，避免明文树数据在内存中残留。
+// 同时清空所有明文缓存（树/Block/IAL/AV），避免明文在内存中残留。
 func LockBox(boxID string) {
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {
@@ -156,7 +156,12 @@ func LockBox(boxID string) {
 	cachedDEKsLock.Unlock()
 	sql.CloseEncryptedDB(boxID)
 	treenode.CloseEncryptedBlockTreeDB(boxID)
+	// 清空明文缓存：锁定后任何加密 box 的明文都不应残留内存
 	cache.ClearTreeCache()
+	sql.ClearCache()
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
+	cache.ClearAVCache()
 }
 
 // LockAllBoxes 清除所有已缓存的 DEK 并关闭所有加密 db。退出登录或全局锁定时调用。
@@ -167,10 +172,14 @@ func LockAllBoxes() {
 		delete(cachedDEKs, id)
 	}
 	cachedDEKsLock.Unlock()
-	// 关闭所有已打开的加密 db 连接，清空树缓存避免明文残留
+	// 关闭所有已打开的加密 db 连接，清空明文缓存避免残留
 	sql.CloseAllEncryptedDBs()
 	treenode.CloseAllEncryptedBlockTreeDBs()
 	cache.ClearTreeCache()
+	sql.ClearCache()
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
+	cache.ClearAVCache()
 }
 
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。

@@ -208,10 +208,15 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 }
 
 func Outline(rootID string, preview bool) (ret []*Path, err error) {
+	return OutlineInBox(rootID, preview, "")
+}
+
+// OutlineInBox 与 Outline 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
+func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err error) {
 	FlushTxQueue()
 
 	ret = []*Path{}
-	tree, _ := LoadTreeByBlockID(rootID)
+	tree, _ := loadTreeByBlockIDInBox(rootID, boxID)
 	if nil == tree {
 		return
 	}

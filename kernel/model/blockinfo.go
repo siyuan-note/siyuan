@@ -498,8 +498,13 @@ type BlockPath struct {
 }
 
 func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, err error) {
+	return BuildBlockBreadcrumbInBox(id, excludeTypes, "")
+}
+
+// BuildBlockBreadcrumbInBox 与 BuildBlockBreadcrumb 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
+func BuildBlockBreadcrumbInBox(id string, excludeTypes []string, boxID string) (ret []*BlockPath, err error) {
 	ret = []*BlockPath{}
-	tree, err := LoadTreeByBlockID(id)
+	tree, err := loadTreeByBlockIDInBox(id, boxID)
 	if nil == tree {
 		err = nil
 		return

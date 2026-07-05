@@ -666,7 +666,13 @@ func getBlockBreadcrumb(c *gin.Context) {
 		}
 	}
 
-	blockPath, err := model.BuildBlockBreadcrumb(id, excludeTypes)
+	var blockPath []*model.BlockPath
+	var err error
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		blockPath, err = model.BuildBlockBreadcrumbInBox(id, excludeTypes, notebook)
+	} else {
+		blockPath, err = model.BuildBlockBreadcrumb(id, excludeTypes)
+	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

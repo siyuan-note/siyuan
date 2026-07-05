@@ -141,10 +141,14 @@ export class Protyle {
                                 /// #if !MOBILE
                                 getAllModels().outline.forEach(item => {
                                     if (item.blockId === data.data) {
-                                        fetchPost("/api/outline/getDocOutline", {
+                                        const outlineParam: IObject = {
                                             id: item.blockId,
                                             preview: item.isPreview
-                                        }, response => {
+                                        };
+                                        if (isEncryptedBox(this.protyle.notebookId)) {
+                                            outlineParam.notebook = this.protyle.notebookId;
+                                        }
+                                        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                                             item.update(response);
                                         });
                                     }

@@ -70,6 +70,7 @@ import {popSearch} from "../../mobile/menu/search";
 import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {isEncryptedBox} from "../../util/pathName";
 import {onGet} from "../util/onGet";
 import {clearTableCell, getTableRangeHTML, isIncludeCell, setTableAlign, updateTableTitle} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
@@ -3226,10 +3227,14 @@ export class WYSIWYG {
                             /// #if !MOBILE
                             getAllModels().outline.forEach(item => {
                                 if (item.blockId === protyle.block.rootID) {
-                                    fetchPost("/api/outline/getDocOutline", {
+                                    const outlineParam: IObject = {
                                         id: item.blockId,
                                         preview: item.isPreview
-                                    }, response => {
+                                    };
+                                    if (isEncryptedBox(protyle.notebookId)) {
+                                        outlineParam.notebook = protyle.notebookId;
+                                    }
+                                    fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                                         item.update(response);
                                     });
                                 }

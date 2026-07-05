@@ -641,10 +641,14 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
                 return;
             }
 
-            fetchPost("/api/outline/getDocOutline", {
+            const outlineParam: IObject = {
                 id: blockId,
                 preview: !protyle.preview.element.classList.contains("fn__none")
-            }, response => {
+            };
+            if (protyle && isEncryptedBox(protyle.notebookId)) {
+                outlineParam.notebook = protyle.notebookId;
+            }
+            fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                 if (!reload && (!isCurrentEditor(blockId) || item.blockId === blockId) &&
                     item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
                     return;

@@ -225,7 +225,11 @@ ${padHTML}
             return;
         }
         const id = blockElement.getAttribute("data-node-id");
-        fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes: []}, (response) => {
+        const breadcrumbParam: IObject = {id, excludeTypes: []};
+        if (isEncryptedBox(protyle.notebookId)) {
+            breadcrumbParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
             response.data.forEach((item: IBreadcrumb) => {
                 let isCurrent = false;
                 if (!protyle.block.showAll && item.id === protyle.block.parentID) {
@@ -629,7 +633,11 @@ ${padHTML}
             // 闪卡面包屑不能显示答案
             excludeTypes.push("NodeTextMark-mark");
         }
-        fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes}, (response) => {
+        const breadcrumbParam: IObject = {id, excludeTypes};
+        if (isEncryptedBox(protyle.notebookId)) {
+            breadcrumbParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
             let html = "";
             response.data.forEach((item: IBreadcrumb, index: number) => {
                 let isCurrent = false;

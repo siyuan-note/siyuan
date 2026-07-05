@@ -4,7 +4,7 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {fetchPost} from "./fetch";
 import {Constants} from "../constants";
-import {getDocDisplayName, setNoteBook} from "./pathName";
+import {getDocDisplayName, isEncryptedBox, setNoteBook} from "./pathName";
 import {getAllModels} from "../layout/getAll";
 import {setStorageVal} from "../protyle/util/compatibility";
 import type {Tab} from "../layout/Tab";
@@ -89,10 +89,22 @@ export const reloadSync = (
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
-            fetchPost("/api/outline/getDocOutline", {
+            const outlineParam: IObject = {
                 id: item.blockId,
                 preview: item.isPreview
-            }, response => {
+            };
+            // 解析大纲面板所属 box：按 blockId 在已打开的编辑器里查找
+            let notebookId: string;
+            allModels.editor.some(editorItem => {
+                if (editorItem.editor.protyle.block.rootID === item.blockId) {
+                    notebookId = editorItem.editor.protyle.notebookId;
+                    return true;
+                }
+            });
+            if (isEncryptedBox(notebookId)) {
+                outlineParam.notebook = notebookId;
+            }
+            fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                 item.update(response);
             });
             if (item.type === "local") {

@@ -23,6 +23,7 @@ import {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {transaction, turnsIntoTransaction} from "../../protyle/wysiwyg/transaction";
 import {goHome} from "../../protyle/wysiwyg/commonHotkey";
+import {isEncryptedBox} from "../../util/pathName";
 import {Editor} from "../../editor";
 import {mathRender} from "../../protyle/render/mathRender";
 import {genEmptyElement} from "../../block/util";
@@ -288,10 +289,22 @@ export class Outline extends Model {
         });
         this.bindSort();
 
-        fetchPost("/api/outline/getDocOutline", {
+        const outlineParam: IObject = {
             id: this.blockId,
             preview: this.isPreview
-        }, response => {
+        };
+        // 解析当前大纲面板所属 box：按 blockId 在已打开的编辑器里查找
+        let notebookId: string;
+        getAllModels().editor.some(item => {
+            if (item.editor.protyle.block.rootID === this.blockId) {
+                notebookId = item.editor.protyle.notebookId;
+                return true;
+            }
+        });
+        if (isEncryptedBox(notebookId)) {
+            outlineParam.notebook = notebookId;
+        }
+        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
             this.update(response);
             if (this.blockId) {
                 this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
@@ -549,10 +562,22 @@ export class Outline extends Model {
             });
         }
         if (needReload) {
-            fetchPost("/api/outline/getDocOutline", {
+            const outlineParam: IObject = {
                 id: this.blockId,
                 preview: this.isPreview
-            }, response => {
+            };
+            // 解析当前大纲面板所属 box：按 blockId 在已打开的编辑器里查找
+            let notebookId: string;
+            getAllModels().editor.some(item => {
+                if (item.editor.protyle.block.rootID === this.blockId) {
+                    notebookId = item.editor.protyle.notebookId;
+                    return true;
+                }
+            });
+            if (isEncryptedBox(notebookId)) {
+                outlineParam.notebook = notebookId;
+            }
+            fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                 // 文档切换后不再更新原有推送 https://github.com/siyuan-note/siyuan/issues/13409
                 if (data.data.rootID !== this.blockId) {
                     return;
@@ -592,10 +617,22 @@ export class Outline extends Model {
             if (previousElement) {
                 this.setCurrentById(previousElement.getAttribute("data-node-id"));
             } else {
-                fetchPost("/api/block/getBlockBreadcrumb", {
+                const breadcrumbParam: IObject = {
                     id: nodeElement.getAttribute("data-node-id"),
                     excludeTypes: []
-                }, (response) => {
+                };
+                // 解析当前大纲面板所属 box：按 blockId 在已打开的编辑器里查找
+                let notebookId: string;
+                getAllModels().editor.some(editorItem => {
+                    if (editorItem.editor.protyle.block.rootID === this.blockId) {
+                        notebookId = editorItem.editor.protyle.notebookId;
+                        return true;
+                    }
+                });
+                if (isEncryptedBox(notebookId)) {
+                    breadcrumbParam.notebook = notebookId;
+                }
+                fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
                     response.data.reverse().find((item: IBreadcrumb) => {
                         if (item.type === "NodeHeading") {
                             this.setCurrentById(item.id);

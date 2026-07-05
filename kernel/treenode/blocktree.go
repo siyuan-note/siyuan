@@ -74,6 +74,9 @@ func initDatabase(forceRebuild bool) {
 		return
 	}
 
+	closeDatabase()
+	util.RemoveDatabaseFile(util.BlockTreeDBPath)
+	initDBConnection()
 	initDBTables()
 	vacuum()
 
@@ -83,7 +86,7 @@ func initDatabase(forceRebuild bool) {
 func initDBTables() {
 	_, err := db.Exec("DROP TABLE IF EXISTS blocktrees")
 	if err != nil {
-		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [blocks] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [blocktrees] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type)")
 	if err != nil {

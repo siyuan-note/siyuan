@@ -17,7 +17,12 @@ jobs:
         with:
           # 不设置 issue-comment / pr-comment：评论会通知所有历史参与者并触发邮件，
           # 仅靠 CONTRIBUTING 中的「Issue 流程」小节说明锁定策略即可。
+          # process-mode=batch：扫描所有符合条件的 closed issue/PR，不受「最近关闭」限制，
+          # 这样能回扫历史存量；已锁定的不会重复处理，所以长期运行也安全。
+          process-mode: batch
           issue-inactive-days: "30"
           issue-lock-reason: "resolved"
+          issue-limit: "1000"
           pr-inactive-days: "30"
           pr-lock-reason: "resolved"
+          pr-limit: "1000"

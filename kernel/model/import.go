@@ -297,9 +297,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			}
 		}
 
-		targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
-		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
-			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+		// 加密笔记本的 AV 定义不能拷到全局目录（明文泄漏 + 路由冲突），
+		// 后续由 notebook 级 AV 拷贝逻辑处理
+		if !IsEncryptedBox(boxID) {
+			targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
+			if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
+				logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+			}
 		}
 
 		// 重新指向数据库属性值
@@ -392,8 +396,46 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	// storage 文件夹已在上方处理，所以这里删除源 storage 文件夹，避免后面被拷贝到导入目录下 targetDir
+	// 加密笔记本需要先把 AV 定义加密拷贝到 notebook 级目录，再删源 storage
+	if IsEncryptedBox(boxID) && gulu.File.IsExist(storageAvDir) {
+		boxAVDir := filepath.Join(util.DataDir, boxID, "storage", "av")
+		if err = os.MkdirAll(boxAVDir, 0755); err != nil {
+			return
+		}
+		dek, dekErr := GetDEK(boxID)
+		if dekErr != nil || dek == nil {
+			err = errors.New("encrypted box not unlocked")
+			return
+		}
+		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, walkErr error) error {
+			if walkErr != nil || d == nil || d.IsDir() {
+				return walkErr
+			}
+			if !strings.HasSuffix(d.Name(), ".json") {
+				return nil
+			}
+			src, readErr := os.ReadFile(path)
+			if readErr != nil {
+				return readErr
+			}
+			enc, encErr := util.Encrypt(dek, src)
+			if encErr != nil {
+				return encErr
+			}
+			return os.WriteFile(filepath.Join(boxAVDir, d.Name()), enc, 0644)
+		})
+	}
+
+	// 普通笔记本拷贝到全局 storage/av/（加密笔记本已在上面处理）
+	if !IsEncryptedBox(boxID) {
+		targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
+		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
+			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+		}
+	}
+
 	if removeErr := os.RemoveAll(storage); nil != removeErr {
-		logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
+		logging.LogErrorf("remove temp storage av dir failed: %s", storage, removeErr)
 	}
 
 	if 1 > len(avIDs) { // 如果本次没有导入数据库，则清理掉文档中的数据库属性 https://github.com/siyuan-note/siyuan/issues/13011
@@ -637,70 +679,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
-	// 将包含的 AV 定义统一移动到 storage/av/ 下
-	// 加密笔记本拷到 <boxID>/storage/av/，普通笔记本拷到全局 storage/av/
-	var avDirs []string
-	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d == nil || unzipRootPath == path {
-			return nil
-		}
-		// storage/av 目录
-		if d.Name() == "av" && d.IsDir() && strings.Contains(filepath.ToSlash(path), "storage/av") {
-			avDirs = append(avDirs, path)
-		}
-		return nil
-	})
-	globalAVDir := filepath.Join(util.DataDir, "storage", "av")
-	if IsEncryptedBox(boxID) {
-		// 加密笔记本的 AV 定义拷到 notebook 级目录，逐个文件 DEK 加密
-		boxAVDir := filepath.Join(util.DataDir, boxID, "storage", "av")
-		if err = os.MkdirAll(boxAVDir, 0755); err != nil {
-			return
-		}
-		dek, dekErr := GetDEK(boxID)
-		if dekErr != nil || dek == nil {
-			err = errors.New("encrypted box not unlocked")
-			return
-		}
-		for _, avDir := range avDirs {
-			if gulu.File.IsDir(avDir) {
-				filelock.Walk(avDir, func(path string, d fs.DirEntry, walkErr error) error {
-					if walkErr != nil || d == nil || d.IsDir() {
-						return walkErr
-					}
-					if !strings.HasSuffix(d.Name(), ".json") {
-						return nil
-					}
-					src, readErr := filelock.ReadFile(path)
-					if readErr != nil {
-						return readErr
-					}
-					enc, encErr := util.Encrypt(dek, src)
-					if encErr != nil {
-						return encErr
-					}
-					return filelock.WriteFile(filepath.Join(boxAVDir, d.Name()), enc)
-				})
-				if err != nil {
-					return
-				}
-			}
-			os.RemoveAll(avDir)
-		}
-	} else {
-		for _, avDir := range avDirs {
-			if gulu.File.IsDir(avDir) {
-				if err = filelock.Copy(avDir, globalAVDir); err != nil {
-					logging.LogErrorf("copy av from [%s] to [%s] failed: %s", avDir, globalAVDir, err)
-					return
-				}
-			}
-			os.RemoveAll(avDir)
-		}
-	}
+	// AV 定义已在 storage 删除前处理（加密 box DEK 加密拷到 notebook 级，
+	// 普通 box 拷到全局 storage/av/），这里不再重复处理
 
 	// 将包含的自定义表情统一移动到 data/emojis/ 下
 	unzipRootEmojisPath := filepath.Join(unzipRootPath, "emojis")

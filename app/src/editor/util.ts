@@ -5,7 +5,7 @@ import {getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../l
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, getDocDisplayName, pathPosix, useShell} from "../util/pathName";
+import {getDisplayName, getDocDisplayName, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
 import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -375,11 +375,15 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         }
     });
     if ((!nodeElement || nodeElement?.clientHeight === 0) && options.id !== options.rootID) {
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             id: options.id,
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
+        };
+        if (isEncryptedBox(editor.editor.protyle.notebookId)) {
+            getDocParam.notebook = editor.editor.protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             onGet({
                 data: getResponse,
                 protyle: editor.editor.protyle,
@@ -702,13 +706,17 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             return;
         }
         item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
-        fetchPost("/api/ref/getBacklink2", {
+        const backlinkParam: IObject = {
             sort: item.status[blockId] ? item.status[blockId].sort.toString() : window.siyuan.config.editor.backlinkSort.toString(),
             mSort: item.status[blockId] ? item.status[blockId].mSort.toString() : window.siyuan.config.editor.backmentionSort.toString(),
             id: blockId || "",
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,
-        }, response => {
+        };
+        if (protyle && isEncryptedBox(protyle.notebookId)) {
+            backlinkParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/ref/getBacklink2", backlinkParam, response => {
             if (!isCurrentEditor(blockId) || item.blockId === blockId) {
                 item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
                 return;

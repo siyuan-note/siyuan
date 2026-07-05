@@ -312,6 +312,12 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 }
 
 func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets, isDatabase bool) (ret []*Block, newDoc bool) {
+	return SearchRefBlockInBox(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase, "")
+}
+
+// SearchRefBlockInBox 与 SearchRefBlock 一致，但按 boxID 路由到加密 db 或全局 db。
+// 加密 box 内搜索块引目标时传入 boxID，只搜该 box 自己的加密 db，避免跨加密边界引用。
+func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrackets, isDatabase bool, boxID string) (ret []*Block, newDoc bool) {
 	cachedTrees := map[string]*parse.Tree{}
 	nodeTrees := map[string]*parse.Tree{}
 	var nodeIDs []string
@@ -327,13 +333,13 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 
 		typeFilter := Conf.Search.TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()
-		refs := sql.QueryRefsRecent(onlyDoc, typeFilter, ignoreLines)
+		refs := sql.QueryRefsRecentInBox(onlyDoc, typeFilter, ignoreLines, boxID)
 		var btsID []string
 		for _, ref := range refs {
 			btsID = append(btsID, ref.DefBlockRootID)
 		}
 		btsID = gulu.Str.RemoveDuplicatedElem(btsID)
-		bts := treenode.GetBlockTrees(btsID)
+		bts := treenode.GetBlockTreesInBox(btsID, boxID)
 
 		for _, ref := range refs {
 			tree := cachedTrees[ref.DefBlockRootID]
@@ -355,7 +361,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 			nodeTrees[node.ID] = tree
 		}
 
-		refCount := sql.QueryRefCount(nodeIDs)
+		refCount := sql.QueryRefCountInBox(nodeIDs, boxID)
 
 		for _, node := range nodes {
 			tree := nodeTrees[node.ID]
@@ -380,14 +386,14 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		return
 	}
 
-	ret = fullTextSearchRefBlock(keyword, beforeLen, onlyDoc)
+	ret = fullTextSearchRefBlockInBox(keyword, beforeLen, onlyDoc, boxID)
 	tmp := ret[:0]
 	var btsID []string
 	for _, b := range ret {
 		btsID = append(btsID, b.RootID)
 	}
 	btsID = gulu.Str.RemoveDuplicatedElem(btsID)
-	bts := treenode.GetBlockTrees(btsID)
+	bts := treenode.GetBlockTreesInBox(btsID, boxID)
 	for _, b := range ret {
 		tree := cachedTrees[b.RootID]
 		if nil == tree {
@@ -432,14 +438,14 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 	}
 	ret = tmp
 
-	refCount := sql.QueryRefCount(nodeIDs)
+	refCount := sql.QueryRefCountInBox(nodeIDs, boxID)
 	for _, b := range ret {
 		b.RefCount = refCount[b.ID]
 	}
 
 	if !isDatabase {
 		// 如果非数据库中搜索块引，则不允许新建重名文档
-		if block := treenode.GetBlockTree(id); nil != block {
+		if block := treenode.GetBlockTreeInBox(id, boxID); nil != block {
 			p := path.Join(block.HPath, keyword)
 			newDoc = nil == treenode.GetBlockTreeRootByHPath(block.BoxID, p)
 		}
@@ -1159,6 +1165,12 @@ func mergeSamePreNext(n *ast.Node) {
 // orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
 func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
+	return FullTextSearchBlockInBox(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, "")
+}
+
+// FullTextSearchBlockInBox 与 FullTextSearchBlock 一致，但按 boxID 路由到加密 db 或全局 db。
+// 加密 box 内搜索时传入 boxID，所有 sql/treenode 查询走加密 db；boxID 为空时 fall-through 全局 db。
+func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return
@@ -1185,30 +1197,30 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
-			blocks, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
+			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize, boxID)
 		} else {
-			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 		}
 	case 2: // SQL
-		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen, page, pageSize)
+		blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox(query, beforeLen, page, pageSize, boxID)
 	case 3: // 正则表达式
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
 		pathFilter, pathArgs := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexpInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 	default: // 关键字
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
-			blocks, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
+			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize, boxID)
 		} else {
 			if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
 				query = stringQuery(query)
-				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 			} else {
 				docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
-				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 			}
 		}
 	}
@@ -1226,7 +1238,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 			btsID = append(btsID, b.RootID)
 		}
 		btsID = gulu.Str.RemoveDuplicatedElem(btsID)
-		bts := treenode.GetBlockTrees(btsID)
+		bts := treenode.GetBlockTreesInBox(btsID, boxID)
 		for _, b := range blocks {
 			if _, ok := rootMap[b.RootID]; !ok {
 				rootMap[b.RootID] = true
@@ -1251,7 +1263,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 			}
 		}
 
-		sqlRoots := sql.GetBlocks(rootIDs)
+		sqlRoots := sql.GetBlocksInBox(rootIDs, boxID)
 		roots := fromSQLBlocks(&sqlRoots, "", beforeLen)
 		for _, root := range roots {
 			for _, b := range blocks {
@@ -1319,7 +1331,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		}
 	}
 
-	refCount := sql.QueryRefCount(nodeIDs)
+	refCount := sql.QueryRefCountInBox(nodeIDs, boxID)
 	for _, b := range ret {
 		if 0 == groupBy {
 			b.RefCount = refCount[b.ID]
@@ -1580,8 +1592,13 @@ func sqlQuoteJoin(items []string) string {
 }
 
 func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	return searchBySQLInBox(stmt, beforeLen, page, pageSize, "")
+}
+
+// searchBySQLInBox 与 searchBySQL 一致，但按 boxID 路由到加密 db 或全局 db。
+func searchBySQLInBox(stmt string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	stmt = strings.TrimSpace(stmt)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
+	blocks := sql.SelectBlocksRawStmtInBox(stmt, page, pageSize, boxID)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -1598,7 +1615,7 @@ func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matc
 		}
 	}
 	stmt = removeLimitClause(stmt)
-	result, _ := sql.QueryNoLimit(stmt)
+	result, _ := sql.QueryNoLimitInBox(stmt, boxID)
 	if 1 > len(result) {
 		return
 	}
@@ -1638,10 +1655,15 @@ func removeLimitClause(stmt string) string {
 }
 
 func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []*Block) {
+	return fullTextSearchRefBlockInBox(keyword, beforeLen, onlyDoc, "")
+}
+
+// fullTextSearchRefBlockInBox 与 fullTextSearchRefBlock 一致，但按 boxID 路由到加密 db 或全局 db。
+func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, boxID string) (ret []*Block) {
 	keyword = filterQueryInvisibleChars(keyword)
 
 	if id := extractID(keyword); "" != id {
-		ret, _, _ = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+id+"'", 36, 1, 32)
+		ret, _, _ = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+id+"'", 36, 1, 32, boxID)
 		return
 	}
 
@@ -1690,7 +1712,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
              ELSE 65535 END ASC, sort ASC, length ASC`
 	orderBy = strings.ReplaceAll(orderBy, "${keyword}", strings.ReplaceAll(keyword, "'", "''"))
 	stmt += orderBy + " LIMIT " + strconv.Itoa(Conf.Search.Limit)
-	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+	blocks := sql.SelectBlocksRawStmtNoParseInBox(stmt, Conf.Search.Limit, boxID)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -1716,6 +1738,10 @@ func extractID(content string) (ret string) {
 }
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	return fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "")
+}
+
+func fullTextSearchByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
@@ -1727,22 +1753,26 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs
 
 	// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	blocks := sql.SelectBlocksRegexArgs(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize, args...)
+	blocks := sql.SelectBlocksRegexArgsInBox(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize, boxID, args...)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
 
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter)
+	matchedBlockCount, matchedRootCount = fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, boxID)
 	return
 }
 
 func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
+	return fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, "")
+}
+
+func fullTextSearchCountByRegexpInBox(exp, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, boxID string) (matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter + ignoreFilter
 	stmt += boxFilter + pathFilter
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	result, _ := sql.QueryNoLimitArgs(stmt, args...)
+	result, _ := sql.QueryNoLimitArgsInBox(stmt, boxID, args...)
 	if 1 > len(result) {
 		return
 	}
@@ -1752,6 +1782,10 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter string, boxArgs, pat
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	return fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "")
+}
+
+func fullTextSearchByFTSInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts"
 	projections := "id, parent_id, root_id, hash, box, path, " +
 		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
@@ -1768,24 +1802,28 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs 
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入；绕开 sqlparser 以保留 "?" 占位
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	blocks := sql.SelectBlocksRawStmtArgs(stmt, args, pageSize)
+	blocks := sql.SelectBlocksRawStmtArgsInBox(stmt, args, pageSize, boxID)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
 
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTS(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter)
+	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, boxID)
 	return
 }
 
 func fullTextSearchCountByFTS(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
+	return fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, "")
+}
+
+func fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, boxID string) (matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts"
 
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter
 	args := append(append([]any{}, boxArgs...), pathArgs...)
-	result, _ := sql.QueryNoLimitArgs(stmt, args...)
+	result, _ := sql.QueryNoLimitArgsInBox(stmt, boxID, args...)
 	if 1 > len(result) {
 		return
 	}
@@ -1795,6 +1833,10 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter string, boxArgs, path
 }
 
 func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	return fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, "")
+}
+
+func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = strings.ReplaceAll(query, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	keywords := strings.Split(query, " ")
 	contentField := columnConcat()
@@ -1838,7 +1880,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, 
 	} else {
 		selectStmt += " " + orderBy
 	}
-	result, _ := sql.QueryNoLimitArgs(selectStmt, args...)
+	result, _ := sql.QueryNoLimitArgsInBox(selectStmt, boxID, args...)
 	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
 		matchedRootCount = int(result[0]["docs"].(int64))
@@ -1856,6 +1898,11 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter string, boxArgs, 
 }
 
 func highlightByFTS(query, typeFilter, id string) (ret []string) {
+	return highlightByFTSInBox(query, typeFilter, id, "")
+}
+
+// highlightByFTSInBox 与 highlightByFTS 一致，但按 boxID 路由到加密 db 或全局 db。
+func highlightByFTSInBox(query, typeFilter, id, boxID string) (ret []string) {
 	query = strings.ReplaceAll(query, " ", " OR ")
 	const limit = 256
 	table := "blocks_fts"
@@ -1873,7 +1920,7 @@ func highlightByFTS(query, typeFilter, id string) (ret []string) {
 	stmt += ") AND " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
 	stmt += " LIMIT " + strconv.Itoa(limit)
-	sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, limit)
+	sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, limit, boxID)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.HPath, search.SearchMarkLeft, search.SearchMarkRight)
 		if 0 < len(keyword) {
@@ -1909,6 +1956,11 @@ func highlightByFTS(query, typeFilter, id string) (ret []string) {
 }
 
 func highlightByRegexp(query, typeFilter, id string) (ret []string) {
+	return highlightByRegexpInBox(query, typeFilter, id, "")
+}
+
+// highlightByRegexpInBox 与 highlightByRegexp 一致，但按 boxID 路由到加密 db 或全局 db。
+func highlightByRegexpInBox(query, typeFilter, id, boxID string) (ret []string) {
 	fieldFilter := fieldRegexp(query)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
@@ -1916,7 +1968,7 @@ func highlightByRegexp(query, typeFilter, id string) (ret []string) {
 	if nil == regex {
 		return
 	}
-	sqlBlocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, 1, 256)
+	sqlBlocks := sql.SelectBlocksRegexInBox(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, 1, 256, boxID)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.HPath, search.SearchMarkLeft, search.SearchMarkRight)
 		if 0 < len(keyword) {

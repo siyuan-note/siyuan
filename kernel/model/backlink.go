@@ -308,6 +308,11 @@ func getBacklinkRenderNodes(n *ast.Node, originalRefBlockIDs map[string]string) 
 }
 
 func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+	return GetBacklink2InBox(id, keyword, mentionKeyword, sortMode, mentionSortMode, containChildren, "")
+}
+
+// GetBacklink2InBox 与 GetBacklink2 一致，但按 boxID 路由到加密 db 或全局 db。
+func GetBacklink2InBox(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool, boxID string) (boxIDOut string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	var keywords []string
 	if "" != keyword {
@@ -316,17 +321,17 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}
 
-	sqlBlock := sql.GetBlock(id)
+	sqlBlock := sql.GetBlockInBox(id, boxID)
 	if nil == sqlBlock {
 		return
 	}
 	rootID := sqlBlock.RootID
-	boxID = sqlBlock.Box
+	boxIDOut = sqlBlock.Box
 
-	refs := sql.QueryRefsByDefID(id, containChildren)
+	refs := sql.QueryRefsByDefIDInBox(id, containChildren, boxID)
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, linkRefsCount, excludeBacklinkIDs, _ := buildLinkRefs(rootID, refs, keywords)
+	linkRefs, linkRefsCount, excludeBacklinkIDs, _ := buildLinkRefsInBox(rootID, refs, keywords, boxID)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink", nil)
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
@@ -355,7 +360,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 		return backlinks[i].ID > backlinks[j].ID
 	})
 
-	mentionRefs, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12)
+	mentionRefs, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12, boxID)
 	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink", nil)
 	for _, l := range tmpBackmentions {
 		l.Blocks = nil
@@ -410,18 +415,23 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 }
 
 func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChildren bool) (boxID string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
+	return GetBacklinkInBox(id, keyword, mentionKeyword, beforeLen, containChildren, "")
+}
+
+// GetBacklinkInBox 与 GetBacklink 一致，但按 boxID 路由到加密 db 或全局 db。
+func GetBacklinkInBox(id, keyword, mentionKeyword string, beforeLen int, containChildren bool, boxID string) (boxIDOut string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
 	linkPaths = []*Path{}
 	mentionPaths = []*Path{}
 
-	sqlBlock := sql.GetBlock(id)
+	sqlBlock := sql.GetBlockInBox(id, boxID)
 	if nil == sqlBlock {
 		return
 	}
 	rootID := sqlBlock.RootID
-	boxID = sqlBlock.Box
+	boxIDOut = sqlBlock.Box
 
 	var links []*Block
-	refs := sql.QueryRefsByDefID(id, containChildren)
+	refs := sql.QueryRefsByDefIDInBox(id, containChildren, boxID)
 	refs = removeDuplicatedRefs(refs)
 
 	// 为了减少查询，组装好 IDs 后一次查出
@@ -433,7 +443,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
 		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
 	}
-	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
+	querySQLBlocks := sql.GetBlocksInBox(queryBlockIDs, boxID)
 	defSQLBlocksCache := map[string]*sql.Block{}
 	for _, defSQLBlock := range querySQLBlocks {
 		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
@@ -488,7 +498,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 			}
 		}
 	}
-	paragraphParents := sql.GetBlocks(paragraphParentIDs)
+	paragraphParents := sql.GetBlocksInBox(paragraphParentIDs, boxID)
 	for _, p := range paragraphParents {
 		if nil == p {
 			continue
@@ -518,15 +528,20 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 			linkRefs = append(linkRefs, ref)
 		}
 	}
-	linkPaths = toSubTree(linkRefs, keyword)
+	linkPaths = toSubTreeInBox(linkRefs, keyword, boxID)
 
-	mentions, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
+	mentions, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen, boxID)
 	mentionsCount = len(mentions)
 	mentionPaths = toFlatTree(mentions, 0, "backlink", nil)
 	return
 }
 
 func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set, originalRefBlockIDs map[string]string) {
+	return buildLinkRefsInBox(defRootID, refs, keywords, "")
+}
+
+// buildLinkRefsInBox 与 buildLinkRefs 一致，但按 boxID 路由到加密 db 或全局 db。
+func buildLinkRefsInBox(defRootID string, refs []*sql.Ref, keywords []string, boxID string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set, originalRefBlockIDs map[string]string) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -537,7 +552,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
 	}
 	queryBlockIDs = gulu.Str.RemoveDuplicatedElem(queryBlockIDs)
-	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
+	querySQLBlocks := sql.GetBlocksInBox(queryBlockIDs, boxID)
 	defSQLBlocksCache := map[string]*sql.Block{}
 	for _, defSQLBlock := range querySQLBlocks {
 		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
@@ -597,7 +612,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 	paragraphParentIDs = gulu.Str.RemoveDuplicatedElem(paragraphParentIDs)
 	refsCountDelta -= len(paragraphParentIDs)
 	refsCount -= refsCountDelta
-	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
+	sqlParagraphParents := sql.GetBlocksInBox(paragraphParentIDs, boxID)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
 
 	luteEngine := util.NewLute()
@@ -678,7 +693,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 		}
 		var headingChildren []*Block
 		for _, headingID := range headingIDs {
-			sqlChildren := sql.GetChildBlocks(headingID, "", -1)
+			sqlChildren := sql.GetChildBlocksInBox(headingID, "", -1, boxID)
 			children := fromSQLBlocks(&sqlChildren, "", 12)
 			headingChildren = append(headingChildren, children...)
 		}
@@ -746,16 +761,21 @@ func removeDuplicatedRefs(refs []*sql.Ref) (ret []*sql.Ref) {
 }
 
 func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword string, excludeBacklinkIDs *hashset.Set, beforeLen int) (ret []*Block, mentionKeywords []string) {
+	return buildTreeBackmentionInBox(defSQLBlock, refBlocks, keyword, excludeBacklinkIDs, beforeLen, "")
+}
+
+// buildTreeBackmentionInBox 与 buildTreeBackmention 一致，但按 boxID 路由到加密 db 或全局 db。
+func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keyword string, excludeBacklinkIDs *hashset.Set, beforeLen int, boxID string) (ret []*Block, mentionKeywords []string) {
 	ret = []*Block{}
 
 	var names, aliases []string
 	var fName, rootID string
 	if "d" == defSQLBlock.Type {
 		if Conf.Search.BacklinkMentionName {
-			names = sql.QueryBlockNamesByRootID(defSQLBlock.ID)
+			names = sql.QueryBlockNamesByRootIDInBox(defSQLBlock.ID, boxID)
 		}
 		if Conf.Search.BacklinkMentionAlias {
-			aliases = sql.QueryBlockAliases(defSQLBlock.ID)
+			aliases = sql.QueryBlockAliasesInBox(defSQLBlock.ID, boxID)
 		}
 		if Conf.Search.BacklinkMentionDoc {
 			fName = path.Base(defSQLBlock.HPath)
@@ -772,7 +792,7 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 				aliases = strings.Split(defSQLBlock.Alias, ",")
 			}
 		}
-		root := treenode.GetBlockTree(defSQLBlock.RootID)
+		root := treenode.GetBlockTreeInBox(defSQLBlock.RootID, boxID)
 		rootID = root.ID
 	}
 
@@ -789,7 +809,7 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 
 	if Conf.Search.BacklinkMentionAnchor {
 		for _, refBlock := range refBlocks {
-			refs := sql.QueryRefsByDefIDRefID(refBlock.DefID, refBlock.ID)
+			refs := sql.QueryRefsByDefIDRefIDInBox(refBlock.DefID, refBlock.ID, boxID)
 			for _, ref := range refs {
 				set.Add(ref.Content)
 			}
@@ -800,11 +820,16 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 		mentionKeywords = append(mentionKeywords, v.(string))
 	}
 	mentionKeywords = prepareMarkKeywords(mentionKeywords)
-	mentionKeywords, ret = searchBackmention(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen)
+	mentionKeywords, ret = searchBackmentionInBox(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen, boxID)
 	return
 }
 
 func searchBackmention(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int) (retMentionKeywords []string, ret []*Block) {
+	return searchBackmentionInBox(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen, "")
+}
+
+// searchBackmentionInBox 与 searchBackmention 一致，但按 boxID 路由到加密 db 或全局 db。
+func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int, boxID string) (retMentionKeywords []string, ret []*Block) {
 	ret = []*Block{}
 	if 1 > len(mentionKeywords) {
 		return
@@ -839,7 +864,7 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 	buf.WriteString(" ORDER BY id DESC LIMIT " + strconv.Itoa(Conf.Search.Limit))
 	query := buf.String()
 
-	sqlBlocks := sql.SelectBlocksRawStmt(query, 1, Conf.Search.Limit)
+	sqlBlocks := sql.SelectBlocksRawStmtInBox(query, 1, Conf.Search.Limit, boxID)
 	terms := mentionKeywords
 	if "" != keyword {
 		terms = append(terms, keyword)

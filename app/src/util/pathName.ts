@@ -772,6 +772,18 @@ export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = fa
 };
 
 /**
+ * 返回指定 boxID 是否为加密笔记本。
+ * 用于前端在加密 box 上下文里给 getDoc / 反链 / 搜索请求带上 notebook 参数，
+ * 让内核走 InBox 版（查加密 blocktree + content db）。
+ */
+export const isEncryptedBox = (boxId: string): boolean => {
+    if (!boxId) {
+        return false;
+    }
+    return !!window.siyuan.notebooks?.find((item) => item.id === boxId && item.encrypted);
+};
+
+/**
  * 规范化并校验相对路径：允许子目录，但禁止通过 ".." 穿越到根外。
  * 用于插件存储，确保路径不逃出指定根目录。
  * @returns 规范化后的相对路径（使用 /），若路径非法则返回替换后的合法路径

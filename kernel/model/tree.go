@@ -265,6 +265,34 @@ func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 	return
 }
 
+// loadTreeByBlockIDInBox 与 LoadTreeByBlockID 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
+func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
+	if !ast.IsNodeIDPattern(id) {
+		stack := logging.ShortStack()
+		logging.LogErrorf("block id is invalid [id=%s], stack: [%s]", id, stack)
+		return nil, ErrTreeNotFound
+	}
+
+	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt {
+		if task.ContainIndexTask() {
+			err = ErrIndexing
+			return
+		}
+
+		stack := logging.ShortStack()
+		if !strings.Contains(stack, "BuildBlockBreadcrumb") {
+			if "dev" == util.Mode {
+				logging.LogWarnf("block tree not found [id=%s], stack: [%s]", id, stack)
+			}
+		}
+		return nil, ErrTreeNotFound
+	}
+
+	ret, err = loadTreeByBlockTree(bt)
+	return
+}
+
 var searchTreeLimiter = rate.NewLimiter(rate.Every(3*time.Second), 1)
 
 func indexTreeInFilesystem(blockID string) error {

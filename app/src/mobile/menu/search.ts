@@ -5,7 +5,7 @@ import {fetchPost} from "../../util/fetch";
 import {getIconByType} from "../../editor/getIcon";
 import {preventScroll} from "../../protyle/scroll/preventScroll";
 import {openModel} from "./model";
-import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../../util/pathName";
+import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {escapeHtml} from "../../util/escape";
@@ -290,7 +290,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 previousElement.setAttribute("disabled", "disabled");
             }
             const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
-            fetchPost(endpoint, {
+            const searchParam: IObject = {
                 query: config.query,
                 method: config.method,
                 types: config.types,
@@ -300,7 +300,16 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 orderBy: config.sort,
                 page: config.page,
                 pageSize: 32,
-            }, (response) => {
+            };
+            // 限定在单个加密 box 内搜索时带 notebook，让内核走加密 db；跨 box 或全局搜索走原函数
+            const idPaths = config.idPath || [];
+            if (idPaths.length > 0) {
+                const box = idPaths[0].split("/")[0];
+                if (isEncryptedBox(box) && idPaths.every(p => p.split("/")[0] === box)) {
+                    searchParam.notebook = box;
+                }
+            }
+            fetchPost(endpoint, searchParam, (response) => {
                 onRecentBlocks(response.data.blocks, config, response, focusId);
                 loadingElement.classList.add("fn__none");
                 if (config.page < response.data.pageCount) {

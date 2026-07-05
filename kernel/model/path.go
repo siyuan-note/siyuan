@@ -180,6 +180,11 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string, tree *parse.Tree) (r
 }
 
 func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
+	return toSubTreeInBox(blocks, keyword, "")
+}
+
+// toSubTreeInBox 与 toSubTree 一致，但按 boxID 路由到加密 db 或全局 db。
+func toSubTreeInBox(blocks []*Block, keyword, boxID string) (ret []*Path) {
 	keyword = strings.TrimSpace(keyword)
 	var blockRoots []*Block
 	for _, block := range blocks {
@@ -206,7 +211,7 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 		}
 		for _, c := range root.Children {
 			if "NodeListItem" == c.Type {
-				tree, _ := LoadTreeByBlockID(c.RootID)
+				tree, _ := loadTreeByBlockIDInBox(c.RootID, boxID)
 				li := treenode.GetNodeInTree(tree, c.ID)
 				if nil == li || nil == li.FirstChild {
 					// 反链面板拖拽到文档以后可能会出现这种情况 https://github.com/siyuan-note/siyuan/issues/5363
@@ -215,9 +220,9 @@ func toSubTree(blocks []*Block, keyword string) (ret []*Path) {
 
 				var first *sql.Block
 				if 3 != li.ListData.Typ {
-					first = sql.GetBlock(li.FirstChild.ID)
+					first = sql.GetBlockInBox(li.FirstChild.ID, boxID)
 				} else {
-					first = sql.GetBlock(li.FirstChild.Next.ID)
+					first = sql.GetBlockInBox(li.FirstChild.Next.ID, boxID)
 				}
 				name := first.Content
 				parentPos := 0

@@ -1200,8 +1200,21 @@ func getDoc(c *gin.Context) {
 		highlight = highlightArg.(bool)
 	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err :=
-		model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
+	var blockCount int
+	var content, parentID, parent2ID, rootID, typ string
+	var eof, scroll bool
+	var boxID, docPath string
+	var isBacklinkExpand bool
+	var keywords []string
+	var err error
+	// 加密笔记本的打开文档走 InBox 版（查加密 blocktree + content db）
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err =
+			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, notebook)
+	} else {
+		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err =
+			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
+	}
 	if errors.Is(err, model.ErrBlockNotFound) {
 		ret.Code = 3
 		return

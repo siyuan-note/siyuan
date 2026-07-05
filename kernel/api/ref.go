@@ -124,7 +124,15 @@ func getBacklink2(c *gin.Context) {
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
 	}
-	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink2(id, keyword, mentionKeyword, sort, mentionSort, containChildren)
+	var boxID string
+	var backlinks, backmentions []*model.Path
+	var linkRefsCount, mentionsCount int
+	// 加密笔记本的反链面板走 InBox 版（查加密 content db）
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBox(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook)
+	} else {
+		boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2(id, keyword, mentionKeyword, sort, mentionSort, containChildren)
+	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		backlinks = model.FilterPathsByPublishAccess(c, publishAccess, backlinks)
@@ -165,7 +173,15 @@ func getBacklink(c *gin.Context) {
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
 	}
-	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink(id, keyword, mentionKeyword, beforeLen, containChildren)
+	var boxID string
+	var backlinks, backmentions []*model.Path
+	var linkRefsCount, mentionsCount int
+	// 加密笔记本的反链面板走 InBox 版（查加密 content db）
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklinkInBox(id, keyword, mentionKeyword, beforeLen, containChildren, notebook)
+	} else {
+		boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink(id, keyword, mentionKeyword, beforeLen, containChildren)
+	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		backlinks = model.FilterPathsByPublishAccess(c, publishAccess, backlinks)

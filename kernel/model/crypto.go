@@ -291,6 +291,26 @@ func IsEncryptedBox(boxID string) bool {
 	return boxConf != nil && boxConf.Encrypted
 }
 
+// IsBlockRefCrossingBoundary 判断从 srcBoxID 引用 defBlockID 是否跨越加密边界。
+// 加密笔记本禁止跨边界块引（双向）：加密 box 的块只能引用同一加密 box 内的块，普通 box 的块不能引用加密 box 的块。
+// 供 transaction 落库时兜底校验，防止手工输入/拖拽/粘贴/API 直调绕过前端搜索分流。
+func IsBlockRefCrossingBoundary(srcBoxID, defBlockID string) bool {
+	if "" == defBlockID {
+		return false
+	}
+	if IsEncryptedBox(srcBoxID) {
+		// 源在加密 box：def 块必须在同一加密 box（查加密 blocktree db）
+		bt := treenode.GetBlockTreeInBox(defBlockID, srcBoxID)
+		return nil == bt || bt.BoxID != srcBoxID
+	}
+	// 源在普通 box：def 块必须在普通 box（查全局 blocktree，且其 box 非加密）
+	bt := treenode.GetBlockTree(defBlockID)
+	if nil == bt {
+		return false // def 块不存在（可能是新建块的临时态），不拦
+	}
+	return IsEncryptedBox(bt.BoxID)
+}
+
 // IsEncryptedAssetPath 判断给定 asset 绝对路径是否属于加密笔记本。
 // 供 server 层在缩略图等场景判断是否需跳过密文文件的处理。
 func IsEncryptedAssetPath(absPath string) bool {

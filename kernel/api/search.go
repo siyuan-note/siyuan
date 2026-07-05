@@ -403,7 +403,14 @@ func searchRefBlock(c *gin.Context) {
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)
 	beforeLen := int(arg["beforeLen"].(float64))
-	blocks, newDoc := model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase)
+	// 加密笔记本内的块引搜索走 InBox 版（只搜该 box 自己的加密 db，阻止跨加密边界引用）
+	var blocks []*model.Block
+	var newDoc bool
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		blocks, newDoc = model.SearchRefBlockInBox(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase, notebook)
+	} else {
+		blocks, newDoc = model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase)
+	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
@@ -434,7 +441,15 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
-	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)
+	var blocks []*model.Block
+	var matchedBlockCount, matchedRootCount, pageCount int
+	var docMode bool
+	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBox(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook)
+	} else {
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlock(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)
+	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)

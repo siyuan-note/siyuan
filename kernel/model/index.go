@@ -229,27 +229,42 @@ func IndexRefs() {
 	util.SetBootDetails(Conf.Language(305))
 
 	var defBlockIDs []string
+	defBlockBoxes := map[string]string{} // defBlockID -> boxID，加密 box 下需按 box 路由后续加载
 	luteEngine := util.NewLute()
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
+		encryptedBox := IsEncryptedBox(box.ID)
 		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)
 		for _, paths := range pages {
 			for _, treeAbsPath := range paths {
-				data, readErr := filelock.ReadFile(treeAbsPath)
-				if nil != readErr {
-					logging.LogWarnf("get data [path=%s] failed: %s", treeAbsPath, readErr)
-					continue
-				}
-
-				if !bytes.Contains(data, []byte("TextMarkBlockRefID")) && !bytes.Contains(data, []byte("TextMarkFileAnnotationRefID")) {
-					continue
-				}
-
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, box.ID)))
-				tree, parseErr := filesys.LoadTreeByData(data, box.ID, p, luteEngine)
-				if nil != parseErr {
-					logging.LogWarnf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
-					continue
+
+				// 加密 box 的 .sy 是密文，必须走 filesys.LoadTree 透明解密；无法用 bytes.Contains 预检
+				var tree *parse.Tree
+				if encryptedBox {
+					loadTree, loadErr := filesys.LoadTree(box.ID, p, luteEngine)
+					if nil != loadErr {
+						logging.LogWarnf("load encrypted box [%s] tree [%s] failed: %s", box.ID, treeAbsPath, loadErr)
+						continue
+					}
+					tree = loadTree
+				} else {
+					data, readErr := filelock.ReadFile(treeAbsPath)
+					if nil != readErr {
+						logging.LogWarnf("get data [path=%s] failed: %s", treeAbsPath, readErr)
+						continue
+					}
+
+					if !bytes.Contains(data, []byte("TextMarkBlockRefID")) && !bytes.Contains(data, []byte("TextMarkFileAnnotationRefID")) {
+						continue
+					}
+
+					parseTree, parseErr := filesys.LoadTreeByData(data, box.ID, p, luteEngine)
+					if nil != parseErr {
+						logging.LogWarnf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
+						continue
+					}
+					tree = parseTree
 				}
 
 				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -259,6 +274,7 @@ func IndexRefs() {
 
 					if treenode.IsBlockRef(n) || treenode.IsFileAnnotationRef(n) {
 						defBlockIDs = append(defBlockIDs, tree.Root.ID)
+						defBlockBoxes[tree.Root.ID] = box.ID
 					}
 					return ast.WalkContinue
 				})
@@ -274,7 +290,14 @@ func IndexRefs() {
 		bootProgressPart := int32(10.0 / float64(size))
 
 		for _, defBlockID := range defBlockIDs {
-			defTree, loadErr := LoadTreeByBlockID(defBlockID)
+			// 加密 box 的 defBlock 在加密 blocktree db，需按 box 路由加载
+			var defTree *parse.Tree
+			var loadErr error
+			if boxID, ok := defBlockBoxes[defBlockID]; ok && IsEncryptedBox(boxID) {
+				defTree, loadErr = loadTreeByBlockIDInBox(defBlockID, boxID)
+			} else {
+				defTree, loadErr = LoadTreeByBlockID(defBlockID)
+			}
 			if nil != loadErr {
 				continue
 			}

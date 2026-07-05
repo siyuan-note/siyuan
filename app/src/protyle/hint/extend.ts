@@ -11,7 +11,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getContenteditableElement, getTopAloneElement} from "../wysiwyg/getBlock";
 import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
-import {getAssetName, getDisplayName, pathPosix} from "../../util/pathName";
+import {getAssetName, getDisplayName, isEncryptedBox, pathPosix} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
 import {escapeHtml} from "../../util/escape";
@@ -458,14 +458,18 @@ export const genHintItemHTML = (item: IBlock) => {
 export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
     protyle.hint.genLoading(protyle);
-    fetchPost("/api/search/searchRefBlock", {
+    const refParam: IObject = {
         k: key,
         id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
         rootID: source === "av" ? "" : protyle.block.rootID,
         isDatabase: source === "av",
         isSquareBrackets: ["[[", "【【"].includes(protyle.hint.splitChar)
-    }, (response) => {
+    };
+    if (isEncryptedBox(protyle.notebookId)) {
+        refParam.notebook = protyle.notebookId;
+    }
+    fetchPost("/api/search/searchRefBlock", refParam, (response) => {
         const dataList: IHintData[] = [];
         if (response.data.newDoc) {
             const newFileName = Lute.UnEscapeHTMLStr(replaceFileName(response.data.k));
@@ -514,13 +518,17 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     }
     protyle.hint.genLoading(protyle);
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
-    fetchPost("/api/search/searchRefBlock", {
+    const embedParam: IObject = {
         k: key,
         isDatabase: false,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
         id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
         rootID: protyle.block.rootID,
-    }, (response) => {
+    };
+    if (isEncryptedBox(protyle.notebookId)) {
+        embedParam.notebook = protyle.notebookId;
+    }
+    fetchPost("/api/search/searchRefBlock", embedParam, (response) => {
         const dataList: IHintData[] = [];
         response.data.blocks.forEach((item: IBlock) => {
             dataList.push({

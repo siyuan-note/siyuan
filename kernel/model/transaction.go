@@ -1255,6 +1255,8 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
 	subTree.Box, subTree.Path = tree.Box, tree.Path
 	tx.processGlobalAssets(subTree)
+	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
+	degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
 
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
@@ -1481,6 +1483,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldDefIDs := getRefDefIDs(oldNode)
 	var newDefIDs []string
 
+	// 兜底校验：禁止跨加密边界块引（加密 box ↔ 普通 box，或不同加密 box 之间）
+	degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
+
 	var unlinks []*ast.Node
 	ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -1494,6 +1499,11 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 					unlinks = append(unlinks, n)
 				}
 			} else if n.IsTextMarkType("block-ref") {
+				if "" == n.TextMarkBlockRefID {
+					// 已被 degradeCrossBoundaryBlockRefs 降级为纯文本，跳过引用处理
+					return ast.WalkContinue
+				}
+
 				sql.CacheRef(subTree, n)
 
 				if "d" == n.TextMarkBlockRefSubtype {
@@ -1680,6 +1690,30 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 	})
 	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	return
+}
+
+// degradeCrossBoundaryBlockRefs 遍历树，把跨越加密边界的块引节点降级为纯文本。
+// 加密笔记本禁止跨边界块引（双向）：防止手工输入/拖拽/粘贴/API 直调绕过前端搜索分流。
+// 返回被降级的引用数。
+func degradeCrossBoundaryBlockRefs(root *ast.Node, srcBox string) int {
+	degraded := 0
+	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
+			if IsBlockRefCrossingBoundary(srcBox, n.TextMarkBlockRefID) {
+				logging.LogWarnf("block ref crosses encrypted boundary, src box [%s] -> def block [%s], degrade to text", srcBox, n.TextMarkBlockRefID)
+				n.TextMarkBlockRefID = ""
+				n.TextMarkBlockRefSubtype = ""
+				n.TextMarkTextContent = strings.TrimSpace(n.TextMarkTextContent)
+				degraded++
+			}
+		}
+		return ast.WalkContinue
+	})
+	return degraded
 }
 
 func getRemovedNodes(oldNode, newNode *ast.Node) (ret []*ast.Node) {

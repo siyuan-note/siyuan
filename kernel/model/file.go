@@ -492,6 +492,13 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 
 func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, err error) {
+	return GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, "")
+}
+
+// GetDocInBox 与 GetDoc 一致，但按 boxID 路由到加密 db 或全局 db。
+// 加密 box 打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
+func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool, boxID string) (
+	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -500,7 +507,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 	FlushTxQueue() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
-	tree, err := LoadTreeByBlockID(id)
+	tree, err := loadTreeByBlockIDInBox(id, boxID)
 	if err != nil {
 		if errors.Is(err, ErrBlockNotFound) {
 			if 0 == mode {
@@ -529,7 +536,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 	isDoc := ast.NodeDocument == node.Type
 	isHeading := ast.NodeHeading == node.Type
 
-	boxID = node.Box
+	boxIDOut = node.Box
 	docPath = node.Path
 	if isDoc {
 		if 4 == mode { // 加载文档末尾
@@ -679,7 +686,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 		}
 	}
 
-	refCount := sql.QueryRootChildrenRefCount(rootID)
+	refCount := sql.QueryRootChildrenRefCountInBox(rootID, boxID)
 	virtualBlockRefKeywords := getBlockVirtualRefKeywords(tree.Root)
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
@@ -690,11 +697,11 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 		switch queryMethod {
 		case 0:
 			query = stringQuery(query)
-			keywords = highlightByFTS(query, typeFilter, rootID)
+			keywords = highlightByFTSInBox(query, typeFilter, rootID, boxID)
 		case 1:
-			keywords = highlightByFTS(query, typeFilter, rootID)
+			keywords = highlightByFTSInBox(query, typeFilter, rootID, boxID)
 		case 3:
-			keywords = highlightByRegexp(query, typeFilter, rootID)
+			keywords = highlightByRegexpInBox(query, typeFilter, rootID, boxID)
 		}
 	}
 

@@ -1695,7 +1695,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
 		}
 	}
 
-	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
+	treenode.RemoveBlockTreesByPathPrefix(box.ID, childrenDir)
 	cache.RemoveDocIAL(ret.Path)
 	cache.RemoveTreeData(ret.ID)
 

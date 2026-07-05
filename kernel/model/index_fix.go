@@ -316,8 +316,8 @@ func resetDuplicateBlocksOnFileSys() {
 
 func recreateTree(tree *parse.Tree, absPath string) {
 	// 删除关于该树的所有块树数据，后面会调用 fixBlockTreeByFileSys() 进行订正补全
-	treenode.RemoveBlockTreesByPathPrefix(strings.TrimSuffix(tree.Path, ".sy"))
-	treenode.RemoveBlockTreesByRootID(tree.ID)
+	treenode.RemoveBlockTreesByPathPrefix(tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
+	treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
 
 	resetTree(tree, "", true)
 	if _, err := filesys.WriteTree(tree); err != nil {
@@ -511,7 +511,7 @@ func reindexTree(rootID string, i, size int, luteEngine *lute.Lute) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			// 文件系统上没有找到该 .sy 文件，则订正块树
-			treenode.RemoveBlockTreesByRootID(rootID)
+			treenode.RemoveBlockTreesByRootID(root.BoxID, rootID)
 		}
 		return
 	}

@@ -289,8 +289,8 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 
 	srcTreeBox, srcTreePath = srcTree.Box, srcTree.Path // 返回旧的文档块位置，前端后续会删除旧的文档块
 	targetTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	treenode.RemoveBlockTreesByRootID(srcTree.ID)
-	treenode.RemoveBlockTreesByRootID(targetTree.ID)
+	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
+	treenode.RemoveBlockTreesByRootID(targetTree.Box, targetTree.ID)
 	err = indexWriteTreeUpsertQueue(targetTree)
 	IncSync()
 	go func() {
@@ -417,7 +417,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph(""))
 	}
-	treenode.RemoveBlockTreesByRootID(srcTree.ID)
+	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
 	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {
 		return "", "", err
 	}

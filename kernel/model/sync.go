@@ -320,10 +320,15 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 		for _, b := range bts {
 			cache.RemoveBlockIAL(b.ID)
 		}
-		if block := treenode.GetBlockTree(rootID); nil != block {
+		block := treenode.GetBlockTree(rootID)
+		if nil != block {
 			cache.RemoveDocIAL(block.Path)
 		}
-		treenode.RemoveBlockTreesByRootID(rootID)
+		boxID := ""
+		if nil != block {
+			boxID = block.BoxID
+		}
+		treenode.RemoveBlockTreesByRootID(boxID, rootID)
 	}
 
 	if 1 > len(removeRootIDs) {

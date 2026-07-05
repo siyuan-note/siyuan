@@ -310,7 +310,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 			logging.LogInfof("removed working doc file [%s]", workingDocPath)
 		}
 		if nil != workingDoc {
-			treenode.RemoveBlockTreesByRootID(rootID)
+			treenode.RemoveBlockTreesByRootID(boxID, rootID)
 		}
 
 		sql.RemoveTreeQueue(rootID)

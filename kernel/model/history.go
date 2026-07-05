@@ -309,7 +309,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 		logging.LogInfof("removed working doc file [%s]", workingDocPath)
 	}
 	if nil != workingDoc {
-		treenode.RemoveBlockTreesByRootID(rootID)
+		treenode.RemoveBlockTreesByRootID(boxID, rootID)
 	}
 	nodes := map[string]*ast.Node{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

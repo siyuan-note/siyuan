@@ -143,9 +143,23 @@
       transition: var(--b3-transition);
       border-radius: var(--b3-border-radius);
 
-      &--hl:hover {
-        color: var(--b3-theme-on-background);
-        background-color: var(--b3-list-icon-hover);
+      &--hl {
+        position: relative;
+
+        // 扩展点击命中范围到 li 的左侧和上下边缘，视觉 hover 高亮区域保持不变
+        &::before {
+          content: "";
+          position: absolute;
+          top: -3px;
+          bottom: -3px;
+          left: -4px;
+          right: 0;
+        }
+
+        &:hover {
+          color: var(--b3-theme-on-background);
+          background-color: var(--b3-list-icon-hover);
+        }
       }
     }
 

@@ -842,6 +842,18 @@ func CloseAllEncryptedBlockTreeDBs() {
 	})
 }
 
+// GetOpenedEncryptedBoxIDs 返回所有已打开的加密 blocktree db 对应的 boxID。
+// 供 boxID 未知时遍历查找（如通用打开入口 openFileById）。
+func GetOpenedEncryptedBoxIDs() (ret []string) {
+	encryptedBlockTreeDBs.Range(func(key, value any) bool {
+		if boxID, ok := key.(string); ok {
+			ret = append(ret, boxID)
+		}
+		return true
+	})
+	return
+}
+
 // RemoveEncryptedBlockTreeDBFile 关闭连接并删除加密 blocktree db 文件。删笔记本时调用。
 func RemoveEncryptedBlockTreeDBFile(boxID string) {
 	CloseEncryptedBlockTreeDB(boxID)

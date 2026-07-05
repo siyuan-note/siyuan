@@ -208,6 +208,15 @@ func LoadTreeByBlockIDWithReindexInBox(id, boxID string) (ret *parse.Tree, err e
 	}
 
 	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt && "" == boxID {
+		// boxID 未知时（如通用打开入口），遍历所有已打开的加密 box 查找
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
+				bt = encBT
+				break
+			}
+		}
+	}
 	if nil == bt {
 		if task.ContainIndexTask() {
 			err = ErrIndexing
@@ -279,6 +288,15 @@ func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
 	}
 
 	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt && "" == boxID {
+		// boxID 未知时（如通用打开入口），遍历所有已打开的加密 box 查找
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
+				bt = encBT
+				break
+			}
+		}
+	}
 	if nil == bt {
 		if task.ContainIndexTask() {
 			err = ErrIndexing

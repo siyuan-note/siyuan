@@ -132,11 +132,9 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
             hasNone = true;
         }
         // 不需要空格，否则列宽调整后在空格后插入图片会换行 https://github.com/siyuan-note/siyuan/issues/7631
-        if (cellElement.tagName === "TH") {
-            rowHTML += `<th class="${currentCellElement.className}" colspan="${currentCellElement.colSpan}" align="${currentCellElement.getAttribute("align")}"></th>`;
-        } else {
-            rowHTML += `<td class="${currentCellElement.className}" colspan="${currentCellElement.colSpan}" align="${currentCellElement.getAttribute("align")}"></td>`;
-        }
+        const classAttr = className ? ` class="${className}"` : "";
+        const tag = cellElement.tagName === "TH" ? "th" : "td";
+        rowHTML += `<${tag}${classAttr} colspan="${currentCellElement.colSpan}" align="${currentCellElement.getAttribute("align") || ""}"></${tag}>`;
     }
 
     if (hasNone) {

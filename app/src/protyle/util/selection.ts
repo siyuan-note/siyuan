@@ -570,16 +570,15 @@ export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle
         const cellElement = hasClosestByTag(range.startContainer, "TH") || hasClosestByTag(range.startContainer, "TD");
         if (cellElement) {
             const offset = getSelectionOffset(cellElement, nodeElement, range);
-            cellElement.classList.add("range");
             const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
-            // 仅移除临时打上的 range 标记，保留 fn__none 等单元格原有 class（合并单元格的占位 class 若被清掉会导致多出空格子）
-            cellElement.classList.remove("range");
-            const cloneCellElement = cloneNode.querySelector(".range");
+            // 通过单元格在行内的索引在克隆树中定位对应单元格，避免在原 DOM 上增删 class 残留 class="" https://github.com/siyuan-note/siyuan/issues/18084
+            const cellIndex = Array.from(cellElement.parentElement.children).indexOf(cellElement);
+            const rowIndex = Array.from(nodeElement.querySelector("table").rows).indexOf(cellElement.parentElement as HTMLTableRowElement);
+            const cloneCellElement = cloneNode.querySelector("table").rows[rowIndex].cells[cellIndex];
             const cloneRange = focusByOffset(cloneCellElement, offset.end, offset.end, false);
             if (cloneRange) {
                 cloneRange.insertNode(document.createElement("wbr"));
             }
-            cloneCellElement.classList.remove("range");
             protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
         }
     } else {

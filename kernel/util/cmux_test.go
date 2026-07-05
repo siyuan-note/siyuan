@@ -242,6 +242,18 @@ func TestServeMultiplexed_HTTPSMustNotReuseExternalServer(t *testing.T) {
 	if res.httpsSrv == externalServer {
 		t.Fatal("returned https server must NOT reuse the external httpServer (would close cmux root on Close)")
 	}
+
+	// 关键断言：外部 server 关闭后，cmux 派生 listener 的 Close 会连带关掉 root，
+	// m.Serve() 随后返回的是 *net.OpError("use of closed network connection")。
+	// 它既不是 http.ErrServerClosed 也不是 cmux.ErrListenerClosed，但能用 net.ErrClosed 匹配——
+	// serve.go 的判错逻辑必须覆盖这一哨兵，否则正常退出会被误判为致命错误并 os.Exit(21)
+	// （多实例下关闭任一实例即弹"监听端口失败"窗的回归，见 issue #18086）。
+	if res.err == nil {
+		t.Fatal("ServeMultiplexed should return non-nil error after external server close")
+	}
+	if !errors.Is(res.err, net.ErrClosed) {
+		t.Fatalf("returned error should match net.ErrClosed (got %v), otherwise serve.go would os.Exit(21)", res.err)
+	}
 }
 
 // 防止回归：端到端验证发布服务的“启动—关闭”闭环。

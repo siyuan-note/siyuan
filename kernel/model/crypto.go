@@ -320,6 +320,15 @@ func IsBlockRefCrossingBoundary(srcBoxID, defBlockID string) bool {
 	// 源在普通 box：def 块必须在普通 box（查全局 blocktree，且其 box 非加密）
 	bt := treenode.GetBlockTree(defBlockID)
 	if nil == bt {
+		// 全局查不到时遍历加密 box 查找，防止对向漏判（普通 box 引用加密 box 块）
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(defBlockID, encBoxID); nil != encBT {
+				bt = encBT
+				break
+			}
+		}
+	}
+	if nil == bt {
 		return false // def 块不存在（可能是新建块的临时态），不拦
 	}
 	return IsEncryptedBox(bt.BoxID)

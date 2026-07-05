@@ -1300,6 +1300,14 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 
 	b := treenode.GetBlockTree(def.ID)
 	if nil == b {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(def.ID, encBoxID); nil != encBT {
+				b = encBT
+				break
+			}
+		}
+	}
+	if nil == b {
 		return
 	}
 

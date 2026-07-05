@@ -142,11 +142,27 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	ret = []*Backlink{}
 	sqlBlock := sql.GetBlock(defID)
 	if nil == sqlBlock {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBlock := sql.GetBlockInBox(defID, encBoxID); nil != encBlock {
+				sqlBlock = encBlock
+				break
+			}
+		}
+	}
+	if nil == sqlBlock {
 		return
 	}
 	rootID := sqlBlock.RootID
 
 	tmpRefs := sql.QueryRefsByDefID(defID, containChildren)
+	if len(tmpRefs) == 0 {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encRefs := sql.QueryRefsByDefIDInBox(defID, containChildren, encBoxID); len(encRefs) > 0 {
+				tmpRefs = encRefs
+				break
+			}
+		}
+	}
 	var refs []*sql.Ref
 	for _, ref := range tmpRefs {
 		if ref.RootID == refTreeID {

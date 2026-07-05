@@ -154,6 +154,16 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 
 	trees := filesys.LoadTrees(blockIDs)
 	bts := treenode.GetBlockTrees(blockIDs)
+	for _, id := range blockIDs {
+		if _, ok := bts[id]; !ok {
+			for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
+					bts[id] = encBT
+					break
+				}
+			}
+		}
+	}
 	for _, blockID := range blockIDs {
 		tree := trees[blockID]
 		if nil == tree {
@@ -376,6 +386,14 @@ func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[str
 	refDefs = []*RefDefs{}
 	originalRefBlockIDs = map[string]string{}
 	bt := treenode.GetBlockTree(defID)
+	if nil == bt {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(defID, encBoxID); nil != encBT {
+				bt = encBT
+				break
+			}
+		}
+	}
 	if nil == bt {
 		return
 	}

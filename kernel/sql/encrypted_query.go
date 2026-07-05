@@ -152,44 +152,6 @@ func SelectBlocksRawStmtInBox(stmt string, page, limit int, boxID string) (ret [
 	return
 }
 
-// QueryTagSpansByLabelInBox 按 label 在指定 box 的 db 里查标签。
-func QueryTagSpansByLabelInBox(label, boxID string) (ret []*Span) {
-	sqlStmt := "SELECT * FROM spans WHERE type LIKE '%tag%' AND content LIKE ?"
-	rows, err := queryForBox(boxID, sqlStmt, "%#"+label+"#%")
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var span Span
-		if err = rows.Scan(&span.ID, &span.BlockID, &span.RootID, &span.Box, &span.Path, &span.Content, &span.Markdown, &span.Type, &span.IAL); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		ret = append(ret, &span)
-	}
-	return
-}
-
-// QueryBookmarkBlocksInBox 在指定 box 的 db 里查书签块。
-func QueryBookmarkBlocksInBox(boxID string) (ret []*Block) {
-	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE '%bookmark=%'"
-	rows, err := queryForBox(boxID, sqlStmt)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		b := scanBlockRows(rows)
-		if b != nil {
-			ret = append(ret, b)
-		}
-	}
-	return
-}
-
 // QueryRefCountInBox 按 defBlockIDs 在指定 box 的 db 里查引用计数。
 func QueryRefCountInBox(defIDs []string, boxID string) (ret map[string]int) {
 	ret = map[string]int{}

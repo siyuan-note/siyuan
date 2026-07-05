@@ -95,6 +95,6 @@ For other details, please refer to https://github.com/siyuan-note/siyuan/issues/
 
 ## Issue workflow
 
-* Issues and pull requests that have been closed with no activity for 30 days are locked automatically to keep the tracker focused on open work.
-* If you run into a problem similar to a locked one, please open a new issue and link back to the original. Avoid replying on old, closed threads — that revives stale context and pings everyone who participated.
-* A new issue with a clear reproduction and a reference to the closed one is far easier to act on than a comment appended to a months-old thread.
+* Issues and pull requests that have been closed with no activity for 30 days are locked automatically to keep the tracker focused on open work
+* If you run into a problem similar to a locked one, please open a new issue and link back to the original — avoid replying on old, closed threads, as that revives stale context and pings everyone who participated
+* A new issue with a clear reproduction and a reference to the closed one is far easier to act on than a comment appended to a months-old thread

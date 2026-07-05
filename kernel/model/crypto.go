@@ -84,6 +84,32 @@ func EnableEncryptedNotebook(password string) error {
 	return nil
 }
 
+// DisableEncryptedNotebook 关闭加密笔记本功能。前置：不能有加密笔记本存在。
+// 清除全局加密配置（MasterSalt/KEKVerifier），KEK/DEK 不再可用。
+func DisableEncryptedNotebook() error {
+	// 检查是否还有加密笔记本
+	boxes, err := ListNotebooks()
+	if err != nil {
+		return err
+	}
+	for _, box := range boxes {
+		boxConf := box.GetConf()
+		if boxConf != nil && boxConf.Encrypted {
+			return errors.New("cannot disable encrypted notebook feature while encrypted notebooks exist, remove them first")
+		}
+	}
+
+	Conf.m.Lock()
+	Conf.NotebookCrypto.Enabled = false
+	Conf.NotebookCrypto.MasterSalt = nil
+	Conf.NotebookCrypto.KEKVerifier = nil
+	Conf.NotebookCrypto.VerifierNonce = nil
+	Conf.m.Unlock()
+
+	Conf.Save()
+	return nil
+}
+
 // deriveKEK 从主密码派生 KEK 并校验。校验失败返回错误。KEK 仅在函数作用域内有效，调用方负责使用。
 func deriveKEK(password string) ([]byte, error) {
 	Conf.m.RLock()

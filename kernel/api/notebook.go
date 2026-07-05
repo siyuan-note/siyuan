@@ -478,6 +478,18 @@ func enableEncryptedNotebooks(c *gin.Context) {
 	}
 }
 
+// disableEncryptedNotebooks 关闭加密笔记本功能。前置：没有加密笔记本存在。
+func disableEncryptedNotebooks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if err := model.DisableEncryptedNotebook(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 // createEncryptedNotebook 创建一个新的加密笔记本。前置：加密功能已启用。
 // 创建时需提供主密码（用于派生 KEK 包络 DEK）。创建后笔记本处于锁定状态，
 // 调用方需再调 unlockBox + openNotebook 才能打开。
@@ -610,7 +622,17 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	count := 0
+	if boxes, err := model.ListNotebooks(); nil == err {
+		for _, box := range boxes {
+			if boxConf := box.GetConf(); nil != boxConf && boxConf.Encrypted {
+				count++
+			}
+		}
+	}
+
 	ret.Data = map[string]any{
 		"enabled": model.Conf.NotebookCrypto.Enabled,
+		"count":   count,
 	}
 }

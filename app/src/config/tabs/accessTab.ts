@@ -336,7 +336,7 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
         html: () =>
             // 开关行：结构与标准 group.switch 一致（label + config-item + b3-switch fn__flex-center）
             `<label class="fn__flex b3-label config-item">
-    ${genConfigItemMainHtml(window.siyuan.languages.enableEncryptedNotebook, window.siyuan.languages.encryptedNotebookTip)}
+    ${genConfigItemMainHtml(window.siyuan.languages.enableEncryptedNotebook, window.siyuan.languages.encryptedNotebookTip + "<br>" + window.siyuan.languages.featurePreview)}
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="encryptedNotebookSwitch" type="checkbox">
 </label>
@@ -377,9 +377,18 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 switchElement.checked = false; // 取消则恢复
             });
         } else {
-            // 切到 OFF：暂不支持禁用（需要确认所有加密笔记本已删除）
-            showMessage(window.siyuan.languages.encryptedNotebookTip, 4000);
-            switchElement.checked = true;
+            // 切到 OFF：没有加密笔记本时允许关闭
+            fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
+                if (response.data.count > 0) {
+                    showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", response.data.count), 4000);
+                    switchElement.checked = true;
+                } else {
+                    fetchPost("/api/notebook/disableEncryptedNotebooks", {}, () => {
+                        showMessage(window.siyuan.languages.encryptedNotebookDisabled);
+                        refresh();
+                    });
+                }
+            });
         }
     });
 };

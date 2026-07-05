@@ -36,7 +36,7 @@ func IsMirror(avID string) bool {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()
 
-	_, boxID := findAttributeViewPath(avID)
+	_, boxID := FindAttributeViewPath(avID)
 	avBlocks := readMirrorBlocks(boxID)
 	blockIDs := avBlocks[avID]
 	return nil != blockIDs && 1 < len(blockIDs)
@@ -46,7 +46,7 @@ func RemoveBlockRel(avID, blockID string, existBlockTree func(string) bool) (ret
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()
 
-	_, boxID := findAttributeViewPath(avID)
+	_, boxID := FindAttributeViewPath(avID)
 	avBlocks := readMirrorBlocks(boxID)
 
 	blockIDs := avBlocks[avID]
@@ -88,7 +88,7 @@ func BatchUpsertBlockRel(nodes []*ast.Node) {
 			continue
 		}
 
-		_, boxID := findAttributeViewPath(n.AttributeViewID)
+		_, boxID := FindAttributeViewPath(n.AttributeViewID)
 		avBlocks, ok := boxAvBlocks[boxID]
 		if !ok {
 			avBlocks = readMirrorBlocks(boxID)
@@ -112,7 +112,7 @@ func UpsertBlockRel(avID, blockID string) (ret bool) {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()
 
-	_, boxID := findAttributeViewPath(avID)
+	_, boxID := FindAttributeViewPath(avID)
 	avBlocks := readMirrorBlocks(boxID)
 
 	blockIDs := avBlocks[avID]

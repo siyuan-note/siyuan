@@ -155,10 +155,12 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	rootID := sqlBlock.RootID
 
 	tmpRefs := sql.QueryRefsByDefID(defID, containChildren)
+	var encBoxIDUsed string
 	if len(tmpRefs) == 0 {
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if encRefs := sql.QueryRefsByDefIDInBox(defID, containChildren, encBoxID); len(encRefs) > 0 {
 				tmpRefs = encRefs
+				encBoxIDUsed = encBoxID
 				break
 			}
 		}
@@ -171,7 +173,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	}
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, _, _, originalRefBlockIDs := buildLinkRefs(rootID, refs, keywords)
+	linkRefs, _, _, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, encBoxIDUsed)
 	refTree, err := LoadTreeByBlockID(refTreeID)
 	if err != nil {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)

@@ -501,7 +501,7 @@ func IsAttributeViewExist(avID string) bool {
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	// 加密笔记本的 AV 定义存笔记本级路径，通过 fallback 自动查找并解密
-	avJSONPath, _ := findAttributeViewPath(avID)
+	avJSONPath, _ := FindAttributeViewPath(avID)
 	if avJSONPath == "" {
 		// 文件不存在，可能是首次创建，按全局路径返回（由调用方处理）
 		avJSONPath = GetAttributeViewDataPath(avID)
@@ -667,7 +667,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
 	// 通过 fallback 查找 AV 定义的实际路径（普通 box 全局，加密 box 笔记本级）
-	avJSONPath, avBoxID := findAttributeViewPath(av.ID)
+	avJSONPath, avBoxID := FindAttributeViewPath(av.ID)
 	if avJSONPath == "" {
 		// 文件不存在（首次创建），使用全局路径，boxID 为空（普通 box）
 		// 加密 box 的首次创建由 handler 层通过 SetAVBoxID 预设路径

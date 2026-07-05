@@ -44,7 +44,7 @@ import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
 import {duplicateBlock} from "../wysiwyg/commonHotkey";
-import {movePathTo, useShell} from "../../util/pathName";
+import {isEncryptedBox, movePathTo, useShell} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {transferBlockRef} from "../../menus/block";
@@ -1879,7 +1879,13 @@ export class Gutter {
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
                 click() {
-                    useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, "storage", "av", nodeElement.getAttribute("data-av-id")) + ".json");
+                    const avId = nodeElement.getAttribute("data-av-id");
+                    const notebookId = protyle.notebookId;
+                    // 加密笔记本的 AV 定义存 notebook 级路径
+                    const avDir = isEncryptedBox(notebookId)
+                        ? path.join(window.siyuan.config.system.dataDir, notebookId, "storage", "av")
+                        : path.join(window.siyuan.config.system.dataDir, "storage", "av");
+                    useShell("showItemInFolder", path.join(avDir, avId) + ".json");
                 }
             }).element);
         } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {

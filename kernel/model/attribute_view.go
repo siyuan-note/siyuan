@@ -3975,7 +3975,16 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 			} else {
 				// Remove av block also remove node attr https://github.com/siyuan-note/siyuan/issues/9091#issuecomment-1709824006
 				if !val.IsDetached && nil != val.Block {
-					if bt := treenode.GetBlockTree(val.Block.ID); nil != bt {
+					bt := treenode.GetBlockTree(val.Block.ID)
+					if nil == bt {
+						for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+							if encBT := treenode.GetBlockTreeInBox(val.Block.ID, encBoxID); nil != encBT {
+								bt = encBT
+								break
+							}
+						}
+					}
+					if nil != bt {
 						tree := trees[bt.RootID]
 						if nil == tree {
 							tree, _ = LoadTreeByBlockID(val.Block.ID)
@@ -5996,6 +6005,14 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 			}
 
 			bt := treenode.GetBlockTree(boundBlockID)
+			if nil == bt {
+				for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+					if encBT := treenode.GetBlockTreeInBox(boundBlockID, encBoxID); nil != encBT {
+						bt = encBT
+						break
+					}
+				}
+			}
 			if nil == bt {
 				continue
 			}

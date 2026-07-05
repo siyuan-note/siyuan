@@ -297,12 +297,27 @@ func ExistBlockTree(id string) bool {
 	err := queryRow(sqlStmt, id).Scan(&count)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			// 全局未命中，遍历加密 box
+			for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
+				if ExistBlockTreeInBox(id, encBoxID) {
+					return true
+				}
+			}
 			return false
 		}
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return false
 	}
-	return 0 < count
+	if 0 < count {
+		return true
+	}
+	// 全局未命中，遍历加密 box
+	for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
+		if ExistBlockTreeInBox(id, encBoxID) {
+			return true
+		}
+	}
+	return false
 }
 
 func ExistBlockTrees(ids []string) (ret map[string]bool) {
@@ -408,6 +423,12 @@ func GetBlockTree(id string) (ret *BlockTree) {
 	if err != nil {
 		ret = nil
 		if errors.Is(err, sql.ErrNoRows) {
+			// 全局 blocktree 未命中，遍历已打开的加密 box 查找
+			for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
+				if encBT := GetBlockTreeInBox(id, encBoxID); nil != encBT {
+					return encBT
+				}
+			}
 			return
 		}
 		logging.LogErrorf("sql query [%s] failed: %v\n\t%s", sqlStmt, err, logging.ShortStack())

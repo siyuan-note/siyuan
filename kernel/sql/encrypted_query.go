@@ -83,10 +83,12 @@ func GetRefTextInBox(defBlockID, boxID string) (ret string) {
 }
 
 // QueryRefsByDefIDInBox 按 defBlockID 在指定 box 的 db 里查引用列表。
+// 注意：加密 content db 里没有 blocktrees 表（在独立的 blocktree db），containChildren 时
+// 不能 JOIN blocktrees，改为用 def_block_root_id 查询。
 func QueryRefsByDefIDInBox(defBlockID string, containChildren bool, boxID string) (ret []*Ref) {
 	sqlStmt := "SELECT * FROM refs WHERE def_block_id = ?"
 	if containChildren {
-		sqlStmt = "SELECT r.* FROM refs r JOIN blocktrees b ON r.def_block_root_id = b.root_id WHERE r.def_block_id = ?"
+		sqlStmt = "SELECT * FROM refs WHERE def_block_root_id = ?"
 	}
 	rows, err := queryForBox(boxID, sqlStmt, defBlockID)
 	if err != nil {

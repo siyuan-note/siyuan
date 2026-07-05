@@ -123,7 +123,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 	if nil != err {
 		return
 	}
-	
+
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
 		tree, e := LoadTreeByBlockID(treeID)

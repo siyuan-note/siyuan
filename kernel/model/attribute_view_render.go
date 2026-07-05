@@ -43,7 +43,6 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 	if "" != blockID {
 		bt := treenode.GetBlockTree(blockID)
 		if nil == bt {
-			// 全局 blocktree 找不到时，遍历已打开的加密 box
 			for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 				if encBT := treenode.GetBlockTreeInBox(blockID, encBoxID); nil != encBT {
 					bt = encBT
@@ -56,7 +55,13 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		}
 	}
 
-	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
+	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密 box notebook 级）
+	existPath, _ := av.FindAttributeViewPath(avID)
+	if "" == existPath {
+		// fallback 找不到时按全局路径检查（首次创建场景）
+		existPath = av.GetAttributeViewDataPath(avID)
+	}
+	if !filelock.IsExist(existPath) {
 		if !createIfNotExist {
 			err = av.ErrAttributeViewNotFound
 			return
@@ -78,6 +83,12 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
+	}
+
+	// 诊断：AV 解析后的数据量
+	blockKV := attrView.GetBlockKeyValues()
+	if nil != blockKV {
+	} else {
 	}
 
 	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, ignoreRows)

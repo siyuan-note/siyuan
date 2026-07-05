@@ -150,7 +150,7 @@ func TestRemoveFiltersByColumn(t *testing.T) {
 
 func TestRemoveSelectOptionFromFilters(t *testing.T) {
 	sel := &ViewFilter{Column: "c1", Operator: FilterOperatorContains, Value: &Value{
-		Type:   KeyTypeSelect,
+		Type:    KeyTypeSelect,
 		MSelect: []*ValueSelect{{Content: "A", Color: "1"}, {Content: "B", Color: "2"}},
 	}}
 	root := group(FilterCombinationAnd, sel)
@@ -173,7 +173,7 @@ func TestRemoveSelectOptionFromFilters(t *testing.T) {
 
 func TestRenameSelectOptionInFilters(t *testing.T) {
 	sel := &ViewFilter{Column: "c1", Operator: FilterOperatorContains, Value: &Value{
-		Type:   KeyTypeMSelect,
+		Type:    KeyTypeMSelect,
 		MSelect: []*ValueSelect{{Content: "old", Color: "1"}},
 	}}
 	nestedSel := &ViewFilter{Column: "c1", Value: &Value{Type: KeyTypeSelect, MSelect: []*ValueSelect{{Content: "old", Color: "1"}}}}

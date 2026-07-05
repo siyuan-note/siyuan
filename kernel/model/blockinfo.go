@@ -102,8 +102,8 @@ func GetDocInfoInBox(blockID, boxID string) (ret *BlockInfo, err error) {
 	}
 
 	bt := treenode.GetBlockTreeInBox(blockID, boxID)
-	refDefs := queryBlockRefDefsInBox(bt, boxID)
-	buildBacklinkListItemRefs(refDefs)
+	refDefs := queryBlockRefDefsInBox(bt, bt.BoxID)
+	buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
 	var refIDs []string
 	for _, refDef := range refDefs {
 		refIDs = append(refIDs, refDef.RefID)
@@ -398,13 +398,14 @@ func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[str
 		return
 	}
 
-	refDefs = queryBlockRefDefs(bt)
-	originalRefBlockIDs = buildBacklinkListItemRefs(refDefs)
+	// 加密 box 的 refs 在加密 db，用 bt.BoxID 路由
+	refDefs = queryBlockRefDefsInBox(bt, bt.BoxID)
+	originalRefBlockIDs = buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
 	return
 }
 
 func queryBlockRefDefs(bt *treenode.BlockTree) (refDefs []*RefDefs) {
-	return queryBlockRefDefsInBox(bt, "")
+	return queryBlockRefDefsInBox(bt, bt.BoxID)
 }
 
 // queryBlockRefDefsInBox 与 queryBlockRefDefs 一致，但按 boxID 路由到加密 db 或全局 db。
@@ -680,13 +681,17 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 }
 
 func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[string]string) {
+	return buildBacklinkListItemRefsInBox(refDefs, "")
+}
+
+func buildBacklinkListItemRefsInBox(refDefs []*RefDefs, boxID string) (originalRefBlockIDs map[string]string) {
 	originalRefBlockIDs = map[string]string{}
 
 	var refIDs []string
 	for _, refDef := range refDefs {
 		refIDs = append(refIDs, refDef.RefID)
 	}
-	sqlRefBlocks := sql.GetBlocks(refIDs)
+	sqlRefBlocks := sql.GetBlocksInBox(refIDs, boxID)
 	refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 12)
 
 	parentRefParagraphs := map[string]*Block{}
@@ -697,7 +702,7 @@ func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[stri
 			paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
 		}
 	}
-	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
+	sqlParagraphParents := sql.GetBlocksInBox(paragraphParentIDs, boxID)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
 
 	luteEngine := util.NewLute()

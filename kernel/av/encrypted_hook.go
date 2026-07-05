@@ -68,7 +68,7 @@ func attributeViewDataPathByBox(avID, boxID string) string {
 // 2. 查全局 storage/av/（普通 box）
 // 3. 遍历已打开的加密 box 查找
 // 返回找到的路径和对应的 boxID（普通 box 返回空 boxID）。找不到返回空串。
-func findAttributeViewPath(avID string) (path string, boxID string) {
+func FindAttributeViewPath(avID string) (path string, boxID string) {
 	// 先查 pendingAVBox（首次创建场景）
 	if pendingBoxID := GetAVBoxID(avID); pendingBoxID != "" {
 		encPath := attributeViewDataPathByBox(avID, pendingBoxID)
@@ -93,7 +93,7 @@ func findAttributeViewPath(avID string) (path string, boxID string) {
 
 // readAttributeViewData 按 fallback 逻辑读取 AV 定义数据（自动解密）。
 func readAttributeViewData(avID string) ([]byte, error) {
-	path, boxID := findAttributeViewPath(avID)
+	path, boxID := FindAttributeViewPath(avID)
 	if path == "" {
 		return nil, nil // 文件不存在，由调用方处理
 	}
@@ -145,7 +145,7 @@ func mirrorBlocksPath(boxID string) string {
 // 先查 findAttributeViewPath（含 pendingAVBox fallback），找到则返回对应 box 的镜像路径。
 // 找不到则返回全局路径。
 func mirrorBlocksPathByAvID(avID string) string {
-	_, boxID := findAttributeViewPath(avID)
+	_, boxID := FindAttributeViewPath(avID)
 	return mirrorBlocksPath(boxID)
 }
 

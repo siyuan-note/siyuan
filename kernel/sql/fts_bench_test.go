@@ -142,27 +142,27 @@ func genBlock(i, root int) []any {
 	}
 	content := bld.String()
 	return []any{
-		fmt.Sprintf("%020d", i),                  // id
-		fmt.Sprintf("%020d", root),               // parent_id
-		fmt.Sprintf("%020d", root),               // root_id
-		fmt.Sprintf("hash%d", i),                 // hash
-		"20230201000",                            // box
-		fmt.Sprintf("/p/%020d.sy", root),         // path
-		fmt.Sprintf("/文档%d", root),              // hpath
-		fmt.Sprintf("块名%d", i),                  // name
-		"alias",                                  // alias
-		"memo",                                   // memo
-		"tag",                                    // tag
-		content,                                  // content
-		content,                                  // fcontent
-		fmt.Sprintf("markdown %d", i),            // markdown
-		len(content),                             // length
-		"p",                                      // type
-		"",                                       // subtype
-		"{: id=\"ial\"}",                         // ial
-		i,                                        // sort
-		"20230101000000",                         // created
-		"20230101000000",                         // updated
+		fmt.Sprintf("%020d", i),          // id
+		fmt.Sprintf("%020d", root),       // parent_id
+		fmt.Sprintf("%020d", root),       // root_id
+		fmt.Sprintf("hash%d", i),         // hash
+		"20230201000",                    // box
+		fmt.Sprintf("/p/%020d.sy", root), // path
+		fmt.Sprintf("/文档%d", root),       // hpath
+		fmt.Sprintf("块名%d", i),           // name
+		"alias",                          // alias
+		"memo",                           // memo
+		"tag",                            // tag
+		content,                          // content
+		content,                          // fcontent
+		fmt.Sprintf("markdown %d", i),    // markdown
+		len(content),                     // length
+		"p",                              // type
+		"",                               // subtype
+		"{: id=\"ial\"}",                 // ial
+		i,                                // sort
+		"20230101000000",                 // created
+		"20230101000000",                 // updated
 	}
 }
 
@@ -429,10 +429,10 @@ func benchFTSQuery(b *testing.B, mode, keyword string) {
 	}
 }
 
-func BenchmarkFTSQueryChineseStandard(b *testing.B)  { benchFTSQuery(b, "standard", "中文") }
-func BenchmarkFTSQueryChineseExternal(b *testing.B)  { benchFTSQuery(b, "external", "中文") }
-func BenchmarkFTSQueryEnglishStandard(b *testing.B)  { benchFTSQuery(b, "standard", "code") }
-func BenchmarkFTSQueryEnglishExternal(b *testing.B)  { benchFTSQuery(b, "external", "code") }
+func BenchmarkFTSQueryChineseStandard(b *testing.B) { benchFTSQuery(b, "standard", "中文") }
+func BenchmarkFTSQueryChineseExternal(b *testing.B) { benchFTSQuery(b, "external", "中文") }
+func BenchmarkFTSQueryEnglishStandard(b *testing.B) { benchFTSQuery(b, "standard", "code") }
+func BenchmarkFTSQueryEnglishExternal(b *testing.B) { benchFTSQuery(b, "external", "code") }
 
 // TestFTSBenchStorage 是普通测试（非 benchmark），打印两种模式下的数据库文件大小对比。
 func TestFTSBenchStorage(t *testing.T) {

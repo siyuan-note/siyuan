@@ -1872,6 +1872,17 @@ func GetEncryptedDB(boxID string) *sql.DB {
 	return nil
 }
 
+// GetEncryptedBoxIDs 返回所有已打开的加密 content db 对应的 boxID。
+func GetEncryptedBoxIDs() (ret []string) {
+	encryptedDBs.Range(func(key, value any) bool {
+		if boxID, ok := key.(string); ok {
+			ret = append(ret, boxID)
+		}
+		return true
+	})
+	return
+}
+
 // RemoveEncryptedDBFile 关闭连接并删除加密 db 文件（含 WAL/SHM）。删除笔记本时调用。
 func RemoveEncryptedDBFile(boxID string) {
 	CloseEncryptedDB(boxID)

@@ -141,6 +141,7 @@ func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
 func QueryRootBlockRefCount() (ret map[string]int) {
 	ret = map[string]int{}
 
+	// 全局 refs
 	rows, err := query("SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
@@ -155,6 +156,23 @@ func QueryRootBlockRefCount() (ret map[string]int) {
 			return
 		}
 		ret[id] = cnt
+	}
+
+	// 加密 box 的 refs
+	for _, encBoxID := range GetEncryptedBoxIDs() {
+		encRows, encErr := queryForBox(encBoxID, "SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")
+		if encErr != nil {
+			continue
+		}
+		for encRows.Next() {
+			var id string
+			var cnt int
+			if err = encRows.Scan(&id, &cnt); err != nil {
+				continue
+			}
+			ret[id] += cnt
+		}
+		encRows.Close()
 	}
 	return
 }

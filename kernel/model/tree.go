@@ -240,30 +240,7 @@ func LoadTreeByBlockIDWithReindexInBox(id, boxID string) (ret *parse.Tree, err e
 }
 
 func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
-	if !ast.IsNodeIDPattern(id) {
-		stack := logging.ShortStack()
-		logging.LogErrorf("block id is invalid [id=%s], stack: [%s]", id, stack)
-		return nil, ErrTreeNotFound
-	}
-
-	bt := treenode.GetBlockTree(id)
-	if nil == bt {
-		if task.ContainIndexTask() {
-			err = ErrIndexing
-			return
-		}
-
-		stack := logging.ShortStack()
-		if !strings.Contains(stack, "BuildBlockBreadcrumb") {
-			if "dev" == util.Mode {
-				logging.LogWarnf("block tree not found [id=%s], stack: [%s]", id, stack)
-			}
-		}
-		return nil, ErrTreeNotFound
-	}
-
-	ret, err = loadTreeByBlockTree(bt)
-	return
+	return loadTreeByBlockIDInBox(id, "")
 }
 
 func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {

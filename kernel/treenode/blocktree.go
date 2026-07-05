@@ -436,13 +436,13 @@ func CheckListItemNesting(parentID, childID string) error {
 }
 
 func SetBlockTreePath(tree *parse.Tree) {
-	RemoveBlockTreesByRootID(tree.ID)
+	RemoveBlockTreesByRootID(tree.Box, tree.ID)
 	IndexBlockTree(tree)
 }
 
-func RemoveBlockTreesByRootID(rootID string) {
+func RemoveBlockTreesByRootID(boxID, rootID string) {
 	sqlStmt := "DELETE FROM blocktrees WHERE root_id = ?"
-	_, err := exec(sqlStmt, rootID)
+	_, err := execForBox(boxID, sqlStmt, rootID)
 	if err != nil {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return
@@ -499,9 +499,9 @@ func GetBlockTreesByRootID(rootID string) (ret []*BlockTree) {
 	return
 }
 
-func RemoveBlockTreesByPathPrefix(pathPrefix string) {
-	sqlStmt := "DELETE FROM blocktrees WHERE path LIKE ?"
-	_, err := exec(sqlStmt, pathPrefix+"%")
+func RemoveBlockTreesByPathPrefix(boxID, pathPrefix string) {
+	sqlStmt := "DELETE FROM blocktrees WHERE path LIKE ? AND box_id = ?"
+	_, err := execForBox(boxID, sqlStmt, pathPrefix+"%", boxID)
 	if err != nil {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return
@@ -553,22 +553,22 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 	return
 }
 
-func RemoveBlockTreesByIDs(ids []string) {
+func RemoveBlockTreesByIDs(boxID string, ids []string) {
 	if 1 > len(ids) {
 		return
 	}
 
 	sqlStmt := "DELETE FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
-	_, err := exec(sqlStmt)
+	_, err := execForBox(boxID, sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return
 	}
 }
 
-func RemoveBlockTree(id string) {
+func RemoveBlockTree(boxID, id string) {
 	sqlStmt := "DELETE FROM blocktrees WHERE id = ?"
-	_, err := exec(sqlStmt, id)
+	_, err := execForBox(boxID, sqlStmt, id)
 	if err != nil {
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return

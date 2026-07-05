@@ -8,6 +8,7 @@
   "masterPassword": "Kata sandi utama",
   "confirmMasterPassword": "Konfirmasi kata sandi utama",
   "changeMasterPassword": "Ubah kata sandi utama",
+  "changeMasterPasswordSuccessTip": "Kata sandi utama diubah",
   "oldMasterPassword": "Kata sandi utama lama",
   "newMasterPassword": "Kata sandi utama baru",
   "encryptedNotebookRiskTip": "Konten terenkripsi tidak dapat dipulihkan jika kata sandi utama hilang. Pastikan Anda mengingatnya.",
@@ -2075,6 +2076,7 @@
     "309": "Buku catatan terenkripsi terkunci, silakan buka terlebih dahulu",
     "310": "Fitur buku catatan terenkripsi tidak diaktifkan",
     "311": "Kata sandi utama salah",
-    "312": "Fitur buku catatan terenkripsi sudah diaktifkan"
+    "312": "Fitur buku catatan terenkripsi sudah diaktifkan",
+    "313": "Memindahkan dokumen melintasi batas buku catatan terenkripsi tidak didukung"
   }
 }

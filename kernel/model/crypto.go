@@ -50,12 +50,6 @@ func EnableEncryptedNotebook(password string) error {
 	if len(password) == 0 {
 		return errors.New("password must not be empty")
 	}
-	Conf.m.Lock()
-	defer Conf.m.Unlock()
-
-	if Conf.NotebookCrypto.Enabled {
-		return errors.New("encrypted notebook already enabled")
-	}
 
 	salt, err := util.GenerateSalt()
 	if err != nil {
@@ -73,12 +67,19 @@ func EnableEncryptedNotebook(password string) error {
 		return err
 	}
 
+	Conf.m.Lock()
+	if Conf.NotebookCrypto.Enabled {
+		Conf.m.Unlock()
+		return errors.New(Conf.Language(312))
+	}
 	Conf.NotebookCrypto.Enabled = true
 	Conf.NotebookCrypto.MasterSalt = salt
 	Conf.NotebookCrypto.KDFParams = params
 	Conf.NotebookCrypto.KEKVerifier = verifierCT
 	Conf.NotebookCrypto.VerifierNonce = verifierCT[:12]
+	Conf.m.Unlock()
 
+	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
 	Conf.Save()
 	return nil
 }
@@ -90,7 +91,7 @@ func deriveKEK(password string) ([]byte, error) {
 	Conf.m.RUnlock()
 
 	if !nc.Enabled {
-		return nil, errors.New("encrypted notebook not enabled")
+		return nil, errors.New(Conf.Language(310))
 	}
 	params := nc.KDFParams
 	if params.KeyLength == 0 {
@@ -100,10 +101,10 @@ func deriveKEK(password string) ([]byte, error) {
 
 	decrypted, err := util.Decrypt(kek, nc.KEKVerifier)
 	if err != nil {
-		return nil, errors.New("incorrect password")
+		return nil, errors.New(Conf.Language(311))
 	}
 	if string(decrypted) != string(kekVerifierMagic) {
-		return nil, errors.New("incorrect password")
+		return nil, errors.New(Conf.Language(311))
 	}
 	return kek, nil
 }
@@ -145,7 +146,7 @@ func IsBoxUnlocked(boxID string) bool {
 }
 
 // LockBox 清除指定笔记本的 DEK 并关闭其加密 db。Unmount 单个加密笔记本或手动锁定时调用。
-// 同时清除该笔记本的 TreeData 缓存，避免明文树数据在内存中残留。
+// 同时清空所有明文缓存（树/Block/IAL/AV），避免明文在内存中残留。
 func LockBox(boxID string) {
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {
@@ -155,7 +156,12 @@ func LockBox(boxID string) {
 	cachedDEKsLock.Unlock()
 	sql.CloseEncryptedDB(boxID)
 	treenode.CloseEncryptedBlockTreeDB(boxID)
+	// 清空明文缓存：锁定后任何加密 box 的明文都不应残留内存
 	cache.ClearTreeCache()
+	sql.ClearCache()
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
+	cache.ClearAVCache()
 }
 
 // LockAllBoxes 清除所有已缓存的 DEK 并关闭所有加密 db。退出登录或全局锁定时调用。
@@ -166,28 +172,33 @@ func LockAllBoxes() {
 		delete(cachedDEKs, id)
 	}
 	cachedDEKsLock.Unlock()
-	// 关闭所有已打开的加密 db 连接，清空树缓存避免明文残留
+	// 关闭所有已打开的加密 db 连接，清空明文缓存避免残留
 	sql.CloseAllEncryptedDBs()
 	treenode.CloseAllEncryptedBlockTreeDBs()
 	cache.ClearTreeCache()
+	sql.ClearCache()
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
+	cache.ClearAVCache()
 }
 
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。
 // KEK 由调用方临时派生（不来自全局缓存），调用方负责使用后丢弃。
-func WrapNewDEK(kek []byte) (*conf.BoxEncryption, error) {
+// 同时返回原始 DEK，供调用方在创建场景下直接开 db 缓存，省去再次 Argon2id 派生。
+func WrapNewDEK(kek []byte) (*conf.BoxEncryption, []byte, error) {
 	dek, err := util.GenerateDEK()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	wrapped, err := util.Encrypt(kek, dek)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return &conf.BoxEncryption{
 		WrappedDEK: wrapped,
 		WrapNonce:  wrapped[:12],
 		CreatedAt:  time.Now().UnixMilli(),
-	}, nil
+	}, dek, nil
 }
 
 // UnwrapDEK 从 BoxEncryption 解出 DEK 并缓存到内存，供后续 GetDEK 使用。
@@ -245,9 +256,9 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	}
 
 	Conf.m.Lock()
-	defer Conf.m.Unlock()
-
 	nc := Conf.NotebookCrypto
+	Conf.m.Unlock()
+
 	newKEK := util.DeriveKey(newPassword, nc.MasterSalt, nc.KDFParams)
 	newVerifier, err := util.Encrypt(newKEK, kekVerifierMagic)
 	if err != nil {
@@ -277,9 +288,12 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		b.SaveConf(boxConf)
 	}
 
+	Conf.m.Lock()
 	Conf.NotebookCrypto.KEKVerifier = newVerifier
 	Conf.NotebookCrypto.VerifierNonce = newVerifier[:12]
+	Conf.m.Unlock()
 
+	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
 	Conf.Save()
 	return nil
 }
@@ -388,13 +402,13 @@ func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 
 // CreateEncryptedBox 创建一个新的加密笔记本。可多次调用创建多个。
 // 前置：加密功能已启用。创建时需要主密码（临时派生 KEK 用于 wrap DEK，用完即弃）。
-// 创建后笔记本处于"已锁定"状态（DEK 未缓存），需调用方再调 UnlockBox + Mount 才能打开。
+// 创建后直接用生成的 DEK 打开加密 db 并缓存（已解锁状态），调用方随后调 openNotebook 即可挂载。
 func CreateEncryptedBox(name, password string) (id string, err error) {
 	Conf.m.RLock()
 	enabled := Conf.NotebookCrypto.Enabled
 	Conf.m.RUnlock()
 	if !enabled {
-		return "", errors.New("encrypted notebook feature not enabled")
+		return "", errors.New(Conf.Language(310))
 	}
 
 	kek, err := deriveKEK(password)
@@ -402,7 +416,7 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		return "", err
 	}
 
-	enc, err := WrapNewDEK(kek)
+	enc, dek, err := WrapNewDEK(kek)
 	if err != nil {
 		return "", err
 	}
@@ -417,6 +431,19 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	boxConf.Encrypted = true
 	boxConf.BoxCrypt = enc
 	box.SaveConf(boxConf)
+
+	// 复用刚派生的 DEK 直接开 db + 缓存，省去再次 Argon2id 解锁
+	cachedDEKsLock.Lock()
+	defer cachedDEKsLock.Unlock()
+	if err = sql.OpenEncryptedDB(id, dek); err != nil {
+		return "", err
+	}
+	if err = treenode.OpenEncryptedBlockTreeDB(id, dek); err != nil {
+		sql.CloseEncryptedDB(id)
+		return "", err
+	}
+	cachedDEKs[id] = dek
+
 	IncSync()
 	return id, nil
 }

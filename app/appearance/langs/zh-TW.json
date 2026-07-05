@@ -8,6 +8,7 @@
   "masterPassword": "主密碼",
   "confirmMasterPassword": "確認主密碼",
   "changeMasterPassword": "修改主密碼",
+  "changeMasterPasswordSuccessTip": "修改主密碼完畢",
   "oldMasterPassword": "舊主密碼",
   "newMasterPassword": "新主密碼",
   "encryptedNotebookRiskTip": "加密筆記本的內容在忘記主密碼後無法恢復，請務必牢記主密碼。",
@@ -2075,6 +2076,7 @@
     "309": "加密筆記本已鎖定，請先解鎖",
     "310": "加密筆記本功能未啟用",
     "311": "主密碼錯誤",
-    "312": "加密筆記本功能已啟用"
+    "312": "加密筆記本功能已啟用",
+    "313": "不支援跨加密筆記本邊界移動文件"
   }
 }

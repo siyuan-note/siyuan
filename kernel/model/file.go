@@ -1381,6 +1381,15 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		}
 	}
 
+	// 禁止跨加密边界移动文档：加密笔记本是孤岛，密文↔明文边界转换未实现，移动会导致数据损坏
+	toEncrypted := IsEncryptedBox(toBox.ID)
+	for _, fromBox := range pathsBoxes {
+		if fromBox.ID != toBox.ID && IsEncryptedBox(fromBox.ID) != toEncrypted {
+			err = errors.New(Conf.Language(313))
+			return
+		}
+	}
+
 	// A progress layer appears when moving more than 64 documents at once https://github.com/siyuan-note/siyuan/issues/9356
 	subDocsCount := 0
 	for fromPath, fromBox := range pathsBoxes {
@@ -1686,7 +1695,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
 		}
 	}
 
-	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
+	treenode.RemoveBlockTreesByPathPrefix(box.ID, childrenDir)
 	cache.RemoveDocIAL(ret.Path)
 	cache.RemoveTreeData(ret.ID)
 

@@ -2,12 +2,8 @@ name: Release Docker Image
 
 on:
   push:
-    branches:
-      - master
     tags:
-      - '*-alpha*'
-      - '*-beta*'
-      - '*-rc*'
+      - 'v*'
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
@@ -67,7 +63,8 @@ jobs:
       - name: Build and push Docker image
         run: |
           LATEST_FLAG=""
-          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+          # 仅 stable 版本（tag 不含 alpha/beta/rc）才打 :latest 标签
+          if [[ "${{ github.ref }}" != *-alpha* && "${{ github.ref }}" != *-beta* && "${{ github.ref }}" != *-rc* ]]; then
             LATEST_FLAG="-t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest"
           fi
           docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 $LATEST_FLAG -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .

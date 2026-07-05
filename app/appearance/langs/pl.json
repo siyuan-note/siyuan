@@ -8,6 +8,7 @@
   "masterPassword": "Główne hasło",
   "confirmMasterPassword": "Potwierdź główne hasło",
   "changeMasterPassword": "Zmień główne hasło",
+  "changeMasterPasswordSuccessTip": "Zmieniono hasło główne",
   "oldMasterPassword": "Stare główne hasło",
   "newMasterPassword": "Nowe główne hasło",
   "encryptedNotebookRiskTip": "Zaszyfrowaną treść nie można odzyskać w przypadku utraty głównego hasła. Upewnij się, że je zapamiętasz.",
@@ -2075,6 +2076,7 @@
     "309": "Zaszyfrowany notatnik jest zablokowany, najpierw go odblokuj",
     "310": "Funkcja zaszyfrowanego notatnika nie jest włączona",
     "311": "Nieprawidłowe główne hasło",
-    "312": "Funkcja zaszyfrowanego notatnika jest już włączona"
+    "312": "Funkcja zaszyfrowanego notatnika jest już włączona",
+    "313": "Przenoszenie dokumentów przez granice zaszyfrowanego notatnika nie jest obsługiwane"
   }
 }

@@ -8,6 +8,7 @@
   "masterPassword": "Hlavné heslo",
   "confirmMasterPassword": "Potvrdiť hlavné heslo",
   "changeMasterPassword": "Zmeniť hlavné heslo",
+  "changeMasterPasswordSuccessTip": "Hlavné heslo bolo zmenené",
   "oldMasterPassword": "Staré hlavné heslo",
   "newMasterPassword": "Nové hlavné heslo",
   "encryptedNotebookRiskTip": "Šifrovaný obsah nie je možné obnoviť, ak sa stratí hlavné heslo. Uistite sa, že si ho zapamätáte.",
@@ -2075,6 +2076,7 @@
     "309": "Šifrovaný zápisník je zamknutý, najprv ho odomknite",
     "310": "Funkcia šifrovaného zápisníka nie je povolená",
     "311": "Nesprávne hlavné heslo",
-    "312": "Funkcia šifrovaného zápisníka je už povolená"
+    "312": "Funkcia šifrovaného zápisníka je už povolená",
+    "313": "Presúvanie dokumentov cez hranice šifrovaného zápisníka nie je podporované"
   }
 }

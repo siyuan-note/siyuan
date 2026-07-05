@@ -159,12 +159,15 @@ func RemoveBox(boxID string) (err error) {
 		}
 	}
 
+	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
+	isEncrypted := IsEncryptedBox(boxID)
+
 	unmount0(boxID)
 	if err = filelock.Remove(localPath); err != nil {
 		return
 	}
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
-	if IsEncryptedBox(boxID) {
+	if isEncrypted {
 		sql.RemoveEncryptedDBFile(boxID)
 		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 	}

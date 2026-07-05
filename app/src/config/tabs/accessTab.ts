@@ -413,6 +413,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
     const inputs = dialog.element.querySelectorAll("input");
     const confirmBtn = btnsElement[1] as HTMLButtonElement;
     const riskCheckbox = dialog.element.querySelector("#encRiskConfirm") as HTMLInputElement;
+    (inputs[0] as HTMLInputElement).focus();
     riskCheckbox.addEventListener("change", () => {
         confirmBtn.disabled = !riskCheckbox.checked;
     });

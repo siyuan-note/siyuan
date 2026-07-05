@@ -689,6 +689,11 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 
+		// 加密笔记本的 assets 是密文，需先解密再输出
+		if serveEncryptedAsset(context, p) {
+			return
+		}
+
 		// 返回原始文件
 		setAssetsAttachmentDisposition(context, p)
 		http.ServeFile(context.Writer, context.Request, p)
@@ -702,7 +707,7 @@ func serveAssets(ginServer *gin.Engine) {
 
 func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	if strings.HasSuffix(assetAbsPath, ".svg") {
-		data, err := os.ReadFile(assetAbsPath)
+		data, err := readAssetBytes(assetAbsPath)
 		if err != nil {
 			logging.LogErrorf("read svg file failed: %s", err)
 			return false
@@ -719,7 +724,59 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	return false
 }
 
+// readAssetBytes 读取 asset 文件字节。加密笔记本的 asset 是密文，自动解密后返回明文。
+func readAssetBytes(absPath string) ([]byte, error) {
+	data, err := os.ReadFile(absPath)
+	if err != nil {
+		return nil, err
+	}
+	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" {
+		if dek, decErr := model.GetDEK(boxID); decErr == nil && dek != nil {
+			if plain, decErr := util.Decrypt(dek, data); decErr == nil {
+				return plain, nil
+			}
+		}
+	}
+	return data, nil
+}
+
+// serveEncryptedAsset 处理加密笔记本 asset 的 HTTP 输出。
+// 若 absPath 在已解锁的加密 box 下，读密文→解密→按扩展名设置 Content-Type→输出，返回 true；
+// 否则返回 false，由调用方走原 http.ServeFile 路径。
+func serveEncryptedAsset(context *gin.Context, absPath string) bool {
+	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
+	if boxID == "" {
+		return false
+	}
+	dek, err := model.GetDEK(boxID)
+	if err != nil || dek == nil {
+		return false // 非加密 box 或未解锁，走原路径
+	}
+	ciphertext, readErr := os.ReadFile(absPath)
+	if readErr != nil {
+		context.Status(http.StatusNotFound)
+		return true
+	}
+	plain, decErr := util.Decrypt(dek, ciphertext)
+	if decErr != nil {
+		logging.LogErrorf("decrypt asset [%s] failed: %s", absPath, decErr)
+		context.Status(http.StatusInternalServerError)
+		return true
+	}
+	setAssetsAttachmentDisposition(context, absPath)
+	contentType := mime.TypeByExtension(filepath.Ext(absPath))
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	context.Data(200, contentType, plain)
+	return true
+}
+
 func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool {
+	// 加密笔记本的资源是密文，imaging.Open 无法解析，跳过缩略图生成（由 serveEncryptedAsset 解密输出原图）
+	if model.IsEncryptedAssetPath(assetAbsPath) {
+		return false
+	}
 	if style := context.Query("style"); style == "thumb" && model.NeedGenerateAssetsThumbnail(assetAbsPath) { // 请求缩略图
 		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", requestPath)
 		if !gulu.File.IsExist(thumbnailPath) {

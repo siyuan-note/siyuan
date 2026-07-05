@@ -118,6 +118,12 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/changeSortNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeSortNotebook)
 	ginServer.Handle("POST", "/api/notebook/setNotebookIcon", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNotebookIcon)
 	ginServer.Handle("POST", "/api/notebook/getNotebookInfo", model.CheckAuth, getNotebookInfo)
+	ginServer.Handle("POST", "/api/notebook/enableEncryptedNotebooks", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, enableEncryptedNotebooks)
+	ginServer.Handle("POST", "/api/notebook/createEncryptedNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createEncryptedNotebook)
+	ginServer.Handle("POST", "/api/notebook/unlockBox", model.CheckAuth, model.CheckAdminRole, unlockBox)
+	ginServer.Handle("POST", "/api/notebook/lockBox", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, lockBox)
+	ginServer.Handle("POST", "/api/notebook/changeMasterPassword", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeMasterPassword)
+	ginServer.Handle("POST", "/api/notebook/getEncryptedNotebookStatus", model.CheckAuth, getEncryptedNotebookStatus)
 
 	ginServer.Handle("POST", "/api/filetree/searchDocs", model.CheckAuth, searchDocs)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)
@@ -201,6 +207,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/search/findReplace", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, findReplace)
 	ginServer.Handle("POST", "/api/search/fullTextSearchAssetContent", model.CheckAuth, fullTextSearchAssetContent)
 	ginServer.Handle("POST", "/api/search/getAssetContent", model.CheckAuth, getAssetContent)
+	ginServer.Handle("POST", "/api/search/getAssetContentByPath", model.CheckAuth, getAssetContentByPath)
 	ginServer.Handle("POST", "/api/search/listInvalidBlockRefs", model.CheckAuth, listInvalidBlockRefs)
 	ginServer.Handle("POST", "/api/search/semanticSearchBlock", model.CheckAuth, semanticSearchBlock)
 

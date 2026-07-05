@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Caderno criptografado",
+  "enableEncryptedNotebook": "Habilitar caderno criptografado",
+  "encryptedNotebookTip": "Armazene conteúdos sensíveis em um caderno criptografado. A senha mestra é necessária para desbloquear e visualizar o conteúdo. A senha não pode ser recuperada se for esquecida.",
+  "encryptedNotebookEnabled": "O caderno criptografado está habilitado",
+  "encryptedNotebookCount": "Cadernos criptografados: ${x}",
+  "setMasterPassword": "Definir senha mestra",
+  "masterPassword": "Senha mestra",
+  "confirmMasterPassword": "Confirmar senha mestra",
+  "changeMasterPassword": "Alterar senha mestra",
+  "oldMasterPassword": "Senha mestra antiga",
+  "newMasterPassword": "Nova senha mestra",
+  "encryptedNotebookRiskTip": "O conteúdo criptografado não pode ser recuperado se a senha mestra for perdida. Certifique-se de lembrá-la.",
+  "newEncryptedNotebook": "Novo caderno criptografado",
+  "unlockEncryptedNotebook": "Desbloquear \"${x}\"",
+  "unlocking": "Desbloqueando...",
+  "incorrectMasterPassword": "Senha mestra incorreta",
   "mcpStatusConnected": "Conectado",
   "mcpStatusConnecting": "Conectando",
   "mcpStatusFailed": "Falha na conexão",
@@ -2055,6 +2071,10 @@
     "305": "Indexando referências...",
     "306": "Indexando referência %s",
     "307": "Sincronizando dados da nuvem...",
-    "308": "Reindexando a sincronização..."
+    "308": "Reindexando a sincronização...",
+    "309": "O caderno criptografado está bloqueado, desbloqueie-o primeiro",
+    "310": "O recurso de caderno criptografado não está habilitado",
+    "311": "Senha mestra incorreta",
+    "312": "O recurso de caderno criptografado já está habilitado"
   }
 }

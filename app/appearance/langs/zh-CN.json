@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "加密笔记本",
+  "enableEncryptedNotebook": "启用加密笔记本",
+  "encryptedNotebookTip": "将敏感内容存入加密笔记本，需要主密码解锁后才能查看。忘记密码将无法恢复数据。",
+  "encryptedNotebookEnabled": "加密笔记本已启用",
+  "encryptedNotebookCount": "加密笔记本：${x} 个",
+  "setMasterPassword": "设置主密码",
+  "masterPassword": "主密码",
+  "confirmMasterPassword": "确认主密码",
+  "changeMasterPassword": "修改主密码",
+  "oldMasterPassword": "旧主密码",
+  "newMasterPassword": "新主密码",
+  "encryptedNotebookRiskTip": "加密笔记本的内容在忘记主密码后无法恢复，请务必牢记主密码。",
+  "newEncryptedNotebook": "新建加密笔记本",
+  "unlockEncryptedNotebook": "解锁「${x}」",
+  "unlocking": "解锁中……",
+  "incorrectMasterPassword": "主密码错误",
   "mcpStatusConnected": "已连接",
   "mcpStatusConnecting": "连接中",
   "mcpStatusFailed": "连接失败",
@@ -2055,6 +2071,10 @@
     "305": "正在索引引用...",
     "306": "正在索引引用 %s",
     "307": "正在从云端同步数据...",
-    "308": "同步重建索引中..."
+    "308": "同步重建索引中...",
+    "309": "加密笔记本已锁定，请先解锁",
+    "310": "加密笔记本功能未启用",
+    "311": "主密码错误",
+    "312": "加密笔记本功能已启用"
   }
 }

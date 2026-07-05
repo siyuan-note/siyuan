@@ -86,6 +86,29 @@ func GetAssetContent(id, query string, queryMethod int) (ret *AssetContent) {
 	return
 }
 
+// GetAssetContentByPath 按资源文件路径获取已索引的完整内容。
+//
+// path 为工作空间相对路径，形如 "assets/xxx.pdf"。返回 nil 表示该文件尚未被索引。
+// 与 GetAssetContent（按索引记录 id）不同，此处直接返回 content 原文，不做高亮。
+func GetAssetContentByPath(path string) (ret *AssetContent) {
+	path = strings.TrimSpace(path)
+	if "" == path {
+		return
+	}
+
+	table := "asset_contents_fts_case_insensitive"
+	// path 来自用户输入，拼接进 SQL 前需转义单引号，与现有 SQL 拼接风格一致
+	escapedPath := strings.ReplaceAll(path, "'", "''")
+	stmt := "SELECT id, name, ext, path, size, updated, content FROM " + table + " WHERE path = '" + escapedPath + "' LIMIT 1"
+	assetContents := sql.SelectAssetContentsRawStmt(stmt, 1, 1)
+	results := fromSQLAssetContents(&assetContents)
+	if 1 > len(results) {
+		return
+	}
+	ret = results[0]
+	return
+}
+
 // FullTextSearchAssetContent 搜索资源文件内容。
 //
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
@@ -195,7 +218,7 @@ func searchAssetContentBySQL(stmt string, page, pageSize int) (ret []*AssetConte
 	stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(path) AS `assets` ")
 	stmt = removeLimitClause(stmt)
 	result, _ := sql.QueryAssetContentNoLimit(stmt)
-	if 1 > len(ret) {
+	if 1 > len(result) {
 		return
 	}
 

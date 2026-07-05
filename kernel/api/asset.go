@@ -280,10 +280,21 @@ func setFileAnnotation(c *gin.Context) {
 			ret.Msg = err.Error()
 			return
 		}
-	} else if err = filelock.WriteFile(writePath, []byte(data)); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	} else {
+		// 加密笔记本的 .sya 写盘前加密
+		writeData := []byte(data)
+		if boxID := model.ExtractBoxIDFromAssetsPath(writePath); boxID != "" {
+			if dek, decErr := model.GetDEK(boxID); decErr == nil && dek != nil {
+				if enc, encErr := util.Encrypt(dek, writeData); encErr == nil {
+					writeData = enc
+				}
+			}
+		}
+		if err = filelock.WriteFile(writePath, writeData); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
 	}
 
 	model.IncSync()
@@ -317,6 +328,14 @@ func getFileAnnotation(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+	// 加密笔记本的 .sya 读盘后解密
+	if boxID := model.ExtractBoxIDFromAssetsPath(readPath); boxID != "" {
+		if dek, decErr := model.GetDEK(boxID); decErr == nil && dek != nil {
+			if plain, decErr := util.Decrypt(dek, data); decErr == nil {
+				data = plain
+			}
+		}
 	}
 	ret.Data = map[string]any{
 		"data": string(data),

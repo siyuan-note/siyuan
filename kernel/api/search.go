@@ -92,6 +92,32 @@ func getAssetContent(c *gin.Context) {
 	return
 }
 
+func getAssetContentByPath(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	path := arg["path"].(string)
+	assetContent := model.GetAssetContentByPath(path)
+	if model.IsReadOnlyRoleContext(c) && assetContent != nil {
+		publishAccess := model.GetPublishAccess()
+		filteredAssetContents := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
+		if len(filteredAssetContents) > 0 {
+			assetContent = filteredAssetContents[0]
+		} else {
+			assetContent = nil
+		}
+	}
+	ret.Data = map[string]any{
+		"assetContent": assetContent,
+	}
+	return
+}
+
 func fullTextSearchAssetContent(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

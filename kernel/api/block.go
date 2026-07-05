@@ -544,7 +544,13 @@ func getRefText(c *gin.Context) {
 		return
 	}
 
-	refText := model.GetBlockRefText(id)
+	// 加密笔记本的块引解析走 InBox 版（查加密 blocktree + content db）
+	var refText string
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		refText = model.GetBlockRefTextInBox(id, notebook)
+	} else {
+		refText = model.GetBlockRefText(id)
+	}
 	if "" == refText {
 		// 空块返回 id https://github.com/siyuan-note/siyuan/issues/10259
 		refText = id

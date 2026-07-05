@@ -479,6 +479,10 @@ siyuan notebook list -w ~/SiYuan
 # 全文搜索（JSON 输出）
 siyuan search "关键词" -w ~/SiYuan -f json
 
+# 搜索资源文件内容（PDF/Word/Excel/txt 等）
+siyuan search "关键词" --asset -w ~/SiYuan
+siyuan search "关键词" --asset --ext pdf --ext docx -w ~/SiYuan
+
 # 导出文档为 Markdown
 siyuan export md --id <block-id> -w ~/SiYuan
 ```
@@ -490,7 +494,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | 笔记本与文档 | `notebook`、`document`、`dailynote` — 增删改查、每日笔记 |
 | 内容 | `block`、`attr`、`outline` — 块读写、自定义属性、大纲 |
 | 元数据 | `tag`、`bookmark`、`template` — 标签、书签、模板片段 |
-| 查询 | `search`、`sql` — 全文和 SQL 查询 |
+| 查询 | `search`、`sql` — 全文、语义、资源文件内容、SQL 查询 |
 | 引用 | `ref` — 反向链接和提及 |
 | 导入导出 | `export`、`import`、`inbox` — Markdown、HTML、preview、Word、.sy.zip、Data、云端收集箱 |
 | 数据管理 | `repo`、`history`、`sync` — 快照、历史、云端同步 |

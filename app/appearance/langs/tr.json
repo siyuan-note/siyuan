@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Şifreli not defteri",
+  "enableEncryptedNotebook": "Şifreli not defterini etkinleştir",
+  "encryptedNotebookTip": "Hassas içeriği şifreli not defterinde saklayın. İçeriğin kilidini açmak ve görüntülemek için ana şifre gereklidir. Şifre unutulursa kurtarılamaz.",
+  "encryptedNotebookEnabled": "Şifreli not defteri etkin",
+  "encryptedNotebookCount": "Şifreli not defterleri: ${x}",
+  "setMasterPassword": "Ana şifre belirle",
+  "masterPassword": "Ana şifre",
+  "confirmMasterPassword": "Ana şifreyi onayla",
+  "changeMasterPassword": "Ana şifreyi değiştir",
+  "oldMasterPassword": "Eski ana şifre",
+  "newMasterPassword": "Yeni ana şifre",
+  "encryptedNotebookRiskTip": "Ana şifre kaybolursa şifreli içerik kurtarılamaz. Lütfen hatırladığınızdan emin olun.",
+  "newEncryptedNotebook": "Yeni şifreli not defteri",
+  "unlockEncryptedNotebook": "\"${x}\" kilidini aç",
+  "unlocking": "Kilit açılıyor...",
+  "incorrectMasterPassword": "Yanlış ana şifre",
   "mcpStatusConnected": "Bağlandı",
   "mcpStatusConnecting": "Bağlanıyor",
   "mcpStatusFailed": "Bağlantı başarısız",
@@ -2055,6 +2071,10 @@
     "305": "Referanslar indeksleniyor...",
     "306": "Referans indeksleniyor %s",
     "307": "Veriler buluttan senkronize ediliyor...",
-    "308": "Senkronizasyon yeniden indeksleniyor..."
+    "308": "Senkronizasyon yeniden indeksleniyor...",
+    "309": "Şifreli not defteri kilitli, önce kilidini açın",
+    "310": "Şifreli not defteri özelliği etkin değil",
+    "311": "Yanlış ana şifre",
+    "312": "Şifreli not defteri özelliği zaten etkin"
   }
 }

@@ -75,9 +75,10 @@ type AppConf struct {
 	Variables      *conf.Variables  `json:"variables"`      // 全局变量库
 	Bazaar         *conf.Bazaar     `json:"bazaar"`         // 集市配置
 	Stat           *conf.Stat       `json:"stat"`           // 统计
-	Api            *conf.API        `json:"api"`            // API
-	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
-	Publish        *conf.Publish    `json:"publish"`        // 发布服务
+	Api            *conf.API             `json:"api"`            // API
+	Repo           *conf.Repo            `json:"repo"`           // 数据仓库
+	NotebookCrypto *conf.NotebookCrypto  `json:"notebookCrypto"` // 加密笔记本密钥管理
+	Publish        *conf.Publish         `json:"publish"`        // 发布服务
 	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
@@ -527,6 +528,10 @@ func InitConf() {
 	}
 	if 0 < len(Conf.Repo.Key) {
 		logging.LogInfof("repo key [%x]", sha1.Sum(Conf.Repo.Key))
+	}
+
+	if nil == Conf.NotebookCrypto {
+		Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	}
 
 	if nil == Conf.Search {

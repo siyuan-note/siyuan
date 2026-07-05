@@ -315,6 +315,157 @@ const mountPublishAuthAccounts = (root: HTMLElement) => {
 
 export const registerAccessTab = (tab: SettingTabBuilder) => {
     registerAccessAuthGroup(tab);
+    registerEncryptedNotebookGroup(tab);
     registerAccessServerGroup(tab);
     registerAccessPublishGroup(tab);
+};
+
+const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
+    const group = tab.group("encryptedNotebook", window.siyuan.languages.encryptedNotebook);
+    group.slot({
+        key: "encryptedNotebookStatus",
+        keywords: [
+            window.siyuan.languages.encryptedNotebook,
+            window.siyuan.languages.enableEncryptedNotebook,
+            window.siyuan.languages.masterPassword,
+            window.siyuan.languages.changeMasterPassword,
+        ],
+        html: () => `<div class="fn__flex b3-label config-item config-wrap">
+    <div class="fn__flex-1 fn__flex-center">
+        <div class="ft__on-surface ft__smaller" id="encryptedNotebookDesc">${window.siyuan.languages.encryptedNotebookTip}</div>
+        <div class="fn__hr--b"></div>
+        <div id="encryptedNotebookActions"></div>
+    </div>
+    <div class="fn__space"></div>
+    <div class="fn__flex-center">
+        <input type="checkbox" id="encryptedNotebookSwitch" class="b3-switch">
+    </div>
+</div>`,
+        afterMount: mountEncryptedNotebook,
+    });
+};
+
+const mountEncryptedNotebook = (root: HTMLElement) => {
+    const switchElement = root.querySelector("#encryptedNotebookSwitch") as HTMLInputElement;
+    const actionsElement = root.querySelector("#encryptedNotebookActions");
+    const refresh = () => {
+        fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
+            const enabled = response.data.enabled;
+            switchElement.checked = enabled;
+            actionsElement.innerHTML = enabled
+                ? `<button class="b3-button b3-button--white" id="changeMasterPasswordBtn">${window.siyuan.languages.changeMasterPassword}</button>`
+                : "";
+            const changeBtn = root.querySelector("#changeMasterPasswordBtn");
+            if (changeBtn) {
+                changeBtn.addEventListener("click", () => openChangeMasterPasswordDialog());
+            }
+        });
+    };
+    refresh();
+
+    switchElement.addEventListener("change", () => {
+        if (switchElement.checked) {
+            // 切到 ON：弹设密码框
+            openEnableEncryptedDialog(() => {
+                refresh();
+            }, () => {
+                switchElement.checked = false; // 取消则恢复
+            });
+        } else {
+            // 切到 OFF：暂不支持禁用（需要确认所有加密笔记本已删除）
+            showMessage(window.siyuan.languages.encryptedNotebookTip, 4000);
+            switchElement.checked = true;
+        }
+    });
+};
+
+const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) => {
+    const dialog = new Dialog({
+        title: window.siyuan.languages.setMasterPassword,
+        content: `<div class="b3-dialog__content">
+    <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
+    <div class="fn__hr"></div>
+    <input type="password" placeholder="${window.siyuan.languages.confirmMasterPassword}" class="b3-text-field fn__block">
+    <div class="fn__hr--b"></div>
+    <label class="b3-label__text"><input type="checkbox" id="encRiskConfirm"> ${window.siyuan.languages.encryptedNotebookRiskTip}</label>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text" disabled>${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "520px",
+    });
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    const inputs = dialog.element.querySelectorAll("input");
+    const confirmBtn = btnsElement[1] as HTMLButtonElement;
+    const riskCheckbox = dialog.element.querySelector("#encRiskConfirm") as HTMLInputElement;
+    riskCheckbox.addEventListener("change", () => {
+        confirmBtn.disabled = !riskCheckbox.checked;
+    });
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+        onCancel();
+    });
+    confirmBtn.addEventListener("click", () => {
+        const pwd1 = (inputs[0] as HTMLInputElement).value;
+        const pwd2 = (inputs[1] as HTMLInputElement).value;
+        if (!pwd1) {
+            showMessage(window.siyuan.languages.masterPassword);
+            return;
+        }
+        if (pwd1 !== pwd2) {
+            showMessage(window.siyuan.languages.passwordNoMatch);
+            return;
+        }
+        fetchPost("/api/notebook/enableEncryptedNotebooks", {password: pwd1}, () => {
+            showMessage(window.siyuan.languages.encryptedNotebookEnabled);
+            dialog.destroy();
+            onSuccess();
+        });
+    });
+};
+
+const openChangeMasterPasswordDialog = () => {
+    const dialog = new Dialog({
+        title: window.siyuan.languages.changeMasterPassword,
+        content: `<div class="b3-dialog__content">
+    <input type="password" placeholder="${window.siyuan.languages.oldMasterPassword}" class="b3-text-field fn__block">
+    <div class="fn__hr"></div>
+    <input type="password" placeholder="${window.siyuan.languages.newMasterPassword}" class="b3-text-field fn__block">
+    <div class="fn__hr"></div>
+    <input type="password" placeholder="${window.siyuan.languages.confirmMasterPassword}" class="b3-text-field fn__block">
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "520px",
+    });
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    const inputs = dialog.element.querySelectorAll("input");
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        const oldPwd = (inputs[0] as HTMLInputElement).value;
+        const newPwd = (inputs[1] as HTMLInputElement).value;
+        const confirmPwd = (inputs[2] as HTMLInputElement).value;
+        if (!oldPwd || !newPwd) {
+            return;
+        }
+        if (newPwd !== confirmPwd) {
+            showMessage(window.siyuan.languages.passwordNoMatch);
+            return;
+        }
+        fetchPost("/api/notebook/changeMasterPassword", {
+            oldPassword: oldPwd,
+            newPassword: newPwd
+        }, () => {
+            showMessage(window.siyuan.languages.changeMasterPassword);
+            dialog.destroy();
+        });
+    });
 };

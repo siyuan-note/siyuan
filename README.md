@@ -378,6 +378,10 @@ siyuan notebook list -w ~/SiYuan
 # Full-text search with JSON output
 siyuan search "keyword" -w ~/SiYuan -f json
 
+# Search inside asset files (PDF/Word/Excel/txt etc.)
+siyuan search "phrase" --asset -w ~/SiYuan
+siyuan search "phrase" --asset --ext pdf --ext docx -w ~/SiYuan
+
 # Export a document as Markdown
 siyuan export md --id <block-id> -w ~/SiYuan
 ```
@@ -389,7 +393,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | Notebooks & Documents | `notebook`, `document`, `dailynote` — CRUD and daily notes |
 | Content | `block`, `attr`, `outline` — block read/write, attributes, outline |
 | Metadata | `tag`, `bookmark`, `template` — tags, bookmarks, template snippets |
-| Queries | `search`, `sql` — full-text and SQL queries |
+| Queries | `search`, `sql` — full-text, semantic, asset-content, and SQL queries |
 | References | `ref` — backlinks and mentions |
 | Import/Export | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, cloud inbox |
 | Data Management | `repo`, `history`, `sync` — snapshots, versions, cloud sync |

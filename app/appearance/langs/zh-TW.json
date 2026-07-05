@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "加密筆記本",
+  "enableEncryptedNotebook": "啟用加密筆記本",
+  "encryptedNotebookTip": "將敏感內容存入加密筆記本，需要主密碼解鎖後才能查看。忘記密碼將無法恢復資料。",
+  "encryptedNotebookEnabled": "加密筆記本已啟用",
+  "encryptedNotebookCount": "加密筆記本：${x} 個",
+  "setMasterPassword": "設定主密碼",
+  "masterPassword": "主密碼",
+  "confirmMasterPassword": "確認主密碼",
+  "changeMasterPassword": "修改主密碼",
+  "oldMasterPassword": "舊主密碼",
+  "newMasterPassword": "新主密碼",
+  "encryptedNotebookRiskTip": "加密筆記本的內容在忘記主密碼後無法恢復，請務必牢記主密碼。",
+  "newEncryptedNotebook": "新建加密筆記本",
+  "unlockEncryptedNotebook": "解鎖「${x}」",
+  "unlocking": "解鎖中……",
+  "incorrectMasterPassword": "主密碼錯誤",
   "mcpStatusConnected": "已連接",
   "mcpStatusConnecting": "連接中",
   "mcpStatusFailed": "連接失敗",
@@ -2055,6 +2071,10 @@
     "305": "正在索引引用...",
     "306": "正在索引引用 %s",
     "307": "正在從雲端同步資料...",
-    "308": "同步重建索引中..."
+    "308": "同步重建索引中...",
+    "309": "加密筆記本已鎖定，請先解鎖",
+    "310": "加密筆記本功能未啟用",
+    "311": "主密碼錯誤",
+    "312": "加密筆記本功能已啟用"
   }
 }

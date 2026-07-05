@@ -1,6 +1,6 @@
 // Lute 配置全部读取全局 window.siyuan.config / window.siyuan.emojis，跨编辑器一致，
 // 因此所有 Protyle 编辑器共用同一个 Lute 实例，将内存与初始化开销从 O(编辑器数) 降为 O(1)。
-// AgentChat 维持自身的独立 Lute.New() 实例，不经过此处。
+// AgentChat 不复用此共享单例，而是通过 getAgentLute 构建独立实例，使渲染不受编辑器设置影响。
 let luteInstance: Lute | undefined;
 
 /**
@@ -22,6 +22,64 @@ export const getLute = (options: ILuteOptions): Lute => {
  */
 export const getLuteInstance = (): Lute | undefined => {
     return luteInstance;
+};
+
+/**
+ * 为智能体（AgentChat）构建独立的 Lute 实例。
+ *
+ * 与共享单例不同：不读取 window.siyuan.config.editor.markdown 的语法开关，
+ * 而是把所有 Markdown 行内语法（斜体/粗体/删除线/上下标/标签/行内公式/标记）硬编码启用，
+ * 使 LLM 输出始终按标准 Markdown 渲染，不受用户「编辑器 → Markdown 语法设置」的影响。
+ * 每次调用都返回新实例，与编辑器渲染相互隔离。
+ */
+export const getAgentLute = (options: ILuteOptions): Lute => {
+    const lute: Lute = Lute.New();
+    lute.SetSpellcheck(false);
+    lute.SetProtyleMarkNetImg(false);
+    lute.SetFileAnnotationRef(true);
+    lute.SetHTMLTag2TextMark(true);
+    lute.SetTextMark(true);
+    lute.SetHeadingID(false);
+    lute.SetYamlFrontMatter(false);
+    lute.PutEmojis(options.emojis);
+    lute.SetEmojiSite(options.emojiSite);
+    lute.SetHeadingAnchor(options.headingAnchor);
+    lute.SetInlineMathAllowDigitAfterOpenMarker(true);
+    lute.SetToC(false);
+    lute.SetIndentCodeBlock(false);
+    lute.SetParagraphBeginningSpace(true);
+    lute.SetSetext(false);
+    lute.SetFootnotes(false);
+    lute.SetLinkRef(false);
+    lute.SetSanitize(options.sanitize);
+    lute.SetChineseParagraphBeginningSpace(options.paragraphBeginningSpace);
+    lute.SetRenderListStyle(options.listStyle);
+    lute.SetImgPathAllowSpace(true);
+    lute.SetKramdownIAL(true);
+    lute.SetSuperBlock(true);
+    lute.SetCallout(true);
+    // 行内语法全部启用，不随编辑器设置变化。
+    lute.SetInlineAsterisk(true);
+    lute.SetInlineUnderscore(true);
+    lute.SetSup(true);
+    lute.SetSub(true);
+    lute.SetTag(true);
+    lute.SetInlineMath(true);
+    lute.SetGFMStrikethrough1(false);
+    lute.SetGFMStrikethrough(true);
+    lute.SetMark(true);
+    lute.SetSpin(true);
+    lute.SetProtyleWYSIWYG(true);
+    if (options.lazyLoadImage) {
+        lute.SetImageLazyLoading(options.lazyLoadImage);
+    }
+    lute.SetBlockRef(true);
+    lute.SetUnorderedListMarker("-");
+    lute.SetDataTask(true);
+    lute.SetExportNormalizeTaskListMarker(true);
+    lute.SetArbitraryTaskListItemMarker(true);
+    lute.SetEnsureListItemParagraph(true);
+    return lute;
 };
 
 /**

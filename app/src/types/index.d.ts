@@ -517,6 +517,7 @@ interface INotebook {
     newFlashcardCount?: string;
     flashcardCount?: string;
     sortMode: number;
+    encrypted?: boolean;
 }
 
 interface ISiyuan {

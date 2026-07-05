@@ -56,6 +56,30 @@ type dbQueueOperation struct {
 	removeAssetHashes             []string    // delete_assets
 }
 
+// boxID 从 op 提取目标 boxID，供 beginTxForBox 路由到加密 db 或全局 db。
+// delete_id/delete_ids/delete_assets/index_node 无 box 上下文，返回空串 → 走全局 db。
+func (op *dbQueueOperation) boxID() string {
+	switch op.action {
+	case "index", "rename", "move":
+		if op.indexTree != nil {
+			return op.indexTree.Box
+		}
+	case "upsert", "update_refs", "delete_refs":
+		if op.upsertTree != nil {
+			return op.upsertTree.Box
+		}
+	case "delete":
+		return op.removeTreeBox
+	case "delete_box", "delete_box_refs":
+		return op.box
+	case "update_block_content":
+		if op.block != nil {
+			return op.block.Box
+		}
+	}
+	return ""
+}
+
 func FlushTxJob() {
 	task.AppendTask(task.DatabaseIndexCommit, FlushQueue)
 }
@@ -164,7 +188,7 @@ func FlushQueue() {
 			return
 		}
 
-		tx, err := beginTx()
+		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
 			return
 		}
@@ -257,9 +281,15 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}
 	case "delete_box":
-		err = deleteByBoxTx(tx, op.box)
-		if nil == err {
-			tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
+		// 加密 box 的数据在独立库，deleteByBoxTx（删全局库 WHERE box=?）对其无意义。
+		// 加密 box 关闭时由 model 层的 CloseEncryptedDB 处理（关库连接），这里跳过全局库删除。
+		if GetEncryptedDB(op.box) != nil {
+			err = nil // 加密 box：不删全局库（数据不在那里）
+		} else {
+			err = deleteByBoxTx(tx, op.box)
+			if nil == err {
+				tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
+			}
 		}
 	case "delete_box_refs":
 		err = deleteRefsByBoxTx(tx, op.box)
@@ -513,7 +543,7 @@ func processDiskQueue() {
 		if nil == op {
 			continue
 		}
-		tx, err := beginTx()
+		tx, err := beginTxForBox(op.boxID())
 		if err != nil {
 			return
 		}

@@ -454,3 +454,163 @@ func lsNotebooks(c *gin.Context) {
 		"notebooks": notebooks,
 	}
 }
+
+// enableEncryptedNotebooks 启用加密笔记本功能并设置主密码。
+// 重复启用返回错误，避免覆盖现有密钥参数。
+func enableEncryptedNotebooks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var password string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("password", &password, true, true)) {
+		return
+	}
+
+	if err := model.EnableEncryptedNotebook(password); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+// createEncryptedNotebook 创建一个新的加密笔记本。前置：加密功能已启用。
+// 创建时需提供主密码（用于派生 KEK 包络 DEK）。创建后笔记本处于锁定状态，
+// 调用方需再调 unlockBox + openNotebook 才能打开。
+func createEncryptedNotebook(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var name, password string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("name", &name, true, false),
+		util.BindJsonArg("password", &password, true, true),
+	) {
+		return
+	}
+
+	id, err := model.CreateEncryptedBox(name, password)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]any{
+		"notebook": model.Conf.Box(id),
+	}
+}
+
+// unlockBox 用主密码派生 KEK 并解出指定加密笔记本的 DEK，缓存到内存。
+// 解锁后该笔记本即可被 Mount。每次调用跑一次 Argon2id（约 1 秒）。
+func unlockBox(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var notebook, password string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("notebook", &notebook, true, true),
+		util.BindJsonArg("password", &password, true, true),
+	) {
+		return
+	}
+
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	box := &model.Box{ID: notebook}
+	boxConf := box.GetConf()
+	if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
+		ret.Code = -1
+		ret.Msg = "notebook is not encrypted"
+		return
+	}
+
+	if err := model.UnlockBox(notebook, password, boxConf.BoxCrypt); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+// lockBox 锁定指定加密笔记本：清除其 DEK 缓存并 Unmount。
+func lockBox(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var notebook string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
+		return
+	}
+
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	if !model.IsEncryptedBox(notebook) {
+		ret.Code = -1
+		ret.Msg = "notebook is not encrypted"
+		return
+	}
+
+	// Unmount 内部的 unmount0 会清 DEK + 关闭加密 db，无需单独 LockBox。
+	// 反过来若先 LockBox 会关闭 db，导致 Unmount 的 Unindex 操作无 db 可用。
+	model.Unmount(notebook)
+}
+
+// changeMasterPassword 修改加密笔记本的主密码。
+// 用旧密码校验后，用新密码派生新 KEK，重新加密 verifier 和所有加密笔记本的 WrappedDEK。
+// 必须在所有加密笔记本都已锁定（DEK 不在内存）的状态下调用。
+func changeMasterPassword(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var oldPassword, newPassword string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("oldPassword", &oldPassword, true, true),
+		util.BindJsonArg("newPassword", &newPassword, true, true),
+	) {
+		return
+	}
+
+	if err := model.ChangeMasterPassword(oldPassword, newPassword); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+// getEncryptedNotebookStatus 返回加密笔记本功能的启用状态。
+func getEncryptedNotebookStatus(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]any{
+		"enabled": model.Conf.NotebookCrypto.Enabled,
+	}
+}

@@ -126,6 +126,12 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
+	// 加密笔记本的 .sy 是密文，读盘后解密成明文供后续解析；非加密 box 原样返回
+	if data, err = decryptData(boxID, data); nil != err {
+		logging.LogErrorf("decrypt tree [%s] failed: %s", p, err)
+		return
+	}
+
 	data, needFix, err = fixTreeJSONData(boxID, p, data, luteEngine)
 	if nil != err {
 		return
@@ -208,6 +214,42 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 }
 
 func DocIAL(absPath string) (ret map[string]string) {
+	// 加密笔记本的 .sy 是密文，流式 jsoniter 解析无法处理，需先整体读+解密。
+	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密 box 走原流式逻辑。
+	boxID := docIALBoxID(absPath)
+	if boxID != "" && DEKProvider != nil {
+		if dek, err := DEKProvider(boxID); err == nil && dek != nil {
+			// 已解锁的加密 box：整体读密文 → 解密 → 流式解析
+			filelock.Lock(absPath)
+			raw, readErr := filelock.ReadFile(absPath)
+			filelock.Unlock(absPath)
+			if readErr != nil {
+				logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
+				return nil
+			}
+			plain, decErr := util.Decrypt(dek, raw)
+			if decErr != nil {
+				// 解密失败（可能文件损坏或密钥不匹配）：返回空 map 而非 nil，
+				// 避免 LoadTreeByData 的父文档补全逻辑把 nil 误判为"文档缺失"而凭空创建文档
+				logging.LogErrorf("decrypt doc [%s] for IAL failed: %s", absPath, decErr)
+				return map[string]string{}
+			}
+			iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, bytes.NewReader(plain), 512)
+			for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
+				if field == "Properties" {
+					iter.ReadVal(&ret)
+					break
+				} else {
+					iter.Skip()
+				}
+			}
+			for k, v := range ret {
+				ret[k] = html.UnescapeAttrVal(v)
+			}
+			return
+		}
+	}
+
 	filelock.Lock(absPath)
 	file, err := os.Open(absPath)
 	if err != nil {
@@ -246,20 +288,31 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		return
 	}
 
+	// 加密笔记本的落盘内容用密文 encData，缓存与比对仍用明文 data（缓存存明文）
+	encData, encErr := encryptData(tree.Box, data)
+	if encErr != nil {
+		err = encErr
+		return
+	}
+
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
 	if cachedData, ok := cache.GetTreeData(tree.ID); ok {
 		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
 			return
 		}
 	} else {
-		if diskData, readErr := filelock.ReadFile(filePath); nil == readErr && len(diskData) == len(data) && bytes.Equal(diskData, data) {
-			cache.SetTreeData(tree.ID, data)
-			return
+		// 读盘比对：加密 box 的磁盘数据是密文，需先解密成明文再与 data 比对
+		if diskData, readErr := filelock.ReadFile(filePath); nil == readErr {
+			decDisk, decErr := decryptData(tree.Box, diskData)
+			if decErr == nil && len(decDisk) == len(data) && bytes.Equal(decDisk, data) {
+				cache.SetTreeData(tree.ID, data)
+				return
+			}
 		}
 	}
 
-	if err = util.WriteFileByMmap(filePath, data); nil != err {
-		if err = writeTreeByWriteFile(filePath, data); nil != err {
+	if err = util.WriteFileByMmap(filePath, encData); nil != err {
+		if err = writeTreeByWriteFile(filePath, encData); nil != err {
 			return
 		}
 	}
@@ -431,7 +484,13 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (d
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
 		return
 	}
-	if err = filelock.WriteFile(filePath, data); err != nil {
+	// 订正后的 data 是明文，加密笔记本落盘前需加密
+	encData, encErr := encryptData(ret.Box, data)
+	if encErr != nil {
+		err = encErr
+		return
+	}
+	if err = filelock.WriteFile(filePath, encData); err != nil {
 		logging.LogErrorf("write data [%s] failed: %s", filePath, err)
 	}
 	return

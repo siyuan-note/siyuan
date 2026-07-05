@@ -31,7 +31,9 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -151,12 +153,20 @@ func RemoveBox(boxID string) (err error) {
 			return
 		}
 
-		copyBoxAssetsToDataAssets(boxID)
+		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
+		if !IsEncryptedBox(boxID) {
+			copyBoxAssetsToDataAssets(boxID)
+		}
 	}
 
 	unmount0(boxID)
 	if err = filelock.Remove(localPath); err != nil {
 		return
+	}
+	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
+	if IsEncryptedBox(boxID) {
+		sql.RemoveEncryptedDBFile(boxID)
+		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 	}
 
 	if isUserGuide {
@@ -208,6 +218,10 @@ func unmount0(boxID string) {
 	boxConf.Closed = true
 	box.SaveConf(boxConf)
 	box.Unindex()
+	if boxConf.Encrypted {
+		// 加密笔记本关闭时清除其 DEK 缓存，恢复"已锁定"状态
+		ClearDEK(boxID)
+	}
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {
@@ -289,6 +303,12 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		if box.ID == boxID {
 			return true, nil
 		}
+	}
+
+	// 加密笔记本必须先通过 UnlockBox 解出 DEK，否则拒绝挂载。Mount 本身不接收密码，
+	// 前端流程为：先调 /api/notebook/unlockBox 解锁，再调 openNotebook 挂载。
+	if preConf := (&Box{ID: boxID}).GetConf(); preConf.Encrypted && !IsBoxUnlocked(boxID) {
+		return false, errors.New("encrypted notebook locked, please unlock it first")
 	}
 
 	box := &Box{ID: boxID}

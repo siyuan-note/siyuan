@@ -599,6 +599,17 @@ func GetDataAssetsAbsPath() (ret string) {
 	return
 }
 
+// EncryptedDBPath 返回加密笔记本的独立 SQLCipher db 文件路径。
+// 与 siyuan.db 同放 temp 目录，文件名带 boxID 区分多个加密笔记本。db 是可重建的索引，非原始内容。
+func EncryptedDBPath(boxID string) string {
+	return filepath.Join(TempDir, "siyuan-encrypted-"+boxID+".db")
+}
+
+// EncryptedBlockTreeDBPath 返回加密笔记本的独立 SQLCipher blocktree db 文件路径。
+func EncryptedBlockTreeDBPath(boxID string) string {
+	return filepath.Join(TempDir, "siyuan-encrypted-"+boxID+"-blocktree.db")
+}
+
 func tryLockWorkspace() {
 	WorkspaceLock = flock.New(filepath.Join(WorkspaceDir, ".lock"))
 	ok, err := WorkspaceLock.TryLock()

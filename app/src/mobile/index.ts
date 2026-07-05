@@ -35,7 +35,7 @@ import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {nbsp2space} from "../protyle/util/normalizeText";
-import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
+import {armKeyboardLock, callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
@@ -104,16 +104,20 @@ class App {
                     });
                 }, Constants.TIMEOUT_TRANSITION);
             }
-            if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
-                if (canInput(event.target)) {
+            if (canInput(event.target)) {
+                // 原生 App 通过桥接主动唤起键盘；移动端浏览器没有桥接，但点击可编辑区域后也会立刻触发 resize，
+                // 进而调用 activeBlur 关闭键盘（比如三星键盘 https://github.com/siyuan-note/siyuan/issues/18078），所以此处也需要上锁
+                if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
                     callMobileAppShowKeyboard();
+                } else {
+                    armKeyboardLock();
                 }
             }
             if (document.contains(event.target) && !hasClosestByClassName(event.target as Element, "protyle-util")) {
                 hideAllElements(["util"]);
             }
         });
-        if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
+        {
             const __siyuan_original_focus = HTMLElement.prototype.focus;
             HTMLElement.prototype.focus = function (this: HTMLElement, ...args) {
                 try {
@@ -124,7 +128,12 @@ class App {
                     console.error("Error in focus event:", e);
                 }
                 if (canInput(this)) {
-                    callMobileAppShowKeyboard();
+                    // 原生 App 通过桥接主动唤起键盘；移动端浏览器没有桥接，仅上锁以阻止 focus 后立即触发的 activeBlur 关闭键盘
+                    if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
+                        callMobileAppShowKeyboard();
+                    } else {
+                        armKeyboardLock();
+                    }
                 }
             };
         }

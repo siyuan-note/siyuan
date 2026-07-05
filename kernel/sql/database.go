@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"os"
@@ -53,6 +54,10 @@ var (
 	assetContentDB *sql.DB
 
 	initDatabaseLock = sync.RWMutex{}
+
+	// encryptedDBs 维护已打开的加密笔记本独立 db 连接，按 boxID 索引。
+	// UnlockBox 时打开并注册，LockBox/Unmount 时关闭并移除。
+	encryptedDBs = &sync.Map{} // boxID -> *sql.DB
 )
 
 func init() {
@@ -1418,6 +1423,37 @@ func query(query string, args ...any) (*sql.Rows, error) {
 	return db.Query(query, args...)
 }
 
+// queryRowForBox 按 box 路由查询单行。加密 box 用独立 db，否则用全局 db。boxID 为空走全局。
+func queryRowForBox(boxID, query string, args ...any) *sql.Row {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		logging.LogErrorf("statement is empty")
+		return nil
+	}
+	if boxDB := GetEncryptedDB(boxID); boxDB != nil {
+		return boxDB.QueryRow(query, args...)
+	}
+	if nil == db {
+		return nil
+	}
+	return db.QueryRow(query, args...)
+}
+
+// queryForBox 按 box 路由查询多行。加密 box 用独立 db，否则用全局 db。boxID 为空走全局。
+func queryForBox(boxID, query string, args ...any) (*sql.Rows, error) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return nil, errors.New("statement is empty")
+	}
+	if boxDB := GetEncryptedDB(boxID); boxDB != nil {
+		return boxDB.Query(query, args...)
+	}
+	if nil == db {
+		return nil, errors.New("database is nil")
+	}
+	return db.Query(query, args...)
+}
+
 func Exec(stmt string, args ...any) error {
 	stmt = strings.TrimSpace(stmt)
 	if "" == stmt {
@@ -1778,4 +1814,108 @@ func vacuum() {
 			logging.LogErrorf("vacuum asset content database failed: %s", err)
 		}
 	}
+}
+
+// OpenEncryptedDB 打开加密笔记本的独立 SQLCipher db 并注册到 encryptedDBs。
+// dek 是该 box 的 32 字节数据密钥；DSN 用 SQLCipher 原始 key 格式 x'<hex>'，避免 SQLCipher 再做 KDF。
+// 首次打开会建表（幂等 IF NOT EXISTS）。UnlockBox 时调用。
+func OpenEncryptedDB(boxID string, dek []byte) (err error) {
+	if _, loaded := encryptedDBs.Load(boxID); loaded {
+		return nil // 已打开
+	}
+	dbPath := util.EncryptedDBPath(boxID)
+	// SQLCipher DSN：_key=x'<hex>' 让 go-sqlite3 执行 PRAGMA key；其余 PRAGMA 与全局 siyuan.db 对齐
+	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_mmap_size=4294967296&_secure_delete=OFF" +
+		"&_cache_size=-128000&_page_size=32768&_busy_timeout=7000&_ignore_check_constraints=ON" +
+		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(dek) + "'"
+	boxDB, err := sql.Open("sqlite3_extended", dsn)
+	if err != nil {
+		return err
+	}
+	boxDB.SetMaxOpenConns(20)
+	boxDB.SetMaxIdleConns(4)
+	if err = initEncryptedDBTables(boxDB); err != nil {
+		boxDB.Close()
+		return err
+	}
+	encryptedDBs.Store(boxID, boxDB)
+	return nil
+}
+
+// CloseEncryptedDB 关闭并移除加密笔记本的 db 连接。LockBox/Unmount 时调用。
+func CloseEncryptedDB(boxID string) {
+	if v, ok := encryptedDBs.LoadAndDelete(boxID); ok {
+		if boxDB, ok := v.(*sql.DB); ok {
+			boxDB.Close()
+		}
+	}
+}
+
+// CloseAllEncryptedDBs 关闭所有已打开的加密 db 连接。全局锁定（LockAllBoxes）时调用。
+func CloseAllEncryptedDBs() {
+	encryptedDBs.Range(func(key, value any) bool {
+		encryptedDBs.Delete(key)
+		if boxDB, ok := value.(*sql.DB); ok {
+			boxDB.Close()
+		}
+		return true
+	})
+}
+
+// GetEncryptedDB 返回加密 box 的 db 句柄；未打开返回 nil。
+func GetEncryptedDB(boxID string) *sql.DB {
+	if v, ok := encryptedDBs.Load(boxID); ok {
+		if boxDB, ok := v.(*sql.DB); ok {
+			return boxDB
+		}
+	}
+	return nil
+}
+
+// RemoveEncryptedDBFile 关闭连接并删除加密 db 文件（含 WAL/SHM）。删除笔记本时调用。
+func RemoveEncryptedDBFile(boxID string) {
+	CloseEncryptedDB(boxID)
+	dbPath := util.EncryptedDBPath(boxID)
+	for _, suffix := range []string{"", "-wal", "-shm"} {
+		if err := os.Remove(dbPath + suffix); err != nil && !os.IsNotExist(err) {
+			logging.LogErrorf("remove encrypted db file [%s] failed: %s", dbPath+suffix, err)
+		}
+	}
+}
+
+// beginTxForBox 按 box 选 db 开事务。加密 box 用其独立 db，否则用全局 db。
+func beginTxForBox(box string) (tx *sql.Tx, err error) {
+	if boxDB := GetEncryptedDB(box); boxDB != nil {
+		if tx, err = boxDB.Begin(); err != nil {
+			logging.LogErrorf("begin tx (encrypted box %s) failed: %s\n  %s", box, err, logging.ShortStack())
+			return
+		}
+		return
+	}
+	return beginTx()
+}
+
+// initEncryptedDBTables 在加密 box db 上建内容表（幂等）。结构与全局 siyuan.db 的内容表一致，
+// 但不含 stat 表（加密 db 不参与版本管理）。首次打开时调用。
+func initEncryptedDBTables(boxDB *sql.DB) (err error) {
+	tables := []string{
+		"CREATE TABLE IF NOT EXISTS blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated)",
+		"CREATE TABLE IF NOT EXISTS spans (id, block_id, root_id, box, path, content, markdown, type, ial)",
+		"CREATE TABLE IF NOT EXISTS assets (id, block_id, root_id, box, docpath, path, name, title, hash)",
+		"CREATE TABLE IF NOT EXISTS attributes (id, name, value, type, block_id, root_id, box, path)",
+		"CREATE TABLE IF NOT EXISTS refs (id, def_block_id, def_block_parent_id, def_block_root_id, def_block_path, block_id, root_id, box, path, content, markdown, type)",
+		"CREATE TABLE IF NOT EXISTS file_annotation_refs (id, file_path, annotation_id, block_id, root_id, box, path, content, type)",
+		"CREATE TABLE IF NOT EXISTS block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0, ignored_type INTEGER NOT NULL DEFAULT 0)",
+	}
+	for _, stmt := range tables {
+		if _, err = boxDB.Exec(stmt); err != nil {
+			return
+		}
+	}
+	// FTS5 external-content 虚拟表，tokenize 与全局保持一致（siyuan 分词器）
+	ftsStmt := "CREATE VIRTUAL TABLE IF NOT EXISTS blocks_fts USING fts5(id UNINDEXED, parent_id UNINDEXED, root_id UNINDEXED, hash UNINDEXED, box UNINDEXED, path UNINDEXED, hpath UNINDEXED, name, alias, memo, tag, content, fcontent, markdown UNINDEXED, length UNINDEXED, type UNINDEXED, subtype UNINDEXED, ial, sort UNINDEXED, created UNINDEXED, updated UNINDEXED, content='blocks', content_rowid='rowid', tokenize=\"" + ftsTokenize() + "\")"
+	if _, err = boxDB.Exec(ftsStmt); err != nil {
+		return
+	}
+	return
 }

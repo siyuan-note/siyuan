@@ -1627,7 +1627,10 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
 	}
 
 	generateAvHistoryInTree(ret, historyDir)
-	copyDocAssetsToDataAssets(box.ID, p)
+	// 加密笔记本的 assets 不提升到全局
+	if !IsEncryptedBox(box.ID) {
+		copyDocAssetsToDataAssets(box.ID, p)
+	}
 
 	removeIDs := treenode.RootChildIDs(ret.ID)
 	dir := path.Dir(p)

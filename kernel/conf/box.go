@@ -31,6 +31,15 @@ type BoxConf struct {
 	DailyNoteSavePath     string `json:"dailyNoteSavePath"`     // 新建日记存储路径
 	DailyNoteTemplatePath string `json:"dailyNoteTemplatePath"` // 新建日记使用的模板路径
 	SortMode              int    `json:"sortMode"`              // 排序方式
+	Encrypted             bool             `json:"encrypted"`    // 是否为加密笔记本
+	BoxCrypt              *BoxEncryption   `json:"boxCrypt"`    // 笔记本加密参数，仅 Encrypted=true 时有值
+}
+
+// BoxEncryption 维护单个加密笔记本的密钥包络参数。WrappedDEK 是用全局 KEK 加密后的 DEK，本身可落盘。
+type BoxEncryption struct {
+	WrappedDEK []byte `json:"wrappedDEK"` // 用 KEK 经 AES-GCM 加密后的 DEK
+	WrapNonce  []byte `json:"wrapNonce"`  // 包络用的 GCM nonce（Encrypt 返回值的前 12 字节）
+	CreatedAt  int64  `json:"createdAt"`  // 创建时间，单位毫秒，便于未来按时间轮换密钥
 }
 
 func NewBoxConf() *BoxConf {
@@ -40,5 +49,6 @@ func NewBoxConf() *BoxConf {
 		DailyNoteSavePath:     "/daily note/{{now | date \"2006/01\"}}/{{now | date \"2006-01-02\"}}",
 		DailyNoteTemplatePath: "",
 		SortMode:              util.SortModeFileTree,
+		Encrypted:             false,
 	}
 }

@@ -500,12 +500,20 @@ func ExportSystemLog() (zipPath string) {
 }
 
 func ExportNotebookSY(id string) (zipPath string) {
+	// 加密笔记本不支持导出，避免密文 .sy 流出后无法解读
+	if IsEncryptedBox(id) {
+		return
+	}
 	zipPath = exportBoxSYZip(id)
 	return
 }
 
 func ExportSYs(ids []string) (zipPath string) {
 	block := treenode.GetBlockTree(ids[0])
+	// 加密笔记本不支持导出
+	if nil != block && IsEncryptedBox(block.BoxID) {
+		return
+	}
 	box := Conf.Box(block.BoxID)
 	baseFolderName := path.Base(block.HPath)
 	if "." == baseFolderName {
@@ -2132,7 +2140,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 
 			destPath := filepath.Join(exportDir, asset)
-			assetErr := filelock.Copy(srcPath, destPath)
+			assetErr := copyAssetDecryptIfEncrypted(srcPath, destPath)
 			if nil != assetErr {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, assetErr)
 				continue
@@ -2142,7 +2150,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				sya := srcPath + ".sya"
 				if filelock.IsExist(sya) {
 					// Related PDF annotation information is not exported when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/7836
-					if syaErr := filelock.Copy(sya, destPath+".sya"); nil != syaErr {
+					if syaErr := copyAssetDecryptIfEncrypted(sya, destPath+".sya"); nil != syaErr {
 						logging.LogErrorf("copy sya from [%s] to [%s] failed: %s", sya, destPath+".sya", syaErr)
 					}
 				}

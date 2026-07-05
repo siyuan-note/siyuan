@@ -640,33 +640,40 @@ export class Gutter {
             plusBefore.style.display = "none";
             plusAfter.style.display = "none";
             if (compressed) {
-                // 竖排：框线贴块标左右边缘，+号定位在外偏位置
+                // 竖排：压缩模式块标贴编辑区左缘，左侧紧邻 .layout__resize--lr 分栏拖拽条（z-index 4）
+                // 若 lineBefore/plusBefore 按横排逻辑外延到块标左侧，鼠标移入该区会被分栏拖拽条抢占悬浮，
+                // 导致加号无法触发。故竖排时上方/下方插入指示均置于块标右侧，上下以纵向位置区分：
+                // 上方插入指示贴图标右缘上半段，下方插入指示贴图标右缘下半段，完全避开左侧拖拽条命中区。
                 const iconRect = buttonElement.querySelector("svg").getBoundingClientRect();
                 const centerY = iconRect.top + iconRect.height / 2;
-                const lineH = 12;
-                const top = centerY - lineH / 2;
+                const lineH = Math.max(8, iconRect.height / 2 - 1);
                 const plusSize = 16;
+                // 线条/加号需落在 button rect（rect.right）外，否则 case A 会判定鼠标仍在块标内而不触发加号
+                const rightX = rect.right + 1;
+                // 上方插入：块标右侧上半段
                 lineBefore.style.display = "";
                 lineBefore.style.opacity = "1";
                 lineBefore.style.width = "2px";
                 lineBefore.style.height = `${lineH}px`;
-                lineBefore.style.left = `${rect.left - 4}px`;
-                lineBefore.style.top = `${top}px`;
+                lineBefore.style.left = `${rightX}px`;
+                lineBefore.style.top = `${iconRect.top - 1}px`;
+                // 下方插入：块标右侧下半段
                 lineAfter.style.display = "";
                 lineAfter.style.opacity = "1";
                 lineAfter.style.width = "2px";
                 lineAfter.style.height = `${lineH}px`;
-                lineAfter.style.left = `${rect.right + 2}px`;
-                lineAfter.style.top = `${top}px`;
+                lineAfter.style.left = `${rightX}px`;
+                lineAfter.style.top = `${centerY + 1}px`;
+                // +号位于右侧线条外偏，上下分开避免重叠
                 plusBefore.style.width = `${plusSize}px`;
                 plusBefore.style.height = `${plusSize}px`;
-                plusBefore.style.left = `${rect.left - 6 - plusSize / 2}px`;
-                plusBefore.style.top = `${centerY - plusSize / 2}px`;
+                plusBefore.style.left = `${rightX + 4}px`;
+                plusBefore.style.top = `${iconRect.top + lineH / 2 - plusSize / 2}px`;
                 plusAfter.style.width = `${plusSize}px`;
                 plusAfter.style.height = `${plusSize}px`;
-                plusAfter.style.left = `${rect.right + 4 - plusSize / 2}px`;
-                plusAfter.style.top = `${centerY - plusSize / 2}px`;
-                // 竖排时隐藏块标提示，避免其遮挡左侧框线
+                plusAfter.style.left = `${rightX + 4}px`;
+                plusAfter.style.top = `${centerY + 1 + lineH / 2 - plusSize / 2}px`;
+                // 竖排时隐藏块标提示，避免其遮挡右侧框线与+号
                 hideTooltip();
             } else {
                 // 横排：框线贴块标上下边缘，+号定位在外偏位置

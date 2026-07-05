@@ -6,7 +6,7 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20260630155703"
+		"updated": "20260704130000"
 	},
 	"Children": [
 		{
@@ -4802,6 +4802,88 @@
 				{
 					"Type": "NodeCodeBlockCode",
 					"Data": "siyuan search \"keyword\"\nsiyuan search \"keyword\" --notebook box1 --notebook box2\nsiyuan search \"keyword\" --path \"/folder\"\nsiyuan search \"keyword\" --type document --type heading\nsiyuan search \"keyword\" --subtype o --subtype u\nsiyuan search \"keyword\" --method 2\nsiyuan search \"keyword\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"keyword\" --group-by 1\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260704120000-7999d08",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260704120000-7999d08",
+				"updated": "20260704120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Add --asset to search the content index of asset files (PDF/Word/Excel/txt etc.); use --ext to filter by extension (repeatable). In this mode --method only supports 0-3, and --order-by values are 0 relevance-desc, 1 relevance-asc, 2 updated-asc, 3 updated-desc."
+				}
+			]
+		},
+		{
+			"ID": "20260704120100-feff4a0",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260704120100-feff4a0",
+				"updated": "20260704120100"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan search \"keyword\" --asset\nsiyuan search \"keyword\" --asset --ext pdf --ext docx\nsiyuan search \"keyword\" --asset --method 3 --order-by 3\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260704130000-d80a64e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260704130000-d80a64e",
+				"updated": "20260704130000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Add --get-asset to get the full indexed content of a single asset file by path (the positional argument is treated as the path, e.g. assets/report.pdf). Useful for retrieving the full text of a file found via --asset search."
+				}
+			]
+		},
+		{
+			"ID": "20260704130100-55c901d",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260704130100-55c901d",
+				"updated": "20260704130100"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "YmFzaA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan search \"assets/report.pdf\" --get-asset\nsiyuan search \"assets/report.pdf\" --get-asset --format json\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

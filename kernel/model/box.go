@@ -59,6 +59,8 @@ type Box struct {
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`
 	FlashcardCount    int `json:"flashcardCount"`
+
+	Encrypted bool `json:"encrypted"` // 是否为加密笔记本
 }
 
 func StatJob() {
@@ -138,12 +140,13 @@ func ListNotebooks() (ret []*Box, err error) {
 		}
 
 		box := &Box{
-			ID:       id,
-			Name:     boxConf.Name,
-			Icon:     icon,
-			Sort:     boxConf.Sort,
-			SortMode: boxConf.SortMode,
-			Closed:   boxConf.Closed,
+			ID:        id,
+			Name:      boxConf.Name,
+			Icon:      icon,
+			Sort:      boxConf.Sort,
+			SortMode:  boxConf.SortMode,
+			Closed:    boxConf.Closed,
+			Encrypted: boxConf.Encrypted,
 		}
 
 		if !isExistConf {

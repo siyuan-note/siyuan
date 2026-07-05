@@ -1,4 +1,20 @@
 {
+  "encryptedNotebook": "Verschlüsseltes Notizbuch",
+  "enableEncryptedNotebook": "Verschlüsseltes Notizbuch aktivieren",
+  "encryptedNotebookTip": "Sensible Inhalte in einem verschlüsselten Notizbuch speichern. Zum Entsperren und Anzeigen der Inhalte ist das Master-Passwort erforderlich. Das Passwort kann bei Verlust nicht wiederhergestellt werden.",
+  "encryptedNotebookEnabled": "Verschlüsseltes Notizbuch ist aktiviert",
+  "encryptedNotebookCount": "Verschlüsselte Notizbücher: ${x}",
+  "setMasterPassword": "Master-Passwort festlegen",
+  "masterPassword": "Master-Passwort",
+  "confirmMasterPassword": "Master-Passwort bestätigen",
+  "changeMasterPassword": "Master-Passwort ändern",
+  "oldMasterPassword": "Altes Master-Passwort",
+  "newMasterPassword": "Neues Master-Passwort",
+  "encryptedNotebookRiskTip": "Die verschlüsselten Inhalte können bei Verlust des Master-Passworts nicht wiederhergestellt werden. Bitte stellen Sie sicher, dass Sie es sich merken.",
+  "newEncryptedNotebook": "Neues verschlüsseltes Notizbuch",
+  "unlockEncryptedNotebook": "„${x}“ entsperren",
+  "unlocking": "Wird entsperrt...",
+  "incorrectMasterPassword": "Falsches Master-Passwort",
   "mcpStatusConnected": "Verbunden",
   "mcpStatusConnecting": "Verbindung wird hergestellt",
   "mcpStatusFailed": "Verbindung fehlgeschlagen",
@@ -2055,6 +2071,10 @@
     "305": "Referenzen werden indiziert...",
     "306": "Referenz wird indiziert %s",
     "307": "Daten werden aus der Cloud synchronisiert...",
-    "308": "Synchronisation wird neu indiziert..."
+    "308": "Synchronisation wird neu indiziert...",
+    "309": "Verschlüsseltes Notizbuch ist gesperrt, bitte zuerst entsperren",
+    "310": "Funktion für verschlüsseltes Notizbuch ist nicht aktiviert",
+    "311": "Falsches Master-Passwort",
+    "312": "Funktion für verschlüsseltes Notizbuch ist bereits aktiviert"
   }
 }

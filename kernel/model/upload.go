@@ -113,7 +113,7 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 				f.Close()
 				return
 			}
-			if err = filelock.WriteFileByReader(writePath, f); err != nil {
+			if err = writeAssetFile(writePath, f, bt.BoxID); err != nil {
 				f.Close()
 				return
 			}
@@ -140,6 +140,7 @@ func Upload(c *gin.Context) {
 		return
 	}
 	assetsDirPath := filepath.Join(util.DataDir, "assets")
+	var uploadBoxID string // 记录上传目标 boxID，供 writeAssetFile 判断是否需加密
 	if nil != form.Value["id"] {
 		id := form.Value["id"][0]
 		bt := treenode.GetBlockTree(id)
@@ -148,6 +149,7 @@ func Upload(c *gin.Context) {
 			ret.Msg = Conf.Language(71)
 			return
 		}
+		uploadBoxID = bt.BoxID
 		docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
 		assetsDirPath = getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
 	}
@@ -276,7 +278,7 @@ func Upload(c *gin.Context) {
 				f.Close()
 				break
 			}
-			if err = filelock.WriteFileByReader(writePath, f); err != nil {
+			if err = writeAssetFile(writePath, f, uploadBoxID); err != nil {
 				logging.LogErrorf("write file failed: %s", err)
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
@@ -357,8 +359,34 @@ func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 	if !filelock.IsExist(assets) {
 		assets = filepath.Join(boxLocalPath, "assets")
 		if !filelock.IsExist(assets) {
+			// 加密笔记本禁用全局 data/assets 回退，强制使用笔记本级 assets，避免明文资源泄漏到全局
+			boxID := filepath.Base(boxLocalPath)
+			if IsEncryptedBox(boxID) {
+				_ = os.MkdirAll(assets, 0755)
+				return
+			}
 			assets = filepath.Join(util.DataDir, "assets")
 		}
 	}
 	return
+}
+
+// writeAssetFile 把 src 的内容写入 writePath。若 boxID 是已解锁的加密 box，先加密字节流再落盘；
+// 否则直接按 reader 写（走 filelock.WriteFileByReader 原路径，保留锁语义）。
+func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
+	if boxID != "" {
+		if dek, decErr := GetDEK(boxID); decErr == nil && dek != nil {
+			// 已解锁的加密 box：全读 → 加密 → 落盘
+			raw, readErr := io.ReadAll(src)
+			if readErr != nil {
+				return readErr
+			}
+			enc, encErr := util.Encrypt(dek, raw)
+			if encErr != nil {
+				return encErr
+			}
+			return filelock.WriteFile(writePath, enc)
+		}
+	}
+	return filelock.WriteFileByReader(writePath, src)
 }

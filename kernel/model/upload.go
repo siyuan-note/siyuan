@@ -153,6 +153,15 @@ func Upload(c *gin.Context) {
 		id := form.Value["id"][0]
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
+			// 全局 blocktree 找不到时，遍历已打开的加密 box 查找
+			for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
+					bt = encBT
+					break
+				}
+			}
+		}
+		if nil == bt {
 			ret.Code = -1
 			ret.Msg = Conf.Language(71)
 			return

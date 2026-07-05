@@ -333,15 +333,19 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.masterPassword,
             window.siyuan.languages.changeMasterPassword,
         ],
-        html: () => `<div class="fn__flex b3-label config-item config-wrap">
-    <div class="fn__flex-1 fn__flex-center">
-        <div class="ft__on-surface ft__smaller" id="encryptedNotebookDesc">${window.siyuan.languages.encryptedNotebookTip}</div>
-        <div class="fn__hr--b"></div>
-        <div id="encryptedNotebookActions"></div>
-    </div>
-    <div class="fn__space"></div>
-    <div class="fn__flex-center">
-        <input type="checkbox" id="encryptedNotebookSwitch" class="b3-switch">
+        html: () =>
+            // 开关行：结构与标准 group.switch 一致（label + config-item + b3-switch fn__flex-center）
+            `<label class="fn__flex b3-label config-item">
+    ${genConfigItemMainHtml(window.siyuan.languages.enableEncryptedNotebook, window.siyuan.languages.encryptedNotebookTip)}
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="encryptedNotebookSwitch" type="checkbox">
+</label>
+<div class="b3-label config-item fn__none" id="encryptedNotebookActions">
+    <div class="fn__flex fn__flex-center">
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="changeMasterPasswordBtn">
+            <svg class="svg"><use xlink:href="#iconLock"></use></svg>
+            ${window.siyuan.languages.changeMasterPassword}
+        </button>
     </div>
 </div>`,
         afterMount: mountEncryptedNotebook,
@@ -355,16 +359,14 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
         fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
             const enabled = response.data.enabled;
             switchElement.checked = enabled;
-            actionsElement.innerHTML = enabled
-                ? `<button class="b3-button b3-button--white" id="changeMasterPasswordBtn">${window.siyuan.languages.changeMasterPassword}</button>`
-                : "";
-            const changeBtn = root.querySelector("#changeMasterPasswordBtn");
-            if (changeBtn) {
-                changeBtn.addEventListener("click", () => openChangeMasterPasswordDialog());
-            }
+            actionsElement.classList.toggle("fn__none", !enabled);
         });
     };
     refresh();
+
+    actionsElement.querySelector("#changeMasterPasswordBtn")?.addEventListener("click", () => {
+        openChangeMasterPasswordDialog();
+    });
 
     switchElement.addEventListener("change", () => {
         if (switchElement.checked) {

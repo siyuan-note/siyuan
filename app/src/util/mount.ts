@@ -204,7 +204,7 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.unlockEncryptedNotebook.replace("${x}", name)}</button>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px"
     });

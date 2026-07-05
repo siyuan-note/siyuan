@@ -108,11 +108,6 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 }
 
 func ImportSY(zipPath, boxID, toPath string) (err error) {
-	// 加密笔记本不支持导入（导入的 .sy 是明文，落到加密目录会导致读取失败）
-	if IsEncryptedBox(boxID) {
-		err = errors.New("import to encrypted notebook is not supported")
-		return
-	}
 	util.PushEndlessProgress(Conf.Language(73))
 	defer util.ClearPushProgress(100)
 
@@ -431,6 +426,17 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			data = buf.Bytes()
 		}
 
+		// 加密笔记本的数据需先加密再落盘，导入的 .sy 原文是明文 JSON
+		if IsEncryptedBox(boxID) {
+			dek, decErr := GetDEK(boxID)
+			if decErr == nil && dek != nil {
+				data, decErr = util.Encrypt(dek, data)
+				if decErr != nil {
+					logging.LogErrorf("encrypt import .sy failed: %s", decErr)
+					return
+				}
+			}
+		}
 		if err = os.WriteFile(syPath, data, 0644); err != nil {
 			logging.LogErrorf("write .sy [%s] failed: %s", syPath, err)
 			return
@@ -774,11 +780,6 @@ func ImportData(zipPath string) (err error) {
 }
 
 func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
-	// 加密笔记本不支持导入
-	if IsEncryptedBox(boxID) {
-		err = errors.New("import to encrypted notebook is not supported")
-		return
-	}
 	util.PushEndlessProgress(Conf.Language(73))
 	defer func() {
 		util.PushClearProgress()

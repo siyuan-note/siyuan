@@ -766,7 +766,13 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 		context.Status(http.StatusInternalServerError)
 		return true
 	}
-	setAssetsAttachmentDisposition(context, absPath)
+	// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
+	diskName := filepath.Base(absPath)
+	if originalName := model.LookupAssetOriginalName(boxID, diskName); originalName != "" {
+		setAssetsAttachmentDisposition(context, originalName)
+	} else {
+		setAssetsAttachmentDisposition(context, absPath)
+	}
 	contentType := mime.TypeByExtension(filepath.Ext(absPath))
 	if contentType == "" {
 		contentType = "application/octet-stream"

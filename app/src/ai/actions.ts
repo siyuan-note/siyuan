@@ -151,8 +151,8 @@ const filterAI = (element: HTMLElement, inputElement: HTMLInputElement) => {
             item.classList.remove("fn__none");
         }
     });
-    element.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
-    element.querySelector(".b3-list-item:not(.fn__none)").classList.add("b3-list-item--focus");
+    element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+    element.querySelector(".b3-list-item:not(.fn__none)")?.classList.add("b3-list-item--focus");
 };
 
 export const AIActions = (elements: Element[], protyle: IProtyle) => {
@@ -226,6 +226,9 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                     event.preventDefault();
                     event.stopPropagation();
                     const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                    if (!currentElement) {
+                        return;
+                    }
                     if (currentElement.dataset.type === "custom") {
                         customDialog(protyle, ids, elements);
                         menu.close();

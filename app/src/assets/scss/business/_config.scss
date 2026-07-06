@@ -131,7 +131,8 @@
         min-height: 0;
         overflow-y: auto;
         margin: 0 -12px 0 0;
-        padding-right: 12px;
+        padding-right: 2px;
+        scrollbar-gutter: stable;
         list-style: none;
         overflow-x: hidden;
       }
@@ -141,6 +142,7 @@
         align-items: center;
         height: 21px;
         margin-bottom: 16px;
+        padding: 0 4px;
       }
 
       .b3-list-item {

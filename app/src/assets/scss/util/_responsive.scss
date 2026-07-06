@@ -8,8 +8,12 @@
       & > .config__side {
         width: auto;
 
+        .config__tab-title {
+          margin-bottom: 0;
+        }
+
         .b3-list-item__text,
-        .b3-form__icon {
+        .config__tab-head .b3-text-field {
           display: none;
         }
 
@@ -106,10 +110,6 @@
         margin-left: 0 !important;
         text-align: center;
       }
-    }
-
-    &__tab-head .b3-text-field {
-      display: none;
     }
   }
 

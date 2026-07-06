@@ -225,7 +225,7 @@ export class MobileOutline extends Model {
             if (previousElement) {
                 this.setCurrentById(previousElement.getAttribute("data-node-id"));
             } else {
-                const breadcrumbParam: IObject = {
+                const breadcrumbParam: Record<string, any> = {
                     id: nodeElement.getAttribute("data-node-id"),
                     excludeTypes: []
                 };

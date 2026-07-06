@@ -1161,7 +1161,7 @@ export const getArticle = (options: {
             if (articleId !== options.id) {
                 return;
             }
-            const getDocParam: IObject = {
+            const getDocParam: Record<string, any> = {
                 id: options.id,
                 query: options.value || null,
                 queryMethod: options.config?.method || null,
@@ -1357,7 +1357,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 previousElement.setAttribute("disabled", "disabled");
             }
             const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
-            const searchParam: IObject = {
+            const searchParam: Record<string, any> = {
                 query: config.query,
                 method: config.method,
                 types: config.types,

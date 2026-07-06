@@ -77,7 +77,7 @@ export const getDocByScroll = (options: {
         }
     }
     if (options.scrollAttr?.zoomInId && options.scrollAttr?.rootId && options.scrollAttr.zoomInId !== options.scrollAttr.rootId) {
-        const getDocParam: IObject = {
+        const getDocParam: Record<string, any> = {
             id: options.scrollAttr.zoomInId,
             size: Constants.SIZE_GET_MAX,
             query: options.protyle.query?.key,
@@ -91,7 +91,7 @@ export const getDocByScroll = (options: {
         }
         fetchPost("/api/filetree/getDoc", getDocParam, response => {
             if (response.code === 1) {
-                const getDocParam: IObject = {
+                const getDocParam: Record<string, any> = {
                     id: options.scrollAttr.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
                     query: options.protyle.query?.key,
                     queryMethod: options.protyle.query?.method,
@@ -132,7 +132,7 @@ export const getDocByScroll = (options: {
         });
         return;
     }
-    const getDocParam: IObject = {
+    const getDocParam: Record<string, any> = {
         id: options.scrollAttr?.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr?.startId,
         startID: options.scrollAttr?.startId,
         endID: options.scrollAttr?.endId,

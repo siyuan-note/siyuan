@@ -287,7 +287,6 @@ export class Graph extends Model {
                     } else if (dataType === "refresh") {
                         this.searchGraph(false, undefined, true);
                     } else if (dataType === "fullscreen") {
-                        fullscreen(this.element, target);
                         const minElement = this.element.querySelector('.block__icons .block__icon[data-type="min"]');
                         if (this.element.className.includes("fullscreen")) {
                             minElement.classList.add("fn__none");
@@ -296,6 +295,7 @@ export class Graph extends Model {
                             minElement.classList.remove("fn__none");
                             minElement.previousElementSibling.classList.remove("fn__none");
                         }
+                        fullscreen(this.element, target);
                     }
                     break;
                 } else if (target.classList.contains("graph__svg")) {

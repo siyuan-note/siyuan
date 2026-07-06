@@ -70,7 +70,6 @@ import {popSearch} from "../../mobile/menu/search";
 import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {isEncryptedBox} from "../../util/pathName";
 import {onGet} from "../util/onGet";
 import {clearTableCell, getTableRangeHTML, isIncludeCell, setTableAlign, updateTableTitle} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";

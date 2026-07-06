@@ -499,7 +499,7 @@ export class Outline extends Model {
         });
     }
 
-    public updateDocTitle(ial?: IObject, count?: number) {
+    public updateDocTitle(ial?: Record<string, string>, count?: number) {
         const docTitleElement = this.headerElement.nextElementSibling as HTMLElement;
         if (this.type === "pin") {
             if (!ial && typeof count === "undefined") {
@@ -617,7 +617,7 @@ export class Outline extends Model {
             if (previousElement) {
                 this.setCurrentById(previousElement.getAttribute("data-node-id"));
             } else {
-                const breadcrumbParam: IObject = {
+                const breadcrumbParam: Record<string, any> = {
                     id: nodeElement.getAttribute("data-node-id"),
                     excludeTypes: []
                 };

@@ -96,7 +96,7 @@ const bgs = [
 
 export class Background {
     public element: HTMLElement;
-    public ial: IObject;
+    public ial: Record<string, string>;
     private imgElement: HTMLImageElement;
     private iconElement: HTMLElement;
     private actionElements: NodeListOf<Element>;
@@ -567,7 +567,7 @@ export class Background {
         this.render(this.ial, protyle.block.rootID);
     }
 
-    public render(ial: IObject, rootId: string) {
+    public render(ial: Record<string, string>, rootId: string) {
         const img = ial["title-img"];
         const icon = ial.icon;
         const tags = ial.tags;

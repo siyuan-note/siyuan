@@ -290,7 +290,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 previousElement.setAttribute("disabled", "disabled");
             }
             const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
-            const searchParam: IObject = {
+            const searchParam: Record<string, any> = {
                 query: config.query,
                 method: config.method,
                 types: config.types,

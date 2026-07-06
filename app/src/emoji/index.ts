@@ -252,7 +252,7 @@ export const openEmojiPanel = (
     }
 
     const dynamicURL = "api/icon/getDynamicIcon?";
-    const dynamicCurrentObj: IObject = {
+    const dynamicCurrentObj: Record<string, any> = {
         color: "#d23f31",
         lang: "",
         date: dayjs().format("YYYY-MM-DD"),

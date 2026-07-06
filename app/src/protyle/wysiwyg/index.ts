@@ -2074,7 +2074,7 @@ export class WYSIWYG {
             }
             // https://github.com/siyuan-note/siyuan/issues/17800 不能删除
             const embedElement = isInEmbedBlock(nodeElement);
-            if (embedElement && embedElement.classList.contains("protyle-wysiwyg--select")) {
+            if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select")) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;

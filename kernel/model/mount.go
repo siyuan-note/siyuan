@@ -139,6 +139,8 @@ func RemoveBox(boxID string) (err error) {
 		return fmt.Errorf("can not remove [%s] caused by it is not a dir", boxID)
 	}
 
+	unmount0(boxID)
+
 	if !isUserGuide {
 		var historyDir string
 		historyDir, err = getHistoryDir(HistoryOpDelete)
@@ -174,7 +176,6 @@ func RemoveBox(boxID string) (err error) {
 		}
 	}
 
-	unmount0(boxID)
 	if err = filelock.Remove(localPath); err != nil {
 		return
 	}

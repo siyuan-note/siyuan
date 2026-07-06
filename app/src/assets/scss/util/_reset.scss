@@ -146,6 +146,7 @@ body {
 
     .layout__wnd--right .layout-tab-container {
       border-top-right-radius: var(--b3-border-radius-b);
+      isolation: isolate;
     }
 
     .layout__wnd--center .layout-tab-bar .item {

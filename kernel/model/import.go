@@ -471,12 +471,14 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		// 加密笔记本的数据需先加密再落盘，导入的 .sy 原文是明文 JSON
 		if IsEncryptedBox(boxID) {
 			dek, decErr := GetDEK(boxID)
-			if decErr == nil && dek != nil {
-				data, decErr = util.Encrypt(dek, data)
-				if decErr != nil {
-					logging.LogErrorf("encrypt import .sy failed: %s", decErr)
-					return
-				}
+			if decErr != nil || dek == nil {
+				err = errors.New(Conf.Language(314))
+				return
+			}
+			data, decErr = util.Encrypt(dek, data)
+			if decErr != nil {
+				logging.LogErrorf("encrypt import .sy failed: %s", decErr)
+				return
 			}
 		}
 		if err = os.WriteFile(syPath, data, 0644); err != nil {

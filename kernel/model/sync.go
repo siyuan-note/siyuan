@@ -322,7 +322,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 			cache.RemoveDocIAL(block.Path)
 		}
 		sql.RemoveTreeQueue(boxID, rootID)
-		bts := treenode.GetBlockTreesByRootID(rootID)
+		bts := treenode.GetBlockTreesByRootIDInBox(rootID, boxID)
 		for _, b := range bts {
 			cache.RemoveBlockIAL(b.ID)
 		}
@@ -366,7 +366,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 		treenode.UpsertBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 
-		bts := treenode.GetBlockTreesByRootID(rootID)
+		bts := treenode.GetBlockTreesByRootIDInBox(rootID, tree.Box)
 		for _, b := range bts {
 			cache.RemoveBlockIAL(b.ID)
 		}

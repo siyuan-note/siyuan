@@ -394,6 +394,16 @@ func getFile(c *gin.Context) {
 		}
 	}
 
+	// 加密笔记本的 .sy 是密文，直接返回密文无意义且可能被插件误解析
+	if strings.HasSuffix(filePath, ".sy") {
+		boxID := model.ExtractBoxIDFromAssetsPath(fileAbsPath)
+		if "" != boxID && model.IsEncryptedBox(boxID) {
+			ret.Code = -1
+			ret.Msg = "access to encrypted notebook .sy files is not supported via this API"
+			return
+		}
+	}
+
 	data, err := filelock.ReadFile(fileAbsPath)
 	if err != nil {
 		logging.LogErrorf("read file [%s] failed: %s", fileAbsPath, err)
@@ -765,6 +775,16 @@ func putFile(c *gin.Context) {
 			if err != nil {
 				logging.LogErrorf("read file failed: %s", err)
 				break
+			}
+
+			// 加密笔记本的 .sy 写入会破坏密文格式
+			if strings.HasSuffix(fileAbsPath, ".sy") {
+				boxID := model.ExtractBoxIDFromAssetsPath(fileAbsPath)
+				if "" != boxID && model.IsEncryptedBox(boxID) {
+					ret.Code = -1
+					ret.Msg = "writing to encrypted notebook .sy files is not supported via this API"
+					return
+				}
 			}
 
 			err = filelock.WriteFile(fileAbsPath, data)

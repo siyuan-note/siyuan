@@ -909,6 +909,14 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		oldPath = oldPath[:idx]
 	}
 
+	// 加密笔记本的资源文件名已脱敏，重命名会破坏映射关系，禁止
+	if absPath, absErr := GetAssetAbsPath(oldPath); absErr == nil {
+		if IsEncryptedAssetPath(absPath) {
+			err = errors.New("renaming assets in encrypted notebooks is not supported")
+			return
+		}
+	}
+
 	newName = strings.TrimSpace(newName)
 	newName = util.FilterUploadFileName(newName)
 	if path.Base(oldPath) == newName {
@@ -971,6 +979,10 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
+		// 加密笔记本的资源重命名已在入口处拦截，这里跳过加密 box
+		if IsEncryptedBox(notebook.ID) {
+			continue
+		}
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 
 		for _, paths := range pages {

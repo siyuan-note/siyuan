@@ -44,7 +44,16 @@ func RefreshBacklink(id string) {
 }
 
 func refreshRefsByDefID(defID string) {
+	// 全局查 + 加密 box fallback
 	refs := sql.QueryRefsByDefID(defID, true)
+	if len(refs) == 0 {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encRefs := sql.QueryRefsByDefIDInBox(defID, true, encBoxID); len(encRefs) > 0 {
+				refs = encRefs
+				break
+			}
+		}
+	}
 	var rootIDs []string
 	for _, ref := range refs {
 		rootIDs = append(rootIDs, ref.RootID)

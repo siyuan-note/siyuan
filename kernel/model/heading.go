@@ -177,6 +177,12 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		return
 	}
 
+	// 禁止跨加密边界：Doc2Heading 会合并 srcTree 和 targetTree 的内容
+	if IsEncryptedBox(srcTree.Box) != IsEncryptedBox(targetTree.Box) {
+		err = errors.New(Conf.Language(313))
+		return
+	}
+
 	pivot := treenode.GetNodeInTree(targetTree, targetID)
 	if nil == pivot {
 		err = ErrBlockNotFound

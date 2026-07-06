@@ -63,7 +63,7 @@ func attributeViewDataPathByBox(avID, boxID string) string {
 	return filepath.Join(util.DataDir, "storage", "av", avID+".json")
 }
 
-// findAttributeViewPath 按 fallback 逻辑查找 AV 定义文件的实际路径。
+// FindAttributeViewPath 按 fallback 逻辑查找 AV 定义文件的实际路径。
 // 1. 先查 pendingAVBox（首次创建预设的 boxID）
 // 2. 查全局 storage/av/（普通 box）
 // 3. 遍历已打开的加密 box 查找

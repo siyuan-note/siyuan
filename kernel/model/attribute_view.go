@@ -1638,8 +1638,11 @@ func insertItemAfter(items []string, item, previousItemID string) []string {
 }
 
 func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error) {
-	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
-	oldAvPath := filepath.Join(storageAvDir, avID+".json")
+	// 加密 box 的 AV 定义在笔记本级目录，通过 fallback 查找实际路径
+	oldAvPath, avBoxID := av.FindAttributeViewPath(avID)
+	if oldAvPath == "" {
+		oldAvPath = av.GetAttributeViewDataPath(avID)
+	}
 	newAvID, newBlockID = ast.NewNodeID(), ast.NewNodeID()
 
 	oldAv, err := av.ParseAttributeView(avID)
@@ -1651,6 +1654,17 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 	if err != nil {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, err)
 		return
+	}
+
+	// 加密 box 的 AV 是密文，需先解密再处理
+	if avBoxID != "" {
+		if dek, decErr := GetDEK(avBoxID); decErr == nil && dek != nil {
+			if data, decErr = util.Decrypt(dek, data); decErr != nil {
+				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, decErr)
+				err = decErr
+				return
+			}
+		}
 	}
 
 	data = bytes.ReplaceAll(data, []byte(avID), []byte(newAvID))
@@ -1680,7 +1694,19 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		return
 	}
 
-	newAvPath := filepath.Join(storageAvDir, newAvID+".json")
+	// 加密 box 的新 AV 定义也存笔记本级目录，且需 DEK 加密
+	newAvPath := filepath.Join(util.DataDir, "storage", "av", newAvID+".json")
+	if avBoxID != "" {
+		newAvPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", newAvID+".json")
+		if dek, decErr := GetDEK(avBoxID); decErr == nil && dek != nil {
+			if data, decErr = util.Encrypt(dek, data); decErr != nil {
+				logging.LogErrorf("encrypt attribute view [%s] failed: %s", newAvID, decErr)
+				err = decErr
+				return
+			}
+		}
+		av.SetAVBoxID(newAvID, avBoxID)
+	}
 	if err = filelock.WriteFile(newAvPath, data); err != nil {
 		logging.LogErrorf("write attribute view [%s] failed: %s", newAvID, err)
 		return

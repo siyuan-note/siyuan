@@ -311,7 +311,16 @@ func RollbackDocHistory(historyPath string) (err error) {
 		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 		for _, avNode := range avNodes {
 			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+			// 加密 box 的 AV 定义在笔记本级目录
 			destAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+			if IsEncryptedBox(boxID) {
+				// 历史目录里 AV 也可能在 boxID 子目录下
+				boxSrcAvPath := filepath.Join(historyDir, boxID, "storage", "av", avNode.AttributeViewID+".json")
+				if gulu.File.IsExist(boxSrcAvPath) {
+					srcAvPath = boxSrcAvPath
+				}
+				destAvPath = filepath.Join(util.DataDir, boxID, "storage", "av", avNode.AttributeViewID+".json")
+			}
 			if gulu.File.IsExist(destAvPath) {
 				if copyErr := filelock.CopyNewtimes(srcAvPath, destAvPath); nil != copyErr {
 					logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
@@ -465,7 +474,18 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	}
 
 	from := historyPath
+	// 从路径提取 boxID 判断是否加密 box 的资源
+	relPath := strings.TrimPrefix(filepath.ToSlash(historyPath), filepath.ToSlash(util.HistoryDir))
+	relPath = strings.TrimPrefix(relPath, "/")
+	pathParts := strings.SplitN(relPath, "/", 3)
 	to := filepath.Join(util.DataDir, "assets", filepath.Base(historyPath))
+	if len(pathParts) >= 2 && IsEncryptedBox(pathParts[1]) {
+		// 加密 box 的资源回滚到笔记本级 assets 目录
+		to = filepath.Join(util.DataDir, pathParts[1], "assets", filepath.Base(historyPath))
+		if err = os.MkdirAll(filepath.Dir(to), 0755); err != nil {
+			return
+		}
+	}
 
 	if err = filelock.CopyNewtimes(from, to); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
@@ -504,7 +524,18 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 	}
 
 	from := historyPath
+	// 从路径提取 boxID 判断是否加密 box 的 AV
+	relPath := strings.TrimPrefix(filepath.ToSlash(historyPath), filepath.ToSlash(util.HistoryDir))
+	relPath = strings.TrimPrefix(relPath, "/")
+	pathParts := strings.SplitN(relPath, "/", 3)
 	to := filepath.Join(util.DataDir, "storage", "av", filepath.Base(historyPath))
+	if len(pathParts) >= 2 && IsEncryptedBox(pathParts[1]) {
+		// 加密 box 的 AV 定义回滚到笔记本级目录
+		to = filepath.Join(util.DataDir, pathParts[1], "storage", "av", filepath.Base(historyPath))
+		if err = os.MkdirAll(filepath.Dir(to), 0755); err != nil {
+			return
+		}
+	}
 
 	if err = filelock.CopyNewtimes(from, to); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)

@@ -367,6 +367,8 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 	updated = file.Updated
 
 	if strings.HasSuffix(file.Path, ".sy") {
+		// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
+		data = decryptRepoDataIfNeeded(data, file.Path)
 		luteEngine := NewLute()
 		var snapshotTree *parse.Tree
 		displayInText, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)

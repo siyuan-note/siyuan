@@ -351,7 +351,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
     if (protyle && protyle.app && protyle.app.plugins) {
         for (let i = 0; i < protyle.app.plugins.length; i++) {
-            const response: IObject & { files: FileList } = await new Promise((resolve) => {
+            const response: IClipboardData & { files: FileList } = await new Promise((resolve) => {
                 const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
                     protyle,
                     resolve,

@@ -1881,7 +1881,7 @@ export class Gutter {
                 click() {
                     const avId = nodeElement.getAttribute("data-av-id");
                     const notebookId = protyle.notebookId;
-                    // 加密笔记本的 AV 定义存 notebook 级路径
+                    // 加密笔记本的 AV 定义存笔记本级路径
                     const avDir = isEncryptedBox(notebookId)
                         ? path.join(window.siyuan.config.system.dataDir, notebookId, "storage", "av")
                         : path.join(window.siyuan.config.system.dataDir, "storage", "av");

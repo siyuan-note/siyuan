@@ -2079,6 +2079,7 @@
 		"310": "Encrypted notebook feature is not enabled",
 		"311": "Incorrect master password",
 		"312": "Encrypted notebook feature is already enabled",
-		"313": "Moving documents across encrypted notebook boundaries is not supported"
+		"313": "Moving documents across encrypted notebook boundaries is not supported",
+		"314": "Please unlock the encrypted notebook first"
 	}
 }

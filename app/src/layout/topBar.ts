@@ -24,7 +24,7 @@ import {exportLayout, resizeTopBar} from "./util";
 import {setTabPosition} from "./tabUtil";
 import {commandPanel} from "../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../plugin/openTopBarMenu";
-import {getWorkspaceName} from "../util/processTitle";
+import {getWorkspaceName, setTitle} from "../util/processTitle";
 
 const sendTrafficLightPosition = (zoom: number) => {
     /// #if !BROWSER
@@ -47,6 +47,10 @@ export const syncHideToolbarLayout = () => {
     /// #if !BROWSER
     if (!isWindow()) {
         sendTrafficLightPosition(window.siyuan.storage[Constants.LOCAL_ZOOM]);
+        if (!window.siyuan.config.appearance.hideToolbar) {
+            const title = document.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"] .item__text')?.textContent || "";
+            setTitle(title, title ? false : true);
+        }
     } else {
         return;
     }

@@ -139,7 +139,7 @@ export class WYSIWYG {
         dropEvent(protyle, this.element);
     }
 
-    public renderCustom(ial: IObject) {
+    public renderCustom(ial: Record<string, string>) {
         let isFullWidth = ial[Constants.CUSTOM_SY_FULLWIDTH];
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";

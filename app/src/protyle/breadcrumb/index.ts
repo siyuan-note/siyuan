@@ -229,7 +229,7 @@ ${padHTML}
             return;
         }
         const id = blockElement.getAttribute("data-node-id");
-        const breadcrumbParam: IObject = {id, excludeTypes: []};
+        const breadcrumbParam: Record<string, any> = {id, excludeTypes: []};
         if (isEncryptedBox(protyle.notebookId)) {
             breadcrumbParam.notebook = protyle.notebookId;
         }
@@ -637,7 +637,7 @@ ${padHTML}
             // 闪卡面包屑不能显示答案
             excludeTypes.push("NodeTextMark-mark");
         }
-        const breadcrumbParam: IObject = {id, excludeTypes};
+        const breadcrumbParam: Record<string, any> = {id, excludeTypes};
         if (isEncryptedBox(protyle.notebookId)) {
             breadcrumbParam.notebook = protyle.notebookId;
         }

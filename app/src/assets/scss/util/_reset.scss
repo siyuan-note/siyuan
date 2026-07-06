@@ -64,7 +64,7 @@ body {
   }
 
   &.body--win32 {
-    --b3-toolbar-left-mac: 0;
+    --b3-toolbar-left-mac: 8px;
     -webkit-font-smoothing: auto;
 
     .toolbar {
@@ -74,7 +74,6 @@ body {
     .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {
-        padding-left: 10px;
         padding-right: 126px;
       }
 
@@ -176,7 +175,8 @@ body {
       }
     }
 
-    .fullscreen > .protyle-breadcrumb, .fullscreen > .block__icons {
+    .fullscreen > .protyle-breadcrumb,
+    .fullscreen > .block__icons {
       padding-left: var(--b3-toolbar-left-mac);
     }
 

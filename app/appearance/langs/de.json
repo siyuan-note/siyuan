@@ -2079,6 +2079,7 @@
 		"310": "Funktion für verschlüsseltes Notizbuch ist nicht aktiviert",
 		"311": "Falsches Master-Passwort",
 		"312": "Funktion für verschlüsseltes Notizbuch ist bereits aktiviert",
-		"313": "Das Verschieben von Dokumenten über verschlüsselte Notizbuchgrenzen hinweg wird nicht unterstützt"
+		"313": "Das Verschieben von Dokumenten über verschlüsselte Notizbuchgrenzen hinweg wird nicht unterstützt",
+		"314": "Bitte entsperren Sie zuerst das verschlüsselte Notizbuch"
 	}
 }

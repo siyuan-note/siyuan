@@ -352,7 +352,10 @@ func updateRecentDocOpenTime(c *gin.Context) {
 	}
 
 	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
+	if "" == rootID {
 		return
 	}
 
@@ -378,7 +381,10 @@ func updateRecentDocViewTime(c *gin.Context) {
 	}
 
 	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
+	if "" == rootID {
 		return
 	}
 
@@ -404,7 +410,10 @@ func updateRecentDocCloseTime(c *gin.Context) {
 	}
 
 	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
+	if "" == rootID {
 		return
 	}
 
@@ -430,7 +439,7 @@ func batchUpdateRecentDocCloseTime(c *gin.Context) {
 	}
 
 	var rootIDsArg []any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootIDs", &rootIDsArg, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootIDs", &rootIDsArg, false, false)) {
 		return
 	}
 
@@ -438,16 +447,15 @@ func batchUpdateRecentDocCloseTime(c *gin.Context) {
 	for _, id := range rootIDsArg {
 		str, elemOk := id.(string)
 		if !elemOk {
-			ret.Code = -1
-			ret.Msg = "Field [rootIDs]: each element should be of type [String]"
-			return
+			continue
 		}
-		if str == "" {
-			ret.Code = -1
-			ret.Msg = "Field [rootIDs]: each element must not be empty"
-			return
+		if "" == str {
+			continue
 		}
 		rootIDs = append(rootIDs, str)
+	}
+	if 0 == len(rootIDs) {
+		return
 	}
 
 	err := model.BatchUpdateRecentDocCloseTime(rootIDs)

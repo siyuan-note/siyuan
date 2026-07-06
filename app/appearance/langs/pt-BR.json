@@ -2079,6 +2079,7 @@
 		"310": "O recurso de caderno criptografado não está habilitado",
 		"311": "Senha mestra incorreta",
 		"312": "O recurso de caderno criptografado já está habilitado",
-		"313": "Não há suporte para mover documentos entre fronteiras de cadernos criptografados"
+		"313": "Não há suporte para mover documentos entre fronteiras de cadernos criptografados",
+		"314": "Por favor, desbloqueie primeiro o caderno criptografado"
 	}
 }

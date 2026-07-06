@@ -17,12 +17,14 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -55,7 +57,7 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		}
 	}
 
-	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密 box notebook 级）
+	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密 box 笔记本级）
 	existPath, _ := av.FindAttributeViewPath(avID)
 	if "" == existPath {
 		// fallback 找不到时按全局路径检查（首次创建场景）
@@ -617,8 +619,27 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	historyDir := matches[0]
 	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 	if !gulu.File.IsExist(avJSONPath) {
+		// 加密笔记本的 AV 定义可能在历史目录的 boxID 子目录下
+		entries, _ := os.ReadDir(historyDir)
+		for _, entry := range entries {
+			if entry.IsDir() && ast.IsNodeIDPattern(entry.Name()) {
+				candidate := filepath.Join(historyDir, entry.Name(), "storage", "av", avID+".json")
+				if gulu.File.IsExist(candidate) {
+					avJSONPath = candidate
+					break
+				}
+			}
+		}
+	}
+	if !gulu.File.IsExist(avJSONPath) {
 		logging.LogWarnf("attribute view [%s] not found in history data [%s], use current data instead", avID, historyDir)
-		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
+		// 加密笔记本的 AV 定义在 notebook 级目录
+		_, boxID := av.FindAttributeViewPath(avID)
+		if boxID != "" {
+			avJSONPath = filepath.Join(util.DataDir, boxID, "storage", "av", avID+".json")
+		} else {
+			avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
+		}
 	}
 	if !gulu.File.IsExist(avJSONPath) {
 		logging.LogWarnf("attribute view [%s] not found in current data", avID)
@@ -637,6 +658,40 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		err = readErr
 		return
+	}
+
+	// 加密笔记本的历史 AV 定义是密文，按路径里的 boxID 解密
+	// avJSONPath 可能在历史目录（<HistoryDir>/<ts>/<boxID>/storage/av/...）或当前数据目录（<DataDir>/<boxID>/storage/av/...）
+	avAbsSlash := filepath.ToSlash(avJSONPath)
+	var histBoxID string
+	if strings.Contains(avAbsSlash, filepath.ToSlash(util.HistoryDir)) {
+		// 历史目录路径：<HistoryDir>/<ts>/<boxID>/storage/av/...
+		rel := strings.TrimPrefix(avAbsSlash, filepath.ToSlash(util.HistoryDir))
+		rel = strings.TrimPrefix(rel, "/")
+		histParts := strings.SplitN(rel, "/", 3)
+		if len(histParts) >= 2 {
+			histBoxID = histParts[1]
+		}
+	} else if strings.Contains(avAbsSlash, filepath.ToSlash(util.DataDir)) {
+		// 当前数据目录路径：<DataDir>/<boxID>/storage/av/...
+		rel := strings.TrimPrefix(avAbsSlash, filepath.ToSlash(util.DataDir))
+		rel = strings.TrimPrefix(rel, "/")
+		dataParts := strings.SplitN(rel, "/", 2)
+		if len(dataParts) >= 1 {
+			histBoxID = dataParts[0]
+		}
+	}
+	if histBoxID != "" && IsEncryptedBox(histBoxID) {
+		dek, decErr := GetDEK(histBoxID)
+		if decErr != nil || dek == nil {
+			err = errors.New(Conf.Language(314))
+			return
+		}
+		if data, decErr = util.Decrypt(dek, data); decErr != nil {
+			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, decErr)
+			err = decErr
+			return
+		}
 	}
 
 	if !ast.IsNodeIDPattern(avID) {

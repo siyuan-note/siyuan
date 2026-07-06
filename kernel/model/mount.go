@@ -162,6 +162,18 @@ func RemoveBox(boxID string) (err error) {
 	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
 	isEncrypted := IsEncryptedBox(boxID)
 
+	// 删除前备份到历史目录（密文原样拷贝，加密笔记本的整个目录保持密文）
+	if isEncrypted {
+		if historyDir, histErr := getHistoryDir(HistoryOpDelete); nil == histErr {
+			boxHistoryDir := filepath.Join(historyDir, boxID)
+			if mkErr := os.MkdirAll(boxHistoryDir, 0755); nil == mkErr {
+				if copyErr := filelock.Copy(localPath, boxHistoryDir); nil != copyErr {
+					logging.LogErrorf("backup encrypted box [%s] to history failed: %s", boxID, copyErr)
+				}
+			}
+		}
+	}
+
 	unmount0(boxID)
 	if err = filelock.Remove(localPath); err != nil {
 		return

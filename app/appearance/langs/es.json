@@ -1,4 +1,8 @@
 {
+	"configGroupMcp": "Servicio MCP del agente",
+	"configGroupEmbedding": "Modelo de incrustación",
+	"addToAgent": "Añadir al chat del agente",
+	"openAgentChatTip": "Abra primero el panel del agente",
 	"encryptedNotebook": "Cuaderno cifrado",
 	"enableEncryptedNotebook": "Habilitar cuaderno cifrado",
 	"encryptedNotebookTip": "Almacene contenido sensible en un cuaderno cifrado. Se requiere la contraseña maestra para desbloquear y ver el contenido. La contraseña no se puede recuperar si se olvida",

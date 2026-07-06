@@ -37,7 +37,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {getContenteditableElement, getParentBlock, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
 import {transparentImgSrc} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
@@ -62,6 +62,7 @@ import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {processClonePHElement} from "../render/util";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
+import {getDockByType} from "../../layout/tabUtil";
 import * as path from "path";
 /// #endif
 import {showMessage} from "../../dialog/message";
@@ -1069,6 +1070,16 @@ export class Gutter {
                     addEditorToDatabase(protyle, getEditorRange(selectsElement[0]));
                 }
             }).element);
+            /// #if !MOBILE
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "addToAgent",
+                icon: "iconSend",
+                label: window.siyuan.languages.addToAgent,
+                click: () => {
+                    addBlockToAgent(Array.from(selectsElement).map(item => item.getAttribute("data-node-id")));
+                }
+            }).element);
+            /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "delete",
                 label: window.siyuan.languages.delete,
@@ -1668,6 +1679,16 @@ export class Gutter {
                     addEditorToDatabase(protyle, getEditorRange(nodeElement));
                 }
             }).element);
+            /// #if !MOBILE
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "addToAgent",
+                icon: "iconSend",
+                label: window.siyuan.languages.addToAgent,
+                click: () => {
+                    addBlockToAgent([nodeElement.getAttribute("data-node-id")]);
+                }
+            }).element);
+            /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "delete",
                 icon: "iconTrashcan",
@@ -3017,3 +3038,46 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
         this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__line" data-type="gutterLineBefore" style="display:none"></button><button class="protyle-gutters__line" data-type="gutterLineAfter" style="display:none"></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusBefore" data-position="4west" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusAfter" data-position="4west" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
     }
 }
+
+// 仅声明调用所需的最小接口，避免在 gutter 中 import AgentChat 类而引入
+// gutter → AgentChat → platformUtils → compatibility → gutter 的循环依赖（TDZ）。
+interface AgentChatLike {
+    insertBlockMentions: (mentions: Array<{ id: string; label: string }>) => void;
+}
+
+// 将选中的块以 @ 引用形式追加到智能体会话发送框末尾，等价于拖拽块到发送框或在框内 @ 搜索选块。
+// 仅桌面端可用：智能体面板（dock）在移动端不存在。
+/// #if !MOBILE
+export const addBlockToAgent = async (blockIds: string[]) => {
+    const ids = blockIds.filter(Boolean);
+    if (ids.length === 0) {
+        return;
+    }
+    const dock = getDockByType("agentChat");
+    const agentChat = dock?.data.agentChat as unknown as AgentChatLike;
+    // 用鸭子类型检测而非 instanceof：dock.data.agentChat 在面板首次打开前不是 AgentChat 实例。
+    if (!agentChat || typeof agentChat.insertBlockMentions !== "function") {
+        // 智能体面板尚未打开：提示并尝试打开面板，composer 在 AgentChat 构造时即时创建，打开后即可使用。
+        showMessage(window.siyuan.languages.openAgentChatTip);
+        if (dock) {
+            dock.toggleModel("agentChat", true);
+        }
+        return;
+    }
+    // 用 getRefText API 并行获取每个块的引用文本作为 label（与 @ 搜索、拖拽一致），失败时回退到 blockId。
+    const mentions: Array<{ id: string; label: string }> = [];
+    await Promise.all(ids.map(async (id) => {
+        let label = id;
+        try {
+            const resp = await fetchSyncPost("/api/block/getRefText", {id});
+            if (resp && resp.data) {
+                label = resp.data;
+            }
+        } catch {
+            label = id;
+        }
+        mentions.push({id, label});
+    }));
+    agentChat.insertBlockMentions(mentions);
+};
+/// #endif

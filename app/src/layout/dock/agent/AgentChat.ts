@@ -429,6 +429,13 @@ export class AgentChat extends Model {
         });
     }
 
+    // 将外部块引用以 mention chip 形式追加到发送框末尾，等价于拖拽块到发送框或在框内 @ 搜索选块。
+    public insertBlockMentions(mentions: Array<{ id: string; label: string }>) {
+        if (this.composer && mentions.length > 0) {
+            this.composer.insertMentions(mentions);
+        }
+    }
+
     // 从 window.siyuan.config.ai 重新计算可用模型列表，幂等可重复调用。
     // 与后端 HasAnyProvider()/GetModel() 判定一致：provider 需 enabled 且 apiKey 非空，model 需 enabled。
     // 零模型时显式置空 selectedModel（避免 undefined 透传到后端），失效选择自动重置。

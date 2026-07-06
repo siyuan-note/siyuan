@@ -80,6 +80,12 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - To also apply a markdown mark (bold/italic), list multiple types in data-type (note: this is about marking types, not CSS):
   <span data-type="text strong" style="color: #ff0000;">bold red</span> (text + bold)
   <span data-type="text em" style="background-color: #ffff00;">italic highlighted</span>
+- Prefer a semantic data-type mark over an equivalent style — data-type is SiYuan's native mark (recognized by the editor, convertible to/from markdown, and queryable), whereas style is just raw CSS. Markdown has no equivalent for these, so use the mark rather than faking it with style:
+  - Underline:   <span data-type="u">underlined</span>      (NOT style="text-decoration: underline")
+  - Superscript: <span data-type="sup">x²</span>            (NOT style="vertical-align: super")
+  - Subscript:   <span data-type="sub">H₂O</span>           (NOT style="vertical-align: sub")
+  - Keyboard key:<span data-type="kbd">Ctrl</span>          (NOT a bare <kbd>, NOT style)
+  - Tag:         <span data-type="tag">#todo</span>         (NOT style="color: ...")
 - NEVER write a bare <span style="..."> without data-type — it will render as escaped literal text.
 - Prefer standard markdown (such as **bold**) when no color/size is needed.
 

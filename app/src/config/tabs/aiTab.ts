@@ -106,7 +106,7 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
 };
 
 const registerAiMcpGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("mcp", "智能体 MCP 服务");
+    const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
 
     group.slot({
         key: "mcpServers",
@@ -117,7 +117,7 @@ const registerAiMcpGroup = (tab: SettingTabBuilder) => {
 };
 
 const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("embedding", "嵌入模型");
+    const group = tab.group("embedding", window.siyuan.languages.configGroupEmbedding);
 
     group.switch("ai.embedding.enabled", {
         title: window.siyuan.languages.semanticSearch,

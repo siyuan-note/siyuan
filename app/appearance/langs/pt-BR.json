@@ -1,4 +1,8 @@
 {
+	"configGroupMcp": "Serviço MCP do agente",
+	"configGroupEmbedding": "Modelo de incorporação",
+	"addToAgent": "Adicionar ao chat do agente",
+	"openAgentChatTip": "Abra primeiro o painel do agente",
 	"encryptedNotebook": "Caderno criptografado",
 	"enableEncryptedNotebook": "Habilitar caderno criptografado",
 	"encryptedNotebookTip": "Armazene conteúdo sensível em um caderno criptografado. A senha mestra é necessária para desbloquear e visualizar o conteúdo. A senha não pode ser recuperada se esquecida",

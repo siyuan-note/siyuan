@@ -1,4 +1,8 @@
 {
+	"configGroupMcp": "智能體 MCP 服務",
+	"configGroupEmbedding": "嵌入模型",
+	"addToAgent": "新增到智能體對話",
+	"openAgentChatTip": "請先開啟智能體面板",
 	"encryptedNotebook": "加密筆記本",
 	"enableEncryptedNotebook": "啟用加密筆記本",
 	"encryptedNotebookTip": "將敏感內容存入加密筆記本，需要主密碼解鎖後才能查看。忘記密碼將無法恢復數據",

@@ -1,4 +1,8 @@
 {
+	"configGroupMcp": "Agent-MCP-Dienst",
+	"configGroupEmbedding": "Embedding-Modell",
+	"addToAgent": "Zum Agenten-Chat hinzufügen",
+	"openAgentChatTip": "Bitte öffnen Sie zuerst das Agenten-Panel",
 	"encryptedNotebook": "Verschlüsseltes Notizbuch",
 	"enableEncryptedNotebook": "Verschlüsseltes Notizbuch aktivieren",
 	"encryptedNotebookTip": "Speichern Sie sensible Inhalte in einem verschlüsselten Notizbuch. Das Master-Passwort ist zum Entsperren und Anzeigen erforderlich. Das Passwort kann bei Verlust nicht wiederhergestellt werden",

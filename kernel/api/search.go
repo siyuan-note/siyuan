@@ -364,7 +364,13 @@ func searchEmbedBlock(c *gin.Context) {
 		breadcrumb = breadcrumbArg.(bool)
 	}
 
-	blocks := model.SearchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
+	// 加密笔记本的嵌入块查询走 InBox 版（查加密 content db，全局库不含加密数据）
+	var blocks []*model.EmbedBlock
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" && model.IsEncryptedBox(notebook) {
+		blocks = model.SearchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, notebook)
+	} else {
+		blocks = model.SearchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
+	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)

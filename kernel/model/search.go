@@ -239,11 +239,18 @@ func getEmbedBlock(embedBlockID string, includeIDs []string, headingMode int, br
 }
 
 func SearchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	return searchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
+	return SearchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, "")
 }
 
-func searchEmbedBlock(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool) (ret []*EmbedBlock) {
-	sqlBlocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+// SearchEmbedBlockInBox 与 SearchEmbedBlock 一致，但按 boxID 路由 SQL 到加密 content db。
+// 加密笔记本的嵌入块查询走独立加密库（全局 siyuan.db 不含加密数据），boxID 为空时落回全局库。
+func SearchEmbedBlockInBox(embedBlockID, stmt string, excludeIDs []string, headingMode int, breadcrumb bool, boxID string) (ret []*EmbedBlock) {
+	var sqlBlocks []*sql.Block
+	if "" != boxID {
+		sqlBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, Conf.Search.Limit, boxID)
+	} else {
+		sqlBlocks = sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+	}
 	ret = buildEmbedBlock(embedBlockID, excludeIDs, headingMode, breadcrumb, sqlBlocks)
 	return
 }

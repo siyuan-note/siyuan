@@ -363,7 +363,10 @@ const renderKeyboardToolbar = () => {
         protyle.toolbar.range = range;
         if (!dynamicElements[0].classList.contains("fn__none")) {
             // 撤销权威栈在 kernel，本地按 rootID 读镜像设按钮态（零 fetch）
-            const undoState = protyle.block?.rootID ? getMirror(protyle.block.rootID) : {canUndo: false, canRedo: false};
+            const undoState = protyle.block?.rootID ? getMirror(protyle.block.rootID) : {
+                canUndo: false,
+                canRedo: false
+            };
             if (!undoState.canUndo) {
                 dynamicElements[0].querySelector('[data-type="undo"]').setAttribute("disabled", "disabled");
             } else {
@@ -616,7 +619,6 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="tag"><svg><use xlink:href="#iconTag"></use></svg></button>
             <button class="keyboard__action" data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
             <button class="keyboard__action" data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
-            <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconCloseRound"></use></svg></button>
         </div>
     </div>
     <span class="keyboard__split"></span>
@@ -829,6 +831,8 @@ export const initKeyboardToolbar = () => {
             }
             focusByRange(range);
             return;
+        } else if (type) {
+            protyle.toolbar.element.querySelector(`[data-type="${type}"]`)?.dispatchEvent(new CustomEvent("click"));
         }
     });
 };

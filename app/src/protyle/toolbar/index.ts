@@ -17,7 +17,12 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {copyPlainText, readClipboard, saveExportFile, setStorageVal} from "../util/compatibility";
+import {
+    copyPlainText,
+    readClipboard,
+    saveExportFile,
+    setStorageVal
+} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -68,6 +73,7 @@ export class Toolbar {
         this.subElement.className = "protyle-util fn__none";
         /// #endif
         this.toolbarHeight = 29;
+        const inlineToolbarElement = document.querySelector('#keyboardToolbar .keyboard__action[data-type="inline-memo"]')?.parentElement;
         protyle.app.plugins.forEach(item => {
             const pluginToolbar = item.updateProtyleToolbar(options.toolbar);
             pluginToolbar.forEach(toolbarItem => {
@@ -80,6 +86,17 @@ export class Toolbar {
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
+                /// #if MOBILE
+                if (inlineToolbarElement) {
+                    const itemElement = new ToolbarItem(protyle, toolbarItem).element;
+                    itemElement.className = "keyboard__action";
+                    const oldItemElement = inlineToolbarElement.querySelector(`[data-type="${toolbarItem.name}"]`);
+                    if (!oldItemElement) {
+                        inlineToolbarElement.insertAdjacentHTML("beforeend",
+                            `<button class="keyboard__action" data-type="${toolbarItem.name}"><svg><use xlink:href="#${toolbarItem.icon}"></use></svg></button>`);
+                    }
+                }
+                /// #endif
             });
             options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });

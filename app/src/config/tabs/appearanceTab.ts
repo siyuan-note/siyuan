@@ -11,6 +11,7 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {desktopModeCookie} from "../../util/cookie";
 import {isMobile, objEquals} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
+import {openByMobile} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Dialog} from "../../dialog";
@@ -620,7 +621,7 @@ const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
 
 const mountAppearanceCodeSnippet = (root: HTMLElement) => {
     root.querySelector("#codeSnippetCommunityShare")?.addEventListener("click", () => {
-        window.open("https://ld246.com/tag/code-snippet", "_blank");
+        openByMobile("https://ld246.com/tag/code-snippet");
     });
     root.querySelector("#codeSnippet")?.addEventListener("click", () => {
         openSnippets();

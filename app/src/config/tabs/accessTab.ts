@@ -8,6 +8,7 @@ import {showMessage} from "../../dialog/message";
 import {shell} from "electron";
 /// #endif
 import {isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
+import {openByMobile} from "../../editor/openLink";
 import {genConfigItemMainHtml} from "../render/fragments";
 import {renderPublishAuthAccounts, savePublish, sendAccessSetting, updatePublishConfig} from "./accessRuntime";
 import {sendAppSetting} from "./appRuntime";
@@ -182,7 +183,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
                 /// #if !BROWSER
                 void shell.openExternal(url);
                 /// #else
-                window.open(url);
+                openByMobile(url);
                 /// #endif
             });
         },

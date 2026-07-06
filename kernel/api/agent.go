@@ -95,11 +95,17 @@ func agentChat(c *gin.Context) {
 	if maxRetries <= 0 {
 		maxRetries = 3
 	}
+	// per-request 超时：作用到 agent 每一轮上游 chat-completions 调用上，
+	// 让单次卡死的请求转为可重试错误，而不是干等到整会话超时。
+	requestTimeout := time.Duration(selectedProvider.RequestTimeout) * time.Second
+	if requestTimeout <= 0 {
+		requestTimeout = 30 * time.Second
+	}
 
 	app := c.GetHeader("X-SiYuan-App-ID")
 
 	ctx, cancel := context.WithCancel(c.Request.Context())
-	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort)
+	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout)
 
 	// 实例级互斥：同一 session 同时只允许一个活跃流。
 	// 检查+占用在同一把锁内（compare-and-set），失败时 cancel 释放刚启动的 goroutine 防泄漏。
@@ -131,13 +137,9 @@ func agentChat(c *gin.Context) {
 		return
 	}
 
-	timeout := selectedProvider.RequestTimeout
-	if timeout <= 0 {
-		timeout = 30
-	}
 	totalTimeout := time.Duration(model.Conf.AI.Agent.SessionTimeout) * time.Second
 	if totalTimeout <= 0 {
-		totalTimeout = time.Duration(timeout) * time.Second * 10
+		totalTimeout = 600 * time.Second
 	}
 	if totalTimeout > 3600*time.Second {
 		totalTimeout = 3600 * time.Second

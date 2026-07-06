@@ -356,7 +356,7 @@ type agentCheckpoint struct {
 	ContextLimit          int            `json:"contextLimit,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout time.Duration) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -465,8 +465,16 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				ReasoningEffort: reasoningEffort,
 			}
 
-			stream, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, ch)
+			// 为每轮单次上游调用派生独立子 context，便于把单轮卡死转为可重试错误，
+			// 而不是直接取消整会话。requestTimeout<=0 时退化为可取消但无超时的 context。
+			roundCtx, roundCancel := context.WithCancel(ctx)
+			if requestTimeout > 0 {
+				roundCtx, roundCancel = context.WithTimeout(ctx, requestTimeout)
+			}
+
+			stream, streamErr := createStreamWithRetry(roundCtx, client, req, maxRetries, ch)
 			if streamErr != nil {
+				roundCancel()
 				if compactCount < 3 && isContextOverflow(streamErr) {
 					keepTurns := 3 - compactCount
 					if keepTurns < 1 {
@@ -502,12 +510,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 					finalCheckpoint()
 					stream.Close()
+					roundCancel()
 					return
 				}
 
 				select {
 				case <-ctx.Done():
 					stream.Close()
+					roundCancel()
 					return
 				default:
 				}
@@ -556,6 +566,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			}
 
 			stream.Close()
+			roundCancel()
 
 			if len(aggregatedToolCalls) > 0 {
 				filtered := make([]openai.ToolCall, 0, len(aggregatedToolCalls))
@@ -1462,8 +1473,14 @@ func classifyRetry(err error) string {
 	if strings.Contains(msg, "Bad Request") {
 		return "fatal"
 	}
-	if strings.Contains(msg, "context canceled") || strings.Contains(msg, "context deadline exceeded") {
+	// 父 context 被取消（用户停止 / 会话结束）属于不可重试的致命错误。
+	if errors.Is(err, context.Canceled) {
 		return "fatal"
+	}
+	// per-request 超时（本会话主动加的 roundCtx deadline）通常意味着对端只是慢，
+	// 归入 timeout 类走退避重试，避免一次卡顿直接终结整个会话。
+	if errors.Is(err, context.DeadlineExceeded) {
+		return "timeout"
 	}
 	return "network"
 }

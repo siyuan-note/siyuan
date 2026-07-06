@@ -583,6 +583,9 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 			return
 		}
 
+		// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
+		data = decryptRepoDataIfNeeded(data, file.Path)
+
 		var tree *parse.Tree
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
@@ -596,8 +599,34 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	return
 }
 
+// decryptRepoDataIfNeeded 判断仓库数据是否属于加密笔记本，如果是则按路径提取 boxID 解密。
+// file.Path 格式：/<boxID>/...
+func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
+	// 从路径提取 boxID
+	relPath := strings.TrimPrefix(filePath, "/")
+	parts := strings.SplitN(relPath, "/", 2)
+	if len(parts) < 1 || !ast.IsNodeIDPattern(parts[0]) {
+		return data
+	}
+	boxID := parts[0]
+	if !IsEncryptedBox(boxID) {
+		return data
+	}
+	dek, err := GetDEK(boxID)
+	if err != nil || dek == nil {
+		return data
+	}
+	plain, err := util.Decrypt(dek, data)
+	if err != nil {
+		return data
+	}
+	return plain
+}
+
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
+	// data 可能是加密笔记本的密文，但 parseTreeInSnapshot 没有 file.Path 上下文
+	// 密文解析会失败返回 err，调用方会 fallback 到文件名
 	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
@@ -673,6 +702,9 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 	if err != nil {
 		return
 	}
+
+	// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
+	data = decryptRepoDataIfNeeded(data, file.Path)
 
 	name := path.Base(file.Path)
 	exportDir := filepath.Join(util.TempDir, "export", "repo")

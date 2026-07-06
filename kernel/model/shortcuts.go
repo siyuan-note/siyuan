@@ -218,7 +218,10 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 					last.InsertAfter(node)
 				}
 
-				indexWriteTreeIndexQueue(tree)
+				if err = indexWriteTreeUpsertQueue(tree); nil != err {
+					logging.LogErrorf("upsert shorthand merged tree failed: %s", err)
+					return
+				}
 				util.PushReloadProtyle(tree.ID)
 			}
 		}

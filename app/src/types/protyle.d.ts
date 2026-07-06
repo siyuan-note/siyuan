@@ -327,7 +327,7 @@ interface IUpload {
     /** 跨站点访问控制。默认值: false */
     withCredentials?: boolean;
     /** 请求头设置 */
-    headers?: IObject;
+    headers?: Record<string, string>;
     /** 额外请求参数 */
     extraData?: { [key: string]: string | Blob };
     /** 上传字段名。默认值：file[] */

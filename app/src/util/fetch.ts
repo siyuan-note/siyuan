@@ -9,7 +9,7 @@ export const fetchPost = (
     url: string,
     data?: any,
     cb?: (response: IWebSocketData) => void,
-    headers?: IObject,
+    headers?: Record<string, string>,
     failCallback?: (response: IWebSocketData) => void,
     signal?: AbortSignal) => {
     const init: RequestInit = {

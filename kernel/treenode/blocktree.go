@@ -894,24 +894,14 @@ func OpenEncryptedBlockTreeDB(boxID string, dek []byte) (err error) {
 	return nil
 }
 
-// CloseEncryptedBlockTreeDB 关闭并移除加密 blocktree db 连接。LockBox/Unmount 时调用。
+// CloseEncryptedBlockTreeDB 仅关闭加密 blocktree db 连接（不删文件）。
+// 被 RemoveEncryptedBlockTreeDBFile 复用作为底层关连接实现。
 func CloseEncryptedBlockTreeDB(boxID string) {
 	if v, ok := encryptedBlockTreeDBs.LoadAndDelete(boxID); ok {
 		if boxDB, ok := v.(*sql.DB); ok {
 			boxDB.Close()
 		}
 	}
-}
-
-// CloseAllEncryptedBlockTreeDBs 关闭所有加密 blocktree db。LockAllBoxes 时调用。
-func CloseAllEncryptedBlockTreeDBs() {
-	encryptedBlockTreeDBs.Range(func(key, value any) bool {
-		encryptedBlockTreeDBs.Delete(key)
-		if boxDB, ok := value.(*sql.DB); ok {
-			boxDB.Close()
-		}
-		return true
-	})
 }
 
 // GetOpenedEncryptedBoxIDs 返回所有已打开的加密 blocktree db 对应的 boxID。
@@ -926,7 +916,7 @@ func GetOpenedEncryptedBoxIDs() (ret []string) {
 	return
 }
 
-// RemoveEncryptedBlockTreeDBFile 关闭连接并删除加密 blocktree db 文件。删笔记本时调用。
+// RemoveEncryptedBlockTreeDBFile 关闭连接并删除加密 blocktree db 文件。删笔记本、关闭加密笔记本时调用。
 func RemoveEncryptedBlockTreeDBFile(boxID string) {
 	CloseEncryptedBlockTreeDB(boxID)
 	dbPath := util.EncryptedBlockTreeDBPath(boxID)
@@ -934,6 +924,14 @@ func RemoveEncryptedBlockTreeDBFile(boxID string) {
 		if err := os.Remove(dbPath + suffix); err != nil && !os.IsNotExist(err) {
 			logging.LogErrorf("remove encrypted blocktree db file [%s] failed: %s", dbPath+suffix, err)
 		}
+	}
+}
+
+// RemoveAllEncryptedBlockTreeDBFiles 关闭所有已打开的加密 blocktree db 连接并删除其文件（含 WAL/SHM）。
+// 进程退出（CloseDatabase）时调用，避免重启后残留旧索引数据。
+func RemoveAllEncryptedBlockTreeDBFiles() {
+	for _, boxID := range GetOpenedEncryptedBoxIDs() {
+		RemoveEncryptedBlockTreeDBFile(boxID)
 	}
 }
 

@@ -1373,6 +1373,10 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 
 func CloseDatabase() {
 	closeIndexQueue()
+	// 退出时删除所有已打开的加密 db 文件：加密索引可由 box.Index() 全量重建，
+	// 文件无需持久化，删除可避免重启后残留旧索引数据导致下次解锁叠加重复行。
+	RemoveAllEncryptedDBFiles()
+	treenode.RemoveAllEncryptedBlockTreeDBFiles()
 	if err := db.Close(); err != nil {
 		logging.LogErrorf("close database failed: %s", err)
 	}
@@ -1842,24 +1846,14 @@ func OpenEncryptedDB(boxID string, dek []byte) (err error) {
 	return nil
 }
 
-// CloseEncryptedDB 关闭并移除加密笔记本的 db 连接。LockBox/Unmount 时调用。
+// CloseEncryptedDB 仅关闭加密笔记本的 db 连接（不删文件）。UnlockBox 创建失败回滚时调用。
+// 关闭/锁定加密笔记本请用 RemoveEncryptedDBFile（关连接 + 删文件）。
 func CloseEncryptedDB(boxID string) {
 	if v, ok := encryptedDBs.LoadAndDelete(boxID); ok {
 		if boxDB, ok := v.(*sql.DB); ok {
 			boxDB.Close()
 		}
 	}
-}
-
-// CloseAllEncryptedDBs 关闭所有已打开的加密 db 连接。全局锁定（LockAllBoxes）时调用。
-func CloseAllEncryptedDBs() {
-	encryptedDBs.Range(func(key, value any) bool {
-		encryptedDBs.Delete(key)
-		if boxDB, ok := value.(*sql.DB); ok {
-			boxDB.Close()
-		}
-		return true
-	})
 }
 
 // GetEncryptedDB 返回加密 box 的 db 句柄；未打开返回 nil。
@@ -1883,7 +1877,7 @@ func GetEncryptedBoxIDs() (ret []string) {
 	return
 }
 
-// RemoveEncryptedDBFile 关闭连接并删除加密 db 文件（含 WAL/SHM）。删除笔记本时调用。
+// RemoveEncryptedDBFile 关闭连接并删除加密 db 文件（含 WAL/SHM）。删除笔记本、关闭加密笔记本时调用。
 func RemoveEncryptedDBFile(boxID string) {
 	CloseEncryptedDB(boxID)
 	dbPath := util.EncryptedDBPath(boxID)
@@ -1891,6 +1885,14 @@ func RemoveEncryptedDBFile(boxID string) {
 		if err := os.Remove(dbPath + suffix); err != nil && !os.IsNotExist(err) {
 			logging.LogErrorf("remove encrypted db file [%s] failed: %s", dbPath+suffix, err)
 		}
+	}
+}
+
+// RemoveAllEncryptedDBFiles 关闭所有已打开的加密 content db 连接并删除其文件（含 WAL/SHM）。
+// 进程退出（CloseDatabase）时调用，避免重启后残留旧索引数据导致下次解锁叠加重复行。
+func RemoveAllEncryptedDBFiles() {
+	for _, boxID := range GetEncryptedBoxIDs() {
+		RemoveEncryptedDBFile(boxID)
 	}
 }
 
@@ -1916,7 +1918,6 @@ func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 		"CREATE TABLE IF NOT EXISTS attributes (id, name, value, type, block_id, root_id, box, path)",
 		"CREATE TABLE IF NOT EXISTS refs (id, def_block_id, def_block_parent_id, def_block_root_id, def_block_path, block_id, root_id, box, path, content, markdown, type)",
 		"CREATE TABLE IF NOT EXISTS file_annotation_refs (id, file_path, annotation_id, block_id, root_id, box, path, content, type)",
-		"CREATE TABLE IF NOT EXISTS block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT, fail_count INTEGER NOT NULL DEFAULT 0, last_tried INTEGER NOT NULL DEFAULT 0, ignored_type INTEGER NOT NULL DEFAULT 0)",
 	}
 	for _, stmt := range tables {
 		if _, err = boxDB.Exec(stmt); err != nil {

@@ -171,8 +171,10 @@ func IsBoxUnlocked(boxID string) bool {
 	return ok
 }
 
-// LockBox 清除指定笔记本的 DEK 并关闭其加密 db。Unmount 单个加密笔记本或手动锁定时调用。
+// LockBox 清除指定笔记本的 DEK 并删除其加密 db 文件。Unmount 单个加密笔记本或手动锁定时调用。
 // 同时清空所有明文缓存（树/Block/IAL/AV），避免明文在内存中残留。
+// 关闭即删 db 文件：加密索引可由 box.Index() 全量重建，文件无需持久化；
+// 同时避免关闭后残留旧索引数据导致下次解锁叠加重复行。
 func LockBox(boxID string) {
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {
@@ -180,8 +182,8 @@ func LockBox(boxID string) {
 		delete(cachedDEKs, boxID)
 	}
 	cachedDEKsLock.Unlock()
-	sql.CloseEncryptedDB(boxID)
-	treenode.CloseEncryptedBlockTreeDB(boxID)
+	sql.RemoveEncryptedDBFile(boxID)
+	treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 	// 清空明文缓存：锁定后任何加密 box 的明文都不应残留内存
 	cache.ClearTreeCache()
 	sql.ClearCache()
@@ -190,7 +192,8 @@ func LockBox(boxID string) {
 	cache.ClearAVCache()
 }
 
-// LockAllBoxes 清除所有已缓存的 DEK 并关闭所有加密 db。退出登录或全局锁定时调用。
+// LockAllBoxes 清除所有已缓存的 DEK 并删除所有加密 db 文件。退出登录或全局锁定时调用。
+// 与 LockBox 一致采用"关闭即删 db 文件"策略，避免残留旧索引数据。
 func LockAllBoxes() {
 	cachedDEKsLock.Lock()
 	for id, dek := range cachedDEKs {
@@ -198,9 +201,9 @@ func LockAllBoxes() {
 		delete(cachedDEKs, id)
 	}
 	cachedDEKsLock.Unlock()
-	// 关闭所有已打开的加密 db 连接，清空明文缓存避免残留
-	sql.CloseAllEncryptedDBs()
-	treenode.CloseAllEncryptedBlockTreeDBs()
+	// 删除所有已打开的加密 db 文件（关闭连接 + 删文件），清空明文缓存避免残留
+	sql.RemoveAllEncryptedDBFiles()
+	treenode.RemoveAllEncryptedBlockTreeDBFiles()
 	cache.ClearTreeCache()
 	sql.ClearCache()
 	cache.ClearDocsIAL()

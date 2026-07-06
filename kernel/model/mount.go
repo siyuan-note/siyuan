@@ -235,10 +235,9 @@ func unmount0(boxID string) {
 	box.SaveConf(boxConf)
 	box.Unindex()
 	if boxConf.Encrypted {
-		// 加密笔记本关闭时清除其 DEK 缓存，恢复"已锁定"状态。
-		// 先等待事务队列和 SQL 索引队列清空，确保异步索引清理任务（unindex → 删
-		// blocktree/content db 数据）已完成，否则 ClearDEK 关闭加密 db 后未完成的
-		// 清理任务会操作已关闭的 db 连接，导致下次 Mount 的 FlushTxQueue 无限等待。
+		// 加密笔记本关闭：先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
+		// 再 ClearDEK（=LockBox）清除 DEK 并删除加密 db 文件。加密索引可由 box.Index() 全量重建，
+		// 关闭即删文件避免残留旧索引数据导致下次解锁叠加重复行。
 		FlushTxQueue()
 		sql.FlushQueue()
 		ClearDEK(boxID)

@@ -141,6 +141,7 @@ body {
 
     .layout__wnd--left .layout-tab-container {
       border-top-left-radius: var(--b3-border-radius-b);
+      isolation: isolate;
     }
 
     .layout__wnd--right .layout-tab-container {

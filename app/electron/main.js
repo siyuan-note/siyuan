@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+// 开发环境下隐藏 Electron 安全清单控制台提示 https://www.electronjs.org/docs/latest/tutorial/security
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
+
 const {
     net,
     app,

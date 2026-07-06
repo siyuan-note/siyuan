@@ -309,12 +309,12 @@ export class Dock {
         this.pin = !this.pin;
         const hasActive = this.elements[0].querySelector(".dock__item--active") ||
             this.elements[1].querySelector(".dock__item--active");
+        this.resetDockPosition(hasActive ? true : false);
+        this.layout.element.style.opacity = "";
         if (!this.pin) {
-            this.resetDockPosition(hasActive ? true : false);
             this.resizeElement.classList.add("fn__none");
             this.hideDock(true);
         } else {
-            this.layout.element.style.opacity = "";
             this.layout.element.style.transform = "";
             this.layout.element.style.zIndex = "";
             if (hasActive) {

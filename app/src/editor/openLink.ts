@@ -4,9 +4,8 @@ import {shell} from "electron";
 /// #endif
 import {getSearch} from "../util/functions";
 import {Constants} from "../constants";
-/// #if MOBILE
 import {processSiYuanUri} from "../util/uri";
-/// #else
+/// #if !MOBILE
 import {openAsset, openBy} from "./util";
 /// #endif
 import {showMessage} from "../dialog/message";
@@ -24,6 +23,9 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
             pdfParams = parseInt(getSearch("page", linkAddress));
             linkAddress = linkAddress.split("?page")[0];
         }
+    }
+    if (processSiYuanUri(protyle.app, linkAddress)) {
+        return;
     }
     /// #if MOBILE
     openByMobile(linkAddress);
@@ -85,11 +87,9 @@ export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
     }
-    /// #if MOBILE
     if (processSiYuanUri(window.siyuan.ws.app, uri)) {
         return;
     }
-    /// #endif
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
             // iOS 16.7 之前的版本，uri 需要 encodeURIComponent

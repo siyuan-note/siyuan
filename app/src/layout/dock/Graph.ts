@@ -287,15 +287,17 @@ export class Graph extends Model {
                     } else if (dataType === "refresh") {
                         this.searchGraph(false, undefined, true);
                     } else if (dataType === "fullscreen") {
-                        const minElement = this.element.querySelector('.block__icons .block__icon[data-type="min"]');
+                        fullscreen(this.element, target);
+                        const minElement = this.element.querySelector('.block__icons .block__icon[data-type="min"]') as HTMLElement;
                         if (this.element.className.includes("fullscreen")) {
+                            minElement.style.transition = "none";
                             minElement.classList.add("fn__none");
                             minElement.previousElementSibling.classList.add("fn__none");
                         } else {
+                            minElement.style.transition = "";
                             minElement.classList.remove("fn__none");
                             minElement.previousElementSibling.classList.remove("fn__none");
                         }
-                        fullscreen(this.element, target);
                     }
                     break;
                 } else if (target.classList.contains("graph__svg")) {

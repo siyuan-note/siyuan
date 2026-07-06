@@ -170,7 +170,7 @@ export const openFileWechatNotify = (protyle: IProtyle) => {
     });
 };
 
-export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: IProtyle) => {
+export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmark", protyle?: IProtyle) => {
     let customHTML = "";
     let notifyHTML = "";
     let hasAV = false;

@@ -124,6 +124,13 @@ export class AgentChat extends Model {
     private userScrolledUp = false;
     private programmaticScroll = false;
     private stickResizeObserver: ResizeObserver | null = null;
+    // 按会话保存的距底部距离（scrollHeight - scrollTop），用于切换会话与开关 dock 面板后恢复滚动位置。
+    // 用距底距离而非绝对 scrollTop：dock 展开/折叠有宽高过渡，期间 scrollHeight 变化，
+    // 距底距离与之无关，恢复后能定位到同样的相对位置。
+    private scrollBottomBySession: Map<string, number> = new Map();
+    // 面板可见性：dock 关闭时容器尺寸归零、浏览器把 scrollTop 钳制到 0，折叠期间不记录滚动位置。
+    private layoutVisible = true;
+    private layoutResizeObserver: ResizeObserver | null = null;
     private settingDialogObserver: MutationObserver | null = null;
     private scrollBottomBtn: HTMLElement;
     private navRail: HTMLElement;
@@ -260,10 +267,17 @@ export class AgentChat extends Model {
         this.initReasoningEffortSelect();
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
+            const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
+            // 仅在面板有效展开时记录滚动位置：dock 折叠过渡期间容器尺寸归零、浏览器把 scrollTop
+            // 钳制到 0，该过程会触发 scroll 事件；若不据尺寸排除，会污染保存的距底距离。
+            // 用 clientHeight 判定（折叠时为 0），比 layoutVisible 标志更可靠——后者由
+            // ResizeObserver 异步设置，可能与本事件交错。
+            if (this.layoutVisible && clientHeight > 0 && this.sessionId) {
+                this.scrollBottomBySession.set(this.sessionId, scrollHeight - scrollTop);
+            }
             if (this.programmaticScroll) {
                 return;
             }
-            const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
             const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
             // Hysteresis: only mark as scrolled-up when clearly above bottom (>=60),
             // and only return to sticky when really at the bottom (<=10).
@@ -308,6 +322,25 @@ export class AgentChat extends Model {
                 },
             }
         );
+        // 监听滚动容器尺寸：dock 面板折叠时容器尺寸归零、浏览器把 scrollTop 钳制到 0；
+        // 这里在面板重新展开后恢复当前会话的滚动位置。dock 展开/折叠有 CSS 宽高过渡（约 0.2s），
+        // 过渡期间 scrollHeight 随尺寸变化，故在折叠→展开转换后用 rAF 循环持续校正约 320ms，
+        // 覆盖过渡动画直到布局稳定。
+        this.layoutResizeObserver = new ResizeObserver(() => {
+            const collapsed = this.messagesContainer.clientWidth === 0 || this.messagesContainer.clientHeight === 0;
+            if (collapsed) {
+                this.layoutVisible = false;
+                return;
+            }
+            // 仅在「刚从折叠恢复」时启动一次校正循环，避免干扰正常滚动 / 流式输出。
+            if (!this.layoutVisible) {
+                this.layoutVisible = true;
+                const saved = this.scrollBottomBySession.get(this.sessionId) ?? 0;
+                this.restoreScrollToBottom(saved);
+            }
+        });
+        this.layoutResizeObserver.observe(this.messagesContainer);
+
         this.initSessions();
     }
 
@@ -948,7 +981,12 @@ export class AgentChat extends Model {
             this.titleElement.textContent = session.title;
             this.renderLoadedSession(session);
             this.rebuildNavMarkers();
-            this.scrollToBottom(true);
+            // 恢复该会话上次的滚动位置；新会话（无记录）默认贴底。
+            if (this.scrollBottomBySession.has(session.id)) {
+                this.restoreScrollToBottom(this.scrollBottomBySession.get(session.id) ?? 0);
+            } else {
+                this.scrollToBottom(true);
+            }
             this.messagesContainer.classList.remove("agent-chat__messages--switching");
         }, {once: true});
     }
@@ -1263,6 +1301,7 @@ export class AgentChat extends Model {
     }
 
     private async deleteSession(id: string) {
+        this.scrollBottomBySession.delete(id);
         const wasCurrent = id === this.sessionId;
         if (wasCurrent) {
             const result = await SessionStore.list({page: 1, pageSize: 2});
@@ -3042,6 +3081,37 @@ export class AgentChat extends Model {
             return false;
         }
         return this.composer.getSendData().text.length > 0;
+    }
+
+    // 持续校正滚动位置约 duration ms（覆盖 dock 宽高过渡 / 异步富渲染期间 scrollHeight 变化），
+    // 使 scrollTop 落到距底部 scrollBottom 的位置。scrollBottom 为 0 即贴底。
+    // 供开关面板（layoutVisible 恢复）与切换会话（renderLoadedSession 后）共用。
+    private restoreScrollToBottom(scrollBottom: number, duration = 320) {
+        if (scrollBottom < 0) {
+            return;
+        }
+        const startedAt = Date.now();
+        // 标记为程序化滚动，避免恢复期间触发 scroll 事件里的 userScrolledUp 翻转。
+        this.programmaticScroll = true;
+        const tick = () => {
+            if (!this.layoutVisible) {
+                this.programmaticScroll = false;
+                return;
+            }
+            const {scrollHeight} = this.messagesContainer;
+            // 距底部同样的距离；距底为 0（贴底）时 target = scrollHeight。
+            const target = Math.max(0, scrollHeight - scrollBottom);
+            this.messagesContainer.scrollTop = target;
+            if (Date.now() - startedAt < duration) {
+                requestAnimationFrame(tick);
+            } else {
+                // 多留一帧再清标志，确保最后一次 scroll 事件已被吞掉。
+                requestAnimationFrame(() => {
+                    this.programmaticScroll = false;
+                });
+            }
+        };
+        requestAnimationFrame(tick);
     }
 
     // 思考结束后定位到思考卡片下方：让折叠后的思考卡片底部贴近容器视口顶部，

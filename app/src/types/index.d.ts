@@ -675,7 +675,7 @@ interface IOperationSrcs {
 }
 
 interface IObject {
-    [key: string]: string;
+    [key: string]: string | number | boolean;
 }
 
 interface ILayoutJSON extends ILayoutOptions {

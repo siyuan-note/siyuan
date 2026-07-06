@@ -55,7 +55,7 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		}
 	}
 
-	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密 box notebook 级）
+	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密 box 笔记本级）
 	existPath, _ := av.FindAttributeViewPath(avID)
 	if "" == existPath {
 		// fallback 找不到时按全局路径检查（首次创建场景）

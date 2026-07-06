@@ -298,7 +298,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 
 		// 加密笔记本的 AV 定义不能拷到全局目录（明文泄漏 + 路由冲突），
-		// 后续由 notebook 级 AV 拷贝逻辑处理
+		// 后续由笔记本级 AV 拷贝逻辑处理
 		if !IsEncryptedBox(boxID) {
 			targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
 			if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
@@ -396,7 +396,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	// storage 文件夹已在上方处理，所以这里删除源 storage 文件夹，避免后面被拷贝到导入目录下 targetDir
-	// 加密笔记本需要先把 AV 定义加密拷贝到 notebook 级目录，再删源 storage
+	// 加密笔记本需要先把 AV 定义加密拷贝到笔记本级目录，再删源 storage
 	if IsEncryptedBox(boxID) && gulu.File.IsExist(storageAvDir) {
 		boxAVDir := filepath.Join(util.DataDir, boxID, "storage", "av")
 		if err = os.MkdirAll(boxAVDir, 0755); err != nil {
@@ -634,7 +634,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	})
 	dataAssets := filepath.Join(util.DataDir, "assets")
 	if IsEncryptedBox(boxID) {
-		// 加密笔记本的资源文件拷到 notebook 级 assets 目录，文件名脱敏 + 内容加密
+		// 加密笔记本的资源文件拷到笔记本级 assets 目录，文件名脱敏 + 内容加密
 		boxAssetsDir := filepath.Join(util.DataDir, boxID, "assets")
 		if err = os.MkdirAll(boxAssetsDir, 0755); err != nil {
 			return
@@ -679,7 +679,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
-	// AV 定义已在 storage 删除前处理（加密 box DEK 加密拷到 notebook 级，
+	// AV 定义已在 storage 删除前处理（加密 box DEK 加密拷到笔记本级，
 	// 普通 box 拷到全局 storage/av/），这里不再重复处理
 
 	// 将包含的自定义表情统一移动到 data/emojis/ 下

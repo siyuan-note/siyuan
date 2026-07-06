@@ -84,8 +84,8 @@ export const initWindowEvent = (app: App) => {
                 }
                 if (["nodeheading", "nodelistitem"].includes(gutterBlockType)) {
                     const statusHeight = document.getElementById("status")?.clientHeight || 0;
-                    const inYRange = event.clientY > document.getElementById("toolbar")?.clientHeight || 0
-                        && event.clientY < window.innerHeight - statusHeight;
+                    const toolbarHeight = document.getElementById("toolbar")?.clientHeight || 0;
+                    const inYRange = event.clientY > toolbarHeight && event.clientY < window.innerHeight - statusHeight;
                     // 通过 dock 容器类名判断位置，避免访问私有属性 position
                     const dockElement = fileDock.layout.element;
                     let onEdge = false;

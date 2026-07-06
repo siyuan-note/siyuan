@@ -281,15 +281,13 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
 		}
 	case "delete_box":
-		// 加密 box 的数据在独立库，deleteByBoxTx（删全局库 WHERE box=?）对其无意义。
-		// 加密 box 关闭时由 model 层的 CloseEncryptedDB 处理（关库连接），这里跳过全局库删除。
-		if GetEncryptedDB(op.box) != nil {
-			err = nil // 加密 box：不删全局库（数据不在那里）
-		} else {
-			err = deleteByBoxTx(tx, op.box)
-			if nil == err {
-				tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
-			}
+		// 清理 box 的内容索引。事务由 beginTxForBox(op.boxID()) 按所属库路由：
+		// 普通 box 落到全局 siyuan.db，加密 box 落到其独立 content db，删除均生效。
+		// 注意加密 box 关闭时必须清空 content db 数据，否则下次 Mount 的全量 Index
+		// 会用纯 INSERT 在无主键的 blocks 表上叠加重复行，导致搜索结果翻倍。
+		err = deleteByBoxTx(tx, op.box)
+		if nil == err {
+			tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
 		}
 	case "delete_box_refs":
 		err = deleteRefsByBoxTx(tx, op.box)

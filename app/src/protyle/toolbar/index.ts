@@ -962,7 +962,7 @@ export class Toolbar {
             title = window.siyuan.languages.memo;
         }
         const isPin = this.subElement.querySelector('[data-type="pin"]')?.getAttribute("aria-label") === window.siyuan.languages.unpin;
-        const pinData: IObject = {};
+        const pinData: Record<string, string> = {};
         if (isPin) {
             const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
             pinData.styleH = textElement.style.height;

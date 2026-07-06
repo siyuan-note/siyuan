@@ -28,7 +28,7 @@ import {registerAction} from "../layout/dock/agent/frontendActions";
 
 export class Plugin {
     private app: App;
-    public i18n: IObject;
+    public i18n: Record<string, string>;
     public eventBus: EventBus;
     public kernel: Kernel;
     public data: any = {};
@@ -77,7 +77,7 @@ export class Plugin {
         app: App,
         name: string,
         displayName: string,
-        i18n: IObject
+        i18n: Record<string, string>
     }) {
         this.app = options.app;
         this.i18n = options.i18n;

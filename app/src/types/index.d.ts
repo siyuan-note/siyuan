@@ -719,7 +719,7 @@ interface IPluginData {
     name: string,
     js: string,
     css: string,
-    i18n: IObject
+    i18n: Record<string, string>
 }
 
 interface IPluginDockTab {
@@ -883,7 +883,7 @@ interface IBlock {
     refs?: IBlock[];
     children?: IBlock[]
     length?: number
-    ial: IObject
+    ial: Record<string, string>
     refCount?: number
 }
 

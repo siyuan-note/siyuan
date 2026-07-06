@@ -592,7 +592,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         }
         if (operation.action === "updateAttrs") { // 调用接口才推送
             const data = operation.data as any;
-            const attrsResult: IObject = {};
+            const attrsResult: Record<string, string> = {};
             let bookmarkHTML = "";
             let nameHTML = "";
             let aliasHTML = "";

@@ -390,7 +390,7 @@ export class Protyle {
     }
 
     private getDoc(mergedOptions: IProtyleOptions) {
-        const getDocParam: IObject = {
+        const getDocParam: Record<string, any> = {
             id: mergedOptions.blockId,
             isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
             originalRefBlockIDs: mergedOptions.originalRefBlockIDs,

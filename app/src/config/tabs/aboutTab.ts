@@ -2,6 +2,7 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 import {getCloudURL} from "../util/about";
+import {openByMobile} from "../../editor/openLink";
 import {sendAppSetting} from "./appRuntime";
 
 const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
@@ -108,7 +109,7 @@ const registerAboutInfoGroup = (tab: SettingTabBuilder) => {
 </div>`,
         afterMount: (root) => {
             root.querySelector("#sponsorBtn")?.addEventListener("click", () => {
-                window.open(getCloudURL("sponsor"), "_blank");
+                openByMobile(getCloudURL("sponsor"));
             });
         },
     });

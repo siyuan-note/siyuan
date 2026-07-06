@@ -2,7 +2,6 @@
 	"configGroupMcp": "خدمة MCP للوكيل",
 	"configGroupEmbedding": "نموذج التضمين",
 	"addToAgent": "إضافة إلى محادثة الوكيل",
-	"openAgentChatTip": "يرجى فتح لوحة الوكيل أولاً",
 	"encryptedNotebook": "دفتر مشفر",
 	"enableEncryptedNotebook": "تمكين الدفتر المشفر",
 	"encryptedNotebookTip": "احفظ المحتوى الحساس في دفتر مشفر. كلمة المرور الرئيسية مطلوبة لفتح وعرض المحتوى. لا يمكن استعادة كلمة المرور إذا فقدت",

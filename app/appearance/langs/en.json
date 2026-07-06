@@ -2,7 +2,6 @@
 	"configGroupMcp": "Agent MCP Service",
 	"configGroupEmbedding": "Embedding Model",
 	"addToAgent": "Add to Agent Chat",
-	"openAgentChatTip": "Please open the agent panel first",
 	"encryptedNotebook": "Encrypted Notebook",
 	"enableEncryptedNotebook": "Enable encrypted notebook",
 	"encryptedNotebookTip": "Store sensitive content in an encrypted notebook. The master password is required to unlock and view the content. The password cannot be recovered if forgotten",

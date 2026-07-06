@@ -2,7 +2,6 @@
 	"configGroupMcp": "에이전트 MCP 서비스",
 	"configGroupEmbedding": "임베딩 모델",
 	"addToAgent": "에이전트 대화에 추가",
-	"openAgentChatTip": "먼저 에이전트 패널을 여세요",
 	"encryptedNotebook": "암호화 노트",
 	"enableEncryptedNotebook": "암호화 노트 활성화",
 	"encryptedNotebookTip": "민감한 콘텐츠를 암호화 노트에 저장하세요. 잠금 해제 및 보려면 마스터 암호가 필요합니다. 암호를 잊으면 데이터를 복구할 수 없습니다",

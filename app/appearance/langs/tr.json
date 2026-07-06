@@ -2,7 +2,6 @@
 	"configGroupMcp": "Ajan MCP Hizmeti",
 	"configGroupEmbedding": "Gömme Modeli",
 	"addToAgent": "Ajan sohbetine ekle",
-	"openAgentChatTip": "Önce ajan panelini açın",
 	"encryptedNotebook": "Şifreli not defteri",
 	"enableEncryptedNotebook": "Şifreli not defterini etkinleştir",
 	"encryptedNotebookTip": "Hassas içeriği şifreli not defterinde saklayın. Kilidi açmak ve içeriği görüntülemek için ana parola gereklidir. Parola unutulursa kurtarılamaz",

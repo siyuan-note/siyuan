@@ -2,7 +2,6 @@
 	"configGroupMcp": "Agent-MCP-service",
 	"configGroupEmbedding": "Embedding-model",
 	"addToAgent": "Toevoegen aan agent-chat",
-	"openAgentChatTip": "Open eerst het agentenpaneel",
 	"encryptedNotebook": "Versleuteld notitieboek",
 	"enableEncryptedNotebook": "Versleuteld notitieboek inschakelen",
 	"encryptedNotebookTip": "Bewaar gevoelige inhoud in een versleuteld notitieboek. Het hoofdwachtwoord is vereist om te ontgrendelen en te bekijken. Het wachtwoord kan niet worden hersteld als het vergeten is",

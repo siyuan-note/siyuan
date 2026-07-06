@@ -2,7 +2,6 @@
 	"configGroupMcp": "Servizio MCP dell'agente",
 	"configGroupEmbedding": "Modello di embedding",
 	"addToAgent": "Aggiungi alla chat dell'agente",
-	"openAgentChatTip": "Apri prima il pannello dell'agente",
 	"encryptedNotebook": "Blocco note crittografato",
 	"enableEncryptedNotebook": "Abilita blocco note crittografato",
 	"encryptedNotebookTip": "Memorizza contenuti sensibili in un blocco note crittografato. La password principale è necessaria per sbloccare e visualizzare i contenuti. La password non può essere recuperata se dimenticata",

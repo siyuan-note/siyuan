@@ -2,7 +2,6 @@
 	"configGroupMcp": "שירות MCP של הסוכן",
 	"configGroupEmbedding": "מודל הטמעה",
 	"addToAgent": "הוסף לצ'אט הסוכן",
-	"openAgentChatTip": "נא לפתוח תחילה את לוח הסוכן",
 	"encryptedNotebook": "פנקס מוצפן",
 	"enableEncryptedNotebook": "הפעל פנקס מוצפן",
 	"encryptedNotebookTip": "אחסן תוכן רגיש בפנקס מוצפן. נדרשת סיסמה ראשית כדי לבטל נעילה ולצפות בתוכן. לא ניתן לשחזר את הסיסמה אם שכחת אותה",

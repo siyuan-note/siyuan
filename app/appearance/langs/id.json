@@ -2,7 +2,6 @@
 	"configGroupMcp": "Layanan MCP Agen",
 	"configGroupEmbedding": "Model Embedding",
 	"addToAgent": "Tambah ke Obrolan Agen",
-	"openAgentChatTip": "Silakan buka panel agen terlebih dahulu",
 	"encryptedNotebook": "Buku catatan terenkripsi",
 	"enableEncryptedNotebook": "Aktifkan buku catatan terenkripsi",
 	"encryptedNotebookTip": "Simpan konten sensitif di buku catatan terenkripsi. Kata sandi utama diperlukan untuk membuka kunci dan melihat konten. Kata sandi tidak dapat dipulihkan jika dilupakan",

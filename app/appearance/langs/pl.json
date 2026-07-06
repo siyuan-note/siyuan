@@ -2,7 +2,6 @@
 	"configGroupMcp": "Usługa MCP agenta",
 	"configGroupEmbedding": "Model osadzania",
 	"addToAgent": "Dodaj do czatu agenta",
-	"openAgentChatTip": "Najpierw otwórz panel agenta",
 	"encryptedNotebook": "Zaszyfrowany notatnik",
 	"enableEncryptedNotebook": "Włącz zaszyfrowany notatnik",
 	"encryptedNotebookTip": "Przechowuj wrażliwe treści w zaszyfrowanym notatniku. Hasło główne jest wymagane do odblokowania i wyświetlenia zawartości. Hasła nie można odzyskać w przypadku jego utraty",

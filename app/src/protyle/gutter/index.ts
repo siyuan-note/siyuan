@@ -980,7 +980,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "ai",
                 icon: "iconSparkles",
-                label: window.siyuan.languages.ai,
+                label: window.siyuan.languages.aiEdit,
                 accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
                 click() {
                     AIActions(selectsElement, protyle);
@@ -1567,7 +1567,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "ai",
                 icon: "iconSparkles",
-                label: window.siyuan.languages.ai,
+                label: window.siyuan.languages.aiEdit,
                 accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
                 click() {
                     AIActions([nodeElement], protyle);

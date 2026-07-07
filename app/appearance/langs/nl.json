@@ -1,4 +1,5 @@
 {
+	"aiEdit": "Slim bewerken",
 	"configGroupMcp": "Agent-MCP-service",
 	"configGroupEmbedding": "Embedding-model",
 	"addToAgent": "Toevoegen aan agent-chat",

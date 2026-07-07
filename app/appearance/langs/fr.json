@@ -1,4 +1,5 @@
 {
+	"aiEdit": "Édition intelligente",
 	"configGroupMcp": "Service MCP de l'agent",
 	"configGroupEmbedding": "Modèle d'intégration",
 	"addToAgent": "Ajouter à la conversation de l'agent",

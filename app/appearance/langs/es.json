@@ -1,4 +1,5 @@
 {
+	"aiEdit": "Edición inteligente",
 	"configGroupMcp": "Servicio MCP del agente",
 	"configGroupEmbedding": "Modelo de incrustación",
 	"addToAgent": "Añadir al chat del agente",

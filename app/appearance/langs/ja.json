@@ -1,4 +1,5 @@
 {
+	"aiEdit": "スマート編集",
 	"configGroupMcp": "エージェント MCP サービス",
 	"configGroupEmbedding": "埋め込みモデル",
 	"addToAgent": "エージェント会話に追加",

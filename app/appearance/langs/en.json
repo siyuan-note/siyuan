@@ -1,4 +1,5 @@
 {
+	"aiEdit": "Smart Edit",
 	"configGroupMcp": "Agent MCP Service",
 	"configGroupEmbedding": "Embedding Model",
 	"addToAgent": "Add to Agent Chat",

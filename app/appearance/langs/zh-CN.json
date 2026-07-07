@@ -1,4 +1,5 @@
 {
+	"aiEdit": "智能编辑",
 	"configGroupMcp": "智能体 MCP 服务",
 	"configGroupEmbedding": "嵌入模型",
 	"addToAgent": "添加到智能体会话",

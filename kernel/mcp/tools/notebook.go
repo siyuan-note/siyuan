@@ -78,18 +78,9 @@ func notebookList(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "list notebooks failed: " + err.Error()}}, IsError: true}, nil
 	}
 
-	// AI/LLM 不得感知加密笔记本的存在，过滤掉加密 box（含其 ID/名称/图标）
-	var visible []*model.Box
-	for _, nb := range notebooks {
-		if model.IsEncryptedBox(nb.ID) {
-			continue
-		}
-		visible = append(visible, nb)
-	}
-
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Notebooks (%d):\n\n", len(visible)))
-	for _, nb := range visible {
+	sb.WriteString(fmt.Sprintf("Notebooks (%d):\n\n", len(notebooks)))
+	for _, nb := range notebooks {
 		sb.WriteString(fmt.Sprintf("- %s (id: %s, icon: %s, closed: %v)\n", nb.Name, nb.ID, nb.Icon, nb.Closed))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil

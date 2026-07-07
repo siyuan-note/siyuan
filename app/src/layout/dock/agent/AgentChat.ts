@@ -16,7 +16,6 @@ import {setPanelFocus} from "../../util";
 import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
-import {isEncryptedBox} from "../../../util/pathName";
 import {Constants} from "../../../constants";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
@@ -1525,8 +1524,6 @@ export class AgentChat extends Model {
         const focusedBlockID = p.block?.id;
         const activeDocTitle = p.title?.editElement?.textContent?.trim() || undefined;
         const notebookID = p.notebookId || undefined;
-        // AI/LLM 不得感知加密笔记本：当前文档位于加密 box 时，不下发 notebookID 与文档标题等元数据
-        const encryptedCtx = isEncryptedBox(notebookID);
 
         const selectedBlockIDs: string[] = [];
         p.wysiwyg?.element?.querySelectorAll("[data-node-id].protyle-wysiwyg--select")
@@ -1572,10 +1569,10 @@ export class AgentChat extends Model {
         if (activeDocID) {
             ctx.activeDocID = activeDocID;
         }
-        if (activeDocTitle && !encryptedCtx) {
+        if (activeDocTitle) {
             ctx.activeDocTitle = activeDocTitle;
         }
-        if (notebookID && !encryptedCtx) {
+        if (notebookID) {
             ctx.notebookID = notebookID;
         }
         if (focusedBlockID && focusedBlockID !== activeDocID) {

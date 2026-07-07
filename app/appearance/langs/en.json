@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Key backup exported, please keep it somewhere safe",
+	"exportNotebookCryptoBackup": "Export key backup",
+	"importNotebookCryptoBackupTip": "Key backup imported, please use the master password corresponding to this key to unlock from now on",
+	"importNotebookCryptoBackup": "Import key backup",
 	"desktopModeRestartTip": "The app will close automatically after the change, please restart it manually",
 	"aiEdit": "Smart Edit",
 	"configGroupMcp": "Agent MCP Service",
@@ -2087,6 +2091,7 @@
 		"313": "Moving documents across encrypted notebook boundaries is not supported",
 		"314": "Please unlock the encrypted notebook first",
 		"315": "Encrypted notebooks already exist but the master key backup is missing. Restore the original conf.json or backup file to re-enable",
-		"316": "Decryption failed: incorrect key or corrupted data"
+		"316": "Decryption failed: incorrect key or corrupted data",
+		"317": "Invalid key backup file"
 	}
 }

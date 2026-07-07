@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Backup da chave exportado, guarde-o em um local seguro",
+	"exportNotebookCryptoBackup": "Exportar backup da chave",
+	"importNotebookCryptoBackupTip": "Backup da chave importado, a partir de agora use a senha mestra correspondente a esta chave para desbloquear",
+	"importNotebookCryptoBackup": "Importar backup da chave",
 	"desktopModeRestartTip": "O aplicativo será fechado automaticamente após a alteração. Reinicie-o manualmente.",
 	"aiEdit": "Edição inteligente",
 	"configGroupMcp": "Serviço MCP do agente",
@@ -2087,6 +2091,7 @@
 		"313": "Não há suporte para mover documentos entre fronteiras de cadernos criptografados",
 		"314": "Por favor, desbloqueie primeiro o caderno criptografado",
 		"315": "Já existem cadernos criptografados mas o backup da chave mestre está ausente. Restaure o conf.json original ou o arquivo de backup para reativar",
-		"316": "Falha na descriptografia: chave incorreta ou dados corrompidos"
+		"316": "Falha na descriptografia: chave incorreta ou dados corrompidos",
+		"317": "Arquivo de backup da chave inválido"
 	}
 }

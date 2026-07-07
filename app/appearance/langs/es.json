@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Copia de seguridad de la clave exportada, guárdala en un lugar seguro",
+	"exportNotebookCryptoBackup": "Exportar copia de seguridad de la clave",
+	"importNotebookCryptoBackupTip": "Copia de seguridad de la clave importada, en adelante utiliza la contraseña maestra correspondiente a esta clave para desbloquear",
+	"importNotebookCryptoBackup": "Importar copia de seguridad de la clave",
 	"desktopModeRestartTip": "La aplicación se cerrará automáticamente después del cambio. Por favor, reiníciela manualmente.",
 	"aiEdit": "Edición inteligente",
 	"configGroupMcp": "Servicio MCP del agente",
@@ -2087,6 +2091,7 @@
 		"313": "No se admite mover documentos a través de los límites del cuaderno cifrado",
 		"314": "Por favor, desbloquee primero el cuaderno cifrado",
 		"315": "Ya existen cuadernos cifrados pero falta la copia de seguridad de la clave maestra. Restaure el conf.json original o el archivo de copia de seguridad para volver a habilitarlo",
-		"316": "Error al descifrar: clave incorrecta o datos dañados"
+		"316": "Error al descifrar: clave incorrecta o datos dañados",
+		"317": "Archivo de copia de seguridad de la clave no válido"
 	}
 }

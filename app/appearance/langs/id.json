@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Cadangan kunci diekspor, simpan di tempat yang aman",
+	"exportNotebookCryptoBackup": "Ekspor cadangan kunci",
+	"importNotebookCryptoBackupTip": "Cadangan kunci diimpor, selanjutnya silakan gunakan kata sandi utama yang sesuai dengan kunci ini untuk membuka kunci",
+	"importNotebookCryptoBackup": "Impor cadangan kunci",
 	"desktopModeRestartTip": "Aplikasi akan ditutup otomatis setelah perubahan, silakan mulai ulang secara manual",
 	"aiEdit": "Editir Pintar",
 	"configGroupMcp": "Layanan MCP Agen",
@@ -2087,6 +2091,7 @@
 		"313": "Memindahkan dokumen melintasi batas buku catatan terenkripsi tidak didukung",
 		"314": "Silakan buka kunci buku catatan terenkripsi terlebih dahulu",
 		"315": "Buku catatan terenkripsi sudah ada tetapi cadangan kunci utama hilang. Pulihkan conf.json asli atau file cadangan untuk mengaktifkan kembali",
-		"316": "Dekripsi gagal: kunci salah atau data rusak"
+		"316": "Dekripsi gagal: kunci salah atau data rusak",
+		"317": "File cadangan kunci tidak valid"
 	}
 }

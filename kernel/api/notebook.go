@@ -17,6 +17,7 @@
 package api
 
 import (
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -634,5 +635,60 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 	ret.Data = map[string]any{
 		"enabled": model.Conf.NotebookCrypto.Enabled,
 		"count":   count,
+	}
+}
+
+// exportNotebookCryptoBackup 导出密钥备份文件到 export 目录供下载。
+// 备份文件不含主密码（salt 不保密、verifier 是密文），用户主动保存作为同步之外的独立恢复途径。
+func exportNotebookCryptoBackup(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	downloadPath, err := model.ExportNotebookCryptoBackup()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{
+		"file": downloadPath,
+	}
+}
+
+// importNotebookCryptoBackup 导入密钥备份文件，恢复加密配置。
+// 用于新设备/重装后不依赖同步、手动恢复。本机已启用时拒绝（避免覆盖孤立数据）。
+func importNotebookCryptoBackup(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if 1 > len(form.File["file"]) {
+		ret.Code = -1
+		ret.Msg = "file not found"
+		return
+	}
+	fh := form.File["file"][0]
+	f, err := fh.Open()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer f.Close()
+	data, err := io.ReadAll(f)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err := model.ImportNotebookCryptoBackup(data); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 }

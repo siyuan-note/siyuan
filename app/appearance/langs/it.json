@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Backup della chiave esportato, conservalo in un luogo sicuro",
+	"exportNotebookCryptoBackup": "Esporta backup della chiave",
+	"importNotebookCryptoBackupTip": "Backup della chiave importato, da ora in poi usa la password principale corrispondente a questa chiave per sbloccare",
+	"importNotebookCryptoBackup": "Importa backup della chiave",
 	"desktopModeRestartTip": "L'app si chiuderà automaticamente dopo la modifica, riavviala manualmente.",
 	"aiEdit": "Modifica intelligente",
 	"configGroupMcp": "Servizio MCP dell'agente",
@@ -2087,6 +2091,7 @@
 		"313": "Lo spostamento di documenti attraverso i confini del blocco note crittografato non è supportato",
 		"314": "Sblocca prima il blocco note crittografato",
 		"315": "Esistono già blocchi note crittografati ma manca il backup della chiave principale. Ripristinare il conf.json originale o il file di backup per riabilitare",
-		"316": "Decrittazione non riuscita: chiave errata o dati danneggiati"
+		"316": "Decrittazione non riuscita: chiave errata o dati danneggiati",
+		"317": "File di backup della chiave non valido"
 	}
 }

@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Anahtar yedeği dışa aktarıldı, lütfen güvenli bir yerde saklayın",
+	"exportNotebookCryptoBackup": "Anahtar yedeğini dışa aktar",
+	"importNotebookCryptoBackupTip": "Anahtar yedeği içe aktarıldı, bu andan itibaren kilidi açmak için lütfen bu anahtara karşılık gelen ana parolayı kullanın",
+	"importNotebookCryptoBackup": "Anahtar yedeğini içe aktar",
 	"desktopModeRestartTip": "Değişiklikten sonra uygulama otomatik olarak kapanacaktır. Lütfen elle yeniden başlatın.",
 	"aiEdit": "Akıllı Düzenleme",
 	"configGroupMcp": "Ajan MCP Hizmeti",
@@ -2087,6 +2091,7 @@
 		"313": "Şifreli not defteri sınırları boyunca belge taşıma desteklenmemektedir",
 		"314": "Lütfen önce şifreli not defterinin kilidini açın",
 		"315": "Şifreli not defterleri zaten mevcut ancak anahtar yedeği eksik. Yeniden etkinleştirmek için orijinal conf.json veya yedek dosyasını geri yükleyin",
-		"316": "Şifre çözme başarısız: yanlış anahtar veya bozuk veriler"
+		"316": "Şifre çözme başarısız: yanlış anahtar veya bozuk veriler",
+		"317": "Geçersiz anahtar yedek dosyası"
 	}
 }

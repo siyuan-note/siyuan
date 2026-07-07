@@ -115,8 +115,15 @@ export class Outline extends Model {
         this.tree = new Tree({
             element: this.element,
             data: null,
-            click: (element: HTMLElement) => {
+            click: (element: HTMLElement, event?: MouseEvent) => {
                 window.siyuan.menus.menu.remove();
+                if (event) {
+                    const actionElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item__action");
+                    if (actionElement) {
+                        this.showContextMenu(element, event);
+                        return;
+                    }
+                }
                 const id = element.getAttribute("data-node-id");
                 if (this.isPreview) {
                     const headElement = document.getElementById(id);
@@ -188,7 +195,9 @@ export class Outline extends Model {
                     }
                 }
                 this.saveExpendIds();
-            }
+            },
+            blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
+            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
         // 为了快捷键的 dispatch
         options.tab.panelElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {

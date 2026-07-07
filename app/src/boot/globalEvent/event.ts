@@ -10,7 +10,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
-import {initTouchDragBridge} from "../../util/touchDragBridge";
+import {cancelManualTouch, initTouchDragBridge} from "../../util/touchDragBridge";
 import {isWindow} from "../../util/functions";
 import {getDockByType} from "../../layout/tabUtil";
 
@@ -218,6 +218,8 @@ export const initWindowEvent = (app: App) => {
     }, false);
 
     document.addEventListener("touchend", (event) => {
+        // 无条件前置取消手动桥接：触发各组件（如 Outline.bindSort）注册的 mouseup 清理回调，复位 document.onmousemove 等状态
+        cancelManualTouch();
         if (window.siyuan.touchDragActive) {
             return;
         }

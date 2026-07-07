@@ -2085,6 +2085,7 @@
 		"311": "Mot de passe maître incorrect",
 		"312": "La fonctionnalité de carnet chiffré est déjà activée",
 		"313": "Le déplacement de documents à travers les frontières du carnet chiffré n'est pas pris en charge",
-		"314": "Veuillez d'abord déverrouiller le carnet chiffré"
+		"314": "Veuillez d'abord déverrouiller le carnet chiffré",
+		"315": "Des carnets chiffrés existent déjà mais la sauvegarde de la clé maître est manquante. Restaurez le conf.json original ou le fichier de sauvegarde pour réactiver"
 	}
 }

@@ -2085,6 +2085,7 @@
 		"311": "Password principale errata",
 		"312": "La funzione del blocco note crittografato è già abilitata",
 		"313": "Lo spostamento di documenti attraverso i confini del blocco note crittografato non è supportato",
-		"314": "Sblocca prima il blocco note crittografato"
+		"314": "Sblocca prima il blocco note crittografato",
+		"315": "Esistono già blocchi note crittografati ma manca il backup della chiave principale. Ripristinare il conf.json originale o il file di backup per riabilitare"
 	}
 }

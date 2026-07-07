@@ -2085,6 +2085,7 @@
 		"311": "Kata sandi utama salah",
 		"312": "Fitur buku catatan terenkripsi sudah diaktifkan",
 		"313": "Memindahkan dokumen melintasi batas buku catatan terenkripsi tidak didukung",
-		"314": "Silakan buka kunci buku catatan terenkripsi terlebih dahulu"
+		"314": "Silakan buka kunci buku catatan terenkripsi terlebih dahulu",
+		"315": "Buku catatan terenkripsi sudah ada tetapi cadangan kunci utama hilang. Pulihkan conf.json asli atau file cadangan untuk mengaktifkan kembali"
 	}
 }

@@ -1975,6 +1975,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	reloadPluginSet := hashset.New()     // 插件代码变更 data/plugins/
 	dataChangePluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
 	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
+	needRestoreNotebookCrypto := false // 加密笔记本备份文件随同步到达，需恢复本机启用状态
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -1990,6 +1991,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
 			needUnindexBoxes[boxID] = true
 			needIndexBoxes[boxID] = true
+		}
+
+		if file.Path == "/.siyuan/notebook-crypto-backup.json" {
+			needRestoreNotebookCrypto = true
 		}
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
@@ -2024,6 +2029,12 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasPrefix(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
 		}
+	}
+
+	// 加密笔记本备份文件随同步到达：若本机未启用，自动把配置装回 conf.json（不需主密码），
+	// 让本机进入"已启用"状态，用户输主密码即可解锁。仅本机 Enabled=false 时生效，不覆盖已启用配置。
+	if needRestoreNotebookCrypto {
+		restoreNotebookCryptoConfigFromBackup()
 	}
 
 	removeWidgetDirSet, unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New(), hashset.New()

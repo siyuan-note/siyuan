@@ -45,7 +45,7 @@ jobs:
 
       - name: Verify tag matches package.json version
         # 仅 tag 推送触发时校验：去掉 tag 前导 v 后与 package.json 中的版本号比对，
-        # 不一致说明开发者推 tag 前忘记同步版本号，直接终止整个 workflow。
+        # 不一致说明开发者推 tag 前忘记同步版本号，直接终止整个流程。
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           TAG="${GITHUB_REF_NAME#v}"

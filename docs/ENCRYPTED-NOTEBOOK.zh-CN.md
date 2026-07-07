@@ -262,10 +262,10 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 - BoxConf.WrappedDEK（密文，需 KEK 解开）
 - 内存中的 DEK/明文缓存（锁定时清空）
 - 历史索引的 content 字段（留空，不存明文也不存密文）
+- **元数据泄漏**（加密不掩盖以下信息）：文件数量、目录结构、文件大小、修改时间（mtime）、asset 文件扩展名、blockID 时间戳。加密 box 的 asset 文件名虽脱敏为 `uuid-blockID.ext`，但扩展名可见；同步端/历史快照中的旧密文也由各存储方自行保管，加密 notebook 无法吊销其副本
 
 **API 防护**：
-- `/api/file/getFile`：拒绝读取加密 box 的 .sy（密文无意义，防止插件误解析）
-- `/api/file/putFile`：拒绝写入加密 box 的 .sy（明文写入会破坏密文格式）
+- `/api/file/getFile`、`/api/file/putFile`、`/api/file/copyFile`、`/api/file/renameFile`、`/api/file/removeFile`：拒绝读写加密 box 下的任何文件（不只 .sy），避免密文泄漏或明文破坏；合法读写走专用 API（已加密感知）
 
 ## 13. AI / LLM 可达性
 
@@ -324,6 +324,8 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 
 ### 修改主密码
 进入 **设置 → 访问授权 → 修改主密码**。改密只需重新包络各 box 的 WrappedDEK，**不重新加密文档数据**，因此即时完成。改密后密钥备份会自动刷新并同步。
+
+> 重要语义：改密采用 KEK 包络模式——DEK 本身不变，只是用新主密码派生的新 KEK 重新包络 WrappedDEK。这意味着**改密不能吊销旧主密码的解密能力**：如果旧主密码和旧 WrappedDEK（如同步端、备份、历史快照中保留的）同时泄露，仍能解出同一个 DEK，进而解当前数据。如果怀疑旧主密码已泄露，应迁移内容到新建的加密笔记本（新 DEK）而非仅改密。
 
 ### 多设备同步
 加密笔记本的密文 `.sy`/assets/数据库文件会随数据同步（密文进密文出，闭环自洽）；全局密钥材料（MasterSalt 等）也会自动备份到同步目录。**新设备同步后无需手动"启用"**：

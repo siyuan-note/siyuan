@@ -346,6 +346,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         (type === "Delete" && (
             blockParentElement.parentElement.classList.contains("protyle-wysiwyg") ||
             blockParentElement.parentElement.classList.contains("li") ||
+            blockParentElement.parentElement.classList.contains("callout-content") ||
             blockParentElement.parentElement.classList.contains("sb")
         ))
     )) {

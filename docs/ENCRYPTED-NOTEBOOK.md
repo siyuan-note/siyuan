@@ -104,6 +104,15 @@ MasterSalt is the global root of KEK derivation — the master password + Master
 
 **Config recovery vs key recovery, separated**: Config recovery only needs to read the backup file and load back the salt/verifier (no password required, since salt is not secret and data remains undecryptable without the password); key recovery requires the password to derive the KEK and verify against the verifier. This allows the "enabled" state to be reached automatically after sync/import, so the user can unlock by entering the master password.
 
+**Manual key export/import**: Beyond auto-sync, users can manually export/import the key backup under **Settings → Access authorization → Encrypted notebooks**, as an independent recovery channel outside sync (e.g. when sync is unavailable, for cross-account migration, or offline physical transfer).
+
+| Operation | Entry | Notes |
+|---|---|---|
+| Export key | Shown when enabled | Copies `notebook-crypto-backup.json` to the export directory for download; the user keeps it (API: `/api/notebook/exportNotebookCryptoBackup`) |
+| Import key | Shown when not enabled | Uploads a local backup file; after validation it is written back to `<DataDir>/.siyuan/` and the local config is restored (`Enabled=true`). Use the master password matching that key to unlock afterwards (API: `/api/notebook/importNotebookCryptoBackup`) |
+
+Import guard: when the local machine is already enabled, import is rejected (to avoid overwriting the existing salt and orphaning WrappedDEKs); the import entry is shown only when not enabled. The backup file itself does not contain the master password (salt is not secret, verifier is ciphertext), so export/import does not leak plaintext data; unlocking still requires the master password.
+
 **Fool-proof guard**: When encrypted notebooks already exist on disk (boxes with `Encrypted=true`), `EnableEncryptedNotebook` **refuses to regenerate MasterSalt** (which would orphan old WrappedDEKs) and instead recovers from backup first; only if the backup is missing does it error out and guide the user to restore `conf.json` or the backup file. This guard mirrors `DisableEncryptedNotebook`'s "cannot disable while encrypted notebooks exist".
 
 **Prerequisite**: `restoreNotebookCryptoConfigFromBackup` only takes effect when the local `Enabled=false`; it never overwrites an in-use local config.
@@ -333,7 +342,7 @@ If the notebook still shows as locked on the new device after sync, that is norm
 **It cannot be recovered** — by design (no backdoor). Even if the ciphertext has been synced to the cloud, it cannot be decrypted without the master password. **You must remember the master password; using a password manager is recommended.**
 
 ### Recovering from a lost key backup
-If both `conf/conf.json` and the key backup in the sync directory are lost (an extreme case), re-enabling the encrypted-notebook feature will be rejected with a prompt to restore the backup file. As long as you can recover `notebook-crypto-backup.json` from another synced device or a local backup, put it back at `<workspace>/data/.siyuan/` and re-enable to unlock with the original master password.
+If both `conf/conf.json` and the key backup in the sync directory are lost (an extreme case), re-enabling the encrypted-notebook feature will be rejected with a prompt to restore the backup file. As long as you can recover `notebook-crypto-backup.json` from another synced device or a previously exported key file, you can import it via the "Import key" button (shown when not enabled), or manually put it back at `<workspace>/data/.siyuan/` and re-enable, then unlock with the master password matching that key.
 
 ### Suitable scenarios for encrypted notebooks
 - Private diary, financial records, medical information

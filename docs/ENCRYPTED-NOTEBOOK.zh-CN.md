@@ -104,6 +104,15 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 
 **配置恢复 vs 密钥恢复分离**：配置恢复只需读备份文件、装回 salt/verifier（不需主密码，因 salt 不保密、没主密码仍解不开数据）；密钥恢复才需主密码派生 KEK 并校验 verifier。这让同步/导入后能自动进入"已启用"状态，用户输主密码即可解锁。
 
+**手动导出/导入密钥**：除自动同步外，用户可在 **设置 → 访问授权 → 加密笔记本** 手动导出/导入密钥备份，作为同步之外的独立恢复途径（如同步不可用、跨账号迁移、物理离线转存）。
+
+| 操作 | 入口 | 说明 |
+|---|---|---|
+| 导出密钥 | 已启用状态下显示 | 把 `notebook-crypto-backup.json` 复制到 export 目录供下载，用户自行保管（API：`/api/notebook/exportNotebookCryptoBackup`） |
+| 导入密钥 | 未启用状态下显示 | 选本地备份文件上传，校验合法后写回 `<DataDir>/.siyuan/` 并装回本机配置（`Enabled=true`）。后续用该密钥对应的主密码解锁（API：`/api/notebook/importNotebookCryptoBackup`） |
+
+导入防呆：本机已启用时拒绝导入（避免覆盖现有 salt 孤立 WrappedDEK），导入入口仅在未启用时露出。备份文件本身不含主密码（salt 不保密、verifier 是密文），导出/导入不涉及明文数据泄漏，解锁仍需主密码。
+
 **防呆守卫**：`EnableEncryptedNotebook` 在磁盘上已存在加密笔记本（`Encrypted=true` 的 box）时，**禁止重新生成 MasterSalt**（否则会孤立旧 WrappedDEK），改为优先从备份恢复；备份缺失才报错引导用户恢复 `conf.json` 或备份文件。此守卫与 `DisableEncryptedNotebook` 的"有加密笔记本时禁止禁用"对称。
 
 **前提条件**：`restoreNotebookCryptoConfigFromBackup` 仅在本机 `Enabled=false` 时生效，不覆盖正在使用的本机配置。
@@ -333,7 +342,7 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 **无法恢复**——这是设计使然（没有后门）。即使密文已同步到云端，没有主密码也解不开。**务必牢记主密码，建议使用密码管理器保存**。
 
 ### 密钥备份丢失的恢复
-若 `conf/conf.json` 与同步目录里的密钥备份同时丢失（极端情况），重新启用加密笔记本会被拒绝并提示恢复备份文件。只要能从其他已同步的设备或本地备份找回 `notebook-crypto-backup.json`，放回 `<工作区>/data/.siyuan/` 后重新启用即可用原主密码解锁。
+若 `conf/conf.json` 与同步目录里的密钥备份同时丢失（极端情况），重新启用加密笔记本会被拒绝并提示恢复备份文件。只要能从其他已同步的设备或之前导出的密钥文件找回 `notebook-crypto-backup.json`，可通过未启用状态下显示的"导入密钥"按钮导入，或手动放回 `<工作区>/data/.siyuan/` 后重新启用，即可用该密钥对应的主密码解锁。
 
 ### 适合用加密笔记本的场景
 - 隐私日记、财务记录、医疗信息

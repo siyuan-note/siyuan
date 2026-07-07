@@ -111,6 +111,12 @@ func readAttributeViewData(avID string) ([]byte, error) {
 	return data, nil
 }
 
+// ReadAttributeViewData 是 readAttributeViewData 的导出版本，供 model.export 等外部包
+// 读取 AV 定义明文（含加密 box 的笔记本级 AV 自动解密）。
+func ReadAttributeViewData(avID string) ([]byte, error) {
+	return readAttributeViewData(avID)
+}
+
 // writeAttributeViewData 写入 AV 定义数据（自动加密）。
 // boxID 为空时写全局路径（普通 box），非空时写加密 box 路径并加密。
 func writeAttributeViewData(avID, boxID string, data []byte) error {

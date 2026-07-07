@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"crypto/sha1"
 	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
@@ -285,7 +286,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 			continue
 		}
 		targetAbsPath := filepath.Join(exportFolder, asset)
-		if copyErr := filelock.Copy(srcAbsPath, targetAbsPath); copyErr != nil {
+		if copyErr := copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); copyErr != nil {
 			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, copyErr)
 		}
 	}
@@ -499,9 +500,21 @@ func ExportSystemLog() (zipPath string) {
 	return
 }
 
+// exportLockedByBlockID 由 docID/blockID 反查 boxID，判断其所属加密笔记本是否未解锁。
+// 未解锁返回 true（调用方应中止导出并返回空结果）；普通笔记本或已解锁返回 false。
+// 用于文档级导出入口的统一 guard，避免未解锁时读出密文或空结果。
+func exportLockedByBlockID(id string) bool {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return false // 找不到块树，交给后续流程处理
+	}
+	return IsEncryptedBox(bt.BoxID) && !IsBoxUnlocked(bt.BoxID)
+}
+
 func ExportNotebookSY(id string) (zipPath string) {
-	// 加密笔记本不支持导出，避免密文 .sy 流出后无法解读
-	if IsEncryptedBox(id) {
+	// 加密笔记本必须已解锁才能导出（DEK 在内存才能读 .sy/assets/AV 明文）
+	if IsEncryptedBox(id) && !IsBoxUnlocked(id) {
+		logging.LogErrorf("export encrypted notebook [%s] failed: locked", id)
 		return
 	}
 	zipPath = exportBoxSYZip(id)
@@ -510,8 +523,8 @@ func ExportNotebookSY(id string) (zipPath string) {
 
 func ExportSYs(ids []string) (zipPath string) {
 	block := treenode.GetBlockTree(ids[0])
-	// 加密笔记本不支持导出
-	if nil != block && IsEncryptedBox(block.BoxID) {
+	if nil != block && IsEncryptedBox(block.BoxID) && !IsBoxUnlocked(block.BoxID) {
+		logging.LogErrorf("export encrypted doc [%s] failed: box [%s] locked", ids[0], block.BoxID)
 		return
 	}
 	box := Conf.Box(block.BoxID)
@@ -669,7 +682,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 		resourceBaseName := filepath.Base(resourceFullPath)                   // 资源名称
 		resourceCopyPath := filepath.Join(exportFolderPath, resourceBaseName) // 资源副本完整路径
-		if err = filelock.Copy(resourceFullPath, resourceCopyPath); err != nil {
+		if err = copyAssetDecryptIfEncrypted(resourceFullPath, resourceCopyPath); err != nil {
 			logging.LogErrorf("copy resource will be exported from [%s] to [%s] failed: %s", resourcePath, resourceCopyPath, err)
 			err = fmt.Errorf(Conf.Language(14), err.Error())
 			return
@@ -699,6 +712,10 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 }
 
 func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
+	if exportLockedByBlockID(id) {
+		logging.LogErrorf("export preview [%s] failed: encrypted notebook locked", id)
+		return
+	}
 	blockRefMode := Conf.Export.BlockRefMode
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
@@ -761,6 +778,10 @@ func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 }
 
 func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string, err error) {
+	if exportLockedByBlockID(id) {
+		err = errors.New(Conf.Language(314))
+		return
+	}
 	if !util.IsValidPandocBin(Conf.Export.PandocBin) {
 		Conf.Export.PandocBin = util.PandocBinPath
 		Conf.Save()
@@ -848,6 +869,10 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 }
 
 func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string) {
+	if exportLockedByBlockID(id) {
+		logging.LogErrorf("export markdown html [%s] failed: encrypted notebook locked", id)
+		return
+	}
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
@@ -899,7 +924,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 			continue
 		}
 		targetAbsPath := filepath.Join(savePath, asset)
-		if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
+		if err = copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); err != nil {
 			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 		}
 	}
@@ -1023,6 +1048,10 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 }
 
 func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom string, node *ast.Node) {
+	if exportLockedByBlockID(id) {
+		logging.LogErrorf("export html [%s] failed: encrypted notebook locked", id)
+		return
+	}
 	savePath = strings.TrimSpace(savePath)
 
 	bt := treenode.GetBlockTree(id)
@@ -1095,7 +1124,7 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 				continue
 			}
 			targetAbsPath := filepath.Join(savePath, asset)
-			if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
+			if err = copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); err != nil {
 				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 			}
 		}
@@ -1684,6 +1713,10 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 }
 
 func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag bool) string {
+	if exportLockedByBlockID(id) {
+		logging.LogErrorf("export std markdown [%s] failed: encrypted notebook locked", id)
+		return ""
+	}
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		logging.LogErrorf("block tree [%s] not found", id)
@@ -1874,6 +1907,10 @@ func ParseExportOptions(arg map[string]any) (opts *ExportOptions) {
 
 func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
 	block := treenode.GetBlockTree(ids[0])
+	if nil != block && IsEncryptedBox(block.BoxID) && !IsBoxUnlocked(block.BoxID) {
+		logging.LogErrorf("export pandoc zip [%s] failed: encrypted notebook locked", ids[0])
+		return
+	}
 	box := Conf.Box(block.BoxID)
 	baseFolderName := path.Base(block.HPath)
 	if "." == baseFolderName {
@@ -1900,6 +1937,10 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 }
 
 func ExportNotebookMarkdown(boxID string) (zipPath string) {
+	if IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
+		logging.LogErrorf("export notebook markdown [%s] failed: encrypted notebook locked", boxID)
+		return
+	}
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
@@ -1981,6 +2022,27 @@ func yfm(docIAL map[string]string) string {
 	return buf.String()
 }
 
+// treeToSYJSON 把内存中的 tree 序列化为 .sy 格式的明文 JSON 字节。
+// 用于导出 .sy.zip：加密笔记本的 tree 已被 filesys.LoadTree 透明解密成明文，
+// 这里重新序列化（而非 filelock.ReadFile 直接读盘，那会拿到密文）。
+// 与 filesys.prepareWriteTree 的区别：无 UpsertBlockTree 写库副作用、路径无关，纯序列化。
+func treeToSYJSON(tree *parse.Tree) (data []byte) {
+	treenode.UpgradeSpec(tree)
+	luteEngine := util.NewLute()
+	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	data = renderer.Render()
+	if !util.UseSingleLineSave {
+		buf := bytes.Buffer{}
+		buf.Grow(1024 * 1024 * 2)
+		if err := json.Indent(&buf, data, "", "\t"); err != nil {
+			logging.LogErrorf("json indent failed: %s", err)
+			return
+		}
+		data = buf.Bytes()
+	}
+	return
+}
+
 func exportBoxSYZip(boxID string) (zipPath string) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
@@ -2055,15 +2117,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	count = 0
 
 	// 按文件夹结构复制选择的树
+	// 注意：tree 已被 filesys.LoadTree 透明解密成明文，这里序列化为明文 JSON 写盘
+	// （不可 filelock.ReadFile 直接读盘，加密 box 的磁盘 .sy 是密文）。
 	total := len(trees) + len(refTrees)
 	for _, tree := range trees {
-		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
-		data, readErr := filelock.ReadFile(readPath)
-		if nil != readErr {
-			logging.LogErrorf("read file [%s] failed: %s", readPath, readErr)
-			continue
-		}
-
 		writePath := strings.TrimPrefix(tree.Path, rootDirPath)
 		writePath = filepath.Join(exportDir, writePath)
 		writeFolder := filepath.Dir(writePath)
@@ -2071,7 +2128,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			logging.LogErrorf("create export temp folder [%s] failed: %s", writeFolder, mkdirErr)
 			continue
 		}
-		if writeErr := os.WriteFile(writePath, data, 0644); nil != writeErr {
+		if writeErr := os.WriteFile(writePath, treeToSYJSON(tree), 0644); nil != writeErr {
 			logging.LogErrorf("write export file [%s] failed: %s", writePath, writeErr)
 			continue
 		}
@@ -2083,16 +2140,8 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	count = 0
 	// 引用树放在导出文件夹根路径下
 	for treeID, tree := range refTrees {
-		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
-		data, readErr := filelock.ReadFile(readPath)
-		if nil != readErr {
-			logging.LogErrorf("read file [%s] failed: %s", readPath, readErr)
-			continue
-		}
-
-		writePath := strings.TrimPrefix(tree.Path, rootDirPath)
-		writePath = filepath.Join(exportDir, treeID+".sy")
-		if writeErr := os.WriteFile(writePath, data, 0644); nil != writeErr {
+		writePath := filepath.Join(exportDir, treeID+".sy")
+		if writeErr := os.WriteFile(writePath, treeToSYJSON(tree), 0644); nil != writeErr {
 			logging.LogErrorf("write export file [%s] failed: %s", writePath, writeErr)
 			continue
 		}
@@ -2292,13 +2341,17 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 }
 
 func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
-	avJSONPath := av.GetAttributeViewDataPath(avID)
-	if !filelock.IsExist(avJSONPath) {
+	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密 box 的 AV 在 <boxID>/storage/av/，
+	// GetAttributeViewDataPath 只查全局路径会漏；filelock.Copy 会拷密文）。
+	avData, readErr := av.ReadAttributeViewData(avID)
+	if readErr != nil {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		return
 	}
-
-	if copyErr := filelock.Copy(avJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
-		logging.LogErrorf("copy av json failed: %s", copyErr)
+	if avData != nil {
+		if writeErr := os.WriteFile(filepath.Join(exportStorageAvDir, avID+".json"), avData, 0644); writeErr != nil {
+			logging.LogErrorf("write av json failed: %s", writeErr)
+		}
 	}
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -2323,7 +2376,7 @@ func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[st
 						continue
 					}
 
-					if copyErr := filelock.Copy(srcPath, destPath); nil != copyErr {
+					if copyErr := copyAssetDecryptIfEncrypted(srcPath, destPath); nil != copyErr {
 						logging.LogErrorf("copy asset failed: %s", copyErr)
 					}
 				}
@@ -2341,13 +2394,16 @@ func exportRelationAvs(avID, exportStorageAvDir string) {
 
 	for _, v := range avIDs.Values() {
 		relAvID := v.(string)
-		relAvJSONPath := av.GetAttributeViewDataPath(relAvID)
-		if !filelock.IsExist(relAvJSONPath) {
+		relAvData, readErr := av.ReadAttributeViewData(relAvID)
+		if readErr != nil {
+			logging.LogErrorf("read relation attribute view [%s] failed: %s", relAvID, readErr)
 			continue
 		}
-
-		if copyErr := filelock.Copy(relAvJSONPath, filepath.Join(exportStorageAvDir, relAvID+".json")); nil != copyErr {
-			logging.LogErrorf("copy av json failed: %s", copyErr)
+		if relAvData == nil {
+			continue
+		}
+		if writeErr := os.WriteFile(filepath.Join(exportStorageAvDir, relAvID+".json"), relAvData, 0644); writeErr != nil {
+			logging.LogErrorf("write av json failed: %s", writeErr)
 		}
 	}
 }
@@ -2376,6 +2432,10 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 }
 
 func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar, adjustHeadingLv, imgTag, addTitle bool) (hPath, exportedMd string) {
+	if exportLockedByBlockID(id) {
+		logging.LogErrorf("export markdown content [%s] failed: encrypted notebook locked", id)
+		return
+	}
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
@@ -2887,7 +2947,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 
 		avID := n.AttributeViewID
-		if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
+		// 用 box-aware 路径解析（加密 box 的 AV 在 <boxID>/storage/av/，GetAttributeViewDataPath 只查全局会漏）
+		if avJSONPath, _ := av.FindAttributeViewPath(avID); "" == avJSONPath {
 			return ast.WalkContinue
 		}
 
@@ -3612,8 +3673,8 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 			}
 
 			destPath := filepath.Join(writeFolder, newAsset)
-			if copyErr := filelock.Copy(srcPath, destPath); copyErr != nil {
-				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
+			if copyErr := copyAssetDecryptIfEncrypted(srcPath, destPath); copyErr != nil {
+				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, copyErr)
 				continue
 			}
 		}

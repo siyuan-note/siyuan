@@ -1,6 +1,6 @@
 import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
-    getContenteditableElement, getFirstBlock,
+    getContenteditableElement,
     getLastBlock,
     getNextBlock,
     getParentBlock,
@@ -343,7 +343,11 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     const blockParentElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
     if (!blockElement.previousElementSibling && (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout) && (
         (type !== "Delete" && blockType !== "NodeHeading") ||
-        (type === "Delete" && blockParentElement.parentElement.classList.contains("protyle-wysiwyg"))
+        (type === "Delete" && (
+            blockParentElement.parentElement.classList.contains("protyle-wysiwyg") ||
+            blockParentElement.parentElement.classList.contains("li") ||
+            blockParentElement.parentElement.classList.contains("sb")
+        ))
     )) {
         if (type !== "Delete") {
             range.insertNode(document.createElement("wbr"));

@@ -6,9 +6,11 @@
   width: 80vw;
 }
 
-.fn__flex-column[data-type="sidebar-file"] {
+.fn__flex-column[data-type="sidebar-file"],
+.fn__flex-column[data-type="sidebar-outline"] {
   .b3-list-item {
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 }
 

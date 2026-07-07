@@ -1,0 +1,301 @@
+# SiYuan Encrypted Notebook
+
+## 1. Design Goals
+
+Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` documents, assets (including filenames), attribute-view definitions, and SQLite index databases (content + blocktree) are all stored encrypted on disk, requiring a master password to unlock and view the content. Existing normal notebooks are completely unaffected.
+
+## 2. Core Constraints
+
+| Aspect | Design Decision |
+|---|---|
+| Encryption scope | `.sy` + assets (incl. filenames) + AV definitions + db (content + blocktree) all encrypted |
+| Notebook identity | Dynamic boxID + `BoxConf.Encrypted: true` flag |
+| Quantity | Multiple encrypted notebooks supported |
+| Password | Shared master password (KEK envelope, per-notebook independent DEK) |
+| Unlock granularity | Strictly per-notebook unlock (KEK used and discarded, ~1s Argon2id per unlock) |
+| DB scheme | Each encrypted notebook has its own physical SQLCipher db, isolated from the global siyuan.db |
+| **Isolation principle** | **Each encrypted notebook is an independent island — isolated from normal notebooks, and encrypted notebooks are also isolated from each other. Data, block refs, AV mirroring, and moves never cross the encrypted-notebook boundary. Unlocking one encrypted notebook does not affect the locked state of other encrypted notebooks.** |
+| Global features | Encrypted notebooks never participate (global search / graph / block refs cannot see them) |
+| Block refs | Normal refs within the box; cross-boundary refs forbidden (bidirectional: normal↔encrypted, encrypted A↔encrypted B) |
+| AI / LLM | Fully isolated — agents, AI chat, embedding vectorization, semantic search, MCP never enter encrypted notebooks |
+| Cross-boundary move | Forbidden — would break data consistency and leak |
+| AV / Attribute View | Notebook-level storage — encrypted box AV definitions follow the box directory, DEK-encrypted; cross-boundary mirroring forbidden |
+| Flashcards / spaced repetition | Not supported (feature limitation) |
+| Bookmarks | Not supported (feature limitation) |
+| Tags | Not supported (feature limitation) |
+| Import | Supported — imported .sy.zip and Markdown are DEK-encrypted before writing to disk, identical to manually created documents |
+| Enable / Disable | Enabling requires setting a master password; disabling requires confirming no encrypted notebooks exist |
+| Restart behavior | All encrypted notebooks force-closed on startup (DEK is memory-only, lost after restart); user must re-unlock |
+| Existing notebooks | Completely untouched, zero migration |
+
+## 3. Encrypted Notebook vs Normal Notebook
+
+| Aspect | Normal Notebook | Encrypted Notebook |
+|---|---|---|
+| **Create** | Anytime, no restrictions | Must first enable encryption (set master password); creating requires verifying master password |
+| **Open (Mount)** | Direct open | Must first enter master password to unlock (~1s Argon2id each time); DEK enters memory |
+| **Close (Unmount)** | Closing makes it invisible | Close = lock (DEK cleared + encrypted db closed + all plaintext caches cleared) |
+| **After restart** | Keeps last open state | Force-closed; must re-enter master password to unlock |
+| **.sy files** | Plaintext JSON on disk | AES-256-GCM ciphertext on disk, transparently decrypted on read |
+| **assets files** | Plaintext binary, original filename | AES-256-GCM ciphertext, filename desensitized, original name encrypted |
+| **AV definitions** | Global `storage/av/<avID>.json` (plaintext) | Notebook-level `<boxID>/storage/av/<avID>.json` (DEK-encrypted) |
+| **content db** | Written to global siyuan.db (plaintext) | Written to independent siyuan-encrypted-`<boxID>`.db (SQLCipher) |
+| **blocktree db** | Written to global blocktree.db (plaintext) | Written to independent siyuan-encrypted-`<boxID>`-blocktree.db (SQLCipher) |
+| **Global search** | Participates (FTS hits) | Does not participate (data not in global db) |
+| **Graph** | Participates | Does not participate |
+| **Block refs** | Referrable by any notebook | Normal refs within box; cross-boundary refs forbidden (bidirectional) |
+| **Move doc (cross-notebook)** | Supported | Forbidden across encrypted boundary |
+| **Doc to heading (Doc2Heading)** | Supported | Forbidden across encrypted boundary |
+| **AV mirroring (cross-notebook)** | Supported | Forbidden across encrypted boundary |
+| **Asset file rename** | Supported | Not supported (desensitized filename rename breaks the mapping) |
+| **Import** | Supported | Supported (.sy.zip and Markdown, auto DEK-encrypted before writing to disk) |
+| **In-notebook search** | Via global db | Via encrypted db |
+| **Backlinks panel** | Via global db | Via encrypted db (incl. mention subquery) |
+| **Open doc / outline / breadcrumb / block info / float preview** | Via global db | Via encrypted db |
+| **Attribute View (database)** | Via global storage + global db | Via notebook-level storage (DEK-encrypted) + encrypted db |
+| **File history** | Supported | Supported (ciphertext .sy copied verbatim to history dir; decrypt by path boxID when viewing/rolling back) |
+| **Deleted notebook history** | Supported | Supported (entire directory backed up as ciphertext before deletion; restored verbatim) |
+| **Embedding vectorization / semantic search** | Participates | Does not participate (AI does not enter encrypted notebooks) |
+| **Agents / AI chat / MCP** | Can read content, can search | Fully isolated: AI cannot read content, cannot even perceive the encrypted box's existence |
+| **Flashcards / spaced repetition** | Participates | Not supported (feature limitation) |
+| **Bookmarks** | Participates (global aggregation) | Not supported (feature limitation) |
+| **Tags** | Participates (global aggregation) | Not supported (feature limitation) |
+| **List icon** | User-custom emoji | Shows lock icon when closed; restores emoji when opened |
+| **Export (.sy.zip)** | Supported | Supported (exports plaintext when unlocked; rejected when locked; see §12 Security Premise) |
+| **Data sync** | dejavu syncs plaintext | Unchanged (ciphertext in, ciphertext out, self-consistent) |
+| **Delete notebook** | Delete directory | Delete directory + delete encrypted db files + delete notebook-level AV storage |
+| **Rebuild index** | Full | Skipped on startup (closed); on open box.Index() fully rebuilds into the encrypted db |
+| **/api/file/getFile + putFile** | Can read/write any file | Refuses .sy reads/writes on encrypted boxes (prevent ciphertext leak or plaintext corruption) |
+
+**Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features, is completely invisible to AI/LLM, and documents/AV definitions do not cross the boundary. In-box features (editing, block refs, backlinks, search, AV, outline, history, etc.) work normally. Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
+
+## 4. Key Architecture
+
+```
+User master password
+    │ Argon2id(global MasterSalt, 64MB/3 passes/4 threads)
+    ▼
+   KEK (key-encryption key, memory-only, used and discarded)
+    │ AES-256-GCM envelope
+    ├─→ unwrap BoxConf.WrappedDEK → DEK₁ → encrypts notebook 1's .sy/assets/AV/db
+    ├─→ unwrap BoxConf.WrappedDEK → DEK₂ → encrypts notebook 2
+    └─→ unwrap BoxConf.WrappedDEK → DEK₃ → encrypts notebook 3
+```
+
+- **Argon2id**: OWASP 2023 recommended parameters, brute-force resistant (memory-hard)
+- **DEK**: Per-notebook independent 32-byte random key; the key that actually encrypts data
+- **KEK envelope**: Changing the password only re-wraps the DEK; data is not re-encrypted
+- **KEK not cached**: Derived on every unlock; strict per-box isolation
+
+## 5. Encrypted File Layout
+
+```
+<workspace>/
+├── conf/conf.json                          ← global encryption config (MasterSalt/KEKVerifier)
+├── storage/av/                             ← normal-box AV definitions (plaintext)
+├── data/
+│   ├── <boxID>/                            ← encrypted notebook directory
+│   │   ├── .siyuan/conf.json               ← BoxConf (Encrypted=true + WrappedDEK)
+│   │   ├── *.sy                            ← AES-256-GCM ciphertext
+│   │   ├── assets/
+│   │   │   ├── <uuid>-<blockID>.ext        ← AES-256-GCM ciphertext, filename desensitized
+│   │   │   └── .names.json                 ← original filename mapping (DEK-encrypted)
+│   │   └── storage/av/
+│   │       └── <avID>.json                 ← AV definition (DEK-encrypted)
+│   └── <normal-boxID>/                     ← normal notebook (plaintext, untouched)
+├── history/                                ← history directory (ciphertext stored verbatim)
+│   └── <timestamp>-update/
+│       └── <boxID>/                        ← encrypted-box history (ciphertext .sy + ciphertext AV)
+└── temp/
+    ├── siyuan.db                           ← global SQLite (plaintext, no encrypted-box data)
+    ├── blocktree.db                        ← global blocktree (plaintext, no encrypted-box data)
+    ├── siyuan-encrypted-<boxID>.db         ← encrypted-notebook content db (SQLCipher)
+    └── siyuan-encrypted-<boxID>-blocktree.db ← encrypted-notebook blocktree db (SQLCipher)
+```
+
+## 6. Database Isolation Design
+
+```
+Normal-notebook operations:
+  frontend → API → original function → global blocktree.db → global siyuan.db
+
+Encrypted-notebook operations (dedicated read path, with boxID):
+  frontend(with notebook) → API handler dispatch → InBox function
+    → encrypted blocktree db → encrypted content db
+```
+
+**Write path**: Centralized funnel; selects db by box. Index queue, blocktree writers, index corrections are all routed by box.
+
+**Read path**: Three-layer fall-through — the handler layer dispatches by the `notebook` parameter; original functions forward to the InBox variant (normal path passes empty boxID); the low-level wrapper decides routing by whether the encrypted db is open, with empty boxID always going to the global db.
+
+**Deep full-routing principle**: Every SQL call on the read path of an encrypted box (including deep helpers: ref counts, block name/alias, child-block recursion, FTS counts, highlighting, mention search, refs definition queries, etc.) is routed to the encrypted db and never leaks to the global db.
+
+**Generic-entry fallback**: Core functions like `GetBlockTree` / `ExistBlockTree` / `GetBlockTrees` / `LoadTreeByBlockID` automatically iterate opened encrypted boxes when a global lookup misses.
+
+## 7. .sy / assets / AV Encryption
+
+**`.sy` transparent encryption** (filesys layer):
+- `DEKProvider` callback injected (avoids circular dependency)
+- Decrypts after read, encrypts before write; cache holds plaintext
+- Reading an encrypted box's title requires a full read + decrypt before parsing
+
+**assets encryption**:
+- On upload, fully read into memory + encrypt + write (cannot stream-encrypt)
+- Filename desensitization: encrypted-box asset filenames are `<uuid>-<blockID>.<ext>`; the original name is stored in an encrypted mapping file
+- On read, decrypt then output; on download, look up the mapping for the original name
+- Encrypted boxes disable the global assets fallback; notebook-level is mandatory
+- Asset file rename is forbidden (desensitized-filename rename breaks the mapping)
+
+**AV definition encryption**:
+- Path fallback: encrypted-box AV definitions are stored at `<boxID>/storage/av/<avID>.json`; normal boxes still use global `storage/av/`
+- Read: first check the global path; on miss, iterate opened encrypted boxes; after finding, DEK-decrypt then JSON-parse
+- Save: after JSON serialization, route by path (global plaintext / encrypted-box DEK-encrypted)
+- First creation: `RenderAttributeView` looks up the boxID from the blockID and presets ownership
+- Mirroring: encrypted boxes are forbidden from cross-boundary mirroring; in-box mirroring stores notebook-level `blocks.msgpack`
+
+## 8. Security Design of History Features
+
+```
+File history:
+  edit triggers history generation → ciphertext .sy copied verbatim to history dir
+  history index → content left empty (ciphertext not indexed for search)
+  view history → decrypt by path boxID (notebook must be unlocked)
+  roll back → decrypt history → load tree → WriteTree auto-encrypts on write-back
+
+Deleted-notebook history:
+  before deletion → entire directory backed up as ciphertext to history dir
+  restore → ciphertext directory copied back verbatim
+
+AV history:
+  generate → encrypted-box AV definitions copied from notebook-level dir to history dir
+  view → decrypt by path boxID
+  roll back → encrypted-box AV/resources rolled back to notebook-level dir
+```
+
+## 9. Block-Ref Cross-Boundary Protection
+
+Block refs of an encrypted notebook: normal within the box, forbidden across the encrypted boundary. Three layers of defense:
+
+1. **Frontend search dispatch**: When typing `((` or `{{` in an encrypted box triggers a search, the request carries a `notebook` parameter; the kernel only searches that box's own encrypted db, so results exclude other boxes' blocks.
+2. **Handler dispatch**: Encrypted boxes call a dedicated search variant.
+3. **Write-time fallback check**: Before a transaction commits, the tree is walked and each block-ref node is checked for crossing the boundary; if so, it is downgraded to plain text (ref attributes cleared, anchor text kept). Defends against hand-entered block IDs, drag-and-drop, paste, direct API calls.
+
+## 10. Cross-Boundary Move: Why Forbidden
+
+Encrypted notebooks forbid moving documents across the encrypted boundary (normal ↔ encrypted, bidirectional).
+
+**Data-corruption risk**: Cross-box moves use a filesystem Rename to directly move `.sy` bytes, with no encrypt/decrypt conversion. Ciphertext moved to a normal directory is unreadable; plaintext moved to an encrypted directory is unreadable. Indexes also cannot be migrated across dbs.
+
+**Security-leak risk** (more critical): When moving from an encrypted box to a normal box — the document body escapes encryption protection; associated resources must be moved out and decrypted together; the reference network binding blocks to subdocuments is split or leaked along with it; index-metadata cross-db migration breaks isolation.
+
+**Design stance**: Consistent with disabling export — an encrypted notebook is an island; content does not enter or leave.
+
+## 11. Interaction Design
+
+| Scenario | Interaction |
+|---|---|
+| Enable | Settings → Access authorization → Encrypted-notebook section → toggle → set master password (double input + risk confirmation) |
+| Disable | Supported when no encrypted notebooks exist; clears global encryption config |
+| Create | File panel "more" menu → "New encrypted notebook" → enter name + master password → auto-unlock and open |
+| Icon | Shows lock icon when closed (locked); restores user emoji when opened (unlocked) |
+| Unlock | Click a closed encrypted notebook → master-password prompt (🔓 Unlock xxx) → wait ~1s → opens |
+| Lock | Equals close (DEK cleared + db closed + all plaintext caches cleared) |
+| Change password | Settings → Access authorization → "Change master password" |
+| Move document | Normal within an encrypted box or between normal boxes; cross-boundary (normal↔encrypted) rejected with a prompt |
+| Doc to heading | Cross-boundary rejected with a prompt |
+| Block ref | Normal refs within an encrypted box (searching `((` only searches this box; backlinks panel displays normally); cross-boundary (normal↔encrypted, encrypted A↔encrypted B) blocked |
+| AV mirroring | Normal mirroring within an encrypted box; cross-boundary forbidden |
+| Asset file rename | Not supported (desensitized-filename rename breaks the mapping) |
+| Import | Supported: imported .sy.zip or Markdown files are auto DEK-encrypted before writing to disk |
+| File history | Supported (must unlock the corresponding encrypted notebook before viewing; the history index stores no plaintext content) |
+| Deleted notebook | Supported (ciphertext backup; restored verbatim) |
+| Export | Supported (identical to normal notebooks; must unlock first, exports plaintext. Rejected when locked) |
+| Sync | Unchanged (ciphertext in, ciphertext out, self-consistent) |
+
+## 12. Security Boundary
+
+**Security premise**: An encrypted notebook is **only secure when it is closed (locked)**. When closed, the DEK is not in memory, the encrypted db has been deleted, all plaintext caches have been cleared, and only ciphertext remains on disk — no path (including authenticated APIs, plugins, MCP, AI) can read plaintext. **When open (unlocked), the DEK is in memory**, and at that point authenticated API requests (including third-party plugins and MCP tools via interfaces exposed by the kernel) can read plaintext content just like a normal notebook — encryption protects "data at rest" and "unreachability when locked", not "visibility to authenticated callers while unlocked". Therefore: while unlocked, treat it as "a normal notebook in use"; isolation of sensitive operations (e.g. AI/LLM isolation, cross-boundary protection) is implemented via functional-layer routing, not ciphertext. **Locking after use** is the only operation that restores full protection.
+
+**Protected (ciphertext on disk)**:
+- `.sy` document body ✅
+- assets binary files ✅
+- assets filenames ✅ (desensitized, original name encrypted)
+- AV definitions (columns/rows/cell values/view config/content snapshots) ✅
+- content db (blocks/FTS/attributes/refs) ✅
+- blocktree db (block-tree metadata: ID/path/title) ✅
+- .sy and AV definitions in the history directory ✅ (ciphertext stored verbatim)
+
+**Not protected**:
+- MasterSalt/KEKVerifier in `conf.json` (designed to be plaintext: salt is not secret, verifier is ciphertext)
+- BoxConf.WrappedDEK (ciphertext, requires KEK to unwrap)
+- DEK / plaintext caches in memory (cleared on lock)
+- The content field of history indexes (left empty; neither plaintext nor ciphertext)
+
+**API protection**:
+- `/api/file/getFile`: refuses to read encrypted-box .sy (ciphertext is meaningless; prevents plugin mis-parsing)
+- `/api/file/putFile`: refuses to write encrypted-box .sy (plaintext writes corrupt the ciphertext format)
+- MCP `fileRead`: refuses to read encrypted-box files (AI does not enter encrypted notebooks)
+
+## 13. AI / LLM Isolation
+
+Encrypted notebooks are completely invisible and unreachable to all AI/LLM features.
+
+**Layer 1: Physical data isolation (at the content layer, naturally effective)** — encrypted-box content lives in an independent SQLCipher db, and all AI code paths only read the global db → features silently no-op, zero content leakage.
+
+**Layer 2: Metadata filtering (explicit interception)** — MCP notebook list filters out encrypted boxes, document list rejects encrypted boxes, the agent-editor context does not deliver encrypted-box notebookIDs or document titles.
+
+Affected features (all no-op for encrypted boxes): embedding vectorization, semantic search, similar-block recommendation, AI chat/continuation/translation, agent read/write, MCP tools.
+
+## 14. Feature Limitations
+
+An encrypted notebook is an island; some features are unimplemented because of their cross-notebook nature or dependence on global aggregation. These are feature boundaries, not performance or security trade-offs.
+
+- **Flashcards / spaced repetition**: Decks and scheduling are cross-notebook and depend on the global db; not implemented.
+- **Bookmarks**: Global aggregation view (scans the global siyuan.db); encrypted notebooks not integrated.
+- **Tags**: Global aggregation view (scans the global spans table); encrypted notebooks not integrated.
+- **Asset file rename**: Encrypted-box asset filenames are already desensitized to `uuid-blockID.ext`; renaming breaks the original-name mapping.
+
+## 15. Performance Differences
+
+| Operation | Normal Notebook | Encrypted Notebook | Reason |
+|---|---|---|---|
+| **Unlock (Mount)** | Instant | **~1 second delay** | Argon2id key derivation (intentionally slow for brute-force resistance) |
+| **Open document** | Read disk + parse JSON | Read disk + AES-GCM decrypt + parse + encrypted-db query | Extra decrypt + encrypted-db query |
+| **Save document** | Render JSON + write disk | Render JSON + AES-GCM encrypt + write disk | Extra encrypt |
+| **Upload assets** | Stream to disk | Fully read into memory + encrypt + write | Cannot stream-encrypt; large files cause memory pressure |
+| **Browse assets** | Direct ServeFile | Read disk + decrypt + output | Decrypts on every request, no browser cache |
+| **AV render** | Global blocktree + plaintext JSON | Encrypted blocktree + DEK-decrypt JSON | Extra JSON decrypt; batch IAL load routed by box |
+| **AV save** | Plaintext JSON to disk | DEK-encrypt + write | Extra encrypt |
+| **In-notebook search** | FTS query on global db | FTS query on independent encrypted db | SQLCipher page-level decrypt ~5-10% overhead |
+| **DB connections** | 1 global | 1 global + 2 per unlocked encrypted box | Each encrypted-db connection pool ~20 connections |
+| **When locked** | No extra overhead | All caches cleared | Cold-start latency on next operation |
+
+**Performance summary**:
+- **Daily editing experience**: Nearly imperceptible. AES-GCM encryption/decryption is microsecond-level; document read/write is bottlenecked by disk IO.
+- **Noticeable latency**: Unlock ~1s, large-asset browsing (full decrypt per request with no cache), first access after lock (cold start).
+- **Zero impact on normal notebooks**: Encryption and routing logic short-circuits for non-encrypted boxes.
+
+## 16. Usage Recommendations
+
+### Suitable scenarios for encrypted notebooks
+- Private diary, financial records, medical information
+- Work secrets, business plans, contracts
+- Multi-user shared computer where each person has their own encrypted notebook
+
+### Unsuitable scenarios for encrypted notebooks
+- Daily notes, study notes (the extra encryption overhead is not worth it)
+- Content that needs global search (encrypted notebooks do not participate)
+- Knowledge networks needing cross-notebook block refs (cross-boundary forbidden)
+- Documents needing cross-notebook move/reorganize (cross-boundary forbidden)
+- Scenarios needing cross-notebook AV mirroring (cross-boundary forbidden)
+- Content needing flashcard review (not supported)
+- Content needing bookmark/tag management (not supported)
+- Content needing AI assistance (AI fully isolated)
+- Large numbers of large files (assets fully decrypt on every browse)
+
+### Daily usage habits
+1. **You must remember the master password**: Forgetting it = data permanently unrecoverable (no backdoor)
+2. **Lock after use**: Reduce the DEK's exposure time in memory
+3. **Don't put all your notes in encrypted notebooks**: Only put what is truly sensitive
+4. **Master password strength**: Recommend 12+ characters, mixed case + digits + symbols
+5. **Backup**: Syncing ciphertext to the cloud is safe, but if the password is lost the backup is useless too

@@ -56,7 +56,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
     if (!isInHarmony() && !isInAndroid()) {
         handleTouchUp();
     }
-    if (Math.abs(clientX - event.changedTouches[0].clientX) < 5 && Math.abs(clientY - event.changedTouches[0].clientY) < 5) {
+    if (Math.abs(clientX - event.changedTouches[0].clientX) < Constants.SIZE_DRAG_THRESHOLD &&
+        Math.abs(clientY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {
                 event.stopImmediatePropagation();

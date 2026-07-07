@@ -463,7 +463,8 @@ export class Background {
 
                 // 阈值判断：移动超过 5 像素才视为拖拽，防止手抖误操作
                 if (!isDragging) {
-                    if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
+                    if (Math.abs(deltaX) < Constants.SIZE_DRAG_THRESHOLD &&
+                        Math.abs(deltaY) < Constants.SIZE_DRAG_THRESHOLD) return;
                     isDragging = true;
 
                     // 创建克隆体

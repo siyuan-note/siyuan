@@ -119,7 +119,8 @@ export class Dock {
                 moveItem.id = "dockMoveItem";
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (window.siyuan.config.readonly ||
-                        Math.abs(moveEvent.clientY - event.clientY) < 5 && Math.abs(moveEvent.clientX - event.clientX) < 5) {
+                        Math.abs(moveEvent.clientY - event.clientY) < Constants.SIZE_DRAG_THRESHOLD &&
+                        Math.abs(moveEvent.clientX - event.clientX) < Constants.SIZE_DRAG_THRESHOLD) {
                         return;
                     }
                     moveEvent.preventDefault();

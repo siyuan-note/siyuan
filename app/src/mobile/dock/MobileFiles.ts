@@ -254,7 +254,8 @@ export class MobileFiles extends Model {
                     this.touchDragState = null;
                     return;
                 }
-                if (Math.abs(touch.clientX - state.startX) < 5 && Math.abs(touch.clientY - state.startY) < 5) return;
+                if (Math.abs(touch.clientX - state.startX) < Constants.SIZE_DRAG_THRESHOLD &&
+                    Math.abs(touch.clientY - state.startY) < Constants.SIZE_DRAG_THRESHOLD) return;
                 state.isDragging = true;
 
                 const ghostElement = document.createElement("ul");

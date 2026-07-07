@@ -5,7 +5,6 @@ import {windowKeyDown} from "./keydown";
 import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
-import {isIPad} from "../../protyle/util/compatibility";
 import {hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
 import {hideTooltip} from "../../dialog/tooltip";
 import {hideAllElements} from "../../protyle/ui/hideElements";
@@ -198,8 +197,12 @@ export const initWindowEvent = (app: App) => {
     });
 
     let time = 0;
+    let startX = 0;
+    let startY = 0;
     document.addEventListener("touchstart", (event) => {
         time = Date.now();
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
         // https://github.com/siyuan-note/siyuan/issues/6328
         const target = event.target as HTMLElement;
         if (hasClosestByClassName(target, "protyle-icons") ||
@@ -218,9 +221,9 @@ export const initWindowEvent = (app: App) => {
         if (window.siyuan.touchDragActive) {
             return;
         }
-        // pad 端长按事件
-        const currentTime = Date.now();
-        if (isIPad() && currentTime - time > 900 && currentTime - time < 2000) {
+        if (Math.abs(startX - event.changedTouches[0].clientX) < Constants.SIZE_DRAG_THRESHOLD &&
+            Math.abs(startY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD &&
+            Date.now() - time > Constants.TIMEOUT_LONGPRESS) {
             event.target.dispatchEvent(new MouseEvent("contextmenu", {
                 bubbles: true,
                 cancelable: true,

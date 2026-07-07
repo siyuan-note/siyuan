@@ -116,6 +116,7 @@ export class Outline extends Model {
             element: this.element,
             data: null,
             click: (element: HTMLElement) => {
+                window.siyuan.menus.menu.remove();
                 const id = element.getAttribute("data-node-id");
                 if (this.isPreview) {
                     const headElement = document.getElementById(id);
@@ -661,7 +662,7 @@ export class Outline extends Model {
         }
     }
 
-    private setCurrentById(id: string) {
+    private setCurrentById(id: string, scroll = true) {
         this.element.querySelectorAll(".b3-list-item.b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");
         });
@@ -684,8 +685,10 @@ export class Outline extends Model {
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
-            const elementRect = this.element.getBoundingClientRect();
-            this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
+            if (scroll) {
+                const elementRect = this.element.getBoundingClientRect();
+                this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
+            }
         }
     }
 
@@ -989,7 +992,7 @@ export class Outline extends Model {
                     action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                 });
             });
-            this.setCurrentById(id);
+            this.setCurrentById(id, false);
             const headingSubMenu = [];
             if (currentLevel !== 1) {
                 headingSubMenu.push(this.genHeadingTransform(id, 1));

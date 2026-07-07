@@ -1,8 +1,8 @@
 {
+	"aiEdit": "智能编辑",
 	"configGroupMcp": "智能体 MCP 服务",
 	"configGroupEmbedding": "嵌入模型",
 	"addToAgent": "添加到智能体会话",
-	"openAgentChatTip": "请先打开智能体面板",
 	"encryptedNotebook": "加密笔记本",
 	"enableEncryptedNotebook": "启用加密笔记本",
 	"encryptedNotebookTip": "将敏感内容存入加密笔记本，需要主密码解锁后才能查看。忘记密码将无法恢复数据",

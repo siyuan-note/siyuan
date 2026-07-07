@@ -1,8 +1,8 @@
 {
+	"aiEdit": "Inteligentná úprava",
 	"configGroupMcp": "Služba MCP agenta",
 	"configGroupEmbedding": "Model vnorenia",
 	"addToAgent": "Pridať do konverzácie s agentom",
-	"openAgentChatTip": "Najprv otvorte panel agenta",
 	"encryptedNotebook": "Šifrovaný zápisník",
 	"enableEncryptedNotebook": "Povoliť šifrovaný zápisník",
 	"encryptedNotebookTip": "Uchovávajte citlivý obsah v šifrovanom zápisníku. Hlavné heslo je potrebné na odomknutie a zobrazenie obsahu. Heslo nie je možné obnoviť, ak sa zabudne",

@@ -5,6 +5,7 @@ import {highlightRender} from "./highlightRender";
 import {genBreadcrumb, improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {avRender} from "./av/render";
 import {genRenderFrame} from "./util";
+import {isEncryptedBox} from "../../util/pathName";
 
 /**
  * 渲染嵌入块
@@ -86,7 +87,8 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                 stmt: content,
                 headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
                 excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],
-                breadcrumb
+                breadcrumb,
+                notebook: isEncryptedBox(protyle.notebookId) ? protyle.notebookId : ""
             }, (response) => {
                 renderEmbed(response.data.blocks, protyle, item, top);
             });

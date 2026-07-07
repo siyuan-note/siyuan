@@ -72,6 +72,9 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
 
         suggestionMenu = document.createElement("div");
         suggestionMenu.className = "b3-list b3-list--background agent-mention-menu protyle-hint";
+        // 候选列表挂载到 body 上，需参与 window.siyuan.zIndex 自增层级体系，
+        // 否则悬浮模式下的智能体面板（z-index ≥ 10）会将其遮盖
+        suggestionMenu.style.zIndex = (++window.siyuan.zIndex).toString();
         suggestionMenu.innerHTML = '<div style="flex: 1;overflow:auto;"></div>';
         for (let i = 0; i < items.length; i++) {
             const item = items[i];

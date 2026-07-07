@@ -980,7 +980,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "ai",
                 icon: "iconSparkles",
-                label: window.siyuan.languages.ai,
+                label: window.siyuan.languages.aiEdit,
                 accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
                 click() {
                     AIActions(selectsElement, protyle);
@@ -1071,14 +1071,17 @@ export class Gutter {
                 }
             }).element);
             /// #if !MOBILE
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "addToAgent",
-                icon: "iconSend",
-                label: window.siyuan.languages.addToAgent,
-                click: () => {
-                    addBlockToAgent(Array.from(selectsElement).map(item => item.getAttribute("data-node-id")));
-                }
-            }).element);
+            // 加密笔记本中的块不暴露该菜单：避免把受保护内容引入智能体会话。
+            if (!isEncryptedBox(protyle.notebookId)) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "addToAgent",
+                    icon: "iconSend",
+                    label: window.siyuan.languages.addToAgent,
+                    click: () => {
+                        addBlockToAgent(Array.from(selectsElement).map(item => item.getAttribute("data-node-id")));
+                    }
+                }).element);
+            }
             /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "delete",
@@ -1564,7 +1567,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "ai",
                 icon: "iconSparkles",
-                label: window.siyuan.languages.ai,
+                label: window.siyuan.languages.aiEdit,
                 accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
                 click() {
                     AIActions([nodeElement], protyle);
@@ -1680,14 +1683,17 @@ export class Gutter {
                 }
             }).element);
             /// #if !MOBILE
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "addToAgent",
-                icon: "iconSend",
-                label: window.siyuan.languages.addToAgent,
-                click: () => {
-                    addBlockToAgent([nodeElement.getAttribute("data-node-id")]);
-                }
-            }).element);
+            // 加密笔记本中的块不暴露该菜单：避免把受保护内容引入智能体会话。
+            if (!isEncryptedBox(protyle.notebookId)) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "addToAgent",
+                    icon: "iconSend",
+                    label: window.siyuan.languages.addToAgent,
+                    click: () => {
+                        addBlockToAgent([nodeElement.getAttribute("data-node-id")]);
+                    }
+                }).element);
+            }
             /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "delete",
@@ -3054,14 +3060,23 @@ export const addBlockToAgent = async (blockIds: string[]) => {
         return;
     }
     const dock = getDockByType("agentChat");
-    const agentChat = dock?.data.agentChat as unknown as AgentChatLike;
-    // 用鸭子类型检测而非 instanceof：dock.data.agentChat 在面板首次打开前不是 AgentChat 实例。
-    if (!agentChat || typeof agentChat.insertBlockMentions !== "function") {
-        // 智能体面板尚未打开：提示并尝试打开面板，composer 在 AgentChat 构造时即时创建，打开后即可使用。
-        showMessage(window.siyuan.languages.openAgentChatTip);
-        if (dock) {
-            dock.toggleModel("agentChat", true);
-        }
+    if (!dock) {
+        return;
+    }
+    // 智能体面板首次打开前 dock.data.agentChat 是占位值（非 AgentChat 实例）。
+    const isReady = (m: unknown): m is AgentChatLike =>
+        !!m && typeof (m as AgentChatLike).insertBlockMentions === "function";
+    let agentChat = dock.data.agentChat;
+    // 实例未就绪（面板从未打开）或面板被折叠时，先 toggleModel 打开/展开：
+    // show=true 既会同步 new AgentChat() 构造常驻实例，也会把折叠的面板重新展开。
+    const dockItem = document.querySelector(".dock__item[data-type=\"agentChat\"]");
+    const isCollapsed = !dockItem || !dockItem.classList.contains("dock__item--active");
+    if (!isReady(agentChat) || isCollapsed) {
+        dock.toggleModel("agentChat", true);
+        agentChat = dock.data.agentChat;
+    }
+    if (!isReady(agentChat)) {
+        // 极端情况下实例仍未就绪，放弃插入避免报错。
         return;
     }
     // 用 getRefText API 并行获取每个块的引用文本作为 label（与 @ 搜索、拖拽一致），失败时回退到 blockId。

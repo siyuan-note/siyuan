@@ -1,8 +1,8 @@
 {
+	"aiEdit": "スマート編集",
 	"configGroupMcp": "エージェント MCP サービス",
 	"configGroupEmbedding": "埋め込みモデル",
 	"addToAgent": "エージェント会話に追加",
-	"openAgentChatTip": "まずエージェントパネルを開いてください",
 	"encryptedNotebook": "暗号化ノートブック",
 	"enableEncryptedNotebook": "暗号化ノートブックを有効化",
 	"encryptedNotebookTip": "機密コンテンツを暗号化ノートブックに保存。コンテンツの表示にはマスターパスワードが必要です。パスワードを忘れた場合、データは復元できません",

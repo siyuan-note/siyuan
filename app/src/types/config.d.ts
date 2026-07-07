@@ -161,7 +161,7 @@ declare namespace Config {
         id: string;
         enabled: boolean;
         baseURL: string;
-        apiKey: string;
+        apiKey?: string;
         name: string;
         timeout: number;
         dimensions: number;
@@ -175,7 +175,7 @@ declare namespace Config {
         enabled: boolean;
         displayName?: string;
         baseURL: string;
-        apiKey: string;
+        apiKey?: string;
         requestTimeout: number;
         models: IModel[];
     }

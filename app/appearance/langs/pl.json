@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "Aplikacja zostanie automatycznie zamknięta po zmianie. Uruchom ją ponownie ręcznie.",
 	"aiEdit": "Inteligentna edycja",
 	"configGroupMcp": "Usługa MCP agenta",
 	"configGroupEmbedding": "Model osadzania",
@@ -2084,6 +2085,8 @@
 		"311": "Nieprawidłowe główne hasło",
 		"312": "Funkcja zaszyfrowanego notatnika jest już włączona",
 		"313": "Przenoszenie dokumentów przez granice zaszyfrowanego notatnika nie jest obsługiwane",
-		"314": "Najpierw odblokuj zaszyfrowany notatnik"
+		"314": "Najpierw odblokuj zaszyfrowany notatnik",
+		"315": "Istnieją już zaszyfrowane notatniki, ale brakuje kopii zapasowej klucza głównego. Przywróć oryginalny conf.json lub plik kopii zapasowej, aby ponownie włączyć",
+		"316": "Odszyfrowanie nie powiodło się: nieprawidłowy klucz lub uszkodzone dane"
 	}
 }

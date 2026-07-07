@@ -919,6 +919,10 @@ func ImportData(zipPath string) (err error) {
 		return
 	}
 
+	// 导入的 Data.zip 可能含加密笔记本备份文件：若本机未启用，自动把配置装回 conf.json，
+	// 让用户输主密码即可解锁导入的加密笔记本（不需主密码，仅装回 salt/verifier 配置）。
+	restoreNotebookCryptoConfigFromBackup()
+
 	logging.LogInfof("import data from [%s] done", zipPath)
 	IncSync()
 	FullReindex(false)

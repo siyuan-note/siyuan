@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -156,10 +155,6 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	abs, err := resolvePath(p)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
-	}
-	// 加密笔记本的文件不可通过 AI/MCP 读取
-	if model.IsEncryptedAssetPath(abs) {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "access denied: encrypted notebook files are not accessible to AI"}}, IsError: true}, nil
 	}
 	data, err := os.ReadFile(abs)
 	if err != nil {

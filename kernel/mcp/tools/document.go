@@ -151,10 +151,6 @@ func documentList(args map[string]interface{}) (CallToolResult, error) {
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
 	}
-	// AI/LLM 不得进入加密笔记本，拒绝列出其文档（防止文档标题等元数据泄漏）
-	if model.IsEncryptedBox(notebook) {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "access denied: encrypted notebook is not accessible to AI"}}, IsError: true}, nil
-	}
 	hPath, _ := args["path"].(string)
 	if hPath == "" {
 		hPath = "/"

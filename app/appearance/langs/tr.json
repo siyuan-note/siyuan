@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "Değişiklikten sonra uygulama otomatik olarak kapanacaktır. Lütfen elle yeniden başlatın.",
 	"aiEdit": "Akıllı Düzenleme",
 	"configGroupMcp": "Ajan MCP Hizmeti",
 	"configGroupEmbedding": "Gömme Modeli",
@@ -2084,6 +2085,8 @@
 		"311": "Yanlış ana şifre",
 		"312": "Şifreli not defteri özelliği zaten etkin",
 		"313": "Şifreli not defteri sınırları boyunca belge taşıma desteklenmemektedir",
-		"314": "Lütfen önce şifreli not defterinin kilidini açın"
+		"314": "Lütfen önce şifreli not defterinin kilidini açın",
+		"315": "Şifreli not defterleri zaten mevcut ancak anahtar yedeği eksik. Yeniden etkinleştirmek için orijinal conf.json veya yedek dosyasını geri yükleyin",
+		"316": "Şifre çözme başarısız: yanlış anahtar veya bozuk veriler"
 	}
 }

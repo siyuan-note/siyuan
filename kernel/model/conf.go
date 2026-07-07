@@ -549,6 +549,18 @@ func InitConf() {
 		Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	}
 
+	// 存量升级补偿：早期版本启用加密笔记本时未生成密钥备份。若本机已启用但备份文件缺失，
+	// 启动时补生成一次，让存量用户也能在 conf.json 丢失/同步到新设备时恢复（详见 §4.1）。
+	// 新用户走 EnableEncryptedNotebook 已会生成备份，此处不重复写入。
+	if Conf.NotebookCrypto.Enabled {
+		if _, err := os.Stat(notebookCryptoBackupPath()); err != nil && os.IsNotExist(err) {
+			if Conf.NotebookCrypto.MasterSalt != nil && len(Conf.NotebookCrypto.MasterSalt) > 0 {
+				saveNotebookCryptoBackup()
+				logging.LogInfof("backfilled notebook crypto backup for existing enabled setup")
+			}
+		}
+	}
+
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()
 	}

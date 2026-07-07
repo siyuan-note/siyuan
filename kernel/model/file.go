@@ -719,65 +719,71 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 				return ast.WalkContinue
 			}
 
-			if "1" == n.IALAttr("heading-fold") {
-				// 折叠标题下被引用的块无法悬浮查看
-				// The referenced block under the folded heading cannot be hovered to view https://github.com/siyuan-note/siyuan/issues/9582
-				if (0 != mode && id != n.ID) || isDoc {
-					unlinks = append(unlinks, n)
-					return ast.WalkContinue
-				}
-			}
-
-			if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
-				// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
-				avNames := getAvNames(n.IALAttr(av.NodeAttrNameAvs))
-				if "" != avNames {
-					n.SetIALAttr(av.NodeAttrViewNames, avNames)
-				}
-			}
-
-			if "" != n.ID {
-				// 填充块引计数
-				if cnt := refCount[n.ID]; 0 < cnt {
-					n.SetIALAttr("refcount", strconv.Itoa(cnt))
-				}
-			}
-
-			if highlight && existKeywords {
-				hitBlock := false
-				for p := n.Parent; nil != p; p = p.Parent {
-					if p.ID == id {
-						hitBlock = true
-						break
-					}
-				}
-				if hitBlock {
-					if ast.NodeCodeBlockCode == n.Type && !treenode.IsChartCodeBlockCode(n) {
-						// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
-						code := string(n.Tokens)
-						markedCode := search.EncloseHighlighting(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
-						if code != markedCode {
-							n.Tokens = gulu.Str.ToBytes(markedCode)
-							return ast.WalkContinue
-						}
-					} else if markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine) {
+			if n.IsBlock() {
+				if treenode.IsInFoldedHeading(n, nil) {
+					// 折叠标题下被引用的块无法悬浮查看
+					// The referenced block under the folded heading cannot be hovered to view https://github.com/siyuan-note/siyuan/issues/9582
+					if (0 != mode && id != n.ID) || isDoc {
+						unlinks = append(unlinks, n)
 						return ast.WalkContinue
 					}
+				} else if "1" == n.IALAttr("heading-fold") {
+					// 标题已展开但子块仍残留 heading-fold 时清理，避免列表等嵌套块渲染为空
+					n.RemoveIALAttr("heading-fold")
+					n.RemoveIALAttr("fold")
 				}
-			}
 
-			if existKeywords && id == n.ID {
-				inlines := n.ChildrenByType(ast.NodeTextMark)
-				for _, inline := range inlines {
-					if inline.IsTextMarkType("inline-memo") && util.ContainsSubStr(inline.TextMarkInlineMemoContent, keywords) {
-						// 支持行级备注搜索定位 https://github.com/siyuan-note/siyuan/issues/13465
-						keywords = append(keywords, inline.TextMarkTextContent)
+				if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
+					// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
+					avNames := getAvNames(n.IALAttr(av.NodeAttrNameAvs))
+					if "" != avNames {
+						n.SetIALAttr(av.NodeAttrViewNames, avNames)
 					}
 				}
-			}
 
-			if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
-				return ast.WalkContinue
+				if "" != n.ID {
+					// 填充块引计数
+					if cnt := refCount[n.ID]; 0 < cnt {
+						n.SetIALAttr("refcount", strconv.Itoa(cnt))
+					}
+				}
+
+				if existKeywords && id == n.ID {
+					inlines := n.ChildrenByType(ast.NodeTextMark)
+					for _, inline := range inlines {
+						if inline.IsTextMarkType("inline-memo") && util.ContainsSubStr(inline.TextMarkInlineMemoContent, keywords) {
+							// 支持行级备注搜索定位 https://github.com/siyuan-note/siyuan/issues/13465
+							keywords = append(keywords, inline.TextMarkTextContent)
+						}
+					}
+				}
+			} else {
+				if highlight && existKeywords {
+					hitBlock := false
+					for p := n.Parent; nil != p; p = p.Parent {
+						if p.ID == id {
+							hitBlock = true
+							break
+						}
+					}
+					if hitBlock {
+						if ast.NodeCodeBlockCode == n.Type && !treenode.IsChartCodeBlockCode(n) {
+							// 支持代码块搜索定位 https://github.com/siyuan-note/siyuan/issues/5520
+							code := string(n.Tokens)
+							markedCode := search.EncloseHighlighting(code, keywords, search.SearchMarkLeft, search.SearchMarkRight, Conf.Search.CaseSensitive, false)
+							if code != markedCode {
+								n.Tokens = gulu.Str.ToBytes(markedCode)
+								return ast.WalkContinue
+							}
+						} else if markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine) {
+							return ast.WalkContinue
+						}
+					}
+				}
+
+				if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
+					return ast.WalkContinue
+				}
 			}
 			return ast.WalkContinue
 		})

@@ -20,9 +20,12 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"errors"
+	"io"
 
 	"golang.org/x/crypto/argon2"
+	"golang.org/x/crypto/hkdf"
 )
 
 // Argon2Params 是 Argon2id 密钥派生函数的参数。参数本身不是秘密，会随配置落盘，以便跨平台一致地派生密钥。
@@ -90,6 +93,64 @@ func Decrypt(key, ciphertext []byte) ([]byte, error) {
 	}
 	nonce, ct := ciphertext[:nonceSize], ciphertext[nonceSize:]
 	return gcm.Open(nil, nonce, ct, nil)
+}
+
+// DeriveSubKey 用 HKDF-SHA256 从主 DEK 派生用途隔离的子密钥。
+// 同一 (dek, purpose) 多次调用结果一致；不同 purpose 派生出相互独立的子密钥，
+// 实现用途分离——.sy/assets/AV 各用独立子密钥，互不可替代，限制单点密钥泄漏的影响面。
+func DeriveSubKey(dek []byte, purpose string) []byte {
+	// HKDF info 用 purpose 字节；salt 为 nil（DEK 本身已是高熵随机密钥，无需额外 salt）
+	r := hkdf.New(sha256.New, dek, nil, []byte(purpose))
+	out := make([]byte, 32) // AES-256
+	if _, err := io.ReadFull(r, out); err != nil {
+		// hkdf.Read 不应出错（除非 dek 为空）；防御性 panic 避免静默返回弱密钥
+		panic("hkdf derive failed: " + err.Error())
+	}
+	return out
+}
+
+// EncryptWithAAD 用 AES-256-GCM 加密并绑定 AAD（附加认证数据）。
+// AAD 不被加密，但参与 GCM 认证——解密时必须提供相同 AAD，否则认证失败。
+// 把用途/boxID/路径等元数据放入 AAD，可防止同 box 内密文被替换用途或路径（bind 到上下文）。
+// 返回格式：nonce(12B) || ciphertext || GCM tag(16B)，与 Encrypt 一致但 AAD 参与校验。
+func EncryptWithAAD(key, plaintext, aad []byte) ([]byte, error) {
+	if len(key) != 32 {
+		return nil, errors.New("EncryptWithAAD requires a 32-byte (AES-256) key")
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := rand.Read(nonce); err != nil {
+		return nil, err
+	}
+	return gcm.Seal(nonce, nonce, plaintext, aad), nil
+}
+
+// DecryptWithAAD 对应 EncryptWithAAD 的解密，AAD 不匹配或密文被篡改时返回错误。
+func DecryptWithAAD(key, ciphertext, aad []byte) ([]byte, error) {
+	if len(key) != 32 {
+		return nil, errors.New("DecryptWithAAD requires a 32-byte (AES-256) key")
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	nonceSize := gcm.NonceSize()
+	if len(ciphertext) < nonceSize {
+		return nil, errors.New("ciphertext too short")
+	}
+	nonce, ct := ciphertext[:nonceSize], ciphertext[nonceSize:]
+	return gcm.Open(nil, nonce, ct, aad)
 }
 
 // GenerateSalt 生成随机 salt（16 字节）。

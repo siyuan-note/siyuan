@@ -869,16 +869,23 @@ func vacuum() {
 // 加密笔记本的独立 blocktree db 注册表。boxID -> *sql.DB。
 var encryptedBlockTreeDBs = &sync.Map{}
 
+// IsEncryptedBoxFn 由 model 层注入，用于判断 boxID 是否为加密笔记本。
+// treenode 包不直接 import model（循环依赖），路由函数据此 fail-closed：
+// 加密 box 未解锁时绝不回退全局库，避免加密 box 块树元数据污染全局明文 blocktree.db。
+var IsEncryptedBoxFn func(boxID string) bool
+
 // OpenEncryptedBlockTreeDB 打开加密笔记本的独立 SQLCipher blocktree db。
-// 与 sql.OpenEncryptedDB 配对，UnlockBox 时调用。dek 为该 box 的 32 字节 DEK。
+// 与 sql.OpenEncryptedDB 配对，UnlockBox 时调用。dek 为该 box 的 32 字节 DEK；
+// 先用 HKDF 派生 blocktree 子密钥（与 content 子密钥分离）。
 func OpenEncryptedBlockTreeDB(boxID string, dek []byte) (err error) {
 	if _, loaded := encryptedBlockTreeDBs.Load(boxID); loaded {
 		return nil
 	}
 	dbPath := util.EncryptedBlockTreeDBPath(boxID)
+	blocktreeKey := util.DeriveSubKey(dek, "siyuan/sqlcipher/blocktree")
 	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_mmap_size=4294967296&_secure_delete=OFF" +
 		"&_cache_size=-128000&_page_size=32768&_busy_timeout=7000&_ignore_check_constraints=ON" +
-		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(dek) + "'"
+		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(blocktreeKey) + "'"
 	boxDB, err := sql.Open("sqlite3_extended", dsn)
 	if err != nil {
 		return err
@@ -961,10 +968,14 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 }
 
 // --- box-scoped wrapper（加密 box 用独立 db，否则用全局 db）---
+// 加密 box 未解锁（db 未打开）时 fail-closed：绝不回退全局库，避免加密 box 块树操作污染全局 blocktree.db。
 
 func queryForBox(box, stmt string, args ...any) (*sql.Rows, error) {
 	if boxDB := getEncryptedBlockTreeDB(box); boxDB != nil {
 		return boxDB.Query(stmt, args...)
+	}
+	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(box) {
+		return nil, errors.New("encrypted blocktree db not opened for box " + box)
 	}
 	return query(stmt, args...)
 }
@@ -973,6 +984,9 @@ func queryRowForBox(box, stmt string, args ...any) *sql.Row {
 	if boxDB := getEncryptedBlockTreeDB(box); boxDB != nil {
 		return boxDB.QueryRow(stmt, args...)
 	}
+	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(box) {
+		return nil
+	}
 	return queryRow(stmt, args...)
 }
 
@@ -980,12 +994,18 @@ func execForBox(box, stmt string, args ...any) (sql.Result, error) {
 	if boxDB := getEncryptedBlockTreeDB(box); boxDB != nil {
 		return boxDB.Exec(stmt, args...)
 	}
+	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(box) {
+		return nil, errors.New("encrypted blocktree db not opened for box " + box)
+	}
 	return exec(stmt, args...)
 }
 
 func beginTxForBox(box string) (tx *sql.Tx, err error) {
 	if boxDB := getEncryptedBlockTreeDB(box); boxDB != nil {
 		return boxDB.Begin()
+	}
+	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(box) {
+		return nil, errors.New("encrypted blocktree db not opened for box " + box)
 	}
 	return db.Begin()
 }

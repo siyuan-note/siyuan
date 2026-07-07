@@ -394,22 +394,26 @@ func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 	return
 }
 
-// writeAssetFile 把 src 的内容写入 writePath。若 boxID 是已解锁的加密 box，先加密字节流再落盘；
-// 否则直接按 reader 写（走 filelock.WriteFileByReader 原路径，保留锁语义）。
+// writeAssetFile 把 src 的内容写入 writePath。加密 box 必须已解锁（DEK 在内存）才写入——
+// 先全读 → 加密 → 落盘；加密但未解锁时返回错误（fail-closed，避免明文落盘到加密 box）。
+// 非加密 box 按 reader 直接写（走 filelock.WriteFileByReader 原路径，保留锁语义）。
 func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
-	if boxID != "" {
-		if dek, decErr := GetDEK(boxID); decErr == nil && dek != nil {
-			// 已解锁的加密 box：全读 → 加密 → 落盘
-			raw, readErr := io.ReadAll(src)
-			if readErr != nil {
-				return readErr
-			}
-			enc, encErr := util.Encrypt(dek, raw)
-			if encErr != nil {
-				return encErr
-			}
-			return filelock.WriteFile(writePath, enc)
+	if boxID != "" && IsEncryptedBox(boxID) {
+		dek, dekErr := GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			// 加密 box 未解锁：拒绝写入，避免明文落盘（深度防御，见 issue #18034）
+			return dekErr
 		}
+		// 已解锁的加密 box：全读 → 加密 → 落盘
+		raw, readErr := io.ReadAll(src)
+		if readErr != nil {
+			return readErr
+		}
+		enc, encErr := EncryptAsset(boxID, dek, raw)
+		if encErr != nil {
+			return encErr
+		}
+		return filelock.WriteFile(writePath, enc)
 	}
 	return filelock.WriteFileByReader(writePath, src)
 }
@@ -442,7 +446,7 @@ func writeAssetNameMapping(boxID, diskName, originalName string) {
 		logging.LogErrorf("get DEK for asset name mapping failed: %s", err)
 		return
 	}
-	enc, err := util.Encrypt(dek, data)
+	enc, err := EncryptAsset(boxID, dek, data)
 	if err != nil {
 		logging.LogErrorf("encrypt asset name mapping failed: %s", err)
 		return
@@ -467,7 +471,7 @@ func readAssetNameMapping(boxID string) map[string]string {
 	if err != nil || dek == nil {
 		return ret
 	}
-	data, err := util.Decrypt(dek, enc)
+	data, err := DecryptAsset(boxID, dek, enc)
 	if err != nil {
 		logging.LogErrorf("decrypt asset name mapping failed: %s", err)
 		return ret

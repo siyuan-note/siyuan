@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "Değişiklikten sonra uygulama otomatik olarak kapanacaktır. Lütfen elle yeniden başlatın.",
 	"aiEdit": "Akıllı Düzenleme",
 	"configGroupMcp": "Ajan MCP Hizmeti",
 	"configGroupEmbedding": "Gömme Modeli",

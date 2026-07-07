@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "Die App wird nach der Änderung automatisch geschlossen. Bitte starten Sie sie manuell neu.",
 	"aiEdit": "Intelligentes Bearbeiten",
 	"configGroupMcp": "Agent-MCP-Dienst",
 	"configGroupEmbedding": "Embedding-Modell",

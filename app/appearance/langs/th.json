@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "แอปจะปิดโดยอัตโนมัติหลังจากเปลี่ยน โปรดเปิดใหม่ด้วยตนเอง",
 	"aiEdit": "แก้ไขอัจฉริยะ",
 	"configGroupMcp": "บริการ MCP ของเอเจนต์",
 	"configGroupEmbedding": "โมเดลฝังตัว",

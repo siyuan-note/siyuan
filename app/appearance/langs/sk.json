@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "Po zmene sa aplikácia automaticky zavrie. Reštartujte ju manuálne.",
 	"aiEdit": "Inteligentná úprava",
 	"configGroupMcp": "Služba MCP agenta",
 	"configGroupEmbedding": "Model vnorenia",

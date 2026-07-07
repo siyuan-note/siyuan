@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "변경 후 앱이 자동으로 종료됩니다. 수동으로 다시 시작해 주세요.",
 	"aiEdit": "스마트 편집",
 	"configGroupMcp": "에이전트 MCP 서비스",
 	"configGroupEmbedding": "임베딩 모델",

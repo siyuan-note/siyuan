@@ -10,6 +10,7 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 /// #endif
 import {desktopModeCookie} from "../../util/cookie";
 import {isMobile, objEquals} from "../../util/functions";
+import {exitSiYuan} from "../../dialog/processSystem";
 import {fetchPost} from "../../util/fetch";
 import {openByMobile} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
@@ -427,18 +428,22 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
                 left: {kind: "desc", text: window.siyuan.languages.mobileModeTip},
                 right: desktopModeControl,
             },
+            {
+                left: {kind: "desc", text: window.siyuan.languages.desktopModeRestartTip},
+            },
         ]),
         controls: [{
             control: desktopModeControl,
             save: (value) => {
                 desktopModeCookie.set(value as boolean);
-                window.location.href = "/";
+                // 切换桌面/移动模式需要重启应用才能加载对应 bundle，走正常退出流程后由用户手动重启
+                void exitSiYuan();
             },
         }],
         afterMount: (root) => {
             root.querySelector("#resetDesktopMode")?.addEventListener("click", () => {
                 desktopModeCookie.remove();
-                window.location.href = "/";
+                void exitSiYuan();
             });
         },
     });

@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "The app will close automatically after the change, please restart it manually",
 	"aiEdit": "Smart Edit",
 	"configGroupMcp": "Agent MCP Service",
 	"configGroupEmbedding": "Embedding Model",

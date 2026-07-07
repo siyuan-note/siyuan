@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "修改後會自動關閉應用，請手動重啟",
 	"aiEdit": "智慧編輯",
 	"configGroupMcp": "智能體 MCP 服務",
 	"configGroupEmbedding": "嵌入模型",

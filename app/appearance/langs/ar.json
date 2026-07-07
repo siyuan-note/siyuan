@@ -1,4 +1,5 @@
 {
+	"desktopModeRestartTip": "سيتم إغلاق التطبيق تلقائيًا بعد التعديل، يرجى إعادة تشغيله يدويًا",
 	"aiEdit": "تحرير ذكي",
 	"configGroupMcp": "خدمة MCP للوكيل",
 	"configGroupEmbedding": "نموذج التضمين",

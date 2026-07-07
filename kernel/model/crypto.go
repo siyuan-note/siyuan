@@ -299,7 +299,8 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 	}
 	dek, err := util.Decrypt(kek, boxEnc.WrappedDEK)
 	if err != nil {
-		return err
+		// 密码已通过 deriveKEK 的 verifier 校验，此处失败说明 WrappedDEK 数据损坏
+		return errors.New(Conf.Language(316))
 	}
 	// 持锁保护"开 db + 缓存 DEK"的原子性，避免与并发的 LockBox 导致 db/DEK 不一致
 	cachedDEKsLock.Lock()
@@ -390,7 +391,7 @@ func UnwrapDEK(boxID string, enc *conf.BoxEncryption, kek []byte) error {
 	}
 	dek, err := util.Decrypt(kek, enc.WrappedDEK)
 	if err != nil {
-		return err
+		return errors.New(Conf.Language(316))
 	}
 	cachedDEKsLock.Lock()
 	cachedDEKs[boxID] = dek
@@ -458,7 +459,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		}
 		dek, err := util.Decrypt(oldKEK, boxConf.BoxCrypt.WrappedDEK)
 		if err != nil {
-			return errors.New("failed to unwrap DEK for box " + b.ID + " during password change: " + err.Error())
+			return errors.New(Conf.Language(316) + " [box=" + b.ID + "]")
 		}
 		newWrapped, err := util.Encrypt(newKEK, dek)
 		if err != nil {
@@ -582,7 +583,7 @@ func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 			}
 			plain, decErr := util.Decrypt(dek, raw)
 			if decErr != nil {
-				return decErr
+				return errors.New(Conf.Language(316))
 			}
 			if err := filelock.WriteFile(destPath, plain); err != nil {
 				return err

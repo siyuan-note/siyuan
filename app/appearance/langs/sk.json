@@ -2086,6 +2086,7 @@
 		"312": "Funkcia šifrovaného zápisníka je už povolená",
 		"313": "Presúvanie dokumentov cez hranice šifrovaného zápisníka nie je podporované",
 		"314": "Najprv odomknite šifrovaný zápisník",
-		"315": "Šifrované zápisníky už existujú, ale chýba záloha hlavného kľúča. Na opätovné povolenie obnovte pôvodný conf.json alebo súbor zálohy"
+		"315": "Šifrované zápisníky už existujú, ale chýba záloha hlavného kľúča. Na opätovné povolenie obnovte pôvodný conf.json alebo súbor zálohy",
+		"316": "Dešifrovanie zlyhalo: nesprávny kľúč alebo poškodené údaje"
 	}
 }

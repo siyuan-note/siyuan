@@ -2086,6 +2086,7 @@
 		"312": "Şifreli not defteri özelliği zaten etkin",
 		"313": "Şifreli not defteri sınırları boyunca belge taşıma desteklenmemektedir",
 		"314": "Lütfen önce şifreli not defterinin kilidini açın",
-		"315": "Şifreli not defterleri zaten mevcut ancak anahtar yedeği eksik. Yeniden etkinleştirmek için orijinal conf.json veya yedek dosyasını geri yükleyin"
+		"315": "Şifreli not defterleri zaten mevcut ancak anahtar yedeği eksik. Yeniden etkinleştirmek için orijinal conf.json veya yedek dosyasını geri yükleyin",
+		"316": "Şifre çözme başarısız: yanlış anahtar veya bozuk veriler"
 	}
 }

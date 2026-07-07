@@ -2086,6 +2086,7 @@
 		"312": "Funktion für verschlüsseltes Notizbuch ist bereits aktiviert",
 		"313": "Das Verschieben von Dokumenten über verschlüsselte Notizbuchgrenzen hinweg wird nicht unterstützt",
 		"314": "Bitte entsperren Sie zuerst das verschlüsselte Notizbuch",
-		"315": "Es existieren bereits verschlüsselte Notizbücher, aber das Schlüsselmaterial-Backup fehlt. Um wieder zu aktivieren, muss die ursprüngliche conf.json oder die Backupdatei wiederhergestellt werden"
+		"315": "Es existieren bereits verschlüsselte Notizbücher, aber das Schlüsselmaterial-Backup fehlt. Um wieder zu aktivieren, muss die ursprüngliche conf.json oder die Backupdatei wiederhergestellt werden",
+		"316": "Entschlüsselung fehlgeschlagen: falscher Schlüssel oder beschädigte Daten"
 	}
 }

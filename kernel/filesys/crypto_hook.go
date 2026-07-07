@@ -25,32 +25,38 @@ import (
 )
 
 // DEKProvider 由 model 层在 init 时注入，用于查询 boxID 对应的 DEK。
-// 返回 (nil, nil) 表示该 box 非加密或未解锁——此时加解密函数原样返回 data，对普通笔记本透明。
+// 返回 (nil, nil) 表示该 box 非加密——加解密函数原样返回 data，对普通笔记本透明。
+// 返回 (nil, error) 表示加密但未解锁——加解密函数拒绝读写，避免未解锁时静默落盘明文。
 // filesys 不能直接 import model（会形成 model → filesys → model 循环依赖），故采用回调注入。
 var DEKProvider func(boxID string) ([]byte, error)
 
-// encryptData 若 boxID 是已解锁的加密 box，用其 DEK 加密 data；否则原样返回。
-// 用于 .sy 写盘前：明文 data → 密文 encData。
+// encryptData 若 boxID 是已解锁的加密 box，用其 DEK 加密 data；非加密 box 原样返回；
+// 加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
 func encryptData(boxID string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
 	}
 	dek, err := DEKProvider(boxID)
-	if err != nil || dek == nil {
-		return data, nil
+	if err != nil {
+		return nil, err
+	}
+	if dek == nil {
+		return data, nil // 非加密 box
 	}
 	return util.Encrypt(dek, data)
 }
 
-// decryptData 对应解密。非加密 box 或未解锁时原样返回。
-// 用于 .sy 读盘后：密文 data → 明文 data。
+// decryptData 对应解密。非加密 box 原样返回；加密但未解锁时返回 error，拒绝读盘。
 func decryptData(boxID string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
 	}
 	dek, err := DEKProvider(boxID)
-	if err != nil || dek == nil {
-		return data, nil
+	if err != nil {
+		return nil, err
+	}
+	if dek == nil {
+		return data, nil // 非加密 box
 	}
 	return util.Decrypt(dek, data)
 }

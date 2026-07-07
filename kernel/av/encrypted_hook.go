@@ -206,8 +206,11 @@ func encryptAVData(boxID string, data []byte) ([]byte, error) {
 		return data, nil
 	}
 	dek, err := AVDEKProvider(boxID)
-	if err != nil || dek == nil {
-		return data, nil
+	if err != nil {
+		return nil, err // 加密但未解锁，拒绝写盘避免明文泄漏
+	}
+	if dek == nil {
+		return data, nil // 非加密 box
 	}
 	return util.Encrypt(dek, data)
 }
@@ -217,8 +220,11 @@ func decryptAVData(boxID string, data []byte) ([]byte, error) {
 		return data, nil
 	}
 	dek, err := AVDEKProvider(boxID)
-	if err != nil || dek == nil {
-		return data, nil
+	if err != nil {
+		return nil, err // 加密但未解锁，拒绝读盘
+	}
+	if dek == nil {
+		return data, nil // 非加密 box
 	}
 	return util.Decrypt(dek, data)
 }

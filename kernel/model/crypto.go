@@ -370,8 +370,10 @@ func IsEncryptedAssetPath(absPath string) bool {
 	return boxID != "" && IsEncryptedBox(boxID)
 }
 
-// GetDEKIfUnlocked 返回已解锁加密 box 的 DEK；非加密 box 或未解锁时返回 (nil, nil)。
-// 供 filesys.DEKProvider 注入用——对非加密 box 透明返回 nil，使 filesys 的加解密函数走"原样返回"分支。
+// GetDEKIfUnlocked 返回已解锁加密 box 的 DEK。
+// 非加密 box 返回 (nil, nil)——filesys 据此原样读写，对普通笔记本透明。
+// 加密但未解锁（DEK 不在内存）返回 (nil, error)——filesys 的加解密函数遇 error 后拒绝读写，
+// 避免加密笔记本在未解锁状态下静默以明文落盘（深度防御，见 issue #18034）。
 func GetDEKIfUnlocked(boxID string) ([]byte, error) {
 	if !IsEncryptedBox(boxID) {
 		return nil, nil
@@ -380,7 +382,7 @@ func GetDEKIfUnlocked(boxID string) ([]byte, error) {
 	defer cachedDEKsLock.RUnlock()
 	dek, ok := cachedDEKs[boxID]
 	if !ok {
-		return nil, nil // 已加密但未解锁
+		return nil, errors.New("encrypted notebook is locked, please unlock it first")
 	}
 	return dek, nil
 }

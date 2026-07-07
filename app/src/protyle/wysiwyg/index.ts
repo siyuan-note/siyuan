@@ -1210,6 +1210,7 @@ export class WYSIWYG {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     if (target.classList.contains("protyle-action__drag") && nodeElement) {
+                        focusBlock(nodeElement);
                         updateTransaction(protyle, nodeElement, html);
                     }
                     nodeElement.classList.remove("iframe--drag");

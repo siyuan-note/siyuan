@@ -112,6 +112,7 @@ const promiseTransaction = (options: {
                 protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((item) => {
                     if (range && (item === range.startContainer || item.contains(range.startContainer))) {
                         // 正在编辑的块不能进行更新
+                        item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                     } else {
                         updateHTML(item, operation.data);
                     }
@@ -119,11 +120,14 @@ const promiseTransaction = (options: {
                 protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg__embed").forEach(item => {
                     if (range && (item === range.startContainer || item.contains(range.startContainer))) {
                         // 正在编辑的块不能进行更新
+                        item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                     } else {
                         // https://github.com/siyuan-note/siyuan/issues/14495
                         const newTempElement = allTempElement.content.querySelector(`[data-node-id="${item.getAttribute("data-id")}"]`);
                         if (newTempElement && !isInEmbedBlock(newTempElement)) {
                             updateHTML(item.querySelector("[data-node-id]"), newTempElement.outerHTML);
+                        } else {
+                            item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                         }
                     }
                 });

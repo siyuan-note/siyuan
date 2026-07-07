@@ -184,18 +184,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
         }
         html = protyle.lute.SpinBlockDOM(html);
-        // 列表项内紧挨标记的第一个段落块不允许产生子列表 https://github.com/siyuan-note/siyuan/issues/17890
-        if (blockElement.closest('[data-type="NodeListItem"]') &&
-            blockElement.previousElementSibling?.classList.contains("protyle-action")) {
-            const tempDiv = document.createElement("div");
-            tempDiv.innerHTML = html;
-            const firstChild = tempDiv.firstElementChild;
-            if (firstChild?.getAttribute("data-type") === "NodeList" ||
-                firstChild?.getAttribute("data-type") === "NodeListItem") {
-                const p = firstChild.querySelector('[data-type="NodeParagraph"]');
-                if (p) html = p.outerHTML;
-            }
-        }
     }
     // 在数学公式输入框中撤销到最后一步，再继续撤销会撤销编辑器正文内容，从而出发 input 事件
     hideElements(["util"], protyle, true);
@@ -204,6 +192,15 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
+    // 列表项内紧挨标记的第一个段落块不允许产生子列表 https://github.com/siyuan-note/siyuan/issues/17890
+    if (blockElement.closest('[data-type="NodeListItem"]') &&
+        blockElement.previousElementSibling?.classList.contains("protyle-action")) {
+        if (tempElement.content.firstElementChild.classList.contains("list")) {
+            getContenteditableElement(blockElement).innerHTML = "<wbr>";
+            html = blockElement.outerHTML;
+            tempElement.innerHTML = html;
+        }
+    }
     if (needRender && (
             getContenteditableElement(tempElement.content.firstElementChild)?.innerHTML !== getContenteditableElement(blockElement).innerHTML ||
             // 内容删空后使用上下键，光标无法到达 https://github.com/siyuan-note/siyuan/issues/4167 https://ld246.com/article/1636256333803

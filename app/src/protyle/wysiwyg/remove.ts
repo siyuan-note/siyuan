@@ -1,6 +1,6 @@
 import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
-    getContenteditableElement,
+    getContenteditableElement, getFirstBlock,
     getLastBlock,
     getNextBlock,
     getParentBlock,

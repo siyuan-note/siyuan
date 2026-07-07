@@ -11,7 +11,7 @@ import {getThemeMode, setInlineStyle} from "../../util/assets";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
-import {getScreenWidth, isInMobileApp, setStorageVal} from "../util/compatibility";
+import {getScreenWidth, isInMobileApp, saveExportFile, setStorageVal} from "../util/compatibility";
 import {getFrontend} from "../../util/functions";
 
 const getPluginStyle = async () => {
@@ -49,13 +49,13 @@ export const saveExport = (option: IExportOptions) => {
                 html: html,
                 name: exportResponse.data.name
             }, zipResponse => {
-                hideMessage(msgId);
                 if (zipResponse.code === -1) {
+                    hideMessage(msgId);
                     showMessage(window.siyuan.languages._kernel[14].replace("%s", zipResponse.msg), 0, "error");
                     return;
                 }
-                window.open(zipResponse.data.zip);
-                showMessage(window.siyuan.languages.exported);
+                // 与导出 .sy.zip/markdown.zip/图片一致，统一走 saveExportFile，以便移动端原生 App 调用 JSAndroid.saveExportFile 等接口保存到本地
+                saveExportFile(zipResponse.data.zip, msgId);
             });
         });
         return;

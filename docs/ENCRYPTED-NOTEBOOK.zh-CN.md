@@ -2,13 +2,13 @@
 
 ## 1. 设计目标
 
-在 SiYuan 中实现"加密笔记本"——一种特殊笔记本，其 `.sy` 文档、assets 资源文件（含文件名）、数据库定义、SQLite 索引数据库（content + blocktree）都在磁盘上加密存储，需要主密码解锁才能查看内容。已有的普通笔记本完全不受影响。
+在 SiYuan 中实现"加密笔记本"——一种特殊笔记本，其 `.sy` 文档、assets 资源文件（含文件名）、数据库文件、SQLite 索引数据库（content + blocktree）都在磁盘上加密存储，需要主密码解锁才能查看内容。已有的普通笔记本完全不受影响。
 
 ## 2. 核心约束
 
 | 维度 | 设计决策 |
 |---|---|
-| 加密范围 | `.sy` + assets（含文件名）+ 数据库定义 + SQLite 数据库（content + blocktree）全部加密 |
+| 加密范围 | `.sy` + assets（含文件名）+ 数据库文件 + SQLite 数据库（content + blocktree）全部加密 |
 | 笔记本身份 | 动态 boxID + `BoxConf.Encrypted: true` 标志位 |
 | 数量 | 支持多个加密笔记本 |
 | 密码 | 共用主密码（KEK 包络，每个笔记本独立 DEK） |
@@ -19,7 +19,7 @@
 | 块引 | box 内部正常引用；禁止跨加密边界引用（双向：普通↔加密、加密 A↔加密 B） |
 | AI / LLM | 不做功能层隔离——解锁后与普通笔记本一样可读可搜；锁定后因无 DEK 物理上不可达（详见 §13） |
 | 跨边界移动 | 禁止——会破坏数据一致性且泄漏 |
-| 数据库 | 笔记本级存储——加密 box 的 数据库定义跟随 box 目录，DEK 加密；禁止跨边界镜像 |
+| 数据库 | 笔记本级存储——加密 box 的 数据库文件跟随 box 目录，DEK 加密；禁止跨边界镜像 |
 | 闪卡 / 间隔重复 | 不支持（功能限制） |
 | 书签 | 不支持（功能限制） |
 | 标签 | 不支持（功能限制） |
@@ -38,7 +38,7 @@
 | **重启后** | 保持上次打开状态 | 强制关闭，需重新输主密码解锁 |
 | **.sy 文件** | 明文 JSON 落盘 | AES-256-GCM 密文落盘，读时透明解密 |
 | **assets 文件** | 明文二进制，原始文件名 | AES-256-GCM 密文，文件名脱敏，原始名加密存储 |
-| **数据库定义** | 全局 `storage/av/<avID>.json`（明文） | 笔记本级 `<boxID>/storage/av/<avID>.json`（DEK 加密） |
+| **数据库文件** | 全局 `storage/av/<avID>.json`（明文） | 笔记本级 `<boxID>/storage/av/<avID>.json`（DEK 加密） |
 | **content SQLite 数据库** | 写入全局 siyuan.db（明文） | 写入独立 siyuan-encrypted-`<boxID>`.db（SQLCipher 加密） |
 | **blocktree SQLite 数据库** | 写入全局 blocktree.db（明文） | 写入独立 siyuan-encrypted-`<boxID>`-blocktree.db（SQLCipher 加密） |
 | **全局搜索** | 参与（FTS 命中） | 不参与（数据不在全局 SQLite 数据库） |
@@ -67,7 +67,7 @@
 | **重建索引** | 全量 | 启动时跳过（已关闭）；打开时 box.Index() 全量重建到加密 SQLite 数据库 |
 | **/api/file/getFile + putFile** | 可读写任意文件 | 拒绝加密 box 的 .sy 读写（防止密文泄漏或明文破坏） |
 
-**核心区别总结**：加密笔记本是"孤岛"——数据物理隔离、操作专用入口、完全不参与全局功能（全局搜索/关系图）、文档和 数据库定义不进出边界。box 内部功能（编辑、块引、反链、搜索、数据库、大纲、历史等）正常使用；解锁后 AI/LLM 也可用（与普通笔记本一致）。加密笔记本之间也互相隔离。普通笔记本完全不受影响。
+**核心区别总结**：加密笔记本是"孤岛"——数据物理隔离、操作专用入口、完全不参与全局功能（全局搜索/关系图）、文档和 数据库文件不进出边界。box 内部功能（编辑、块引、反链、搜索、数据库、大纲、历史等）正常使用；解锁后 AI/LLM 也可用（与普通笔记本一致）。加密笔记本之间也互相隔离。普通笔记本完全不受影响。
 
 ## 4. 密钥架构
 
@@ -77,7 +77,7 @@
     ▼
    KEK（密钥加密密钥，仅内存，用完即弃）
     │ AES-256-GCM 包络
-    ├─→ 解 BoxConf.WrappedDEK → DEK₁ → 加密笔记本 1 的 .sy/assets/数据库定义/SQLite 数据库
+    ├─→ 解 BoxConf.WrappedDEK → DEK₁ → 加密笔记本 1 的 .sy/assets/数据库文件/SQLite 数据库
     ├─→ 解 BoxConf.WrappedDEK → DEK₂ → 加密笔记本 2
     └─→ 解 BoxConf.WrappedDEK → DEK₃ → 加密笔记本 3
 ```
@@ -104,6 +104,15 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 
 **配置恢复 vs 密钥恢复分离**：配置恢复只需读备份文件、装回 salt/verifier（不需主密码，因 salt 不保密、没主密码仍解不开数据）；密钥恢复才需主密码派生 KEK 并校验 verifier。这让同步/导入后能自动进入"已启用"状态，用户输主密码即可解锁。
 
+**手动导出/导入密钥**：除自动同步外，用户可在 **设置 → 访问授权 → 加密笔记本** 手动导出/导入密钥备份，作为同步之外的独立恢复途径（如同步不可用、跨账号迁移、物理离线转存）。
+
+| 操作 | 入口 | 说明 |
+|---|---|---|
+| 导出密钥 | 已启用状态下显示 | 把 `notebook-crypto-backup.json` 复制到 export 目录供下载，用户自行保管（API：`/api/notebook/exportNotebookCryptoBackup`） |
+| 导入密钥 | 未启用状态下显示 | 选本地备份文件上传，校验合法后写回 `<DataDir>/.siyuan/` 并装回本机配置（`Enabled=true`）。后续用该密钥对应的主密码解锁（API：`/api/notebook/importNotebookCryptoBackup`） |
+
+导入防呆：本机已启用时拒绝导入（避免覆盖现有 salt 孤立 WrappedDEK），导入入口仅在未启用时露出。备份文件本身不含主密码（salt 不保密、verifier 是密文），导出/导入不涉及明文数据泄漏，解锁仍需主密码。
+
 **防呆守卫**：`EnableEncryptedNotebook` 在磁盘上已存在加密笔记本（`Encrypted=true` 的 box）时，**禁止重新生成 MasterSalt**（否则会孤立旧 WrappedDEK），改为优先从备份恢复；备份缺失才报错引导用户恢复 `conf.json` 或备份文件。此守卫与 `DisableEncryptedNotebook` 的"有加密笔记本时禁止禁用"对称。
 
 **前提条件**：`restoreNotebookCryptoConfigFromBackup` 仅在本机 `Enabled=false` 时生效，不覆盖正在使用的本机配置。
@@ -113,7 +122,7 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 ```
 <workspace>/
 ├── conf/conf.json                          ← 全局加密配置（MasterSalt/KEKVerifier）
-├── storage/av/                             ← 普通 box 的 数据库定义（明文）
+├── storage/av/                             ← 普通 box 的 数据库文件（明文）
 ├── data/
 │   ├── .siyuan/
 │   │   └── notebook-crypto-backup.json     ← NotebookCrypto 备份（MasterSalt/KEKVerifier，进同步范围，详见 §4.1）
@@ -124,11 +133,11 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 │   │   │   ├── <uuid>-<blockID>.ext        ← AES-256-GCM 密文，文件名已脱敏
 │   │   │   └── .names.json                 ← 原始文件名映射（DEK 加密）
 │   │   └── storage/av/
-│   │       └── <avID>.json                 ← 数据库定义（DEK 加密）
+│   │       └── <avID>.json                 ← 数据库文件（DEK 加密）
 │   └── <normal-boxID>/                     ← 普通笔记本（明文，不动）
 ├── history/                                ← 历史目录（密文原样存储）
 │   └── <timestamp>-update/
-│       └── <boxID>/                        ← 加密 box 的历史（密文 .sy + 密文数据库定义）
+│       └── <boxID>/                        ← 加密 box 的历史（密文 .sy + 密文数据库文件）
 └── temp/
     ├── siyuan.db                           ← 全局 SQLite（明文，不含加密 box 数据）
     ├── blocktree.db                        ← 全局 blocktree（明文，不含加密 box 数据）
@@ -136,7 +145,7 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
     └── siyuan-encrypted-<boxID>-blocktree.db ← 加密笔记本 blocktree SQLite 数据库（SQLCipher）
 ```
 
-## 6. 数据库隔离设计
+## 6. SQLite 数据库隔离设计
 
 ```
 普通笔记本操作：
@@ -155,7 +164,7 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 
 **通用入口 fallback**：`GetBlockTree` / `ExistBlockTree` / `GetBlockTrees` / `LoadTreeByBlockID` 等核心函数全局查不到时自动遍历已打开的加密 box。
 
-## 7. .sy / assets / 数据库定义加解密
+## 7. .sy / assets / 数据库文件加解密
 
 **`.sy` 透明加解密**（filesys 层）：
 - `DEKProvider` 回调注入（避免循环依赖）
@@ -169,8 +178,8 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 - 加密 box 禁用全局 assets 回退，强制笔记本级
 - 资源文件重命名禁止（脱敏文件名重命名会破坏映射）
 
-**数据库定义加密**：
-- 路径 fallback：加密 box 的 数据库定义存 `<boxID>/storage/av/<avID>.json`，普通 box 仍存全局 `storage/av/`
+**数据库文件加密**：
+- 路径 fallback：加密 box 的 数据库文件存 `<boxID>/storage/av/<avID>.json`，普通 box 仍存全局 `storage/av/`
 - 读取：先查全局路径，找不到时遍历已打开的加密 box；找到后 DEK 解密再 JSON 解析
 - 保存：JSON 序列化后按路径路由（全局明文 / 加密 box DEK 加密）
 - 首次创建：`RenderAttributeView` 从 blockID 反查 boxID 并预设归属
@@ -190,9 +199,9 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
   恢复 → 密文目录原样拷回
 
 数据库历史：
-  生成 → 加密 box 的 数据库定义从笔记本级目录拷到历史目录
+  生成 → 加密 box 的 数据库文件从笔记本级目录拷到历史目录
   查看 → 按路径 boxID 解密
-  回滚 → 加密 box 的数据库定义/资源回滚到笔记本级目录
+  回滚 → 加密 box 的数据库文件/资源回滚到笔记本级目录
 ```
 
 ## 9. 块引跨加密边界防护
@@ -243,10 +252,10 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 - `.sy` 文档正文（已加密）
 - assets 二进制文件（已加密）
 - assets 文件名（脱敏，原始名加密存储）
-- 数据库定义（列/行/cell 值/视图配置/内容快照，已加密）
+- 数据库文件（列/行/cell 值/视图配置/内容快照，已加密）
 - content SQLite 数据库（blocks/FTS/attributes/refs，SQLCipher 加密）
 - blocktree SQLite 数据库（块树元数据：ID/路径/标题，SQLCipher 加密）
-- 历史目录中的 .sy 和 数据库定义（密文原样存储）
+- 历史目录中的 .sy 和 数据库文件（密文原样存储）
 
 **不保护**：
 - `conf.json` 里的 MasterSalt/KEKVerifier（设计可明文：salt 不保密，verifier 是密文）
@@ -317,7 +326,7 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 进入 **设置 → 访问授权 → 修改主密码**。改密只需重新包络各 box 的 WrappedDEK，**不重新加密文档数据**，因此即时完成。改密后密钥备份会自动刷新并同步。
 
 ### 多设备同步
-加密笔记本的密文 `.sy`/assets/数据库定义会随数据同步（密文进密文出，闭环自洽）；全局密钥材料（MasterSalt 等）也会自动备份到同步目录。**新设备同步后无需手动"启用"**：
+加密笔记本的密文 `.sy`/assets/数据库文件会随数据同步（密文进密文出，闭环自洽）；全局密钥材料（MasterSalt 等）也会自动备份到同步目录。**新设备同步后无需手动"启用"**：
 
 1. 在新设备配置好相同的同步账号并完成同步
 2. 同步会把密钥备份拉到本地，内核自动恢复"已启用"状态
@@ -333,12 +342,12 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 **无法恢复**——这是设计使然（没有后门）。即使密文已同步到云端，没有主密码也解不开。**务必牢记主密码，建议使用密码管理器保存**。
 
 ### 密钥备份丢失的恢复
-若 `conf/conf.json` 与同步目录里的密钥备份同时丢失（极端情况），重新启用加密笔记本会被拒绝并提示恢复备份文件。只要能从其他已同步的设备或本地备份找回 `notebook-crypto-backup.json`，放回 `<工作区>/data/.siyuan/` 后重新启用即可用原主密码解锁。
+若 `conf/conf.json` 与同步目录里的密钥备份同时丢失（极端情况），重新启用加密笔记本会被拒绝并提示恢复备份文件。只要能从其他已同步的设备或之前导出的密钥文件找回 `notebook-crypto-backup.json`，可通过未启用状态下显示的"导入密钥"按钮导入，或手动放回 `<工作区>/data/.siyuan/` 后重新启用，即可用该密钥对应的主密码解锁。
 
 ### 适合用加密笔记本的场景
 - 隐私日记、财务记录、医疗信息
 - 工作机密、商业方案、合同
-- 多用户共享电脑，每人有自己的加密笔记本
+- 担心设备遗失或被盗——加密后即使磁盘数据被恢复，没有主密码也只是密文
 
 ### 不适合用加密笔记本的场景
 - 日常笔记、学习笔记（加密的额外开销不值得）

@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Schlüsselsicherung exportiert, bitte an einem sicheren Ort aufbewahren",
+	"exportNotebookCryptoBackup": "Schlüsselsicherung exportieren",
+	"importNotebookCryptoBackupTip": "Schlüsselsicherung importiert, bitte verwenden Sie danach das zu diesem Schlüssel gehörende Masterpasswort zum Entsperren",
+	"importNotebookCryptoBackup": "Schlüsselsicherung importieren",
 	"desktopModeRestartTip": "Die App wird nach der Änderung automatisch geschlossen. Bitte starten Sie sie manuell neu.",
 	"aiEdit": "Intelligentes Bearbeiten",
 	"configGroupMcp": "Agent-MCP-Dienst",
@@ -2087,6 +2091,7 @@
 		"313": "Das Verschieben von Dokumenten über verschlüsselte Notizbuchgrenzen hinweg wird nicht unterstützt",
 		"314": "Bitte entsperren Sie zuerst das verschlüsselte Notizbuch",
 		"315": "Es existieren bereits verschlüsselte Notizbücher, aber das Schlüsselmaterial-Backup fehlt. Um wieder zu aktivieren, muss die ursprüngliche conf.json oder die Backupdatei wiederhergestellt werden",
-		"316": "Entschlüsselung fehlgeschlagen: falscher Schlüssel oder beschädigte Daten"
+		"316": "Entschlüsselung fehlgeschlagen: falscher Schlüssel oder beschädigte Daten",
+		"317": "Ungültige Schlüsselsicherungsdatei"
 	}
 }

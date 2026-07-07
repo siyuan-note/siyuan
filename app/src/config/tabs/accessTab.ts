@@ -341,12 +341,26 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="encryptedNotebookSwitch" type="checkbox">
 </label>
+<div class="b3-label config-item fn__none" id="encryptedNotebookImport">
+    <div class="fn__flex fn__flex-center config-wrap">
+        <div class="fn__flex-1"></div>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="importCryptoBackupBtn">
+            <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
+            ${window.siyuan.languages.importNotebookCryptoBackup}
+        </button>
+    </div>
+</div>
 <div class="b3-label config-item fn__none" id="encryptedNotebookActions">
     <div class="fn__flex fn__flex-center config-wrap">
         <div class="fn__flex-1"></div>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="changeMasterPasswordBtn">
             <svg class="svg"><use xlink:href="#iconLock"></use></svg>
             ${window.siyuan.languages.changeMasterPassword}
+        </button>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportCryptoBackupBtn">
+            <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
+            ${window.siyuan.languages.exportNotebookCryptoBackup}
         </button>
     </div>
 </div>`,
@@ -357,17 +371,58 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
 const mountEncryptedNotebook = (root: HTMLElement) => {
     const switchElement = root.querySelector("#encryptedNotebookSwitch") as HTMLInputElement;
     const actionsElement = root.querySelector("#encryptedNotebookActions");
+    const importElement = root.querySelector("#encryptedNotebookImport");
     const refresh = () => {
         fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
             const enabled = response.data.enabled;
             switchElement.checked = enabled;
             actionsElement.classList.toggle("fn__none", !enabled);
+            // 导入入口仅在未启用时可见（已启用时导入会覆盖现有 salt，由后端防呆拒绝）
+            importElement.classList.toggle("fn__none", enabled);
         });
     };
     refresh();
 
     actionsElement.querySelector("#changeMasterPasswordBtn")?.addEventListener("click", () => {
         openChangeMasterPasswordDialog();
+    });
+
+    actionsElement.querySelector("#exportCryptoBackupBtn")?.addEventListener("click", () => {
+        fetchPost("/api/notebook/exportNotebookCryptoBackup", {}, async (response) => {
+            if (response.code === -1) {
+                showMessage(response.msg, 6000, "error");
+                return;
+            }
+            await saveExportFile(response.data.file);
+            showMessage(window.siyuan.languages.exportNotebookCryptoBackupTip);
+        });
+    });
+
+    importElement.querySelector("#importCryptoBackupBtn")?.addEventListener("click", () => {
+        // 用隐藏 file input 选备份文件，multipart 上传导入
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = ".json,application/json";
+        fileInput.onchange = () => {
+            const file = fileInput.files?.[0];
+            if (!file) {
+                return;
+            }
+            const formData = new FormData();
+            formData.append("file", file);
+            fetch("/api/notebook/importNotebookCryptoBackup", {
+                method: "POST",
+                body: formData,
+            }).then((res) => res.json()).then((response: IWebSocketData) => {
+                if (response.code === -1) {
+                    showMessage(response.msg, 6000, "error");
+                    return;
+                }
+                showMessage(window.siyuan.languages.importNotebookCryptoBackupTip);
+                refresh();
+            });
+        };
+        fileInput.click();
     });
 
     switchElement.addEventListener("change", () => {

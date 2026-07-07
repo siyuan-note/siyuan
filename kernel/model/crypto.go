@@ -19,12 +19,14 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -45,6 +47,74 @@ var kekVerifierMagic = []byte("siyuan-enc-v1")
 // MasterSalt/KEKVerifier 设计为可明文（salt 不保密，verifier 是密文），备份文件按明文 JSON 存储。
 func notebookCryptoBackupPath() string {
 	return filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+}
+
+// ExportNotebookCryptoBackup 把密钥备份文件复制到 export 目录，返回可下载的相对路径。
+// 供用户主动导出保存，作为同步之外的独立恢复途径（详见设计文档 §4.1）。
+// 备份文件本身不含主密码（salt 不保密、verifier 是密文），拿到它也解不开任何数据。
+func ExportNotebookCryptoBackup() (downloadPath string, err error) {
+	backupPath := notebookCryptoBackupPath()
+	data, readErr := filelock.ReadFile(backupPath)
+	if readErr != nil {
+		if os.IsNotExist(readErr) {
+			err = errors.New(Conf.Language(315))
+			return
+		}
+		err = readErr
+		return
+	}
+	exportBase := filepath.Join(util.TempDir, "export")
+	if mkErr := os.MkdirAll(exportBase, 0755); mkErr != nil {
+		err = mkErr
+		return
+	}
+	// 用随机名避免不同用户/设备互相覆盖，文件名固定带易识别前缀
+	fileName := "notebook-crypto-backup-" + gulu.Rand.String(7) + ".json"
+	downloadPath = "/export/" + url.PathEscape(fileName)
+	if writeErr := os.WriteFile(filepath.Join(exportBase, fileName), data, 0644); writeErr != nil {
+		err = writeErr
+		return
+	}
+	return
+}
+
+// ImportNotebookCryptoBackup 接收用户导入的密钥备份文件内容（JSON 字节），
+// 校验为合法 NotebookCrypto 后写回 <DataDir>/.siyuan/notebook-crypto-backup.json 并装回本机 Conf。
+// 用于新设备/重装后不依赖同步、手动恢复加密配置（详见设计文档 §4.1）。
+// 安全：备份文件不含主密码（salt 不保密、verifier 是密文），导入只恢复配置，解锁仍需主密码。
+// 防呆：本机已启用加密笔记本时拒绝导入，避免覆盖现有 salt/verifier 孤立现有 WrappedDEK。
+func ImportNotebookCryptoBackup(data []byte) error {
+	nc := &conf.NotebookCrypto{}
+	if err := json.Unmarshal(data, nc); err != nil {
+		return errors.New(Conf.Language(317))
+	}
+	if len(nc.MasterSalt) == 0 || len(nc.KEKVerifier) == 0 {
+		return errors.New(Conf.Language(317))
+	}
+
+	Conf.m.RLock()
+	enabled := Conf.NotebookCrypto.Enabled
+	Conf.m.RUnlock()
+	if enabled {
+		// 本机已启用：覆盖会改变 salt，孤立现有 WrappedDEK（数据永久锁死）
+		return errors.New(Conf.Language(312))
+	}
+
+	nc.Enabled = true
+	Conf.m.Lock()
+	*Conf.NotebookCrypto = *nc
+	Conf.m.Unlock()
+	Conf.Save()
+
+	// 同步写回备份文件（导入的备份即新的本地备份）
+	if err := os.MkdirAll(filepath.Dir(notebookCryptoBackupPath()), 0755); err != nil {
+		logging.LogErrorf("mkdir notebook crypto backup dir failed: %s", err)
+		return nil
+	}
+	if err := filelock.WriteFile(notebookCryptoBackupPath(), data); err != nil {
+		logging.LogErrorf("write notebook crypto backup failed: %s", err)
+	}
+	return nil
 }
 
 // saveNotebookCryptoBackup 把当前 NotebookCrypto（含 MasterSalt/KEKVerifier/KDFParams）备份到 DataDir。

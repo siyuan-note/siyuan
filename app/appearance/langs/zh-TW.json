@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "金鑰已匯出，請妥善保管",
+	"exportNotebookCryptoBackup": "匯出金鑰",
+	"importNotebookCryptoBackupTip": "金鑰已匯入，後續請使用該金鑰對應的主密碼解鎖",
+	"importNotebookCryptoBackup": "匯入金鑰",
 	"desktopModeRestartTip": "修改後會自動關閉應用，請手動重啟",
 	"aiEdit": "智慧編輯",
 	"configGroupMcp": "智能體 MCP 服務",
@@ -2087,6 +2091,7 @@
 		"313": "不支援跨加密筆記本邊界移動文件",
 		"314": "請先解鎖加密筆記本",
 		"315": "已存在加密筆記本但缺少主金鑰備份，需恢復原始 conf.json 或備份檔案後才能重新啟用",
-		"316": "解密失敗：金鑰不正確或資料已損壞"
+		"316": "解密失敗：金鑰不正確或資料已損壞",
+		"317": "金鑰備份檔案無效"
 	}
 }

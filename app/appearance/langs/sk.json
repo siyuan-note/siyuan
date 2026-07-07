@@ -1,4 +1,8 @@
 {
+	"exportNotebookCryptoBackupTip": "Záloha kľúča exportovaná, uložte ju na bezpečné miesto",
+	"exportNotebookCryptoBackup": "Exportovať zálohu kľúča",
+	"importNotebookCryptoBackupTip": "Záloha kľúča importovaná, od teraz na odomknutie používajte hlavné heslo zodpovedajúce tomuto kľúču",
+	"importNotebookCryptoBackup": "Importovať zálohu kľúča",
 	"desktopModeRestartTip": "Po zmene sa aplikácia automaticky zavrie. Reštartujte ju manuálne.",
 	"aiEdit": "Inteligentná úprava",
 	"configGroupMcp": "Služba MCP agenta",
@@ -2087,6 +2091,7 @@
 		"313": "Presúvanie dokumentov cez hranice šifrovaného zápisníka nie je podporované",
 		"314": "Najprv odomknite šifrovaný zápisník",
 		"315": "Šifrované zápisníky už existujú, ale chýba záloha hlavného kľúča. Na opätovné povolenie obnovte pôvodný conf.json alebo súbor zálohy",
-		"316": "Dešifrovanie zlyhalo: nesprávny kľúč alebo poškodené údaje"
+		"316": "Dešifrovanie zlyhalo: nesprávny kľúč alebo poškodené údaje",
+		"317": "Neplatný súbor zálohy kľúča"
 	}
 }

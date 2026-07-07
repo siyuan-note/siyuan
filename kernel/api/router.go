@@ -125,6 +125,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/lockBox", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, lockBox)
 	ginServer.Handle("POST", "/api/notebook/changeMasterPassword", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeMasterPassword)
 	ginServer.Handle("POST", "/api/notebook/getEncryptedNotebookStatus", model.CheckAuth, getEncryptedNotebookStatus)
+	ginServer.Handle("POST", "/api/notebook/exportNotebookCryptoBackup", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, exportNotebookCryptoBackup)
+	ginServer.Handle("POST", "/api/notebook/importNotebookCryptoBackup", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importNotebookCryptoBackup)
 
 	ginServer.Handle("POST", "/api/filetree/searchDocs", model.CheckAuth, searchDocs)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)

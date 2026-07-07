@@ -8,7 +8,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 
 | Aspect | Design Decision |
 |---|---|
-| Encryption scope | `.sy` + assets (incl. filenames) + database definitions + db (content + blocktree) all encrypted |
+| Encryption scope | `.sy` + assets (incl. filenames) + database files + SQLite database (content + blocktree) all encrypted |
 | Notebook identity | Dynamic boxID + `BoxConf.Encrypted: true` flag |
 | Quantity | Multiple encrypted notebooks supported |
 | Password | Shared master password (KEK envelope, per-notebook independent DEK) |
@@ -19,7 +19,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | Block refs | Normal refs within the box; cross-boundary refs forbidden (bidirectional: normal↔encrypted, encrypted A↔encrypted B) |
 | AI / LLM | No functional-layer isolation — when unlocked, AI/LLM can read/search just like a normal notebook; when locked, physically unreachable without DEK (see §13) |
 | Cross-boundary move | Forbidden — would break data consistency and leak |
-| Database | Notebook-level storage — encrypted box database definitions follow the box directory, DEK-encrypted; cross-boundary mirroring forbidden |
+| Database | Notebook-level storage — encrypted box database files follow the box directory, DEK-encrypted; cross-boundary mirroring forbidden |
 | Flashcards / spaced repetition | Not supported (feature limitation) |
 | Bookmarks | Not supported (feature limitation) |
 | Tags | Not supported (feature limitation) |
@@ -38,7 +38,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **After restart** | Keeps last open state | Force-closed; must re-enter master password to unlock |
 | **.sy files** | Plaintext JSON on disk | AES-256-GCM ciphertext on disk, transparently decrypted on read |
 | **assets files** | Plaintext binary, original filename | AES-256-GCM ciphertext, filename desensitized, original name encrypted |
-| **database definitions** | Global `storage/av/<avID>.json` (plaintext) | Notebook-level `<boxID>/storage/av/<avID>.json` (DEK-encrypted) |
+| **database files** | Global `storage/av/<avID>.json` (plaintext) | Notebook-level `<boxID>/storage/av/<avID>.json` (DEK-encrypted) |
 | **content SQLite database** | Written to global siyuan.db (plaintext) | Written to independent siyuan-encrypted-`<boxID>`.db (SQLCipher) |
 | **blocktree SQLite database** | Written to global blocktree.db (plaintext) | Written to independent siyuan-encrypted-`<boxID>`-blocktree.db (SQLCipher) |
 | **Global search** | Participates (FTS hits) | Does not participate (data not in global SQLite database) |
@@ -67,7 +67,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **Rebuild index** | Full | Skipped on startup (closed); on open box.Index() fully rebuilds into the encrypted SQLite database |
 | **/api/file/getFile + putFile** | Can read/write any file | Refuses .sy reads/writes on encrypted boxes (prevent ciphertext leak or plaintext corruption) |
 
-**Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), and documents/database definitions do not cross the boundary. In-box features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; AI/LLM is also usable when unlocked (same as a normal notebook). Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
+**Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), and documents/database files do not cross the boundary. In-box features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; AI/LLM is also usable when unlocked (same as a normal notebook). Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
 
 ## 4. Key Architecture
 
@@ -77,7 +77,7 @@ User master password
     ▼
    KEK (key-encryption key, memory-only, used and discarded)
     │ AES-256-GCM envelope
-    ├─→ unwrap BoxConf.WrappedDEK → DEK₁ → encrypts notebook 1's .sy/assets/database definition/SQLite database
+    ├─→ unwrap BoxConf.WrappedDEK → DEK₁ → encrypts notebook 1's .sy/assets/database file/SQLite database
     ├─→ unwrap BoxConf.WrappedDEK → DEK₂ → encrypts notebook 2
     └─→ unwrap BoxConf.WrappedDEK → DEK₃ → encrypts notebook 3
 ```
@@ -113,7 +113,7 @@ MasterSalt is the global root of KEK derivation — the master password + Master
 ```
 <workspace>/
 ├── conf/conf.json                          ← global encryption config (MasterSalt/KEKVerifier)
-├── storage/av/                             ← normal-box database definitions (plaintext)
+├── storage/av/                             ← normal-box database files (plaintext)
 ├── data/
 │   ├── .siyuan/
 │   │   └── notebook-crypto-backup.json     ← NotebookCrypto backup (MasterSalt/KEKVerifier, synced; see §4.1)
@@ -124,11 +124,11 @@ MasterSalt is the global root of KEK derivation — the master password + Master
 │   │   │   ├── <uuid>-<blockID>.ext        ← AES-256-GCM ciphertext, filename desensitized
 │   │   │   └── .names.json                 ← original filename mapping (DEK-encrypted)
 │   │   └── storage/av/
-│   │       └── <avID>.json                 ← database definition (DEK-encrypted)
+│   │       └── <avID>.json                 ← database file (DEK-encrypted)
 │   └── <normal-boxID>/                     ← normal notebook (plaintext, untouched)
 ├── history/                                ← history directory (ciphertext stored verbatim)
 │   └── <timestamp>-update/
-│       └── <boxID>/                        ← encrypted-box history (ciphertext .sy + ciphertext database definitions)
+│       └── <boxID>/                        ← encrypted-box history (ciphertext .sy + ciphertext database files)
 └── temp/
     ├── siyuan.db                           ← global SQLite (plaintext, no encrypted-box data)
     ├── blocktree.db                        ← global blocktree (plaintext, no encrypted-box data)
@@ -136,7 +136,7 @@ MasterSalt is the global root of KEK derivation — the master password + Master
     └── siyuan-encrypted-<boxID>-blocktree.db ← encrypted-notebook blocktree SQLite database (SQLCipher)
 ```
 
-## 6. Database Isolation Design
+## 6. SQLite Database Isolation Design
 
 ```
 Normal-notebook operations:
@@ -155,7 +155,7 @@ Encrypted-notebook operations (dedicated read path, with boxID):
 
 **Generic-entry fallback**: Core functions like `GetBlockTree` / `ExistBlockTree` / `GetBlockTrees` / `LoadTreeByBlockID` automatically iterate opened encrypted boxes when a global lookup misses.
 
-## 7. .sy / assets / Database Definition Encryption
+## 7. .sy / assets / Database File Encryption
 
 **`.sy` transparent encryption** (filesys layer):
 - `DEKProvider` callback injected (avoids circular dependency)
@@ -169,8 +169,8 @@ Encrypted-notebook operations (dedicated read path, with boxID):
 - Encrypted boxes disable the global assets fallback; notebook-level is mandatory
 - Asset file rename is forbidden (desensitized-filename rename breaks the mapping)
 
-**database definition encryption**:
-- Path fallback: encrypted-box database definitions are stored at `<boxID>/storage/av/<avID>.json`; normal boxes still use global `storage/av/`
+**database file encryption**:
+- Path fallback: encrypted-box database files are stored at `<boxID>/storage/av/<avID>.json`; normal boxes still use global `storage/av/`
 - Read: first check the global path; on miss, iterate opened encrypted boxes; after finding, DEK-decrypt then JSON-parse
 - Save: after JSON serialization, route by path (global plaintext / encrypted-box DEK-encrypted)
 - First creation: `RenderAttributeView` looks up the boxID from the blockID and presets ownership
@@ -190,9 +190,9 @@ Deleted-notebook history:
   restore → ciphertext directory copied back verbatim
 
 database history:
-  generate → encrypted-box database definitions copied from notebook-level dir to history dir
+  generate → encrypted-box database files copied from notebook-level dir to history dir
   view → decrypt by path boxID
-  roll back → encrypted-box database definition/resources rolled back to notebook-level dir
+  roll back → encrypted-box database file/resources rolled back to notebook-level dir
 ```
 
 ## 9. Block-Ref Cross-Boundary Protection
@@ -243,10 +243,10 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 - `.sy` document body (encrypted)
 - assets binary files (encrypted)
 - assets filenames (desensitized, original name encrypted)
-- database definitions (columns/rows/cell values/view config/content snapshots, encrypted)
+- database files (columns/rows/cell values/view config/content snapshots, encrypted)
 - content SQLite database (blocks/FTS/attributes/refs, SQLCipher-encrypted)
 - blocktree SQLite database (block-tree metadata: ID/path/title, SQLCipher-encrypted)
-- .sy and database definitions in the history directory (ciphertext stored verbatim)
+- .sy and database files in the history directory (ciphertext stored verbatim)
 
 **Not protected**:
 - MasterSalt/KEKVerifier in `conf.json` (designed to be plaintext: salt is not secret, verifier is ciphertext)
@@ -317,7 +317,7 @@ An encrypted notebook is an island; some features are unimplemented because of t
 Go to **Settings → Access authorization → Change master password**. Changing the password only re-wraps each box's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
 
 ### Multi-device sync
-Encrypted-notebook ciphertext `.sy`/assets/database definitions sync along with the data (ciphertext in, ciphertext out, self-consistent); the global key material (MasterSalt etc.) is also automatically backed up to the sync directory. **No manual "enable" is needed on a new device after sync**:
+Encrypted-notebook ciphertext `.sy`/assets/database files sync along with the data (ciphertext in, ciphertext out, self-consistent); the global key material (MasterSalt etc.) is also automatically backed up to the sync directory. **No manual "enable" is needed on a new device after sync**:
 
 1. Configure the same sync account on the new device and complete a sync
 2. Sync pulls the key backup to the local machine; the kernel auto-restores the "enabled" state
@@ -338,7 +338,7 @@ If both `conf/conf.json` and the key backup in the sync directory are lost (an e
 ### Suitable scenarios for encrypted notebooks
 - Private diary, financial records, medical information
 - Work secrets, business plans, contracts
-- Multi-user shared computer where each person has their own encrypted notebook
+- Concern about device loss or theft — once encrypted, even if the disk data is recovered, it remains ciphertext without the master password
 
 ### Unsuitable scenarios for encrypted notebooks
 - Daily notes, study notes (the extra encryption overhead is not worth it)

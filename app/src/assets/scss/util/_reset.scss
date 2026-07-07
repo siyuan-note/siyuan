@@ -122,6 +122,13 @@ body {
     }
   }
 
+  &:not(.body--toolbar-hide):not(.body--window) {
+    .fullscreen > .protyle-breadcrumb,
+    .fullscreen > .block__icons {
+      min-height: 32px;
+    }
+  }
+
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {

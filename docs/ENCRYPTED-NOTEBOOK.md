@@ -87,6 +87,27 @@ User master password
 - **KEK envelope**: Changing the password only re-wraps the DEK; data is not re-encrypted
 - **KEK not cached**: Derived on every unlock; strict per-box isolation
 
+### 4.1 MasterSalt Backup and Cross-Device Recovery
+
+MasterSalt is the global root of KEK derivation — the master password + MasterSalt derive the KEK via Argon2id, and the KEK then unwraps each box's WrappedDEK. **Losing MasterSalt permanently locks the data**: even with the same master password, a changed salt derives a different KEK, so old WrappedDEKs cannot be unwrapped. A backup-and-recovery mechanism is therefore introduced.
+
+**Backup**: `<DataDir>/.siyuan/notebook-crypto-backup.json`, holding the full NotebookCrypto (MasterSalt/KEKVerifier/KDFParams). Located inside DataDir, it **enters the dejavu sync scope**. It is refreshed when enabling encrypted notebooks and when changing the master password, and deleted on disable. Stored as plaintext JSON (salt is not secret, verifier is ciphertext — identical to how they are stored in `conf/conf.json`).
+
+**Recovery triggers** (covering scenarios such as conf.json loss, sync to a new device, importing Data.zip):
+
+| Trigger scenario | Function | Password required? | Notes |
+|---|---|---|---|
+| After sync completes (backup file pulled down) | `restoreNotebookCryptoConfigFromBackup` | No | Loads the config back into the local conf.json and sets `Enabled=true`; UI shows "enabled, locked" |
+| After importing Data.zip | `restoreNotebookCryptoConfigFromBackup` | No | Same; covers "backup arrived with Data.zip but the local machine is not enabled" |
+| User enters master password to unlock (fallback) | `tryRestoreNotebookCryptoFromBackup` | Yes | `deriveKEK` attempts recovery when the local `Enabled=false`; returns the KEK after verifying the password |
+| User manually enables (fool-proof guard) | `tryRestoreNotebookCryptoFromBackup` | Yes | When encrypted notebooks already exist, refuses to regenerate salt and instead recovers from backup, verifying the password |
+
+**Config recovery vs key recovery, separated**: Config recovery only needs to read the backup file and load back the salt/verifier (no password required, since salt is not secret and data remains undecryptable without the password); key recovery requires the password to derive the KEK and verify against the verifier. This allows the "enabled" state to be reached automatically after sync/import, so the user can unlock by entering the master password.
+
+**Fool-proof guard**: When encrypted notebooks already exist on disk (boxes with `Encrypted=true`), `EnableEncryptedNotebook` **refuses to regenerate MasterSalt** (which would orphan old WrappedDEKs) and instead recovers from backup first; only if the backup is missing does it error out and guide the user to restore `conf.json` or the backup file. This guard mirrors `DisableEncryptedNotebook`'s "cannot disable while encrypted notebooks exist".
+
+**Prerequisite**: `restoreNotebookCryptoConfigFromBackup` only takes effect when the local `Enabled=false`; it never overwrites an in-use local config.
+
 ## 5. Encrypted File Layout
 
 ```
@@ -94,6 +115,8 @@ User master password
 ├── conf/conf.json                          ← global encryption config (MasterSalt/KEKVerifier)
 ├── storage/av/                             ← normal-box AV definitions (plaintext)
 ├── data/
+│   ├── .siyuan/
+│   │   └── notebook-crypto-backup.json     ← NotebookCrypto backup (MasterSalt/KEKVerifier, synced; see §4.1)
 │   ├── <boxID>/                            ← encrypted notebook directory
 │   │   ├── .siyuan/conf.json               ← BoxConf (Encrypted=true + WrappedDEK)
 │   │   ├── *.sy                            ← AES-256-GCM ciphertext

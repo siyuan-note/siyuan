@@ -87,6 +87,27 @@
 - **KEK 包络**：改密码只需重新包络 DEK，不重新加密数据
 - **不缓存 KEK**：每次解锁都派生，严格 per-box 隔离
 
+### 4.1 MasterSalt 备份与跨设备恢复
+
+MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2id 派生 KEK，KEK 再解开各 box 的 WrappedDEK。**MasterSalt 丢失等于数据永久锁死**：即使输入相同主密码，因 salt 变化派生出的 KEK 不同，旧 WrappedDEK 无法解开。为此引入备份与恢复机制。
+
+**备份**：`<DataDir>/.siyuan/notebook-crypto-backup.json`，保存整套 NotebookCrypto（MasterSalt/KEKVerifier/KDFParams）。位于 DataDir 内，**进入 dejavu 同步范围**。启用加密笔记本、修改主密码时刷新；禁用时删除。备份文件按明文 JSON 存储（salt 不保密、verifier 是密文，与 `conf/conf.json` 的存储方式一致）。
+
+**恢复触发点**（覆盖 conf.json 丢失 / 同步到新设备 / 导入 Data.zip 等场景）：
+
+| 触发场景 | 函数 | 需要主密码？ | 说明 |
+|---|---|---|---|
+| 同步完成后（拉取到备份文件） | `restoreNotebookCryptoConfigFromBackup` | 否 | 把配置装回本机 conf.json 并置 `Enabled=true`，UI 显示"已启用、锁定" |
+| 导入 Data.zip 后 | `restoreNotebookCryptoConfigFromBackup` | 否 | 同上，覆盖"备份随 Data.zip 到达本机但本机未启用"的情况 |
+| 用户输主密码解锁（兜底） | `tryRestoreNotebookCryptoFromBackup` | 是 | `deriveKEK` 在本机 `Enabled=false` 时尝试恢复，校验主密码后返回 KEK |
+| 用户手动启用（防呆） | `tryRestoreNotebookCryptoFromBackup` | 是 | 已存在加密笔记本时拒绝生成新 salt，改为从备份恢复并校验主密码 |
+
+**配置恢复 vs 密钥恢复分离**：配置恢复只需读备份文件、装回 salt/verifier（不需主密码，因 salt 不保密、没主密码仍解不开数据）；密钥恢复才需主密码派生 KEK 并校验 verifier。这让同步/导入后能自动进入"已启用"状态，用户输主密码即可解锁。
+
+**防呆守卫**：`EnableEncryptedNotebook` 在磁盘上已存在加密笔记本（`Encrypted=true` 的 box）时，**禁止重新生成 MasterSalt**（否则会孤立旧 WrappedDEK），改为优先从备份恢复；备份缺失才报错引导用户恢复 `conf.json` 或备份文件。此守卫与 `DisableEncryptedNotebook` 的"有加密笔记本时禁止禁用"对称。
+
+**前提条件**：`restoreNotebookCryptoConfigFromBackup` 仅在本机 `Enabled=false` 时生效，不覆盖正在使用的本机配置。
+
 ## 5. 加密文件布局
 
 ```
@@ -94,6 +115,8 @@
 ├── conf/conf.json                          ← 全局加密配置（MasterSalt/KEKVerifier）
 ├── storage/av/                             ← 普通 box 的 AV 定义（明文）
 ├── data/
+│   ├── .siyuan/
+│   │   └── notebook-crypto-backup.json     ← NotebookCrypto 备份（MasterSalt/KEKVerifier，进同步范围，详见 §4.1）
 │   ├── <boxID>/                            ← 加密笔记本目录
 │   │   ├── .siyuan/conf.json               ← BoxConf（Encrypted=true + WrappedDEK)
 │   │   ├── *.sy                            ← AES-256-GCM 密文

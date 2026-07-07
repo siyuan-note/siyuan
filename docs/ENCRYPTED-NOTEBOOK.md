@@ -298,7 +298,43 @@ An encrypted notebook is an island; some features are unimplemented because of t
 - **Noticeable latency**: Unlock ~1s, large-asset browsing (full decrypt per request with no cache), first access after lock (cold start).
 - **Zero impact on normal notebooks**: Encryption and routing logic short-circuits for non-encrypted boxes.
 
-## 16. Usage Recommendations
+## 16. Usage Guide
+
+### First-time enablement
+1. Go to **Settings → Access authorization → Encrypted notebooks** and toggle it on
+2. Set a master password (double input + risk confirmation). The master password is the unified key for all encrypted notebooks — **you must remember it; there is no recovery backdoor**
+3. Once enabled, you can **create a new encrypted notebook** from the file-panel "more" menu (enter a name + master password → auto-unlocks and opens)
+
+> Strength recommendation: 12+ characters, mixed case + digits + symbols. Master-password strength directly determines brute-force resistance (the kernel derives keys with Argon2id, intentionally slow).
+
+### Daily use: unlock and lock
+- **Unlock**: Click a closed encrypted notebook → enter the master password → wait ~1 second (Argon2id derivation) → opens. Unlocking only affects that notebook; other encrypted notebooks stay locked
+- **Lock**: Closing the notebook equals locking (DEK cleared + encrypted db deleted + plaintext caches cleared). **Locking after use** is the most important security habit — it minimizes the key's exposure time in memory
+- **After restart**: All encrypted notebooks are force-closed; you must re-enter the master password to unlock (the DEK lives only in memory and is lost on restart)
+
+> Important: An encrypted notebook is **only fully secure when locked**. While unlocked, authenticated APIs/plugins/MCP can read plaintext just like a normal notebook (see §12 Security premise).
+
+### Changing the master password
+Go to **Settings → Access authorization → Change master password**. Changing the password only re-wraps each box's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
+
+### Multi-device sync
+Encrypted-notebook ciphertext `.sy`/assets/AV definitions sync along with the data (ciphertext in, ciphertext out, self-consistent); the global key material (MasterSalt etc.) is also automatically backed up to the sync directory. **No manual "enable" is needed on a new device after sync**:
+
+1. Configure the same sync account on the new device and complete a sync
+2. Sync pulls the key backup to the local machine; the kernel auto-restores the "enabled" state
+3. Just click the encrypted notebook and enter the master password to unlock and use it
+
+If the notebook still shows as locked on the new device after sync, that is normal — click it and enter the master password.
+
+### Import and export
+- **Import**: Supports importing `.sy.zip` and Markdown; content is automatically DEK-encrypted before writing to disk, identical to manually created documents
+- **Export**: Identical to normal notebooks (must unlock first; exports plaintext). `.sy.zip`, HTML, Word, PDF, Markdown, etc. are all supported; export is rejected while locked
+
+### What if I forget the password
+**It cannot be recovered** — by design (no backdoor). Even if the ciphertext has been synced to the cloud, it cannot be decrypted without the master password. **You must remember the master password; using a password manager is recommended.**
+
+### Recovering from a lost key backup
+If both `conf/conf.json` and the key backup in the sync directory are lost (an extreme case), re-enabling the encrypted-notebook feature will be rejected with a prompt to restore the backup file. As long as you can recover `notebook-crypto-backup.json` from the sync cloud or a local backup, put it back at `<workspace>/data/.siyuan/` and re-enable to unlock with the original master password.
 
 ### Suitable scenarios for encrypted notebooks
 - Private diary, financial records, medical information

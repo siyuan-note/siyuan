@@ -123,6 +123,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 4. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
 5. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
 6. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
+7. **Git:** Do not run `git commit` / `git push` unless explicitly asked
 
 ---
 

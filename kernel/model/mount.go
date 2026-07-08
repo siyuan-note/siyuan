@@ -233,18 +233,18 @@ func unmount0(boxID string) {
 	boxConf := box.GetConf()
 	boxConf.Closed = true
 	box.SaveConf(boxConf)
-	box.Unindex()
 	if boxConf.Encrypted {
-		// 加密笔记本关闭：先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
-		// 再 ClearDEK（=LockBox）清除 DEK 并删除加密 db 文件。加密索引可由 box.Index() 全量重建，
-		// 关闭即删文件避免残留旧索引数据导致下次解锁叠加重复行。
+		// 加密笔记本关闭：跳过 Unindex（索引 db 马上要删，逐条删是白费），
+		// 先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
+		// 生成文件历史，再 ClearDEK（=LockBox）清除 DEK 并删除加密 db 文件。
+		// 加密索引可由 box.Index() 全量重建，关闭即删文件避免残留旧索引数据导致下次解锁叠加重复行。
 		FlushTxQueue()
 		sql.FlushQueue()
 		// 关闭前生成一次文件历史：锁定后定时器无法为加密笔记本生成历史（不在 GetOpenedBoxes 里）
-		if box := Conf.Box(boxID); nil != box {
-			GenerateFileHistoryForBox(box)
-		}
+		GenerateFileHistoryForBox(box)
 		ClearDEK(boxID)
+	} else {
+		box.Unindex()
 	}
 }
 

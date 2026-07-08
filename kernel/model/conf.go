@@ -894,6 +894,13 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	}
 
 	Conf.Close()
+	// 退出前关闭已打开的加密笔记本（走 unmount0：落盘 + 生成历史 + 锁定），
+	// 确保编辑历史不丢失、DEK 不残留内存
+	for _, box := range Conf.GetOpenedBoxes() {
+		if IsEncryptedBox(box.ID) {
+			unmount0(box.ID)
+		}
+	}
 	sql.CloseDatabase()
 	closePushQueue()
 	util.SaveAssetsTexts()

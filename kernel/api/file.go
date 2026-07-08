@@ -41,6 +41,15 @@ import (
 // errMsgSeeKernelLog 接在 API 错误提示末尾，引导用户查看内核日志以获取完整信息（避免在 Msg 暴露工作空间绝对路径）。
 const errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
 
+// rejectEncryptedBoxPath 检查 absPath 是否落在加密 box 目录下，是则返回 true。
+// 原始文件 API（getFile/putFile/copyFile/renameFile/removeFile）是绕过加密层的逃生口，
+// 对加密 box 的任何文件读写都应拒绝——合法读写走专用 API（upload/getBlockKramdown 等，已加密感知），
+// 避免密文泄漏给插件或明文破坏加密格式。
+func rejectEncryptedBoxPath(absPath string) bool {
+	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
+	return boxID != "" && model.IsEncryptedBox(boxID)
+}
+
 func getUniqueFilename(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -290,6 +299,14 @@ func copyFile(c *gin.Context) {
 		return
 	}
 
+	// 加密 box 的文件不允许通过原始文件 API 复制（src 读出密文/明文，dest 写入破坏加密存储）
+	if rejectEncryptedBoxPath(src) || rejectEncryptedBoxPath(dest) {
+		ret.Code = -1
+		ret.Msg = "copying encrypted notebook files is not supported via this API"
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+
 	info, err := os.Stat(src)
 	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", src, err)
@@ -348,6 +365,13 @@ func getFile(c *gin.Context) {
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
+	// 加密 box 的任何文件都不允许通过原始文件 API 读取（不只 .sy）：
+	// 密文对插件无意义，且可能被误解析或泄漏；合法读取走专用 API（已加密感知）
+	if rejectEncryptedBoxPath(fileAbsPath) {
+		ret.Code = -1
+		ret.Msg = "access to encrypted notebook files is not supported via this API"
+		return
+	}
 	if !filelock.IsExist(fileAbsPath) {
 		ret.Code = http.StatusNotFound
 		ret.Msg = "file does not exist"
@@ -390,16 +414,6 @@ func getFile(c *gin.Context) {
 			ret.Code = http.StatusForbidden
 			ret.Msg = http.StatusText(http.StatusForbidden)
 			c.JSON(http.StatusAccepted, ret)
-			return
-		}
-	}
-
-	// 加密笔记本的 .sy 是密文，直接返回密文无意义且可能被插件误解析
-	if strings.HasSuffix(filePath, ".sy") {
-		boxID := model.ExtractBoxIDFromAssetsPath(fileAbsPath)
-		if "" != boxID && model.IsEncryptedBox(boxID) {
-			ret.Code = -1
-			ret.Msg = "access to encrypted notebook .sy files is not supported via this API"
 			return
 		}
 	}
@@ -607,6 +621,12 @@ func renameFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	// 加密 box 的文件不允许通过原始文件 API 重命名（会破坏加密存储结构/跨 box 搬运密文）
+	if rejectEncryptedBoxPath(srcAbsPath) || rejectEncryptedBoxPath(destAbsPath) {
+		ret.Code = -1
+		ret.Msg = "renaming encrypted notebook files is not supported via this API"
+		return
+	}
 	if filelock.IsExist(destAbsPath) {
 		ret.Code = http.StatusConflict
 		ret.Msg = "Field [newPath]: path already exists"
@@ -675,6 +695,12 @@ func removeFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	// 加密 box 的文件不允许通过原始文件 API 删除（破坏加密存储结构）
+	if rejectEncryptedBoxPath(fileAbsPath) {
+		ret.Code = -1
+		ret.Msg = "removing encrypted notebook files is not supported via this API"
+		return
+	}
 	_, err = os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
@@ -717,6 +743,14 @@ func putFile(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		return
+	}
+
+	// 加密 box 的任何文件都不允许通过原始文件 API 写入（不只 .sy）：
+	// 明文写入会破坏密文格式或污染加密存储；合法写入走专用 API（已加密感知）
+	if rejectEncryptedBoxPath(fileAbsPath) {
+		ret.Code = -1
+		ret.Msg = "writing to encrypted notebook files is not supported via this API"
 		return
 	}
 
@@ -775,16 +809,6 @@ func putFile(c *gin.Context) {
 			if err != nil {
 				logging.LogErrorf("read file failed: %s", err)
 				break
-			}
-
-			// 加密笔记本的 .sy 写入会破坏密文格式
-			if strings.HasSuffix(fileAbsPath, ".sy") {
-				boxID := model.ExtractBoxIDFromAssetsPath(fileAbsPath)
-				if "" != boxID && model.IsEncryptedBox(boxID) {
-					ret.Code = -1
-					ret.Msg = "writing to encrypted notebook .sy files is not supported via this API"
-					return
-				}
 			}
 
 			err = filelock.WriteFile(fileAbsPath, data)

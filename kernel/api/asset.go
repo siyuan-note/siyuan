@@ -281,14 +281,22 @@ func setFileAnnotation(c *gin.Context) {
 			return
 		}
 	} else {
-		// 加密笔记本的 .sya 写盘前加密
+		// 加密笔记本的 .sya 写盘前必须加密；加密 box 未解锁时拒绝写入（fail-closed，避免明文落盘）
 		writeData := []byte(data)
-		if boxID := model.ExtractBoxIDFromAssetsPath(writePath); boxID != "" {
-			if dek, decErr := model.GetDEK(boxID); decErr == nil && dek != nil {
-				if enc, encErr := util.Encrypt(dek, writeData); encErr == nil {
-					writeData = enc
-				}
+		if boxID := model.ExtractBoxIDFromAssetsPath(writePath); boxID != "" && model.IsEncryptedBox(boxID) {
+			dek, dekErr := model.GetDEKIfUnlocked(boxID)
+			if dekErr != nil {
+				ret.Code = -1
+				ret.Msg = dekErr.Error()
+				return
 			}
+			enc, encErr := model.EncryptAsset(boxID, dek, writeData)
+			if encErr != nil {
+				ret.Code = -1
+				ret.Msg = encErr.Error()
+				return
+			}
+			writeData = enc
 		}
 		if err = filelock.WriteFile(writePath, writeData); err != nil {
 			ret.Code = -1
@@ -329,13 +337,21 @@ func getFileAnnotation(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	// 加密笔记本的 .sya 读盘后解密
-	if boxID := model.ExtractBoxIDFromAssetsPath(readPath); boxID != "" {
-		if dek, decErr := model.GetDEK(boxID); decErr == nil && dek != nil {
-			if plain, decErr := util.Decrypt(dek, data); decErr == nil {
-				data = plain
-			}
+	// 加密笔记本的 .sya 读盘后必须解密；未解锁时拒绝返回（fail-closed，避免返回密文或误判）
+	if boxID := model.ExtractBoxIDFromAssetsPath(readPath); boxID != "" && model.IsEncryptedBox(boxID) {
+		dek, dekErr := model.GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			ret.Code = -1
+			ret.Msg = dekErr.Error()
+			return
 		}
+		plain, decErr := model.DecryptAsset(boxID, dek, data)
+		if decErr != nil {
+			ret.Code = -1
+			ret.Msg = decErr.Error()
+			return
+		}
+		data = plain
 	}
 	ret.Data = map[string]any{
 		"data": string(data),

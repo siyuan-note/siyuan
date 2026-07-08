@@ -558,6 +558,18 @@ func IsEncryptedBox(boxID string) bool {
 	return boxConf != nil && boxConf.Encrypted
 }
 
+// IsSameCryptoBoundary 判断 srcBox 与 dstBox 是否处于同一加密边界（跨 box 操作是否安全）。
+// 普通笔记本之间允许（都不加密）；加密笔记本仅允许同一 box 内部操作——两个不同的加密 box 各有独立 DEK，
+// 之间互为"加密边界外"，跨 box 移动/合并会用错 DEK 导致密文损坏。供 MoveDocs/Doc2Heading 等跨 box 操作校验。
+func IsSameCryptoBoundary(srcBox, dstBox string) bool {
+	srcEnc := IsEncryptedBox(srcBox)
+	dstEnc := IsEncryptedBox(dstBox)
+	if !srcEnc && !dstEnc {
+		return true // 普通↔普通：允许
+	}
+	return srcEnc && dstEnc && srcBox == dstBox // 加密：仅同一 box 内允许
+}
+
 // IsBlockRefCrossingBoundary 判断从 srcBoxID 引用 defBlockID 是否跨越加密边界。
 // 加密笔记本禁止跨边界块引（双向）：加密 box 的块只能引用同一加密 box 内的块，普通 box 的块不能引用加密 box 的块。
 // 供 transaction 落库时兜底校验，防止手工输入/拖拽/粘贴/API 直调绕过前端搜索分流。
@@ -643,23 +655,39 @@ func ExtractBoxIDFromAssetsPath(absPath string) string {
 // copyAssetDecryptIfEncrypted 把 srcPath 的 asset 复制到 destPath。
 // 若 srcPath 在已解锁的加密 box 下，读密文→解密→写明文到 destPath（导出目录）；
 // 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
+// EncryptAsset 用 assetKey（DEK 派生子密钥）加密 asset 字节，AAD 绑定 boxID。
+// 供 assets/.names.json/.sya 等资源类数据统一加密，与 .sy（fileKey）和 AV（avKey）用途分离。
+func EncryptAsset(boxID string, dek, plaintext []byte) ([]byte, error) {
+	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
+	return util.EncryptWithAAD(assetKey, plaintext, []byte(boxID))
+}
+
+// DecryptAsset 对应解密。
+func DecryptAsset(boxID string, dek, ciphertext []byte) ([]byte, error) {
+	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
+	return util.DecryptWithAAD(assetKey, ciphertext, []byte(boxID))
+}
+
 func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	boxID := ExtractBoxIDFromAssetsPath(srcPath)
-	if boxID != "" {
-		if dek, err := GetDEK(boxID); err == nil && dek != nil {
-			raw, readErr := filelock.ReadFile(srcPath)
-			if readErr != nil {
-				return readErr
-			}
-			plain, decErr := util.Decrypt(dek, raw)
-			if decErr != nil {
-				return errors.New(Conf.Language(316))
-			}
-			if err := filelock.WriteFile(destPath, plain); err != nil {
-				return err
-			}
-			return nil
+	if boxID != "" && IsEncryptedBox(boxID) {
+		dek, err := GetDEKIfUnlocked(boxID)
+		if err != nil {
+			// 加密 box 未解锁：fail-closed，不解密
+			return filelock.Copy(srcPath, destPath)
 		}
+		raw, readErr := filelock.ReadFile(srcPath)
+		if readErr != nil {
+			return readErr
+		}
+		plain, decErr := DecryptAsset(boxID, dek, raw)
+		if decErr != nil {
+			return errors.New(Conf.Language(316))
+		}
+		if err := filelock.WriteFile(destPath, plain); err != nil {
+			return err
+		}
+		return nil
 	}
 	return filelock.Copy(srcPath, destPath)
 }

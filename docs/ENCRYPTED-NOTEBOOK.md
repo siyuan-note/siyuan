@@ -262,10 +262,10 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 - BoxConf.WrappedDEK (ciphertext, requires KEK to unwrap)
 - DEK / plaintext caches in memory (cleared on lock)
 - The content field of history indexes (left empty; neither plaintext nor ciphertext)
+- **Metadata leakage** (encryption does not conceal): file count, directory structure, file sizes, modification times (mtime), asset file extensions, blockID timestamps. Encrypted-box asset filenames are desensitized to `uuid-blockID.ext` but the extension is visible; old ciphertext retained in sync endpoints or historical snapshots is held by those storage providers, and the encrypted notebook cannot revoke their copies.
 
 **API protection**:
-- `/api/file/getFile`: refuses to read encrypted-box .sy (ciphertext is meaningless; prevents plugin mis-parsing)
-- `/api/file/putFile`: refuses to write encrypted-box .sy (plaintext writes corrupt the ciphertext format)
+- `/api/file/getFile`, `/api/file/putFile`, `/api/file/copyFile`, `/api/file/renameFile`, `/api/file/removeFile`: refuse to read/write any file under an encrypted box (not just .sy), preventing ciphertext leakage or plaintext corruption; legitimate reads/writes go through dedicated APIs (encryption-aware).
 
 ## 13. AI / LLM Reachability
 
@@ -324,6 +324,8 @@ An encrypted notebook is an island; some features are unimplemented because of t
 
 ### Changing the master password
 Go to **Settings → Access authorization → Change master password**. Changing the password only re-wraps each box's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
+
+> Important semantics: password change uses the KEK envelope model — the DEK itself does not change; only a new KEK (derived from the new password) re-wraps the WrappedDEK. This means **changing the password does not revoke the old password's decryption ability**: if the old password and an old WrappedDEK (retained in sync endpoints, backups, or historical snapshots) leak together, the same DEK can still be unwrapped, decrypting current data. If you suspect the old password has leaked, migrate content to a freshly created encrypted notebook (new DEK) rather than just changing the password.
 
 ### Multi-device sync
 Encrypted-notebook ciphertext `.sy`/assets/database files sync along with the data (ciphertext in, ciphertext out, self-consistent); the global key material (MasterSalt etc.) is also automatically backed up to the sync directory. **No manual "enable" is needed on a new device after sync**:

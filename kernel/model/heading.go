@@ -177,8 +177,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		return
 	}
 
-	// 禁止跨加密边界：Doc2Heading 会合并 srcTree 和 targetTree 的内容
-	if IsEncryptedBox(srcTree.Box) != IsEncryptedBox(targetTree.Box) {
+	// 禁止跨加密边界：Doc2Heading 会合并 srcTree 和 targetTree 的内容，
+	// 不同加密 box 各有独立 DEK，跨边界合并会导致密文用错 DEK 损坏数据
+	if !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
 		err = errors.New(Conf.Language(313))
 		return
 	}

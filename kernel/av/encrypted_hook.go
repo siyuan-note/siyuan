@@ -156,6 +156,7 @@ func mirrorBlocksPathByAvID(avID string) string {
 }
 
 // readMirrorBlocks 按路径读取镜像索引（boxID 为空读全局，非空读加密 box）。
+// 加密 box 的镜像索引是 DEK 加密的密文，读取后需解密。
 func readMirrorBlocks(boxID string) (ret map[string][]string) {
 	ret = map[string][]string{}
 	p := mirrorBlocksPath(boxID)
@@ -167,6 +168,15 @@ func readMirrorBlocks(boxID string) (ret map[string][]string) {
 		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
+	if boxID != "" {
+		// 加密 box 的镜像索引是密文，解密后再反序列化
+		dec, decErr := decryptAVData(boxID, data)
+		if decErr != nil {
+			logging.LogErrorf("decrypt attribute view blocks failed: %s", decErr)
+			return
+		}
+		data = dec
+	}
 	if err = msgpack.Unmarshal(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 		return
@@ -175,6 +185,7 @@ func readMirrorBlocks(boxID string) (ret map[string][]string) {
 }
 
 // writeMirrorBlocks 按路径写入镜像索引。
+// 加密 box 的镜像索引写入前用 DEK 加密。
 func writeMirrorBlocks(boxID string, data map[string][]string) error {
 	p := mirrorBlocksPath(boxID)
 	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
@@ -183,6 +194,14 @@ func writeMirrorBlocks(boxID string, data map[string][]string) error {
 	raw, err := msgpack.Marshal(data)
 	if err != nil {
 		return err
+	}
+	if boxID != "" {
+		// 加密 box 的镜像索引写入前加密
+		enc, encErr := encryptAVData(boxID, raw)
+		if encErr != nil {
+			return encErr
+		}
+		raw = enc
 	}
 	return filelock.WriteFile(p, raw)
 }
@@ -218,7 +237,8 @@ func encryptAVData(boxID string, data []byte) ([]byte, error) {
 	if dek == nil {
 		return data, nil // 非加密 box
 	}
-	return util.Encrypt(dek, data)
+	avKey := util.DeriveSubKey(dek, "siyuan/av")
+	return util.EncryptWithAAD(avKey, data, []byte(boxID))
 }
 
 func decryptAVData(boxID string, data []byte) ([]byte, error) {
@@ -232,5 +252,6 @@ func decryptAVData(boxID string, data []byte) ([]byte, error) {
 	if dek == nil {
 		return data, nil // 非加密 box
 	}
-	return util.Decrypt(dek, data)
+	avKey := util.DeriveSubKey(dek, "siyuan/av")
+	return util.DecryptWithAAD(avKey, data, []byte(boxID))
 }

@@ -1393,10 +1393,10 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		}
 	}
 
-	// 禁止跨加密边界移动文档：加密笔记本是孤岛，密文↔明文边界转换未实现，移动会导致数据损坏
-	toEncrypted := IsEncryptedBox(toBox.ID)
+	// 禁止跨加密边界移动文档：加密笔记本是孤岛，不同加密 box 各有独立 DEK，
+	// 跨边界移动（普通↔加密、加密 A↔加密 B）会导致密文用错 DEK 损坏数据
 	for _, fromBox := range pathsBoxes {
-		if fromBox.ID != toBox.ID && IsEncryptedBox(fromBox.ID) != toEncrypted {
+		if fromBox.ID != toBox.ID && !IsSameCryptoBoundary(fromBox.ID, toBox.ID) {
 			err = errors.New(Conf.Language(313))
 			return
 		}

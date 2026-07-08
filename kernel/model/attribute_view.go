@@ -53,9 +53,6 @@ func RemoveUnusedAttributeView(id string) {
 	if !filelock.IsExist(absPath) {
 		return
 	}
-	if !gulu.File.IsSubPath(base, absPath) {
-		return
-	}
 
 	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
@@ -258,6 +255,8 @@ func getAvIDs(tree *parse.Tree, allAvIDs []string) (ret []string) {
 func getAllAvIDs() (ret []string, err error) {
 	ret = []string{}
 
+	// 只扫全局 AV 目录。加密 box 的 AV 存在笔记本级目录（密文），不参与全局枚举——
+	// 未引用清理功能在加密 box 锁定时无法确认引用关系（loadTree 失败），枚举加密 AV 有误删风险
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "av"))
 	if nil != err {
 		return
@@ -1923,6 +1922,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 	keywords := strings.Fields(keyword)
 
 	var avSearchTmpResults []*AvSearchTempResult
+	// 只扫全局 AV 目录。加密 box 的 AV 不参与全局搜索——避免跨加密边界暴露数据库名等元信息
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	entries, err := os.ReadDir(avDir)
 	if err != nil {
@@ -4069,7 +4069,10 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		}
 	}
 
-	srcAvPath := filepath.Join(util.DataDir, "storage", "av", avID+".json")
+	srcAvPath, _ := av.FindAttributeViewPath(avID)
+	if srcAvPath == "" {
+		return
+	}
 	destAvPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 	if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
 		logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)

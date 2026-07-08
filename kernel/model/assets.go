@@ -1225,14 +1225,19 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		}
 	}
 
-	// 排除数据库中引用的资源文件
-	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
-	if gulu.File.IsDir(storageAvDir) {
+	// 排除数据库中引用的资源文件（含加密 box 的 AV，解密后扫描）
+	avDirs := []string{filepath.Join(util.DataDir, "storage", "av")}
+	for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+		avDirs = append(avDirs, filepath.Join(util.DataDir, encBoxID, "storage", "av"))
+	}
+	for _, storageAvDir := range avDirs {
+		if !gulu.File.IsDir(storageAvDir) {
+			continue
+		}
 		entries, readErr := os.ReadDir(storageAvDir)
 		if nil != readErr {
 			logging.LogErrorf("read dir [%s] failed: %s", storageAvDir, readErr)
-			err = readErr
-			return
+			continue
 		}
 
 		for _, entry := range entries {
@@ -1240,11 +1245,11 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 				continue
 			}
 
-			data, readDataErr := filelock.ReadFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()))
-			if nil != readDataErr {
-				logging.LogErrorf("read file [%s] failed: %s", entry.Name(), readDataErr)
-				err = readDataErr
-				return
+			avID := strings.TrimSuffix(entry.Name(), ".json")
+			// 用 ReadAttributeViewData 解密读取（加密 box 的 AV 是密文）
+			data, readDataErr := av.ReadAttributeViewData(avID)
+			if readDataErr != nil || data == nil {
+				continue
 			}
 
 			for asset := range assetsPathMap {

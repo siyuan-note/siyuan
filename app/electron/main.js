@@ -324,7 +324,11 @@ const exitApp = (port, errorWindowId) => {
             if (resetWindowStateOnRestart) {
                 fs.writeFileSync(windowStatePath, "{}");
             } else {
-                const bounds = mainWindow.getBounds();
+                // 保存窗口状态供下次启动恢复。isMaximized 记录关闭时是否最大化；x/y/width/height 须用 getNormalBounds，
+                // 其在任意窗口状态下均返回向下还原时的矩形。而 getBounds 在最大化时返回全屏尺寸，会导致还原时贴边。
+                // https://github.com/siyuan-note/siyuan/issues/18154
+                // https://www.electronjs.org/docs/latest/api/browser-window#wingetnormalbounds
+                const bounds = mainWindow.getNormalBounds();
                 fs.writeFileSync(windowStatePath, JSON.stringify({
                     isMaximized: mainWindow.isMaximized(),
                     fullscreen: mainWindow.isFullScreen(),

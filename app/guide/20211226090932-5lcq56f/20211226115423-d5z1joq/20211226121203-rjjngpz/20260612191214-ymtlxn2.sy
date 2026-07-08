@@ -163,6 +163,74 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。Microsoft Store 版本執行於 MSIX 沙箱中，無法自動修改 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​。可部署一個 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan.cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 轉發器（一次性，商店版更新後依然有效）"
+								}
+							]
+						},
+						{
+							"ID": "20260708122000-twstore1",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20260708122000-twstore1",
+								"updated": "20260708122000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "cG93ZXJzaGVsbA=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "# 僅適用於 Microsoft Store 版 —— 在 PowerShell 中執行一次\n$shimDir = \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\"   # 該目錄預設已在 PATH 中\n@(\n    '@echo off'\n    'setlocal'\n    'set \"ROOT=\"'\n    'for /f \"delims=\" %%i in (''powershell -NoProfile -Command \"(Get-AppxPackage *SiYuan*).InstallLocation\"'') do set \"ROOT=%%i\"'\n    'if not defined ROOT goto :noshim'\n    '\"%ROOT%\\app\\resources\\kernel\\SiYuan-Kernel.exe\" %*'\n    'exit /b %ERRORLEVEL%'\n    ':noshim'\n    '1>&2 echo siyuan: 找不到 Microsoft Store 版本'\n    'exit /b 1'\n) | Set-Content \"$shimDir\\siyuan.cmd\"\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20260708130000-twuninst",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260708130000-twuninst",
+								"updated": "20260708130000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "解除安裝商店版時如需清理："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Remove-Item \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\\siyuan.cmd\""
 								}
 							]
 						}

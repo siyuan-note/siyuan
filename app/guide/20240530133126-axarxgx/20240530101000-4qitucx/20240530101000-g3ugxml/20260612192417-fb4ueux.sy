@@ -163,6 +163,74 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ を使用できます"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。Microsoft Store 版は MSIX サンドボックスで実行されるため "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を自動的に変更できません。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan.cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ シム（一回のデプロイでストア更新後も有効）を配置できます"
+								}
+							]
+						},
+						{
+							"ID": "20260708123000-jastore1",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20260708123000-jastore1",
+								"updated": "20260708123000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "cG93ZXJzaGVsbA=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "# Microsoft Store 版のみ — PowerShell で一度実行\n$shimDir = \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\"   # デフォルトで PATH に含まれる\n@(\n    '@echo off'\n    'setlocal'\n    'set \"ROOT=\"'\n    'for /f \"delims=\" %%i in (''powershell -NoProfile -Command \"(Get-AppxPackage *SiYuan*).InstallLocation\"'') do set \"ROOT=%%i\"'\n    'if not defined ROOT goto :noshim'\n    '\"%ROOT%\\app\\resources\\kernel\\SiYuan-Kernel.exe\" %*'\n    'exit /b %ERRORLEVEL%'\n    ':noshim'\n    '1>&2 echo siyuan: Microsoft Store 版が見つかりません'\n    'exit /b 1'\n) | Set-Content \"$shimDir\\siyuan.cmd\"\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20260708130000-jauninst",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260708130000-jauninst",
+								"updated": "20260708130000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アンインストール時に削除する場合: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Remove-Item \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\\siyuan.cmd\""
 								}
 							]
 						}

@@ -964,10 +964,14 @@ func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {
 		// 用 FindAttributeViewPath 解析 AV 定义的真实路径（自动路由全局/加密 box 笔记本级）
 		srcAvPath, _ := av.FindAttributeViewPath(avNode.AttributeViewID)
 		if srcAvPath == "" {
-			// AV 定义不存在（可能尚未落盘或已删除），跳过
 			continue
 		}
+		// 普通笔记本保持原路径 historyDir/storage/av/；加密笔记本加 boxID 前缀（与文档历史
+		// 结构一致），让 indexHistoryDir 能从路径反查 boxID 判断是否加密
 		destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+		if IsEncryptedBox(tree.Box) {
+			destAvPath = filepath.Join(historyDir, tree.Box, "storage", "av", avNode.AttributeViewID+".json")
+		}
 		if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
 			logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
 		}

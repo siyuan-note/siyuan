@@ -961,10 +961,11 @@ func generateTreeHistory(tree *parse.Tree, historyDir string) {
 func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {
 	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 	for _, avNode := range avNodes {
-		// 加密笔记本的 AV 定义在笔记本级目录
-		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
-		if IsEncryptedBox(tree.Box) {
-			srcAvPath = filepath.Join(util.DataDir, tree.Box, "storage", "av", avNode.AttributeViewID+".json")
+		// 用 FindAttributeViewPath 解析 AV 定义的真实路径（自动路由全局/加密 box 笔记本级）
+		srcAvPath, _ := av.FindAttributeViewPath(avNode.AttributeViewID)
+		if srcAvPath == "" {
+			// AV 定义不存在（可能尚未落盘或已删除），跳过
+			continue
 		}
 		destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
 		if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {

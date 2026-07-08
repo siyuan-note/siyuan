@@ -397,25 +397,20 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         if (range && item.contains(range.startContainer)) {
             isRangeBlock = true;
         }
-        // 表格出现滚动条，更新块后需还原横向滚动位置 https://github.com/siyuan-note/siyuan/issues/3650
+        // 表格的横向、纵向滚动均发生在首个子节点（contenteditable 容器，overflow:auto）上，
+        // 更新块后需一并还原，否则固定表头长表格撤销/重做会跳回开头
+        // https://github.com/siyuan-note/siyuan/issues/3650 https://github.com/siyuan-note/siyuan/issues/18035
         let tableScrollLeft: number;
         let tableScrollTop: number;
         if (item.classList.contains("table")) {
             tableScrollLeft = (item.firstElementChild as HTMLElement).scrollLeft;
-            // 固定表头后表格出现纵向滚动条，撤销/重做会重置滚动位置 https://github.com/siyuan-note/siyuan/issues/18035
-            tableScrollTop = item.querySelector("table").scrollTop;
+            tableScrollTop = (item.firstElementChild as HTMLElement).scrollTop;
         }
         item.insertAdjacentHTML("afterend",
             // 图标撤销后无法渲染
             item.getAttribute("data-subtype") === "echarts" ? protyle.lute.SpinBlockDOM(operation.data) : operation.data);
         item = item.nextElementSibling;
         item.previousElementSibling.remove();
-        if (tableScrollLeft > 0) {
-            (item.firstElementChild as HTMLElement).scrollLeft = tableScrollLeft;
-        }
-        if (tableScrollTop > 0) {
-            item.querySelector("table").scrollTop = tableScrollTop;
-        }
 
         const wbrElement = item.querySelector("wbr");
         if (isRangeBlock && isUndo) {
@@ -426,6 +421,13 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
             }
         }
         wbrElement?.remove();
+        // 聚焦后再还原滚动，避免 focusByWbr/focusBlock 改变滚动位置导致表格跳回开头
+        if (tableScrollLeft > 0) {
+            (item.firstElementChild as HTMLElement).scrollLeft = tableScrollLeft;
+        }
+        if (tableScrollTop > 0) {
+            (item.firstElementChild as HTMLElement).scrollTop = tableScrollTop;
+        }
 
         processRender(item);
         highlightRender(item);

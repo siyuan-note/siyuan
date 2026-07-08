@@ -27,7 +27,7 @@ var AVDEKProvider func(boxID string) ([]byte, error)
 // 供 AV 路径 fallback 时遍历查找。
 var AVEncryptedBoxIDs func() []string
 
-// AVIsEncryptedBox 由 model 层注入，判断 boxID 是否为加密 notebook。
+// AVIsEncryptedBox 由 model 层注入，判断 boxID 是否为加密笔记本。
 var AVIsEncryptedBox func(boxID string) bool
 
 // pendingAVBox 记录首次创建的 AV 归属哪个加密 box。
@@ -36,7 +36,7 @@ var AVIsEncryptedBox func(boxID string) bool
 var pendingAVBox = map[string]string{}
 var pendingAVBoxLock = sync.RWMutex{}
 
-// SetAVBoxID 预设 AV 定义的归属 box。加密 notebook 创建 AV 时调用。
+// SetAVBoxID 预设 AV 定义的归属 box。加密笔记本创建 AV 时调用。
 // 普通笔记本不需要调（AV 默认走全局路径）。
 func SetAVBoxID(avID, boxID string) {
 	if boxID != "" {

@@ -1127,8 +1127,8 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	if err != nil {
 		return
 	}
-	// 排除加密 notebook 的资源：加密 box 锁定时 loadTree 失败会误判引用关系，
-	// 且加密 notebook 是孤岛，资源不参与全局未引用清理
+	// 排除加密笔记本的资源：加密 box 锁定时 loadTree 失败会误判引用关系，
+	// 且加密笔记本是孤岛，资源不参与全局未引用清理
 	for dest, absPath := range assetsPathMap {
 		if boxID := ExtractBoxIDFromAssetsPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
 			delete(assetsPathMap, dest)
@@ -1142,10 +1142,10 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		if IsEncryptedBox(notebook.ID) {
-			continue // 加密 notebook 的文档引用不扫描（loadTree 在锁定时会失败）
+			continue // 加密笔记本的文档引用不扫描（loadTree 在锁定时会失败）
 		}
 		if IsEncryptedBox(notebook.ID) {
-			continue // 加密 notebook 的资源不参与未引用清理（孤岛，资源不跨边界）
+			continue // 加密笔记本的资源不参与未引用清理（孤岛，资源不跨边界）
 		}
 		dests := map[string]bool{}
 
@@ -1238,7 +1238,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		}
 	}
 
-	// 排除数据库中引用的资源文件。加密 notebook 的资源不参与未引用清理（孤岛，资源不跨边界）
+	// 排除数据库中引用的资源文件。加密笔记本的资源不参与未引用清理（孤岛，资源不跨边界）
 	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
 	if gulu.File.IsDir(storageAvDir) {
 		entries, readErr := os.ReadDir(storageAvDir)

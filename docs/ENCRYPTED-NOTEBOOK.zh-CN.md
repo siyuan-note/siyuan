@@ -262,7 +262,7 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 - BoxConf.WrappedDEK（密文，需 KEK 解开）
 - 内存中的 DEK/明文缓存（锁定时清空）
 - 历史索引的 content 字段（留空，不存明文也不存密文）
-- **元数据泄漏**（加密不掩盖以下信息）：文件数量、目录结构、文件大小、修改时间（mtime）、asset 文件扩展名、blockID 时间戳。加密 box 的 asset 文件名虽脱敏为 `uuid-blockID.ext`，但扩展名可见；同步端/历史快照中的旧密文也由各存储方自行保管，加密 notebook 无法吊销其副本
+- **元数据泄漏**（加密不掩盖以下信息）：文件数量、目录结构、文件大小、修改时间（mtime）、asset 文件扩展名、blockID 时间戳。加密 box 的 asset 文件名虽脱敏为 `uuid-blockID.ext`，但扩展名可见；同步端/历史快照中的旧密文也由各存储方自行保管，加密笔记本无法吊销其副本
 
 **API 防护**：
 - `/api/file/getFile`、`/api/file/putFile`、`/api/file/copyFile`、`/api/file/renameFile`、`/api/file/removeFile`：拒绝读写加密 box 下的任何文件（不只 .sy），避免密文泄漏或明文破坏；合法读写走专用 API（已加密感知）
@@ -282,8 +282,8 @@ MasterSalt 是 KEK 派生的全局根基——主密码 + MasterSalt 经 Argon2i
 加密笔记本是孤岛，部分功能因其跨 notebook 特性或依赖全局聚合而未实现，属于功能边界，非性能或安全取舍。
 
 - **闪卡 / 间隔重复**：牌组与调度跨 notebook 且依赖全局 SQLite 数据库，未实现。
-- **书签**：全局聚合视图（扫全局 siyuan.db），加密 notebook 未接入。
-- **标签**：全局聚合视图（扫全局 spans 表），加密 notebook 未接入。
+- **书签**：全局聚合视图（扫全局 siyuan.db），加密笔记本 未接入。
+- **标签**：全局聚合视图（扫全局 spans 表），加密笔记本 未接入。
 - **资源文件重命名**：加密 box 的 asset 文件名已脱敏为 `uuid-blockID.ext`，重命名会破坏原始名映射。
 
 ## 15. 性能区别

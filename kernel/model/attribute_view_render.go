@@ -539,6 +539,18 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID strin
 	return
 }
 
+// avBoxIDFromRepoPath 从快照文件路径反查 boxID。
+// 全局路径 /storage/av/<avID>.json 返回空串；加密 box 路径 /<boxID>/storage/av/<avID>.json 返回 boxID。
+func avBoxIDFromRepoPath(repoPath string) string {
+	parts := strings.Split(repoPath, "/")
+	// 全局路径: ["", "storage", "av", "xxx.json"] → parts[1]=="storage"
+	// 加密 box: ["", "<boxID>", "storage", "av", "xxx.json"] → parts[1]=="<boxID>"
+	if len(parts) >= 4 && parts[2] == "storage" {
+		return parts[1]
+	}
+	return ""
+}
+
 func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	repo, err := newRepository()
 	if err != nil {
@@ -556,7 +568,8 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 	var avFile *entity.File
 	for _, f := range files {
-		if "/storage/av/"+avID+".json" == f.Path {
+		// 匹配全局 /storage/av/<avID>.json 或加密 box /<boxID>/storage/av/<avID>.json
+		if strings.HasSuffix(f.Path, "/storage/av/"+avID+".json") {
 			avFile = f
 			break
 		}
@@ -578,6 +591,17 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		err = readErr
 		return
+	}
+
+	// 加密笔记本的 AV 在快照中是密文，按路径反查 boxID 后解密
+	if histBoxID := avBoxIDFromRepoPath(avFile.Path); histBoxID != "" && IsEncryptedBox(histBoxID) {
+		dec, decErr := av.DecryptAVData(histBoxID, data)
+		if decErr != nil {
+			logging.LogErrorf("decrypt snapshot attribute view [%s] failed: %s", avID, decErr)
+			err = decErr
+			return
+		}
+		data = dec
 	}
 
 	if !ast.IsNodeIDPattern(avID) {

@@ -8,6 +8,9 @@ interface LongPressGate {
     touchStartTime: number;
     requireLongPress: boolean;
     longPressCancelled: boolean;
+    // 输入源为鼠标：部分平板 WebView 会把鼠标合成成 touch 事件，鼠标无滚动冲突（滚动走滚轮），跳过时间门槛
+    // 仅保留位移门槛以区分点击与拖拽，避免点击 + 号/箭头等操作时因抖动误入拖拽
+    isMouse: boolean;
 }
 
 // 判定一次滑动是否应放行原生滚动（而非进入拖拽）：位移超阈值且在长按门槛内移动，则标记为滚动
@@ -18,6 +21,14 @@ const shouldYieldToScroll = (gate: LongPressGate, clientX: number, clientY: numb
     if (Math.abs(dx) < Constants.SIZE_DRAG_THRESHOLD && Math.abs(dy) < Constants.SIZE_DRAG_THRESHOLD) {
         // 位移过小，继续等待长按判定
         return true;
+    }
+    if (gate.isMouse) {
+        // 鼠标无滚动冲突（滚动走滚轮），跳过手指的 400ms 长按门槛
+        // 但仍需区分点击与拖拽：桌面原生 DnD 在 mousedown 后会短暂等待（系统级约 3-10px + 短时判定）
+        // 这里用位移门槛 + 短暂时间下限双重判定，避免点击 + 号/箭头时抖动误触发 dragstart
+        // （误触发会合成 dragstart → 文档树加 disablehover → + 号消失、子元素 pointer-events:none）
+        const MOUSE_DRAG_DELAY = 150;
+        return Date.now() - gate.touchStartTime < MOUSE_DRAG_DELAY;
     }
     if (!gate.requireLongPress) {
         return false;
@@ -47,6 +58,24 @@ let lastDragOverElement: Element | null = null;
 
 let manualState: (LongPressGate) | null = null;
 
+// 最近一次 pointerdown 的输入源，pointerType 是唯一可靠区分 mouse/touch/pen 的字段
+let lastPointerType: string = "";
+
+// 判定当前输入源是否为鼠标：部分平板 WebView 会把鼠标合成成 touch 事件
+// pointerType === "mouse" 且接触面积为 0（radiusX/radiusY 为 0）时判定为鼠标
+// radiusX > 0 单向可信：非零一定是真手指，据此否决鼠标判断，避免把手指误判成鼠标跳过长按
+// 不用 force（iOS 真手指常报 0）、不用 sourceCapabilities（WebKit 不支持）
+const isMouseInput = (touch: Touch): boolean => {
+    const hasContactArea = (touch.radiusX ?? 0) > 0 || (touch.radiusY ?? 0) > 0;
+    return !hasContactArea && lastPointerType === "mouse";
+};
+
+// 最近一次输入源是否为鼠标，供 event.ts 的长按菜单合成判断使用
+// 鼠标左键长按不应触发右键菜单（触屏长按出菜单的手势专属逻辑），鼠标的菜单由右键触发
+export const isLastPointerMouse = (): boolean => {
+    return lastPointerType === "mouse";
+};
+
 // 触摸起始：先判断是否命中原生 Drag API（draggable="true"），命中则走原生路径；否则判断手动 mousedown 白名单
 const handleTouchStart = (e: TouchEvent) => {
     if (dragState || manualState) return;
@@ -74,6 +103,7 @@ const handleTouchStart = (e: TouchEvent) => {
                     draggable.closest(".av__gallery-item") !== null ||
                     draggable.closest(".protyle-action") !== null,
                 longPressCancelled: false,
+                isMouse: isMouseInput(touch),
             };
             return;
         }
@@ -120,6 +150,7 @@ const handleTouchStart = (e: TouchEvent) => {
         touchStartTime: Date.now(),
         requireLongPress: target.closest(".sy__outline") !== null,
         longPressCancelled: false,
+        isMouse: isMouseInput(touch),
     };
 };
 
@@ -373,6 +404,11 @@ export const cancelManualTouch = () => {
 };
 
 export const initTouchDragBridge = () => {
+    // 记录输入源，供 touchstart 回调区分鼠标合成 touch 的场景（部分平板把鼠标合成成 touch 事件）
+    document.addEventListener("pointerdown", (e: PointerEvent) => {
+        lastPointerType = e.pointerType;
+    }, {passive: true});
+
     // 触摸事件桥接：原生 Drag API（draggable="true"）与手动 mousedown 拖拽（dock/outline/resize 把手）统一入口
     document.addEventListener("touchstart", handleTouchStart, {passive: false});
     document.addEventListener("touchmove", handleTouchMove, {passive: false});

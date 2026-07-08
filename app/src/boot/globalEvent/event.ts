@@ -10,7 +10,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
-import {cancelManualTouch, initTouchDragBridge} from "../../util/touchDragBridge";
+import {cancelManualTouch, initTouchDragBridge, isLastPointerMouse} from "../../util/touchDragBridge";
 import {isWindow} from "../../util/functions";
 import {getDockByType} from "../../layout/tabUtil";
 
@@ -225,7 +225,9 @@ export const initWindowEvent = (app: App) => {
         }
         if (Math.abs(startX - event.changedTouches[0].clientX) < Constants.SIZE_DRAG_THRESHOLD &&
             Math.abs(startY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD &&
-            Date.now() - time > Constants.TIMEOUT_LONGPRESS) {
+            Date.now() - time > Constants.TIMEOUT_LONGPRESS &&
+            // 鼠标长按不应合成右键菜单：触屏长按出菜单是手指专属手势，鼠标菜单由右键触发
+            !isLastPointerMouse()) {
             event.target.dispatchEvent(new MouseEvent("contextmenu", {
                 bubbles: true,
                 cancelable: true,

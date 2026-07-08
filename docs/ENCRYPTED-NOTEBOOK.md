@@ -285,6 +285,8 @@ An encrypted notebook is an island; some features are unimplemented because of t
 - **Bookmarks**: Global aggregation view (scans the global siyuan.db); encrypted notebooks not integrated.
 - **Tags**: Global aggregation view (scans the global spans table); encrypted notebooks not integrated.
 - **Asset file rename**: Encrypted-box asset filenames are already desensitized to `uuid-blockID.ext`; renaming breaks the original-name mapping.
+- **Unused asset cleanup**: Encrypted-notebook assets are excluded from global unused-asset cleanup (island, assets do not cross boundaries), preventing false deletion when locked and document references cannot be scanned.
+- **Unused database cleanup**: Encrypted-notebook database definitions are excluded from global unused-database cleanup, preventing false deletion when locked and reference relationships cannot be confirmed.
 
 ## 15. Performance Differences
 

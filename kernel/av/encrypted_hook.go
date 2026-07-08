@@ -255,3 +255,13 @@ func decryptAVData(boxID string, data []byte) ([]byte, error) {
 	avKey := util.DeriveSubKey(dek, "siyuan/av")
 	return util.DecryptWithAAD(avKey, data, []byte(boxID))
 }
+
+// EncryptAVData 是 encryptAVData 的导出版本，供 model 层（导入/复制数据库等）统一加密 AV 定义。
+func EncryptAVData(boxID string, data []byte) ([]byte, error) {
+	return encryptAVData(boxID, data)
+}
+
+// DecryptAVData 是 decryptAVData 的导出版本。
+func DecryptAVData(boxID string, data []byte) ([]byte, error) {
+	return decryptAVData(boxID, data)
+}

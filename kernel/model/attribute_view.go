@@ -1656,14 +1656,14 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		return
 	}
 
-	// 加密 box 的 AV 是密文，需先解密再处理
-	if avBoxID != "" {
-		if dek, decErr := GetDEK(avBoxID); decErr == nil && dek != nil {
-			if data, decErr = util.Decrypt(dek, data); decErr != nil {
-				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, decErr)
-				err = decErr
-				return
-			}
+	// 加密 box 的 AV 是密文，需先解密再处理（av.DecryptAVData 内部按 box 加密/已解锁路由）
+	if avBoxID != "" && IsEncryptedBox(avBoxID) {
+		var decErr error
+		data, decErr = av.DecryptAVData(avBoxID, data)
+		if decErr != nil {
+			logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, decErr)
+			err = decErr
+			return
 		}
 	}
 
@@ -1694,16 +1694,16 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		return
 	}
 
-	// 加密 box 的新 AV 定义也存笔记本级目录，且需 DEK 加密
+	// 加密 box 的新 AV 定义也存笔记本级目录，且需 avKey 加密
 	newAvPath := filepath.Join(util.DataDir, "storage", "av", newAvID+".json")
 	if avBoxID != "" {
 		newAvPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", newAvID+".json")
-		if dek, decErr := GetDEK(avBoxID); decErr == nil && dek != nil {
-			if data, decErr = util.Encrypt(dek, data); decErr != nil {
-				logging.LogErrorf("encrypt attribute view [%s] failed: %s", newAvID, decErr)
-				err = decErr
-				return
-			}
+		var encErr error
+		data, encErr = av.EncryptAVData(avBoxID, data)
+		if encErr != nil {
+			logging.LogErrorf("encrypt attribute view [%s] failed: %s", newAvID, encErr)
+			err = encErr
+			return
 		}
 		av.SetAVBoxID(newAvID, avBoxID)
 	}

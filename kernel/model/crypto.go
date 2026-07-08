@@ -655,6 +655,19 @@ func ExtractBoxIDFromAssetsPath(absPath string) string {
 // copyAssetDecryptIfEncrypted 把 srcPath 的 asset 复制到 destPath。
 // 若 srcPath 在已解锁的加密 box 下，读密文→解密→写明文到 destPath（导出目录）；
 // 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
+// EncryptFile 用 fileKey（DEK 派生子密钥）加密 .sy 文档字节，AAD 绑定 boxID。
+// 与 filesys.encryptData/decryptData 使用相同的 AAD（boxID 级），保证读写一致。
+func EncryptFile(boxID string, dek, plaintext []byte) ([]byte, error) {
+	fileKey := util.DeriveSubKey(dek, "siyuan/file")
+	return util.EncryptWithAAD(fileKey, plaintext, []byte(boxID))
+}
+
+// DecryptFile 对应解密。
+func DecryptFile(boxID string, dek, ciphertext []byte) ([]byte, error) {
+	fileKey := util.DeriveSubKey(dek, "siyuan/file")
+	return util.DecryptWithAAD(fileKey, ciphertext, []byte(boxID))
+}
+
 // EncryptAsset 用 assetKey（DEK 派生子密钥）加密 asset 字节，AAD 绑定 boxID。
 // 供 assets/.names.json/.sya 等资源类数据统一加密，与 .sy（fileKey）和 AV（avKey）用途分离。
 func EncryptAsset(boxID string, dek, plaintext []byte) ([]byte, error) {

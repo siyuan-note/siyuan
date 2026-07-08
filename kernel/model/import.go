@@ -402,11 +402,6 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err = os.MkdirAll(boxAVDir, 0755); err != nil {
 			return
 		}
-		dek, dekErr := GetDEK(boxID)
-		if dekErr != nil || dek == nil {
-			err = errors.New("encrypted box not unlocked")
-			return
-		}
 		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, walkErr error) error {
 			if walkErr != nil || d == nil || d.IsDir() {
 				return walkErr
@@ -418,7 +413,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if readErr != nil {
 				return readErr
 			}
-			enc, encErr := util.Encrypt(dek, src)
+			// av.EncryptAVData 内部按 box 是否加密/已解锁路由，加密 box 用 avKey+AAD
+			enc, encErr := av.EncryptAVData(boxID, src)
 			if encErr != nil {
 				return encErr
 			}
@@ -470,14 +466,15 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 		// 加密笔记本的数据需先加密再落盘，导入的 .sy 原文是明文 JSON
 		if IsEncryptedBox(boxID) {
-			dek, decErr := GetDEK(boxID)
-			if decErr != nil || dek == nil {
+			dek, dekErr := GetDEKIfUnlocked(boxID)
+			if dekErr != nil {
 				err = errors.New(Conf.Language(314))
 				return
 			}
-			data, decErr = util.Encrypt(dek, data)
-			if decErr != nil {
-				logging.LogErrorf("encrypt import .sy failed: %s", decErr)
+			var encErr error
+			data, encErr = EncryptFile(boxID, dek, data)
+			if encErr != nil {
+				logging.LogErrorf("encrypt import .sy failed: %s", encErr)
 				return
 			}
 		}

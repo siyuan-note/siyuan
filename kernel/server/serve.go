@@ -733,12 +733,16 @@ func readAssetBytes(absPath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" {
-		if dek, decErr := model.GetDEK(boxID); decErr == nil && dek != nil {
-			if plain, decErr := util.Decrypt(dek, data); decErr == nil {
-				return plain, nil
-			}
+	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
+		dek, dekErr := model.GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			return nil, dekErr // 加密 box 未解锁：fail-closed，不返回密文
 		}
+		plain, decErr := model.DecryptAsset(boxID, dek, data)
+		if decErr != nil {
+			return nil, decErr
+		}
+		return plain, nil
 	}
 	return data, nil
 }
@@ -748,19 +752,21 @@ func readAssetBytes(absPath string) ([]byte, error) {
 // 否则返回 false，由调用方走原 http.ServeFile 路径。
 func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
-	if boxID == "" {
-		return false
+	if boxID == "" || !model.IsEncryptedBox(boxID) {
+		return false // 非加密 box，走原路径
 	}
-	dek, err := model.GetDEK(boxID)
-	if err != nil || dek == nil {
-		return false // 非加密 box 或未解锁，走原路径
+	dek, err := model.GetDEKIfUnlocked(boxID)
+	if err != nil {
+		// 加密 box 未解锁：fail-closed，返回 403，不走 ServeFile（避免返回密文）
+		context.Status(http.StatusForbidden)
+		return true
 	}
 	ciphertext, readErr := os.ReadFile(absPath)
 	if readErr != nil {
 		context.Status(http.StatusNotFound)
 		return true
 	}
-	plain, decErr := util.Decrypt(dek, ciphertext)
+	plain, decErr := model.DecryptAsset(boxID, dek, ciphertext)
 	if decErr != nil {
 		logging.LogErrorf("decrypt asset [%s] failed: %s", absPath, decErr)
 		context.Status(http.StatusInternalServerError)

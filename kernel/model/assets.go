@@ -69,7 +69,12 @@ func GetAssetImgSize(assetPath string) (width, height int) {
 	return
 }
 
-func GetAssetPathByHash(hash string) string {
+// GetAssetPathByHash 按 hash 查已存在的 asset 路径用于去重。boxID 非空且为加密 box 时返回空——
+// 加密 box 不参与全局去重（避免复用普通明文 asset）；普通 box 走全局 cache/SQL（加密 box 数据不在全局表）。
+func GetAssetPathByHash(hash, boxID string) string {
+	if boxID != "" && IsEncryptedBox(boxID) {
+		return "" // 加密 box：跳过全局去重，强制新写（防跨边界复用明文 asset）
+	}
 	assetHash := cache.GetAssetHash(hash)
 	if nil == assetHash {
 		sqlAsset := sql.QueryAssetByHash(hash)
@@ -306,11 +311,31 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 				name = filepath.Base(u)
 				name = util.FilterUploadFileName(name)
 				name = "network-asset-" + name
-				name = util.AssetName(name, ast.NewNodeID())
-				writePath := filepath.Join(assetsDirPath, name)
-				if err = filelock.Copy(u, writePath); err != nil {
-					logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
-					continue
+				var writePath string
+				if IsEncryptedBox(tree.Box) {
+					// 加密 box：脱敏文件名 + 加密内容（writeAssetFile 内部按路径反查 box 加密）+ 写映射
+					diskName := encryptedAssetName(util.Ext(name), ast.NewNodeID())
+					writePath = filepath.Join(assetsDirPath, diskName)
+					f, openErr := os.Open(u)
+					if openErr != nil {
+						logging.LogErrorf("open [%s] failed: %s", u, openErr)
+						continue
+					}
+					if err = writeAssetFile(writePath, f, tree.Box); err != nil {
+						logging.LogErrorf("write encrypted asset [%s] failed: %s", writePath, err)
+						f.Close()
+						continue
+					}
+					f.Close()
+					writeAssetNameMapping(tree.Box, diskName, name)
+					name = diskName
+				} else {
+					name = util.AssetName(name, ast.NewNodeID())
+					writePath = filepath.Join(assetsDirPath, name)
+					if err = filelock.Copy(u, writePath); err != nil {
+						logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
+						continue
+					}
 				}
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
@@ -416,12 +441,25 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 						name += ext
 					}
 				}
-				name = util.AssetName(name, ast.NewNodeID())
-				name = "network-asset-" + name
-				writePath := filepath.Join(assetsDirPath, name)
-				if err = filelock.WriteFile(writePath, data); err != nil {
-					logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
-					continue
+				if IsEncryptedBox(tree.Box) {
+					// 加密 box：脱敏文件名 + 加密内容 + 写映射
+					name = "network-asset-" + name
+					diskName := encryptedAssetName(util.Ext(name), ast.NewNodeID())
+					writePath := filepath.Join(assetsDirPath, diskName)
+					if err = writeAssetFile(writePath, bytes.NewReader(data), tree.Box); err != nil {
+						logging.LogErrorf("write encrypted network asset [%s] failed: %s", writePath, err)
+						continue
+					}
+					writeAssetNameMapping(tree.Box, diskName, name)
+					name = diskName
+				} else {
+					name = util.AssetName(name, ast.NewNodeID())
+					name = "network-asset-" + name
+					writePath := filepath.Join(assetsDirPath, name)
+					if err = filelock.WriteFile(writePath, data); err != nil {
+						logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
+						continue
+					}
 				}
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
@@ -589,6 +627,9 @@ func getAssetAbsPath(relativePath string) (absPath string, err error) {
 		return "", errors.New(Conf.Language(0))
 	}
 	for _, notebook := range notebooks {
+		if IsEncryptedBox(notebook.ID) {
+			continue // 加密 box 的资源不参与全局路径解析（孤岛，资源不跨边界）
+		}
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
 		filelock.Walk(notebookAbsPath, func(path string, d fs.DirEntry, err error) error {
 			if isSkipFile(d.Name()) {

@@ -614,11 +614,11 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
 	if !IsEncryptedBox(boxID) {
 		return data
 	}
-	dek, err := GetDEK(boxID)
-	if err != nil || dek == nil {
-		return data
+	dek, err := GetDEKIfUnlocked(boxID)
+	if err != nil {
+		return data // 加密 box 未解锁：同步快照解析返回原数据（调用方解析失败时按文件名回退）
 	}
-	plain, err := util.Decrypt(dek, data)
+	plain, err := DecryptFile(boxID, dek, data)
 	if err != nil {
 		return data
 	}

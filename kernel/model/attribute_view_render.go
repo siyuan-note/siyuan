@@ -17,7 +17,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -682,12 +681,9 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		}
 	}
 	if histBoxID != "" && IsEncryptedBox(histBoxID) {
-		dek, decErr := GetDEK(histBoxID)
-		if decErr != nil || dek == nil {
-			err = errors.New(Conf.Language(314))
-			return
-		}
-		if data, decErr = util.Decrypt(dek, data); decErr != nil {
+		var decErr error
+		data, decErr = av.DecryptAVData(histBoxID, data)
+		if decErr != nil {
 			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, decErr)
 			err = decErr
 			return

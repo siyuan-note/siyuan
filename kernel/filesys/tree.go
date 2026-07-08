@@ -257,7 +257,7 @@ func DocIAL(absPath string) (ret map[string]string) {
 				logging.LogErrorf("read file [%s] failed: %s", absPath, readErr)
 				return nil
 			}
-			plain, decErr := util.Decrypt(dek, raw)
+			plain, decErr := decryptData(boxID, raw)
 			if decErr != nil {
 				// 解密失败（可能文件损坏或密钥不匹配）：返回空 map 而非 nil，
 				// 避免 LoadTreeByData 的父文档补全逻辑把 nil 误判为"文档缺失"而凭空创建文档

@@ -96,7 +96,7 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			hash = "random_1_" + gulu.Rand.String(12)
 		}
 
-		existAssetPath := GetAssetPathByHash(hash)
+		existAssetPath := GetAssetPathByHash(hash, bt.BoxID)
 		if "" != existAssetPath {
 			originalName := util.RemoveID(filepath.Base(existAssetPath))
 			if strings.ToLower(fName) != strings.ToLower(originalName) {
@@ -180,6 +180,10 @@ func Upload(c *gin.Context) {
 			ret.Msg = "Path [" + assetsDirPath + "] is not in workspace"
 			return
 		}
+		// assetsDirPath 可能指向加密 box（调用方未传 id），反查 boxID 让文件名脱敏/.names.json 生效
+		if pathBox := ExtractBoxIDFromAssetsPath(assetsDirPath); pathBox != "" && IsEncryptedBox(pathBox) {
+			uploadBoxID = pathBox
+		}
 	}
 	if !gulu.File.IsExist(assetsDirPath) {
 		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {
@@ -236,7 +240,7 @@ func Upload(c *gin.Context) {
 			hash = "random_1_" + gulu.Rand.String(12)
 		}
 
-		existAssetPath := GetAssetPathByHash(hash)
+		existAssetPath := GetAssetPathByHash(hash, uploadBoxID)
 		if "" != existAssetPath {
 			originalName := util.RemoveID(filepath.Base(existAssetPath))
 			if strings.ToLower(fName) != strings.ToLower(originalName) {
@@ -394,12 +398,19 @@ func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 	return
 }
 
-// writeAssetFile 把 src 的内容写入 writePath。加密 box 必须已解锁（DEK 在内存）才写入——
-// 先全读 → 加密 → 落盘；加密但未解锁时返回错误（fail-closed，避免明文落盘到加密 box）。
+// writeAssetFile 把 src 的内容写入 writePath。从 writePath 反查真实 boxID 决定是否加密——
+// 不轻信传入的 boxID（调用方可能未传，或 assetsDirPath 指向加密 box 但 id 为空）。
+// 加密 box 必须已解锁（DEK 在内存）才写入；加密但未解锁返回错误（fail-closed，避免明文落盘）。
 // 非加密 box 按 reader 直接写（走 filelock.WriteFileByReader 原路径，保留锁语义）。
 func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
-	if boxID != "" && IsEncryptedBox(boxID) {
-		dek, dekErr := GetDEKIfUnlocked(boxID)
+	// 以路径反查的 boxID 为准（防绕过）：传入 boxID 与路径 box 不一致时以路径为准
+	pathBoxID := ExtractBoxIDFromAssetsPath(writePath)
+	actualBoxID := pathBoxID
+	if actualBoxID == "" {
+		actualBoxID = boxID // 路径不在 box 下（如全局 assets），回退传入值
+	}
+	if actualBoxID != "" && IsEncryptedBox(actualBoxID) {
+		dek, dekErr := GetDEKIfUnlocked(actualBoxID)
 		if dekErr != nil {
 			// 加密 box 未解锁：拒绝写入，避免明文落盘（深度防御，见 issue #18034）
 			return dekErr
@@ -409,7 +420,7 @@ func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
 		if readErr != nil {
 			return readErr
 		}
-		enc, encErr := EncryptAsset(boxID, dek, raw)
+		enc, encErr := EncryptAsset(actualBoxID, dek, raw)
 		if encErr != nil {
 			return encErr
 		}

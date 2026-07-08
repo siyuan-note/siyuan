@@ -167,7 +167,9 @@ func GetBlockTreesByType(typ string) (ret []*BlockTree) {
 func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"
-	err := queryRowForBox(boxID, sqlStmt, boxID, path).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	row := queryRowForBox(boxID, sqlStmt, boxID, path)
+	if row == nil { return }
+	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
 		if errors.Is(err, sql.ErrNoRows) {
@@ -206,7 +208,9 @@ func CountBlocks() (ret int) {
 func GetBlockTreeRootByPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ? AND type = 'd'"
-	err := queryRowForBox(boxID, sqlStmt, boxID, path).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	row := queryRowForBox(boxID, sqlStmt, boxID, path)
+	if row == nil { return }
+	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
 		if errors.Is(err, sql.ErrNoRows) {
@@ -222,7 +226,9 @@ func GetBlockTreeRootByHPath(boxID, hPath string) (ret *BlockTree) {
 	ret = &BlockTree{}
 	hPath = gulu.Str.RemoveInvisible(hPath)
 	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND hpath = ? AND type = 'd'"
-	err := queryRowForBox(boxID, sqlStmt, boxID, hPath).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	row := queryRowForBox(boxID, sqlStmt, boxID, hPath)
+	if row == nil { return }
+	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
 		if errors.Is(err, sql.ErrNoRows) {
@@ -523,7 +529,9 @@ func RemoveBlockTreesByRootID(boxID, rootID string) {
 
 func CountBlockTreesByPathPrefix(boxID, pathPrefix string) (ret int) {
 	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE path LIKE ? AND box_id = ?"
-	err := queryRowForBox(boxID, sqlStmt, pathPrefix+"%", boxID).Scan(&ret)
+	row := queryRowForBox(boxID, sqlStmt, pathPrefix+"%", boxID)
+	if row == nil { return }
+	err := row.Scan(&ret)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0
@@ -1062,6 +1070,9 @@ func GetBlockTreesInBox(ids []string, boxID string) (ret map[string]*BlockTree) 
 func ExistBlockTreeInBox(id, boxID string) bool {
 	sqlStmt := "SELECT 1 FROM blocktrees WHERE id = ? LIMIT 1"
 	row := queryRowForBox(boxID, sqlStmt, id)
+	if row == nil {
+		return false // 加密 box 未解锁，视作不存在
+	}
 	var tmp any
 	return row.Scan(&tmp) == nil
 }

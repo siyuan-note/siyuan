@@ -168,14 +168,17 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 		return
 	}
 
-	// 加密笔记本的 .sy 是密文，需先解密。从路径反推 boxID，已解锁的加密 box 才解密；
-	// 非加密 box 或未解锁的加密 box 原样 data（非加密 box 的 .sy 是明文，能正常解析）。
-	if boxID := extractBoxIDFromPath(localPath); boxID != "" {
-		if dek, decErr := GetDEK(boxID); decErr == nil && dek != nil {
-			if data, err = util.Decrypt(dek, data); err != nil {
-				logging.LogErrorf("decrypt tree [path=%s] failed: %s", localPath, err)
-				return
-			}
+	// 加密笔记本的 .sy 是密文，需先解密。从路径反推 boxID，已解锁的加密 box 用 fileKey 解密；
+	// 加密 box 未解锁时返回错误（fail-closed）；非加密 box 原样 data。
+	if boxID := extractBoxIDFromPath(localPath); boxID != "" && IsEncryptedBox(boxID) {
+		dek, dekErr := GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			err = dekErr
+			return
+		}
+		if data, err = DecryptFile(boxID, dek, data); err != nil {
+			logging.LogErrorf("decrypt tree [path=%s] failed: %s", localPath, err)
+			return
 		}
 	}
 

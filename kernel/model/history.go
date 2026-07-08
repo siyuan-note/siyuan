@@ -59,6 +59,16 @@ func AutoGenerateFileHistory() {
 	}
 }
 
+// GenerateFileHistoryForBox 对单个 box 生成文件历史。供加密笔记本关闭（锁定）前调用——
+// 锁定后定时器（GenerateFileHistory）无法为加密笔记本生成历史（不在 GetOpenedBoxes 里）。
+func GenerateFileHistoryForBox(box *Box) {
+	defer logging.Recover()
+	if 1 > Conf.Editor.GenerateHistoryInterval {
+		return
+	}
+	box.generateDocHistory0()
+}
+
 func GenerateFileHistory() {
 	defer logging.Recover()
 

@@ -240,6 +240,10 @@ func unmount0(boxID string) {
 		// 关闭即删文件避免残留旧索引数据导致下次解锁叠加重复行。
 		FlushTxQueue()
 		sql.FlushQueue()
+		// 关闭前生成一次文件历史：锁定后定时器无法为加密笔记本生成历史（不在 GetOpenedBoxes 里）
+		if box := Conf.Box(boxID); nil != box {
+			GenerateFileHistoryForBox(box)
+		}
 		ClearDEK(boxID)
 	}
 }

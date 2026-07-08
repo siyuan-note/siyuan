@@ -56,7 +56,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **File history** | Supported | Supported (ciphertext .sy copied verbatim to history dir; decrypt by path boxID when viewing/rolling back) |
 | **Deleted notebook history** | Supported | Supported (entire directory backed up as ciphertext before deletion; restored verbatim) |
 | **Embedding vectorization / semantic search** | Participates | Does not participate (encrypted data never enters the global block_embeddings table; the embedding pipeline reads only the global SQLite database — independent of lock state) |
-| **Agents / AI chat / MCP** | Can read content, can search | Same as normal when unlocked (can read blocks, list docs, etc.); unreachable when locked (see §13) |
+| **Agents / AI chat / MCP** | Can read content, can search | Available when unlocked (can read blocks, list docs, search within notebook); unreachable when locked (see §13). Global search / semantic search not included |
 | **Flashcards / spaced repetition** | Participates | Not supported (feature limitation) |
 | **Bookmarks** | Participates (global aggregation) | Not supported (feature limitation) |
 | **Tags** | Participates (global aggregation) | Not supported (feature limitation) |
@@ -220,7 +220,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 **Security-leak risk** (more critical): When moving from an encrypted box to a normal box — the document body escapes encryption protection; associated resources must be moved out and decrypted together; the reference network binding blocks to subdocuments is split or leaked along with it; index-metadata cross-db migration breaks isolation.
 
-**Design stance**: Consistent with disabling export — an encrypted notebook is an island; content does not enter or leave.
+**Design stance**: An encrypted notebook is an island; content does not enter or leave (moving out of an encrypted box to a normal one would leak plaintext; the reverse would corrupt the ciphertext).
 
 ## 11. Interaction Design
 
@@ -273,7 +273,7 @@ The visibility of encrypted notebooks to AI/LLM is determined entirely by the **
 
 **When locked**: the DEK is not in memory, so AI/LLM (including MCP, agents, semantic search, embedding vectorization) cannot read any encrypted content — the data lives in an independent encrypted SQLite database and is ciphertext on disk, unreadable without the key.
 
-**When unlocked**: the DEK is in memory, so AI/LLM can read and search just like a normal notebook — MCP tools can list encrypted notebooks and their documents, read block content, run semantic search, etc., with no difference from a normal notebook.
+**When unlocked**: the DEK is in memory, so AI/LLM can read encrypted-notebook content and search within a notebook — MCP tools can list encrypted notebooks and their documents, read block content, run in-notebook FTS search, etc. However, global search, semantic search, and embedding vectorization still do not include encrypted content (encrypted data never enters the global `block_embeddings`/`blocks` tables; physically unreachable), see §3 comparison table.
 
 Design stance: there is no "hide from AI" isolation at the functional layer, because such isolation is neither thorough nor easy to reason about. **The only reliable protection is locking** — once locked, the data is physically unreachable to any caller. Users only need to understand one rule: **lock sensitive content after use**.
 

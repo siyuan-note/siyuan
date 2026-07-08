@@ -686,7 +686,11 @@ func importNotebookCryptoBackup(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	if err := model.ImportNotebookCryptoBackup(data); err != nil {
+	password := ""
+	if vals := form.Value["password"]; len(vals) > 0 {
+		password = vals[0]
+	}
+	if err := model.ImportNotebookCryptoBackup(data, password); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

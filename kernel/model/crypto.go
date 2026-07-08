@@ -83,7 +83,9 @@ func ExportNotebookCryptoBackup() (downloadPath string, err error) {
 // 用于新设备/重装后不依赖同步、手动恢复加密配置（详见设计文档 §4.1）。
 // 安全：备份文件不含主密码（salt 不保密、verifier 是密文），导入只恢复配置，解锁仍需主密码。
 // 防呆：本机已启用加密笔记本时拒绝导入，避免覆盖现有 salt/verifier 孤立现有 WrappedDEK。
-func ImportNotebookCryptoBackup(data []byte) error {
+// ImportNotebookCryptoBackup 接收用户导入的密钥备份文件内容（JSON 字节）+ 主密码，
+// 校验主密码能解开备份里的 verifier 后才写回配置。防止 crafted 备份设置弱 KDFParams 等攻击。
+func ImportNotebookCryptoBackup(data []byte, password string) error {
 	nc := &conf.NotebookCrypto{}
 	if err := json.Unmarshal(data, nc); err != nil {
 		return errors.New(Conf.Language(317))
@@ -98,6 +100,17 @@ func ImportNotebookCryptoBackup(data []byte) error {
 	if enabled {
 		// 本机已启用：覆盖会改变 salt，孤立现有 WrappedDEK（数据永久锁死）
 		return errors.New(Conf.Language(312))
+	}
+
+	// 用导入的 salt + 用户输入的主密码派生 KEK，校验能否解开备份里的 verifier
+	params := nc.KDFParams
+	if params.KeyLength == 0 {
+		params = util.DefaultArgon2Params()
+	}
+	kek := util.DeriveKey(password, nc.MasterSalt, params)
+	decrypted, dErr := util.Decrypt(kek, nc.KEKVerifier)
+	if dErr != nil || string(decrypted) != string(kekVerifierMagic) {
+		return errors.New(Conf.Language(311)) // 主密码错误
 	}
 
 	nc.Enabled = true
@@ -379,7 +392,7 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		return err
 	}
 	if err = treenode.OpenEncryptedBlockTreeDB(boxID, dek); err != nil {
-		sql.CloseEncryptedDB(boxID)
+		sql.RemoveEncryptedDBFile(boxID) // 清理已创建的 content db 文件，避免遗留空加密库
 		return err
 	}
 	cachedDEKs[boxID] = dek

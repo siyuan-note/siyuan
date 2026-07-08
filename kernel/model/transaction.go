@@ -508,6 +508,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		if isSameTree {
 			targetTree = srcTree
 		}
+		// 禁止跨加密边界移动块：加密笔记本是孤岛，跨 box 移动会破坏隔离（内容从 A 泄漏到 B）
+		if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
+			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
+		}
 
 		targetNode := treenode.GetNodeInTree(targetTree, targetPreviousID)
 		if nil == targetNode {
@@ -584,6 +588,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	isSameTree := srcTree.ID == targetTree.ID
 	if isSameTree {
 		targetTree = srcTree
+	}
+	// 禁止跨加密边界移动块（同 doMove targetPreviousID 分支）
+	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
 	}
 
 	targetNode := treenode.GetNodeInTree(targetTree, targetParentID)
@@ -924,6 +932,10 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	isSameTree := srcTree.ID == targetTree.ID
 	if isSameTree {
 		targetTree = srcTree
+	}
+	// 禁止跨加密边界插入块（同 doMove 守卫）
+	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
 	}
 
 	targetRoot := targetTree.Root

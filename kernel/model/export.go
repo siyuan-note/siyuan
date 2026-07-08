@@ -682,6 +682,11 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 		resourceBaseName := filepath.Base(resourceFullPath)                   // 资源名称
 		resourceCopyPath := filepath.Join(exportFolderPath, resourceBaseName) // 资源副本完整路径
+		// 加密 box 未解锁时拒绝导出（copyAssetDecryptIfEncrypted 锁定时复制密文，这里提前拦截避免产出无效文件）
+		if resBoxID := ExtractBoxIDFromAssetsPath(resourceFullPath); resBoxID != "" && IsEncryptedBox(resBoxID) && !IsBoxUnlocked(resBoxID) {
+			err = errors.New(Conf.Language(314))
+			return
+		}
 		if err = copyAssetDecryptIfEncrypted(resourceFullPath, resourceCopyPath); err != nil {
 			logging.LogErrorf("copy resource will be exported from [%s] to [%s] failed: %s", resourcePath, resourceCopyPath, err)
 			err = fmt.Errorf(Conf.Language(14), err.Error())

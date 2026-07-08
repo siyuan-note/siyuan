@@ -687,21 +687,16 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	// avJSONPath 可能在历史目录（<HistoryDir>/<ts>/<boxID>/storage/av/...）或当前数据目录（<DataDir>/<boxID>/storage/av/...）
 	avAbsSlash := filepath.ToSlash(avJSONPath)
 	var histBoxID string
-	if strings.Contains(avAbsSlash, filepath.ToSlash(util.HistoryDir)) {
-		// 历史目录路径：<HistoryDir>/<ts>/<boxID>/storage/av/...
-		rel := strings.TrimPrefix(avAbsSlash, filepath.ToSlash(util.HistoryDir))
-		rel = strings.TrimPrefix(rel, "/")
-		histParts := strings.SplitN(rel, "/", 3)
-		if len(histParts) >= 2 {
-			histBoxID = histParts[1]
-		}
-	} else if strings.Contains(avAbsSlash, filepath.ToSlash(util.DataDir)) {
-		// 当前数据目录路径：<DataDir>/<boxID>/storage/av/...
-		rel := strings.TrimPrefix(avAbsSlash, filepath.ToSlash(util.DataDir))
-		rel = strings.TrimPrefix(rel, "/")
-		dataParts := strings.SplitN(rel, "/", 2)
-		if len(dataParts) >= 1 {
-			histBoxID = dataParts[0]
+	// 从路径中提取 /storage/av/ 前面的那一段作为 boxID
+	if idx := strings.Index(avAbsSlash, "/storage/av/"); idx > 0 {
+		prefix := avAbsSlash[:idx]
+		// prefix 的最后一段是 boxID（或时间戳目录名）
+		segs := strings.Split(prefix, "/")
+		for i := len(segs) - 1; i >= 0; i-- {
+			if ast.IsNodeIDPattern(segs[i]) {
+				histBoxID = segs[i]
+				break
+			}
 		}
 	}
 	if histBoxID != "" && IsEncryptedBox(histBoxID) {

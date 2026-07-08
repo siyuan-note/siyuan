@@ -24,11 +24,13 @@ const shouldYieldToScroll = (gate: LongPressGate, clientX: number, clientY: numb
     }
     if (gate.isMouse) {
         // 鼠标无滚动冲突（滚动走滚轮），跳过手指的 400ms 长按门槛
-        // 但仍需区分点击与拖拽：桌面原生 DnD 在 mousedown 后会短暂等待（系统级约 3-10px + 短时判定）
-        // 这里用位移门槛 + 短暂时间下限双重判定，避免点击 + 号/箭头时抖动误触发 dragstart
-        // （误触发会合成 dragstart → 文档树加 disablehover → + 号消失、子元素 pointer-events:none）
-        const MOUSE_DRAG_DELAY = 150;
-        return Date.now() - gate.touchStartTime < MOUSE_DRAG_DELAY;
+        // 但文件树/画廊/列表操作等元素同一手势既可能点击（+ 号、箭头）也可能拖拽，需短暂时间下限区分
+        // 避免点击抖动误触发 dragstart → 文档树加 disablehover → + 号消失、子元素 pointer-events:none
+        // 块标等 requireLongPress=false 的元素本就是要拖的，按下即拖，与桌面原生一致
+        if (gate.requireLongPress) {
+            return Date.now() - gate.touchStartTime < Constants.TIMEOUT_MOUSE_DRAG_DELAY;
+        }
+        return false;
     }
     if (!gate.requireLongPress) {
         return false;

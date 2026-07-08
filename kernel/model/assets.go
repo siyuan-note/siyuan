@@ -1142,9 +1142,6 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		if IsEncryptedBox(notebook.ID) {
-			continue // 加密笔记本的文档引用不扫描（loadTree 在锁定时会失败）
-		}
-		if IsEncryptedBox(notebook.ID) {
 			continue // 加密笔记本的资源不参与未引用清理（孤岛，资源不跨边界）
 		}
 		dests := map[string]bool{}

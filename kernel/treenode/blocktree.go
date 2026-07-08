@@ -1027,7 +1027,11 @@ func GetBlockTreeInBox(id, boxID string) (ret *BlockTree) {
 	}
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE id = ?"
-	err := queryRowForBox(boxID, sqlStmt, id).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	row := queryRowForBox(boxID, sqlStmt, id)
+	if row == nil {
+		return nil // 加密 box 未解锁，视作不存在
+	}
+	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
 		if !errors.Is(err, sql.ErrNoRows) {

@@ -668,7 +668,7 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		relativePath := path.Join("assets", requestPath)
-		p, err := model.GetAssetAbsPath(relativePath)
+		p, err := model.GetAssetAbsPathWithOpt(relativePath, true)
 		if err != nil {
 			context.Status(http.StatusNotFound)
 			return

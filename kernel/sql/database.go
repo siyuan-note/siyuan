@@ -1115,9 +1115,12 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		return
 	}
 
+	// block_embeddings 表在加密 db 中不存在（加密笔记本不参与嵌入向量化），对该表不存在的错误容错
 	stmt = "DELETE FROM block_embeddings WHERE id IN (" + strings.Join(ftsIDs, ",") + ")"
-	if err = execStmtTx(tx, stmt); err != nil {
-		return
+	if _, embedErr := tx.Exec(stmt); embedErr != nil {
+		if !strings.Contains(embedErr.Error(), "no such table") {
+			err = embedErr // 非"表不存在"的真实错误照常返回
+		}
 	}
 	return
 }

@@ -19,6 +19,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -129,7 +130,9 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 
 			p := "assets/" + fName
 			succMap[baseName] = p
-			cache.SetAssetHash(hash, p)
+			if !IsEncryptedBox(bt.BoxID) {
+				cache.SetAssetHash(hash, p) // 加密 box 不写全局 cache，避免跨边界去重污染
+			}
 		}
 	}
 	IncSync()
@@ -369,7 +372,9 @@ func Upload(c *gin.Context) {
 
 			p := strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
 			succMap[baseName] = p
-			cache.SetAssetHash(hash, p)
+			if uploadBoxID == "" || !IsEncryptedBox(uploadBoxID) {
+				cache.SetAssetHash(hash, p) // 加密 box 不写全局 cache
+			}
 		}
 	}
 
@@ -403,8 +408,16 @@ func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {
 // 加密 box 必须已解锁（DEK 在内存）才写入；加密但未解锁返回错误（fail-closed，避免明文落盘）。
 // 非加密 box 按 reader 直接写（走 filelock.WriteFileByReader 原路径，保留锁语义）。
 func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
-	// 以路径反查的 boxID 为准（防绕过）：传入 boxID 与路径 box 不一致时以路径为准
+	// 从 writePath 反查真实 boxID，与传入 boxID 交叉校验
 	pathBoxID := ExtractBoxIDFromAssetsPath(writePath)
+	// 传入 boxID 与路径 box 都非空但不一致：路径指向另一个 box，拒绝（防跨 box 写入）
+	if boxID != "" && pathBoxID != "" && boxID != pathBoxID {
+		return fmt.Errorf("boxID mismatch: param=%s, path=%s", boxID, pathBoxID)
+	}
+	// 路径不在 box 下但传入的是加密 box：加密内容只能写 box 内，拒绝写全局 assets
+	if pathBoxID == "" && boxID != "" && IsEncryptedBox(boxID) {
+		return fmt.Errorf("encrypted box asset must be written inside the box directory, got global path: %s", writePath)
+	}
 	actualBoxID := pathBoxID
 	if actualBoxID == "" {
 		actualBoxID = boxID // 路径不在 box 下（如全局 assets），回退传入值

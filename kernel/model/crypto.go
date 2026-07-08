@@ -699,8 +699,8 @@ func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	if boxID != "" && IsEncryptedBox(boxID) {
 		dek, err := GetDEKIfUnlocked(boxID)
 		if err != nil {
-			// 加密 box 未解锁：fail-closed，不解密
-			return filelock.Copy(srcPath, destPath)
+			// 加密 box 未解锁：fail-closed，拒绝复制（不复制密文，避免泄漏无效文件）
+			return errors.New(Conf.Language(314))
 		}
 		raw, readErr := filelock.ReadFile(srcPath)
 		if readErr != nil {

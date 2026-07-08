@@ -591,12 +591,18 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 }
 
 func GetAssetAbsPath(relativePath string) (string, error) {
+	return GetAssetAbsPathWithOpt(relativePath, false)
+}
+
+// GetAssetAbsPathWithOpt 与 GetAssetAbsPath 一致，但可通过 includeEncrypted 控制是否遍历加密 box。
+// serveAssets 传 true（下游 serveEncryptedAsset 会按锁定状态 fail-closed），其他调用方传 false（安全跳过）。
+func GetAssetAbsPathWithOpt(relativePath string, includeEncrypted bool) (string, error) {
 	relativePath = strings.TrimSpace(relativePath)
 	if idx := strings.Index(relativePath, "?"); idx >= 0 {
 		relativePath = relativePath[:idx]
 	}
 
-	absPath, err := getAssetAbsPath(relativePath)
+	absPath, err := getAssetAbsPath(relativePath, includeEncrypted)
 	if err == nil && absPath != "" {
 		return absPath, nil
 	}
@@ -607,7 +613,7 @@ func GetAssetAbsPath(relativePath string) (string, error) {
 	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }
 
-func getAssetAbsPath(relativePath string) (absPath string, err error) {
+func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string, err error) {
 	relativePath = filepath.ToSlash(relativePath)
 	// 在 data 文件夹下搜索，主要是 data/assets 文件夹
 	p := filepath.Join(util.DataDir, relativePath)
@@ -627,7 +633,7 @@ func getAssetAbsPath(relativePath string) (absPath string, err error) {
 		return "", errors.New(Conf.Language(0))
 	}
 	for _, notebook := range notebooks {
-		if IsEncryptedBox(notebook.ID) {
+		if !includeEncrypted && IsEncryptedBox(notebook.ID) {
 			continue // 加密 box 的资源不参与全局路径解析（孤岛，资源不跨边界）
 		}
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)

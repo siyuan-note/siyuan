@@ -135,22 +135,22 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         id: "calloutNote",
         value: `> [!NOTE]\n> ${Lute.Caret}`,
         html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">✏️</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span></span></div>`,
-    },{
+    }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "tip"],
         id: "calloutTip",
         value: `> [!TIP]\n> ${Lute.Caret}`,
         html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">💡</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-tip)">Tip</span></span></div>`,
-    },{
+    }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "important"],
         id: "calloutImportant",
         value: `> [!IMPORTANT]\n> ${Lute.Caret}`,
         html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">❗</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-important)">Important</span></span></div>`,
-    },{
+    }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "warning"],
         id: "calloutWarning",
         value: `> [!WARNING]\n> ${Lute.Caret}`,
         html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">⚠️</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-warning)">Warning</span></span></div>`,
-    },{
+    }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "caution"],
         id: "calloutCaution",
         value: `> [!CAUTION]\n> ${Lute.Caret}`,
@@ -458,16 +458,21 @@ export const genHintItemHTML = (item: IBlock) => {
 export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
     protyle.hint.genLoading(protyle);
-    const refParam: IObject = {
-        k: key,
-        id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
-        beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
-        rootID: source === "av" ? "" : protyle.block.rootID,
-        isDatabase: source === "av",
-        isSquareBrackets: ["[[", "【【"].includes(protyle.hint.splitChar)
-    };
-    if (isEncryptedBox(protyle.notebookId)) {
-        refParam.notebook = protyle.notebookId;
+    let refParam: IObject;
+    if (protyle.lite) {
+        refParam = {k: key, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true};
+    } else {
+        refParam = {
+            k: key,
+            id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
+            beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
+            rootID: source === "av" ? "" : protyle.block.rootID,
+            isDatabase: source === "av",
+            isSquareBrackets: ["[[", "【【"].includes(protyle.hint.splitChar)
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            refParam.notebook = protyle.notebookId;
+        }
     }
     fetchPost("/api/search/searchRefBlock", refParam, (response) => {
         const dataList: IHintData[] = [];

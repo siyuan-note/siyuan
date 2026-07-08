@@ -509,6 +509,9 @@ interface IProtyleOptions {
 
     /** 编辑器异步渲染完成后的回调方法 */
     after?(protyle: import("../protyle").Protyle): void;
+
+    /** 精简版本 */
+    lite?: boolean;
 }
 
 interface IProtyle {
@@ -542,6 +545,7 @@ interface IProtyle {
         action?: TProtyleAction[]
     },
     disabled: boolean,
+    lite?: boolean,
     selectElement?: HTMLElement,
     ws?: import("../layout/Model").Model,
     notebookId?: string

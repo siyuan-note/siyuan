@@ -61,7 +61,7 @@ export class Protyle {
      * @param id 要挂载 Protyle 的元素或者元素 ID。
      * @param options Protyle 参数
      */
-    constructor(app: App, id: HTMLElement, options?: IProtyleOptions) {
+    constructor(app: App, id: HTMLElement, options: IProtyleOptions) {
         this.version = Constants.SIYUAN_VERSION;
         let pluginsOptions: IProtyleOptions = options;
         app.plugins.forEach(item => {
@@ -76,6 +76,7 @@ export class Protyle {
             app,
             id: genUUID(),
             disabled: false,
+            lite: !!options.lite,
             updated: false,
             element: id,
             options: mergedOptions,

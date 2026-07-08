@@ -245,9 +245,9 @@ export class AgentChat extends Model {
             "</svg>" +
             "</span>" +
             '<select class="b3-select b3-select--noborder" tabindex="0"></select>' +
-            '<span class="agent-chat__reasoning-effort b3-tooltips b3-tooltips__n" aria-label="' + (L.reasoningEffortTooltip || "Reasoning effort") + '"><select class="b3-select b3-select--noborder agent-chat__reasoning-effort-select" tabindex="0"></select><svg><use xlink:href="#iconBrain"></use></svg></span>' +
-            '<button class="agent-chat__send b3-button b3-button--icon b3-button--text b3-tooltips b3-tooltips__n" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
-            '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none b3-tooltips b3-tooltips__n" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
+            '<div class="b3-form__icon ariaLabel" aria-label="' + (L.reasoningEffortTooltip || "Reasoning effort") + '"><svg class="b3-form__icon-icon"><use xlink:href="#iconBrain"></use></svg><select class="b3-select b3-select--noborder b3-form__icon-input" tabindex="0"></select></div>' +
+            '<button class="agent-chat__send b3-button b3-button--icon b3-button--text ariaLabel" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
+            '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none ariaLabel" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
             '<div class="agent-chat__preview-notice">' + (L.featurePreview || "") + "</div>" +
@@ -262,7 +262,7 @@ export class AgentChat extends Model {
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
         this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
         this.modelSelect = panel.querySelector(".b3-select") as HTMLSelectElement;
-        this.reasoningEffortSelect = panel.querySelector(".agent-chat__reasoning-effort-select") as HTMLSelectElement;
+        this.reasoningEffortSelect = panel.querySelector(".b3-form__icon-input") as HTMLSelectElement;
         this.initReasoningEffortSelect();
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
         this.messagesContainer.addEventListener("scroll", () => {
@@ -2370,7 +2370,7 @@ export class AgentChat extends Model {
         el.innerHTML = '<div class="agent-chat__snapshot-body">' +
             '<span class="agent-chat__snapshot-icon"><svg><use xlink:href="#iconHistory"></use></svg></span>' +
             '<span class="agent-chat__snapshot-text">' + escapeHtml((L.snapshotAutoCreated || "Auto snapshot created") + " " + shortID) + "</span>" +
-            '<button class="b3-button b3-button--text agent-chat__snapshot-rollback b3-tooltips b3-tooltips__n" aria-label="' + (L.rollback || "Rollback") + '"><svg><use xlink:href="#iconUndo"></use></svg></button>' +
+            '<button class="b3-button b3-button--text agent-chat__snapshot-rollback ariaLabel" aria-label="' + (L.rollback || "Rollback") + '"><svg><use xlink:href="#iconUndo"></use></svg></button>' +
             "</div>";
         const rollbackBtn = el.querySelector(".agent-chat__snapshot-rollback") as HTMLButtonElement;
         rollbackBtn.addEventListener("click", () => {

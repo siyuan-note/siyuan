@@ -1466,6 +1466,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     if (doOperations.length === 0) {
         return;
     }
+    if (protyle?.lite) {
+        return;
+    }
     if (!protyle) {
         // 文档树中点开属性->数据库后的变更操作 & 文档树添加到数据库
         fetchPost("/api/transactions", {

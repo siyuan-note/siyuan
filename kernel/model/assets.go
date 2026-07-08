@@ -1127,6 +1127,13 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	if err != nil {
 		return
 	}
+	// 排除加密 notebook 的资源：加密 box 锁定时 loadTree 失败会误判引用关系，
+	// 且加密 notebook 是孤岛，资源不参与全局未引用清理
+	for dest, absPath := range assetsPathMap {
+		if boxID := ExtractBoxIDFromAssetsPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
+			delete(assetsPathMap, dest)
+		}
+	}
 	linkDestMap := map[string]bool{}
 	notebooks, err := ListNotebooks()
 	if err != nil {
@@ -1134,6 +1141,12 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	}
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
+		if IsEncryptedBox(notebook.ID) {
+			continue // 加密 notebook 的文档引用不扫描（loadTree 在锁定时会失败）
+		}
+		if IsEncryptedBox(notebook.ID) {
+			continue // 加密 notebook 的资源不参与未引用清理（孤岛，资源不跨边界）
+		}
 		dests := map[string]bool{}
 
 		// 分页加载，优化清理未引用资源内存占用 https://github.com/siyuan-note/siyuan/issues/5200
@@ -1225,19 +1238,14 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		}
 	}
 
-	// 排除数据库中引用的资源文件（含加密 box 的 AV，解密后扫描）
-	avDirs := []string{filepath.Join(util.DataDir, "storage", "av")}
-	for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-		avDirs = append(avDirs, filepath.Join(util.DataDir, encBoxID, "storage", "av"))
-	}
-	for _, storageAvDir := range avDirs {
-		if !gulu.File.IsDir(storageAvDir) {
-			continue
-		}
+	// 排除数据库中引用的资源文件。加密 notebook 的资源不参与未引用清理（孤岛，资源不跨边界）
+	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
+	if gulu.File.IsDir(storageAvDir) {
 		entries, readErr := os.ReadDir(storageAvDir)
 		if nil != readErr {
 			logging.LogErrorf("read dir [%s] failed: %s", storageAvDir, readErr)
-			continue
+			err = readErr
+			return
 		}
 
 		for _, entry := range entries {
@@ -1245,11 +1253,11 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 				continue
 			}
 
-			avID := strings.TrimSuffix(entry.Name(), ".json")
-			// 用 ReadAttributeViewData 解密读取（加密 box 的 AV 是密文）
-			data, readDataErr := av.ReadAttributeViewData(avID)
-			if readDataErr != nil || data == nil {
-				continue
+			data, readDataErr := filelock.ReadFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()))
+			if nil != readDataErr {
+				logging.LogErrorf("read file [%s] failed: %s", entry.Name(), readDataErr)
+				err = readDataErr
+				return
 			}
 
 			for asset := range assetsPathMap {

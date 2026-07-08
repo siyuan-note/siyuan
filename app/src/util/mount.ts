@@ -173,11 +173,6 @@ export const newEncryptedNotebook = () => {
                 showMessage(window.siyuan.languages.masterPassword);
                 return false;
             }
-            // 创建含 KEK 派生 + 开加密 db，约耗时 1 秒
-            const confirmBtn = btnsElement[1] as HTMLButtonElement;
-            const originalText = confirmBtn.textContent;
-            confirmBtn.setAttribute("disabled", "disabled");
-            confirmBtn.textContent = window.siyuan.languages.loading;
             const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
                 name: replaceFileName(name),
                 password
@@ -188,9 +183,6 @@ export const newEncryptedNotebook = () => {
                     notebook: response.data.notebook.id
                 });
                 dialog.destroy();
-            } else {
-                confirmBtn.removeAttribute("disabled");
-                confirmBtn.textContent = originalText;
             }
         });
     });

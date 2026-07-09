@@ -618,7 +618,12 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
 	if err != nil {
 		return data // 加密笔记本未解锁：同步快照解析返回原数据（调用方解析失败时按文件名回退）
 	}
-	plain, err := DecryptFile(boxID, dek, data)
+	// repo 路径格式：/<boxID>/<relativePath>，parts[1] 为 box 内相对路径作为 AAD
+	boxRelPath := ""
+	if len(parts) >= 2 {
+		boxRelPath = parts[1]
+	}
+	plain, err := DecryptFile(boxID, boxRelPath, dek, data)
 	if err != nil {
 		return data
 	}

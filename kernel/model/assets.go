@@ -69,6 +69,32 @@ func GetAssetImgSize(assetPath string) (width, height int) {
 	return
 }
 
+// ReadAssetBytesInBox 读取指定 box 内的资源文件字节。若 box 为加密笔记本则自动解密返回明文。
+// relativePath 形如 "assets/xxx.png"。
+func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
+	absPath, err := GetAssetAbsPathInBox(relativePath, boxID)
+	if err != nil {
+		return nil, err
+	}
+	data, readErr := os.ReadFile(absPath)
+	if readErr != nil {
+		return nil, readErr
+	}
+	if IsEncryptedBox(boxID) {
+		dek, dekErr := GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			return nil, dekErr
+		}
+		diskName := filepath.Base(relativePath)
+		plain, decErr := DecryptAsset(boxID, diskName, dek, data)
+		if decErr != nil {
+			return nil, decErr
+		}
+		return plain, nil
+	}
+	return data, nil
+}
+
 // GetAssetPathByHash 按 hash 查已存在的 asset 路径用于去重。boxID 非空且为加密笔记本时返回空——
 // 加密笔记本不参与全局去重（避免复用普通明文 asset）；普通 box 走全局 cache/SQL（加密笔记本数据不在全局表）。
 func GetAssetPathByHash(hash, boxID string) string {
@@ -105,6 +131,12 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 		return
 	}
 
+	// 加密笔记本的 asset 是密文，跳过全局索引和 hash 缓存操作
+	if IsEncryptedAssetPath(assetAbsPath) {
+		removeAssetThumbnail(assetAbsPath)
+		return
+	}
+
 	removeIndexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
 
@@ -130,6 +162,12 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 		return
 	}
 	if strings.HasSuffix(assetAbsPath, ".tmp") {
+		return
+	}
+
+	// 加密笔记本的 asset 是密文，跳过全局内容索引和 hash 缓存（避免密文污染搜索索引）
+	if IsEncryptedAssetPath(assetAbsPath) {
+		removeAssetThumbnail(assetAbsPath)
 		return
 	}
 
@@ -592,6 +630,30 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 
 func GetAssetAbsPath(relativePath string) (string, error) {
 	return GetAssetAbsPathWithOpt(relativePath, false)
+}
+
+// GetAssetAbsPathInBox 在指定 box 内解析资源绝对路径，不进行全局遍历。
+// boxID 为空时退化为全局搜索 GetAssetAbsPathWithOpt(..., true)。
+// 加密 box 直接从 <boxID>/assets/ 查找，不依赖后缀匹配。
+func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
+	relativePath = strings.TrimSpace(relativePath)
+	if idx := strings.Index(relativePath, "?"); idx >= 0 {
+		relativePath = relativePath[:idx]
+	}
+	relativePath = filepath.ToSlash(relativePath)
+
+	if boxID == "" {
+		return GetAssetAbsPathWithOpt(relativePath, true)
+	}
+
+	p := filepath.Join(util.DataDir, boxID, relativePath)
+	if gulu.File.IsExist(p) {
+		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
+			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
+		}
+		return p, nil
+	}
+	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }
 
 // GetAssetAbsPathWithOpt 与 GetAssetAbsPath 一致，但可通过 includeEncrypted 控制是否遍历加密 box。

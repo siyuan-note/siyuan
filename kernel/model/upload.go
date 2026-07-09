@@ -25,6 +25,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -129,6 +130,9 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			f.Close()
 
 			p := "assets/" + fName
+			if IsEncryptedBox(bt.BoxID) {
+				p += "?box=" + bt.BoxID
+			}
 			succMap[baseName] = p
 			if !IsEncryptedBox(bt.BoxID) {
 				cache.SetAssetHash(hash, p) // 加密笔记本不写全局 cache，避免跨边界去重污染
@@ -371,6 +375,9 @@ func Upload(c *gin.Context) {
 			}
 
 			p := strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+			if uploadBoxID != "" && IsEncryptedBox(uploadBoxID) {
+				p += "?box=" + uploadBoxID
+			}
 			succMap[baseName] = p
 			if uploadBoxID == "" || !IsEncryptedBox(uploadBoxID) {
 				cache.SetAssetHash(hash, p) // 加密笔记本不写全局 cache
@@ -433,13 +440,48 @@ func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
 		if readErr != nil {
 			return readErr
 		}
-		enc, encErr := EncryptAsset(actualBoxID, dek, raw)
+		enc, encErr := EncryptAsset(actualBoxID, filepath.Base(writePath), dek, raw)
 		if encErr != nil {
 			return encErr
 		}
 		return filelock.WriteFile(writePath, enc)
 	}
 	return filelock.WriteFileByReader(writePath, src)
+}
+
+// storeAssetForBox 统一资产写入入口：根据 boxID 决定加密/明文写入，返回磁盘文件名（不含路径前缀）。
+// 加密 box：生成脱敏名 → writeAssetNameMapping 记录映射 → EncryptAsset 加密 → filelock.WriteFile
+// 普通 box：util.AssetName 生成名 → filelock.WriteFile 明文写入
+// boxID 为空时按普通 box 处理（写入全局 assets）。
+func storeAssetForBox(boxID, assetDirPath, originalName string, data []byte) (diskName string, err error) {
+	if IsEncryptedBox(boxID) {
+		ext := filepath.Ext(originalName)
+		blockID := ast.NewNodeID()
+		diskName = encryptedAssetName(ext, blockID)
+		writeAssetNameMapping(boxID, diskName, originalName)
+
+		dek, dekErr := GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			return "", dekErr
+		}
+		enc, encErr := EncryptAsset(boxID, diskName, dek, data)
+		if encErr != nil {
+			return "", encErr
+		}
+		writePath := filepath.Join(assetDirPath, diskName)
+		if err = filelock.WriteFile(writePath, enc); err != nil {
+			return "", err
+		}
+		return diskName, nil
+	}
+
+	// 普通 box：生成带 ID 的文件名，明文写入
+	diskName = util.AssetName(originalName, ast.NewNodeID())
+	writePath := filepath.Join(assetDirPath, diskName)
+	if err = filelock.WriteFile(writePath, data); err != nil {
+		return "", err
+	}
+	return diskName, nil
 }
 
 // encryptedAssetName 生成加密笔记本专用的无语义资源文件名：uuid-blockID.ext。
@@ -453,11 +495,19 @@ func assetNameMappingPath(boxID string) string {
 	return filepath.Join(util.DataDir, boxID, "assets", ".names.json")
 }
 
+// assetNameMappingLocks 按 boxID 分组的互斥锁，保护 .names.json read-modify-write 的并发安全
+var assetNameMappingLocks sync.Map // map[string]*sync.Mutex
+
 // writeAssetNameMapping 把"磁盘文件名 -> 原始文件名"映射写入加密笔记本的 .names.json（DEK 加密落盘）。
 func writeAssetNameMapping(boxID, diskName, originalName string) {
 	if boxID == "" || !IsEncryptedBox(boxID) {
 		return
 	}
+	muI, _ := assetNameMappingLocks.LoadOrStore(boxID, &sync.Mutex{})
+	mu := muI.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
+
 	mapping := readAssetNameMapping(boxID)
 	mapping[diskName] = originalName
 	data, err := json.Marshal(mapping)
@@ -470,7 +520,7 @@ func writeAssetNameMapping(boxID, diskName, originalName string) {
 		logging.LogErrorf("get DEK for asset name mapping failed: %s", err)
 		return
 	}
-	enc, err := EncryptAsset(boxID, dek, data)
+		enc, err := EncryptAsset(boxID, ".names.json", dek, data)
 	if err != nil {
 		logging.LogErrorf("encrypt asset name mapping failed: %s", err)
 		return
@@ -495,7 +545,7 @@ func readAssetNameMapping(boxID string) map[string]string {
 	if err != nil || dek == nil {
 		return ret
 	}
-	data, err := DecryptAsset(boxID, dek, enc)
+		data, err := DecryptAsset(boxID, ".names.json", dek, enc)
 	if err != nil {
 		logging.LogErrorf("decrypt asset name mapping failed: %s", err)
 		return ret

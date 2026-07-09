@@ -290,7 +290,7 @@ func setFileAnnotation(c *gin.Context) {
 				ret.Msg = dekErr.Error()
 				return
 			}
-			enc, encErr := model.EncryptAsset(boxID, dek, writeData)
+			enc, encErr := model.EncryptAsset(boxID, filepath.Base(writePath), dek, writeData)
 			if encErr != nil {
 				ret.Code = -1
 				ret.Msg = encErr.Error()
@@ -345,7 +345,7 @@ func getFileAnnotation(c *gin.Context) {
 			ret.Msg = dekErr.Error()
 			return
 		}
-		plain, decErr := model.DecryptAsset(boxID, dek, data)
+		plain, decErr := model.DecryptAsset(boxID, filepath.Base(readPath), dek, data)
 		if decErr != nil {
 			ret.Code = -1
 			ret.Msg = decErr.Error()

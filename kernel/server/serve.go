@@ -668,10 +668,36 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 
+		// 硬边界：拒绝路径遍历
+		if strings.Contains(requestPath, "..") || filepath.IsAbs(requestPath) {
+			context.Status(http.StatusForbidden)
+			return
+		}
+
 		relativePath := path.Join("assets", requestPath)
-		p, err := model.GetAssetAbsPathWithOpt(relativePath, true)
-		if err != nil {
+		cleanPath := path.Clean(relativePath)
+		if !strings.HasPrefix(cleanPath, "assets/") {
+			context.Status(http.StatusForbidden)
+			return
+		}
+
+		// 解析 box 查询参数，加密 box 资源按 box 内精确查找（不全局搜索）
+		boxID := context.Query("box")
+		var p string
+		var err error
+		if boxID != "" {
+			p, err = model.GetAssetAbsPathInBox(cleanPath, boxID)
+		} else {
+			p, err = model.GetAssetAbsPathWithOpt(cleanPath, true)
+		}
+		if err != nil || p == "" {
 			context.Status(http.StatusNotFound)
+			return
+		}
+
+		// 验证最终绝对路径必须在 data/assets 或 <boxID>/assets 下
+		if !strings.HasSuffix(filepath.ToSlash(p), "/"+strings.TrimPrefix(cleanPath, "/")) {
+			context.Status(http.StatusForbidden)
 			return
 		}
 
@@ -738,12 +764,13 @@ func readAssetBytes(absPath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
-		dek, dekErr := model.GetDEKIfUnlocked(boxID)
-		if dekErr != nil {
-			return nil, dekErr // 加密笔记本未解锁：fail-closed，不返回密文
-		}
-		plain, decErr := model.DecryptAsset(boxID, dek, data)
+		if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
+			dek, dekErr := model.GetDEKIfUnlocked(boxID)
+			if dekErr != nil {
+				return nil, dekErr // 加密笔记本未解锁：fail-closed，不返回密文
+			}
+			diskName := filepath.Base(absPath)
+			plain, decErr := model.DecryptAsset(boxID, diskName, dek, data)
 		if decErr != nil {
 			return nil, decErr
 		}
@@ -771,15 +798,15 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 		context.Status(http.StatusNotFound)
 		return true
 	}
-	plain, decErr := model.DecryptAsset(boxID, dek, ciphertext)
-	if decErr != nil {
-		logging.LogErrorf("decrypt asset [%s] failed: %s", absPath, decErr)
-		context.Status(http.StatusInternalServerError)
-		return true
-	}
-	// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
-	diskName := filepath.Base(absPath)
-	if originalName := model.LookupAssetOriginalName(boxID, diskName); originalName != "" {
+		diskName := filepath.Base(absPath)
+		plain, decErr := model.DecryptAsset(boxID, diskName, dek, ciphertext)
+		if decErr != nil {
+			logging.LogErrorf("decrypt asset [%s] failed: %s", absPath, decErr)
+			context.Status(http.StatusInternalServerError)
+			return true
+		}
+		// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
+		if originalName := model.LookupAssetOriginalName(boxID, diskName); originalName != "" {
 		setAssetsAttachmentDisposition(context, originalName)
 	} else {
 		setAssetsAttachmentDisposition(context, absPath)
@@ -815,15 +842,21 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	var plain []byte
 	var decErr error
 	if strings.HasSuffix(absPath, ".sy") {
-		plain, decErr = model.DecryptFile(boxID, dek, ciphertext)
+		// 从绝对路径推导 box 内相对路径作为 AAD
+		relPath := strings.TrimPrefix(absPath, filepath.Join(util.DataDir, boxID)+string(os.PathSeparator))
+		relPath = filepath.ToSlash(relPath)
+		plain, decErr = model.DecryptFile(boxID, relPath, dek, ciphertext)
 	} else if strings.Contains(absPath, "assets"+string(os.PathSeparator)) {
-		plain, decErr = model.DecryptAsset(boxID, dek, ciphertext)
+		diskName := filepath.Base(absPath)
+		plain, decErr = model.DecryptAsset(boxID, diskName, dek, ciphertext)
 	} else if strings.Contains(absPath, "storage"+string(os.PathSeparator)+"av"+string(os.PathSeparator)) {
 		// AV 定义用 siyuan/av 子密钥加密，与 assets 的 siyuan/asset 子密钥不同
-		plain, decErr = av.DecryptAVData(boxID, ciphertext)
+		avID := strings.TrimSuffix(filepath.Base(absPath), filepath.Ext(absPath))
+		plain, decErr = av.DecryptAVData(boxID, avID, ciphertext)
 	} else {
 		// 其他历史文件（如 JSON 元数据等）尝试用 asset 解密方式
-		plain, decErr = model.DecryptAsset(boxID, dek, ciphertext)
+		diskName := filepath.Base(absPath)
+		plain, decErr = model.DecryptAsset(boxID, diskName, dek, ciphertext)
 	}
 	if decErr != nil {
 		logging.LogErrorf("decrypt history [%s] failed: %s", absPath, decErr)

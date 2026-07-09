@@ -103,7 +103,7 @@ func readAttributeViewData(avID string) ([]byte, error) {
 	}
 	// 加密笔记本的数据需解密
 	if boxID != "" {
-		data, err = decryptAVData(boxID, data)
+		data, err = decryptAVData(boxID, avID, data)
 		if err != nil {
 			return nil, err
 		}
@@ -129,7 +129,7 @@ func writeAttributeViewData(avID, boxID string, data []byte) error {
 	// 加密笔记本的数据需加密
 	if boxID != "" {
 		var err error
-		data, err = encryptAVData(boxID, data)
+		data, err = encryptAVData(boxID, avID, data)
 		if err != nil {
 			return err
 		}
@@ -168,9 +168,9 @@ func readMirrorBlocks(boxID string) (ret map[string][]string) {
 		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
-	if boxID != "" {
-		// 加密笔记本的镜像索引是密文，解密后再反序列化
-		dec, decErr := decryptAVData(boxID, data)
+		if boxID != "" {
+			// 加密笔记本的镜像索引是密文，解密后再反序列化
+			dec, decErr := decryptAVData(boxID, "mirror", data)
 		if decErr != nil {
 			logging.LogErrorf("decrypt attribute view blocks failed: %s", decErr)
 			return
@@ -195,9 +195,9 @@ func writeMirrorBlocks(boxID string, data map[string][]string) error {
 	if err != nil {
 		return err
 	}
-	if boxID != "" {
-		// 加密笔记本的镜像索引写入前加密
-		enc, encErr := encryptAVData(boxID, raw)
+		if boxID != "" {
+			// 加密笔记本的镜像索引写入前加密
+			enc, encErr := encryptAVData(boxID, "mirror", raw)
 		if encErr != nil {
 			return encErr
 		}
@@ -226,7 +226,7 @@ func avBoxIDFromPath(absPath string) string {
 	return boxID
 }
 
-func encryptAVData(boxID string, data []byte) ([]byte, error) {
+func encryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 	if AVDEKProvider == nil {
 		return data, nil
 	}
@@ -238,10 +238,11 @@ func encryptAVData(boxID string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	avKey := util.DeriveSubKey(dek, "siyuan/av")
-	return util.EncryptWithAAD(avKey, data, []byte(boxID))
+	aad := "siyuan:v1:av:" + boxID + ":" + avID
+	return util.EncryptWithAAD(avKey, data, []byte(aad))
 }
 
-func decryptAVData(boxID string, data []byte) ([]byte, error) {
+func decryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 	if AVDEKProvider == nil {
 		return data, nil
 	}
@@ -253,15 +254,16 @@ func decryptAVData(boxID string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	avKey := util.DeriveSubKey(dek, "siyuan/av")
-	return util.DecryptWithAAD(avKey, data, []byte(boxID))
+	aad := "siyuan:v1:av:" + boxID + ":" + avID
+	return util.DecryptWithAAD(avKey, data, []byte(aad))
 }
 
 // EncryptAVData 是 encryptAVData 的导出版本，供 model 层（导入/复制数据库等）统一加密 AV 定义。
-func EncryptAVData(boxID string, data []byte) ([]byte, error) {
-	return encryptAVData(boxID, data)
+func EncryptAVData(boxID, avID string, data []byte) ([]byte, error) {
+	return encryptAVData(boxID, avID, data)
 }
 
 // DecryptAVData 是 decryptAVData 的导出版本。
-func DecryptAVData(boxID string, data []byte) ([]byte, error) {
-	return decryptAVData(boxID, data)
+func DecryptAVData(boxID, avID string, data []byte) ([]byte, error) {
+	return decryptAVData(boxID, avID, data)
 }

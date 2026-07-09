@@ -594,8 +594,8 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 
 	// 加密笔记本的 AV 在快照中是密文，按路径反查 boxID 后解密
-	if histBoxID := avBoxIDFromRepoPath(avFile.Path); histBoxID != "" && IsEncryptedBox(histBoxID) {
-		dec, decErr := av.DecryptAVData(histBoxID, data)
+		if histBoxID := avBoxIDFromRepoPath(avFile.Path); histBoxID != "" && IsEncryptedBox(histBoxID) {
+			dec, decErr := av.DecryptAVData(histBoxID, avID, data)
 		if decErr != nil {
 			logging.LogErrorf("decrypt snapshot attribute view [%s] failed: %s", avID, decErr)
 			err = decErr
@@ -698,7 +698,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		}
 	}
 	if histBoxID != "" && IsEncryptedBox(histBoxID) {
-		data, err = av.DecryptAVData(histBoxID, data)
+		data, err = av.DecryptAVData(histBoxID, avID, data)
 		if err != nil {
 			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, err)
 			return
@@ -706,7 +706,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	} else {
 		// 路径没提取到 boxID（如历史目录无 boxID 前缀的旧路径），尝试遍历已打开的加密笔记本解密
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-			if dec, decErr := av.DecryptAVData(encBoxID, data); decErr == nil {
+			if dec, decErr := av.DecryptAVData(encBoxID, avID, data); decErr == nil {
 				data = dec
 				break
 			}

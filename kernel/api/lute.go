@@ -91,7 +91,7 @@ func html2BlockDOM(c *gin.Context) {
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
-	tree, _ := model.HTML2Tree(dom, luteEngine)
+	tree, _ := model.HTML2Tree(dom, luteEngine, "")
 	if nil == tree {
 		ret.Data = "Failed to convert"
 		return

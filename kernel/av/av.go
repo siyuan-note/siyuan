@@ -530,8 +530,8 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 			return
 		}
 		// 加密笔记本的 AV 定义是密文，按路径反查 boxID 后解密
-		if boxID := avBoxIDFromPath(avJSONPath); boxID != "" {
-			data, readErr = decryptAVData(boxID, data)
+			if boxID := avBoxIDFromPath(avJSONPath); boxID != "" {
+				data, readErr = decryptAVData(boxID, avID, data)
 			if readErr != nil {
 				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, readErr)
 				return
@@ -681,7 +681,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		if diskData, readErr := filelock.ReadFile(avJSONPath); nil == readErr {
 			// 加密笔记本的磁盘数据是密文，需先解密再比对
 			if avBoxID != "" {
-				diskData, _ = decryptAVData(avBoxID, diskData)
+					diskData, _ = decryptAVData(avBoxID, av.ID, diskData)
 			}
 			if len(diskData) == len(data) && bytes.Equal(diskData, data) {
 				cache.SetAVData(av.ID, data)
@@ -692,8 +692,8 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 	// 加密笔记本的数据需加密后再写盘
 	writeData := data
-	if avBoxID != "" {
-		writeData, err = encryptAVData(avBoxID, data)
+		if avBoxID != "" {
+			writeData, err = encryptAVData(avBoxID, av.ID, data)
 		if err != nil {
 			logging.LogErrorf("encrypt attribute view [%s] failed: %s", av.ID, err)
 			return

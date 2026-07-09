@@ -234,7 +234,7 @@ func extensionCopy(c *gin.Context) {
 			return s
 		})
 
-		tree, withMath = model.HTML2Tree(dom, luteEngine)
+		tree, withMath = model.HTML2Tree(dom, luteEngine, "")
 	} else {
 		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	}

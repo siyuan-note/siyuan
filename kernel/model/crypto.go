@@ -542,6 +542,18 @@ func LockBox(boxID string) {
 		delete(cachedDEKs, boxID)
 	}
 	cachedDEKsLock.Unlock()
+
+	// 锁定前确保备份存在，便于 conf 损坏恢复
+	box := &Box{ID: boxID}
+	boxConf := box.GetConf()
+	if boxConf != nil && boxConf.Encrypted && boxConf.BoxCrypt != nil {
+		if !filelock.IsExist(notebookCryptBackupPath(boxID)) {
+			if err := writeNotebookCryptBackup(boxID, boxConf.BoxCrypt); err != nil {
+				logging.LogWarnf("write notebook crypt backup [%s] failed: %s", boxID, err)
+			}
+		}
+	}
+
 	sql.RemoveEncryptedDBFile(boxID)
 	treenode.RemoveEncryptedBlockTreeDBFile(boxID)
 	// 清空明文缓存：锁定后任何加密笔记本的明文都不应残留内存

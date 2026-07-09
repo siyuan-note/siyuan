@@ -617,9 +617,9 @@ func deprecated(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-		msg := fmt.Sprintf("[%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
-			c.Request.RequestURI)
-		logging.LogWarn(msg)
+	msg := fmt.Sprintf("[%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
+		c.Request.RequestURI)
+	logging.LogWarn(msg)
 
 	ret.Code = -1
 	ret.Msg = msg

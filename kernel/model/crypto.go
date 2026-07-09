@@ -69,6 +69,9 @@ func notebookCryptoBackupPath() string {
 // 供用户主动导出保存，作为同步之外的独立恢复途径（详见设计文档 §4.1）。
 // 备份文件本身不含主密码（salt 不保密、verifier 是密文），拿到它也解不开任何数据。
 func ExportNotebookCryptoBackup() (downloadPath string, err error) {
+	notebookCryptoMu.Lock()
+	defer notebookCryptoMu.Unlock()
+
 	backupPath := notebookCryptoBackupPath()
 	data, readErr := filelock.ReadFile(backupPath)
 	if readErr != nil {
@@ -132,21 +135,22 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 		return errors.New(Conf.Language(311)) // 主密码错误
 	}
 
+	// 若已有加密笔记本，校验 KEK 能解密其 WrappedDEK（防止导入 salt 不同的旧备份导致现有数据锁死）
+	if !verifyKEKAgainstExistingBoxes(kek) {
+		return errors.New(Conf.Language(316)) // 密钥不匹配
+	}
+
 	nc.KDFParams = params // 归一化：确保写回 Conf 的是校验后的参数（含默认值回退）
 	nc.Enabled = true
+
+	// 先写 backup，再提交 conf；backup 失败时 conf 尚未改变，可重试
+	if err := writeNotebookCryptoBackupData(nc); err != nil {
+		return fmt.Errorf("failed to persist key backup: %w", err)
+	}
 	Conf.m.Lock()
 	*Conf.NotebookCrypto = *nc
 	Conf.m.Unlock()
 	Conf.Save()
-
-	// 同步写回备份文件（导入的备份即新的本地备份）
-	if err := os.MkdirAll(filepath.Dir(notebookCryptoBackupPath()), 0755); err != nil {
-		logging.LogErrorf("mkdir notebook crypto backup dir failed: %s", err)
-		return nil
-	}
-	if err := filelock.WriteFile(notebookCryptoBackupPath(), data); err != nil {
-		logging.LogErrorf("write notebook crypto backup failed: %s", err)
-	}
 	return nil
 }
 
@@ -167,6 +171,52 @@ func saveNotebookCryptoBackup() error {
 		return fmt.Errorf("write notebook crypto backup failed: %w", err)
 	}
 	return nil
+}
+
+// writeNotebookCryptoBackupData 将指定的 NotebookCrypto 写入备份文件（不依赖 Conf.NotebookCrypto）。
+// 供 ImportNotebookCryptoBackup 等先写备份再提交 conf 的场景使用。
+func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto) error {
+	data, err := json.Marshal(nc)
+	if err != nil {
+		return fmt.Errorf("marshal notebook crypto backup failed: %w", err)
+	}
+	backupPath := notebookCryptoBackupPath()
+	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
+		return fmt.Errorf("mkdir notebook crypto backup dir failed: %w", err)
+	}
+	if err := filelock.WriteFile(backupPath, data); err != nil {
+		return fmt.Errorf("write notebook crypto backup failed: %w", err)
+	}
+	return nil
+}
+
+// verifyKEKAgainstExistingBoxes 用 KEK 对所有现有加密笔记本的 WrappedDEK 做无副作用解密校验。
+// 优先尝试 conf 的 WrappedDEK，解密失败时 fallback 到 backup（与解锁路径一致）；
+// GetBoxEncryption 报错时 fail-closed（元数据损坏的加密笔记本不能静默跳过）。
+// 全部通过或不存在加密笔记本时返回 true。
+func verifyKEKAgainstExistingBoxes(kek []byte) bool {
+	for _, id := range ListAllEncryptedBoxIDs() {
+		boxCrypt, err := GetBoxEncryption(id)
+		if err != nil {
+			return false // 元数据读取失败 → fail-closed
+		}
+		if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
+			return false // ListAllEncryptedBoxIDs 认定为加密但无可用 key material → fail-closed
+		}
+		if _, dErr := util.Decrypt(kek, boxCrypt.WrappedDEK); dErr == nil {
+			continue // 解密成功
+		}
+		// conf 的 WrappedDEK 无法解密：尝试 backup（与解锁路径 fallback 一致）
+		backup, bErr := readNotebookCryptBackup(id)
+		if bErr == nil && backup != nil && len(backup.WrappedDEK) > 0 &&
+			!bytes.Equal(backup.WrappedDEK, boxCrypt.WrappedDEK) {
+			if _, err2 := util.Decrypt(kek, backup.WrappedDEK); err2 == nil {
+				continue // backup 解密成功
+			}
+		}
+		return false
+	}
+	return true
 }
 
 // loadNotebookCryptoBackup 从 DataDir 读取 NotebookCrypto 备份。文件不存在返回 (nil, nil)。
@@ -354,7 +404,7 @@ func EnableEncryptedNotebook(password string) error {
 	// conf.json 丢失后重新启用会派生新 KEK，导致旧 WrappedDEK 用相同主密码也无法解开（数据永久锁死）。
 	// 此时必须从 DataDir 备份恢复原 MasterSalt/KEKVerifier，并用主密码校验通过后才算恢复成功。
 	if hasEncryptedNotebook() {
-		if _, restoreErr := tryRestoreNotebookCryptoFromBackup(password); restoreErr != nil {
+		if _, restoreErr := tryRestoreNotebookCryptoFromBackupLocked(password); restoreErr != nil {
 			// 恢复失败：主密码错（恢复函数返回 311 文案）保持原提示；其余（备份缺失/损坏）提示需恢复备份
 			if strings.Contains(restoreErr.Error(), Conf.Language(311)) {
 				return errors.New(Conf.Language(311)) // 主密码错误
@@ -370,7 +420,10 @@ func EnableEncryptedNotebook(password string) error {
 	if err != nil {
 		return err
 	}
-	params, validErr := util.ValidateArgon2Params(Conf.NotebookCrypto.KDFParams)
+	Conf.m.RLock()
+	kdfParams := Conf.NotebookCrypto.KDFParams
+	Conf.m.RUnlock()
+	params, validErr := util.ValidateArgon2Params(kdfParams)
 	if validErr != nil {
 		return validErr
 	}
@@ -449,13 +502,21 @@ func restoreNotebookCryptoConfigFromBackup() {
 	if err != nil || backup == nil || len(backup.MasterSalt) == 0 || len(backup.KEKVerifier) == 0 {
 		return // 无可用备份，静默跳过
 	}
-	// 校验 KDFParams：非法参数（如恶意备份设置极大内存）时拒绝恢复，避免卡到"已启用但无法解锁"状态
+	// 校验 KDFParams：非法参数时拒绝恢复
 	params, validErr := util.ValidateArgon2Params(backup.KDFParams)
 	if validErr != nil {
 		logging.LogErrorf("skip restore notebook crypto: invalid KDFParams in backup: %s", validErr)
 		return
 	}
 	backup.KDFParams = params
+
+	// 若有加密笔记本存在，不在无主密码的路径提交启用状态；backup 文件已就位，
+	// 等用户解锁时走带密码的恢复路径（含现有 box WrappedDEK 校验）。
+	if len(ListAllEncryptedBoxIDs()) > 0 {
+		logging.LogInfof("notebook crypto backup found but deferred restore (encrypted notebooks exist, waiting for unlock)")
+		return
+	}
+
 	backup.Enabled = true
 	Conf.m.Lock()
 	*Conf.NotebookCrypto = *backup
@@ -464,16 +525,13 @@ func restoreNotebookCryptoConfigFromBackup() {
 	logging.LogInfof("notebook crypto config restored from backup (auto-enable after sync/import)")
 }
 
-// tryRestoreNotebookCryptoFromBackup 在本机 NotebookCrypto 未启用时，尝试从 DataDir 备份恢复。
+// tryRestoreNotebookCryptoFromBackupLocked 在本机 NotebookCrypto 未启用时，尝试从 DataDir 备份恢复。
 // 数据同步到新设备后，本机 conf.json 的 NotebookCrypto 是空的（Enabled=false），但备份文件已随
 // DataDir 同步过来。此时用户点加密笔记本输主密码，deriveKEK 会调本函数用主密码校验备份里的
 // verifier，校验通过则装回 salt/verifier 并置 Enabled=true，让旧 WrappedDEK 可正常解开。
 // 校验通过时同时返回已派生的 KEK（恢复用的 salt 与装回的 salt 相同，避免 deriveKEK 重复跑 Argon2id）。
 // 返回错误表示恢复失败（备份缺失/主密码错），此时 KEK 为 nil。
-func tryRestoreNotebookCryptoFromBackup(password string) (kek []byte, err error) {
-	notebookCryptoMu.Lock()
-	defer notebookCryptoMu.Unlock()
-
+func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err error) {
 	backup, bErr := loadNotebookCryptoBackup()
 	if bErr != nil || backup == nil || len(backup.MasterSalt) == 0 || len(backup.KEKVerifier) == 0 {
 		// 备份不存在或不完整：无法恢复，调用方按"未启用"报错
@@ -489,6 +547,12 @@ func tryRestoreNotebookCryptoFromBackup(password string) (kek []byte, err error)
 		// 主密码错误（或备份损坏），不能恢复
 		return nil, errors.New(Conf.Language(311))
 	}
+
+	// 若有加密笔记本，校验 KEK 能解密其 WrappedDEK（防止 salt 不匹配的备份导致数据锁死）
+	if !verifyKEKAgainstExistingBoxes(kek) {
+		return nil, errors.New(Conf.Language(316)) // 密钥不匹配
+	}
+
 	backup.KDFParams = params // 归一化：确保写回 Conf 的是校验后的参数（含默认值回退）
 	backup.Enabled = true
 	Conf.m.Lock()
@@ -508,7 +572,7 @@ func deriveKEK(password string) ([]byte, error) {
 	if !nc.Enabled {
 		// 本机未启用：可能是数据同步到新设备后本机 conf.json 还没有加密配置。
 		// 尝试从 DataDir 备份恢复（备份会随 DataDir 同步过来）；恢复成功时直接复用其派生的 KEK。
-		kek, restoreErr := tryRestoreNotebookCryptoFromBackup(password)
+		kek, restoreErr := tryRestoreNotebookCryptoFromBackupLocked(password)
 		if restoreErr != nil {
 			return nil, restoreErr
 		}
@@ -576,10 +640,16 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 	if boxEnc == nil || len(boxEnc.WrappedDEK) == 0 {
 		return errors.New("no encrypted key material for box")
 	}
+
+	// 加锁与改密/创建等控制面操作串行化，确保读 verifier + 自动恢复 + 解密 + conf 修复都在同一临界区
+	notebookCryptoMu.Lock()
+	defer notebookCryptoMu.Unlock()
+
 	kek, err := deriveKEK(password)
 	if err != nil {
 		return err
 	}
+
 	// 用 decryptBoxCrypt 统一处理解密 + backup fallback + conf 修复
 	dek, trustedCrypt, err := decryptBoxCrypt(boxID, kek)
 	if err != nil {
@@ -922,7 +992,21 @@ func needWriteNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) bool 
 		return true
 	}
 	return !bytes.Equal(existing.WrappedDEK, crypt.WrappedDEK) ||
-		!bytes.Equal(existing.WrapNonce, crypt.WrapNonce)
+		!bytes.Equal(existing.WrapNonce, crypt.WrapNonce) ||
+		existing.CreatedAt != crypt.CreatedAt
+}
+
+// DeepCopyBoxEncryption 深拷贝 BoxEncryption（含 []byte 字段），输入 nil 时返回 nil。
+// 供 api 层在反序列化请求体前保存加密字段的不可变快照。
+func DeepCopyBoxEncryption(src *conf.BoxEncryption) *conf.BoxEncryption {
+	if src == nil {
+		return nil
+	}
+	return &conf.BoxEncryption{
+		WrappedDEK: append([]byte(nil), src.WrappedDEK...),
+		WrapNonce:  append([]byte(nil), src.WrapNonce...),
+		CreatedAt:  src.CreatedAt,
+	}
 }
 
 // ListAllEncryptedBoxIDs 扫描 data 目录下所有含 notebook-crypt-backup.json 的 box 目录，
@@ -1212,6 +1296,20 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		return "", err
 	}
 
+	// 若后续步骤失败，清理已创建的 box 目录和加密 db 文件，避免半创建状态
+	boxCreated := true
+	defer func() {
+		if err != nil && boxCreated {
+			sql.RemoveEncryptedDBFile(id)
+			treenode.RemoveEncryptedBlockTreeDBFile(id)
+			boxDir := filepath.Join(util.DataDir, id)
+			if rmErr := filelock.Remove(boxDir); rmErr != nil {
+				logging.LogErrorf("cleanup failed encrypted box [%s]: %s", id, rmErr)
+			}
+			id = ""
+		}
+	}()
+
 	box := &Box{ID: id}
 	boxConf := box.GetConf()
 	boxConf.Encrypted = true
@@ -1225,7 +1323,8 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	// 回读校验加密配置已落盘，避免写失败后按普通笔记本处理
 	verifyConf := box.GetConf()
 	if verifyConf == nil || !verifyConf.Encrypted || verifyConf.BoxCrypt == nil {
-		return "", errors.New("encrypted notebook metadata verification failed after write")
+		err = errors.New("encrypted notebook metadata verification failed after write")
+		return "", err
 	}
 
 	// 复用刚派生的 DEK 直接开 db + 缓存，省去再次 Argon2id 解锁

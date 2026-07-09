@@ -365,11 +365,17 @@ func setNotebookConf(c *gin.Context) {
 	}
 
 	boxConf := box.GetConf()
+	// 深拷贝加密相关字段，防止反序列化请求体时被覆盖
+	// BoxCrypt 是指针，UnmarshalJSON 会修改同一指针对象，必须用 model 层辅助函数深拷贝
+	savedBoxCrypt := model.DeepCopyBoxEncryption(boxConf.BoxCrypt)
+	savedEncrypted := boxConf.Encrypted
 	if err = gulu.JSON.UnmarshalJSON(param, boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+	boxConf.Encrypted = savedEncrypted
+	boxConf.BoxCrypt = savedBoxCrypt
 
 	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
 
@@ -397,7 +403,11 @@ func setNotebookConf(c *gin.Context) {
 		}
 	}
 
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	ret.Data = boxConf
 }
 
@@ -629,7 +639,7 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 
 	model.NotebookCryptoMuLock()
 	count := len(model.ListAllEncryptedBoxIDs())
-	enabled := model.Conf.NotebookCrypto.Enabled
+	enabled := model.NotebookCryptoEnabled()
 	model.NotebookCryptoMuUnlock()
 
 	ret.Data = map[string]any{

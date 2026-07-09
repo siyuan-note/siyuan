@@ -1096,7 +1096,8 @@ func (conf *AppConf) GetBoxes() (ret []*Box) {
 		id := notebook.ID
 		name := notebook.Name
 		closed := notebook.Closed
-		box := &Box{ID: id, Name: name, Closed: closed}
+		encrypted := IsEncryptedBox(id) // 使用 IsEncryptedBox 统一判定（含 backup fallback）
+		box := &Box{ID: id, Name: name, Closed: closed, Encrypted: encrypted}
 		ret = append(ret, box)
 	}
 	return
@@ -1449,4 +1450,11 @@ func subscribeConfEvents() {
 		logging.LogInfof("pandoc resources [%s, %s]", util.PandocTemplatePath, util.PandocColorFilterPath)
 		Conf.Save()
 	})
+}
+
+// NotebookCryptoEnabled 返回加密笔记本功能是否已启用（线程安全）。
+func NotebookCryptoEnabled() bool {
+	Conf.m.RLock()
+	defer Conf.m.RUnlock()
+	return Conf.NotebookCrypto.Enabled
 }

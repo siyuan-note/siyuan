@@ -415,14 +415,14 @@ func Export2Liandi(id string) (err error) {
 	}
 	if 200 != resp.StatusCode {
 		msg := fmt.Sprintf("send article to liandi failed [sc=%d]", resp.StatusCode)
-			logging.LogError(msg)
-			return errors.New(msg)
+		logging.LogError(msg)
+		return errors.New(msg)
 	}
 
 	if 0 != result.Code {
 		msg := fmt.Sprintf("send article to liandi failed [code=%d, msg=%s]", result.Code, result.Msg)
-			logging.LogError(msg)
-			util.PushClearMsg(msgId)
+		logging.LogError(msg)
+		util.PushClearMsg(msgId)
 		return errors.New(result.Msg)
 	}
 

@@ -67,7 +67,9 @@ func CreateBox(name string) (id string, err error) {
 	for i, b := range boxes {
 		c := b.GetConf()
 		c.Sort = i + 1
-		b.SaveConf(c)
+		if err := b.SaveConf(c); err != nil {
+			logging.LogErrorf("save box conf [%s] failed: %s", b.ID, err)
+		}
 	}
 
 	id = ast.NewNodeID()
@@ -80,7 +82,9 @@ func CreateBox(name string) (id string, err error) {
 	box := &Box{ID: id, Name: name}
 	boxConf := box.GetConf()
 	boxConf.Name = name
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
+	}
 	IncSync()
 	logging.LogInfof("created box [%s]", id)
 	return
@@ -105,7 +109,9 @@ func RenameBox(boxID, name string) (err error) {
 	boxConf := box.GetConf()
 	boxConf.Name = name
 	box.Name = name
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+	}
 	IncSync()
 	logging.LogInfof("renamed box [%s] to [%s]", boxID, name)
 	return

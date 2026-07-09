@@ -52,15 +52,19 @@ import (
 )
 
 func GetAssetImgSize(assetPath string) (width, height int) {
-	absPath, err := GetAssetAbsPath(assetPath)
+	return GetAssetImgSizeInBox(assetPath, "")
+}
+
+func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
+	data, err := ReadAssetBytesInBox(boxID, assetPath)
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", assetPath, err)
 		return
 	}
 
-	img, err := imaging.Open(absPath)
+	img, err := imaging.Decode(bytes.NewReader(data))
 	if err != nil {
-		logging.LogErrorf("open asset image [%s] failed: %s", absPath, err)
+		logging.LogErrorf("open asset image [%s] failed: %s", assetPath, err)
 		return
 	}
 
@@ -632,18 +636,46 @@ func GetAssetAbsPath(relativePath string) (string, error) {
 	return GetAssetAbsPathWithOpt(relativePath, false)
 }
 
-// GetAssetAbsPathInBox 在指定 box 内解析资源绝对路径，不进行全局遍历。
-// boxID 为空时退化为全局搜索 GetAssetAbsPathWithOpt(..., true)。
-// 加密 box 直接从 <boxID>/assets/ 查找，不依赖后缀匹配。
-func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
+// AssetPathWithoutQuery 返回去掉查询参数后的资源路径，用于复制到导出目录等磁盘路径场景。
+func AssetPathWithoutQuery(relativePath string) string {
 	relativePath = strings.TrimSpace(relativePath)
 	if idx := strings.Index(relativePath, "?"); idx >= 0 {
 		relativePath = relativePath[:idx]
 	}
-	relativePath = filepath.ToSlash(relativePath)
+	return filepath.ToSlash(relativePath)
+}
+
+func assetPathAndBox(relativePath, defaultBoxID string) (cleanPath, boxID string) {
+	relativePath = strings.TrimSpace(relativePath)
+	boxID = defaultBoxID
+	if idx := strings.Index(relativePath, "?"); idx >= 0 {
+		query := relativePath[idx+1:]
+		relativePath = relativePath[:idx]
+		if values, err := url.ParseQuery(query); err == nil {
+			if queryBoxID := strings.TrimSpace(values.Get("box")); queryBoxID != "" {
+				boxID = queryBoxID
+			}
+		}
+	}
+	cleanPath = filepath.ToSlash(relativePath)
+	return
+}
+
+// GetAssetAbsPathInBox 在指定 box 内解析资源绝对路径，不进行全局遍历。
+// boxID 为空且路径没有 box 查询参数时只解析普通/全局资源，不遍历加密 box。
+// 加密 box 直接从 <boxID>/assets/ 查找，不依赖后缀匹配。
+func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
+	relativePath, boxID = assetPathAndBox(relativePath, boxID)
+	relativePath = path.Clean(relativePath)
+	if relativePath == "." || strings.HasPrefix(relativePath, "../") || relativePath == ".." || path.IsAbs(relativePath) {
+		return "", fmt.Errorf("[%s] is not an asset path", relativePath)
+	}
+	if boxID != "" && !ast.IsNodeIDPattern(boxID) {
+		return "", fmt.Errorf("[%s] is not a box id", boxID)
+	}
 
 	if boxID == "" {
-		return GetAssetAbsPathWithOpt(relativePath, true)
+		return GetAssetAbsPathWithOpt(relativePath, false)
 	}
 
 	p := filepath.Join(util.DataDir, boxID, relativePath)
@@ -1014,12 +1046,10 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
-	if idx := strings.Index(oldPath, "?"); idx >= 0 {
-		oldPath = oldPath[:idx]
-	}
+	oldCleanPath := AssetPathWithoutQuery(oldPath)
 
 	// 加密笔记本的资源文件名已脱敏，重命名会破坏映射关系，禁止
-	if absPath, absErr := GetAssetAbsPath(oldPath); absErr == nil {
+	if absPath, absErr := GetAssetAbsPathInBox(oldPath, ""); absErr == nil {
 		if IsEncryptedAssetPath(absPath) {
 			err = errors.New("renaming assets in encrypted notebooks is not supported")
 			return
@@ -1028,7 +1058,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 
 	newName = strings.TrimSpace(newName)
 	newName = util.FilterUploadFileName(newName)
-	if path.Base(oldPath) == newName {
+	if path.Base(oldCleanPath) == newName {
 		return
 	}
 	if "" == newName {
@@ -1040,10 +1070,10 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 
-	newName = util.AssetName(newName+filepath.Ext(oldPath), ast.NewNodeID())
-	parentDir := path.Dir(oldPath)
+	newName = util.AssetName(newName+filepath.Ext(oldCleanPath), ast.NewNodeID())
+	parentDir := path.Dir(oldCleanPath)
 	newPath = path.Join(parentDir, newName)
-	oldAbsPath, getErr := GetAssetAbsPath(oldPath)
+	oldAbsPath, getErr := GetAssetAbsPathInBox(oldPath, "")
 	if getErr != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", oldPath, getErr)
 		return

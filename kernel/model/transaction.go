@@ -1462,7 +1462,7 @@ func (tx *Transaction) processGlobalAssets(tree *parse.Tree) {
 
 		if ast.NodeLinkDest == n.Type && bytes.HasPrefix(n.Tokens, []byte("assets/")) {
 			assetP := gulu.Str.FromBytes(n.Tokens)
-			assetPath, e := GetAssetAbsPath(assetP)
+			assetPath, e := GetAssetAbsPathInBox(assetP, tree.Box)
 			if nil != e {
 				logging.LogErrorf("get path of asset [%s] failed: %s", assetP, e)
 				return ast.WalkContinue

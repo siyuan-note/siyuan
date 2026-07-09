@@ -1195,6 +1195,18 @@ func DecryptAsset(boxID, diskName string, dek, ciphertext []byte) ([]byte, error
 	return util.DecryptWithAAD(assetKey, ciphertext, []byte(aad))
 }
 
+func EncryptAssetNameMapping(boxID string, dek, plaintext []byte) ([]byte, error) {
+	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
+	aad := "siyuan:v1:asset-names:" + boxID
+	return util.EncryptWithAAD(assetKey, plaintext, []byte(aad))
+}
+
+func DecryptAssetNameMapping(boxID string, dek, ciphertext []byte) ([]byte, error) {
+	assetKey := util.DeriveSubKey(dek, "siyuan/asset")
+	aad := "siyuan:v1:asset-names:" + boxID
+	return util.DecryptWithAAD(assetKey, ciphertext, []byte(aad))
+}
+
 // notebookCryptBackupPath 返回加密笔记本的独立 BoxCrypt 备份路径。
 // 该文件在主 conf.json 丢失时用作"此笔记本是加密笔记本"的标识和降级恢复源。
 // 与全局 NotebookCrypto 备份（<DataDir>/.siyuan/notebook-crypto-backup.json）配合使用，

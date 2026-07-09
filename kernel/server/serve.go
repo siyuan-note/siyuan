@@ -688,7 +688,7 @@ func serveAssets(ginServer *gin.Engine) {
 		if boxID != "" {
 			p, err = model.GetAssetAbsPathInBox(cleanPath, boxID)
 		} else {
-			p, err = model.GetAssetAbsPathWithOpt(cleanPath, true)
+			p, err = model.GetAssetAbsPath(cleanPath)
 		}
 		if err != nil || p == "" {
 			context.Status(http.StatusNotFound)
@@ -696,7 +696,20 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		// 验证最终绝对路径必须在 data/assets 或 <boxID>/assets 下
-		if !strings.HasSuffix(filepath.ToSlash(p), "/"+strings.TrimPrefix(cleanPath, "/")) {
+		boxIDFromPath := model.ExtractBoxIDFromAssetsPath(p)
+		assetsRoot := filepath.Join(util.DataDir, "assets")
+		if boxIDFromPath != "" {
+			assetsRoot = filepath.Join(util.DataDir, boxIDFromPath, "assets")
+		}
+		if boxID != "" && boxID != boxIDFromPath {
+			context.Status(http.StatusForbidden)
+			return
+		}
+		if boxID == "" && model.IsEncryptedAssetPath(p) {
+			context.Status(http.StatusForbidden)
+			return
+		}
+		if !gulu.File.IsSubPath(assetsRoot, p) {
 			context.Status(http.StatusForbidden)
 			return
 		}
@@ -764,13 +777,13 @@ func readAssetBytes(absPath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-		if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
-			dek, dekErr := model.GetDEKIfUnlocked(boxID)
-			if dekErr != nil {
-				return nil, dekErr // 加密笔记本未解锁：fail-closed，不返回密文
-			}
-			diskName := filepath.Base(absPath)
-			plain, decErr := model.DecryptAsset(boxID, diskName, dek, data)
+	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
+		dek, dekErr := model.GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			return nil, dekErr // 加密笔记本未解锁：fail-closed，不返回密文
+		}
+		diskName := filepath.Base(absPath)
+		plain, decErr := model.DecryptAsset(boxID, diskName, dek, data)
 		if decErr != nil {
 			return nil, decErr
 		}
@@ -798,15 +811,15 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 		context.Status(http.StatusNotFound)
 		return true
 	}
-		diskName := filepath.Base(absPath)
-		plain, decErr := model.DecryptAsset(boxID, diskName, dek, ciphertext)
-		if decErr != nil {
-			logging.LogErrorf("decrypt asset [%s] failed: %s", absPath, decErr)
-			context.Status(http.StatusInternalServerError)
-			return true
-		}
-		// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
-		if originalName := model.LookupAssetOriginalName(boxID, diskName); originalName != "" {
+	diskName := filepath.Base(absPath)
+	plain, decErr := model.DecryptAsset(boxID, diskName, dek, ciphertext)
+	if decErr != nil {
+		logging.LogErrorf("decrypt asset [%s] failed: %s", absPath, decErr)
+		context.Status(http.StatusInternalServerError)
+		return true
+	}
+	// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
+	if originalName := model.LookupAssetOriginalName(boxID, diskName); originalName != "" {
 		setAssetsAttachmentDisposition(context, originalName)
 	} else {
 		setAssetsAttachmentDisposition(context, absPath)

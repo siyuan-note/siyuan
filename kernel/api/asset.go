@@ -46,7 +46,7 @@ func statAsset(c *gin.Context) {
 	var p string
 	if strings.HasPrefix(path, "assets/") {
 		var err error
-		p, err = model.GetAssetAbsPath(path)
+		p, err = model.GetAssetAbsPathInBox(path, "")
 		if err != nil {
 			ret.Code = 1
 			return
@@ -360,7 +360,7 @@ func getFileAnnotation(c *gin.Context) {
 
 func resolveFileAnnotationAbsPath(assetRelPath string) (ret string, err error) {
 	filePath := strings.TrimSuffix(assetRelPath, ".sya")
-	absPath, err := model.GetAssetAbsPath(filePath)
+	absPath, err := model.GetAssetAbsPathInBox(filePath, "")
 	if err != nil {
 		return
 	}
@@ -431,10 +431,16 @@ func resolveAssetPath(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-	p, err := model.GetAssetAbsPath(path)
+	p, err := model.GetAssetAbsPathInBox(path, "")
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 3000}
+		return
+	}
+	if model.IsEncryptedAssetPath(p) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
 		ret.Data = map[string]any{"closeTimeout": 3000}
 		return
 	}

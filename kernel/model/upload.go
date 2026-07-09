@@ -234,6 +234,12 @@ func Upload(c *gin.Context) {
 			ret.Msg = openErr.Error()
 			break
 		}
+		if needUnzip2Dir && IsEncryptedBox(uploadBoxID) {
+			errFiles = append(errFiles, fName)
+			ret.Msg = "directory assets are not supported in encrypted notebooks"
+			f.Close()
+			break
+		}
 
 		hash, hashErr := util.GetEtagByHandle(f, file.Size)
 		if nil != hashErr {
@@ -520,7 +526,7 @@ func writeAssetNameMapping(boxID, diskName, originalName string) {
 		logging.LogErrorf("get DEK for asset name mapping failed: %s", err)
 		return
 	}
-		enc, err := EncryptAsset(boxID, ".names.json", dek, data)
+	enc, err := EncryptAssetNameMapping(boxID, dek, data)
 	if err != nil {
 		logging.LogErrorf("encrypt asset name mapping failed: %s", err)
 		return
@@ -545,7 +551,7 @@ func readAssetNameMapping(boxID string) map[string]string {
 	if err != nil || dek == nil {
 		return ret
 	}
-		data, err := DecryptAsset(boxID, ".names.json", dek, enc)
+	data, err := DecryptAssetNameMapping(boxID, dek, enc)
 	if err != nil {
 		logging.LogErrorf("decrypt asset name mapping failed: %s", err)
 		return ret

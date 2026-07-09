@@ -54,7 +54,7 @@ func LogoutAuth(c *gin.Context) {
 	session := util.GetSession(c)
 	util.RemoveWorkspaceSession(session)
 	if err := session.Save(c); err != nil {
-		logging.LogErrorf("saves session failed: " + err.Error())
+		logging.LogError("saves session failed: " + err.Error())
 		session.Clear(c)
 		ret.Code = 1
 		ret.Msg = Conf.Language(258)
@@ -99,7 +99,7 @@ func LoginAuth(c *gin.Context) {
 
 			workspaceSession.Captcha = gulu.Rand.String(7) // https://github.com/siyuan-note/siyuan/issues/13147
 			if err := session.Save(c); err != nil {
-				logging.LogErrorf("save session failed: " + err.Error())
+				logging.LogError("save session failed: " + err.Error())
 				session.Clear(c)
 				ret.Code = 1
 				ret.Msg = Conf.Language(258)
@@ -125,7 +125,7 @@ func LoginAuth(c *gin.Context) {
 		}
 
 		if err := session.Save(c); err != nil {
-			logging.LogErrorf("save session failed: " + err.Error())
+			logging.LogError("save session failed: " + err.Error())
 			session.Clear(c)
 			ret.Code = 1
 			ret.Msg = Conf.Language(258)
@@ -152,7 +152,7 @@ func LoginAuth(c *gin.Context) {
 
 	logging.LogInfof("auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), maxAge)
 	if err := session.Save(c); err != nil {
-		logging.LogErrorf("save session failed: " + err.Error())
+		logging.LogError("save session failed: " + err.Error())
 		session.Clear(c)
 		ret.Code = 1
 		ret.Msg = Conf.Language(258)
@@ -170,7 +170,7 @@ func GetCaptcha(c *gin.Context) {
 		options.BackgroundColor = color.White
 	})
 	if err != nil {
-		logging.LogErrorf("generates captcha failed: " + err.Error())
+		logging.LogError("generates captcha failed: " + err.Error())
 		c.Status(http.StatusInternalServerError)
 		return
 	}
@@ -179,13 +179,13 @@ func GetCaptcha(c *gin.Context) {
 	workspaceSession := util.GetWorkspaceSession(session)
 	workspaceSession.Captcha = img.Text
 	if err = session.Save(c); err != nil {
-		logging.LogErrorf("save session failed: " + err.Error())
+		logging.LogError("save session failed: " + err.Error())
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
 	if err = img.WriteImage(c.Writer); err != nil {
-		logging.LogErrorf("writes captcha image failed: " + err.Error())
+		logging.LogError("writes captcha image failed: " + err.Error())
 		c.Status(http.StatusInternalServerError)
 		return
 	}

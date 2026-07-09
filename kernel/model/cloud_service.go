@@ -119,7 +119,7 @@ func StartFreeTrial() (err error) {
 		return ErrFailedToConnectCloudServer
 	}
 	if -2 == requestResult.Code { // 已经试用订阅过
-		return fmt.Errorf(Conf.Language(298))
+		return errors.New(Conf.Language(298))
 	}
 	if 0 != requestResult.Code {
 		return errors.New(requestResult.Msg)

@@ -201,8 +201,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	defer func() {
 		if e := recover(); nil != e {
-			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
-			logging.LogErrorf(msg)
+		msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
+				logging.LogError(msg)
 
 			if 1 == tx.state.Load() {
 				tx.rollback()
@@ -691,7 +691,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	tree, err := tx.loadTree(block.ID)
 	if err != nil {
 		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
@@ -787,7 +787,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	tree, err := tx.loadTree(block.ID)
 	if err != nil {
 		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
 	}
 
@@ -995,7 +995,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		}
 
 		msg := fmt.Sprintf("load tree [%s] failed: %s", id, err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
@@ -1266,7 +1266,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	tree, err := tx.loadTreeByBlockTree(bt)
 	if err != nil {
 		msg := fmt.Sprintf("load tree [%s] failed: %s", bt.ID, err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: bt.ID}
 	}
 

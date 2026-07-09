@@ -163,7 +163,7 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	historyPath = filepath.Join(util.WorkspaceDir, historyPath)
 	if !util.IsAbsPathInWorkspace(historyPath) {
 		msg := "Path [" + historyPath + "] is not in workspace"
-		logging.LogErrorf(msg)
+			logging.LogError(msg)
 		err = errors.New(msg)
 		return
 	}

@@ -5270,8 +5270,8 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (
 			itemID = v["rowID"].(string)
 			msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
 				"/api/av/batchSetAttributeViewBlockAttrs", "rowID")
-			logging.LogWarnf(msg)
-			err = fmt.Errorf(msg)
+			logging.LogWarn(msg)
+				err = errors.New(msg)
 			return
 		}
 		valueData := v["value"]

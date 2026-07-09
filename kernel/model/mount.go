@@ -115,7 +115,7 @@ var boxLock = sync.Map{}
 
 func RemoveBox(boxID string) (err error) {
 	if _, ok := boxLock.Load(boxID); ok {
-		err = fmt.Errorf(Conf.language(239))
+		err = errors.New(Conf.language(239))
 		return
 	}
 
@@ -241,7 +241,7 @@ func unmount0(boxID string) {
 
 func Mount(boxID string) (alreadyMount bool, err error) {
 	if _, ok := boxLock.Load(boxID); ok {
-		err = fmt.Errorf(Conf.language(239))
+		err = errors.New(Conf.language(239))
 		return
 	}
 

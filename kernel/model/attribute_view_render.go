@@ -683,14 +683,12 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		return
 	}
 
-	// 加密笔记本的历史 AV 定义是密文，按路径里的 boxID 解密
-	// avJSONPath 可能在历史目录（<HistoryDir>/<ts>/<boxID>/storage/av/...）或当前数据目录（<DataDir>/<boxID>/storage/av/...）
+	// 加密笔记本的历史 AV 定义是密文，需要解密后才能解析。
+	// 从路径提取 boxID，提取不到时遍历所有已打开的加密 box 尝试解密。
 	avAbsSlash := filepath.ToSlash(avJSONPath)
 	var histBoxID string
-	// 从路径中提取 /storage/av/ 前面的那一段作为 boxID
 	if idx := strings.Index(avAbsSlash, "/storage/av/"); idx > 0 {
 		prefix := avAbsSlash[:idx]
-		// prefix 的最后一段是 boxID（或时间戳目录名）
 		segs := strings.Split(prefix, "/")
 		for i := len(segs) - 1; i >= 0; i-- {
 			if ast.IsNodeIDPattern(segs[i]) {
@@ -700,12 +698,18 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		}
 	}
 	if histBoxID != "" && IsEncryptedBox(histBoxID) {
-		var decErr error
-		data, decErr = av.DecryptAVData(histBoxID, data)
-		if decErr != nil {
-			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, decErr)
-			err = decErr
+		data, err = av.DecryptAVData(histBoxID, data)
+		if err != nil {
+			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, err)
 			return
+		}
+	} else {
+		// 路径没提取到 boxID（如历史目录无 boxID 前缀的旧路径），尝试遍历已打开的加密 box 解密
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if dec, decErr := av.DecryptAVData(encBoxID, data); decErr == nil {
+				data = dec
+				break
+			}
 		}
 	}
 

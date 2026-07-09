@@ -165,14 +165,14 @@ func RemoveBox(boxID string) (err error) {
 		}
 	}
 
-		if err = filelock.Remove(localPath); err != nil {
-			return
-		}
-		// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
-		if isEncrypted {
-			sql.RemoveEncryptedDBFile(boxID)
-			treenode.RemoveEncryptedBlockTreeDBFile(boxID)
-		}
+	if err = filelock.Remove(localPath); err != nil {
+		return
+	}
+	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
+	if isEncrypted {
+		sql.RemoveEncryptedDBFile(boxID)
+		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
+	}
 
 	if isUserGuide {
 		if avFiles, readAvErr := getUserGuideAVJSONFiles(boxID); nil == readAvErr {
@@ -327,11 +327,11 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	}
 
 	box := &Box{ID: boxID}
-		boxConf := box.GetConf()
-		boxConf.Closed = false
-		if err := box.SaveConf(boxConf); err != nil {
-			logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
-		}
+	boxConf := box.GetConf()
+	boxConf.Closed = false
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+	}
 
 	// 缓存根一级的文档树展开
 	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)

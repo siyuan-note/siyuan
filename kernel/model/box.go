@@ -110,51 +110,51 @@ func ListNotebooks() (ret []*Box, err error) {
 		}
 
 		boxConf := conf.NewBoxConf()
-			boxDirPath := filepath.Join(util.DataDir, id)
-			boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
-			isExistConf := filelock.IsExist(boxConfPath)
-			if !isExistConf {
-				if !IsUserGuide(id) {
-					// conf.json 缺失时检查加密备份，确认是否为加密笔记本
-					backup, backupErr := readNotebookCryptBackup(id)
-					if backupErr != nil {
-						logging.LogErrorf("read notebook crypt backup [%s] failed: %s", boxDirPath, backupErr)
+		boxDirPath := filepath.Join(util.DataDir, id)
+		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
+		isExistConf := filelock.IsExist(boxConfPath)
+		if !isExistConf {
+			if !IsUserGuide(id) {
+				// conf.json 缺失时检查加密备份，确认是否为加密笔记本
+				backup, backupErr := readNotebookCryptBackup(id)
+				if backupErr != nil {
+					logging.LogErrorf("read notebook crypt backup [%s] failed: %s", boxDirPath, backupErr)
+					continue
+				}
+				if backup != nil {
+					// 从备份恢复 conf.json，避免加密笔记本被当作普通笔记本处理
+					boxConf.Encrypted = true
+					boxConf.BoxCrypt = backup
+					tmpBox := &Box{ID: id}
+					if saveErr := tmpBox.SaveConf(boxConf); saveErr != nil {
+						logging.LogErrorf("restore encrypted notebook conf from backup failed [%s]: %s", boxDirPath, saveErr)
 						continue
 					}
-					if backup != nil {
-							// 从备份恢复 conf.json，避免加密笔记本被当作普通笔记本处理
-							boxConf.Encrypted = true
-							boxConf.BoxCrypt = backup
-							tmpBox := &Box{ID: id}
-							if saveErr := tmpBox.SaveConf(boxConf); saveErr != nil {
-							logging.LogErrorf("restore encrypted notebook conf from backup failed [%s]: %s", boxDirPath, saveErr)
-							continue
-						}
-						logging.LogWarnf("restored encrypted notebook conf from backup [%s]", boxDirPath)
-					} else {
-						// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
-						logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
-					}
+					logging.LogWarnf("restored encrypted notebook conf from backup [%s]", boxDirPath)
 				} else {
-					continue
+					// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
+					logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
 				}
 			} else {
-				data, readErr := filelock.ReadFile(boxConfPath)
-				if nil != readErr {
-					logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
-					continue
-				}
-				if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
-					logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
-					// 检查加密备份，有备份则保留损坏 conf 不删（避免标记为缺失后自动恢复旧数据）
-					backup, backupErr := readNotebookCryptBackup(id)
-					if backupErr == nil && backup != nil {
-						continue
-					}
-					filelock.Remove(boxConfPath)
-					continue
-				}
+				continue
 			}
+		} else {
+			data, readErr := filelock.ReadFile(boxConfPath)
+			if nil != readErr {
+				logging.LogErrorf("read box conf [%s] failed: %s", boxConfPath, readErr)
+				continue
+			}
+			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
+				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
+				// 检查加密备份，有备份则保留损坏 conf 不删（避免标记为缺失后自动恢复旧数据）
+				backup, backupErr := readNotebookCryptBackup(id)
+				if backupErr == nil && backup != nil {
+					continue
+				}
+				filelock.Remove(boxConfPath)
+				continue
+			}
+		}
 
 		icon := boxConf.Icon
 		if strings.Contains(icon, ".") { // 说明是自定义图标
@@ -173,13 +173,13 @@ func ListNotebooks() (ret []*Box, err error) {
 		}
 
 		if !isExistConf {
-				// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
-				if err := box.SaveConf(boxConf); err != nil {
-					logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, err)
-				}
-				box.Unindex()
-				logging.LogWarnf("fixed a corrupted box [%s]", boxDirPath)
+			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
+			if err := box.SaveConf(boxConf); err != nil {
+				logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, err)
 			}
+			box.Unindex()
+			logging.LogWarnf("fixed a corrupted box [%s]", boxDirPath)
+		}
 		ret = append(ret, box)
 	}
 

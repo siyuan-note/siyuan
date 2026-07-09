@@ -138,6 +138,9 @@ func InitConf() {
 				logging.LogInfof("loaded conf [%s]", confPath)
 			}
 
+			// 启动时检测并完成中断的改密迁移
+			recoverMasterPasswordMigration()
+
 			if conf.NeedsAIMigration(data) {
 				Conf.AI = conf.MigrateAI(data)
 				Conf.Save()
@@ -146,17 +149,17 @@ func InitConf() {
 
 			// 重启后加密笔记本的 DEK 丢失（仅内存），必须重新解锁。
 			// 强制把所有加密笔记本标记为已关闭，避免启动索引读到无法解密的密文 .sy。
-				changed := false
-				for _, box := range Conf.GetBoxes() {
-					boxConf := box.GetConf()
-					if boxConf.Encrypted && !boxConf.Closed {
-						boxConf.Closed = true
-						if err := box.SaveConf(boxConf); err != nil {
-							logging.LogErrorf("close encrypted notebook on boot [%s] failed: %s", box.ID, err)
-						}
-						changed = true
+			changed := false
+			for _, box := range Conf.GetBoxes() {
+				boxConf := box.GetConf()
+				if boxConf.Encrypted && !boxConf.Closed {
+					boxConf.Closed = true
+					if err := box.SaveConf(boxConf); err != nil {
+						logging.LogErrorf("close encrypted notebook on boot [%s] failed: %s", box.ID, err)
 					}
+					changed = true
 				}
+			}
 			if changed {
 				logging.LogInfof("closed encrypted notebooks on boot (DEK not in memory)")
 			}

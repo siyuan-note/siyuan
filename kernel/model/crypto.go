@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -176,6 +177,108 @@ func loadNotebookCryptoBackup() (*conf.NotebookCrypto, error) {
 func removeNotebookCryptoBackup() {
 	if err := os.Remove(notebookCryptoBackupPath()); err != nil && !os.IsNotExist(err) {
 		logging.LogErrorf("remove notebook crypto backup failed: %s", err)
+	}
+}
+
+// masterPasswordMigration 记录改密迁移的完整状态，用于崩溃后恢复。
+type masterPasswordMigration struct {
+	OldVerifier      []byte              `json:"oldVerifier"`
+	NewVerifier      []byte              `json:"newVerifier"`
+	NewVerifierNonce []byte              `json:"newVerifierNonce"`
+	NewKDFParams     json.RawMessage     `json:"newKDFParams"`
+	Boxes            []migrationBoxEntry `json:"boxes"`
+}
+
+type migrationBoxEntry struct {
+	BoxID         string `json:"boxID"`
+	NewWrappedDEK []byte `json:"newWrappedDEK"`
+	NewWrapNonce  []byte `json:"newWrapNonce"`
+}
+
+func masterPasswordMigrationPath() string {
+	return filepath.Join(util.DataDir, ".siyuan", "master-password-migration.json")
+}
+
+func writeMasterPasswordMigration(m *masterPasswordMigration) error {
+	p := masterPasswordMigrationPath()
+	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+		return fmt.Errorf("mkdir master password migration dir failed: %w", err)
+	}
+	data, err := gulu.JSON.MarshalIndentJSON(m, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal master password migration failed: %w", err)
+	}
+	return filelock.WriteFile(p, data)
+}
+
+func readMasterPasswordMigration() (*masterPasswordMigration, error) {
+	p := masterPasswordMigrationPath()
+	if !filelock.IsExist(p) {
+		return nil, nil
+	}
+	data, err := filelock.ReadFile(p)
+	if err != nil {
+		return nil, fmt.Errorf("read master password migration failed: %w", err)
+	}
+	var m masterPasswordMigration
+	if err = gulu.JSON.UnmarshalJSON(data, &m); err != nil {
+		return nil, fmt.Errorf("unmarshal master password migration failed: %w", err)
+	}
+	return &m, nil
+}
+
+func removeMasterPasswordMigration() {
+	p := masterPasswordMigrationPath()
+	if err := filelock.Remove(p); err != nil && !os.IsNotExist(err) {
+		logging.LogErrorf("remove master password migration failed: %s", err)
+	}
+}
+
+// recoverMasterPasswordMigration 在启动时检测并完成中断的改密迁移。
+// 若 migration manifest 存在，根据全局 verifier 是否已切换决定恢复策略。
+func recoverMasterPasswordMigration() {
+	mig, err := readMasterPasswordMigration()
+	if err != nil {
+		logging.LogErrorf("read master password migration failed: %s", err)
+		return
+	}
+	if mig == nil {
+		return // 无待恢复的迁移
+	}
+
+	Conf.m.RLock()
+	currentVerifier := Conf.NotebookCrypto.KEKVerifier
+	Conf.m.RUnlock()
+
+	if bytes.Equal(currentVerifier, mig.NewVerifier) {
+		// Phase 2 已完成（verifier 已切换），补写未完成的 box
+		for _, entry := range mig.Boxes {
+			box := &Box{ID: entry.BoxID}
+			boxConf := box.GetConf()
+			if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
+				continue
+			}
+			// 若 WrappedDEK 已匹配则跳过
+			if bytes.Equal(boxConf.BoxCrypt.WrappedDEK, entry.NewWrappedDEK) {
+				continue
+			}
+			boxConf.BoxCrypt.WrappedDEK = entry.NewWrappedDEK
+			boxConf.BoxCrypt.WrapNonce = entry.NewWrapNonce
+			if saveErr := box.SaveConf(boxConf); saveErr != nil {
+				logging.LogErrorf("recover box conf [%s] failed: %s", entry.BoxID, saveErr)
+				return
+			}
+			if writeErr := writeNotebookCryptBackup(entry.BoxID, boxConf.BoxCrypt); writeErr != nil {
+				logging.LogErrorf("recover box crypt backup [%s] failed: %s", entry.BoxID, writeErr)
+				return
+			}
+		}
+		removeMasterPasswordMigration()
+		logging.LogInfof("master password migration recovered successfully")
+	} else {
+		// Phase 2 未完成：清除 manifest，保留旧 verifier + 旧 WrappedDEK，状态一致
+		removeMasterPasswordMigration()
+		logging.LogErrorf("master password migration was interrupted, please retry")
 	}
 }
 
@@ -518,6 +621,14 @@ func ClearDEK(boxID string) {
 // ChangeMasterPassword 改主密码：用旧密码校验后，用新密码派生新 KEK，
 // 重新加密 verifier，并把所有加密笔记本的 WrappedDEK 用新 KEK 重新包络后写回各自的 BoxConf。
 //
+// 使用两阶段提交确保崩溃后可恢复：
+//
+//	Phase 0: 预计算所有新 WrappedDEK（内存）
+//	Phase 1: 写入 migration manifest
+//	Phase 2: 切换全局 verifier
+//	Phase 3: 写入各 box conf + backup
+//	Phase 4: 清除 manifest
+//
 // 注意：必须在所有加密笔记本都已 Unmount 的状态下调用（DEK 不在内存），否则新旧 KEK 切换会让缓存与磁盘不一致。
 func ChangeMasterPassword(oldPassword, newPassword string) error {
 	if len(newPassword) == 0 {
@@ -551,11 +662,12 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		return err
 	}
 
-	// 遍历所有笔记本，找到加密笔记本并用新 KEK 重新 wrap 其 WrappedDEK
+	// Phase 0: 遍历所有加密笔记本，预计算新 WrappedDEK（内存操作）
 	boxes, err := ListNotebooks()
 	if err != nil {
 		return err
 	}
+	var entries []migrationBoxEntry
 	for _, b := range boxes {
 		boxConf := b.GetConf()
 		if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
@@ -569,33 +681,74 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		if err != nil {
 			return err
 		}
-			boxConf.BoxCrypt.WrappedDEK = newWrapped
-			boxConf.BoxCrypt.WrapNonce = newWrapped[:12]
-			if err = b.SaveConf(boxConf); err != nil {
-				return fmt.Errorf("save conf for notebook [%s] failed: %w", b.ID, err)
-			}
-			if err = writeNotebookCryptBackup(b.ID, boxConf.BoxCrypt); err != nil {
-				return fmt.Errorf("update notebook crypt backup [%s] failed: %w", b.ID, err)
-			}
+		entries = append(entries, migrationBoxEntry{
+			BoxID:         b.ID,
+			NewWrappedDEK: newWrapped,
+			NewWrapNonce:  newWrapped[:12],
+		})
 	}
 
+	// Phase 1: 持久化 migration manifest（崩溃后 recovery 的依据）
+	newParamsJSON, _ := gulu.JSON.MarshalJSON(params)
+	mig := &masterPasswordMigration{
+		OldVerifier:      nc.KEKVerifier,
+		NewVerifier:      newVerifier,
+		NewVerifierNonce: newVerifier[:12],
+		NewKDFParams:     newParamsJSON,
+		Boxes:            entries,
+	}
+	if err = writeMasterPasswordMigration(mig); err != nil {
+		return err
+	}
+
+	// Phase 2: 切换全局 verifier
 	Conf.m.Lock()
 	Conf.NotebookCrypto.KEKVerifier = newVerifier
 	Conf.NotebookCrypto.VerifierNonce = newVerifier[:12]
-	Conf.NotebookCrypto.KDFParams = params // 归一化：确保存的是校验后的参数
+	Conf.NotebookCrypto.KDFParams = params
 	Conf.m.Unlock()
 
 	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
 	Conf.Save()
-	saveNotebookCryptoBackup() // verifier 已变，刷新备份
+
+	// Phase 3: 写入各 box conf + backup
+	for _, entry := range entries {
+		box := &Box{ID: entry.BoxID}
+		boxConf := box.GetConf()
+		if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
+			continue
+		}
+		boxConf.BoxCrypt.WrappedDEK = entry.NewWrappedDEK
+		boxConf.BoxCrypt.WrapNonce = entry.NewWrapNonce
+		if err = box.SaveConf(boxConf); err != nil {
+			return fmt.Errorf("save conf for notebook [%s] failed: %w", entry.BoxID, err)
+		}
+		if err = writeNotebookCryptBackup(entry.BoxID, boxConf.BoxCrypt); err != nil {
+			return fmt.Errorf("update notebook crypt backup [%s] failed: %w", entry.BoxID, err)
+		}
+	}
+
+	// Phase 4: 清除 manifest，迁移完成
+	removeMasterPasswordMigration()
+	saveNotebookCryptoBackup() // verifier 已变，刷新全局备份
 	return nil
 }
 
 // IsEncryptedBox 判断给定 boxID 是否为加密笔记本。
+// 优先读 conf.json，若缺失/损坏则 fallback 到独立备份，避免 fail-open。
 func IsEncryptedBox(boxID string) bool {
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
-	return boxConf != nil && boxConf.Encrypted
+	if boxConf != nil && boxConf.Encrypted {
+		return true
+	}
+	// 主 conf 缺失/损坏时检查独立备份，确认是否为加密笔记本
+	backup, err := readNotebookCryptBackup(boxID)
+	if err != nil {
+		logging.LogWarnf("failed to read notebook crypt backup for [%s]: %s", boxID, err)
+		return false
+	}
+	return backup != nil && len(backup.WrappedDEK) > 0
 }
 
 // IsSameCryptoBoundary 判断 srcBox 与 dstBox 是否处于同一加密边界（跨 box 操作是否安全）。

@@ -43,6 +43,7 @@ import (
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/api"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/mcp"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
@@ -818,9 +819,8 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	} else if strings.Contains(absPath, "assets"+string(os.PathSeparator)) {
 		plain, decErr = model.DecryptAsset(boxID, dek, ciphertext)
 	} else if strings.Contains(absPath, "storage"+string(os.PathSeparator)+"av"+string(os.PathSeparator)) {
-		// AV 定义在历史中也用加密存储，暂用 DecryptAsset 解密（与 assets 同模式），
-		// 后续可切换为专用 AV 解密函数
-		plain, decErr = model.DecryptAsset(boxID, dek, ciphertext)
+		// AV 定义用 siyuan/av 子密钥加密，与 assets 的 siyuan/asset 子密钥不同
+		plain, decErr = av.DecryptAVData(boxID, ciphertext)
 	} else {
 		// 其他历史文件（如 JSON 元数据等）尝试用 asset 解密方式
 		plain, decErr = model.DecryptAsset(boxID, dek, ciphertext)

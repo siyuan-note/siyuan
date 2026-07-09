@@ -216,9 +216,9 @@ const genKeymapListHtml = () => {
 
     return `<div class="b3-label file-tree config-keymap config-item" id="keymapList">
     <div class="fn__flex config-wrap">
-        <input id="keymapInput" class="b3-text-field" placeholder="${window.siyuan.languages.search}">
+        <input id="keymapInput" class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.search}">
         <div class="fn__space"></div>
-        <label class="b3-form__icon fn__block searchByKeyLabel">
+        <label class="b3-form__icon fn__flex-1 searchByKeyLabel">
             <svg class="b3-form__icon-icon"><use xlink:href="#iconKeymap"></use></svg>
             <input id="searchByKey" style="font-family: var(--b3-font-family-kbd);font-variant-emoji: text;" data-keymap="" class="b3-form__icon-input b3-text-field fn__block" spellcheck="false" autocomplete="off" inputmode="none" readonly placeholder="${window.siyuan.languages.keymap}">
         </label>

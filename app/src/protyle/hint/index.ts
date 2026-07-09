@@ -653,7 +653,9 @@ ${genHintItemHTML(item)}
             blockRender(protyle, protyle.wysiwyg.element);
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
-            if (value === "((" || value === "{{") {
+            if (protyle.lite) {
+                insertHTML(value, protyle);
+            } else if (value === "((" || value === "{{") {
                 this.enableExtend = true;
                 if (value === "((") {
                     hintRef("", protyle, "hint");

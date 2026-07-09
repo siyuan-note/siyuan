@@ -196,9 +196,18 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         // https://github.com/siyuan-note/siyuan/issues/5083
         if (this.splitChar === "/" || this.splitChar === "、") {
             clearTimeout(this.timeId);
-            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
-            if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
-                this.genHTML(hintSlash(key, protyle), protyle, false, "hint");
+            if (protyle.lite) {
+                protyle.options.hint.extend.find((item) => {
+                    if (item.key === "/" && item.hint) {
+                        item.hint(key, protyle, "hint");
+                        return true;
+                    }
+                });
+            } else {
+                const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+                if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
+                    this.genHTML(hintSlash(key, protyle), protyle, false, "hint");
+                }
             }
             return;
         }

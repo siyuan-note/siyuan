@@ -289,8 +289,8 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 
 		tree, _ := loadTree(from, util.NewLute())
 		if nil == tree {
-		msg := fmt.Sprintf("no such file or directory: %s", from)
-				logging.LogError(msg)
+			msg := fmt.Sprintf("no such file or directory: %s", from)
+			logging.LogError(msg)
 			err = errors.New(msg)
 			return
 		}
@@ -1659,13 +1659,13 @@ func bootSyncRepo() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", html.EscapeString(err.Error()))
-			logging.LogError(msg)
-			util.PushStatusBar(msg)
-			util.PushErrMsg(msg, 0)
-			return
-		}
+		logging.LogError(msg)
+		util.PushStatusBar(msg)
+		util.PushErrMsg(msg, 0)
+		return
+	}
 
-		isBootSyncing.Store(true)
+	isBootSyncing.Store(true)
 
 	waitGroup := sync.WaitGroup{}
 	var errs []error

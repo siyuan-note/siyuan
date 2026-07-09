@@ -201,8 +201,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	defer func() {
 		if e := recover(); nil != e {
-		msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
-				logging.LogError(msg)
+			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
+			logging.LogError(msg)
 
 			if 1 == tx.state.Load() {
 				tx.rollback()

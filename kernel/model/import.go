@@ -1221,8 +1221,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		}
 		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
 		if nil == tree {
-		msg := fmt.Sprintf("parse tree [%s] failed", localPath)
-				logging.LogError(msg)
+			msg := fmt.Sprintf("parse tree [%s] failed", localPath)
+			logging.LogError(msg)
 			return errors.New(msg)
 		}
 

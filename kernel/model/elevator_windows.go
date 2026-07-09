@@ -61,7 +61,7 @@ func AddMicrosoftDefenderExclusion() (err error) {
 
 	if !gulu.File.IsExist(elevator) {
 		msg := fmt.Sprintf("not found elevator [%s]", elevator)
-			logging.LogWarn(msg)
+		logging.LogWarn(msg)
 		err = errors.New(msg)
 		return
 	}

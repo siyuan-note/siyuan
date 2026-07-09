@@ -199,7 +199,7 @@ func BootWithFlags(workspacePath, wdPath, port, readOnly, accessAuthCode, lang, 
 	tryLockWorkspace()
 
 	bootBanner := figure.NewColorFigure("SiYuan", "isometric3", "green", true)
-		logging.LogInfo("\n" + bootBanner.String())
+	logging.LogInfo("\n" + bootBanner.String())
 	logBootInfo()
 }
 
@@ -414,17 +414,17 @@ func ReadWorkspacePaths() (ret []string, err error) {
 	data, err := os.ReadFile(workspaceConf)
 	if err != nil {
 		msg := fmt.Sprintf("read workspace conf [%s] failed: %s", workspaceConf, err)
-			logging.LogError(msg)
-			err = errors.New(msg)
-			return
-		}
+		logging.LogError(msg)
+		err = errors.New(msg)
+		return
+	}
 
-		if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-			msg := fmt.Sprintf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
-			logging.LogError(msg)
-			err = errors.New(msg)
-			return
-		}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
+		msg := fmt.Sprintf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogError(msg)
+		err = errors.New(msg)
+		return
+	}
 
 	var tmp []string
 	workspaceBaseDir := filepath.Dir(HomeDir)
@@ -454,17 +454,17 @@ func WriteWorkspacePaths(workspacePaths []string) (err error) {
 	data, err := gulu.JSON.MarshalJSON(workspacePaths)
 	if err != nil {
 		msg := fmt.Sprintf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
-			logging.LogError(msg)
-			err = errors.New(msg)
-			return
-		}
+		logging.LogError(msg)
+		err = errors.New(msg)
+		return
+	}
 
-		if err = filelock.WriteFile(workspaceConf, data); err != nil {
-			msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
-			logging.LogError(msg)
-			err = errors.New(msg)
-			return
-		}
+	if err = filelock.WriteFile(workspaceConf, data); err != nil {
+		msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
+		logging.LogError(msg)
+		err = errors.New(msg)
+		return
+	}
 	return
 }
 

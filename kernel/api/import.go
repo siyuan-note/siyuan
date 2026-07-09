@@ -234,7 +234,7 @@ func importStdMd(c *gin.Context) {
 
 	if gulu.File.IsSubPath(util.WorkingDir, localPath) {
 		msg := fmt.Sprintf("import from local path [%s] failed: local path is sub path of working dir", localPath)
-			logging.LogError(msg)
+		logging.LogError(msg)
 		ret.Code = -1
 		ret.Msg = msg
 		return
@@ -242,7 +242,7 @@ func importStdMd(c *gin.Context) {
 
 	if util.IsSensitivePath(localPath) {
 		msg := fmt.Sprintf("import from local path [%s] failed: local path is sensitive path", localPath)
-			logging.LogError(msg)
+		logging.LogError(msg)
 		ret.Code = -1
 		ret.Msg = msg
 		return

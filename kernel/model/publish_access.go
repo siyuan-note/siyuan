@@ -102,22 +102,22 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 	err = os.MkdirAll(filepath.Dir(publishAccessPath), 0755)
 	if err != nil {
 		msg := fmt.Sprintf("create dir for publishAccess.json [%s] failed: %s", publishAccessPath, err)
-			logging.LogError(msg)
-			err = errors.New(msg)
-			return
-		}
+		logging.LogError(msg)
+		err = errors.New(msg)
+		return
+	}
 
-		data, err := gulu.JSON.MarshalJSON(inputPublishAccess)
-		if err != nil {
-			logging.LogErrorf("marshal publishAccess.json [%s] failed: %s", publishAccessPath, err)
-			return
-		}
+	data, err := gulu.JSON.MarshalJSON(inputPublishAccess)
+	if err != nil {
+		logging.LogErrorf("marshal publishAccess.json [%s] failed: %s", publishAccessPath, err)
+		return
+	}
 
-		err = filelock.WriteFile(publishAccessPath, data)
-		if err != nil {
-			msg := fmt.Sprintf("write publishAccess.json [%s] failed: %s", publishAccessPath, err)
-			logging.LogError(msg)
-			err = errors.New(msg)
+	err = filelock.WriteFile(publishAccessPath, data)
+	if err != nil {
+		msg := fmt.Sprintf("write publishAccess.json [%s] failed: %s", publishAccessPath, err)
+		logging.LogError(msg)
+		err = errors.New(msg)
 		return
 	}
 	return

@@ -310,9 +310,9 @@ func clearHistory(c *gin.Context) {
 	}
 
 	var rootID string
-	util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("rootID", &rootID, false, false),
-	)
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
 
 	model.GlobalUndoLog.Clear(rootID)
 }

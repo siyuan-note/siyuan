@@ -228,13 +228,13 @@ func checkoutRepo(c *gin.Context) {
 		return
 	}
 
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+	var id, sessionID string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, true, true),
+		util.BindJsonArg("sessionID", &sessionID, false, false),
+	) {
 		return
 	}
-
-	var sessionID string
-	util.ParseJsonArgs(arg, ret, util.BindJsonArg("sessionID", &sessionID, true, false))
 	if sessionID != "" {
 		markerDir := filepath.Join(util.TempDir, "ai", "agent")
 		os.MkdirAll(markerDir, 0755)

@@ -513,6 +513,13 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		return err
 	}
 	cachedDEKs[boxID] = dek
+
+	// 确保备份存在（首次解锁或之前未成功写入备份时自动生成），便于 conf 损坏恢复
+	if !filelock.IsExist(notebookCryptBackupPath(boxID)) {
+		if err = writeNotebookCryptBackup(boxID, boxEnc); err != nil {
+			logging.LogWarnf("write notebook crypt backup [%s] failed: %s", boxID, err)
+		}
+	}
 	return nil
 }
 

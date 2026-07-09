@@ -19,6 +19,7 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -568,9 +569,14 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		if err != nil {
 			return err
 		}
-		boxConf.BoxCrypt.WrappedDEK = newWrapped
-		boxConf.BoxCrypt.WrapNonce = newWrapped[:12]
-		b.SaveConf(boxConf)
+			boxConf.BoxCrypt.WrappedDEK = newWrapped
+			boxConf.BoxCrypt.WrapNonce = newWrapped[:12]
+			if err = b.SaveConf(boxConf); err != nil {
+				return fmt.Errorf("save conf for notebook [%s] failed: %w", b.ID, err)
+			}
+			if err = writeNotebookCryptBackup(b.ID, boxConf.BoxCrypt); err != nil {
+				return fmt.Errorf("update notebook crypt backup [%s] failed: %w", b.ID, err)
+			}
 	}
 
 	Conf.m.Lock()
@@ -743,6 +749,58 @@ func DecryptAsset(boxID string, dek, ciphertext []byte) ([]byte, error) {
 	return util.DecryptWithAAD(assetKey, ciphertext, []byte(boxID))
 }
 
+// notebookCryptBackupPath 返回加密笔记本的独立 BoxCrypt 备份路径。
+// 该文件在主 conf.json 丢失时用作"此笔记本是加密笔记本"的标识和降级恢复源。
+// 与全局 NotebookCrypto 备份（<DataDir>/.siyuan/notebook-crypto-backup.json）配合使用，
+// 全局备份存 MasterSalt/KEKVerifier，per-notebook 备份存 WrappedDEK/WrapNonce。
+func notebookCryptBackupPath(boxID string) string {
+	return filepath.Join(util.DataDir, boxID, ".siyuan", "notebook-crypt-backup.json")
+}
+
+// writeNotebookCryptBackup 写入加密笔记本的 BoxCrypt 备份。
+// 仅在 Encrypted=true 的笔记本上调用，配合 CreateEncryptedBox / ChangeMasterPassword 写入。
+func writeNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) error {
+	backupPath := notebookCryptBackupPath(boxID)
+	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
+		return fmt.Errorf("mkdir notebook crypt backup dir failed: %w", err)
+	}
+	data, err := gulu.JSON.MarshalIndentJSON(crypt, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal notebook crypt backup failed: %w", err)
+	}
+	if err := filelock.WriteFile(backupPath, data); err != nil {
+		return fmt.Errorf("write notebook crypt backup failed: %w", err)
+	}
+	return nil
+}
+
+// readNotebookCryptBackup 读取加密笔记本的 BoxCrypt 备份。
+// 备份文件不存在时返回 (nil, nil)，调用方据此区分"非加密笔记本"和"备份不存在"。
+func readNotebookCryptBackup(boxID string) (*conf.BoxEncryption, error) {
+	backupPath := notebookCryptBackupPath(boxID)
+	if !filelock.IsExist(backupPath) {
+		return nil, nil
+	}
+	data, err := filelock.ReadFile(backupPath)
+	if err != nil {
+		return nil, fmt.Errorf("read notebook crypt backup failed: %w", err)
+	}
+	var crypt conf.BoxEncryption
+	if err = gulu.JSON.UnmarshalJSON(data, &crypt); err != nil {
+		return nil, fmt.Errorf("unmarshal notebook crypt backup failed: %w", err)
+	}
+	return &crypt, nil
+}
+
+// removeNotebookCryptBackup 清除加密笔记本的 BoxCrypt 备份。
+// 关闭/锁定/删除加密笔记本时调用，避免残留过期备份数据。
+func removeNotebookCryptBackup(boxID string) {
+	backupPath := notebookCryptBackupPath(boxID)
+	if err := filelock.Remove(backupPath); err != nil && !os.IsNotExist(err) {
+		logging.LogErrorf("remove notebook crypt backup [%s] failed: %s", backupPath, err)
+	}
+}
+
 func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	boxID := ExtractBoxIDFromAssetsPath(srcPath)
 	if boxID != "" && IsEncryptedBox(boxID) {
@@ -797,7 +855,17 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	boxConf := box.GetConf()
 	boxConf.Encrypted = true
 	boxConf.BoxCrypt = enc
-	box.SaveConf(boxConf)
+	if err = box.SaveConf(boxConf); err != nil {
+		return "", fmt.Errorf("save encrypted notebook conf failed: %w", err)
+	}
+	if err = writeNotebookCryptBackup(id, enc); err != nil {
+		return "", fmt.Errorf("write notebook crypt backup failed: %w", err)
+	}
+	// 回读校验加密配置已落盘，避免写失败后按普通笔记本处理
+	verifyConf := box.GetConf()
+	if verifyConf == nil || !verifyConf.Encrypted || verifyConf.BoxCrypt == nil {
+		return "", errors.New("encrypted notebook metadata verification failed after write")
+	}
 
 	// 复用刚派生的 DEK 直接开 db + 缓存，省去再次 Argon2id 解锁
 	cachedDEKsLock.Lock()

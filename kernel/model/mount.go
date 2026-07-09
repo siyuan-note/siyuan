@@ -221,7 +221,9 @@ func unmount0(boxID string) {
 
 	boxConf := box.GetConf()
 	boxConf.Closed = true
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
+	}
 	if boxConf.Encrypted {
 		// 加密笔记本关闭：跳过 Unindex（索引 db 马上要删，逐条删是白费），
 		// 先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
@@ -325,9 +327,11 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	}
 
 	box := &Box{ID: boxID}
-	boxConf := box.GetConf()
-	boxConf.Closed = false
-	box.SaveConf(boxConf)
+		boxConf := box.GetConf()
+		boxConf.Closed = false
+		if err := box.SaveConf(boxConf); err != nil {
+			logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+		}
 
 	// 缓存根一级的文档树展开
 	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)

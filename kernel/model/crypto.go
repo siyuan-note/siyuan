@@ -433,7 +433,7 @@ func LockBox(boxID string) {
 	cachedDEKsLock.Unlock()
 	sql.RemoveEncryptedDBFile(boxID)
 	treenode.RemoveEncryptedBlockTreeDBFile(boxID)
-	// 清空明文缓存：锁定后任何加密 box 的明文都不应残留内存
+	// 清空明文缓存：锁定后任何加密笔记本的明文都不应残留内存
 	cache.ClearTreeCache()
 	sql.ClearCache()
 	cache.ClearDocsIAL()
@@ -495,7 +495,8 @@ func UnwrapDEK(boxID string, enc *conf.BoxEncryption, kek []byte) error {
 	return nil
 }
 
-// GetDEK 取已缓存的 DEK。filesys/assets/db 加解密时调用。
+// GetDEK 取已缓存的 DEK。返回副本，避免外部零化影响缓存。
+// filesys/assets/db 加解密时调用。
 func GetDEK(boxID string) ([]byte, error) {
 	cachedDEKsLock.RLock()
 	defer cachedDEKsLock.RUnlock()
@@ -503,7 +504,9 @@ func GetDEK(boxID string) ([]byte, error) {
 	if !ok {
 		return nil, errors.New("no DEK cached for box " + boxID)
 	}
-	return dek, nil
+	ret := make([]byte, len(dek))
+	copy(ret, dek)
+	return ret, nil
 }
 
 // ClearDEK 清除指定笔记本的 DEK。Unmount 单个加密笔记本时调用。
@@ -590,7 +593,7 @@ func IsEncryptedBox(boxID string) bool {
 }
 
 // IsSameCryptoBoundary 判断 srcBox 与 dstBox 是否处于同一加密边界（跨 box 操作是否安全）。
-// 普通笔记本之间允许（都不加密）；加密笔记本仅允许同一 box 内部操作——两个不同的加密 box 各有独立 DEK，
+// 普通笔记本之间允许（都不加密）；加密笔记本仅允许同一 box 内部操作——两个不同的加密笔记本各有独立 DEK，
 // 之间互为"加密边界外"，跨 box 移动/合并会用错 DEK 导致密文损坏。供 MoveDocs/Doc2Heading 等跨 box 操作校验。
 func IsSameCryptoBoundary(srcBox, dstBox string) bool {
 	srcEnc := IsEncryptedBox(srcBox)
@@ -602,7 +605,7 @@ func IsSameCryptoBoundary(srcBox, dstBox string) bool {
 }
 
 // IsBlockRefCrossingBoundary 判断从 srcBoxID 引用 defBlockID 是否跨越加密边界。
-// 加密笔记本禁止跨边界块引（双向）：加密 box 的块只能引用同一加密 box 内的块，普通 box 的块不能引用加密 box 的块。
+// 加密笔记本禁止跨边界块引（双向）：加密笔记本的块只能引用同一加密笔记本内的块，普通 box 的块不能引用加密笔记本的块。
 // 供 transaction 落库时兜底校验，防止手工输入/拖拽/粘贴/API 直调绕过前端搜索分流。
 func IsBlockRefCrossingBoundary(srcBoxID, defBlockID string) bool {
 	if "" == defBlockID {
@@ -616,7 +619,7 @@ func IsBlockRefCrossingBoundary(srcBoxID, defBlockID string) bool {
 	// 源在普通 box：def 块必须在普通 box（查全局 blocktree，且其 box 非加密）
 	bt := treenode.GetBlockTree(defBlockID)
 	if nil == bt {
-		// 全局查不到时遍历加密 box 查找，防止对向漏判（普通 box 引用加密 box 块）
+		// 全局查不到时遍历加密笔记本查找，防止对向漏判（普通 box 引用加密笔记本块）
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if encBT := treenode.GetBlockTreeInBox(defBlockID, encBoxID); nil != encBT {
 				bt = encBT
@@ -637,8 +640,8 @@ func IsEncryptedAssetPath(absPath string) bool {
 	return boxID != "" && IsEncryptedBox(boxID)
 }
 
-// GetDEKIfUnlocked 返回已解锁加密 box 的 DEK。
-// 非加密 box 返回 (nil, nil)——filesys 据此原样读写，对普通笔记本透明。
+// GetDEKIfUnlocked 返回已解锁加密笔记本的 DEK（副本）。
+// 非加密笔记本返回 (nil, nil)——filesys 据此原样读写，对普通笔记本透明。
 // 加密但未解锁（DEK 不在内存）返回 (nil, error)——filesys 的加解密函数遇 error 后拒绝读写，
 // 避免加密笔记本在未解锁状态下静默以明文落盘（深度防御，见 issue #18034）。
 func GetDEKIfUnlocked(boxID string) ([]byte, error) {
@@ -651,7 +654,9 @@ func GetDEKIfUnlocked(boxID string) ([]byte, error) {
 	if !ok {
 		return nil, errors.New("encrypted notebook is locked, please unlock it first")
 	}
-	return dek, nil
+	ret := make([]byte, len(dek))
+	copy(ret, dek)
+	return ret, nil
 }
 
 // extractBoxIDFromPath 从 data 目录下的绝对路径反推 boxID。
@@ -683,8 +688,34 @@ func ExtractBoxIDFromAssetsPath(absPath string) string {
 	return boxID
 }
 
+// ExtractBoxIDFromHistoryPath 从历史目录下的绝对路径反推 boxID。
+// 路径形如 <HistoryDir>/<timestamp>-<op>/<boxID>/...，切出紧跟在时间戳目录后的一段。
+// 若路径不在 HistoryDir 下或 boxID 非合法 ID 模式，返回空串。
+func ExtractBoxIDFromHistoryPath(absPath string) string {
+	absPath = filepath.ToSlash(absPath)
+	historyDir := filepath.ToSlash(util.HistoryDir)
+	rel, err := filepath.Rel(historyDir, absPath)
+	if err != nil {
+		return ""
+	}
+	rel = filepath.ToSlash(rel)
+	if strings.HasPrefix(rel, "..") || rel == "." || rel == "" {
+		return ""
+	}
+	parts := strings.SplitN(rel, "/", 3)
+	if len(parts) < 2 {
+		return ""
+	}
+	// parts[0] = timestamp-op, parts[1] = boxID
+	boxID := parts[1]
+	if !ast.IsNodeIDPattern(boxID) {
+		return ""
+	}
+	return boxID
+}
+
 // copyAssetDecryptIfEncrypted 把 srcPath 的 asset 复制到 destPath。
-// 若 srcPath 在已解锁的加密 box 下，读密文→解密→写明文到 destPath（导出目录）；
+// 若 srcPath 在已解锁的加密笔记本下，读密文→解密→写明文到 destPath（导出目录）；
 // 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
 // EncryptFile 用 fileKey（DEK 派生子密钥）加密 .sy 文档字节，AAD 绑定 boxID。
 // 与 filesys.encryptData/decryptData 使用相同的 AAD（boxID 级），保证读写一致。
@@ -717,7 +748,7 @@ func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	if boxID != "" && IsEncryptedBox(boxID) {
 		dek, err := GetDEKIfUnlocked(boxID)
 		if err != nil {
-			// 加密 box 未解锁：fail-closed，拒绝复制（不复制密文，避免泄漏无效文件）
+			// 加密笔记本未解锁：fail-closed，拒绝复制（不复制密文，避免泄漏无效文件）
 			return errors.New(Conf.Language(314))
 		}
 		raw, readErr := filelock.ReadFile(srcPath)

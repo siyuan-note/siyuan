@@ -635,13 +635,7 @@ func getBlockDefIDsByRefText(c *gin.Context) {
 	}
 
 	anchor := arg["anchor"].(string)
-	excludeIDsArg := arg["excludeIDs"].([]any)
-	var excludeIDs []string
-	for _, excludeID := range excludeIDsArg {
-		excludeIDs = append(excludeIDs, excludeID.(string))
-	}
-	excludeIDs = nil // 不限制虚拟引用搜索自己 https://ld246.com/article/1633243424177
-	ids := model.GetBlockDefIDsByRefText(anchor, excludeIDs)
+	ids := model.GetBlockDefIDsByRefText(anchor)
 	var retRefDefs []model.RefDefs
 	for _, id := range ids {
 		retRefDefs = append(retRefDefs, model.RefDefs{RefID: id, DefIDs: []string{}})

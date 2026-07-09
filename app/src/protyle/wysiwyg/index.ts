@@ -3135,19 +3135,15 @@ export class WYSIWYG {
             if (virtualRefElement && range.toString() === "") {
                 event.stopPropagation();
                 event.preventDefault();
-                const blockElement = hasClosestBlock(virtualRefElement);
-                if (blockElement) {
-                    fetchPost("/api/block/getBlockDefIDsByRefText", {
-                        anchor: virtualRefElement.textContent,
-                        excludeIDs: [blockElement.getAttribute("data-node-id")]
-                    }, (response) => {
-                        checkFold(response.data.refDefs[0].refID, (zoomIn) => {
-                            mobileBlur = true;
-                            activeBlur();
-                            openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
-                        });
+                fetchPost("/api/block/getBlockDefIDsByRefText", {
+                    anchor: virtualRefElement.textContent,
+                }, (response) => {
+                    checkFold(response.data.refDefs[0].refID, (zoomIn) => {
+                        mobileBlur = true;
+                        activeBlur();
+                        openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                     });
-                }
+                });
                 return;
             }
             /// #endif

@@ -1,5 +1,5 @@
 import {BlockPanel} from "./Panel";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip, tooltipTargetElement} from "../dialog/tooltip";
 import {isLocalPath, parseSiYuanUriInfo} from "../util/pathName";
@@ -450,14 +450,10 @@ export const showPopover = async (app: App, showRef = false) => {
             }
         }
     } else if (popoverTargetElement.getAttribute("data-type")?.indexOf("virtual-block-ref") > -1) {
-        const nodeElement = hasClosestBlock(popoverTargetElement);
-        if (nodeElement) {
-            const postResponse = await fetchSyncPost("/api/block/getBlockDefIDsByRefText", {
-                anchor: popoverTargetElement.textContent,
-                excludeIDs: [nodeElement.getAttribute("data-node-id")]
-            });
-            refDefs = postResponse.data.refDefs;
-        }
+        const postResponse = await fetchSyncPost("/api/block/getBlockDefIDsByRefText", {
+            anchor: popoverTargetElement.textContent,
+        });
+        refDefs = postResponse.data.refDefs;
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
         // 以思源协议开头的链接
         refDefs = [{refID: parseSiYuanUriInfo(popoverTargetElement.getAttribute("data-href"))?.id ?? ""}];

@@ -263,22 +263,24 @@ func getRefText(defBlockID string) string {
 	return block.Content
 }
 
-func QueryBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string) {
-	ret = queryDefIDsByDefText(refText, excludeIDs)
-	ret = append(ret, queryDefIDsByNameAlias(refText, excludeIDs)...)
-	ret = append(ret, queryDocIDsByTitle(refText, excludeIDs)...)
+func QueryBlockDefIDsByRefText(refText string) (ret []string) {
+	ret = queryDefIDsByDefText(refText)
+	ret = append(ret, queryDefIDsByNameAliasAndDocTitle(refText)...)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
 
-func queryDefIDsByDefText(keyword string, excludeIDs []string) (ret []string) {
+func queryDefIDsByDefText(keyword string) (ret []string) {
 	ret = []string{}
-	notIn := "('" + strings.Join(excludeIDs, "','") + "')"
-	q := "SELECT DISTINCT(def_block_id) FROM refs WHERE content LIKE ? AND def_block_id NOT IN " + notIn
+	var q, arg string
 	if caseSensitive {
-		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ? AND def_block_id NOT IN " + notIn
+		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content = ?"
+		arg = keyword
+	} else {
+		q = "SELECT DISTINCT(def_block_id) FROM refs WHERE content LIKE ? ESCAPE '\\'"
+		arg = escapeLikePattern(keyword)
 	}
-	rows, err := query(q, keyword)
+	rows, err := query(q, arg)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
@@ -295,38 +297,37 @@ func queryDefIDsByDefText(keyword string, excludeIDs []string) (ret []string) {
 	return
 }
 
-func queryDefIDsByNameAlias(keyword string, excludeIDs []string) (ret []string) {
+func queryDefIDsByNameAliasAndDocTitle(keyword string) (ret []string) {
 	ret = []string{}
-	notIn := "('" + strings.Join(excludeIDs, "','") + "')"
-	rows, err := query("SELECT DISTINCT(id), name, alias FROM blocks WHERE (name = ? OR alias LIKE ?) AND id NOT IN "+notIn, keyword, "%"+keyword+"%")
+	escaped := escapeLikePattern(keyword)
+	aliasArg := "%," + escaped + ",%"
+	var nameCond, docCond, exactArg string
+	if caseSensitive {
+		nameCond = "name = ?"
+		docCond = "content = ?"
+		exactArg = keyword
+	} else {
+		nameCond = "name LIKE ? ESCAPE '\\'"
+		docCond = "content LIKE ? ESCAPE '\\'"
+		exactArg = escaped
+	}
+	// 命名精确匹配；别名按逗号整段匹配（','||alias||',' LIKE '%,kw,%'）；文档标题单独 LIMIT 32
+	// 大小写均跟随 caseSensitive / case_sensitive_like 配置；LIKE 参数转义 %/_/\ 以免通配符改变语义
+	q := "SELECT id FROM blocks WHERE " + nameCond + " OR (',' || alias || ',') LIKE ? ESCAPE '\\'" +
+		" UNION ALL SELECT id FROM (" +
+		"SELECT id FROM blocks WHERE type = 'd' AND " + docCond + " LIMIT ?" +
+		")"
+	rows, err := query(q, exactArg, aliasArg, exactArg, 32)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var id, name, alias string
-		if err = rows.Scan(&id, &name, &alias); err != nil {
+		var id string
+		if err = rows.Scan(&id); err != nil {
 			logging.LogErrorf("query scan field failed: %s", err)
 			return
-		}
-		if name == keyword {
-			ret = append(ret, id)
-			continue
-		}
-
-		var hitAlias bool
-		aliases := strings.SplitSeq(alias, ",")
-		for a := range aliases {
-			if "" == a {
-				continue
-			}
-			if keyword == a {
-				hitAlias = true
-			}
-		}
-		if strings.Contains(alias, keyword) && !hitAlias {
-			continue
 		}
 		ret = append(ret, id)
 	}

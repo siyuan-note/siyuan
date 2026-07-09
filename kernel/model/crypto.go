@@ -996,6 +996,19 @@ func needWriteNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) bool 
 		existing.CreatedAt != crypt.CreatedAt
 }
 
+// DeepCopyBoxEncryption 深拷贝 BoxEncryption（含 []byte 字段），输入 nil 时返回 nil。
+// 供 api 层在反序列化请求体前保存加密字段的不可变快照。
+func DeepCopyBoxEncryption(src *conf.BoxEncryption) *conf.BoxEncryption {
+	if src == nil {
+		return nil
+	}
+	return &conf.BoxEncryption{
+		WrappedDEK: append([]byte(nil), src.WrappedDEK...),
+		WrapNonce:  append([]byte(nil), src.WrapNonce...),
+		CreatedAt:  src.CreatedAt,
+	}
+}
+
 // ListAllEncryptedBoxIDs 扫描 data 目录下所有含 notebook-crypt-backup.json 的 box 目录，
 // 补全 ListNotebooks 可能遗漏的 conf 损坏加密笔记本。供改密/禁用/检测等关键路径使用。
 // 统一使用 IsEncryptedBox 作为"是否加密"的唯一判定入口。
@@ -1283,6 +1296,20 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		return "", err
 	}
 
+	// 若后续步骤失败，清理已创建的 box 目录和加密 db 文件，避免半创建状态
+	boxCreated := true
+	defer func() {
+		if err != nil && boxCreated {
+			sql.RemoveEncryptedDBFile(id)
+			treenode.RemoveEncryptedBlockTreeDBFile(id)
+			boxDir := filepath.Join(util.DataDir, id)
+			if rmErr := filelock.Remove(boxDir); rmErr != nil {
+				logging.LogErrorf("cleanup failed encrypted box [%s]: %s", id, rmErr)
+			}
+			id = ""
+		}
+	}()
+
 	box := &Box{ID: id}
 	boxConf := box.GetConf()
 	boxConf.Encrypted = true
@@ -1296,7 +1323,8 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	// 回读校验加密配置已落盘，避免写失败后按普通笔记本处理
 	verifyConf := box.GetConf()
 	if verifyConf == nil || !verifyConf.Encrypted || verifyConf.BoxCrypt == nil {
-		return "", errors.New("encrypted notebook metadata verification failed after write")
+		err = errors.New("encrypted notebook metadata verification failed after write")
+		return "", err
 	}
 
 	// 复用刚派生的 DEK 直接开 db + 缓存，省去再次 Argon2id 解锁

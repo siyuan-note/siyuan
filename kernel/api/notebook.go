@@ -365,9 +365,10 @@ func setNotebookConf(c *gin.Context) {
 	}
 
 	boxConf := box.GetConf()
-	// 保留加密相关字段，不允许通过此 API 覆盖（加密状态只能通过专用 API 改变）
+	// 深拷贝加密相关字段，防止反序列化请求体时被覆盖
+	// BoxCrypt 是指针，UnmarshalJSON 会修改同一指针对象，必须用 model 层辅助函数深拷贝
+	savedBoxCrypt := model.DeepCopyBoxEncryption(boxConf.BoxCrypt)
 	savedEncrypted := boxConf.Encrypted
-	savedBoxCrypt := boxConf.BoxCrypt
 	if err = gulu.JSON.UnmarshalJSON(param, boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

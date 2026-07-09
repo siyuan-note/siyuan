@@ -1096,7 +1096,7 @@ func (conf *AppConf) GetBoxes() (ret []*Box) {
 		id := notebook.ID
 		name := notebook.Name
 		closed := notebook.Closed
-		encrypted := notebook.Encrypted
+		encrypted := IsEncryptedBox(id) // 使用 IsEncryptedBox 统一判定（含 backup fallback）
 		box := &Box{ID: id, Name: name, Closed: closed, Encrypted: encrypted}
 		ret = append(ret, box)
 	}

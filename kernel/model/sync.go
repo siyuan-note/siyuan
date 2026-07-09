@@ -487,27 +487,27 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 	absPath, err := filepath.Abs(local.Endpoint)
 	if nil != err {
 		msg := fmt.Sprintf("get endpoint [%s] abs path failed: %s", local.Endpoint, err)
-		logging.LogErrorf(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
+			logging.LogError(msg)
+			err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 	if !gulu.File.IsExist(absPath) {
 		msg := fmt.Sprintf("endpoint [%s] not exist", local.Endpoint)
-		logging.LogErrorf(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
+			logging.LogError(msg)
+			err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 	if util.IsAbsPathInWorkspace(absPath) || filepath.Clean(absPath) == filepath.Clean(util.WorkspaceDir) {
 		msg := fmt.Sprintf("endpoint [%s] is in workspace", local.Endpoint)
-		logging.LogErrorf(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
+			logging.LogError(msg)
+			err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 
 	if gulu.File.IsSubPath(absPath, util.WorkspaceDir) {
 		msg := fmt.Sprintf("endpoint [%s] is parent of workspace", local.Endpoint)
-		logging.LogErrorf(msg)
-		err = fmt.Errorf(Conf.Language(77), msg)
+			logging.LogError(msg)
+			err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 

@@ -2092,6 +2092,8 @@
 		"314": "Silakan buka kunci buku catatan terenkripsi terlebih dahulu",
 		"315": "Buku catatan terenkripsi sudah ada tetapi cadangan kunci utama hilang. Pulihkan conf.json asli atau file cadangan untuk mengaktifkan kembali",
 		"316": "Dekripsi gagal: kunci salah atau data rusak",
-		"317": "File cadangan kunci tidak valid"
+		"317": "File cadangan kunci tidak valid",
+		"318": "Metadata buku catatan terenkripsi rusak, harap periksa cadangan",
+		"319": "Buku catatan tidak terenkripsi"
 	}
-}
+	}

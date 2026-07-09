@@ -43,7 +43,7 @@ func WriteFileByMmap(filePath string, data []byte) (err error) {
 
 	if err = f.Truncate(int64(len(data))); err != nil {
 		msg := fmt.Sprintf("truncate file [%s] failed: %s", filePath, err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		err = errors.New(msg)
 		return
 	}
@@ -51,7 +51,7 @@ func WriteFileByMmap(filePath string, data []byte) (err error) {
 	m, err := mmap.Map(f, mmap.RDWR, 0)
 	if err != nil {
 		msg := fmt.Sprintf("map file [%s] failed: %s", filePath, err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		err = errors.New(msg)
 		return
 	}
@@ -60,7 +60,7 @@ func WriteFileByMmap(filePath string, data []byte) (err error) {
 	copy(m, data)
 	if err = m.Flush(); err != nil {
 		msg := fmt.Sprintf("flush data [%s] failed: %s", filePath, err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		err = errors.New(msg)
 		return
 	}

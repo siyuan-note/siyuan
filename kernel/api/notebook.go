@@ -546,15 +546,19 @@ func unlockBox(c *gin.Context) {
 		return
 	}
 
-	box := &model.Box{ID: notebook}
-	boxConf := box.GetConf()
-	if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
+	boxCrypt, err := model.GetBoxEncryption(notebook)
+	if err != nil {
 		ret.Code = -1
-		ret.Msg = "notebook is not encrypted"
+		ret.Msg = model.Conf.Language(318)
+		return
+	}
+	if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(319)
 		return
 	}
 
-	if err := model.UnlockBox(notebook, password, boxConf.BoxCrypt); err != nil {
+	if err := model.UnlockBox(notebook, password, boxCrypt); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -582,7 +586,7 @@ func lockBox(c *gin.Context) {
 
 	if !model.IsEncryptedBox(notebook) {
 		ret.Code = -1
-		ret.Msg = "notebook is not encrypted"
+		ret.Msg = model.Conf.Language(319)
 		return
 	}
 
@@ -623,17 +627,13 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	count := 0
-	if boxes, err := model.ListNotebooks(); nil == err {
-		for _, box := range boxes {
-			if boxConf := box.GetConf(); nil != boxConf && boxConf.Encrypted {
-				count++
-			}
-		}
-	}
+	model.NotebookCryptoMuLock()
+	count := len(model.ListAllEncryptedBoxIDs())
+	enabled := model.Conf.NotebookCrypto.Enabled
+	model.NotebookCryptoMuUnlock()
 
 	ret.Data = map[string]any{
-		"enabled": model.Conf.NotebookCrypto.Enabled,
+		"enabled": enabled,
 		"count":   count,
 	}
 }

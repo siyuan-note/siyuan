@@ -2092,6 +2092,8 @@
 		"314": "Please unlock the encrypted notebook first",
 		"315": "Encrypted notebooks already exist but the master key backup is missing. Restore the original conf.json or backup file to re-enable",
 		"316": "Decryption failed: incorrect key or corrupted data",
-		"317": "Invalid key backup file"
+		"317": "Invalid key backup file",
+		"318": "Encrypted notebook metadata is damaged, please check backup",
+		"319": "Notebook is not encrypted"
 	}
-}
+	}

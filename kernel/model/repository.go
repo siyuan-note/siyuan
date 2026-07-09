@@ -289,8 +289,8 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 
 		tree, _ := loadTree(from, util.NewLute())
 		if nil == tree {
-			msg := fmt.Sprintf("no such file or directory: %s", from)
-			logging.LogErrorf(msg)
+		msg := fmt.Sprintf("no such file or directory: %s", from)
+				logging.LogError(msg)
 			err = errors.New(msg)
 			return
 		}
@@ -1510,7 +1510,7 @@ func syncRepoDownload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
 		return
@@ -1584,7 +1584,7 @@ func syncRepoUpload() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
 		return
@@ -1659,13 +1659,13 @@ func bootSyncRepo() (err error) {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", html.EscapeString(err.Error()))
-		logging.LogErrorf(msg)
-		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		return
-	}
+			logging.LogError(msg)
+			util.PushStatusBar(msg)
+			util.PushErrMsg(msg, 0)
+			return
+		}
 
-	isBootSyncing.Store(true)
+		isBootSyncing.Store(true)
 
 	waitGroup := sync.WaitGroup{}
 	var errs []error
@@ -1797,7 +1797,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
-		logging.LogErrorf(msg)
+		logging.LogError(msg)
 		util.PushStatusBar(msg)
 		util.PushErrMsg(msg, 0)
 		return
@@ -2487,22 +2487,22 @@ func subscribeRepoEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudLock, func(context map[string]any) {
-		msg := fmt.Sprintf(Conf.Language(186))
+		msg := Conf.Language(186)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudUnlock, func(context map[string]any) {
-		msg := fmt.Sprintf(Conf.Language(187))
+		msg := Conf.Language(187)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadIndexes, func(context map[string]any) {
-		msg := fmt.Sprintf(Conf.Language(208))
+		msg := Conf.Language(208)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudBeforeUploadCheckIndex, func(context map[string]any) {
-		msg := fmt.Sprintf(Conf.Language(209))
+		msg := Conf.Language(209)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
@@ -2512,7 +2512,7 @@ func subscribeRepoEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtCloudAfterFixObjects, func(context map[string]any) {
-		msg := fmt.Sprintf(Conf.Language(211))
+		msg := Conf.Language(211)
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
@@ -2529,7 +2529,7 @@ func subscribeRepoEvents() {
 		util.ContextPushMsg(context, Conf.language(226))
 	})
 	eventbus.Subscribe(eventbus.EvtCloudPurgeDownloadIndexes, func(context map[string]any) {
-		util.ContextPushMsg(context, fmt.Sprintf(Conf.language(227)))
+		util.ContextPushMsg(context, Conf.language(227))
 	})
 	eventbus.Subscribe(eventbus.EvtCloudPurgeDownloadFiles, func(context map[string]any) {
 		util.ContextPushMsg(context, Conf.language(228))

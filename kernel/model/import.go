@@ -431,7 +431,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	if removeErr := os.RemoveAll(storage); nil != removeErr {
-		logging.LogErrorf("remove temp storage av dir failed: %s", storage, removeErr)
+		logging.LogErrorf("remove temp storage av dir [%s] failed: %s", storage, removeErr)
 	}
 
 	if 1 > len(avIDs) { // 如果本次没有导入数据库，则清理掉文档中的数据库属性 https://github.com/siyuan-note/siyuan/issues/13011
@@ -1221,8 +1221,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		}
 		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
 		if nil == tree {
-			msg := fmt.Sprintf("parse tree [%s] failed", localPath)
-			logging.LogErrorf(msg)
+		msg := fmt.Sprintf("parse tree [%s] failed", localPath)
+				logging.LogError(msg)
 			return errors.New(msg)
 		}
 

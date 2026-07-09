@@ -89,6 +89,15 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - This rule also forbids faking ANY mark type with style — never write style="font-weight: bold", style="font-style: italic", style="text-decoration: line-through", etc. to mimic bold/italic/strikethrough/mark/code; use standard markdown (or the data-type mark) instead.
 - NEVER write a bare <span style="..."> without data-type — it will render as escaped literal text.
 - Prefer standard markdown (such as **bold**) when no color/size is needed.
+- HTML blocks (NodeHTMLBlock) render raw HTML in the document. Use one when the user wants HTML actually rendered (e.g. <ruby> annotations, styled containers), not displayed as code.
+  Write the HTML as a bare block-level element whose opening tag starts with <div, on its own line(s); in SiYuan's editor the parser only recognizes a <div-opening line as an HTML block:
+
+  <div>
+  <ruby>你<rt>nǐ</rt></ruby>
+  </div>
+
+  - If the HTML root is not <div (e.g. <p>, <table>, <section>, <ruby>), wrap the whole snippet in <div>...</div> — otherwise it falls back to a plain paragraph and the HTML is escaped to literal text.
+  - Do NOT use a fenced code block with an html info string for rendered HTML: that produces a code block (NodeCodeBlock) where the HTML is shown as syntax-highlighted text, not rendered. A fenced code block is for displaying source code, the opposite of rendering HTML.
 
 ## SiYuan User Guide
 SiYuan has a built-in user guide notebook documenting all features. IDs by language: 简体中文 "20210808180117-czj9bvb", 繁體中文 "20211226090932-5lcq56f", 日本語 "20240530133126-axarxgx", others "20210808180117-6v0mkxr".

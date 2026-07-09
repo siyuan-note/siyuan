@@ -2092,6 +2092,8 @@
 		"314": "Najpierw odblokuj zaszyfrowany notatnik",
 		"315": "Istnieją już zaszyfrowane notatniki, ale brakuje kopii zapasowej klucza głównego. Przywróć oryginalny conf.json lub plik kopii zapasowej, aby ponownie włączyć",
 		"316": "Odszyfrowanie nie powiodło się: nieprawidłowy klucz lub uszkodzone dane",
-		"317": "Nieprawidłowy plik kopii zapasowej klucza"
+		"317": "Nieprawidłowy plik kopii zapasowej klucza",
+		"318": "Metadane szyfrowania notesu są uszkodzone, sprawdź kopię zapasową",
+		"319": "Notes nie jest zaszyfrowany"
 	}
-}
+	}

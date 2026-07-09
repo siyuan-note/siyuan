@@ -1044,8 +1044,8 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	} else if _, ok := arg["rowID"]; ok {
 		// TODO 该参数将于 2026 年 12 月 1 日后删除
 		msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
-			c.Request.RequestURI, "rowID")
-		logging.LogWarnf(msg)
+				c.Request.RequestURI, "rowID")
+			logging.LogWarn(msg)
 		ret.Code = -1
 		ret.Msg = msg
 		return

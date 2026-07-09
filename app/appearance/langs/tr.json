@@ -2092,6 +2092,8 @@
 		"314": "Lütfen önce şifreli not defterinin kilidini açın",
 		"315": "Şifreli not defterleri zaten mevcut ancak anahtar yedeği eksik. Yeniden etkinleştirmek için orijinal conf.json veya yedek dosyasını geri yükleyin",
 		"316": "Şifre çözme başarısız: yanlış anahtar veya bozuk veriler",
-		"317": "Geçersiz anahtar yedek dosyası"
+		"317": "Geçersiz anahtar yedek dosyası",
+		"318": "Şifrelenmiş not defteri meta verileri hasar görmüş, lütfen yedeği kontrol edin",
+		"319": "Not defteri şifrelenmemiş"
 	}
-}
+	}

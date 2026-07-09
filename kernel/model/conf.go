@@ -903,11 +903,13 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	}
 
 	Conf.Close()
-	// 退出前关闭已打开的加密笔记本（走 unmount0：落盘 + 生成历史 + 锁定），
-	// 确保编辑历史不丢失、DEK 不残留内存
+	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
+	// 走 Unmount：落盘 Closed=true + 生成历史 + 锁定清 DEK + 广播 closeBox。
+	// 排除用户指南：Unmount 对用户指南会触发 RemoveBox（mount.go:208-214）。
+	// 放在 BroadcastByType("exit")（第 933 行）之前推送，随后的 time.Sleep(500ms) 留给前端处理事件。
 	for _, box := range Conf.GetOpenedBoxes() {
-		if IsEncryptedBox(box.ID) {
-			unmount0(box.ID)
+		if IsEncryptedBox(box.ID) && !IsUserGuide(box.ID) {
+			Unmount(box.ID)
 		}
 	}
 	sql.CloseDatabase()

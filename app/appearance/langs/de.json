@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Gesendet",
 	"agentQuestionPending": "Wartet auf Antwort",
 	"agentNewSession": "Neue Sitzung",
-	"agentInputPlaceholder": "Nachricht eingeben, @Referenz, /Skill, Enter zum Senden...",
+	"agentInputPlaceholder": "Nachricht eingeben, /Skill, Enter zum Senden...",
 	"agentSend": "Senden",
 	"agentStop": "Stopp",
 	"editorFontSize": "Editor-Schriftgröße",

@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Odoslané",
 	"agentQuestionPending": "Čaká sa na odpoveď",
 	"agentNewSession": "Nová relácia",
-	"agentInputPlaceholder": "Napíšte správu, @odkaz, /zručnosť, Enter na odoslanie...",
+	"agentInputPlaceholder": "Napíšte správu, /zručnosť, Enter na odoslanie...",
 	"agentSend": "Odoslať",
 	"agentStop": "Zastaviť",
 	"editorFontSize": "Veľkosť písma editora",

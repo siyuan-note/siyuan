@@ -565,6 +565,6 @@ interface IProtyle {
     preview?: import("../protyle/preview").Preview;
     hint?: import("../protyle/hint").Hint;
     upload?: import("../protyle/upload").Upload;
-    undo?: import("../protyle/undo").Undo;
+    undo?: import("../protyle/undo").IUndo;
     wysiwyg?: import("../protyle/wysiwyg").WYSIWYG
 }

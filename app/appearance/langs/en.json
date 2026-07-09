@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Submitted",
 	"agentQuestionPending": "Awaiting answer",
 	"agentNewSession": "New Session",
-	"agentInputPlaceholder": "Type a message, @reference, /skill, Enter to send...",
+	"agentInputPlaceholder": "Type a message, /skill, Enter to send...",
 	"agentSend": "Send",
 	"agentStop": "Stop",
 	"editorFontSize": "Editor Font Size",

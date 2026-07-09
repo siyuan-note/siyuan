@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "נשלח",
 	"agentQuestionPending": "ממתין לתשובה",
 	"agentNewSession": "הפעלה חדשה",
-	"agentInputPlaceholder": "הקלד הודעה, @להפניה, /מיומנות, Enter לשליחה...",
+	"agentInputPlaceholder": "הקלד הודעה, /מיומנות, Enter לשליחה...",
 	"agentSend": "שלח",
 	"agentStop": "עצור",
 	"editorFontSize": "גודל גופן העורך",

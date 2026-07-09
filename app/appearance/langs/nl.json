@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Verzonden",
 	"agentQuestionPending": "Wacht op antwoord",
 	"agentNewSession": "Nieuwe sessie",
-	"agentInputPlaceholder": "Typ een bericht, @referentie, /vaardigheid, Enter om te verzenden...",
+	"agentInputPlaceholder": "Typ een bericht, /vaardigheid, Enter om te verzenden...",
 	"agentSend": "Verzenden",
 	"agentStop": "Stoppen",
 	"editorFontSize": "Editorlettergrootte",

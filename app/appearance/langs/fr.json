@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Soumis",
 	"agentQuestionPending": "En attente de réponse",
 	"agentNewSession": "Nouvelle session",
-	"agentInputPlaceholder": "Tapez un message, @référence, /compétence, Entrée pour envoyer...",
+	"agentInputPlaceholder": "Tapez un message, /compétence, Entrée pour envoyer...",
 	"agentSend": "Envoyer",
 	"agentStop": "Arrêter",
 	"editorFontSize": "Taille de la police de l'éditeur",

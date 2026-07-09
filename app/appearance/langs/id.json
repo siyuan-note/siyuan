@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Terkirim",
 	"agentQuestionPending": "Menunggu jawaban",
 	"agentNewSession": "Sesi baru",
-	"agentInputPlaceholder": "Ketik pesan, @referensi, /keterampilan, Enter untuk mengirim...",
+	"agentInputPlaceholder": "Ketik pesan, /keterampilan, Enter untuk mengirim...",
 	"agentSend": "Kirim",
 	"agentStop": "Berhenti",
 	"editorFontSize": "Ukuran Font Editor",

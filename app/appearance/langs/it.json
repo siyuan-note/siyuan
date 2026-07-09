@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Inviato",
 	"agentQuestionPending": "In attesa di risposta",
 	"agentNewSession": "Nuova sessione",
-	"agentInputPlaceholder": "Digita un messaggio, @riferimento, /abilità, Invio per inviare...",
+	"agentInputPlaceholder": "Digita un messaggio, /abilità, Invio per inviare...",
 	"agentSend": "Invia",
 	"agentStop": "Ferma",
 	"editorFontSize": "Dimensione del font dell'editor",

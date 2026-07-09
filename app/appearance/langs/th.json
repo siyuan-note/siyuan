@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "ส่งแล้ว",
 	"agentQuestionPending": "รอคำตอบ",
 	"agentNewSession": "เซสชันใหม่",
-	"agentInputPlaceholder": "พิมพ์ข้อความ, @อ้างอิง, /ทักษะ, Enter เพื่อส่ง...",
+	"agentInputPlaceholder": "พิมพ์ข้อความ, /ทักษะ, Enter เพื่อส่ง...",
 	"agentSend": "ส่ง",
 	"agentStop": "หยุด",
 	"editorFontSize": "ขนาดตัวอักษรตัวแก้ไข",

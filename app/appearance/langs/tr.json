@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Gönderildi",
 	"agentQuestionPending": "Cevap bekleniyor",
 	"agentNewSession": "Yeni oturum",
-	"agentInputPlaceholder": "Mesaj yazın, @referans, /beceri, Enter ile gönderin...",
+	"agentInputPlaceholder": "Mesaj yazın, /beceri, Enter ile gönderin...",
 	"agentSend": "Gönder",
 	"agentStop": "Durdur",
 	"editorFontSize": "Editör yazı boyutu",

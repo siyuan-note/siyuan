@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "تم الإرسال",
 	"agentQuestionPending": "بانتظار الرد",
 	"agentNewSession": "جلسة جديدة",
-	"agentInputPlaceholder": "اكتب رسالة، @للإشارة، /مهارة، Enter للإرسال...",
+	"agentInputPlaceholder": "اكتب رسالة، /مهارة، Enter للإرسال...",
 	"agentSend": "إرسال",
 	"agentStop": "إيقاف",
 	"editorFontSize": "حجم خط المحرر",

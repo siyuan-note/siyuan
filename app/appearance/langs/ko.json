@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "제출됨",
 	"agentQuestionPending": "답변 대기 중",
 	"agentNewSession": "새 세션",
-	"agentInputPlaceholder": "메시지를 입력하고 @로 참조, /스킬, Enter로 전송...",
+	"agentInputPlaceholder": "메시지를 입력하고, /스킬, Enter로 전송...",
 	"agentSend": "보내기",
 	"agentStop": "중지",
 	"editorFontSize": "편집기 글꼴 크기",

@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "Отправлено",
 	"agentQuestionPending": "Ожидает ответа",
 	"agentNewSession": "Новая сессия",
-	"agentInputPlaceholder": "Введите сообщение, @ссылка, /навык, Enter для отправки...",
+	"agentInputPlaceholder": "Введите сообщение, /навык, Enter для отправки...",
 	"agentSend": "Отправить",
 	"agentStop": "Остановить",
 	"editorFontSize": "Размер шрифта редактора",

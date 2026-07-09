@@ -225,7 +225,7 @@
 	"agentQuestionSubmitted": "जमा हुआ",
 	"agentQuestionPending": "उत्तर की प्रतीक्षा",
 	"agentNewSession": "नया सत्र",
-	"agentInputPlaceholder": "संदेश लिखें, @संदर्भ, /कौशल, Enter भेजने के लिए...",
+	"agentInputPlaceholder": "संदेश लिखें, /कौशल, Enter भेजने के लिए...",
 	"agentSend": "भेजें",
 	"agentStop": "रोकें",
 	"editorFontSize": "संपादक फ़ॉन्ट आकार",

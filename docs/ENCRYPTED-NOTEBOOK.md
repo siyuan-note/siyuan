@@ -34,7 +34,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 |---|---|---|
 | **Create** | Anytime, no restrictions | Must first enable encryption (set master password); creating requires verifying master password |
 | **Open (Mount)** | Direct open | Must first enter master password to unlock (~1s Argon2id each time); DEK enters memory |
-| **Close (Unmount)** | Closing makes it invisible | Close = lock (DEK cleared + encrypted SQLite database closed + all plaintext caches cleared) |
+| **Close (Unmount)** | Closing makes it invisible | Close = lock (DEK cleared + encrypted SQLite database deleted + all plaintext caches cleared) |
 | **After restart** | Keeps last open state | Force-closed; must re-enter master password to unlock |
 | **.sy files** | Plaintext JSON on disk | AES-256-GCM ciphertext on disk, transparently decrypted on read |
 | **assets files** | Plaintext binary, original filename | AES-256-GCM ciphertext, filename desensitized, original name encrypted |
@@ -190,6 +190,7 @@ Encrypted-notebook operations (dedicated read path, with boxID):
 ```
 File history:
   edit triggers history generation → ciphertext .sy copied verbatim to history dir
+  auto-generated before close/exit → ensures history is captured even after locking
   history index → content left empty (ciphertext not indexed for search)
   view history → decrypt by path boxID (notebook must be unlocked)
   roll back → decrypt history → load tree → WriteTree auto-encrypts on write-back
@@ -231,7 +232,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 | Create | File panel "more" menu → "New encrypted notebook" → enter name + master password → auto-unlock and open |
 | Icon | Shows lock icon when closed (locked); restores user emoji when opened (unlocked) |
 | Unlock | Click a closed encrypted notebook → master-password prompt (🔓 Unlock xxx) → wait ~1s → opens |
-| Lock | Equals close (DEK cleared + encrypted SQLite database closed + all plaintext caches cleared) |
+| Lock | Equals close (DEK cleared + encrypted SQLite database deleted + all plaintext caches cleared). Unsaved edits and file history are automatically saved before locking |
 | Change password | Settings → Access authorization → "Change master password" |
 | Move document | Normal within an encrypted box or between normal boxes; cross-boundary (normal↔encrypted) rejected with a prompt |
 | Doc to heading | Cross-boundary rejected with a prompt |

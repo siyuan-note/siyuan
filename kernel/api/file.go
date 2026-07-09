@@ -41,13 +41,65 @@ import (
 // errMsgSeeKernelLog 接在 API 错误提示末尾，引导用户查看内核日志以获取完整信息（避免在 Msg 暴露工作空间绝对路径）。
 const errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
 
-// rejectEncryptedBoxPath 检查 absPath 是否落在加密 box 目录下，是则返回 true。
+// rejectEncryptedBoxPath 检查 absPath 是否落在加密 box 目录下（含 symlink 绕过），是则返回 true。
 // 原始文件 API（getFile/putFile/copyFile/renameFile/removeFile）是绕过加密层的逃生口，
 // 对加密 box 的任何文件读写都应拒绝——合法读写走专用 API（upload/getBlockKramdown 等，已加密感知），
 // 避免密文泄漏给插件或明文破坏加密格式。
+// 防止 symlink 绕过：找到最长已存在的父路径，解析 symlink 后拼回剩余路径，再检查是否落入加密 box。
 func rejectEncryptedBoxPath(absPath string) bool {
+	// 先检查字面路径
 	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
-	return boxID != "" && model.IsEncryptedBox(boxID)
+	if boxID != "" && model.IsEncryptedBox(boxID) {
+		return true
+	}
+	// 找最长已存在的父路径，解析 symlink 后拼回剩余路径
+	resolved := resolveLongestExistingParent(absPath)
+	if resolved != absPath {
+		boxID = model.ExtractBoxIDFromAssetsPath(resolved)
+		if boxID != "" && model.IsEncryptedBox(boxID) {
+			return true
+		}
+	}
+	return false
+}
+
+// resolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
+// 例如 absPath = /workspace/data/link/newdir/file，其中 /workspace/data/link 是指向
+// /workspace/data/<encBoxID>/ 的 symlink，newdir/file 尚不存在：
+// 返回 /workspace/data/<encBoxID>/newdir/file。
+func resolveLongestExistingParent(absPath string) string {
+	cleaned := filepath.Clean(absPath)
+	// 从完整路径逐级向上找第一个存在的路径
+	dir := cleaned
+	for {
+		if _, err := os.Lstat(dir); err == nil {
+			break
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// 已到卷根/UNC 根（Windows 盘符如 Z:\ 或 Unix /），不再上溯
+			return cleaned
+		}
+		dir = parent
+	}
+	if dir == cleaned {
+		// 完整路径已存在，直接 EvalSymlinks
+		if resolved, err := filepath.EvalSymlinks(cleaned); err == nil {
+			return resolved
+		}
+		return cleaned
+	}
+	if dir == "/" || dir == "." {
+		return cleaned // 没有已存在的父路径，无法解析
+	}
+	// 解析已存在的父路径的 symlink
+	resolvedDir, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return cleaned
+	}
+	// 拼回剩余的不存在部分
+	remaining := strings.TrimPrefix(cleaned, dir)
+	return resolvedDir + remaining
 }
 
 func getUniqueFilename(c *gin.Context) {
@@ -124,6 +176,12 @@ func globalCopyFiles(c *gin.Context) {
 			return
 		}
 
+		if rejectEncryptedBoxPath(absSrc) {
+			ret.Code = -1
+			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			return
+		}
+
 		srcs[i] = absSrc
 	}
 
@@ -131,6 +189,12 @@ func globalCopyFiles(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		return
+	}
+	// 在 MkdirAll 前拒绝加密 box 目录，避免在加密 box 内创建明文目录
+	if rejectEncryptedBoxPath(destDir) {
+		ret.Code = -1
+		ret.Msg = "copying encrypted notebook files is not supported via this API"
 		return
 	}
 	if filelock.IsExist(destDir) {
@@ -156,6 +220,17 @@ func globalCopyFiles(c *gin.Context) {
 
 	for _, src := range srcs {
 		dest := filepath.Join(destDir, filepath.Base(src))
+		if rejectEncryptedBoxPath(dest) {
+			ret.Code = -1
+			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			return
+		}
+		// 拒绝目标已存在的 symlink：os.Create 会跟随 symlink，可能写入加密 box 内部
+		if li, lerr := os.Lstat(dest); lerr == nil && li.Mode()&os.ModeSymlink != 0 {
+			ret.Code = -1
+			ret.Msg = "destination path is a symlink, which is not supported"
+			return
+		}
 		if err := filelock.Copy(src, dest); err != nil {
 			logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 			ret.Code = -1
@@ -222,6 +297,11 @@ func workspaceCopyFiles(c *gin.Context) {
 			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
 			return
 		}
+		if rejectEncryptedBoxPath(absSrc) {
+			ret.Code = -1
+			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			return
+		}
 		absSrcs = append(absSrcs, absSrc)
 	}
 
@@ -229,6 +309,12 @@ func workspaceCopyFiles(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
+		return
+	}
+	// 在 MkdirAll 前拒绝加密 box 目录，避免在加密 box 内创建明文目录
+	if rejectEncryptedBoxPath(destDir) {
+		ret.Code = -1
+		ret.Msg = "copying encrypted notebook files is not supported via this API"
 		return
 	}
 	if filelock.IsExist(destDir) {
@@ -254,6 +340,16 @@ func workspaceCopyFiles(c *gin.Context) {
 
 	for _, absSrc := range absSrcs {
 		dest := filepath.Join(destDir, filepath.Base(absSrc))
+		if rejectEncryptedBoxPath(dest) {
+			ret.Code = -1
+			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			return
+		}
+		if li, lerr := os.Lstat(dest); lerr == nil && li.Mode()&os.ModeSymlink != 0 {
+			ret.Code = -1
+			ret.Msg = "destination path is a symlink, which is not supported"
+			return
+		}
 		if err := filelock.Copy(absSrc, dest); err != nil {
 			logging.LogErrorf("copy file [%s] to [%s] failed: %s", absSrc, dest, err)
 			ret.Code = -1
@@ -370,6 +466,7 @@ func getFile(c *gin.Context) {
 	if rejectEncryptedBoxPath(fileAbsPath) {
 		ret.Code = -1
 		ret.Msg = "access to encrypted notebook files is not supported via this API"
+		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 	if !filelock.IsExist(fileAbsPath) {

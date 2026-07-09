@@ -40,6 +40,10 @@ import (
 // kekVerifierMagic 是写入 KEKVerifier 的固定魔数。启用时用 KEK 加密它，校验主密码时解密比对。
 var kekVerifierMagic = []byte("siyuan-enc-v1")
 
+// ErrWrappedDEKCorrupted 表示 WrappedDEK 解密失败（密钥不匹配或数据损坏）。
+// 底层 crypto 函数返回此错误，API 层需要展示用户文案时转换成 Conf.Language(316)。
+var ErrWrappedDEKCorrupted = errors.New("wrapped DEK corrupted or key mismatch")
+
 // notebookCryptoBackupPath 是 NotebookCrypto 的备份路径，位于 DataDir/.siyuan/ 下（进入 dejavu 同步范围）。
 // MasterSalt 是加密体系的全局根基：conf/conf.json 丢失后若重新启用会生成新 salt，
 // 导致旧 WrappedDEK 无法用相同主密码解开（KEK 随 salt 改变）。把整套 NotebookCrypto 备份到
@@ -103,9 +107,9 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 	}
 
 	// 用导入的 salt + 用户输入的主密码派生 KEK，校验能否解开备份里的 verifier
-	params := nc.KDFParams
-	if params.KeyLength == 0 {
-		params = util.DefaultArgon2Params()
+	params, validErr := util.ValidateArgon2Params(nc.KDFParams)
+	if validErr != nil {
+		return errors.New(Conf.Language(317))
 	}
 	kek := util.DeriveKey(password, nc.MasterSalt, params)
 	decrypted, dErr := util.Decrypt(kek, nc.KEKVerifier)
@@ -113,6 +117,7 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 		return errors.New(Conf.Language(311)) // 主密码错误
 	}
 
+	nc.KDFParams = params // 归一化：确保写回 Conf 的是校验后的参数（含默认值回退）
 	nc.Enabled = true
 	Conf.m.Lock()
 	*Conf.NotebookCrypto = *nc
@@ -231,9 +236,9 @@ func EnableEncryptedNotebook(password string) error {
 	if err != nil {
 		return err
 	}
-	params := Conf.NotebookCrypto.KDFParams
-	if params.KeyLength == 0 {
-		params = util.DefaultArgon2Params()
+	params, validErr := util.ValidateArgon2Params(Conf.NotebookCrypto.KDFParams)
+	if validErr != nil {
+		return validErr
 	}
 	kek := util.DeriveKey(password, salt, params)
 
@@ -300,6 +305,13 @@ func restoreNotebookCryptoConfigFromBackup() {
 	if err != nil || backup == nil || len(backup.MasterSalt) == 0 || len(backup.KEKVerifier) == 0 {
 		return // 无可用备份，静默跳过
 	}
+	// 校验 KDFParams：非法参数（如恶意备份设置极大内存）时拒绝恢复，避免卡到"已启用但无法解锁"状态
+	params, validErr := util.ValidateArgon2Params(backup.KDFParams)
+	if validErr != nil {
+		logging.LogErrorf("skip restore notebook crypto: invalid KDFParams in backup: %s", validErr)
+		return
+	}
+	backup.KDFParams = params
 	backup.Enabled = true
 	Conf.m.Lock()
 	*Conf.NotebookCrypto = *backup
@@ -320,9 +332,9 @@ func tryRestoreNotebookCryptoFromBackup(password string) (kek []byte, err error)
 		// 备份不存在或不完整：无法恢复，调用方按"未启用"报错
 		return nil, errors.New(Conf.Language(310))
 	}
-	params := backup.KDFParams
-	if params.KeyLength == 0 {
-		params = util.DefaultArgon2Params()
+	params, validErr := util.ValidateArgon2Params(backup.KDFParams)
+	if validErr != nil {
+		return nil, errors.New(Conf.Language(317))
 	}
 	kek = util.DeriveKey(password, backup.MasterSalt, params)
 	decrypted, dErr := util.Decrypt(kek, backup.KEKVerifier)
@@ -330,6 +342,7 @@ func tryRestoreNotebookCryptoFromBackup(password string) (kek []byte, err error)
 		// 主密码错误（或备份损坏），不能恢复
 		return nil, errors.New(Conf.Language(311))
 	}
+	backup.KDFParams = params // 归一化：确保写回 Conf 的是校验后的参数（含默认值回退）
 	backup.Enabled = true
 	Conf.m.Lock()
 	*Conf.NotebookCrypto = *backup
@@ -354,9 +367,9 @@ func deriveKEK(password string) ([]byte, error) {
 		}
 		return kek, nil // 恢复函数已校验过 verifier，KEK 直接可用
 	}
-	params := nc.KDFParams
-	if params.KeyLength == 0 {
-		params = util.DefaultArgon2Params()
+	params, validErr := util.ValidateArgon2Params(nc.KDFParams)
+	if validErr != nil {
+		return nil, validErr
 	}
 	kek := util.DeriveKey(password, nc.MasterSalt, params)
 
@@ -474,7 +487,7 @@ func UnwrapDEK(boxID string, enc *conf.BoxEncryption, kek []byte) error {
 	}
 	dek, err := util.Decrypt(kek, enc.WrappedDEK)
 	if err != nil {
-		return errors.New(Conf.Language(316))
+		return ErrWrappedDEKCorrupted
 	}
 	cachedDEKsLock.Lock()
 	cachedDEKs[boxID] = dek
@@ -524,7 +537,11 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	nc := Conf.NotebookCrypto
 	Conf.m.Unlock()
 
-	newKEK := util.DeriveKey(newPassword, nc.MasterSalt, nc.KDFParams)
+	params, validErr := util.ValidateArgon2Params(nc.KDFParams)
+	if validErr != nil {
+		return validErr
+	}
+	newKEK := util.DeriveKey(newPassword, nc.MasterSalt, params)
 	newVerifier, err := util.Encrypt(newKEK, kekVerifierMagic)
 	if err != nil {
 		return err
@@ -556,6 +573,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	Conf.m.Lock()
 	Conf.NotebookCrypto.KEKVerifier = newVerifier
 	Conf.NotebookCrypto.VerifierNonce = newVerifier[:12]
+	Conf.NotebookCrypto.KDFParams = params // 归一化：确保存的是校验后的参数
 	Conf.m.Unlock()
 
 	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）

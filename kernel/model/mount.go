@@ -141,6 +141,9 @@ func RemoveBox(boxID string) (err error) {
 
 	unmount0(boxID)
 
+	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
+	isEncrypted := IsEncryptedBox(boxID)
+
 	if !isUserGuide {
 		var historyDir string
 		historyDir, err = getHistoryDir(HistoryOpDelete)
@@ -148,6 +151,7 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("get history dir failed: %s", err)
 			return
 		}
+		// 删除前备份到历史目录（密文原样拷贝，加密笔记本的整个目录保持密文）
 		p := strings.TrimPrefix(localPath, util.DataDir)
 		historyPath := filepath.Join(historyDir, p)
 		if err = filelock.Copy(localPath, historyPath); err != nil {
@@ -156,23 +160,8 @@ func RemoveBox(boxID string) (err error) {
 		}
 
 		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
-		if !IsEncryptedBox(boxID) {
+		if !isEncrypted {
 			copyBoxAssetsToDataAssets(boxID)
-		}
-	}
-
-	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
-	isEncrypted := IsEncryptedBox(boxID)
-
-	// 删除前备份到历史目录（密文原样拷贝，加密笔记本的整个目录保持密文）
-	if isEncrypted {
-		if historyDir, histErr := getHistoryDir(HistoryOpDelete); nil == histErr {
-			boxHistoryDir := filepath.Join(historyDir, boxID)
-			if mkErr := os.MkdirAll(boxHistoryDir, 0755); nil == mkErr {
-				if copyErr := filelock.Copy(localPath, boxHistoryDir); nil != copyErr {
-					logging.LogErrorf("backup encrypted box [%s] to history failed: %s", boxID, copyErr)
-				}
-			}
 		}
 	}
 

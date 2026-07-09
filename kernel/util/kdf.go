@@ -47,6 +47,34 @@ func DefaultArgon2Params() Argon2Params {
 	}
 }
 
+// ValidateArgon2Params 校验 Argon2id 参数是否在合理范围内。
+// KeyLength 为 0 时视为旧配置，返回默认值；非零但不合法的参数返回错误。
+// 防止恶意备份设置极大内存导致 OOM，或过弱参数降低安全性。
+func ValidateArgon2Params(p Argon2Params) (Argon2Params, error) {
+	if p.KeyLength == 0 {
+		return DefaultArgon2Params(), nil
+	}
+	if p.KeyLength != 32 {
+		return p, errors.New("Argon2id KeyLength must be 32")
+	}
+	if p.Memory < 16*1024 {
+		return p, errors.New("Argon2id Memory too low (minimum 16 MB)")
+	}
+	if p.Memory > 256*1024 {
+		return p, errors.New("Argon2id Memory too high (maximum 256 MB)")
+	}
+	if p.Iterations < 2 {
+		return p, errors.New("Argon2id Iterations too low (minimum 2)")
+	}
+	if p.Iterations > 10 {
+		return p, errors.New("Argon2id Iterations too high (maximum 10)")
+	}
+	if p.Parallelism == 0 || p.Parallelism > 16 {
+		return p, errors.New("Argon2id Parallelism must be between 1 and 16")
+	}
+	return p, nil
+}
+
 // DeriveKey 用 Argon2id 从密码派生密钥。同一 password+salt+params 多次调用结果一致。
 func DeriveKey(password string, salt []byte, p Argon2Params) []byte {
 	return argon2.IDKey([]byte(password), salt, p.Iterations, p.Memory, p.Parallelism, p.KeyLength)

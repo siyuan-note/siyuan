@@ -56,7 +56,7 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		}
 	}
 
-	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密 box 笔记本级）
+	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密笔记本笔记本级）
 	existPath, _ := av.FindAttributeViewPath(avID)
 	if "" == existPath {
 		// fallback 找不到时按全局路径检查（首次创建场景）
@@ -540,7 +540,7 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID strin
 }
 
 // avBoxIDFromRepoPath 从快照文件路径反查 boxID。
-// 全局路径 /storage/av/<avID>.json 返回空串；加密 box 路径 /<boxID>/storage/av/<avID>.json 返回 boxID。
+// 全局路径 /storage/av/<avID>.json 返回空串；加密笔记本路径 /<boxID>/storage/av/<avID>.json 返回 boxID。
 func avBoxIDFromRepoPath(repoPath string) string {
 	parts := strings.Split(repoPath, "/")
 	// 全局路径: ["", "storage", "av", "xxx.json"] → parts[1]=="storage"
@@ -568,7 +568,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 	var avFile *entity.File
 	for _, f := range files {
-		// 匹配全局 /storage/av/<avID>.json 或加密 box /<boxID>/storage/av/<avID>.json
+		// 匹配全局 /storage/av/<avID>.json 或加密笔记本/<boxID>/storage/av/<avID>.json
 		if strings.HasSuffix(f.Path, "/storage/av/"+avID+".json") {
 			avFile = f
 			break
@@ -684,7 +684,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	}
 
 	// 加密笔记本的历史 AV 定义是密文，需要解密后才能解析。
-	// 从路径提取 boxID，提取不到时遍历所有已打开的加密 box 尝试解密。
+	// 从路径提取 boxID，提取不到时遍历所有已打开的加密笔记本尝试解密。
 	avAbsSlash := filepath.ToSlash(avJSONPath)
 	var histBoxID string
 	if idx := strings.Index(avAbsSlash, "/storage/av/"); idx > 0 {
@@ -704,7 +704,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 			return
 		}
 	} else {
-		// 路径没提取到 boxID（如历史目录无 boxID 前缀的旧路径），尝试遍历已打开的加密 box 解密
+		// 路径没提取到 boxID（如历史目录无 boxID 前缀的旧路径），尝试遍历已打开的加密笔记本解密
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if dec, decErr := av.DecryptAVData(encBoxID, data); decErr == nil {
 				data = dec

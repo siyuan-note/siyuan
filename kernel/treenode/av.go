@@ -21,7 +21,7 @@ import (
 )
 
 // GetMirrorAttrViewBlockIDs 返回引用了该 AV 的所有块 ID（仅含块树仍存在的）。
-// 通过 av.GetBlockRels 获取镜像索引，已合并全局 + 所有已打开加密 box 的镜像数据（加密感知）。
+// 通过 av.GetBlockRels 获取镜像索引，已合并全局 + 所有已打开加密笔记本的镜像数据（加密感知）。
 func GetMirrorAttrViewBlockIDs(avID string) (ret []string) {
 	ret = []string{}
 	avBlocks := av.GetBlockRels()

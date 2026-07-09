@@ -502,7 +502,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes, quer
 }
 
 // GetDocInBox 与 GetDoc 一致，但按 boxID 路由到加密 db 或全局 db。
-// 加密 box 打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
+// 加密笔记本打开文档时传入 boxID，blocktree/content 查询走加密 db；boxID 为空时 fall-through 全局 db。
 func GetDocInBox(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool, boxID string) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxIDOut, docPath string, isBacklinkExpand bool, keywords []string, err error) {
 	//os.MkdirAll("pprof", 0755)
@@ -1393,7 +1393,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		}
 	}
 
-	// 禁止跨加密边界移动文档：加密笔记本是孤岛，不同加密 box 各有独立 DEK，
+	// 禁止跨加密边界移动文档：加密笔记本是孤岛，不同加密笔记本各有独立 DEK，
 	// 跨边界移动（普通↔加密、加密 A↔加密 B）会导致密文用错 DEK 损坏数据
 	for _, fromBox := range pathsBoxes {
 		if fromBox.ID != toBox.ID && !IsSameCryptoBoundary(fromBox.ID, toBox.ID) {

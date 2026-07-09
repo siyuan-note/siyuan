@@ -1242,7 +1242,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	if nil == bt {
-		// 全局 blocktree 找不到时，遍历已打开的加密 box 查找
+		// 全局 blocktree 找不到时，遍历已打开的加密笔记本查找
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			encBTs := treenode.GetBlockTreesInBox([]string{operation.ParentID, operation.PreviousID, operation.NextID}, encBoxID)
 			for _, b := range encBTs {
@@ -1510,7 +1510,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldDefIDs := getRefDefIDs(oldNode)
 	var newDefIDs []string
 
-	// 兜底校验：禁止跨加密边界块引（加密 box ↔ 普通 box，或不同加密 box 之间）
+	// 兜底校验：禁止跨加密边界块引（加密笔记本↔ 普通 box，或不同加密笔记本之间）
 	degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
 
 	var unlinks []*ast.Node
@@ -2057,7 +2057,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 	var rootID, box, p string
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
-		// 全局 blocktree 找不到时，遍历已打开的加密 box 查找
+		// 全局 blocktree 找不到时，遍历已打开的加密笔记本查找
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
 				bt = encBT

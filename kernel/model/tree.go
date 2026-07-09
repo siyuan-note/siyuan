@@ -168,8 +168,8 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 		return
 	}
 
-	// 加密笔记本的 .sy 是密文，需先解密。从路径反推 boxID，已解锁的加密 box 用 fileKey 解密；
-	// 加密 box 未解锁时返回错误（fail-closed）；非加密 box 原样 data。
+	// 加密笔记本的 .sy 是密文，需先解密。从路径反推 boxID，已解锁的加密笔记本用 fileKey 解密；
+	// 加密笔记本未解锁时返回错误（fail-closed）；非加密笔记本原样 data。
 	if boxID := extractBoxIDFromPath(localPath); boxID != "" && IsEncryptedBox(boxID) {
 		dek, dekErr := GetDEKIfUnlocked(boxID)
 		if dekErr != nil {
@@ -212,7 +212,7 @@ func LoadTreeByBlockIDWithReindexInBox(id, boxID string) (ret *parse.Tree, err e
 
 	bt := treenode.GetBlockTreeInBox(id, boxID)
 	if nil == bt && "" == boxID {
-		// boxID 未知时（如通用打开入口），遍历所有已打开的加密 box 查找
+		// boxID 未知时（如通用打开入口），遍历所有已打开的加密笔记本查找
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
 				bt = encBT
@@ -269,7 +269,7 @@ func loadTreeByBlockIDInBox(id, boxID string) (ret *parse.Tree, err error) {
 
 	bt := treenode.GetBlockTreeInBox(id, boxID)
 	if nil == bt && "" == boxID {
-		// boxID 未知时（如通用打开入口），遍历所有已打开的加密 box 查找
+		// boxID 未知时（如通用打开入口），遍历所有已打开的加密笔记本查找
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
 				bt = encBT

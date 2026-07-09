@@ -323,7 +323,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 }
 
 // SearchRefBlockInBox 与 SearchRefBlock 一致，但按 boxID 路由到加密 db 或全局 db。
-// 加密 box 内搜索块引目标时传入 boxID，只搜该 box 自己的加密 db，避免跨加密边界引用。
+// 加密笔记本内搜索块引目标时传入 boxID，只搜该 box 自己的加密 db，避免跨加密边界引用。
 func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrackets, isDatabase bool, boxID string) (ret []*Block, newDoc bool) {
 	cachedTrees := map[string]*parse.Tree{}
 	nodeTrees := map[string]*parse.Tree{}
@@ -1176,7 +1176,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes ma
 }
 
 // FullTextSearchBlockInBox 与 FullTextSearchBlock 一致，但按 boxID 路由到加密 db 或全局 db。
-// 加密 box 内搜索时传入 boxID，所有 sql/treenode 查询走加密 db；boxID 为空时 fall-through 全局 db。
+// 加密笔记本内搜索时传入 boxID，所有 sql/treenode 查询走加密 db；boxID 为空时 fall-through 全局 db。
 func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {

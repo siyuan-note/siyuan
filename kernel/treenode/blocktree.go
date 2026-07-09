@@ -168,7 +168,9 @@ func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"
 	row := queryRowForBox(boxID, sqlStmt, boxID, path)
-	if row == nil { return }
+	if row == nil {
+		return
+	}
 	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
@@ -209,7 +211,9 @@ func GetBlockTreeRootByPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ? AND type = 'd'"
 	row := queryRowForBox(boxID, sqlStmt, boxID, path)
-	if row == nil { return }
+	if row == nil {
+		return
+	}
 	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
@@ -227,7 +231,9 @@ func GetBlockTreeRootByHPath(boxID, hPath string) (ret *BlockTree) {
 	hPath = gulu.Str.RemoveInvisible(hPath)
 	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND hpath = ? AND type = 'd'"
 	row := queryRowForBox(boxID, sqlStmt, boxID, hPath)
-	if row == nil { return }
+	if row == nil {
+		return
+	}
 	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
@@ -353,7 +359,7 @@ func ExistBlockTrees(ids []string) (ret map[string]bool) {
 		ret[id] = true
 	}
 
-	// 全局 blocktree 未命中的 id，遍历已打开的加密 box 查找
+	// 全局 blocktree 未命中的 id，遍历已打开的加密笔记本查找
 	var missing []string
 	for id, found := range ret {
 		if !found {
@@ -416,7 +422,7 @@ func GetBlockTrees(ids []string) (ret map[string]*BlockTree) {
 		ret[block.ID] = &block
 	}
 
-	// 全局未命中的 id，遍历已打开的加密 box 查找
+	// 全局未命中的 id，遍历已打开的加密笔记本查找
 	var missing []string
 	for _, id := range ids {
 		if _, ok := ret[id]; !ok {
@@ -454,7 +460,7 @@ func GetBlockTree(id string) (ret *BlockTree) {
 	if err != nil {
 		ret = nil
 		if errors.Is(err, sql.ErrNoRows) {
-			// 全局 blocktree 未命中，遍历已打开的加密 box 查找
+			// 全局 blocktree 未命中，遍历已打开的加密笔记本查找
 			for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
 				if encBT := GetBlockTreeInBox(id, encBoxID); nil != encBT {
 					return encBT
@@ -530,7 +536,9 @@ func RemoveBlockTreesByRootID(boxID, rootID string) {
 func CountBlockTreesByPathPrefix(boxID, pathPrefix string) (ret int) {
 	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE path LIKE ? AND box_id = ?"
 	row := queryRowForBox(boxID, sqlStmt, pathPrefix+"%", boxID)
-	if row == nil { return }
+	if row == nil {
+		return
+	}
 	err := row.Scan(&ret)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -675,7 +683,7 @@ func IndexBlockTree(tree *parse.Tree) {
 	indexBlockTreeLock.Lock()
 	defer indexBlockTreeLock.Unlock()
 
-	// 加密 box 用独立 blocktree db；非加密 box 用全局 db（两者都可能为 nil——重建过程中）
+	// 加密笔记本用独立 blocktree db；非加密笔记本用全局 db（两者都可能为 nil——重建过程中）
 	if nil == db && getEncryptedBlockTreeDB(tree.Box) == nil {
 		logging.LogErrorf("database is nil")
 		return
@@ -879,7 +887,7 @@ var encryptedBlockTreeDBs = &sync.Map{}
 
 // IsEncryptedBoxFn 由 model 层注入，用于判断 boxID 是否为加密笔记本。
 // treenode 包不直接 import model（循环依赖），路由函数据此 fail-closed：
-// 加密 box 未解锁时绝不回退全局库，避免加密 box 块树元数据污染全局明文 blocktree.db。
+// 加密笔记本未解锁时绝不回退全局库，避免加密笔记本块树元数据污染全局明文 blocktree.db。
 var IsEncryptedBoxFn func(boxID string) bool
 
 // OpenEncryptedBlockTreeDB 打开加密笔记本的独立 SQLCipher blocktree db。
@@ -950,7 +958,7 @@ func RemoveAllEncryptedBlockTreeDBFiles() {
 	}
 }
 
-// getEncryptedBlockTreeDB 返回加密 box 的 blocktree db 句柄；未打开返回 nil。
+// getEncryptedBlockTreeDB 返回加密笔记本的 blocktree db 句柄；未打开返回 nil。
 func getEncryptedBlockTreeDB(boxID string) *sql.DB {
 	if v, ok := encryptedBlockTreeDBs.Load(boxID); ok {
 		if boxDB, ok := v.(*sql.DB); ok {
@@ -975,8 +983,8 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 	return
 }
 
-// --- box-scoped wrapper（加密 box 用独立 db，否则用全局 db）---
-// 加密 box 未解锁（db 未打开）时 fail-closed：绝不回退全局库，避免加密 box 块树操作污染全局 blocktree.db。
+// --- box-scoped wrapper（加密笔记本用独立 db，否则用全局 db）---
+// 加密笔记本未解锁（db 未打开）时 fail-closed：绝不回退全局库，避免加密笔记本块树操作污染全局 blocktree.db。
 
 func queryForBox(box, stmt string, args ...any) (*sql.Rows, error) {
 	if boxDB := getEncryptedBlockTreeDB(box); boxDB != nil {
@@ -1018,7 +1026,7 @@ func beginTxForBox(box string) (tx *sql.Tx, err error) {
 	return db.Begin()
 }
 
-// --- InBox 读函数（加密 box 内浏览时调用方传 boxID，路由到加密 db） ---
+// --- InBox 读函数（加密笔记本内浏览时调用方传 boxID，路由到加密 db） ---
 
 // GetBlockTreeInBox 按 id 在指定 box 的 db 里查块树。boxID 为空则查全局 db。
 func GetBlockTreeInBox(id, boxID string) (ret *BlockTree) {
@@ -1029,7 +1037,7 @@ func GetBlockTreeInBox(id, boxID string) (ret *BlockTree) {
 	sqlStmt := "SELECT * FROM blocktrees WHERE id = ?"
 	row := queryRowForBox(boxID, sqlStmt, id)
 	if row == nil {
-		return nil // 加密 box 未解锁，视作不存在
+		return nil // 加密笔记本未解锁，视作不存在
 	}
 	err := row.Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
@@ -1075,7 +1083,7 @@ func ExistBlockTreeInBox(id, boxID string) bool {
 	sqlStmt := "SELECT 1 FROM blocktrees WHERE id = ? LIMIT 1"
 	row := queryRowForBox(boxID, sqlStmt, id)
 	if row == nil {
-		return false // 加密 box 未解锁，视作不存在
+		return false // 加密笔记本未解锁，视作不存在
 	}
 	var tmp any
 	return row.Scan(&tmp) == nil

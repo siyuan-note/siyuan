@@ -413,7 +413,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if readErr != nil {
 				return readErr
 			}
-			// av.EncryptAVData 内部按 box 是否加密/已解锁路由，加密 box 用 avKey+AAD
+			// av.EncryptAVData 内部按 box 是否加密/已解锁路由，加密笔记本用 avKey+AAD
 			enc, encErr := av.EncryptAVData(boxID, src)
 			if encErr != nil {
 				return encErr
@@ -678,7 +678,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 	}
 
-	// AV 定义已在 storage 删除前处理（加密 box DEK 加密拷到笔记本级，
+	// AV 定义已在 storage 删除前处理（加密笔记本DEK 加密拷到笔记本级，
 	// 普通 box 拷到全局 storage/av/），这里不再重复处理
 
 	// 将包含的自定义表情统一移动到 data/emojis/ 下

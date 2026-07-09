@@ -69,8 +69,8 @@ func GetAssetImgSize(assetPath string) (width, height int) {
 	return
 }
 
-// GetAssetPathByHash 按 hash 查已存在的 asset 路径用于去重。boxID 非空且为加密 box 时返回空——
-// 加密 box 不参与全局去重（避免复用普通明文 asset）；普通 box 走全局 cache/SQL（加密 box 数据不在全局表）。
+// GetAssetPathByHash 按 hash 查已存在的 asset 路径用于去重。boxID 非空且为加密笔记本时返回空——
+// 加密笔记本不参与全局去重（避免复用普通明文 asset）；普通 box 走全局 cache/SQL（加密笔记本数据不在全局表）。
 func GetAssetPathByHash(hash, boxID string) string {
 	if boxID != "" && IsEncryptedBox(boxID) {
 		return "" // 加密 box：跳过全局去重，强制新写（防跨边界复用明文 asset）
@@ -634,7 +634,7 @@ func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string
 	}
 	for _, notebook := range notebooks {
 		if !includeEncrypted && IsEncryptedBox(notebook.ID) {
-			continue // 加密 box 的资源不参与全局路径解析（孤岛，资源不跨边界）
+			continue // 加密笔记本的资源不参与全局路径解析（孤岛，资源不跨边界）
 		}
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
 		filelock.Walk(notebookAbsPath, func(path string, d fs.DirEntry, err error) error {
@@ -1127,7 +1127,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	if err != nil {
 		return
 	}
-	// 排除加密笔记本的资源：加密 box 锁定时 loadTree 失败会误判引用关系，
+	// 排除加密笔记本的资源：加密笔记本锁定时 loadTree 失败会误判引用关系，
 	// 且加密笔记本是孤岛，资源不参与全局未引用清理
 	for dest, absPath := range assetsPathMap {
 		if boxID := ExtractBoxIDFromAssetsPath(absPath); boxID != "" && IsEncryptedBox(boxID) {

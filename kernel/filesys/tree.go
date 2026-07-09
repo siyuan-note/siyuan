@@ -50,7 +50,7 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 
 	bts := treenode.GetBlockTrees(ids)
 
-	// 全局 blocktree 未命中的 id，遍历已打开的加密 box 查找
+	// 全局 blocktree 未命中的 id，遍历已打开的加密笔记本查找
 	foundSet := map[string]bool{}
 	for id := range bts {
 		foundSet[id] = true
@@ -157,7 +157,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
-	// 加密笔记本的 .sy 是密文，读盘后解密成明文供后续解析；非加密 box 原样返回
+	// 加密笔记本的 .sy 是密文，读盘后解密成明文供后续解析；非加密笔记本原样返回
 	if data, err = decryptData(boxID, data); nil != err {
 		logging.LogErrorf("decrypt tree [%s] failed: %s", p, err)
 		return
@@ -246,7 +246,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 
 func DocIAL(absPath string) (ret map[string]string) {
 	// 加密笔记本的 .sy 是密文，流式 jsoniter 解析无法处理，需先整体读+解密。
-	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密 box 走原流式逻辑。
+	// 反推 boxID：路径形如 <DataDir>/<boxID>/...；非加密笔记本走原流式逻辑。
 	boxID := docIALBoxID(absPath)
 	if boxID != "" && DEKProvider != nil {
 		if dek, err := DEKProvider(boxID); err == nil && dek != nil {
@@ -331,7 +331,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 			return
 		}
 	} else {
-		// 读盘比对：加密 box 的磁盘数据是密文，需先解密成明文再与 data 比对
+		// 读盘比对：加密笔记本的磁盘数据是密文，需先解密成明文再与 data 比对
 		if diskData, readErr := filelock.ReadFile(filePath); nil == readErr {
 			decDisk, decErr := decryptData(tree.Box, diskData)
 			if decErr == nil && len(decDisk) == len(data) && bytes.Equal(decDisk, data) {

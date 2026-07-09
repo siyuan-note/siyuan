@@ -158,7 +158,7 @@ func QueryRootBlockRefCount() (ret map[string]int) {
 		ret[id] = cnt
 	}
 
-	// 加密 box 的 refs
+	// 加密笔记本的 refs
 	for _, encBoxID := range GetEncryptedBoxIDs() {
 		encRows, encErr := queryForBox(encBoxID, "SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")
 		if encErr != nil {

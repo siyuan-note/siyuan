@@ -80,7 +80,7 @@ func writeRelations(boxID string, avRels map[string][]string) {
 }
 
 // relationsBoxIDByAvID 由 destAvID 反查归属 boxID，决定 relations 索引的存储位置。
-// 加密 box 的 AV 返回其 boxID；普通 box 的 AV 返回空串（全局路径）。
+// 加密笔记本的 AV 返回其 boxID；普通 box 的 AV 返回空串（全局路径）。
 func relationsBoxIDByAvID(avID string) string {
 	_, boxID := FindAttributeViewPath(avID)
 	return boxID

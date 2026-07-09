@@ -288,6 +288,9 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
 };
 
 export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement, successCB?: (res: string) => void) => {
+    if (protyle.lite) {
+        return;
+    }
     // FileList | DataTransferItemList | File[] => File[]
     let fileList = [];
     for (let i = 0; i < files.length; i++) {

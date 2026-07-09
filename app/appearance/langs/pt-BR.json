@@ -2092,6 +2092,8 @@
 		"314": "Por favor, desbloqueie primeiro o caderno criptografado",
 		"315": "Já existem cadernos criptografados mas o backup da chave mestre está ausente. Restaure o conf.json original ou o arquivo de backup para reativar",
 		"316": "Falha na descriptografia: chave incorreta ou dados corrompidos",
-		"317": "Arquivo de backup da chave inválido"
+		"317": "Arquivo de backup da chave inválido",
+		"318": "Metadados de criptografia do caderno estão danificados, verifique o backup",
+		"319": "O caderno não está criptografado"
 	}
-}
+	}

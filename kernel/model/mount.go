@@ -224,7 +224,7 @@ func unmount0(boxID string) {
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
 	}
-	if boxConf.Encrypted {
+	if IsEncryptedBox(box.ID) {
 		// 加密笔记本关闭：跳过 Unindex（索引 db 马上要删，逐条删是白费），
 		// 先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
 		// 生成文件历史，再 ClearDEK（=LockBox）清除 DEK 并删除加密 db 文件。
@@ -322,7 +322,8 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 
 	// 加密笔记本必须先通过 UnlockBox 解出 DEK，否则拒绝挂载。Mount 本身不接收密码，
 	// 前端流程为：先调 /api/notebook/unlockBox 解锁，再调 openNotebook 挂载。
-	if preConf := (&Box{ID: boxID}).GetConf(); preConf.Encrypted && !IsBoxUnlocked(boxID) {
+	// 使用 IsEncryptedBox 统一判定（含 backup fallback，不依赖 conf 完整性）。
+	if IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
 		return false, errors.New("encrypted notebook locked, please unlock it first")
 	}
 

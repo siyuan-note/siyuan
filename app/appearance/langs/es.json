@@ -2092,6 +2092,8 @@
 		"314": "Por favor, desbloquee primero el cuaderno cifrado",
 		"315": "Ya existen cuadernos cifrados pero falta la copia de seguridad de la clave maestra. Restaure el conf.json original o el archivo de copia de seguridad para volver a habilitarlo",
 		"316": "Error al descifrar: clave incorrecta o datos dañados",
-		"317": "Archivo de copia de seguridad de la clave no válido"
+		"317": "Archivo de copia de seguridad de la clave no válido",
+		"318": "Los metadatos de cifrado del cuaderno están dañados, verifique la copia de seguridad",
+		"319": "El cuaderno no está cifrado"
 	}
-}
+	}

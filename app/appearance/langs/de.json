@@ -2092,6 +2092,8 @@
 		"314": "Bitte entsperren Sie zuerst das verschlüsselte Notizbuch",
 		"315": "Es existieren bereits verschlüsselte Notizbücher, aber das Schlüsselmaterial-Backup fehlt. Um wieder zu aktivieren, muss die ursprüngliche conf.json oder die Backupdatei wiederhergestellt werden",
 		"316": "Entschlüsselung fehlgeschlagen: falscher Schlüssel oder beschädigte Daten",
-		"317": "Ungültige Schlüsselsicherungsdatei"
+		"317": "Ungültige Schlüsselsicherungsdatei",
+		"318": "Verschlüsselungsmetadaten des Notizbuchs beschädigt, bitte Backup prüfen",
+		"319": "Notizbuch ist nicht verschlüsselt"
 	}
-}
+	}

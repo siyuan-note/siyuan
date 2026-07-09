@@ -149,10 +149,11 @@ func InitConf() {
 
 			// 重启后加密笔记本的 DEK 丢失（仅内存），必须重新解锁。
 			// 强制把所有加密笔记本标记为已关闭，避免启动索引读到无法解密的密文 .sy。
+			// 使用 IsEncryptedBox 统一判定（含 backup fallback）。
 			changed := false
 			for _, box := range Conf.GetBoxes() {
-				boxConf := box.GetConf()
-				if boxConf.Encrypted && !boxConf.Closed {
+				if IsEncryptedBox(box.ID) && !box.Closed {
+					boxConf := box.GetConf()
 					boxConf.Closed = true
 					if err := box.SaveConf(boxConf); err != nil {
 						logging.LogErrorf("close encrypted notebook on boot [%s] failed: %s", box.ID, err)
@@ -560,8 +561,11 @@ func InitConf() {
 	if Conf.NotebookCrypto.Enabled {
 		if _, err := os.Stat(notebookCryptoBackupPath()); err != nil && os.IsNotExist(err) {
 			if Conf.NotebookCrypto.MasterSalt != nil && len(Conf.NotebookCrypto.MasterSalt) > 0 {
-				saveNotebookCryptoBackup()
-				logging.LogInfof("backfilled notebook crypto backup for existing enabled setup")
+				if err := saveNotebookCryptoBackup(); err != nil {
+					logging.LogErrorf("backfill notebook crypto backup failed: %s", err)
+				} else {
+					logging.LogInfof("backfilled notebook crypto backup for existing enabled setup")
+				}
 			}
 		}
 	}

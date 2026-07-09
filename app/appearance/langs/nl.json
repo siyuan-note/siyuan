@@ -2092,6 +2092,8 @@
 		"314": "Ontgrendel eerst het versleutelde notitieboek",
 		"315": "Er bestaan al versleutelde notitieboeken maar de back-up van de hoofdsleutel ontbreekt. Herstel de originele conf.json of het back-upbestand om opnieuw in te schakelen",
 		"316": "Ontsleuteling mislukt: onjuiste sleutel of beschadigde gegevens",
-		"317": "Ongeldig sleutelback-upbestand"
+		"317": "Ongeldig sleutelback-upbestand",
+		"318": "Versleutelde notitieboekmetadata is beschadigd, controleer de back-up",
+		"319": "Notitieboek is niet versleuteld"
 	}
-}
+	}

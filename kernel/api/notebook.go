@@ -365,11 +365,16 @@ func setNotebookConf(c *gin.Context) {
 	}
 
 	boxConf := box.GetConf()
+	// 保留加密相关字段，不允许通过此 API 覆盖（加密状态只能通过专用 API 改变）
+	savedEncrypted := boxConf.Encrypted
+	savedBoxCrypt := boxConf.BoxCrypt
 	if err = gulu.JSON.UnmarshalJSON(param, boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+	boxConf.Encrypted = savedEncrypted
+	boxConf.BoxCrypt = savedBoxCrypt
 
 	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
 
@@ -397,7 +402,11 @@ func setNotebookConf(c *gin.Context) {
 		}
 	}
 
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	ret.Data = boxConf
 }
 
@@ -629,7 +638,7 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 
 	model.NotebookCryptoMuLock()
 	count := len(model.ListAllEncryptedBoxIDs())
-	enabled := model.Conf.NotebookCrypto.Enabled
+	enabled := model.NotebookCryptoEnabled()
 	model.NotebookCryptoMuUnlock()
 
 	ret.Data = map[string]any{

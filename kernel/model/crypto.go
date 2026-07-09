@@ -420,7 +420,10 @@ func EnableEncryptedNotebook(password string) error {
 	if err != nil {
 		return err
 	}
-	params, validErr := util.ValidateArgon2Params(Conf.NotebookCrypto.KDFParams)
+	Conf.m.RLock()
+	kdfParams := Conf.NotebookCrypto.KDFParams
+	Conf.m.RUnlock()
+	params, validErr := util.ValidateArgon2Params(kdfParams)
 	if validErr != nil {
 		return validErr
 	}
@@ -989,7 +992,8 @@ func needWriteNotebookCryptBackup(boxID string, crypt *conf.BoxEncryption) bool 
 		return true
 	}
 	return !bytes.Equal(existing.WrappedDEK, crypt.WrappedDEK) ||
-		!bytes.Equal(existing.WrapNonce, crypt.WrapNonce)
+		!bytes.Equal(existing.WrapNonce, crypt.WrapNonce) ||
+		existing.CreatedAt != crypt.CreatedAt
 }
 
 // ListAllEncryptedBoxIDs 扫描 data 目录下所有含 notebook-crypt-backup.json 的 box 目录，

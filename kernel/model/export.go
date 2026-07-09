@@ -120,9 +120,11 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 		av.SetAVBoxID(avID, avBoxID)
 	}
 
-	attrView, err := av.ParseAttributeView(avID)
+	var attrView *av.AttributeView
 	if avBoxID != "" {
 		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
+	} else {
+		attrView, err = av.ParseAttributeView(avID)
 	}
 	if err != nil {
 		return
@@ -2211,9 +2213,6 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				srcPath = assetPathMap[cleanAsset]
 			}
 			if "" == srcPath {
-				srcPath, _ = GetAssetAbsPathInBox(asset, tree.Box)
-			}
-			if "" == srcPath {
 				logging.LogWarnf("get asset [%s] abs path failed", asset)
 				continue
 			}
@@ -2382,9 +2381,12 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
 	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密笔记本的 AV 在 <boxID>/storage/av/，
 	// GetAttributeViewDataPath 只查全局路径会漏；filelock.Copy 会拷密文）。
-	avData, readErr := av.ReadAttributeViewData(avID)
+	var avData []byte
+	var readErr error
 	if boxID != "" {
 		avData, readErr = av.ReadAttributeViewDataInBox(avID, boxID)
+	} else {
+		avData, readErr = av.ReadAttributeViewData(avID)
 	}
 	if readErr != nil {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
@@ -2396,12 +2398,15 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 		}
 	}
 
-	attrView, err := av.ParseAttributeView(avID)
+	var attrView *av.AttributeView
+	var parseErr error
 	if boxID != "" {
-		attrView, err = av.ParseAttributeViewInBox(avID, boxID)
+		attrView, parseErr = av.ParseAttributeViewInBox(avID, boxID)
+	} else {
+		attrView, parseErr = av.ParseAttributeView(avID)
 	}
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+	if parseErr != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, parseErr)
 		return
 	}
 
@@ -2421,9 +2426,6 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 					}
 					if "" == srcPath {
 						srcPath = assetPathMap[AssetPathWithoutQuery(asset.Content)]
-					}
-					if "" == srcPath {
-						srcPath, _ = GetAssetAbsPathInBox(asset.Content, boxID)
 					}
 					if "" == srcPath {
 						logging.LogWarnf("get asset [%s] abs path failed", asset.Content)
@@ -3729,9 +3731,6 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 			}
 			if "" == srcPath {
 				srcPath = assetsPathMap[AssetPathWithoutQuery(spaceDecodedOldAsset)]
-			}
-			if "" == srcPath {
-				srcPath, _ = GetAssetAbsPathInBox(spaceDecodedOldAsset, boxID)
 			}
 			if "" == srcPath {
 				logging.LogWarnf("get asset [%s] abs path failed", spaceDecodedOldAsset)

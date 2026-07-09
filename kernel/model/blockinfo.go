@@ -398,7 +398,7 @@ func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[str
 		return
 	}
 
-	// 加密 box 的 refs 在加密 db，用 bt.BoxID 路由
+	// 加密笔记本的 refs 在加密 db，用 bt.BoxID 路由
 	refDefs = queryBlockRefDefsInBox(bt, bt.BoxID)
 	originalRefBlockIDs = buildBacklinkListItemRefsInBox(refDefs, bt.BoxID)
 	return

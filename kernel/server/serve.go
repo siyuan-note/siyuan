@@ -43,6 +43,7 @@ import (
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/api"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/mcp"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
@@ -668,7 +669,7 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		relativePath := path.Join("assets", requestPath)
-		p, err := model.GetAssetAbsPath(relativePath)
+		p, err := model.GetAssetAbsPathWithOpt(relativePath, true)
 		if err != nil {
 			context.Status(http.StatusNotFound)
 			return
@@ -704,6 +705,10 @@ func serveAssets(ginServer *gin.Engine) {
 
 	ginServer.GET("/history/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
 		p := filepath.Join(util.HistoryDir, context.Param("path"))
+		// 加密笔记本的历史是密文（.sy/assets/AV），需先解密再输出
+		if serveEncryptedHistory(context, p) {
+			return
+		}
 		http.ServeFile(context.Writer, context.Request, p)
 	})
 }
@@ -733,34 +738,40 @@ func readAssetBytes(absPath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" {
-		if dek, decErr := model.GetDEK(boxID); decErr == nil && dek != nil {
-			if plain, decErr := util.Decrypt(dek, data); decErr == nil {
-				return plain, nil
-			}
+	if boxID := model.ExtractBoxIDFromAssetsPath(absPath); boxID != "" && model.IsEncryptedBox(boxID) {
+		dek, dekErr := model.GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			return nil, dekErr // 加密笔记本未解锁：fail-closed，不返回密文
 		}
+		plain, decErr := model.DecryptAsset(boxID, dek, data)
+		if decErr != nil {
+			return nil, decErr
+		}
+		return plain, nil
 	}
 	return data, nil
 }
 
 // serveEncryptedAsset 处理加密笔记本 asset 的 HTTP 输出。
-// 若 absPath 在已解锁的加密 box 下，读密文→解密→按扩展名设置 Content-Type→输出，返回 true；
+// 若 absPath 在已解锁的加密笔记本下，读密文→解密→按扩展名设置 Content-Type→输出，返回 true；
 // 否则返回 false，由调用方走原 http.ServeFile 路径。
 func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
-	if boxID == "" {
-		return false
+	if boxID == "" || !model.IsEncryptedBox(boxID) {
+		return false // 非加密 box，走原路径
 	}
-	dek, err := model.GetDEK(boxID)
-	if err != nil || dek == nil {
-		return false // 非加密 box 或未解锁，走原路径
+	dek, err := model.GetDEKIfUnlocked(boxID)
+	if err != nil {
+		// 加密笔记本未解锁：fail-closed，返回 403，不走 ServeFile（避免返回密文）
+		context.Status(http.StatusForbidden)
+		return true
 	}
 	ciphertext, readErr := os.ReadFile(absPath)
 	if readErr != nil {
 		context.Status(http.StatusNotFound)
 		return true
 	}
-	plain, decErr := util.Decrypt(dek, ciphertext)
+	plain, decErr := model.DecryptAsset(boxID, dek, ciphertext)
 	if decErr != nil {
 		logging.LogErrorf("decrypt asset [%s] failed: %s", absPath, decErr)
 		context.Status(http.StatusInternalServerError)
@@ -772,6 +783,52 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 		setAssetsAttachmentDisposition(context, originalName)
 	} else {
 		setAssetsAttachmentDisposition(context, absPath)
+	}
+	contentType := mime.TypeByExtension(filepath.Ext(absPath))
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	context.Data(200, contentType, plain)
+	return true
+}
+
+// serveEncryptedHistory 处理加密笔记本历史文件的 HTTP 输出。
+// 若 absPath 在已解锁的加密笔记本下，读密文→解密→按扩展名设置 Content-Type→输出，返回 true；
+// 若加密但未解锁，返回 403，返回 true，不走 ServeFile（避免返回密文）；
+// 否则返回 false，由调用方走原 http.ServeFile 路径。
+func serveEncryptedHistory(context *gin.Context, absPath string) bool {
+	boxID := model.ExtractBoxIDFromHistoryPath(absPath)
+	if boxID == "" || !model.IsEncryptedBox(boxID) {
+		return false // 非加密 box，走原路径
+	}
+	dek, err := model.GetDEKIfUnlocked(boxID)
+	if err != nil {
+		// 加密笔记本未解锁：fail-closed，返回 403，不走 ServeFile（避免返回密文）
+		context.Status(http.StatusForbidden)
+		return true
+	}
+	ciphertext, readErr := os.ReadFile(absPath)
+	if readErr != nil {
+		context.Status(http.StatusNotFound)
+		return true
+	}
+	var plain []byte
+	var decErr error
+	if strings.HasSuffix(absPath, ".sy") {
+		plain, decErr = model.DecryptFile(boxID, dek, ciphertext)
+	} else if strings.Contains(absPath, "assets"+string(os.PathSeparator)) {
+		plain, decErr = model.DecryptAsset(boxID, dek, ciphertext)
+	} else if strings.Contains(absPath, "storage"+string(os.PathSeparator)+"av"+string(os.PathSeparator)) {
+		// AV 定义用 siyuan/av 子密钥加密，与 assets 的 siyuan/asset 子密钥不同
+		plain, decErr = av.DecryptAVData(boxID, ciphertext)
+	} else {
+		// 其他历史文件（如 JSON 元数据等）尝试用 asset 解密方式
+		plain, decErr = model.DecryptAsset(boxID, dek, ciphertext)
+	}
+	if decErr != nil {
+		logging.LogErrorf("decrypt history [%s] failed: %s", absPath, decErr)
+		context.Status(http.StatusInternalServerError)
+		return true
 	}
 	contentType := mime.TypeByExtension(filepath.Ext(absPath))
 	if contentType == "" {

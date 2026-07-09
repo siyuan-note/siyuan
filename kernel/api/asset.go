@@ -281,7 +281,7 @@ func setFileAnnotation(c *gin.Context) {
 			return
 		}
 	} else {
-		// 加密笔记本的 .sya 写盘前必须加密；加密 box 未解锁时拒绝写入（fail-closed，避免明文落盘）
+		// 加密笔记本的 .sya 写盘前必须加密；加密笔记本未解锁时拒绝写入（fail-closed，避免明文落盘）
 		writeData := []byte(data)
 		if boxID := model.ExtractBoxIDFromAssetsPath(writePath); boxID != "" && model.IsEncryptedBox(boxID) {
 			dek, dekErr := model.GetDEKIfUnlocked(boxID)

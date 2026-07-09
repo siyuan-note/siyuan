@@ -229,7 +229,7 @@ func IndexRefs() {
 	util.SetBootDetails(Conf.Language(305))
 
 	var defBlockIDs []string
-	defBlockBoxes := map[string]string{} // defBlockID -> boxID，加密 box 下需按 box 路由后续加载
+	defBlockBoxes := map[string]string{} // defBlockID -> boxID，加密笔记本下需按 box 路由后续加载
 	luteEngine := util.NewLute()
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
@@ -239,7 +239,7 @@ func IndexRefs() {
 			for _, treeAbsPath := range paths {
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, box.ID)))
 
-				// 加密 box 的 .sy 是密文，必须走 filesys.LoadTree 透明解密；无法用 bytes.Contains 预检
+				// 加密笔记本的 .sy 是密文，必须走 filesys.LoadTree 透明解密；无法用 bytes.Contains 预检
 				var tree *parse.Tree
 				if encryptedBox {
 					loadTree, loadErr := filesys.LoadTree(box.ID, p, luteEngine)
@@ -290,7 +290,7 @@ func IndexRefs() {
 		bootProgressPart := int32(10.0 / float64(size))
 
 		for _, defBlockID := range defBlockIDs {
-			// 加密 box 的 defBlock 在加密 blocktree db，需按 box 路由加载
+			// 加密笔记本的 defBlock 在加密 blocktree db，需按 box 路由加载
 			var defTree *parse.Tree
 			var loadErr error
 			if boxID, ok := defBlockBoxes[defBlockID]; ok && IsEncryptedBox(boxID) {

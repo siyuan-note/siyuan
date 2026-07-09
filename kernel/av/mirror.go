@@ -21,7 +21,7 @@ func GetBlockRels() (ret map[string][]string) {
 	for k, v := range readMirrorBlocks("") {
 		ret[k] = v
 	}
-	// 加密 box 的镜像索引（已打开的）
+	// 加密笔记本的镜像索引（已打开的）
 	if AVEncryptedBoxIDs != nil {
 		for _, encBoxID := range AVEncryptedBoxIDs() {
 			for k, v := range readMirrorBlocks(encBoxID) {
@@ -76,7 +76,7 @@ func BatchUpsertBlockRel(nodes []*ast.Node) {
 	AttributeViewBlocksLock.Lock()
 	defer AttributeViewBlocksLock.Unlock()
 
-	// 按 boxID 分桶：普通 box 的 avID 写全局镜像，加密 box 的 avID 写笔记本级镜像
+	// 按 boxID 分桶：普通 box 的 avID 写全局镜像，加密笔记本的 avID 写笔记本级镜像
 	boxAvBlocks := map[string]map[string][]string{} // boxID → avBlocks
 
 	for _, n := range nodes {

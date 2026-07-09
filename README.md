@@ -404,19 +404,36 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 Run `siyuan --help` for the full command tree. Use `-f json` (default is `-f table`) for script-friendly output. Most mutating commands also support `--dry-run` to preview changes without applying them.
 
-### Setup
+### Installation
 
-The CLI binary is `SiYuan-Kernel` under `<install>/resources/kernel`.
-Windows installer adds it to PATH automatically.
-On macOS/Linux, create a symlink manually:
+The CLI binary is `<install-dir>/resources/kernel/SiYuan-Kernel`, invoked via the `siyuan` command.
 
-```bash
-# macOS
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
-
-# Linux
-ln -s /path/to/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
-```
+- **Windows**: the installer automatically adds the kernel directory to `PATH`, so `siyuan` works out of the box. The Microsoft Store edition runs in an MSIX sandbox and cannot modify `PATH`; deploy a `siyuan.cmd` shim once (survives Store updates):
+  ```powershell
+  # Microsoft Store edition only — run once in PowerShell
+  $shimDir = "$env:LOCALAPPDATA\Microsoft\WindowsApps"   # already in PATH by default
+  @(
+      '@echo off'
+      'setlocal'
+      'set "ROOT="'
+      'for /f "delims=" %%i in (''powershell -NoProfile -Command "(Get-AppxPackage *SiYuan*).InstallLocation"'') do set "ROOT=%%i"'
+      'if not defined ROOT goto :noshim'
+      '"%ROOT%\app\resources\kernel\SiYuan-Kernel.exe" %*'
+      'exit /b %ERRORLEVEL%'
+      ':noshim'
+      '1>&2 echo siyuan: Microsoft Store edition not found'
+      'exit /b 1'
+  ) | Set-Content "$shimDir\siyuan.cmd"
+  ```
+  To remove on uninstall: `Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.cmd"`.
+- **macOS**: create a symlink after installing:
+  ```bash
+  ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ```
+- **Linux**: create a symlink after installing:
+  ```bash
+  ln -s <install-dir>/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ```
 
 ## 🏘️ Community
 

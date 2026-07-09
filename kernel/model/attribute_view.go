@@ -53,9 +53,6 @@ func RemoveUnusedAttributeView(id string) {
 	if !filelock.IsExist(absPath) {
 		return
 	}
-	if !gulu.File.IsSubPath(base, absPath) {
-		return
-	}
 
 	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
@@ -258,6 +255,8 @@ func getAvIDs(tree *parse.Tree, allAvIDs []string) (ret []string) {
 func getAllAvIDs() (ret []string, err error) {
 	ret = []string{}
 
+	// 只扫全局 AV 目录。加密笔记本的 AV 存在笔记本级目录（密文），不参与全局枚举——
+	// 未引用清理功能在加密笔记本锁定时无法确认引用关系（loadTree 失败），枚举加密 AV 有误删风险
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "av"))
 	if nil != err {
 		return
@@ -1638,7 +1637,7 @@ func insertItemAfter(items []string, item, previousItemID string) []string {
 }
 
 func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error) {
-	// 加密 box 的 AV 定义在笔记本级目录，通过 fallback 查找实际路径
+	// 加密笔记本的 AV 定义在笔记本级目录，通过 fallback 查找实际路径
 	oldAvPath, avBoxID := av.FindAttributeViewPath(avID)
 	if oldAvPath == "" {
 		oldAvPath = av.GetAttributeViewDataPath(avID)
@@ -1656,14 +1655,14 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		return
 	}
 
-	// 加密 box 的 AV 是密文，需先解密再处理
-	if avBoxID != "" {
-		if dek, decErr := GetDEK(avBoxID); decErr == nil && dek != nil {
-			if data, decErr = util.Decrypt(dek, data); decErr != nil {
-				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, decErr)
-				err = decErr
-				return
-			}
+	// 加密笔记本的 AV 是密文，需先解密再处理（av.DecryptAVData 内部按 box 加密/已解锁路由）
+	if avBoxID != "" && IsEncryptedBox(avBoxID) {
+		var decErr error
+		data, decErr = av.DecryptAVData(avBoxID, data)
+		if decErr != nil {
+			logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, decErr)
+			err = decErr
+			return
 		}
 	}
 
@@ -1694,16 +1693,16 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		return
 	}
 
-	// 加密 box 的新 AV 定义也存笔记本级目录，且需 DEK 加密
+	// 加密笔记本的新 AV 定义也存笔记本级目录，且需 avKey 加密
 	newAvPath := filepath.Join(util.DataDir, "storage", "av", newAvID+".json")
 	if avBoxID != "" {
 		newAvPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", newAvID+".json")
-		if dek, decErr := GetDEK(avBoxID); decErr == nil && dek != nil {
-			if data, decErr = util.Encrypt(dek, data); decErr != nil {
-				logging.LogErrorf("encrypt attribute view [%s] failed: %s", newAvID, decErr)
-				err = decErr
-				return
-			}
+		var encErr error
+		data, encErr = av.EncryptAVData(avBoxID, data)
+		if encErr != nil {
+			logging.LogErrorf("encrypt attribute view [%s] failed: %s", newAvID, encErr)
+			err = encErr
+			return
 		}
 		av.SetAVBoxID(newAvID, avBoxID)
 	}
@@ -1923,6 +1922,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 	keywords := strings.Fields(keyword)
 
 	var avSearchTmpResults []*AvSearchTempResult
+	// 只扫全局 AV 目录。加密笔记本的 AV 不参与全局搜索——避免跨加密边界暴露数据库名等元信息
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	entries, err := os.ReadDir(avDir)
 	if err != nil {
@@ -4069,7 +4069,10 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		}
 	}
 
-	srcAvPath := filepath.Join(util.DataDir, "storage", "av", avID+".json")
+	srcAvPath, _ := av.FindAttributeViewPath(avID)
+	if srcAvPath == "" {
+		return
+	}
 	destAvPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 	if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
 		logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)

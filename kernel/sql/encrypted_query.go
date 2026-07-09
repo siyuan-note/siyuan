@@ -27,7 +27,7 @@ import (
 )
 
 // 本文件提供加密笔记本的 box-scoped 读查询。每个函数接收 boxID，路由到加密 db（已打开）或全局 db。
-// 调用方（model 层）在加密 box 上下文里改用这些 InBox 版；全局功能继续用原函数。
+// 调用方（model 层）在加密笔记本上下文里改用这些 InBox 版；全局功能继续用原函数。
 
 // GetBlockInBox 按 id 在指定 box 的 db 里查 block。boxID 为空则查全局 db。
 func GetBlockInBox(id, boxID string) (ret *Block) {
@@ -376,7 +376,7 @@ func QueryRefsByDefIDRefIDInBox(defBlockID, refBlockID, boxID string) (ret []*Re
 	return
 }
 
-// QueryRefsRecentInBox 按 boxID 路由查最近引用，用于加密 box 内的块引搜索。
+// QueryRefsRecentInBox 按 boxID 路由查最近引用，用于加密笔记本内的块引搜索。
 func QueryRefsRecentInBox(onlyDoc bool, typeFilter string, ignoreLines []string, boxID string) (ret []*Ref) {
 	stmt := "SELECT r.* FROM refs AS r, blocks AS b WHERE b.id = r.def_block_id AND b.type IN " + typeFilter
 	if onlyDoc {

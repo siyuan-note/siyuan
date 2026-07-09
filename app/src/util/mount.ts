@@ -173,11 +173,6 @@ export const newEncryptedNotebook = () => {
                 showMessage(window.siyuan.languages.masterPassword);
                 return false;
             }
-            // 创建含 KEK 派生 + 开加密 db，约耗时 1 秒
-            const confirmBtn = btnsElement[1] as HTMLButtonElement;
-            const originalText = confirmBtn.textContent;
-            confirmBtn.setAttribute("disabled", "disabled");
-            confirmBtn.textContent = window.siyuan.languages.loading;
             const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
                 name: replaceFileName(name),
                 password
@@ -188,9 +183,6 @@ export const newEncryptedNotebook = () => {
                     notebook: response.data.notebook.id
                 });
                 dialog.destroy();
-            } else {
-                confirmBtn.removeAttribute("disabled");
-                confirmBtn.textContent = originalText;
             }
         });
     });
@@ -221,10 +213,6 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         if (!password) {
             return false;
         }
-        const unlockBtn = btnsElement[1] as HTMLButtonElement;
-        const originalText = unlockBtn.textContent;
-        unlockBtn.setAttribute("disabled", "disabled");
-        unlockBtn.textContent = window.siyuan.languages.loading;
         // 先解锁（派生 KEK + 解 DEK + 打开加密 db，Argon2id 约耗时 1 秒），成功后再挂载
         const response = await fetchSyncPost("/api/notebook/unlockBox", {
             notebook: notebookId,
@@ -235,10 +223,6 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
                 notebook: notebookId
             });
             dialog.destroy();
-        } else {
-            // fetchSyncPost 已通过 processMessage 弹出错误提示，这里只需恢复按钮
-            unlockBtn.removeAttribute("disabled");
-            unlockBtn.textContent = originalText;
         }
     });
 };

@@ -282,8 +282,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 	case "delete_box":
 		// 清理 box 的内容索引。事务由 beginTxForBox(op.boxID()) 按所属库路由：
-		// 普通 box 落到全局 siyuan.db，加密 box 落到其独立 content db，删除均生效。
-		// 注意加密 box 关闭时必须清空 content db 数据，否则下次 Mount 的全量 Index
+		// 普通 box 落到全局 siyuan.db，加密笔记本落到其独立 content db，删除均生效。
+		// 注意加密笔记本关闭时必须清空 content db 数据，否则下次 Mount 的全量 Index
 		// 会用纯 INSERT 在无主键的 blocks 表上叠加重复行，导致搜索结果翻倍。
 		err = deleteByBoxTx(tx, op.box)
 		if nil == err {

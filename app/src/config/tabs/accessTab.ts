@@ -408,19 +408,46 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             if (!file) {
                 return;
             }
-            const formData = new FormData();
-            formData.append("file", file);
-            fetch("/api/notebook/importNotebookCryptoBackup", {
-                method: "POST",
-                body: formData,
-            }).then((res) => res.json()).then((response: IWebSocketData) => {
-                if (response.code === -1) {
-                    showMessage(response.msg, 6000, "error");
+            // 导入前需输入主密码校验（备份文件不含密码，校验用导入备份对应的主密码）
+            const passwordDialog = new Dialog({
+                title: window.siyuan.languages.masterPassword,
+                content: `<div class="b3-dialog__content">
+    <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+                width: "520px",
+            });
+            const pwdInput = passwordDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+            passwordDialog.element.querySelector(".b3-button--cancel")?.addEventListener("click", () => {
+                passwordDialog.close();
+            });
+            passwordDialog.element.querySelector(".b3-button--text")?.addEventListener("click", () => {
+                const password = pwdInput.value.trim();
+                if (!password) {
+                    showMessage(window.siyuan.languages.masterPassword);
                     return;
                 }
-                showMessage(window.siyuan.languages.importNotebookCryptoBackupTip);
-                refresh();
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("password", password);
+                fetch("/api/notebook/importNotebookCryptoBackup", {
+                    method: "POST",
+                    body: formData,
+                }).then((res) => res.json()).then((response: IWebSocketData) => {
+                    if (response.code === -1) {
+                        showMessage(response.msg, 6000, "error");
+                        return;
+                    }
+                    showMessage(window.siyuan.languages.importNotebookCryptoBackupTip);
+                    passwordDialog.close();
+                    refresh();
+                });
             });
+            pwdInput.focus();
         };
         fileInput.click();
     });
@@ -489,19 +516,11 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
-        // Argon2id 密钥派生约耗时 1 秒，期间禁用按钮并显示 loading，避免用户误以为卡住而重复点击
-        const originalText = confirmBtn.textContent;
-        confirmBtn.setAttribute("disabled", "disabled");
-        confirmBtn.textContent = window.siyuan.languages.loading;
         const response = await fetchSyncPost("/api/notebook/enableEncryptedNotebooks", {password: pwd1});
         if (response.code === 0) {
             showMessage(window.siyuan.languages.encryptedNotebookEnabled);
             dialog.destroy();
             onSuccess();
-        } else {
-            // fetchSyncPost 已通过 processMessage 弹出错误提示，这里只需恢复按钮
-            confirmBtn.removeAttribute("disabled");
-            confirmBtn.textContent = originalText;
         }
     });
 };
@@ -538,11 +557,6 @@ const openChangeMasterPasswordDialog = () => {
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
-        // 改密需校验旧密码 + 重新派生 KEK + 重包络所有加密 box 的 DEK，耗时较长
-        const confirmBtn = btnsElement[1] as HTMLButtonElement;
-        const originalText = confirmBtn.textContent;
-        confirmBtn.setAttribute("disabled", "disabled");
-        confirmBtn.textContent = window.siyuan.languages.loading;
         const response = await fetchSyncPost("/api/notebook/changeMasterPassword", {
             oldPassword: oldPwd,
             newPassword: newPwd
@@ -550,10 +564,6 @@ const openChangeMasterPasswordDialog = () => {
         if (response.code === 0) {
             showMessage(window.siyuan.languages.changeMasterPasswordSuccessTip);
             dialog.destroy();
-        } else {
-            // fetchSyncPost 已通过 processMessage 弹出错误提示，这里只需恢复按钮
-            confirmBtn.removeAttribute("disabled");
-            confirmBtn.textContent = originalText;
         }
     });
 };

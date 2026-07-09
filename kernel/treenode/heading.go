@@ -54,7 +54,6 @@ func MoveFoldHeading(updateNode, oldNode *ast.Node) {
 			h.Next.InsertAfter(children[i]) // Next 是 Block IAL
 		}
 	}
-	return
 }
 
 func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
@@ -66,12 +65,14 @@ func IsInFoldedHeading(node, currentHeading *ast.Node) bool {
 	if nil == heading {
 		return false
 	}
-	if "1" == heading.IALAttr("heading-fold") || "1" == heading.IALAttr("fold") {
-		return true
-	}
-	if heading == currentHeading {
-		// node 就在当前标题层级下的话不递归继续查询，直接返回不折叠
-		return false
+	if ast.NodeHeading == heading.Type {
+		if "1" == heading.IALAttr("heading-fold") || "1" == heading.IALAttr("fold") {
+			return true
+		}
+		if heading == currentHeading {
+			// node 就在当前标题层级下的话不递归继续查询，直接返回不折叠
+			return false
+		}
 	}
 	return IsInFoldedHeading(heading, currentHeading)
 }

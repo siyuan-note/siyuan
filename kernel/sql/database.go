@@ -61,7 +61,7 @@ var (
 
 	// IsEncryptedBoxFn 由 model 层注入，用于判断 boxID 是否为加密笔记本。
 	// sql 包不直接 import model（循环依赖），路由函数据此 fail-closed：
-	// 加密 box 未解锁时绝不回退全局库，避免加密 box 索引污染全局明文库。
+	// 加密笔记本未解锁时绝不回退全局库，避免加密笔记本索引污染全局明文库。
 	IsEncryptedBoxFn func(boxID string) bool
 )
 
@@ -1115,9 +1115,12 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		return
 	}
 
+	// block_embeddings 表在加密 db 中不存在（加密笔记本不参与嵌入向量化），对该表不存在的错误容错
 	stmt = "DELETE FROM block_embeddings WHERE id IN (" + strings.Join(ftsIDs, ",") + ")"
-	if err = execStmtTx(tx, stmt); err != nil {
-		return
+	if _, embedErr := tx.Exec(stmt); embedErr != nil {
+		if !strings.Contains(embedErr.Error(), "no such table") {
+			err = embedErr // 非"表不存在"的真实错误照常返回
+		}
 	}
 	return
 }
@@ -1432,8 +1435,8 @@ func query(query string, args ...any) (*sql.Rows, error) {
 	return db.Query(query, args...)
 }
 
-// queryRowForBox 按 box 路由查询单行。加密 box 用独立 db，否则用全局 db。boxID 为空走全局。
-// 加密 box 未解锁（db 未打开）时返回 nil——绝不回退全局库，避免加密 box 查询命中全局明文库。
+// queryRowForBox 按 box 路由查询单行。加密笔记本用独立 db，否则用全局 db。boxID 为空走全局。
+// 加密笔记本未解锁（db 未打开）时返回 nil——绝不回退全局库，避免加密笔记本查询命中全局明文库。
 func queryRowForBox(boxID, query string, args ...any) *sql.Row {
 	query = strings.TrimSpace(query)
 	if "" == query {
@@ -1444,7 +1447,7 @@ func queryRowForBox(boxID, query string, args ...any) *sql.Row {
 		return boxDB.QueryRow(query, args...)
 	}
 	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) {
-		// 加密 box 未解锁：fail-closed，不回退全局库
+		// 加密笔记本未解锁：fail-closed，不回退全局库
 		return nil
 	}
 	if nil == db {
@@ -1453,8 +1456,8 @@ func queryRowForBox(boxID, query string, args ...any) *sql.Row {
 	return db.QueryRow(query, args...)
 }
 
-// queryForBox 按 box 路由查询多行。加密 box 用独立 db，否则用全局 db。boxID 为空走全局。
-// 加密 box 未解锁时返回错误——绝不回退全局库。
+// queryForBox 按 box 路由查询多行。加密笔记本用独立 db，否则用全局 db。boxID 为空走全局。
+// 加密笔记本未解锁时返回错误——绝不回退全局库。
 func queryForBox(boxID, query string, args ...any) (*sql.Rows, error) {
 	query = strings.TrimSpace(query)
 	if "" == query {
@@ -1872,7 +1875,7 @@ func CloseEncryptedDB(boxID string) {
 	}
 }
 
-// GetEncryptedDB 返回加密 box 的 db 句柄；未打开返回 nil。
+// GetEncryptedDB 返回加密笔记本的 db 句柄；未打开返回 nil。
 func GetEncryptedDB(boxID string) *sql.DB {
 	if v, ok := encryptedDBs.Load(boxID); ok {
 		if boxDB, ok := v.(*sql.DB); ok {
@@ -1912,9 +1915,9 @@ func RemoveAllEncryptedDBFiles() {
 	}
 }
 
-// beginTxForBox 按 box 选 db 开事务。加密 box 用其独立 db，否则用全局 db。
-// beginTxForBox 按 box 选 db 开事务。加密 box 用其独立 db，否则用全局 db。
-// 加密 box 未解锁时返回错误——绝不回退全局库，避免加密 box 的索引写操作污染全局明文库。
+// beginTxForBox 按 box 选 db 开事务。加密笔记本用其独立 db，否则用全局 db。
+// beginTxForBox 按 box 选 db 开事务。加密笔记本用其独立 db，否则用全局 db。
+// 加密笔记本未解锁时返回错误——绝不回退全局库，避免加密笔记本的索引写操作污染全局明文库。
 func beginTxForBox(box string) (tx *sql.Tx, err error) {
 	if boxDB := GetEncryptedDB(box); boxDB != nil {
 		if tx, err = boxDB.Begin(); err != nil {
@@ -1924,13 +1927,13 @@ func beginTxForBox(box string) (tx *sql.Tx, err error) {
 		return
 	}
 	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(box) {
-		// 加密 box 未解锁：fail-closed，不回退全局库
+		// 加密笔记本未解锁：fail-closed，不回退全局库
 		return nil, errors.New("encrypted box db not opened for box " + box)
 	}
 	return beginTx()
 }
 
-// initEncryptedDBTables 在加密 box db 上建内容表（幂等）。结构与全局 siyuan.db 的内容表一致，
+// initEncryptedDBTables 在加密笔记本db 上建内容表（幂等）。结构与全局 siyuan.db 的内容表一致，
 // 但不含 stat 表（加密 db 不参与版本管理）。首次打开时调用。
 func initEncryptedDBTables(boxDB *sql.DB) (err error) {
 	tables := []string{

@@ -17,7 +17,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -57,7 +56,7 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		}
 	}
 
-	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密 box 笔记本级）
+	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密笔记本笔记本级）
 	existPath, _ := av.FindAttributeViewPath(avID)
 	if "" == existPath {
 		// fallback 找不到时按全局路径检查（首次创建场景）
@@ -540,6 +539,18 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID strin
 	return
 }
 
+// avBoxIDFromRepoPath 从快照文件路径反查 boxID。
+// 全局路径 /storage/av/<avID>.json 返回空串；加密笔记本路径 /<boxID>/storage/av/<avID>.json 返回 boxID。
+func avBoxIDFromRepoPath(repoPath string) string {
+	parts := strings.Split(repoPath, "/")
+	// 全局路径: ["", "storage", "av", "xxx.json"] → parts[1]=="storage"
+	// 加密 box: ["", "<boxID>", "storage", "av", "xxx.json"] → parts[1]=="<boxID>"
+	if len(parts) >= 4 && parts[2] == "storage" {
+		return parts[1]
+	}
+	return ""
+}
+
 func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	repo, err := newRepository()
 	if err != nil {
@@ -557,7 +568,8 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 	var avFile *entity.File
 	for _, f := range files {
-		if "/storage/av/"+avID+".json" == f.Path {
+		// 匹配全局 /storage/av/<avID>.json 或加密笔记本/<boxID>/storage/av/<avID>.json
+		if strings.HasSuffix(f.Path, "/storage/av/"+avID+".json") {
 			avFile = f
 			break
 		}
@@ -579,6 +591,17 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		err = readErr
 		return
+	}
+
+	// 加密笔记本的 AV 在快照中是密文，按路径反查 boxID 后解密
+	if histBoxID := avBoxIDFromRepoPath(avFile.Path); histBoxID != "" && IsEncryptedBox(histBoxID) {
+		dec, decErr := av.DecryptAVData(histBoxID, data)
+		if decErr != nil {
+			logging.LogErrorf("decrypt snapshot attribute view [%s] failed: %s", avID, decErr)
+			err = decErr
+			return
+		}
+		data = dec
 	}
 
 	if !ast.IsNodeIDPattern(avID) {
@@ -660,37 +683,33 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		return
 	}
 
-	// 加密笔记本的历史 AV 定义是密文，按路径里的 boxID 解密
-	// avJSONPath 可能在历史目录（<HistoryDir>/<ts>/<boxID>/storage/av/...）或当前数据目录（<DataDir>/<boxID>/storage/av/...）
+	// 加密笔记本的历史 AV 定义是密文，需要解密后才能解析。
+	// 从路径提取 boxID，提取不到时遍历所有已打开的加密笔记本尝试解密。
 	avAbsSlash := filepath.ToSlash(avJSONPath)
 	var histBoxID string
-	if strings.Contains(avAbsSlash, filepath.ToSlash(util.HistoryDir)) {
-		// 历史目录路径：<HistoryDir>/<ts>/<boxID>/storage/av/...
-		rel := strings.TrimPrefix(avAbsSlash, filepath.ToSlash(util.HistoryDir))
-		rel = strings.TrimPrefix(rel, "/")
-		histParts := strings.SplitN(rel, "/", 3)
-		if len(histParts) >= 2 {
-			histBoxID = histParts[1]
-		}
-	} else if strings.Contains(avAbsSlash, filepath.ToSlash(util.DataDir)) {
-		// 当前数据目录路径：<DataDir>/<boxID>/storage/av/...
-		rel := strings.TrimPrefix(avAbsSlash, filepath.ToSlash(util.DataDir))
-		rel = strings.TrimPrefix(rel, "/")
-		dataParts := strings.SplitN(rel, "/", 2)
-		if len(dataParts) >= 1 {
-			histBoxID = dataParts[0]
+	if idx := strings.Index(avAbsSlash, "/storage/av/"); idx > 0 {
+		prefix := avAbsSlash[:idx]
+		segs := strings.Split(prefix, "/")
+		for i := len(segs) - 1; i >= 0; i-- {
+			if ast.IsNodeIDPattern(segs[i]) {
+				histBoxID = segs[i]
+				break
+			}
 		}
 	}
 	if histBoxID != "" && IsEncryptedBox(histBoxID) {
-		dek, decErr := GetDEK(histBoxID)
-		if decErr != nil || dek == nil {
-			err = errors.New(Conf.Language(314))
+		data, err = av.DecryptAVData(histBoxID, data)
+		if err != nil {
+			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, err)
 			return
 		}
-		if data, decErr = util.Decrypt(dek, data); decErr != nil {
-			logging.LogErrorf("decrypt history AV [%s] failed: %s", avID, decErr)
-			err = decErr
-			return
+	} else {
+		// 路径没提取到 boxID（如历史目录无 boxID 前缀的旧路径），尝试遍历已打开的加密笔记本解密
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if dec, decErr := av.DecryptAVData(encBoxID, data); decErr == nil {
+				data = dec
+				break
+			}
 		}
 	}
 

@@ -31,7 +31,7 @@ import (
 var DEKProvider func(boxID string) ([]byte, error)
 
 // encryptData 若 boxID 是已解锁的加密 box，用 fileKey（DEK 派生子密钥）加密 data 并绑定 boxID 为 AAD；
-// 非加密 box 原样返回；加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
+// 非加密笔记本原样返回；加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
 func encryptData(boxID string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
@@ -47,7 +47,7 @@ func encryptData(boxID string, data []byte) ([]byte, error) {
 	return util.EncryptWithAAD(fileKey, data, []byte(boxID))
 }
 
-// decryptData 对应解密。非加密 box 原样返回；加密但未解锁时返回 error，拒绝读盘。
+// decryptData 对应解密。非加密笔记本原样返回；加密但未解锁时返回 error，拒绝读盘。
 func decryptData(boxID string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil

@@ -17,37 +17,14 @@
 package treenode
 
 import (
-	"path/filepath"
-
-	"github.com/siyuan-note/filelock"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/util"
-	"github.com/vmihailenco/msgpack/v5"
 )
 
+// GetMirrorAttrViewBlockIDs 返回引用了该 AV 的所有块 ID（仅含块树仍存在的）。
+// 通过 av.GetBlockRels 获取镜像索引，已合并全局 + 所有已打开加密笔记本的镜像数据（加密感知）。
 func GetMirrorAttrViewBlockIDs(avID string) (ret []string) {
-	av.AttributeViewBlocksLock.Lock()
-	defer av.AttributeViewBlocksLock.Unlock()
-
 	ret = []string{}
-	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
-	if !filelock.IsExist(blocks) {
-		return
-	}
-
-	data, err := filelock.ReadFile(blocks)
-	if err != nil {
-		logging.LogErrorf("read attribute view blocks failed: %s", err)
-		return
-	}
-
-	avBlocks := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avBlocks); err != nil {
-		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
-		return
-	}
-
+	avBlocks := av.GetBlockRels()
 	blockIDs := avBlocks[avID]
 	bts := GetBlockTrees(blockIDs)
 	for blockID := range bts {

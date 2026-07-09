@@ -217,9 +217,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         let scrollLeft: number;
         let scrollTop: number;
         if (blockElement.classList.contains("table")) {
+            // 表格的横向、纵向滚动均发生在首个子节点（contenteditable 容器，overflow:auto）上，
+            // 重建 DOM 后需一并还原，否则固定表头长表格输入会跳回开头 https://github.com/siyuan-note/siyuan/issues/18035
             scrollLeft = blockElement.firstElementChild.scrollLeft;
-            // 固定表头后表格出现纵向滚动条，输入会重置滚动位置 https://github.com/siyuan-note/siyuan/issues/18035
-            scrollTop = blockElement.querySelector("table").scrollTop;
+            scrollTop = blockElement.firstElementChild.scrollTop;
         }
         if (!/<span data-type="backslash">.{1,8}<\/span><wbr>/.test(html)) {
             // 使用 md 闭合后继续输入应为普通文本, 转义不需要添加 zwsp
@@ -300,7 +301,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                         blockElement.firstElementChild.scrollLeft = scrollLeft;
                     }
                     if (scrollTop > 0) {
-                        blockElement.querySelector("table").scrollTop = scrollTop;
+                        blockElement.firstElementChild.scrollTop = scrollTop;
                     }
                 }
             }

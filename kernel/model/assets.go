@@ -69,7 +69,12 @@ func GetAssetImgSize(assetPath string) (width, height int) {
 	return
 }
 
-func GetAssetPathByHash(hash string) string {
+// GetAssetPathByHash 按 hash 查已存在的 asset 路径用于去重。boxID 非空且为加密笔记本时返回空——
+// 加密笔记本不参与全局去重（避免复用普通明文 asset）；普通 box 走全局 cache/SQL（加密笔记本数据不在全局表）。
+func GetAssetPathByHash(hash, boxID string) string {
+	if boxID != "" && IsEncryptedBox(boxID) {
+		return "" // 加密 box：跳过全局去重，强制新写（防跨边界复用明文 asset）
+	}
 	assetHash := cache.GetAssetHash(hash)
 	if nil == assetHash {
 		sqlAsset := sql.QueryAssetByHash(hash)
@@ -306,11 +311,31 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 				name = filepath.Base(u)
 				name = util.FilterUploadFileName(name)
 				name = "network-asset-" + name
-				name = util.AssetName(name, ast.NewNodeID())
-				writePath := filepath.Join(assetsDirPath, name)
-				if err = filelock.Copy(u, writePath); err != nil {
-					logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
-					continue
+				var writePath string
+				if IsEncryptedBox(tree.Box) {
+					// 加密 box：脱敏文件名 + 加密内容（writeAssetFile 内部按路径反查 box 加密）+ 写映射
+					diskName := encryptedAssetName(util.Ext(name), ast.NewNodeID())
+					writePath = filepath.Join(assetsDirPath, diskName)
+					f, openErr := os.Open(u)
+					if openErr != nil {
+						logging.LogErrorf("open [%s] failed: %s", u, openErr)
+						continue
+					}
+					if err = writeAssetFile(writePath, f, tree.Box); err != nil {
+						logging.LogErrorf("write encrypted asset [%s] failed: %s", writePath, err)
+						f.Close()
+						continue
+					}
+					f.Close()
+					writeAssetNameMapping(tree.Box, diskName, name)
+					name = diskName
+				} else {
+					name = util.AssetName(name, ast.NewNodeID())
+					writePath = filepath.Join(assetsDirPath, name)
+					if err = filelock.Copy(u, writePath); err != nil {
+						logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
+						continue
+					}
 				}
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
@@ -416,12 +441,25 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 						name += ext
 					}
 				}
-				name = util.AssetName(name, ast.NewNodeID())
-				name = "network-asset-" + name
-				writePath := filepath.Join(assetsDirPath, name)
-				if err = filelock.WriteFile(writePath, data); err != nil {
-					logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
-					continue
+				if IsEncryptedBox(tree.Box) {
+					// 加密 box：脱敏文件名 + 加密内容 + 写映射
+					name = "network-asset-" + name
+					diskName := encryptedAssetName(util.Ext(name), ast.NewNodeID())
+					writePath := filepath.Join(assetsDirPath, diskName)
+					if err = writeAssetFile(writePath, bytes.NewReader(data), tree.Box); err != nil {
+						logging.LogErrorf("write encrypted network asset [%s] failed: %s", writePath, err)
+						continue
+					}
+					writeAssetNameMapping(tree.Box, diskName, name)
+					name = diskName
+				} else {
+					name = util.AssetName(name, ast.NewNodeID())
+					name = "network-asset-" + name
+					writePath := filepath.Join(assetsDirPath, name)
+					if err = filelock.WriteFile(writePath, data); err != nil {
+						logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
+						continue
+					}
 				}
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
@@ -553,12 +591,18 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 }
 
 func GetAssetAbsPath(relativePath string) (string, error) {
+	return GetAssetAbsPathWithOpt(relativePath, false)
+}
+
+// GetAssetAbsPathWithOpt 与 GetAssetAbsPath 一致，但可通过 includeEncrypted 控制是否遍历加密 box。
+// serveAssets 传 true（下游 serveEncryptedAsset 会按锁定状态 fail-closed），其他调用方传 false（安全跳过）。
+func GetAssetAbsPathWithOpt(relativePath string, includeEncrypted bool) (string, error) {
 	relativePath = strings.TrimSpace(relativePath)
 	if idx := strings.Index(relativePath, "?"); idx >= 0 {
 		relativePath = relativePath[:idx]
 	}
 
-	absPath, err := getAssetAbsPath(relativePath)
+	absPath, err := getAssetAbsPath(relativePath, includeEncrypted)
 	if err == nil && absPath != "" {
 		return absPath, nil
 	}
@@ -569,7 +613,7 @@ func GetAssetAbsPath(relativePath string) (string, error) {
 	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }
 
-func getAssetAbsPath(relativePath string) (absPath string, err error) {
+func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string, err error) {
 	relativePath = filepath.ToSlash(relativePath)
 	// 在 data 文件夹下搜索，主要是 data/assets 文件夹
 	p := filepath.Join(util.DataDir, relativePath)
@@ -589,6 +633,9 @@ func getAssetAbsPath(relativePath string) (absPath string, err error) {
 		return "", errors.New(Conf.Language(0))
 	}
 	for _, notebook := range notebooks {
+		if !includeEncrypted && IsEncryptedBox(notebook.ID) {
+			continue // 加密笔记本的资源不参与全局路径解析（孤岛，资源不跨边界）
+		}
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
 		filelock.Walk(notebookAbsPath, func(path string, d fs.DirEntry, err error) error {
 			if isSkipFile(d.Name()) {
@@ -1080,6 +1127,13 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	if err != nil {
 		return
 	}
+	// 排除加密笔记本的资源：加密笔记本锁定时 loadTree 失败会误判引用关系，
+	// 且加密笔记本是孤岛，资源不参与全局未引用清理
+	for dest, absPath := range assetsPathMap {
+		if boxID := ExtractBoxIDFromAssetsPath(absPath); boxID != "" && IsEncryptedBox(boxID) {
+			delete(assetsPathMap, dest)
+		}
+	}
 	linkDestMap := map[string]bool{}
 	notebooks, err := ListNotebooks()
 	if err != nil {
@@ -1087,6 +1141,9 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	}
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
+		if IsEncryptedBox(notebook.ID) {
+			continue // 加密笔记本的资源不参与未引用清理（孤岛，资源不跨边界）
+		}
 		dests := map[string]bool{}
 
 		// 分页加载，优化清理未引用资源内存占用 https://github.com/siyuan-note/siyuan/issues/5200
@@ -1178,7 +1235,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		}
 	}
 
-	// 排除数据库中引用的资源文件
+	// 排除数据库中引用的资源文件。加密笔记本的资源不参与未引用清理（孤岛，资源不跨边界）
 	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
 	if gulu.File.IsDir(storageAvDir) {
 		entries, readErr := os.ReadDir(storageAvDir)

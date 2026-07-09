@@ -508,6 +508,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		if isSameTree {
 			targetTree = srcTree
 		}
+		// 禁止跨加密边界移动块：加密笔记本是孤岛，跨 box 移动会破坏隔离（内容从 A 泄漏到 B）
+		if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
+			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
+		}
 
 		targetNode := treenode.GetNodeInTree(targetTree, targetPreviousID)
 		if nil == targetNode {
@@ -584,6 +588,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	isSameTree := srcTree.ID == targetTree.ID
 	if isSameTree {
 		targetTree = srcTree
+	}
+	// 禁止跨加密边界移动块（同 doMove targetPreviousID 分支）
+	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
 	}
 
 	targetNode := treenode.GetNodeInTree(targetTree, targetParentID)
@@ -925,6 +933,10 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	if isSameTree {
 		targetTree = srcTree
 	}
+	// 禁止跨加密边界插入块（同 doMove 守卫）
+	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
+		return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
+	}
 
 	targetRoot := targetTree.Root
 	if nil != targetNewList {
@@ -1230,7 +1242,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 	if nil == bt {
-		// 全局 blocktree 找不到时，遍历已打开的加密 box 查找
+		// 全局 blocktree 找不到时，遍历已打开的加密笔记本查找
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			encBTs := treenode.GetBlockTreesInBox([]string{operation.ParentID, operation.PreviousID, operation.NextID}, encBoxID)
 			for _, b := range encBTs {
@@ -1498,7 +1510,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldDefIDs := getRefDefIDs(oldNode)
 	var newDefIDs []string
 
-	// 兜底校验：禁止跨加密边界块引（加密 box ↔ 普通 box，或不同加密 box 之间）
+	// 兜底校验：禁止跨加密边界块引（加密笔记本↔ 普通 box，或不同加密笔记本之间）
 	degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
 
 	var unlinks []*ast.Node
@@ -2045,7 +2057,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 	var rootID, box, p string
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
-		// 全局 blocktree 找不到时，遍历已打开的加密 box 查找
+		// 全局 blocktree 找不到时，遍历已打开的加密笔记本查找
 		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
 			if encBT := treenode.GetBlockTreeInBox(id, encBoxID); nil != encBT {
 				bt = encBT

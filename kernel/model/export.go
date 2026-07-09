@@ -682,6 +682,11 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 		resourceBaseName := filepath.Base(resourceFullPath)                   // 资源名称
 		resourceCopyPath := filepath.Join(exportFolderPath, resourceBaseName) // 资源副本完整路径
+		// 加密笔记本未解锁时拒绝导出（copyAssetDecryptIfEncrypted 锁定时复制密文，这里提前拦截避免产出无效文件）
+		if resBoxID := ExtractBoxIDFromAssetsPath(resourceFullPath); resBoxID != "" && IsEncryptedBox(resBoxID) && !IsBoxUnlocked(resBoxID) {
+			err = errors.New(Conf.Language(314))
+			return
+		}
 		if err = copyAssetDecryptIfEncrypted(resourceFullPath, resourceCopyPath); err != nil {
 			logging.LogErrorf("copy resource will be exported from [%s] to [%s] failed: %s", resourcePath, resourceCopyPath, err)
 			err = fmt.Errorf(Conf.Language(14), err.Error())
@@ -2118,7 +2123,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 	// 按文件夹结构复制选择的树
 	// 注意：tree 已被 filesys.LoadTree 透明解密成明文，这里序列化为明文 JSON 写盘
-	// （不可 filelock.ReadFile 直接读盘，加密 box 的磁盘 .sy 是密文）。
+	// （不可 filelock.ReadFile 直接读盘，加密笔记本的磁盘 .sy 是密文）。
 	total := len(trees) + len(refTrees)
 	for _, tree := range trees {
 		writePath := strings.TrimPrefix(tree.Path, rootDirPath)
@@ -2341,7 +2346,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 }
 
 func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
-	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密 box 的 AV 在 <boxID>/storage/av/，
+	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密笔记本的 AV 在 <boxID>/storage/av/，
 	// GetAttributeViewDataPath 只查全局路径会漏；filelock.Copy 会拷密文）。
 	avData, readErr := av.ReadAttributeViewData(avID)
 	if readErr != nil {
@@ -2947,7 +2952,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 
 		avID := n.AttributeViewID
-		// 用 box-aware 路径解析（加密 box 的 AV 在 <boxID>/storage/av/，GetAttributeViewDataPath 只查全局会漏）
+		// 用 box-aware 路径解析（加密笔记本的 AV 在 <boxID>/storage/av/，GetAttributeViewDataPath 只查全局会漏）
 		if avJSONPath, _ := av.FindAttributeViewPath(avID); "" == avJSONPath {
 			return ast.WalkContinue
 		}

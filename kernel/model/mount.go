@@ -141,6 +141,9 @@ func RemoveBox(boxID string) (err error) {
 
 	unmount0(boxID)
 
+	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
+	isEncrypted := IsEncryptedBox(boxID)
+
 	if !isUserGuide {
 		var historyDir string
 		historyDir, err = getHistoryDir(HistoryOpDelete)
@@ -148,6 +151,7 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("get history dir failed: %s", err)
 			return
 		}
+		// 删除前备份到历史目录（密文原样拷贝，加密笔记本的整个目录保持密文）
 		p := strings.TrimPrefix(localPath, util.DataDir)
 		historyPath := filepath.Join(historyDir, p)
 		if err = filelock.Copy(localPath, historyPath); err != nil {
@@ -156,23 +160,8 @@ func RemoveBox(boxID string) (err error) {
 		}
 
 		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
-		if !IsEncryptedBox(boxID) {
+		if !isEncrypted {
 			copyBoxAssetsToDataAssets(boxID)
-		}
-	}
-
-	// 删目录前缓存加密状态：删目录后 conf.json 不复存在，IsEncryptedBox 会返回 false
-	isEncrypted := IsEncryptedBox(boxID)
-
-	// 删除前备份到历史目录（密文原样拷贝，加密笔记本的整个目录保持密文）
-	if isEncrypted {
-		if historyDir, histErr := getHistoryDir(HistoryOpDelete); nil == histErr {
-			boxHistoryDir := filepath.Join(historyDir, boxID)
-			if mkErr := os.MkdirAll(boxHistoryDir, 0755); nil == mkErr {
-				if copyErr := filelock.Copy(localPath, boxHistoryDir); nil != copyErr {
-					logging.LogErrorf("backup encrypted box [%s] to history failed: %s", boxID, copyErr)
-				}
-			}
 		}
 	}
 
@@ -232,15 +221,21 @@ func unmount0(boxID string) {
 
 	boxConf := box.GetConf()
 	boxConf.Closed = true
-	box.SaveConf(boxConf)
-	box.Unindex()
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
+	}
 	if boxConf.Encrypted {
-		// 加密笔记本关闭：先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
-		// 再 ClearDEK（=LockBox）清除 DEK 并删除加密 db 文件。加密索引可由 box.Index() 全量重建，
-		// 关闭即删文件避免残留旧索引数据导致下次解锁叠加重复行。
+		// 加密笔记本关闭：跳过 Unindex（索引 db 马上要删，逐条删是白费），
+		// 先等待事务队列和 SQL 索引队列落盘（确保 pending 写入已持久化到加密 .sy），
+		// 生成文件历史，再 ClearDEK（=LockBox）清除 DEK 并删除加密 db 文件。
+		// 加密索引可由 box.Index() 全量重建，关闭即删文件避免残留旧索引数据导致下次解锁叠加重复行。
 		FlushTxQueue()
 		sql.FlushQueue()
+		// 关闭前生成一次文件历史：锁定后定时器无法为加密笔记本生成历史（不在 GetOpenedBoxes 里）
+		GenerateFileHistoryForBox(box)
 		ClearDEK(boxID)
+	} else {
+		box.Unindex()
 	}
 }
 
@@ -334,7 +329,9 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	boxConf.Closed = false
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+	}
 
 	// 缓存根一级的文档树展开
 	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)

@@ -138,6 +138,9 @@ func InitConf() {
 				logging.LogInfof("loaded conf [%s]", confPath)
 			}
 
+			// 启动时检测并完成中断的改密迁移
+			recoverMasterPasswordMigration()
+
 			if conf.NeedsAIMigration(data) {
 				Conf.AI = conf.MigrateAI(data)
 				Conf.Save()
@@ -151,7 +154,9 @@ func InitConf() {
 				boxConf := box.GetConf()
 				if boxConf.Encrypted && !boxConf.Closed {
 					boxConf.Closed = true
-					box.SaveConf(boxConf)
+					if err := box.SaveConf(boxConf); err != nil {
+						logging.LogErrorf("close encrypted notebook on boot [%s] failed: %s", box.ID, err)
+					}
 					changed = true
 				}
 			}
@@ -894,6 +899,13 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	}
 
 	Conf.Close()
+	// 退出前关闭已打开的加密笔记本（走 unmount0：落盘 + 生成历史 + 锁定），
+	// 确保编辑历史不丢失、DEK 不残留内存
+	for _, box := range Conf.GetOpenedBoxes() {
+		if IsEncryptedBox(box.ID) {
+			unmount0(box.ID)
+		}
+	}
 	sql.CloseDatabase()
 	closePushQueue()
 	util.SaveAssetsTexts()

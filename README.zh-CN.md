@@ -505,19 +505,36 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 运行 `siyuan --help` 查看完整命令树。使用 `-f json`（默认 `-f table`）获得适合脚本处理的输出。大多数写命令还支持 `--dry-run`，可预览将要发生的改动而不实际执行。
 
-### 设置
+### 安装
 
-CLI 二进制为 `<安装目录>/resources/kernel/SiYuan-Kernel`。
-Windows 安装程序自动将内核目录添加到 PATH。
-macOS/Linux 下需要手动创建软链接：
+CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通过 `siyuan` 命令调用。
 
-```bash
-# macOS
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
-
-# Linux
-ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
-```
+- **Windows**：安装程序自动将内核目录加入 `PATH`，可直接使用 `siyuan`。微软商店版运行在 MSIX 沙箱中，无法自动修改 `PATH`；可部署一个 `siyuan.cmd` 转发器（一次性，商店版更新后依然有效）：
+  ```powershell
+  # 仅适用于微软商店版 —— 在 PowerShell 中运行一次
+  $shimDir = "$env:LOCALAPPDATA\Microsoft\WindowsApps"   # 该目录默认已在 PATH 中
+  @(
+      '@echo off'
+      'setlocal'
+      'set "ROOT="'
+      'for /f "delims=" %%i in (''powershell -NoProfile -Command "(Get-AppxPackage *SiYuan*).InstallLocation"'') do set "ROOT=%%i"'
+      'if not defined ROOT goto :noshim'
+      '"%ROOT%\app\resources\kernel\SiYuan-Kernel.exe" %*'
+      'exit /b %ERRORLEVEL%'
+      ':noshim'
+      '1>&2 echo siyuan: 未找到微软商店版'
+      'exit /b 1'
+  ) | Set-Content "$shimDir\siyuan.cmd"
+  ```
+  卸载商店版时如需清理：`Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.cmd"`。
+- **macOS**：安装后创建软链接：
+  ```bash
+  ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ```
+- **Linux**：安装后创建软链接：
+  ```bash
+  ln -s <安装目录>/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ```
 
 ## 🏘️ 社区
 

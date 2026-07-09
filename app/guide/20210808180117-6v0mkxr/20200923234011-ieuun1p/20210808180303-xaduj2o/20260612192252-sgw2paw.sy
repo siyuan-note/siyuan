@@ -163,6 +163,74 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ works out of the box"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". The Microsoft Store edition runs in an MSIX sandbox and cannot modify "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "PATH"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​; deploy a "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan.cmd"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ shim once (survives Store updates)"
+								}
+							]
+						},
+						{
+							"ID": "20260708120000-enstore1",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20260708120000-enstore1",
+								"updated": "20260708120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "cG93ZXJzaGVsbA=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "# Microsoft Store edition only — run once in PowerShell\n$shimDir = \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\"   # already in PATH by default\n@(\n    '@echo off'\n    'setlocal'\n    'set \"ROOT=\"'\n    'for /f \"delims=\" %%i in (''powershell -NoProfile -Command \"(Get-AppxPackage *SiYuan*).InstallLocation\"'') do set \"ROOT=%%i\"'\n    'if not defined ROOT goto :noshim'\n    '\"%ROOT%\\app\\resources\\kernel\\SiYuan-Kernel.exe\" %*'\n    'exit /b %ERRORLEVEL%'\n    ':noshim'\n    '1>&2 echo siyuan: Microsoft Store edition not found'\n    'exit /b 1'\n) | Set-Content \"$shimDir\\siyuan.cmd\"\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20260708130000-enuninst",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260708130000-enuninst",
+								"updated": "20260708130000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "To remove on uninstall: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Remove-Item \"$env:LOCALAPPDATA\\Microsoft\\WindowsApps\\siyuan.cmd\""
 								}
 							]
 						}

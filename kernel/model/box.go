@@ -115,8 +115,26 @@ func ListNotebooks() (ret []*Box, err error) {
 		isExistConf := filelock.IsExist(boxConfPath)
 		if !isExistConf {
 			if !IsUserGuide(id) {
-				// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
-				logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+				// conf.json 缺失时检查加密备份，确认是否为加密笔记本
+				backup, backupErr := readNotebookCryptBackup(id)
+				if backupErr != nil {
+					logging.LogErrorf("read notebook crypt backup [%s] failed: %s", boxDirPath, backupErr)
+					continue
+				}
+				if backup != nil {
+					// 从备份恢复 conf.json，避免加密笔记本被当作普通笔记本处理
+					boxConf.Encrypted = true
+					boxConf.BoxCrypt = backup
+					tmpBox := &Box{ID: id}
+					if saveErr := tmpBox.SaveConf(boxConf); saveErr != nil {
+						logging.LogErrorf("restore encrypted notebook conf from backup failed [%s]: %s", boxDirPath, saveErr)
+						continue
+					}
+					logging.LogWarnf("restored encrypted notebook conf from backup [%s]", boxDirPath)
+				} else {
+					// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
+					logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+				}
 			} else {
 				continue
 			}
@@ -128,6 +146,11 @@ func ListNotebooks() (ret []*Box, err error) {
 			}
 			if readErr = gulu.JSON.UnmarshalJSON(data, boxConf); nil != readErr {
 				logging.LogErrorf("parse box conf [%s] failed: %s", boxConfPath, readErr)
+				// 检查加密备份，有备份则保留损坏 conf 不删（避免标记为缺失后自动恢复旧数据）
+				backup, backupErr := readNotebookCryptBackup(id)
+				if backupErr == nil && backup != nil {
+					continue
+				}
 				filelock.Remove(boxConfPath)
 				continue
 			}
@@ -151,7 +174,9 @@ func ListNotebooks() (ret []*Box, err error) {
 
 		if !isExistConf {
 			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
-			box.SaveConf(boxConf)
+			if err := box.SaveConf(boxConf); err != nil {
+				logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, err)
+			}
 			box.Unindex()
 			logging.LogWarnf("fixed a corrupted box [%s]", boxDirPath)
 		}
@@ -213,37 +238,35 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 	return
 }
 
-func (box *Box) SaveConf(conf *conf.BoxConf) {
+func (box *Box) SaveConf(conf *conf.BoxConf) error {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	newData, err := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
 	if err != nil {
-		logging.LogErrorf("marshal box conf [%s] failed: %s", confPath, err)
-		return
+		return fmt.Errorf("marshal box conf [%s] failed: %w", confPath, err)
 	}
 
 	oldData, err := filelock.ReadFile(confPath)
 	if err != nil {
-		box.saveConf0(newData)
-		return
+		return box.saveConf0(newData)
 	}
 
 	if bytes.Equal(newData, oldData) {
-		return
+		return nil
 	}
 
-	box.saveConf0(newData)
+	return box.saveConf0(newData)
 }
 
-func (box *Box) saveConf0(data []byte) {
+func (box *Box) saveConf0(data []byte) error {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); err != nil {
-		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
+		return fmt.Errorf("mkdir box conf dir failed: %w", err)
 	}
 	if err := filelock.WriteFile(confPath, data); err != nil {
-		logging.LogErrorf("write box conf [%s] failed: %s", confPath, err)
 		util.ReportFileSysFatalError(err)
-		return
+		return fmt.Errorf("write box conf [%s] failed: %w", confPath, err)
 	}
+	return nil
 }
 
 func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {

@@ -666,11 +666,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	}
 
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
-	// 通过 fallback 查找 AV 定义的实际路径（普通 box 全局，加密 box 笔记本级）
+	// 通过 fallback 查找 AV 定义的实际路径（普通 box 全局，加密笔记本笔记本级）
 	avJSONPath, avBoxID := FindAttributeViewPath(av.ID)
 	if avJSONPath == "" {
 		// 文件不存在（首次创建），使用全局路径，boxID 为空（普通 box）
-		// 加密 box 的首次创建由 handler 层通过 SetAVBoxID 预设路径
+		// 加密笔记本的首次创建由 handler 层通过 SetAVBoxID 预设路径
 		avJSONPath = GetAttributeViewDataPath(av.ID)
 	}
 	if cachedData, ok := cache.GetAVData(av.ID); ok {
@@ -679,7 +679,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	} else {
 		if diskData, readErr := filelock.ReadFile(avJSONPath); nil == readErr {
-			// 加密 box 的磁盘数据是密文，需先解密再比对
+			// 加密笔记本的磁盘数据是密文，需先解密再比对
 			if avBoxID != "" {
 				diskData, _ = decryptAVData(avBoxID, diskData)
 			}
@@ -690,7 +690,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		}
 	}
 
-	// 加密 box 的数据需加密后再写盘
+	// 加密笔记本的数据需加密后再写盘
 	writeData := data
 	if avBoxID != "" {
 		writeData, err = encryptAVData(avBoxID, data)
@@ -699,7 +699,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			return
 		}
 	}
-	// 确保目录存在（加密 box 的笔记本级 AV 目录可能尚不存在）
+	// 确保目录存在（加密笔记本的笔记本级 AV 目录可能尚不存在）
 	if err = os.MkdirAll(filepath.Dir(avJSONPath), 0755); nil != err {
 		logging.LogErrorf("create attribute view dir [%s] failed: %s", filepath.Dir(avJSONPath), err)
 		return

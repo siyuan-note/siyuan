@@ -34,7 +34,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 |---|---|---|
 | **Create** | Anytime, no restrictions | Must first enable encryption (set master password); creating requires verifying master password |
 | **Open (Mount)** | Direct open | Must first enter master password to unlock (~1s Argon2id each time); DEK enters memory |
-| **Close (Unmount)** | Closing makes it invisible | Close = lock (DEK cleared + encrypted SQLite database closed + all plaintext caches cleared) |
+| **Close (Unmount)** | Closing makes it invisible | Close = lock (DEK cleared + encrypted SQLite database deleted + all plaintext caches cleared) |
 | **After restart** | Keeps last open state | Force-closed; must re-enter master password to unlock |
 | **.sy files** | Plaintext JSON on disk | AES-256-GCM ciphertext on disk, transparently decrypted on read |
 | **assets files** | Plaintext binary, original filename | AES-256-GCM ciphertext, filename desensitized, original name encrypted |
@@ -56,7 +56,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **File history** | Supported | Supported (ciphertext .sy copied verbatim to history dir; decrypt by path boxID when viewing/rolling back) |
 | **Deleted notebook history** | Supported | Supported (entire directory backed up as ciphertext before deletion; restored verbatim) |
 | **Embedding vectorization / semantic search** | Participates | Does not participate (encrypted data never enters the global block_embeddings table; the embedding pipeline reads only the global SQLite database — independent of lock state) |
-| **Agents / AI chat / MCP** | Can read content, can search | Same as normal when unlocked (can read blocks, list docs, etc.); unreachable when locked (see §13) |
+| **Agents / AI chat / MCP** | Can read content, can search | Available when unlocked (can read blocks, list docs, search within notebook); unreachable when locked (see §13). Global search / semantic search not included |
 | **Flashcards / spaced repetition** | Participates | Not supported (feature limitation) |
 | **Bookmarks** | Participates (global aggregation) | Not supported (feature limitation) |
 | **Tags** | Participates (global aggregation) | Not supported (feature limitation) |
@@ -65,7 +65,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **Data sync** | dejavu syncs plaintext | Unchanged (ciphertext in, ciphertext out, self-consistent) |
 | **Delete notebook** | Delete directory | Delete directory + delete encrypted SQLite database files + delete notebook-level database storage |
 | **Rebuild index** | Full | Skipped on startup (closed); on open box.Index() fully rebuilds into the encrypted SQLite database |
-| **/api/file/getFile + putFile** | Can read/write any file | Refuses .sy reads/writes on encrypted boxes (prevent ciphertext leak or plaintext corruption) |
+| **/api/file/getFile + putFile** | Can read/write any file | Refuses reads/writes of any file under encrypted boxes (not just .sy); legitimate reads/writes go through dedicated APIs (encryption-aware) |
 
 **Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), and documents/database files do not cross the boundary. In-box features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; AI/LLM is also usable when unlocked (same as a normal notebook). Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
 
@@ -190,6 +190,7 @@ Encrypted-notebook operations (dedicated read path, with boxID):
 ```
 File history:
   edit triggers history generation → ciphertext .sy copied verbatim to history dir
+  auto-generated before close/exit → ensures history is captured even after locking
   history index → content left empty (ciphertext not indexed for search)
   view history → decrypt by path boxID (notebook must be unlocked)
   roll back → decrypt history → load tree → WriteTree auto-encrypts on write-back
@@ -220,7 +221,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 **Security-leak risk** (more critical): When moving from an encrypted box to a normal box — the document body escapes encryption protection; associated resources must be moved out and decrypted together; the reference network binding blocks to subdocuments is split or leaked along with it; index-metadata cross-db migration breaks isolation.
 
-**Design stance**: Consistent with disabling export — an encrypted notebook is an island; content does not enter or leave.
+**Design stance**: An encrypted notebook is an island; content does not enter or leave (moving out of an encrypted box to a normal one would leak plaintext; the reverse would corrupt the ciphertext).
 
 ## 11. Interaction Design
 
@@ -231,7 +232,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 | Create | File panel "more" menu → "New encrypted notebook" → enter name + master password → auto-unlock and open |
 | Icon | Shows lock icon when closed (locked); restores user emoji when opened (unlocked) |
 | Unlock | Click a closed encrypted notebook → master-password prompt (🔓 Unlock xxx) → wait ~1s → opens |
-| Lock | Equals close (DEK cleared + encrypted SQLite database closed + all plaintext caches cleared) |
+| Lock | Equals close (DEK cleared + encrypted SQLite database deleted + all plaintext caches cleared). Unsaved edits and file history are automatically saved before locking |
 | Change password | Settings → Access authorization → "Change master password" |
 | Move document | Normal within an encrypted box or between normal boxes; cross-boundary (normal↔encrypted) rejected with a prompt |
 | Doc to heading | Cross-boundary rejected with a prompt |
@@ -273,7 +274,7 @@ The visibility of encrypted notebooks to AI/LLM is determined entirely by the **
 
 **When locked**: the DEK is not in memory, so AI/LLM (including MCP, agents, semantic search, embedding vectorization) cannot read any encrypted content — the data lives in an independent encrypted SQLite database and is ciphertext on disk, unreadable without the key.
 
-**When unlocked**: the DEK is in memory, so AI/LLM can read and search just like a normal notebook — MCP tools can list encrypted notebooks and their documents, read block content, run semantic search, etc., with no difference from a normal notebook.
+**When unlocked**: the DEK is in memory, so AI/LLM can read encrypted-notebook content and search within a notebook — MCP tools can list encrypted notebooks and their documents, read block content, run in-notebook FTS search, etc. However, global search, semantic search, and embedding vectorization still do not include encrypted content (encrypted data never enters the global `block_embeddings`/`blocks` tables; physically unreachable), see §3 comparison table.
 
 Design stance: there is no "hide from AI" isolation at the functional layer, because such isolation is neither thorough nor easy to reason about. **The only reliable protection is locking** — once locked, the data is physically unreachable to any caller. Users only need to understand one rule: **lock sensitive content after use**.
 
@@ -285,6 +286,8 @@ An encrypted notebook is an island; some features are unimplemented because of t
 - **Bookmarks**: Global aggregation view (scans the global siyuan.db); encrypted notebooks not integrated.
 - **Tags**: Global aggregation view (scans the global spans table); encrypted notebooks not integrated.
 - **Asset file rename**: Encrypted-box asset filenames are already desensitized to `uuid-blockID.ext`; renaming breaks the original-name mapping.
+- **Unused asset cleanup**: Encrypted-notebook assets are excluded from global unused-asset cleanup (island, assets do not cross boundaries), preventing false deletion when locked and document references cannot be scanned.
+- **Unused database cleanup**: Encrypted-notebook database definitions are excluded from global unused-database cleanup, preventing false deletion when locked and reference relationships cannot be confirmed.
 
 ## 15. Performance Differences
 

@@ -25,7 +25,7 @@ import (
 
 // init 把加密相关的回调注入各底层包，让它们能查询 box 的 DEK / 加密状态。
 // filesys / av / sql / treenode 不能直接 import model（循环依赖），故通过回调注入。
-// sql / treenode 的路由函数据此 fail-closed：加密 box 未解锁时绝不回退全局库。
+// sql / treenode 的路由函数据此 fail-closed：加密笔记本未解锁时绝不回退全局库。
 func init() {
 	filesys.DEKProvider = GetDEKIfUnlocked
 	av.AVDEKProvider = GetDEKIfUnlocked

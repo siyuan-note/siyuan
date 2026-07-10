@@ -17,6 +17,8 @@
 package cache
 
 import (
+	"sync"
+
 	"github.com/dgraph-io/ristretto"
 )
 
@@ -30,10 +32,20 @@ var (
 		MaxCost:     1024 * 1024 * 200,
 		BufferItems: 64,
 	})
+	treeCacheKeys   = map[string]map[string]struct{}{}
+	treeCacheKeysMu sync.Mutex
 )
 
+func treeCacheKey(rootID, boxID string) string {
+	return boxID + "\x00" + rootID
+}
+
 func GetTreeData(rootID string) (raw []byte, ok bool) {
-	v, _ := treeCache.Get(rootID)
+	return GetTreeDataInBox(rootID, "")
+}
+
+func GetTreeDataInBox(rootID, boxID string) (raw []byte, ok bool) {
+	v, _ := treeCache.Get(treeCacheKey(rootID, boxID))
 	if nil == v {
 		return nil, false
 	}
@@ -42,17 +54,57 @@ func GetTreeData(rootID string) (raw []byte, ok bool) {
 }
 
 func SetTreeData(rootID string, raw []byte) {
+	SetTreeDataInBox(rootID, "", raw)
+}
+
+func SetTreeDataInBox(rootID, boxID string, raw []byte) {
 	if raw == nil {
 		return
 	}
+	key := treeCacheKey(rootID, boxID)
 	entry := &treeCacheEntry{raw: raw}
-	treeCache.Set(rootID, entry, int64(len(raw)))
+	treeCache.Set(key, entry, int64(len(raw)))
+
+	treeCacheKeysMu.Lock()
+	defer treeCacheKeysMu.Unlock()
+	keys := treeCacheKeys[rootID]
+	if keys == nil {
+		keys = map[string]struct{}{}
+		treeCacheKeys[rootID] = keys
+	}
+	keys[key] = struct{}{}
 }
 
 func RemoveTreeData(rootID string) {
+	treeCacheKeysMu.Lock()
+	keys := treeCacheKeys[rootID]
+	delete(treeCacheKeys, rootID)
+	treeCacheKeysMu.Unlock()
+
 	treeCache.Del(rootID)
+	treeCache.Del(treeCacheKey(rootID, ""))
+	for key := range keys {
+		treeCache.Del(key)
+	}
+}
+
+func RemoveTreeDataInBox(rootID, boxID string) {
+	key := treeCacheKey(rootID, boxID)
+	treeCache.Del(key)
+
+	treeCacheKeysMu.Lock()
+	defer treeCacheKeysMu.Unlock()
+	if keys := treeCacheKeys[rootID]; keys != nil {
+		delete(keys, key)
+		if len(keys) == 0 {
+			delete(treeCacheKeys, rootID)
+		}
+	}
 }
 
 func ClearTreeCache() {
+	treeCacheKeysMu.Lock()
+	treeCacheKeys = map[string]map[string]struct{}{}
+	treeCacheKeysMu.Unlock()
 	treeCache.Clear()
 }

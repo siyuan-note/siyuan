@@ -1140,19 +1140,20 @@ type encryptedBoxAwareWebdavFS struct {
 }
 
 func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
-	rel := filepath.ToSlash(name)
+	// 标准化路径，WebDAV handler 已去掉 /webdav/ 前缀
+	rel := filepath.ToSlash(path.Clean(name))
+	rel = strings.TrimPrefix(rel, "/")
+	parts := strings.Split(rel, "/")
+	if len(parts) < 1 || parts[0] == "" || rel == "" || rel == "." {
+		return false
+	}
 	// 阻止访问 temp/ 目录（包含已解密的导出、repo 快照等）
-	if strings.HasPrefix(rel, "temp/") || strings.Contains(rel, "/temp/") {
+	if parts[0] == "temp" {
 		return true
 	}
-	if idx := strings.Index(rel, "/data/"); idx >= 0 {
-		candidate := rel[idx+len("/data/"):]
-		if slashIdx := strings.Index(candidate, "/"); slashIdx > 0 {
-			boxID := candidate[:slashIdx]
-			if model.IsEncryptedBox(boxID) {
-				return true
-			}
-		}
+	// 阻止访问 data/<encryptedBoxID>/ 目录
+	if len(parts) >= 2 && parts[0] == "data" && model.IsEncryptedBox(parts[1]) {
+		return true
 	}
 	return false
 }

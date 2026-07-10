@@ -170,7 +170,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 	rootID := util.GetTreeID(p)
-	if raw, ok := cache.GetTreeData(rootID); ok {
+	if raw, ok := cache.GetTreeDataInBox(rootID, boxID); ok {
 		ret, err = LoadTreeByData(raw, boxID, p, luteEngine)
 		return
 	}
@@ -195,7 +195,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 
 	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
 	if nil == err {
-		cache.SetTreeData(rootID, data)
+		cache.SetTreeDataInBox(rootID, boxID, data)
 	}
 	return
 }
@@ -352,7 +352,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	}
 
 	// 缓存与待写入数据一致时跳过落盘；缓存未命中时再读盘比对，避免无变更的重复写入
-	if cachedData, ok := cache.GetTreeData(tree.ID); ok {
+	if cachedData, ok := cache.GetTreeDataInBox(tree.ID, tree.Box); ok {
 		if len(cachedData) == len(data) && bytes.Equal(cachedData, data) {
 			return
 		}
@@ -361,7 +361,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		if diskData, readErr := filelock.ReadFile(filePath); nil == readErr {
 			decDisk, decErr := decryptData(tree.Box, tree.Path, diskData)
 			if decErr == nil && len(decDisk) == len(data) && bytes.Equal(decDisk, data) {
-				cache.SetTreeData(tree.ID, data)
+				cache.SetTreeDataInBox(tree.ID, tree.Box, data)
 				return
 			}
 		}
@@ -378,7 +378,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		util.PushErrMsg(msg, 7000)
 	}
 
-	cache.SetTreeData(tree.ID, data)
+	cache.SetTreeDataInBox(tree.ID, tree.Box, data)
 	afterWriteTree(tree)
 	size = uint64(len(data))
 	return

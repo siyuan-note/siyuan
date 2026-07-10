@@ -768,6 +768,9 @@ func ClearTempFiles() {
 
 	thumbnailsTmp := filepath.Join(util.TempDir, "thumbnails")
 	clearTempDir(thumbnailsTmp, &count, &size)
+
+	repoTmp := filepath.Join(util.TempDir, "repo")
+	clearTempDir(repoTmp, &count, &size)
 }
 
 func clearTempDir(dir string, count *int, size *int64) {

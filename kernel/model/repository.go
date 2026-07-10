@@ -271,6 +271,8 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		logging.LogErrorf("write file [%s] failed: %v", filepath.Join(tempRepoDiffDir, file.Path), err)
 		return
 	}
+	// 解密后的临时文件在函数返回时清理，避免加密文档明文残留在磁盘
+	defer os.Remove(from)
 
 	if strings.HasSuffix(file.Path, ".sy") {
 		boxID := strings.TrimPrefix(file.Path, "/")
@@ -1998,6 +2000,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 							continue
 						}
 					}
+					// 解密后的冲突文件在函数返回时清理
+					defer os.Remove(absPath)
 				}
 				tree, loadTreeErr := loadTree(absPath, luteEngine)
 				if nil != loadTreeErr {

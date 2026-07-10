@@ -18,6 +18,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"html/template"
@@ -940,6 +941,14 @@ func serveRepoDiff(ginServer *gin.Engine) {
 			context.Status(http.StatusUnauthorized)
 			return
 		}
+		// 从路径提取 boxID，加密笔记本已锁定时拒绝访问（锁定后 repo 预览解密文件仍存在磁盘上）
+		parts := strings.SplitN(strings.TrimPrefix(requestPath, "/"), "/", 2)
+		if len(parts) >= 1 && model.IsEncryptedBox(parts[0]) {
+			if _, dekErr := model.GetDEKIfUnlocked(parts[0]); dekErr != nil {
+				context.Status(http.StatusForbidden)
+				return
+			}
+		}
 		p := filepath.Join(repoDiffBaseDir, requestPath)
 		if !gulu.File.IsSubPath(repoDiffBaseDir, p) {
 			context.Status(http.StatusUnauthorized)
@@ -1124,11 +1133,69 @@ func serveWebSocket(ginServer *gin.Engine) {
 	})
 }
 
+// encryptedBoxAwareWebdavFS 包装 webdav.Dir，拦截所有指向加密笔记本的访问。
+// 加密笔记本的文件只能通过 assets/serve 路由访问，WebDAV 直接暴露原始磁盘会绕过所有加密流程。
+type encryptedBoxAwareWebdavFS struct {
+	inner webdav.FileSystem
+}
+
+func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
+	rel := filepath.ToSlash(name)
+	if idx := strings.Index(rel, "/data/"); idx >= 0 {
+		candidate := rel[idx+len("/data/"):]
+		if slashIdx := strings.Index(candidate, "/"); slashIdx > 0 {
+			boxID := candidate[:slashIdx]
+			if model.IsEncryptedBox(boxID) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (fs *encryptedBoxAwareWebdavFS) Mkdir(ctx context.Context, name string, perm os.FileMode) error {
+	if fs.isEncryptedBoxPath(name) {
+		return os.ErrPermission
+	}
+	return fs.inner.Mkdir(ctx, name, perm)
+}
+
+func (fs *encryptedBoxAwareWebdavFS) OpenFile(ctx context.Context, name string, flag int, perm os.FileMode) (webdav.File, error) {
+	if fs.isEncryptedBoxPath(name) {
+		return nil, os.ErrPermission
+	}
+	return fs.inner.OpenFile(ctx, name, flag, perm)
+}
+
+func (fs *encryptedBoxAwareWebdavFS) RemoveAll(ctx context.Context, name string) error {
+	if fs.isEncryptedBoxPath(name) {
+		return os.ErrPermission
+	}
+	return fs.inner.RemoveAll(ctx, name)
+}
+
+func (fs *encryptedBoxAwareWebdavFS) Rename(ctx context.Context, oldName, newName string) error {
+	if fs.isEncryptedBoxPath(oldName) || fs.isEncryptedBoxPath(newName) {
+		return os.ErrPermission
+	}
+	return fs.inner.Rename(ctx, oldName, newName)
+}
+
+func (fs *encryptedBoxAwareWebdavFS) Stat(ctx context.Context, name string) (os.FileInfo, error) {
+	if fs.isEncryptedBoxPath(name) {
+		return nil, os.ErrPermission
+	}
+	return fs.inner.Stat(ctx, name)
+}
+
 func serveWebDAV(ginServer *gin.Engine) {
-	// REF: https://github.com/fungaren/gin-webdav
+	// 自定义 WebDAV 文件系统包装——拒绝加密笔记本的所有访问
+	// 加密笔记本的读写必须通过 assets/serve 路由的 box-aware + 解密流程，
+	// WebDAV 直接访问原始文件系统会绕过所有这些安全控制
+	encBoxAwareFS := &encryptedBoxAwareWebdavFS{inner: webdav.Dir(util.WorkspaceDir)}
 	handler := webdav.Handler{
 		Prefix:     "/webdav/",
-		FileSystem: webdav.Dir(util.WorkspaceDir),
+		FileSystem: encBoxAwareFS,
 		LockSystem: webdav.NewMemLS(),
 		Logger: func(r *http.Request, err error) {
 			if nil != err {

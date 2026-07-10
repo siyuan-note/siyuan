@@ -705,6 +705,20 @@ func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
 		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
 			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
 		}
+		// 解析符号链接/目录联接，防止软链接跳出资产根目录
+		if realP, evalErr := filepath.EvalSymlinks(p); evalErr == nil && realP != p {
+			if !gulu.File.IsSubPath(util.WorkspaceDir, realP) {
+				return "", fmt.Errorf("symlink [%s] resolves outside workspace: [%s]", p, realP)
+			}
+			// 验证解析后的路径仍在 <boxID>/assets/ 或全局 data/assets/ 下
+			expectedPrefix := filepath.Join(util.DataDir, "assets")
+			if boxID != "" {
+				expectedPrefix = filepath.Join(util.DataDir, boxID, "assets")
+			}
+			if !gulu.File.IsSubPath(expectedPrefix, realP) {
+				return "", fmt.Errorf("symlink [%s] resolves outside assets directory: [%s]", p, realP)
+			}
+		}
 		return p, nil
 	}
 	// 非加密 box 的资源可能回退到全局 data/assets（兼容旧笔记本结构）
@@ -740,6 +754,12 @@ func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string
 	if gulu.File.IsExist(p) {
 		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
 			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
+		}
+		// 解析符号链接，防止软链接跳出工作区
+		if realP, evalErr := filepath.EvalSymlinks(p); evalErr == nil && realP != p {
+			if !gulu.File.IsSubPath(util.WorkspaceDir, realP) {
+				return "", fmt.Errorf("symlink [%s] resolves outside workspace: [%s]", p, realP)
+			}
 		}
 		return p, nil
 	}

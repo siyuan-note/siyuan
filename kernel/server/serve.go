@@ -333,6 +333,13 @@ func serveExport(ginServer *gin.Engine) {
 				c.Status(http.StatusUnauthorized)
 				return
 			}
+
+			if util.IsSensitivePath(fullPath) {
+				logging.LogErrorf("refuse to export sensitive file [%s]", c.Request.URL.Path)
+				c.Status(http.StatusForbidden)
+				return
+			}
+
 			c.File(fullPath)
 			return
 		}

@@ -460,50 +460,9 @@ func resolveAssetPath(c *gin.Context) {
 		return
 	}
 	if model.IsEncryptedAssetPath(p) {
-		// 加密 asset 在磁盘上是密文，无法直接用系统应用打开
-		// 已解锁时解密到临时文件返回路径，未解锁时提示先解锁
-		assetBoxID := model.ExtractBoxIDFromAssetsPath(p)
-		dek, dekErr := model.GetDEKIfUnlocked(assetBoxID)
-		if dekErr != nil {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(314)
-			ret.Data = map[string]any{"closeTimeout": 3000}
-			return
-		}
-		diskName := filepath.Base(p)
-		data, readErr := os.ReadFile(p)
-		if readErr != nil {
-			ret.Code = -1
-			ret.Msg = readErr.Error()
-			ret.Data = map[string]any{"closeTimeout": 3000}
-			return
-		}
-		plainData, decErr := model.DecryptAsset(assetBoxID, diskName, dek, data)
-		if decErr != nil {
-			ret.Code = -1
-			ret.Msg = decErr.Error()
-			ret.Data = map[string]any{"closeTimeout": 3000}
-			return
-		}
-		// 用原始文件名（查映射）作为临时文件名
-		displayName := diskName
-		if origName := model.LookupAssetOriginalName(assetBoxID, diskName); origName != "" {
-			displayName = origName
-		}
-		tempPath := filepath.Join(util.TempDir, "export", "asset-open", gulu.Rand.String(7)+"-"+displayName)
-		if mkErr := os.MkdirAll(filepath.Dir(tempPath), 0755); mkErr != nil {
-			ret.Code = -1
-			ret.Msg = mkErr.Error()
-			ret.Data = map[string]any{"closeTimeout": 3000}
-			return
-		}
-		if writeErr := os.WriteFile(tempPath, plainData, 0644); writeErr != nil {
-			ret.Code = -1
-			ret.Msg = writeErr.Error()
-			ret.Data = map[string]any{"closeTimeout": 3000}
-			return
-		}
-		ret.Data = tempPath
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		ret.Data = map[string]any{"closeTimeout": 3000}
 		return
 	}
 	ret.Data = p

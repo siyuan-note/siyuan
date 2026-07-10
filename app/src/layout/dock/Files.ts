@@ -1327,7 +1327,12 @@ data-type="navigation-root" data-path="/">
         }
         let currentPath = filePath;
         let liElement: HTMLElement;
+        const visitedPaths = new Set<string>();
         while (!liElement) {
+            if (visitedPaths.has(currentPath)) {
+                return;
+            }
+            visitedPaths.add(currentPath);
             liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
             if (!liElement) {
                 const dirname = pathPosix().dirname(currentPath);

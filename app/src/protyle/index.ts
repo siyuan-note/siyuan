@@ -79,6 +79,7 @@ export class Protyle {
             lite: !!options.lite,
             updated: false,
             element: id,
+            notebookId: mergedOptions.notebookId,
             options: mergedOptions,
             block: {},
             highlight: {

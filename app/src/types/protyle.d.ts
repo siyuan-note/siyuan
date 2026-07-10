@@ -472,6 +472,7 @@ interface IProtyleOptions {
     mode?: TEditorMode,
     blockId?: string
     rootId?: string
+    notebookId?: string
     originalRefBlockIDs?: IObject
     key?: string
     defIds?: string[]

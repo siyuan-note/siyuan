@@ -22,7 +22,7 @@ import {Backlink} from "./dock/Backlink";
 import {openFileById} from "../editor/util";
 import {isWindow} from "../util/functions";
 import {showMessage} from "../dialog/message";
-import {parseUriInfo} from "../util/pathName";
+import {isEncryptedBox, parseUriInfo} from "../util/pathName";
 import {Custom} from "./dock/Custom";
 import {newCardModel} from "../card/newCardTab";
 import {App} from "../index";
@@ -377,6 +377,12 @@ export const JSONToCenter = (
         }
         (layout as Wnd).addTab(child, false, false, json.activeTime);
     } else if (json.instance === "Editor" && json.blockId) {
+        const notebook = window.siyuan.notebooks.find((item) => item.id === json.notebookId);
+        if (notebook?.closed && isEncryptedBox(json.notebookId)) {
+            (layout as Tab).headElement.removeAttribute("data-init-active");
+            removedTabs.push(layout as Tab);
+            return;
+        }
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             (layout as Tab).headElement.classList.add("item--unupdate");
         }
@@ -791,6 +797,7 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             tab,
             rootId: json.rootId,
             blockId: json.blockId,
+            notebookId: json.notebookId,
             mode: json.mode,
             scrollPosition: json.scrollPosition,
             action: Array.isArray(json.action) ? json.action.concat(Constants.CB_GET_FOCUS) :

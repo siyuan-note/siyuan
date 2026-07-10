@@ -284,6 +284,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 		return
 	}
 	boxID := parts[1]
+	origBoxID := boxID // 保留原始 boxID 用于解密（getRollbackBox 可能返回不同的 box）
 
 	box, needResetTree, err := getRollbackBox(boxID)
 	if err != nil {
@@ -312,16 +313,17 @@ func RollbackDocHistory(historyPath string) (err error) {
 		logging.LogErrorf("read history [%s] failed: %s", srcPath, srcReadErr)
 		return
 	}
-	if IsEncryptedBox(boxID) {
-		dek, dekErr := GetDEKIfUnlocked(boxID)
+	if IsEncryptedBox(origBoxID) {
+		dek, dekErr := GetDEKIfUnlocked(origBoxID)
 		if dekErr != nil {
 			err = errors.New(Conf.Language(314))
 			return
 		}
 		var decErr error
 		// 历史路径格式：<historyDir>/<datePrefix>/<boxID>/<relativePath>
+		// 用原始 boxID 解密（getRollbackBox 可能创建了新 box，密文仍属于原加密 box）
 		filePath := parts[2]
-		srcData, decErr = DecryptFile(boxID, filePath, dek, srcData)
+		srcData, decErr = DecryptFile(origBoxID, filePath, dek, srcData)
 		if decErr != nil {
 			logging.LogErrorf("decrypt history [%s] failed: %s", srcPath, decErr)
 			err = decErr

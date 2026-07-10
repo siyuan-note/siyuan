@@ -1543,8 +1543,8 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 				if "d" == n.TextMarkBlockRefSubtype {
 					// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
 					// 使用缓存的动态锚文本强制覆盖当前块中的引用节点动态锚文本
-					if dRefText, ok := treenode.DynamicRefTexts.Load(n.TextMarkBlockRefID); ok && "" != dRefText {
-						n.TextMarkTextContent = dRefText.(string)
+					if dRefText := treenode.GetDynamicRefText(n.TextMarkBlockRefID, tree.Box); "" != dRefText {
+						n.TextMarkTextContent = dRefText
 					}
 				}
 
@@ -1583,7 +1583,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		treenode.MoveFoldHeading(updatedNode, oldNode)
 	}
 
-	cache.PutBlockIAL(updatedNode.ID, parse.IAL2Map(updatedNode.KramdownIAL))
+	cache.PutBlockIALInBox(updatedNode.ID, tree.Box, parse.IAL2Map(updatedNode.KramdownIAL))
 
 	if ast.NodeHTMLBlock == updatedNode.Type {
 		content := string(updatedNode.Tokens)
@@ -1889,7 +1889,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	}
 
 	tx.writeTree(tree)
-	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
+	cache.PutBlockIALInBox(id, tree.Box, parse.IAL2Map(node.KramdownIAL))
 	return
 }
 

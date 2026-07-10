@@ -64,9 +64,9 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 
 	tx.writeTree(tree)
 	IncSync()
-	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
+	cache.PutBlockIALInBox(headingID, tree.Box, parse.IAL2Map(heading.KramdownIAL))
 	for _, child := range children {
-		cache.PutBlockIAL(child.ID, parse.IAL2Map(child.KramdownIAL))
+		cache.PutBlockIALInBox(child.ID, tree.Box, parse.IAL2Map(child.KramdownIAL))
 	}
 	sql.UpsertTreeQueue(tree)
 	operation.RetData = childrenIDs
@@ -128,9 +128,9 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	tx.writeTree(tree)
 	IncSync()
 
-	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
+	cache.PutBlockIALInBox(headingID, tree.Box, parse.IAL2Map(heading.KramdownIAL))
 	for _, child := range children {
-		cache.PutBlockIAL(child.ID, parse.IAL2Map(child.KramdownIAL))
+		cache.PutBlockIALInBox(child.ID, tree.Box, parse.IAL2Map(child.KramdownIAL))
 	}
 	sql.UpsertTreeQueue(tree)
 

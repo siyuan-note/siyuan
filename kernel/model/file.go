@@ -115,7 +115,7 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 		return nil
 	}
 
-	ret = cache.GetDocIAL(p)
+	ret = cache.GetDocIALInBox(p, box.ID)
 	if nil != ret {
 		return ret
 	}
@@ -135,7 +135,7 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 		box.moveCorruptedData(filePath)
 		return nil
 	}
-	cache.PutDocIAL(p, ret)
+	cache.PutDocIALInBox(p, box.ID, ret)
 	return ret
 }
 

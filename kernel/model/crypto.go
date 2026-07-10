@@ -754,6 +754,8 @@ func LockBox(boxID string) {
 	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", "repo")); rmErr != nil {
 		logging.LogWarnf("remove export/repo dir for box [%s] failed: %s", boxID, rmErr)
 	}
+	// 清理动态引用锚文本缓存
+	treenode.RemoveDynamicRefTexts(boxID)
 }
 
 // LockAllBoxes 清除所有已缓存的 DEK 并删除所有加密 db 文件。退出登录或全局锁定时调用。
@@ -781,6 +783,8 @@ func LockAllBoxes() {
 	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export")); rmErr != nil {
 		logging.LogErrorf("remove export directory failed: %s", rmErr)
 	}
+	// 清理所有动态引用锚文本缓存
+	treenode.ClearDynamicRefTexts()
 }
 
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。

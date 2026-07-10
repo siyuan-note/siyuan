@@ -129,7 +129,7 @@ func SetBlockReminder(id, timed string) (err error) {
 		return
 	}
 	IncSync()
-	cache.PutBlockIAL(id, attrs)
+	cache.PutBlockIALInBox(id, tree.Box, attrs)
 	return
 }
 
@@ -165,7 +165,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 			return e
 		}
 
-		cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+		cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 		pushBlockAttrs(oldAttrs, node)
 		nodes = append(nodes, node)
 	}
@@ -213,7 +213,7 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	}
 
 	IncSync()
-	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 
 	pushBlockAttrs(oldAttrs, node)
 
@@ -257,7 +257,7 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 	tx.writeTree(tree)
 
 	IncSync()
-	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 	pushBlockAttrs(oldAttrs, node)
 	return
 }

@@ -18,6 +18,7 @@ package cache
 
 import (
 	"maps"
+	"sync"
 
 	"github.com/dgraph-io/ristretto"
 )
@@ -27,27 +28,76 @@ var docIALCache, _ = ristretto.NewCache(&ristretto.Config{
 	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
 })
+var docIALCacheKeys = map[string]map[string]struct{}{}
+var docIALCacheKeysMu sync.Mutex
+
+func docIALCacheKey(p, boxID string) string {
+	return boxID + "\x00" + p
+}
 
 func PutDocIAL(p string, ial map[string]string) {
-	docIALCache.Set(p, ial, 128)
+	PutDocIALInBox(p, "", ial)
+}
+
+func PutDocIALInBox(p, boxID string, ial map[string]string) {
+	key := docIALCacheKey(p, boxID)
+	docIALCache.Set(key, ial, 128)
+
+	docIALCacheKeysMu.Lock()
+	defer docIALCacheKeysMu.Unlock()
+	keys := docIALCacheKeys[p]
+	if keys == nil {
+		keys = map[string]struct{}{}
+		docIALCacheKeys[p] = keys
+	}
+	keys[key] = struct{}{}
 }
 
 func GetDocIAL(p string) (ret map[string]string) {
-	ial, _ := docIALCache.Get(p)
+	return GetDocIALInBox(p, "")
+}
+
+func GetDocIALInBox(p, boxID string) (ret map[string]string) {
+	ial, _ := docIALCache.Get(docIALCacheKey(p, boxID))
 	if nil == ial {
 		return
 	}
-
 	ret = map[string]string{}
 	maps.Copy(ret, ial.(map[string]string))
 	return
 }
 
 func RemoveDocIAL(p string) {
+	docIALCacheKeysMu.Lock()
+	keys := docIALCacheKeys[p]
+	delete(docIALCacheKeys, p)
+	docIALCacheKeysMu.Unlock()
+
 	docIALCache.Del(p)
+	docIALCache.Del(docIALCacheKey(p, ""))
+	for key := range keys {
+		docIALCache.Del(key)
+	}
+}
+
+func RemoveDocIALInBox(p, boxID string) {
+	key := docIALCacheKey(p, boxID)
+	docIALCache.Del(key)
+
+	docIALCacheKeysMu.Lock()
+	defer docIALCacheKeysMu.Unlock()
+	if keys := docIALCacheKeys[p]; keys != nil {
+		delete(keys, key)
+		if len(keys) == 0 {
+			delete(docIALCacheKeys, p)
+		}
+	}
 }
 
 func ClearDocsIAL() {
+	docIALCacheKeysMu.Lock()
+	docIALCacheKeys = map[string]map[string]struct{}{}
+	docIALCacheKeysMu.Unlock()
 	docIALCache.Clear()
 }
 
@@ -56,14 +106,37 @@ var blockIALCache, _ = ristretto.NewCache(&ristretto.Config{
 	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
 })
+var blockIALCacheKeys = map[string]map[string]struct{}{}
+var blockIALCacheKeysMu sync.Mutex
+
+func blockIALCacheKey(id, boxID string) string {
+	return boxID + "\x00" + id
+}
 
 func PutBlockIAL(id string, ial map[string]string) {
-	// 这里存入的属性值都是反转义过的，用的是 parse.IAL2Map()，而不是 parse.IAL2MapUnEsc()
-	blockIALCache.Set(id, ial, 128)
+	PutBlockIALInBox(id, "", ial)
+}
+
+func PutBlockIALInBox(id, boxID string, ial map[string]string) {
+	key := blockIALCacheKey(id, boxID)
+	blockIALCache.Set(key, ial, 128)
+
+	blockIALCacheKeysMu.Lock()
+	defer blockIALCacheKeysMu.Unlock()
+	keys := blockIALCacheKeys[id]
+	if keys == nil {
+		keys = map[string]struct{}{}
+		blockIALCacheKeys[id] = keys
+	}
+	keys[key] = struct{}{}
 }
 
 func GetBlockIAL(id string) (ret map[string]string) {
-	ial, _ := blockIALCache.Get(id)
+	return GetBlockIALInBox(id, "")
+}
+
+func GetBlockIALInBox(id, boxID string) (ret map[string]string) {
+	ial, _ := blockIALCache.Get(blockIALCacheKey(id, boxID))
 	if nil == ial {
 		return
 	}
@@ -71,9 +144,35 @@ func GetBlockIAL(id string) (ret map[string]string) {
 }
 
 func RemoveBlockIAL(id string) {
+	blockIALCacheKeysMu.Lock()
+	keys := blockIALCacheKeys[id]
+	delete(blockIALCacheKeys, id)
+	blockIALCacheKeysMu.Unlock()
+
 	blockIALCache.Del(id)
+	blockIALCache.Del(blockIALCacheKey(id, ""))
+	for key := range keys {
+		blockIALCache.Del(key)
+	}
+}
+
+func RemoveBlockIALInBox(id, boxID string) {
+	key := blockIALCacheKey(id, boxID)
+	blockIALCache.Del(key)
+
+	blockIALCacheKeysMu.Lock()
+	defer blockIALCacheKeysMu.Unlock()
+	if keys := blockIALCacheKeys[id]; keys != nil {
+		delete(keys, key)
+		if len(keys) == 0 {
+			delete(blockIALCacheKeys, id)
+		}
+	}
 }
 
 func ClearBlocksIAL() {
+	blockIALCacheKeysMu.Lock()
+	blockIALCacheKeys = map[string]map[string]struct{}{}
+	blockIALCacheKeysMu.Unlock()
 	blockIALCache.Clear()
 }

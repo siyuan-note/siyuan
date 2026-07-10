@@ -482,7 +482,7 @@ func removeUnescapedUnicodeNull(data []byte) (ret []byte, needFix bool) {
 
 func afterWriteTree(tree *parse.Tree) {
 	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
-	cache.PutDocIAL(tree.Path, docIAL)
+	cache.PutDocIALInBox(tree.Path, tree.Box, docIAL)
 }
 
 // fixTreeJSONData 订正树 JSON 数据。

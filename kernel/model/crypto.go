@@ -730,12 +730,12 @@ func IsBoxUnlocked(boxID string) bool {
 // 关闭即删 db 文件：加密索引可由 box.Index() 全量重建，文件无需持久化；
 // 同时避免关闭后残留旧索引数据导致下次解锁叠加重复行。
 func LockBox(boxID string) {
+	// 事务可能需要获取该 box 的读锁才能完成加密写入，必须在取得写锁前排空队列，避免互相等待。
+	FlushTxQueue()
+
 	// 获取写锁，等待所有在途解密操作完成，确保锁定后不会继续输出明文
 	acquireBoxWriteLock(boxID)
 	defer releaseBoxWriteLock(boxID)
-
-	// 排空事务队列，避免在途 write 在缓存清理后写回旧数据
-	FlushTxQueue()
 
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {

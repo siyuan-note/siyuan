@@ -882,7 +882,7 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	} else if strings.Contains(absPath, "storage"+string(os.PathSeparator)+"av"+string(os.PathSeparator)) {
 		// AV 定义用 siyuan/av 子密钥加密，与 assets 的 siyuan/asset 子密钥不同
 		avID := strings.TrimSuffix(filepath.Base(absPath), filepath.Ext(absPath))
-		plain, decErr = av.DecryptAVData(boxID, avID, ciphertext)
+		plain, decErr = av.DecryptAVDataLocked(boxID, avID, ciphertext)
 	} else {
 		// 其他历史文件（如 JSON 元数据等）尝试用 asset 解密方式
 		diskName := filepath.Base(absPath)

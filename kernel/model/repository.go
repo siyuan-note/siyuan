@@ -440,7 +440,7 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 				defer ReleaseBoxReadLock(repoBoxID)
 				if dek, dekErr := GetDEKIfUnlocked(repoBoxID); dekErr == nil && dek != nil {
 					avID := strings.TrimSuffix(filepath.Base(file.Path), ".json")
-					if plainData, decErr := av.DecryptAVData(repoBoxID, avID, data); decErr == nil {
+					if plainData, decErr := av.DecryptAVDataLocked(repoBoxID, avID, data); decErr == nil {
 						data = plainData
 					} else {
 						logging.LogWarnf("decrypt repo snapshot AV [%s] failed: %s", file.Path, decErr)
@@ -698,7 +698,7 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
 	}
 	if strings.HasPrefix(boxRelPath, "storage/av/") && strings.HasSuffix(boxRelPath, ".json") {
 		avID := strings.TrimSuffix(filepath.Base(boxRelPath), ".json")
-		plain, decErr := av.DecryptAVData(boxID, avID, data)
+		plain, decErr := av.DecryptAVDataLocked(boxID, avID, data)
 		if decErr != nil {
 			return data
 		}

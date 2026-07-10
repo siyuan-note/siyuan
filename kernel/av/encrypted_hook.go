@@ -288,6 +288,13 @@ func decryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 		AVLockAcquire(boxID)
 		defer AVLockRelease(boxID)
 	}
+	return decryptAVDataLocked(boxID, avID, data)
+}
+
+func decryptAVDataLocked(boxID, avID string, data []byte) ([]byte, error) {
+	if AVDEKProvider == nil {
+		return data, nil
+	}
 	dek, err := AVDEKProvider(boxID)
 	if err != nil {
 		return nil, err // 加密但未解锁，拒绝读盘
@@ -319,4 +326,9 @@ func EncryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 // DecryptAVData 是 decryptAVData 的导出版本。
 func DecryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 	return decryptAVData(boxID, avID, data)
+}
+
+// DecryptAVDataLocked 在调用方已持有对应 box 读锁时解密 AV 数据。
+func DecryptAVDataLocked(boxID, avID string, data []byte) ([]byte, error) {
+	return decryptAVDataLocked(boxID, avID, data)
 }

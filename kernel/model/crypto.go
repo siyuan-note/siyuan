@@ -1165,18 +1165,25 @@ func ExtractBoxIDFromHistoryPath(absPath string) string {
 // copyAssetDecryptIfEncrypted 把 srcPath 的 asset 复制到 destPath。
 // 若 srcPath 在已解锁的加密笔记本下，读密文→解密→写明文到 destPath（导出目录）；
 // 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
+// normalizeRelPath 标准化 box 内相对路径用于 AAD：去掉前导 /、统一为正斜杠。
+func normalizeRelPath(p string) string {
+	p = filepath.ToSlash(p)
+	p = strings.TrimPrefix(p, "/")
+	return p
+}
+
 // EncryptFile 用 fileKey（DEK 派生子密钥）加密 .sy 文档字节，AAD 绑定 boxID + 相对路径。
-// relativePath 形如 "/20240101000000-abc123.sy"，与 filesys.encryptData/decryptData 保持一致。
+// relativePath 在构造 AAD 前会标准化（去前导 /、统一斜杠），与 filesys.encryptData/decryptData 保持一致。
 func EncryptFile(boxID, relativePath string, dek, plaintext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad := "siyuan:v1:file:" + boxID + ":" + relativePath
+	aad := "siyuan:v1:file:" + boxID + ":" + normalizeRelPath(relativePath)
 	return util.EncryptWithAAD(fileKey, plaintext, []byte(aad))
 }
 
 // DecryptFile 对应解密。
 func DecryptFile(boxID, relativePath string, dek, ciphertext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad := "siyuan:v1:file:" + boxID + ":" + relativePath
+	aad := "siyuan:v1:file:" + boxID + ":" + normalizeRelPath(relativePath)
 	return util.DecryptWithAAD(fileKey, ciphertext, []byte(aad))
 }
 

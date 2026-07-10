@@ -122,6 +122,14 @@ func getImageOCRText(c *gin.Context) {
 
 	path = arg["path"].(string)
 
+	// 加密笔记本的资源不参与全局 OCR（OCR 文本存在全局 data/assets/ocr-texts.json）
+	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
+		ret.Data = map[string]any{
+			"text": "",
+		}
+		return
+	}
+
 	ret.Data = map[string]any{
 		"text": util.GetAssetText(path),
 	}
@@ -138,6 +146,11 @@ func setImageOCRText(c *gin.Context) {
 
 	path := arg["path"].(string)
 	text := arg["text"].(string)
+
+	// 加密笔记本的资源不参与全局 OCR
+	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
+		return
+	}
 	util.SetAssetText(path, text)
 
 	// 刷新 OCR 结果到数据库
@@ -159,6 +172,14 @@ func ocr(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
+
+	// 加密笔记本的资源不参与全局 OCR
+	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
+		ret.Code = -1
+		ret.Msg = "OCR is not supported for assets in encrypted notebooks"
+		ret.Data = map[string]any{"closeTimeout": 3000}
+		return
+	}
 
 	ocrJSON, err := util.OcrAsset(path)
 	if nil != err {

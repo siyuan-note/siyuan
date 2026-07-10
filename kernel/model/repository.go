@@ -56,6 +56,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -337,7 +338,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 			return
 		}
 
-		if strings.HasPrefix(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
+		if strings.Contains(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			avID := strings.TrimSuffix(filepath.Base(file.Path), ".json")
 			cache.RemoveAVData(avID)
 			ReloadAttrView(avID)
@@ -425,6 +426,29 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 	} else {
 		displayInText = true
 		title = file.Path
+		// 加密 notebook 的 AV 定义在仓库里是密文，需先解密再展示
+		if strings.Contains(file.Path, "storage/av/") && strings.HasSuffix(file.Path, ".json") {
+			repoBoxID := ""
+			origPath := strings.TrimPrefix(file.Path, "/")
+			if parts := strings.SplitN(origPath, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) {
+				repoBoxID = parts[0]
+			}
+			if repoBoxID != "" && IsEncryptedBox(repoBoxID) {
+				if dek, dekErr := GetDEKIfUnlocked(repoBoxID); dekErr == nil && dek != nil {
+					avID := strings.TrimSuffix(filepath.Base(file.Path), ".json")
+					if plainData, decErr := av.DecryptAVData(repoBoxID, avID, data); decErr == nil {
+						data = plainData
+					} else {
+						logging.LogWarnf("decrypt repo snapshot AV [%s] failed: %s", file.Path, decErr)
+						content = file.Path
+						return
+					}
+				} else {
+					content = file.Path
+					return
+				}
+			}
+		}
 		if mimeType := mime.TypeByExtension(filepath.Ext(file.Path)); strings.HasPrefix(mimeType, "text/") || strings.Contains(mimeType, "json") {
 			// 如果是文本文件，直接返回文本内容
 			// All plain text formats are supported when comparing data snapshots https://github.com/siyuan-note/siyuan/issues/12975
@@ -2062,7 +2086,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadSnippet = true
 		}
 
-		if strings.HasPrefix(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
+		if strings.Contains(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
 		}
 	}
@@ -2122,7 +2146,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadSnippet = true
 		}
 
-		if strings.HasPrefix(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
+		if strings.Contains(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
 		}
 	}

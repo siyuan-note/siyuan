@@ -699,7 +699,7 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	}
 
 	refCount := sql.QueryRootChildrenRefCountInBox(rootID, boxID)
-	virtualBlockRefKeywords := getBlockVirtualRefKeywords(tree.Root)
+	virtualBlockRefKeywords := getBlockVirtualRefKeywords(tree.Root, tree.Box)
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 

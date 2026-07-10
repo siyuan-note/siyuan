@@ -47,6 +47,7 @@ var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 
 func ClearCache() {
 	blockCache.Clear()
+	clearRefCache()
 }
 
 func putBlockCache(block *Block) {
@@ -81,20 +82,33 @@ func removeBlockCache(id string) {
 	removeRefCacheByDefID(id)
 }
 
-var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute) // [defBlockID]map[refBlockID]*Ref
+var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute)
+
+func refCacheKey(defBlockID, boxID string) string {
+	return boxID + "\x00" + defBlockID
+}
 
 func GetRefsCacheByDefID(defID string) (ret []*Ref) {
-	for defBlockID, refs := range defIDRefsCache.Items() {
-		if defBlockID == defID {
+	return GetRefsCacheByDefIDInBox(defID, "")
+}
+
+func GetRefsCacheByDefIDInBox(defID, boxID string) (ret []*Ref) {
+	key := refCacheKey(defID, boxID)
+	for k, refs := range defIDRefsCache.Items() {
+		if k == key {
 			for _, ref := range refs.Object.(map[string]*Ref) {
 				ret = append(ret, ref)
 			}
 		}
 	}
 	if 1 > len(ret) {
-		ret = QueryRefsByDefID(defID, false)
-		for _, ref := range ret {
-			putRefCache(ref)
+		allRefs := QueryRefsByDefID(defID, false)
+		for _, ref := range allRefs {
+			// 按 box 过滤：boxID 非空时只选同 box 的 Ref，boxID 为空时全部保留
+			if boxID == "" || ref.Box == boxID {
+				ret = append(ret, ref)
+				putRefCache(boxID, ref)
+			}
 		}
 	}
 	return
@@ -102,18 +116,27 @@ func GetRefsCacheByDefID(defID string) (ret []*Ref) {
 
 func CacheRef(tree *parse.Tree, refNode *ast.Node) {
 	ref := buildRef(tree, refNode)
-	putRefCache(ref)
+	putRefCache(tree.Box, ref)
 }
 
-func putRefCache(ref *Ref) {
-	defBlockRefs, ok := defIDRefsCache.Get(ref.DefBlockID)
+func putRefCache(boxID string, ref *Ref) {
+	key := refCacheKey(ref.DefBlockID, boxID)
+	defBlockRefs, ok := defIDRefsCache.Get(key)
 	if !ok {
 		defBlockRefs = map[string]*Ref{}
 	}
 	defBlockRefs.(map[string]*Ref)[ref.BlockID] = ref
-	defIDRefsCache.SetDefault(ref.DefBlockID, defBlockRefs)
+	defIDRefsCache.SetDefault(key, defBlockRefs)
 }
 
 func removeRefCacheByDefID(defID string) {
-	defIDRefsCache.Delete(defID)
+	defIDRefsCache.Delete(refCacheKey(defID, ""))
+}
+
+func removeRefCacheByDefIDInBox(defID, boxID string) {
+	defIDRefsCache.Delete(refCacheKey(defID, boxID))
+}
+
+func clearRefCache() {
+	defIDRefsCache.Flush()
 }

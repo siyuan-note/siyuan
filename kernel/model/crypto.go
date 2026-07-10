@@ -756,6 +756,8 @@ func LockBox(boxID string) {
 	}
 	// 清理动态引用锚文本缓存
 	treenode.RemoveDynamicRefTexts(boxID)
+	// 清理虚拟引用关键字缓存
+	ResetVirtualBlockRefCache()
 }
 
 // LockAllBoxes 清除所有已缓存的 DEK 并删除所有加密 db 文件。退出登录或全局锁定时调用。

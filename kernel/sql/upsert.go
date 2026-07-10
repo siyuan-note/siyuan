@@ -370,7 +370,7 @@ func insertRefs0(tx *sql.Tx, bulk []*Ref) (err error) {
 		valueArgs = append(valueArgs, ref.Markdown)
 		valueArgs = append(valueArgs, ref.Type)
 
-		putRefCache(ref)
+		putRefCache(ref.Box, ref)
 	}
 	stmt := fmt.Sprintf("INSERT INTO refs (id, def_block_id, def_block_parent_id, def_block_root_id, def_block_path, block_id, root_id, box, path, content, markdown, type) VALUES %s", strings.Join(valueStrings, ","))
 	err = prepareExecInsertTx(tx, stmt, valueArgs)

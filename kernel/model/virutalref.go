@@ -45,8 +45,9 @@ var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
 	BufferItems: 64,
 })
 
-func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
-	val, ok := virtualBlockRefCache.Get(root.ID)
+func getBlockVirtualRefKeywords(root *ast.Node, boxID string) (ret []string) {
+	key := boxID + "\x00" + root.ID
+	val, ok := virtualBlockRefCache.Get(key)
 	if !ok {
 		buf := bytes.Buffer{}
 		ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -60,14 +61,14 @@ func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 			return ast.WalkContinue
 		})
 		content := buf.String()
-		ret = putBlockVirtualRefKeywords(content, root)
+		ret = putBlockVirtualRefKeywords(content, root, boxID)
 		return
 	}
 	ret = val.([]string)
 	return
 }
 
-func putBlockVirtualRefKeywords(blockContent string, root *ast.Node) (ret []string) {
+func putBlockVirtualRefKeywords(blockContent string, root *ast.Node, boxID string) (ret []string) {
 	keywords := getVirtualRefKeywords(root)
 	if 1 > len(keywords) {
 		return
@@ -98,7 +99,8 @@ func putBlockVirtualRefKeywords(blockContent string, root *ast.Node) (ret []stri
 	}
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	virtualBlockRefCache.SetWithTTL(root.ID, ret, 1, 10*time.Minute)
+	key := boxID + "\x00" + root.ID
+	virtualBlockRefCache.SetWithTTL(key, ret, 1, 10*time.Minute)
 	return
 }
 

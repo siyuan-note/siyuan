@@ -566,7 +566,7 @@ func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
 
 	defBlockID, text, _ := treenode.GetBlockRef(refNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
-	defBlock := treenode.GetBlockTree(defBlockID)
+	defBlock := treenode.GetBlockTreeInBox(defBlockID, tree.Box)
 	if nil != defBlock {
 		defBlockParentID = defBlock.ParentID
 		defBlockRootID = defBlock.RootID
@@ -592,7 +592,7 @@ func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
 func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node) *Ref {
 	defBlockID := getEmbedRef(embedNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
-	defBlock := treenode.GetBlockTree(defBlockID)
+	defBlock := treenode.GetBlockTreeInBox(defBlockID, tree.Box)
 	if nil != defBlock {
 		defBlockParentID = defBlock.ParentID
 		defBlockRootID = defBlock.RootID

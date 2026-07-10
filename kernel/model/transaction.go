@@ -2100,7 +2100,7 @@ func (tx *Transaction) writeTree(tree *parse.Tree) {
 
 func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedNodes []*ast.Node) {
 	changedNodesMap := map[string]*ast.Node{}
-	ret = sql.GetRefsCacheByDefID(updateNode.ID)
+	ret = sql.GetRefsCacheByDefIDInBox(updateNode.ID, updateNode.Box)
 	if nil != updateNode.Parent && ast.NodeDocument != updateNode.Parent.Type &&
 		updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) {
 		// 如果是容器块下第一个叶子块，则需要向上查找引用
@@ -2109,7 +2109,7 @@ func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedNodes [
 				break
 			}
 
-			parentRefs := sql.GetRefsCacheByDefID(parent.ID)
+			parentRefs := sql.GetRefsCacheByDefIDInBox(parent.ID, updateNode.Box)
 			if 0 < len(parentRefs) {
 				ret = append(ret, parentRefs...)
 				if _, ok := changedNodesMap[parent.ID]; !ok {
@@ -2125,7 +2125,7 @@ func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedNodes [
 				return ast.WalkContinue
 			}
 
-			childRefs := sql.GetRefsCacheByDefID(n.ID)
+			childRefs := sql.GetRefsCacheByDefIDInBox(n.ID, updateNode.Box)
 			if 0 < len(childRefs) {
 				ret = append(ret, childRefs...)
 				changedNodesMap[n.ID] = n
@@ -2137,7 +2137,7 @@ func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedNodes [
 		// 如果是折叠标题，则需要向下查找引用
 		children := treenode.HeadingChildren(updateNode)
 		for _, child := range children {
-			childRefs := sql.GetRefsCacheByDefID(child.ID)
+			childRefs := sql.GetRefsCacheByDefIDInBox(child.ID, updateNode.Box)
 			if 0 < len(childRefs) {
 				ret = append(ret, childRefs...)
 				changedNodesMap[child.ID] = child

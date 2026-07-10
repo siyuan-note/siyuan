@@ -383,17 +383,14 @@ type RefDefs struct {
 }
 
 func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[string]string) {
+	return GetBlockRefsInBox(defID, "")
+}
+
+// GetBlockRefsInBox 获取指定笔记本内的块引用关系。空 box 不回退搜索加密笔记本。
+func GetBlockRefsInBox(defID, boxID string) (refDefs []*RefDefs, originalRefBlockIDs map[string]string) {
 	refDefs = []*RefDefs{}
 	originalRefBlockIDs = map[string]string{}
-	bt := treenode.GetBlockTree(defID)
-	if nil == bt {
-		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-			if encBT := treenode.GetBlockTreeInBox(defID, encBoxID); nil != encBT {
-				bt = encBT
-				break
-			}
-		}
-	}
+	bt := treenode.GetBlockTreeInBox(defID, boxID)
 	if nil == bt {
 		return
 	}

@@ -87,15 +87,6 @@ func FindAttributeViewPath(avID string) (path string, boxID string) {
 	if filelock.IsExist(globalPath) {
 		return globalPath, ""
 	}
-	// 遍历已打开的加密 box
-	if AVEncryptedBoxIDs != nil {
-		for _, encBoxID := range AVEncryptedBoxIDs() {
-			encPath := attributeViewDataPathByBox(avID, encBoxID)
-			if filelock.IsExist(encPath) {
-				return encPath, encBoxID
-			}
-		}
-	}
 	return "", ""
 }
 

@@ -444,27 +444,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			data = buf.Bytes()
 		}
 
-		// 加密笔记本的数据需先加密再落盘，导入的 .sy 原文是明文 JSON
-		if IsEncryptedBox(boxID) {
-			dek, dekErr := GetDEKIfUnlocked(boxID)
-			if dekErr != nil {
-				err = errors.New(Conf.Language(314))
-				return
-			}
-			var encErr error
-			data, encErr = EncryptFile(boxID, finalRelPath, dek, data)
-			if encErr != nil {
-				logging.LogErrorf("encrypt import .sy failed: %s", encErr)
-				return
-			}
-		}
-		if err = os.WriteFile(syPath, data, 0644); err != nil {
-			logging.LogErrorf("write .sy [%s] failed: %s", syPath, err)
-			return
-		}
 		newSyPath := filepath.Join(filepath.Dir(syPath), finalSyName)
-		if err = filelock.Rename(syPath, newSyPath); err != nil {
-			logging.LogErrorf("rename .sy from [%s] to [%s] failed: %s", syPath, newSyPath, err)
+		if err = writeImportedTree(boxID, syPath, newSyPath, finalRelPath, data); err != nil {
+			logging.LogErrorf("write imported .sy [%s] failed: %s", syPath, err)
 			return
 		}
 		tree.Path = finalRelPath
@@ -780,6 +762,26 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	task.AppendTask(task.UpdateIDs, util.PushUpdateIDs, blockIDs)
 	return
+}
+
+func writeImportedTree(boxID, syPath, newSyPath, relPath string, data []byte) error {
+	if IsEncryptedBox(boxID) {
+		HoldBoxReadLock(boxID)
+		defer ReleaseBoxReadLock(boxID)
+
+		dek, err := GetDEKIfUnlocked(boxID)
+		if err != nil {
+			return errors.New(Conf.Language(314))
+		}
+		data, err = EncryptFile(boxID, relPath, dek, data)
+		if err != nil {
+			return err
+		}
+	}
+	if err := os.WriteFile(syPath, data, 0644); err != nil {
+		return err
+	}
+	return filelock.Rename(syPath, newSyPath)
 }
 
 // updateImportedAssetRefs 遍历树的 assets 引用路径，将原始文件名替换为脱敏文件名。

@@ -164,9 +164,17 @@ type BlockTreeInfo struct {
 }
 
 func GetBlockTreeInfos(ids []string) (ret map[string]*BlockTreeInfo) {
+	return GetBlockTreeInfosInBox(ids, "")
+}
+
+// GetBlockTreeInfosInBox 获取指定笔记本内的块树信息。空 box 仅查询普通全局库。
+func GetBlockTreeInfosInBox(ids []string, boxID string) (ret map[string]*BlockTreeInfo) {
 	ret = map[string]*BlockTreeInfo{}
-	trees := filesys.LoadTrees(ids)
-	for id, tree := range trees {
+	for _, id := range ids {
+		tree := loadTreeForBlockDOM(id, boxID)
+		if nil == tree {
+			continue
+		}
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
 			ret[id] = &BlockTreeInfo{ID: id}
@@ -195,8 +203,13 @@ func GetBlockTreeInfos(ids []string) (ret map[string]*BlockTreeInfo) {
 }
 
 func GetBlockSiblingID(id string) (parent, previous, next string) {
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
+	return GetBlockSiblingIDInBox(id, "")
+}
+
+// GetBlockSiblingIDInBox 获取指定笔记本内块的相邻关系。空 box 不回退搜索加密笔记本。
+func GetBlockSiblingIDInBox(id, boxID string) (parent, previous, next string) {
+	tree := loadTreeForBlockDOM(id, boxID)
+	if nil == tree {
 		return
 	}
 
@@ -305,8 +318,14 @@ func getPreNext(parent *ast.Node) (previous, next string) {
 }
 
 func GetBlockRelevantIDs(id string) (parentID, previousID, nextID string, err error) {
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
+	return GetBlockRelevantIDsInBox(id, "")
+}
+
+// GetBlockRelevantIDsInBox 获取指定笔记本内块的父级及相邻块 ID。空 box 不回退搜索加密笔记本。
+func GetBlockRelevantIDsInBox(id, boxID string) (parentID, previousID, nextID string, err error) {
+	tree := loadTreeForBlockDOM(id, boxID)
+	if nil == tree {
+		err = ErrTreeNotFound
 		return
 	}
 
@@ -825,24 +844,37 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 }
 
 func GetBlockDOM(id string) (ret string) {
+	return GetBlockDOMInBox(id, "")
+}
+
+// GetBlockDOMInBox 渲染指定笔记本内的块 DOM。boxID 为空时仅查询普通全局库。
+func GetBlockDOMInBox(id, boxID string) (ret string) {
 	if "" == id {
 		return
 	}
 
-	doms := GetBlockDOMs([]string{id})
+	doms := GetBlockDOMsInBox([]string{id}, boxID)
 	ret = doms[id]
 	return
 }
 
 func GetBlockDOMs(ids []string) (ret map[string]string) {
+	return GetBlockDOMsInBox(ids, "")
+}
+
+// GetBlockDOMsInBox 渲染指定笔记本内的块 DOM。禁止在 boxID 未指定时遍历加密笔记本。
+func GetBlockDOMsInBox(ids []string, boxID string) (ret map[string]string) {
 	ret = map[string]string{}
 	if 0 == len(ids) {
 		return
 	}
 
 	luteEngine := NewLute()
-	trees := filesys.LoadTrees(ids)
-	for id, tree := range trees {
+	for _, id := range ids {
+		tree := loadTreeForBlockDOM(id, boxID)
+		if nil == tree {
+			continue
+		}
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
 			continue
@@ -865,30 +897,43 @@ func GetBlockDOMs(ids []string) (ret map[string]string) {
 }
 
 func GetBlockDOMWithEmbed(id string) (ret string) {
+	return GetBlockDOMWithEmbedInBox(id, "")
+}
+
+// GetBlockDOMWithEmbedInBox 渲染指定笔记本内包含嵌入块的 DOM。
+func GetBlockDOMWithEmbedInBox(id, boxID string) (ret string) {
 	if "" == id {
 		return
 	}
 
-	doms := GetBlockDOMsWithEmbed([]string{id})
+	doms := GetBlockDOMsWithEmbedInBox([]string{id}, boxID)
 	ret = doms[id]
 	return
 }
 
 func GetBlockDOMsWithEmbed(ids []string) (ret map[string]string) {
+	return GetBlockDOMsWithEmbedInBox(ids, "")
+}
+
+// GetBlockDOMsWithEmbedInBox 渲染指定笔记本内包含嵌入块的 DOM。boxID 为空时仅查询普通全局库。
+func GetBlockDOMsWithEmbedInBox(ids []string, boxID string) (ret map[string]string) {
 	ret = map[string]string{}
 	if 0 == len(ids) {
 		return
 	}
 
 	luteEngine := NewLute()
-	trees := filesys.LoadTrees(ids)
-	for id, tree := range trees {
+	for _, id := range ids {
+		tree := loadTreeForBlockDOM(id, boxID)
+		if nil == tree {
+			continue
+		}
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
 			continue
 		}
 
-		resolveEmbedContent(node, luteEngine)
+		resolveEmbedContentInBox(node, luteEngine, boxID)
 
 		// 处理折叠标题
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -912,6 +957,23 @@ func GetBlockDOMsWithEmbed(ids []string) (ret map[string]string) {
 }
 
 func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
+	resolveEmbedContentInBox(n, luteEngine, "")
+}
+
+// loadTreeForBlockDOM 按指定 box 加载树，空 box 不回退搜索已打开的加密笔记本。
+func loadTreeForBlockDOM(id, boxID string) *parse.Tree {
+	bt := treenode.GetBlockTreeInBox(id, boxID)
+	if nil == bt {
+		return nil
+	}
+	tree, err := loadTreeByBlockTree(bt)
+	if nil != err {
+		return nil
+	}
+	return tree
+}
+
+func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string) {
 	ast.Walk(n, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockQueryEmbed != node.Type {
 			return ast.WalkContinue
@@ -927,7 +989,7 @@ func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 
 		// 执行查询获取嵌入的块
-		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+		sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, boxID)
 
 		// 收集所有嵌入块的内容 HTML
 		var embedContents []string
@@ -936,7 +998,7 @@ func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
 				continue
 			}
 
-			subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+			subTree := loadTreeForBlockDOM(sqlBlock.ID, boxID)
 			if nil == subTree {
 				continue
 			}

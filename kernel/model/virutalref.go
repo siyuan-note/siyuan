@@ -113,6 +113,9 @@ func CacheVirtualBlockRefJob() {
 
 func ResetVirtualBlockRefCache() {
 	virtualBlockRefCache.Clear()
+	if nil == Conf {
+		return
+	}
 	if !Conf.Editor.VirtualBlockRef {
 		return
 	}

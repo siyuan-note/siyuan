@@ -3612,6 +3612,8 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	}
 	// 加密 box 的 .sya 是密文，需先解密
 	if IsEncryptedBox(boxID) {
+		HoldBoxReadLock(boxID)
+		defer ReleaseBoxReadLock(boxID)
 		dek, dekErr := GetDEKIfUnlocked(boxID)
 		if dekErr != nil {
 			logging.LogWarnf("get DEK for file annotation [%s] failed: %s", sya, dekErr)

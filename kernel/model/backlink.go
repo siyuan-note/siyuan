@@ -202,6 +202,115 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	return
 }
 
+func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string) (ret []*Backlink, keywords []string) {
+	keyword = strings.TrimSpace(keyword)
+	if "" != keyword {
+		keywords = strings.Split(keyword, " ")
+	}
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
+
+	ret = []*Backlink{}
+	sqlBlock := sql.GetBlockInBox(defID, boxID)
+	if nil == sqlBlock {
+		return
+	}
+	rootID := sqlBlock.RootID
+
+	tmpRefs := sql.QueryRefsByDefIDInBox(defID, containChildren, boxID)
+	var refs []*sql.Ref
+	for _, ref := range tmpRefs {
+		if ref.RootID == refTreeID {
+			refs = append(refs, ref)
+		}
+	}
+	refs = removeDuplicatedRefs(refs)
+
+	linkRefs, _, _, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, boxID)
+	refTree, err := loadTreeByBlockIDInBox(refTreeID, boxID)
+	if err != nil {
+		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
+		return
+	}
+
+	luteEngine := util.NewLute()
+	for _, linkRef := range linkRefs {
+		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine)
+		if nil != backlink {
+			ret = append(ret, backlink)
+		}
+	}
+
+	sortBacklinks(ret, refTree)
+	filterBlockPaths(ret)
+	return
+}
+
+func GetBackmentionDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string) (ret []*Backlink, keywords []string) {
+	keyword = strings.TrimSpace(keyword)
+	if "" != keyword {
+		keywords = strings.Split(keyword, " ")
+	}
+	ret = []*Backlink{}
+	beforeLen := 12
+	sqlBlock := sql.GetBlockInBox(defID, boxID)
+	if nil == sqlBlock {
+		return
+	}
+	rootID := sqlBlock.RootID
+
+	refs := sql.QueryRefsByDefIDInBox(defID, containChildren, boxID)
+	refs = removeDuplicatedRefs(refs)
+
+	linkRefs, _, excludeBacklinkIDs, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, boxID)
+	tmpMentions, mentionKeywords := buildTreeBackmentionInBox(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen, boxID)
+	luteEngine := util.NewLute()
+	var mentions []*Block
+	for _, mention := range tmpMentions {
+		if mention.RootID == refTreeID {
+			mentions = append(mentions, mention)
+		}
+	}
+	var mentionBlockIDs []string
+	for _, mention := range mentions {
+		mentionBlockIDs = append(mentionBlockIDs, mention.ID)
+	}
+	mentionBlockIDs = gulu.Str.RemoveDuplicatedElem(mentionBlockIDs)
+
+	if "" != keyword {
+		mentionKeywords = append(mentionKeywords, strings.Split(keyword, " ")...)
+	}
+	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
+	keywords = append(keywords, mentionKeywords...)
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
+
+	var refTree *parse.Tree
+	for _, id := range mentionBlockIDs {
+		tree, loadErr := loadTreeByBlockIDInBox(id, boxID)
+		if loadErr != nil || tree == nil {
+			continue
+		}
+		backlink := buildBacklink(id, tree, originalRefBlockIDs, mentionKeywords, highlight, luteEngine)
+		if nil != backlink {
+			ret = append(ret, backlink)
+		}
+		if nil != tree && nil == refTree {
+			refTree = tree
+		}
+	}
+
+	if 0 < len(ret) {
+		sortBacklinks(ret, refTree)
+		filterBlockPaths(ret)
+	}
+	return
+}
+
 func filterBlockPaths(blockLinks []*Backlink) {
 	for _, b := range blockLinks {
 		if 2 == len(b.BlockPaths) {
@@ -820,6 +929,9 @@ func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keywo
 			}
 		}
 		root := treenode.GetBlockTreeInBox(defSQLBlock.RootID, boxID)
+		if nil == root {
+			return
+		}
 		rootID = root.ID
 	}
 

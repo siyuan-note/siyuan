@@ -436,6 +436,8 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 				repoBoxID = parts[0]
 			}
 			if repoBoxID != "" && IsEncryptedBox(repoBoxID) {
+				HoldBoxReadLock(repoBoxID)
+				defer ReleaseBoxReadLock(repoBoxID)
 				if dek, dekErr := GetDEKIfUnlocked(repoBoxID); dekErr == nil && dek != nil {
 					avID := strings.TrimSuffix(filepath.Base(file.Path), ".json")
 					if plainData, decErr := av.DecryptAVData(repoBoxID, avID, data); decErr == nil {
@@ -465,6 +467,8 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 					repoBoxID = parts[0]
 				}
 				if repoBoxID != "" && IsEncryptedBox(repoBoxID) {
+					HoldBoxReadLock(repoBoxID)
+					defer ReleaseBoxReadLock(repoBoxID)
 					// 加密 asset：尝试解密后预览，无法解密则 fail-closed
 					if dek, dekErr := GetDEKIfUnlocked(repoBoxID); dekErr == nil && dek != nil {
 						diskName := filepath.Base(file.Path)
@@ -794,6 +798,8 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 	repoRel := strings.TrimPrefix(file.Path, "/")
 	repoParts := strings.SplitN(repoRel, "/", 2)
 	if len(repoParts) >= 1 && ast.IsNodeIDPattern(repoParts[0]) && IsEncryptedBox(repoParts[0]) {
+		HoldBoxReadLock(repoParts[0])
+		defer ReleaseBoxReadLock(repoParts[0])
 		if _, dekErr := GetDEKIfUnlocked(repoParts[0]); dekErr != nil {
 			err = errors.New(Conf.Language(314))
 			return

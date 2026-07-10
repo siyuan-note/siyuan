@@ -436,6 +436,8 @@ func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
 		actualBoxID = boxID // 路径不在 box 下（如全局 assets），回退传入值
 	}
 	if actualBoxID != "" && IsEncryptedBox(actualBoxID) {
+		HoldBoxReadLock(actualBoxID)
+		defer ReleaseBoxReadLock(actualBoxID)
 		dek, dekErr := GetDEKIfUnlocked(actualBoxID)
 		if dekErr != nil {
 			// 加密笔记本未解锁：拒绝写入，避免明文落盘（深度防御，见 issue #18034）
@@ -469,10 +471,13 @@ func StoreAssetForBox(boxID, assetDirPath, originalName string, data []byte) (di
 // boxID 为空时按普通 box 处理（写入全局 assets）。
 func storeAssetForBox(boxID, assetDirPath, originalName string, data []byte) (diskName string, err error) {
 	if IsEncryptedBox(boxID) {
+		HoldBoxReadLock(boxID)
+		defer ReleaseBoxReadLock(boxID)
+
 		ext := filepath.Ext(originalName)
 		blockID := ast.NewNodeID()
 		diskName = encryptedAssetName(ext, blockID)
-		writeAssetNameMapping(boxID, diskName, originalName)
+		writeAssetNameMappingLocked(boxID, diskName, originalName)
 
 		dek, dekErr := GetDEKIfUnlocked(boxID)
 		if dekErr != nil {
@@ -517,12 +522,18 @@ func writeAssetNameMapping(boxID, diskName, originalName string) {
 	if boxID == "" || !IsEncryptedBox(boxID) {
 		return
 	}
+	HoldBoxReadLock(boxID)
+	defer ReleaseBoxReadLock(boxID)
+	writeAssetNameMappingLocked(boxID, diskName, originalName)
+}
+
+func writeAssetNameMappingLocked(boxID, diskName, originalName string) {
 	muI, _ := assetNameMappingLocks.LoadOrStore(boxID, &sync.Mutex{})
 	mu := muI.(*sync.Mutex)
 	mu.Lock()
 	defer mu.Unlock()
 
-	mapping := readAssetNameMapping(boxID)
+	mapping := readAssetNameMappingLocked(boxID)
 	mapping[diskName] = originalName
 	data, err := json.Marshal(mapping)
 	if err != nil {
@@ -550,6 +561,13 @@ func readAssetNameMapping(boxID string) map[string]string {
 	if boxID == "" || !IsEncryptedBox(boxID) {
 		return ret
 	}
+	HoldBoxReadLock(boxID)
+	defer ReleaseBoxReadLock(boxID)
+	return readAssetNameMappingLocked(boxID)
+}
+
+func readAssetNameMappingLocked(boxID string) map[string]string {
+	ret := map[string]string{}
 	p := assetNameMappingPath(boxID)
 	enc, err := filelock.ReadFile(p)
 	if err != nil {
@@ -575,4 +593,9 @@ func readAssetNameMapping(boxID string) map[string]string {
 // 未找到时返回空串。
 func LookupAssetOriginalName(boxID, diskName string) string {
 	return readAssetNameMapping(boxID)[diskName]
+}
+
+// LookupAssetOriginalNameLocked 在调用方已持有 box 读锁时查询原始资源名。
+func LookupAssetOriginalNameLocked(boxID, diskName string) string {
+	return readAssetNameMappingLocked(boxID)[diskName]
 }

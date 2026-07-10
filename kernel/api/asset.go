@@ -305,6 +305,8 @@ func setFileAnnotation(c *gin.Context) {
 		// 加密笔记本的 .sya 写盘前必须加密；加密笔记本未解锁时拒绝写入（fail-closed，避免明文落盘）
 		writeData := []byte(data)
 		if boxID := model.ExtractBoxIDFromAssetsPath(writePath); boxID != "" && model.IsEncryptedBox(boxID) {
+			model.HoldBoxReadLock(boxID)
+			defer model.ReleaseBoxReadLock(boxID)
 			dek, dekErr := model.GetDEKIfUnlocked(boxID)
 			if dekErr != nil {
 				ret.Code = -1
@@ -360,6 +362,8 @@ func getFileAnnotation(c *gin.Context) {
 	}
 	// 加密笔记本的 .sya 读盘后必须解密；未解锁时拒绝返回（fail-closed，避免返回密文或误判）
 	if boxID := model.ExtractBoxIDFromAssetsPath(readPath); boxID != "" && model.IsEncryptedBox(boxID) {
+		model.HoldBoxReadLock(boxID)
+		defer model.ReleaseBoxReadLock(boxID)
 		dek, dekErr := model.GetDEKIfUnlocked(boxID)
 		if dekErr != nil {
 			ret.Code = -1

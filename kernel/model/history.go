@@ -186,6 +186,8 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	if len(pathParts) >= 2 {
 		histBoxID := pathParts[1]
 		if IsEncryptedBox(histBoxID) {
+			HoldBoxReadLock(histBoxID)
+			defer ReleaseBoxReadLock(histBoxID)
 			dek, dekErr := GetDEKIfUnlocked(histBoxID)
 			if dekErr != nil {
 				err = errors.New(Conf.Language(314))
@@ -313,6 +315,8 @@ func RollbackDocHistory(historyPath string) (err error) {
 		return
 	}
 	if IsEncryptedBox(origBoxID) {
+		HoldBoxReadLock(origBoxID)
+		defer ReleaseBoxReadLock(origBoxID)
 		dek, dekErr := GetDEKIfUnlocked(origBoxID)
 		if dekErr != nil {
 			err = errors.New(Conf.Language(314))

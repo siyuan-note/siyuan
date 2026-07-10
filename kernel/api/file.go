@@ -69,6 +69,8 @@ func copyDecryptedAsset(src, dest string) error {
 	if boxID == "" || !model.IsEncryptedBox(boxID) {
 		return fmt.Errorf("source is not an encrypted asset")
 	}
+	model.HoldBoxReadLock(boxID)
+	defer model.ReleaseBoxReadLock(boxID)
 	dek, dekErr := model.GetDEKIfUnlocked(boxID)
 	if dekErr != nil {
 		return dekErr

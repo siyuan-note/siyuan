@@ -833,7 +833,7 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 		return true
 	}
 	// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
-	if originalName := model.LookupAssetOriginalName(boxID, diskName); originalName != "" {
+	if originalName := model.LookupAssetOriginalNameLocked(boxID, diskName); originalName != "" {
 		setAssetsAttachmentDisposition(context, originalName)
 	} else {
 		setAssetsAttachmentDisposition(context, absPath)
@@ -953,6 +953,8 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		// 从路径提取 boxID，加密笔记本已锁定时拒绝访问（锁定后 repo 预览解密文件仍存在磁盘上）
 		parts := strings.SplitN(strings.TrimPrefix(requestPath, "/"), "/", 2)
 		if len(parts) >= 1 && model.IsEncryptedBox(parts[0]) {
+			model.HoldBoxReadLock(parts[0])
+			defer model.ReleaseBoxReadLock(parts[0])
 			if _, dekErr := model.GetDEKIfUnlocked(parts[0]); dekErr != nil {
 				context.Status(http.StatusForbidden)
 				return

@@ -52,6 +52,10 @@ func getBackmentionDoc(c *gin.Context) {
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
 	keyword := arg["keyword"].(string)
+	var notebook string
+	if val, ok := arg["notebook"]; ok {
+		notebook = val.(string)
+	}
 	containChildren := model.Conf.Editor.BacklinkContainChildren
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
@@ -60,7 +64,13 @@ func getBackmentionDoc(c *gin.Context) {
 	if val, ok := arg["highlight"]; ok {
 		highlight = val.(bool)
 	}
-	backlinks, keywords := model.GetBackmentionDoc(defID, refTreeID, keyword, containChildren, highlight)
+	var backlinks []*model.Backlink
+	var keywords []string
+	if notebook != "" && model.IsEncryptedBox(notebook) {
+		backlinks, keywords = model.GetBackmentionDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook)
+	} else {
+		backlinks, keywords = model.GetBackmentionDoc(defID, refTreeID, keyword, containChildren, highlight)
+	}
 	ret.Data = map[string]any{
 		"backmentions": backlinks,
 		"keywords":     keywords,
@@ -79,6 +89,10 @@ func getBacklinkDoc(c *gin.Context) {
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
 	keyword := arg["keyword"].(string)
+	var notebook string
+	if val, ok := arg["notebook"]; ok {
+		notebook = val.(string)
+	}
 	containChildren := model.Conf.Editor.BacklinkContainChildren
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
@@ -87,7 +101,13 @@ func getBacklinkDoc(c *gin.Context) {
 	if val, ok := arg["highlight"]; ok {
 		highlight = val.(bool)
 	}
-	backlinks, keywords := model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight)
+	var backlinks []*model.Backlink
+	var keywords []string
+	if notebook != "" && model.IsEncryptedBox(notebook) {
+		backlinks, keywords = model.GetBacklinkDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook)
+	} else {
+		backlinks, keywords = model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight)
+	}
 	ret.Data = map[string]any{
 		"backlinks": backlinks,
 		"keywords":  keywords,

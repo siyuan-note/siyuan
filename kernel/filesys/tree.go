@@ -27,6 +27,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
@@ -143,7 +144,29 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 	return
 }
 
+// ValidateBoxRelativePath 校验 box 内相对路径是否安全。
+// 拒绝 ..、绝对路径、盘符，确保最终路径位于 <DataDir>/<boxID> 内。
+func ValidateBoxRelativePath(boxID, p string) (string, error) {
+	p = filepath.ToSlash(p)
+	if strings.HasPrefix(p, "..") || strings.Contains(p, "/../") || strings.HasSuffix(p, "/..") || p == ".." {
+		return "", fmt.Errorf("path [%s] must not contain '..'", p)
+	}
+	if strings.HasPrefix(p, "/") {
+		return "", fmt.Errorf("path [%s] must be relative", p)
+	}
+	resolved := filepath.Join(util.DataDir, boxID, p)
+	boxRoot := filepath.Join(util.DataDir, boxID)
+	if !gulu.File.IsSubPath(boxRoot, resolved) {
+		return "", fmt.Errorf("path [%s] escapes box directory", p)
+	}
+	return p, nil
+}
+
 func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
+	if _, err = ValidateBoxRelativePath(boxID, p); err != nil {
+		logging.LogErrorf("invalid tree path [%s] for box [%s]: %s", p, boxID, err)
+		return
+	}
 	rootID := util.GetTreeID(p)
 	if raw, ok := cache.GetTreeData(rootID); ok {
 		ret, err = LoadTreeByData(raw, boxID, p, luteEngine)
@@ -380,6 +403,10 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	}
 
 	treenode.UpgradeSpec(tree)
+
+	if _, err = ValidateBoxRelativePath(tree.Box, tree.Path); err != nil {
+		return
+	}
 
 	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)
 	tree.Root.SetIALAttr("type", "doc")

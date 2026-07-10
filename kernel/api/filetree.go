@@ -78,8 +78,24 @@ func listDocTree(c *gin.Context) {
 
 	p := arg["path"].(string)
 	p = strings.TrimSuffix(p, ".sy")
+	// 越界校验：拒绝 .. 和绝对路径，确保路径位于 <data>/<notebook>/ 内
+	if idx := strings.Index(p, ".."); idx >= 0 {
+		ret.Code = -1
+		ret.Msg = "path must not contain '..'"
+		return
+	}
+	if filepath.IsAbs(p) {
+		ret.Code = -1
+		ret.Msg = "path must be relative"
+		return
+	}
 	var doctree []*DocFile
 	root := filepath.Join(util.WorkspaceDir, "data", notebook, p)
+	if !gulu.File.IsSubPath(filepath.Join(util.WorkspaceDir, "data", notebook), root) {
+		ret.Code = -1
+		ret.Msg = "path escapes notebook directory"
+		return
+	}
 	dir, err := os.ReadDir(root)
 	if err != nil {
 		ret.Code = -1

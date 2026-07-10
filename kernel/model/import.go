@@ -809,6 +809,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 // updateImportedAssetRefs 遍历树的 assets 引用路径，将原始文件名替换为脱敏文件名。
 // 覆盖：链接 href、图片 src、data-src、音视频 src、文件标注等。
 func updateImportedAssetRefs(tree *parse.Tree, assetNameMap map[string]string) {
+	boxSuffix := ""
+	if IsEncryptedBox(tree.Box) {
+		boxSuffix = "?box=" + tree.Box
+	}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -817,26 +821,26 @@ func updateImportedAssetRefs(tree *parse.Tree, assetNameMap map[string]string) {
 		case ast.NodeLink:
 			// 链接 dest
 			dest := string(n.Tokens)
-			if updated := replaceAssetName(dest, assetNameMap); updated != dest {
+			if updated := replaceAssetName(dest, assetNameMap, boxSuffix); updated != dest {
 				n.Tokens = []byte(updated)
 			}
 		case ast.NodeImage:
 			// 图片 src 在 LinkDest 子节点
 			if dest := n.ChildByType(ast.NodeLinkDest); nil != dest {
 				src := string(dest.Tokens)
-				if updated := replaceAssetName(src, assetNameMap); updated != src {
+				if updated := replaceAssetName(src, assetNameMap, boxSuffix); updated != src {
 					dest.Tokens = []byte(updated)
 				}
 			}
 		case ast.NodeAudio, ast.NodeVideo:
 			src := n.TokensStr()
-			if updated := replaceAssetName(src, assetNameMap); updated != src {
+			if updated := replaceAssetName(src, assetNameMap, boxSuffix); updated != src {
 				n.Tokens = []byte(updated)
 			}
 		case ast.NodeTextMark:
 			// 行级文本标记里的 data-href（附件链接）
 			if "" != n.TextMarkAHref {
-				if updated := replaceAssetName(n.TextMarkAHref, assetNameMap); updated != n.TextMarkAHref {
+				if updated := replaceAssetName(n.TextMarkAHref, assetNameMap, boxSuffix); updated != n.TextMarkAHref {
 					n.TextMarkAHref = updated
 				}
 			}
@@ -845,8 +849,8 @@ func updateImportedAssetRefs(tree *parse.Tree, assetNameMap map[string]string) {
 	})
 }
 
-// replaceAssetName 在 assets 路径中替换原始文件名为脱敏文件名。
-func replaceAssetName(path string, assetNameMap map[string]string) string {
+// replaceAssetName 在 assets 路径中替换原始文件名为脱敏文件名，并按需追加 box query。
+func replaceAssetName(path string, assetNameMap map[string]string, boxSuffix string) string {
 	if !strings.Contains(path, "assets/") {
 		return path
 	}
@@ -855,6 +859,10 @@ func replaceAssetName(path string, assetNameMap map[string]string) string {
 		idx := strings.LastIndex(path, original)
 		if idx > 0 && strings.Contains(path[idx:], original) {
 			path = path[:idx] + diskName + path[idx+len(original):]
+			// 替换后如果没有 box query，补上
+			if boxSuffix != "" && !strings.Contains(path, "?box=") {
+				path += boxSuffix
+			}
 		}
 	}
 	return path

@@ -455,6 +455,14 @@ func writeAssetFile(writePath string, src io.Reader, boxID string) (err error) {
 	return filelock.WriteFileByReader(writePath, src)
 }
 
+// StoreAssetForBox 统一资产写入入口：根据 boxID 决定加密/明文写入，返回磁盘文件名（不含路径前缀）。
+// 加密 box：生成脱敏名 → writeAssetNameMapping 记录映射 → EncryptAsset 加密 → filelock.WriteFile
+// 普通 box：util.AssetName 生成名 → filelock.WriteFile 明文写入
+// boxID 为空时按普通 box 处理（写入全局 assets）。
+func StoreAssetForBox(boxID, assetDirPath, originalName string, data []byte) (diskName string, err error) {
+	return storeAssetForBox(boxID, assetDirPath, originalName, data)
+}
+
 // storeAssetForBox 统一资产写入入口：根据 boxID 决定加密/明文写入，返回磁盘文件名（不含路径前缀）。
 // 加密 box：生成脱敏名 → writeAssetNameMapping 记录映射 → EncryptAsset 加密 → filelock.WriteFile
 // 普通 box：util.AssetName 生成名 → filelock.WriteFile 明文写入

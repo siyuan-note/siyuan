@@ -862,9 +862,9 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	var plain []byte
 	var decErr error
 	if strings.HasSuffix(absPath, ".sy") {
-		// 从绝对路径推导 box 内相对路径作为 AAD
-		relPath := strings.TrimPrefix(absPath, filepath.Join(util.DataDir, boxID)+string(os.PathSeparator))
-		relPath = filepath.ToSlash(relPath)
+		// history 路径格式：<historyDir>/<datePrefix>/<boxID>/<relativePath>
+		// 需提取 box 内相对路径作为 AAD，不能用 DataDir 前缀 trim
+		relPath := extractHistoryRelPath(absPath, boxID)
 		plain, decErr = model.DecryptFile(boxID, relPath, dek, ciphertext)
 	} else if strings.Contains(absPath, "assets"+string(os.PathSeparator)) {
 		diskName := filepath.Base(absPath)
@@ -889,6 +889,18 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	}
 	context.Data(200, contentType, plain)
 	return true
+}
+
+// extractHistoryRelPath 从 history 绝对路径中提取 box 内相对路径作为 AAD。
+// history 路径格式：<historyDir>/<datePrefix>/<boxID>/<relativePath>。
+func extractHistoryRelPath(absPath, boxID string) string {
+	absPath = filepath.ToSlash(absPath)
+	idx := strings.Index(absPath, "/"+boxID+"/")
+	if idx < 0 {
+		return ""
+	}
+	rel := absPath[idx+len("/"+boxID+"/"):]
+	return rel
 }
 
 func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool {

@@ -36,13 +36,15 @@ var AVIsEncryptedBox func(boxID string) bool
 var pendingAVBox = map[string]string{}
 var pendingAVBoxLock = sync.RWMutex{}
 
-// SetAVBoxID 预设 AV 定义的归属 box。加密笔记本创建 AV 时调用。
+// SetAVBoxID 预设 AV 定义的归属 box。加密笔记本创建 AV 时调用，boxID 为空时清理映射。
 // 普通笔记本不需要调（AV 默认走全局路径）。
 func SetAVBoxID(avID, boxID string) {
+	pendingAVBoxLock.Lock()
+	defer pendingAVBoxLock.Unlock()
 	if boxID != "" {
-		pendingAVBoxLock.Lock()
-		defer pendingAVBoxLock.Unlock()
 		pendingAVBox[avID] = boxID
+	} else {
+		delete(pendingAVBox, avID)
 	}
 }
 
@@ -64,14 +66,15 @@ func attributeViewDataPathByBox(avID, boxID string) string {
 }
 
 // FindAttributeViewPath 按 fallback 逻辑查找 AV 定义文件的实际路径。
-// 1. 先查 pendingAVBox（首次创建预设的 boxID）
+// 1. 先查 pendingAVBox（首次创建预设的 boxID），不检查文件是否存在（首次创建场景）
 // 2. 查全局 storage/av/（普通 box）
 // 3. 遍历已打开的加密笔记本查找
 // 返回找到的路径和对应的 boxID（普通 box 返回空 boxID）。找不到返回空串。
 func FindAttributeViewPath(avID string) (path string, boxID string) {
-	// 先查 pendingAVBox（首次创建场景）
+	// 先查 pendingAVBox（首次创建场景），不要求文件存在
 	if pendingBoxID := GetAVBoxID(avID); pendingBoxID != "" {
 		encPath := attributeViewDataPathByBox(avID, pendingBoxID)
+		// pending 存在就直接返回该 box 路径（首次创建时文件尚不存在）
 		return encPath, pendingBoxID
 	}
 	// 查全局
@@ -95,9 +98,10 @@ func FindAttributeViewPath(avID string) (path string, boxID string) {
 func FindAttributeViewPathInBox(avID, boxID string) (path string, retBoxID string) {
 	if pendingBoxID := GetAVBoxID(avID); pendingBoxID != "" {
 		if pendingBoxID == boxID {
+			// pending 匹配目标 box，直接返回（首次创建时文件尚不存在）
 			return attributeViewDataPathByBox(avID, pendingBoxID), pendingBoxID
 		}
-		return "", boxID
+		// pending 映射属于其他 box，不遮蔽本 box 的文件查找，继续检查磁盘
 	}
 	avPath := attributeViewDataPathByBox(avID, boxID)
 	if filelock.IsExist(avPath) {

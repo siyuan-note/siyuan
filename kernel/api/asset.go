@@ -359,14 +359,14 @@ func getFileAnnotation(c *gin.Context) {
 }
 
 func resolveFileAnnotationAbsPath(assetRelPath string) (ret string, err error) {
+	// .sya 在 URL 末尾，例如 assets/a.pdf?box=<id>.sya
+	// TrimSuffix 去掉 .sya 得到 assets/a.pdf?box=<id>，保留 query 供 box-aware 解析
 	filePath := strings.TrimSuffix(assetRelPath, ".sya")
 	absPath, err := model.GetAssetAbsPathInBox(filePath, "")
 	if err != nil {
 		return
 	}
-	dir := filepath.Dir(absPath)
-	base := filepath.Base(assetRelPath)
-	ret = filepath.Join(dir, base)
+	ret = absPath + ".sya"
 	return
 }
 

@@ -74,7 +74,7 @@ func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 }
 
 // ReadAssetBytesInBox 读取指定 box 内的资源文件字节。若 box 为加密笔记本则自动解密返回明文。
-// relativePath 形如 "assets/xxx.png"。
+// relativePath 形如 "assets/xxx.png"，可带 ?box= 查询参数。
 func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
 	absPath, err := GetAssetAbsPathInBox(relativePath, boxID)
 	if err != nil {
@@ -84,13 +84,15 @@ func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
 	if readErr != nil {
 		return nil, readErr
 	}
-	if IsEncryptedBox(boxID) {
-		dek, dekErr := GetDEKIfUnlocked(boxID)
+	// 从解析到的绝对路径反推有效 boxID，不轻信传入参数（路径可能通过 ?box= 指定了不同 box）
+	effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath)
+	if effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
+		dek, dekErr := GetDEKIfUnlocked(effectiveBoxID)
 		if dekErr != nil {
 			return nil, dekErr
 		}
-		diskName := filepath.Base(relativePath)
-		plain, decErr := DecryptAsset(boxID, diskName, dek, data)
+		diskName := filepath.Base(AssetPathWithoutQuery(relativePath))
+		plain, decErr := DecryptAsset(effectiveBoxID, diskName, dek, data)
 		if decErr != nil {
 			return nil, decErr
 		}
@@ -380,7 +382,11 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 					}
 				}
 
-				setAssetsLinkDest(destNode, dest, "assets/"+name)
+				assetURL := "assets/" + name
+				if IsEncryptedBox(tree.Box) {
+					assetURL += "?box=" + tree.Box
+				}
+				setAssetsLinkDest(destNode, dest, assetURL)
 				assetsMap[u] = name
 				files++
 				size += gulu.File.GetFileSize(writePath)
@@ -504,7 +510,11 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 					}
 				}
 
-				setAssetsLinkDest(destNode, dest, "assets/"+name)
+				assetURL := "assets/" + name
+				if IsEncryptedBox(tree.Box) {
+					assetURL += "?box=" + tree.Box
+				}
+				setAssetsLinkDest(destNode, dest, assetURL)
 				assetsMap[u] = name
 				files++
 				size += int64(len(data))
@@ -645,14 +655,19 @@ func AssetPathWithoutQuery(relativePath string) string {
 	return filepath.ToSlash(relativePath)
 }
 
-func assetPathAndBox(relativePath, defaultBoxID string) (cleanPath, boxID string) {
+func assetPathAndBox(relativePath, defaultBoxID string) (cleanPath, boxID string, err error) {
 	relativePath = strings.TrimSpace(relativePath)
 	boxID = defaultBoxID
 	if idx := strings.Index(relativePath, "?"); idx >= 0 {
 		query := relativePath[idx+1:]
 		relativePath = relativePath[:idx]
-		if values, err := url.ParseQuery(query); err == nil {
+		if values, parseErr := url.ParseQuery(query); parseErr == nil {
 			if queryBoxID := strings.TrimSpace(values.Get("box")); queryBoxID != "" {
+				if defaultBoxID != "" && defaultBoxID != queryBoxID {
+					// 调用方指定了 boxID 但 URL 里是另一个 box：拒绝，防止解析到错误 box
+					err = fmt.Errorf("box mismatch: caller specified [%s] but URL has [%s]", defaultBoxID, queryBoxID)
+					return
+				}
 				boxID = queryBoxID
 			}
 		}
@@ -662,13 +677,20 @@ func assetPathAndBox(relativePath, defaultBoxID string) (cleanPath, boxID string
 }
 
 // GetAssetAbsPathInBox 在指定 box 内解析资源绝对路径，不进行全局遍历。
-// boxID 为空且路径没有 box 查询参数时只解析普通/全局资源，不遍历加密 box。
+// relativePath 必须以 assets/ 前缀开头，boxID 为空且路径没有 box 查询参数时只解析普通/全局资源，不遍历加密 box。
 // 加密 box 直接从 <boxID>/assets/ 查找，不依赖后缀匹配。
 func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
-	relativePath, boxID = assetPathAndBox(relativePath, boxID)
+	var err error
+	relativePath, boxID, err = assetPathAndBox(relativePath, boxID)
+	if err != nil {
+		return "", err
+	}
 	relativePath = path.Clean(relativePath)
 	if relativePath == "." || strings.HasPrefix(relativePath, "../") || relativePath == ".." || path.IsAbs(relativePath) {
 		return "", fmt.Errorf("[%s] is not an asset path", relativePath)
+	}
+	if !strings.HasPrefix(relativePath, "assets/") {
+		return "", fmt.Errorf("[%s] is not an asset path (must start with assets/)", relativePath)
 	}
 	if boxID != "" && !ast.IsNodeIDPattern(boxID) {
 		return "", fmt.Errorf("[%s] is not a box id", boxID)
@@ -1828,8 +1850,11 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 	}
 
 	assetsAbsPathMap = map[string]string{}
-	// 笔记本 assets
+	// 笔记本 assets（跳过加密 box，加密资产不参与全局去重/清理）
 	for _, notebook := range notebooks {
+		if IsEncryptedBox(notebook.ID) {
+			continue
+		}
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
 		filelock.Walk(notebookAbsPath, func(path string, d fs.DirEntry, err error) error {
 			if notebookAbsPath == path {

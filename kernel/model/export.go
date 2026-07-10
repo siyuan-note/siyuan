@@ -1581,6 +1581,12 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 
 		if !removeAssets {
 			// 不移除资源文件夹的话将超链接指向资源文件夹
+			// 加密资源的 link.URI 需要保留 ?box= 上下文，否则导出的 PDF 链接无法解析
+			if idx := strings.Index(sourceURI, "?"); 0 < idx {
+				if strings.Contains(sourceURI[idx:], "box=") {
+					link.URI = sourceURI
+				}
+			}
 			if 1 > len(linkMap[link.Page]) {
 				linkMap[link.Page] = []model.AnnotationRenderer{link}
 			} else {
@@ -2441,16 +2447,22 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 	}
 
 	// 级联导出关联列关联的数据库
-	exportRelationAvs(avID, exportStorageAvDir)
+	exportRelationAvs(avID, boxID, exportStorageAvDir)
 }
 
-func exportRelationAvs(avID, exportStorageAvDir string) {
+func exportRelationAvs(avID, boxID, exportStorageAvDir string) {
 	avIDs := hashset.New()
-	walkRelationAvs(avID, avIDs)
+	walkRelationAvs(avID, boxID, avIDs)
 
 	for _, v := range avIDs.Values() {
 		relAvID := v.(string)
-		relAvData, readErr := av.ReadAttributeViewData(relAvID)
+		var relAvData []byte
+		var readErr error
+		if boxID != "" {
+			relAvData, readErr = av.ReadAttributeViewDataInBox(relAvID, boxID)
+		} else {
+			relAvData, readErr = av.ReadAttributeViewData(relAvID)
+		}
 		if readErr != nil {
 			logging.LogErrorf("read relation attribute view [%s] failed: %s", relAvID, readErr)
 			continue
@@ -2464,12 +2476,17 @@ func exportRelationAvs(avID, exportStorageAvDir string) {
 	}
 }
 
-func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
+func walkRelationAvs(avID, boxID string, exportAvIDs *hashset.Set) {
 	if exportAvIDs.Contains(avID) {
 		return
 	}
 
-	attrView, _ := av.ParseAttributeView(avID)
+	var attrView *av.AttributeView
+	if boxID != "" {
+		attrView, _ = av.ParseAttributeViewInBox(avID, boxID)
+	} else {
+		attrView, _ = av.ParseAttributeView(avID)
+	}
 	if nil == attrView {
 		return
 	}
@@ -2482,7 +2499,7 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 				break
 			}
 
-			walkRelationAvs(keyValues.Key.Relation.AvID, exportAvIDs)
+			walkRelationAvs(keyValues.Key.Relation.AvID, boxID, exportAvIDs)
 		}
 	}
 }
@@ -2756,7 +2773,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					return ast.WalkSkipChildren
 				}
 
-				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode)
+				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode, tree.Box)
 				unlinks = append(unlinks, n)
 				return status
 			} else if n.IsTextMarkType("tag") {
@@ -3580,18 +3597,32 @@ type refAsFootnotes struct {
 	refAnchorText string
 }
 
-func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int) ast.WalkStatus {
+func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int, boxID string) ast.WalkStatus {
 	p := refID[:strings.LastIndex(refID, "/")]
-	absPath, err := GetAssetAbsPathInBox(p, "")
+	absPath, err := GetAssetAbsPathInBox(p, boxID)
 	if err != nil {
 		logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
 		return ast.WalkSkipChildren
 	}
 	sya := absPath + ".sya"
-	syaData, err := os.ReadFile(sya)
-	if err != nil {
-		logging.LogErrorf("read file [%s] failed: %s", sya, err)
+	syaData, readErr := os.ReadFile(sya)
+	if readErr != nil {
+		logging.LogErrorf("read file [%s] failed: %s", sya, readErr)
 		return ast.WalkSkipChildren
+	}
+	// 加密 box 的 .sya 是密文，需先解密
+	if IsEncryptedBox(boxID) {
+		dek, dekErr := GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			logging.LogWarnf("get DEK for file annotation [%s] failed: %s", sya, dekErr)
+			return ast.WalkSkipChildren
+		}
+		plain, decErr := DecryptAsset(boxID, filepath.Base(sya), dek, syaData)
+		if decErr != nil {
+			logging.LogWarnf("decrypt file annotation [%s] failed: %s", sya, decErr)
+			return ast.WalkSkipChildren
+		}
+		syaData = plain
 	}
 	syaJSON := map[string]any{}
 	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); err != nil {

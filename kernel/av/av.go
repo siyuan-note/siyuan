@@ -514,13 +514,15 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 }
 
 func ParseAttributeViewInBox(avID, boxID string) (ret *AttributeView, err error) {
-	if boxID != "" {
-		SetAVBoxID(avID, boxID)
-	}
 	avJSONPath, avBoxID := FindAttributeViewPathInBox(avID, boxID)
 	if avJSONPath == "" {
 		avJSONPath = attributeViewDataPathByBox(avID, boxID)
 		avBoxID = boxID
+	} else {
+		// 只在文件确实存在于该 box 内时才设置映射，避免错误 boxID 污染后续路由
+		if boxID != "" {
+			SetAVBoxID(avID, boxID)
+		}
 	}
 	return parseAttributeViewByPathInBox(avJSONPath, avBoxID)
 }

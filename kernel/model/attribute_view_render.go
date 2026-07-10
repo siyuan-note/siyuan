@@ -594,8 +594,8 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 
 	// 加密笔记本的 AV 在快照中是密文，按路径反查 boxID 后解密
-		if histBoxID := avBoxIDFromRepoPath(avFile.Path); histBoxID != "" && IsEncryptedBox(histBoxID) {
-			dec, decErr := av.DecryptAVData(histBoxID, avID, data)
+	if histBoxID := avBoxIDFromRepoPath(avFile.Path); histBoxID != "" && IsEncryptedBox(histBoxID) {
+		dec, decErr := av.DecryptAVData(histBoxID, avID, data)
 		if decErr != nil {
 			logging.LogErrorf("decrypt snapshot attribute view [%s] failed: %s", avID, decErr)
 			err = decErr

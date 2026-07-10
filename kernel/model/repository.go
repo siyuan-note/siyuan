@@ -258,6 +258,14 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 	util.PushClearProgress()
 
 	from := filepath.Join(tempRepoDiffDir, f)
+	// 加密笔记本的快照数据是密文，写入临时文件前先解密
+	if strings.HasSuffix(file.Path, ".sy") {
+		boxID := strings.TrimPrefix(file.Path, "/")
+		boxID = strings.Split(boxID, "/")[0]
+		if IsEncryptedBox(boxID) {
+			data = decryptRepoDataIfNeeded(data, file.Path)
+		}
+	}
 	if err = os.WriteFile(from, data, 0644); nil != err {
 		logging.LogErrorf("write file [%s] failed: %v", filepath.Join(tempRepoDiffDir, file.Path), err)
 		return
@@ -423,6 +431,29 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 			content = gulu.Str.FromBytes(data)
 		} else {
 			if strings.Contains(file.Path, "assets/") { // 剔除笔记本级或者文档级资源文件路径前缀
+				// 加密 notebook 的 asset 在仓库里是密文，不解密直接写临时目录会泄漏密文
+				// 先用原始 path 检测是否加密 box，再裁剪 file.Path 到 assets/ 前缀
+				repoBoxID := ""
+				origPath := strings.TrimPrefix(file.Path, "/")
+				if parts := strings.SplitN(origPath, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) {
+					repoBoxID = parts[0]
+				}
+				if repoBoxID != "" && IsEncryptedBox(repoBoxID) {
+					// 加密 asset：尝试解密后预览，无法解密则 fail-closed
+					if dek, dekErr := GetDEKIfUnlocked(repoBoxID); dekErr == nil && dek != nil {
+						diskName := filepath.Base(file.Path)
+						if plainData, decErr := DecryptAsset(repoBoxID, diskName, dek, data); decErr == nil {
+							data = plainData
+						} else {
+							logging.LogWarnf("decrypt repo snapshot asset [%s] failed: %s", file.Path, decErr)
+							content = file.Path
+							return
+						}
+					} else {
+						content = file.Path
+						return
+					}
+				}
 				file.Path = file.Path[strings.Index(file.Path, "assets/"):]
 				if util.IsDisplayableAsset(file.Path) {
 					dir, f := filepath.Split(file.Path)

@@ -113,6 +113,9 @@ func flushTx(tx *Transaction) {
 	start := time.Now()
 	if txErr := performTx(tx); nil != txErr {
 		switch txErr.code {
+		case TxErrCodeSkipTx:
+			// 操作已跳过，提示消息已在具体函数中 PushMsg，不弹状态异常
+			return
 		case TxErrCodeBlockNotFound, TxErrCodePushMsg:
 			pushMsg := txErr.msg
 			if pushMsg == "" {
@@ -158,6 +161,7 @@ const (
 	TxErrCodeWriteTree       = 2
 	TxErrHandleAttributeView = 3
 	TxErrCodePushMsg         = 4
+	TxErrCodeSkipTx          = 5 // 操作被跳过（如跨加密边界移动），已 PushMsg 提示，不弹状态异常
 )
 
 type TxErr struct {
@@ -510,7 +514,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 		// 禁止跨加密边界移动块：加密笔记本是孤岛，跨 box 移动会破坏隔离（内容从 A 泄漏到 B）
 		if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-			return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
+			util.PushMsg(Conf.Language(313), 5000)
+			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
 		targetNode := treenode.GetNodeInTree(targetTree, targetPreviousID)
@@ -591,7 +596,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 	// 禁止跨加密边界移动块（同 doMove targetPreviousID 分支）
 	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
+		util.PushMsg(Conf.Language(313), 5000)
+		return &TxErr{code: TxErrCodeSkipTx}
 	}
 
 	targetNode := treenode.GetNodeInTree(targetTree, targetParentID)
@@ -935,7 +941,8 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	}
 	// 禁止跨加密边界插入块（同 doMove 守卫）
 	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-		return &TxErr{code: TxErrCodeBlockNotFound, id: id, msg: Conf.Language(313)}
+		util.PushMsg(Conf.Language(313), 5000)
+		return &TxErr{code: TxErrCodeSkipTx}
 	}
 
 	targetRoot := targetTree.Root

@@ -243,7 +243,8 @@
           pointer-events: none;
         }
 
-        &--order::after {
+        &--order::after,
+        &--task::after {
           border-radius: var(--b3-border-radius);
         }
       }

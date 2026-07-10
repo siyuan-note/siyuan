@@ -750,6 +750,10 @@ func LockBox(boxID string) {
 			}
 		}
 	}
+	// 清理临时导出目录中的 repo 导出（无法按 box 单独区分，锁定时统一清理）
+	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", "repo")); rmErr != nil {
+		logging.LogWarnf("remove export/repo dir for box [%s] failed: %s", boxID, rmErr)
+	}
 }
 
 // LockAllBoxes 清除所有已缓存的 DEK 并删除所有加密 db 文件。退出登录或全局锁定时调用。
@@ -772,6 +776,10 @@ func LockAllBoxes() {
 	// 清理所有 repo 临时目录中的解密文件
 	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "repo")); rmErr != nil {
 		logging.LogErrorf("remove repo directory failed: %s", rmErr)
+	}
+	// 清理临时导出目录（锁定后不应继续提供明文导出下载）
+	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export")); rmErr != nil {
+		logging.LogErrorf("remove export directory failed: %s", rmErr)
 	}
 }
 

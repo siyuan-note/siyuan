@@ -63,6 +63,31 @@ func rejectEncryptedBoxPath(absPath string) bool {
 	return false
 }
 
+// copyDecryptedAsset 将加密 asset 解密后复制到目标路径（dest 必须在工作区外）。
+func copyDecryptedAsset(src, dest string) error {
+	boxID := model.ExtractBoxIDFromAssetsPath(src)
+	if boxID == "" || !model.IsEncryptedBox(boxID) {
+		return fmt.Errorf("source is not an encrypted asset")
+	}
+	dek, dekErr := model.GetDEKIfUnlocked(boxID)
+	if dekErr != nil {
+		return dekErr
+	}
+	diskName := filepath.Base(src)
+	data, readErr := os.ReadFile(src)
+	if readErr != nil {
+		return readErr
+	}
+	plain, decErr := model.DecryptAsset(boxID, diskName, dek, data)
+	if decErr != nil {
+		return decErr
+	}
+	if writeErr := os.WriteFile(dest, plain, 0644); writeErr != nil {
+		return writeErr
+	}
+	return nil
+}
+
 // resolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
 // 例如 absPath = /workspace/data/link/newdir/file，其中 /workspace/data/link 是指向
 // /workspace/data/<encBoxID>/ 的 symlink，newdir/file 尚不存在：
@@ -396,7 +421,18 @@ func copyFile(c *gin.Context) {
 	}
 
 	// 加密笔记本的文件不允许通过原始文件 API 复制（src 读出密文/明文，dest 写入破坏加密存储）
+	// 例外：dest 在工作区外时允许解密复制（用户导出的场景）
 	if rejectEncryptedBoxPath(src) || rejectEncryptedBoxPath(dest) {
+		if !rejectEncryptedBoxPath(dest) {
+			// dest 在工作区外，允许解密后复制
+			if err = copyDecryptedAsset(src, dest); err != nil {
+				ret.Code = -1
+				ret.Msg = err.Error()
+				ret.Data = map[string]any{"closeTimeout": 5000}
+				return
+			}
+			return
+		}
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
 		ret.Data = map[string]any{"closeTimeout": 5000}

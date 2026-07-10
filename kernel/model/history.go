@@ -192,7 +192,12 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 				return
 			}
 			var decErr error
-			data, decErr = DecryptFile(histBoxID, dek, data)
+			// 历史路径格式：<historyDir>/<datePrefix>/<boxID>/<relativePath>
+			filePath := ""
+			if len(pathParts) >= 3 {
+				filePath = pathParts[2]
+			}
+			data, decErr = DecryptFile(histBoxID, filePath, dek, data)
 			if decErr != nil {
 				logging.LogErrorf("decrypt history [%s] failed: %s", historyPath, decErr)
 				err = decErr
@@ -314,7 +319,9 @@ func RollbackDocHistory(historyPath string) (err error) {
 			return
 		}
 		var decErr error
-		srcData, decErr = DecryptFile(boxID, dek, srcData)
+		// 历史路径格式：<historyDir>/<datePrefix>/<boxID>/<relativePath>
+		filePath := parts[2]
+		srcData, decErr = DecryptFile(boxID, filePath, dek, srcData)
 		if decErr != nil {
 			logging.LogErrorf("decrypt history [%s] failed: %s", srcPath, decErr)
 			err = decErr

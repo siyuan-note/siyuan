@@ -83,11 +83,15 @@ const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
             }
         })();
         // id 不存在时无副作用
+        let icon = uriObj.searchParams.get("icon");
+        if (icon && !/^[a-zA-Z0-9]+$/.test(icon)) {
+            icon = null; // 拒绝非法 icon 值，使用默认图标
+        }
         openFile({
             app,
             custom: {
                 title: uriObj.searchParams.get("title") ?? pluginNameOrTabType,
-                icon: uriObj.searchParams.get("icon") ?? "iconPlugin",
+                icon: icon ?? "iconPlugin",
                 data,
                 id: pluginNameOrTabType
             },

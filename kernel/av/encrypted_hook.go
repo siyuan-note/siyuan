@@ -36,13 +36,15 @@ var AVIsEncryptedBox func(boxID string) bool
 var pendingAVBox = map[string]string{}
 var pendingAVBoxLock = sync.RWMutex{}
 
-// SetAVBoxID 预设 AV 定义的归属 box。加密笔记本创建 AV 时调用。
+// SetAVBoxID 预设 AV 定义的归属 box。加密笔记本创建 AV 时调用，boxID 为空时清理映射。
 // 普通笔记本不需要调（AV 默认走全局路径）。
 func SetAVBoxID(avID, boxID string) {
+	pendingAVBoxLock.Lock()
+	defer pendingAVBoxLock.Unlock()
 	if boxID != "" {
-		pendingAVBoxLock.Lock()
-		defer pendingAVBoxLock.Unlock()
 		pendingAVBox[avID] = boxID
+	} else {
+		delete(pendingAVBox, avID)
 	}
 }
 
@@ -64,14 +66,15 @@ func attributeViewDataPathByBox(avID, boxID string) string {
 }
 
 // FindAttributeViewPath 按 fallback 逻辑查找 AV 定义文件的实际路径。
-// 1. 先查 pendingAVBox（首次创建预设的 boxID）
+// 1. 先查 pendingAVBox（首次创建预设的 boxID），不检查文件是否存在（首次创建场景）
 // 2. 查全局 storage/av/（普通 box）
 // 3. 遍历已打开的加密笔记本查找
 // 返回找到的路径和对应的 boxID（普通 box 返回空 boxID）。找不到返回空串。
 func FindAttributeViewPath(avID string) (path string, boxID string) {
-	// 先查 pendingAVBox（首次创建场景）
+	// 先查 pendingAVBox（首次创建场景），不要求文件存在
 	if pendingBoxID := GetAVBoxID(avID); pendingBoxID != "" {
 		encPath := attributeViewDataPathByBox(avID, pendingBoxID)
+		// pending 存在就直接返回该 box 路径（首次创建时文件尚不存在）
 		return encPath, pendingBoxID
 	}
 	// 查全局
@@ -91,6 +94,22 @@ func FindAttributeViewPath(avID string) (path string, boxID string) {
 	return "", ""
 }
 
+// FindAttributeViewPathInBox 只在指定 box 内查找 AV 定义，避免加密上下文落回全局路径。
+func FindAttributeViewPathInBox(avID, boxID string) (path string, retBoxID string) {
+	if pendingBoxID := GetAVBoxID(avID); pendingBoxID != "" {
+		if pendingBoxID == boxID {
+			// pending 匹配目标 box，直接返回（首次创建时文件尚不存在）
+			return attributeViewDataPathByBox(avID, pendingBoxID), pendingBoxID
+		}
+		// pending 映射属于其他 box，不遮蔽本 box 的文件查找，继续检查磁盘
+	}
+	avPath := attributeViewDataPathByBox(avID, boxID)
+	if filelock.IsExist(avPath) {
+		return avPath, boxID
+	}
+	return "", boxID
+}
+
 // readAttributeViewData 按 fallback 逻辑读取 AV 定义数据（自动解密）。
 func readAttributeViewData(avID string) ([]byte, error) {
 	path, boxID := FindAttributeViewPath(avID)
@@ -103,7 +122,7 @@ func readAttributeViewData(avID string) ([]byte, error) {
 	}
 	// 加密笔记本的数据需解密
 	if boxID != "" {
-		data, err = decryptAVData(boxID, data)
+		data, err = decryptAVData(boxID, avID, data)
 		if err != nil {
 			return nil, err
 		}
@@ -115,6 +134,25 @@ func readAttributeViewData(avID string) ([]byte, error) {
 // 读取 AV 定义明文（含加密笔记本的笔记本级 AV 自动解密）。
 func ReadAttributeViewData(avID string) ([]byte, error) {
 	return readAttributeViewData(avID)
+}
+
+// ReadAttributeViewDataInBox 只读取指定 box 内的 AV 定义明文。
+func ReadAttributeViewDataInBox(avID, boxID string) ([]byte, error) {
+	path, retBoxID := FindAttributeViewPathInBox(avID, boxID)
+	if path == "" {
+		return nil, nil
+	}
+	data, err := filelock.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	if retBoxID != "" {
+		data, err = decryptAVData(retBoxID, avID, data)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return data, nil
 }
 
 // writeAttributeViewData 写入 AV 定义数据（自动加密）。
@@ -129,7 +167,7 @@ func writeAttributeViewData(avID, boxID string, data []byte) error {
 	// 加密笔记本的数据需加密
 	if boxID != "" {
 		var err error
-		data, err = encryptAVData(boxID, data)
+		data, err = encryptAVData(boxID, avID, data)
 		if err != nil {
 			return err
 		}
@@ -170,7 +208,7 @@ func readMirrorBlocks(boxID string) (ret map[string][]string) {
 	}
 	if boxID != "" {
 		// 加密笔记本的镜像索引是密文，解密后再反序列化
-		dec, decErr := decryptAVData(boxID, data)
+		dec, decErr := decryptAVData(boxID, "mirror", data)
 		if decErr != nil {
 			logging.LogErrorf("decrypt attribute view blocks failed: %s", decErr)
 			return
@@ -197,7 +235,7 @@ func writeMirrorBlocks(boxID string, data map[string][]string) error {
 	}
 	if boxID != "" {
 		// 加密笔记本的镜像索引写入前加密
-		enc, encErr := encryptAVData(boxID, raw)
+		enc, encErr := encryptAVData(boxID, "mirror", raw)
 		if encErr != nil {
 			return encErr
 		}
@@ -226,7 +264,7 @@ func avBoxIDFromPath(absPath string) string {
 	return boxID
 }
 
-func encryptAVData(boxID string, data []byte) ([]byte, error) {
+func encryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 	if AVDEKProvider == nil {
 		return data, nil
 	}
@@ -238,10 +276,11 @@ func encryptAVData(boxID string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	avKey := util.DeriveSubKey(dek, "siyuan/av")
-	return util.EncryptWithAAD(avKey, data, []byte(boxID))
+	aad := avAAD(boxID, avID)
+	return util.EncryptWithAAD(avKey, data, []byte(aad))
 }
 
-func decryptAVData(boxID string, data []byte) ([]byte, error) {
+func decryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 	if AVDEKProvider == nil {
 		return data, nil
 	}
@@ -253,15 +292,27 @@ func decryptAVData(boxID string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	avKey := util.DeriveSubKey(dek, "siyuan/av")
-	return util.DecryptWithAAD(avKey, data, []byte(boxID))
+	aad := avAAD(boxID, avID)
+	return util.DecryptWithAAD(avKey, data, []byte(aad))
+}
+
+func avAAD(boxID, avID string) string {
+	switch avID {
+	case "mirror":
+		return "siyuan:v1:av-mirror:" + boxID
+	case "relation":
+		return "siyuan:v1:av-relation:" + boxID
+	default:
+		return "siyuan:v1:av:" + boxID + ":" + avID
+	}
 }
 
 // EncryptAVData 是 encryptAVData 的导出版本，供 model 层（导入/复制数据库等）统一加密 AV 定义。
-func EncryptAVData(boxID string, data []byte) ([]byte, error) {
-	return encryptAVData(boxID, data)
+func EncryptAVData(boxID, avID string, data []byte) ([]byte, error) {
+	return encryptAVData(boxID, avID, data)
 }
 
 // DecryptAVData 是 decryptAVData 的导出版本。
-func DecryptAVData(boxID string, data []byte) ([]byte, error) {
-	return decryptAVData(boxID, data)
+func DecryptAVData(boxID, avID string, data []byte) ([]byte, error) {
+	return decryptAVData(boxID, avID, data)
 }

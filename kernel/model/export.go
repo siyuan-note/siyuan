@@ -114,7 +114,18 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
-	attrView, err := av.ParseAttributeView(avID)
+	avBoxID := ""
+	if bt := treenode.GetBlockTree(blockID); nil != bt && IsEncryptedBox(bt.BoxID) {
+		avBoxID = bt.BoxID
+		av.SetAVBoxID(avID, avBoxID)
+	}
+
+	var attrView *av.AttributeView
+	if avBoxID != "" {
+		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
+	} else {
+		attrView, err = av.ParseAttributeView(avID)
+	}
 	if err != nil {
 		return
 	}
@@ -280,12 +291,12 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	writer.Flush()
 
 	for _, asset := range assets {
-		srcAbsPath, getErr := GetAssetAbsPath(asset)
+		srcAbsPath, getErr := GetAssetAbsPathInBox(asset, avBoxID)
 		if getErr != nil {
 			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, getErr)
 			continue
 		}
-		targetAbsPath := filepath.Join(exportFolder, asset)
+		targetAbsPath := filepath.Join(exportFolder, AssetPathWithoutQuery(asset))
 		if copyErr := copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); copyErr != nil {
 			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, copyErr)
 		}
@@ -919,16 +930,12 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 			continue
 		}
 
-		if strings.Contains(asset, "?") {
-			asset = asset[:strings.LastIndex(asset, "?")]
-		}
-
-		srcAbsPath, err := GetAssetAbsPath(asset)
+		srcAbsPath, err := GetAssetAbsPathInBox(asset, tree.Box)
 		if err != nil {
 			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
 			continue
 		}
-		targetAbsPath := filepath.Join(savePath, asset)
+		targetAbsPath := filepath.Join(savePath, AssetPathWithoutQuery(asset))
 		if err = copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); err != nil {
 			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 		}
@@ -1119,16 +1126,12 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 
 		assets := getAssetsLinkDests(tree.Root, false)
 		for _, asset := range assets {
-			if strings.Contains(asset, "?") {
-				asset = asset[:strings.LastIndex(asset, "?")]
-			}
-
-			srcAbsPath, err := GetAssetAbsPath(asset)
+			srcAbsPath, err := GetAssetAbsPathInBox(asset, tree.Box)
 			if err != nil {
 				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
 				continue
 			}
-			targetAbsPath := filepath.Join(savePath, asset)
+			targetAbsPath := filepath.Join(savePath, AssetPathWithoutQuery(asset))
 			if err = copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); err != nil {
 				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 			}
@@ -1330,7 +1333,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	}
 
 	processPDFBookmarks(pdfCtx, headings)
-	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
+	processPDFLinkEmbedAssets(pdfCtx, assetDests, tree.Box, removeAssets)
 	processPDFWatermark(pdfCtx, watermark)
 
 	pdfcpuVer := model.VersionStr
@@ -1527,10 +1530,10 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 
 // processPDFLinkEmbedAssets 处理资源文件超链接，根据 removeAssets 参数决定是否将资源文件嵌入到 PDF 中。
 // 导出 PDF 时支持将资源文件作为附件嵌入 https://github.com/siyuan-note/siyuan/issues/7414
-func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, removeAssets bool) {
+func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID string, removeAssets bool) {
 	var assetAbsPaths []string
 	for _, dest := range assetDests {
-		if absPath, _ := GetAssetAbsPath(dest); "" != absPath {
+		if absPath, _ := GetAssetAbsPathInBox(dest, boxID); "" != absPath {
 			assetAbsPaths = append(assetAbsPaths, absPath)
 		}
 	}
@@ -1571,12 +1574,19 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/", "") // Exporting PDF embedded asset files as attachments fails https://github.com/siyuan-note/siyuan/issues/7414#issuecomment-1704573557
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":6806/", "")
 		link.URI, _ = url.PathUnescape(link.URI)
+		sourceURI := link.URI
 		if idx := strings.Index(link.URI, "?"); 0 < idx {
 			link.URI = link.URI[:idx]
 		}
 
 		if !removeAssets {
 			// 不移除资源文件夹的话将超链接指向资源文件夹
+			// 加密资源的 link.URI 需要保留 ?box= 上下文，否则导出的 PDF 链接无法解析
+			if idx := strings.Index(sourceURI, "?"); 0 < idx {
+				if strings.Contains(sourceURI[idx:], "box=") {
+					link.URI = sourceURI
+				}
+			}
 			if 1 > len(linkMap[link.Page]) {
 				linkMap[link.Page] = []model.AnnotationRenderer{link}
 			} else {
@@ -1588,18 +1598,33 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 
 		// 移除资源文件夹的话使用内嵌附件
 
-		absPath, getErr := GetAssetAbsPath(link.URI)
+		absPath, getErr := GetAssetAbsPathInBox(sourceURI, boxID)
 		if nil != getErr {
 			continue
 		}
+		embedPath := absPath
+		if IsEncryptedAssetPath(absPath) {
+			assetBoxID := ExtractBoxIDFromAssetsPath(absPath)
+			plain, readErr := ReadAssetBytesInBox(assetBoxID, sourceURI)
+			if nil != readErr {
+				logging.LogWarnf("read encrypted asset [%s] failed: %s", sourceURI, readErr)
+				continue
+			}
+			embedPath = filepath.Join(util.TempDir, "export", "pdf-assets", gulu.Rand.String(7)+"-"+filepath.Base(AssetPathWithoutQuery(sourceURI)))
+			if writeErr := filelock.WriteFile(embedPath, plain); nil != writeErr {
+				logging.LogWarnf("write temp embedded asset [%s] failed: %s", embedPath, writeErr)
+				continue
+			}
+			defer os.Remove(embedPath)
+		}
 
-		ir, newErr := pdfCtx.XRefTable.NewEmbeddedFileStreamDict(absPath)
+		ir, newErr := pdfCtx.XRefTable.NewEmbeddedFileStreamDict(embedPath)
 		if nil != newErr {
 			logging.LogWarnf("new embedded file stream dict failed: %s", newErr)
 			continue
 		}
 
-		fn := filepath.Base(absPath)
+		fn := filepath.Base(AssetPathWithoutQuery(sourceURI))
 		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, fn, "attached by SiYuan", *ir)
 		if nil != newErr {
 			logging.LogWarnf("new file spec dict failed: %s", newErr)
@@ -2179,26 +2204,32 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), asset))
 
 			asset = string(html.DecodeDestination([]byte(asset)))
-			if strings.Contains(asset, "?") {
-				asset = asset[:strings.LastIndex(asset, "?")]
-			}
+			cleanAsset := AssetPathWithoutQuery(asset)
 
-			if copiedAssets.Contains(asset) {
+			copyKey := tree.Box + "\x00" + cleanAsset
+			if copiedAssets.Contains(copyKey) {
 				continue
 			}
 
-			srcPath := assetPathMap[asset]
+			srcPath := ""
+			if IsEncryptedBox(tree.Box) {
+				srcPath, _ = GetAssetAbsPathInBox(asset, tree.Box)
+			}
+			if "" == srcPath {
+				srcPath = assetPathMap[cleanAsset]
+			}
 			if "" == srcPath {
 				logging.LogWarnf("get asset [%s] abs path failed", asset)
 				continue
 			}
 
-			destPath := filepath.Join(exportDir, asset)
+			destPath := filepath.Join(exportDir, cleanAsset)
 			assetErr := copyAssetDecryptIfEncrypted(srcPath, destPath)
 			if nil != assetErr {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, assetErr)
 				continue
 			}
+			copiedAssets.Add(copyKey)
 
 			if !gulu.File.IsDir(srcPath) && strings.HasSuffix(strings.ToLower(srcPath), ".pdf") {
 				sya := srcPath + ".sya"
@@ -2227,6 +2258,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	// 导出数据库 Attribute View export https://github.com/siyuan-note/siyuan/issues/8710
 	exportStorageAvDir := filepath.Join(exportDir, "storage", "av")
 	var avIDs []string
+	avBoxes := map[string]string{}
 	for _, tree := range trees {
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || !n.IsBlock() {
@@ -2235,6 +2267,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 			if ast.NodeAttributeView == n.Type {
 				avIDs = append(avIDs, n.AttributeViewID)
+				if IsEncryptedBox(tree.Box) {
+					avBoxes[n.AttributeViewID] = tree.Box
+				}
 			}
 
 			avs := n.IALAttr(av.NodeAttrNameAvs)
@@ -2243,7 +2278,11 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 
 			for _, avID := range strings.Split(avs, ",") {
-				avIDs = append(avIDs, strings.TrimSpace(avID))
+				avID = strings.TrimSpace(avID)
+				avIDs = append(avIDs, avID)
+				if IsEncryptedBox(tree.Box) {
+					avBoxes[avID] = tree.Box
+				}
 			}
 			return ast.WalkContinue
 		})
@@ -2254,7 +2293,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			continue
 		}
 
-		exportAv(avID, exportStorageAvDir, exportDir, assetPathMap)
+		exportAv(avID, avBoxes[avID], exportStorageAvDir, exportDir, assetPathMap)
 	}
 
 	// 导出闪卡 Export related flashcard data when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/9372
@@ -2345,10 +2384,16 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	return
 }
 
-func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
+func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
 	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密笔记本的 AV 在 <boxID>/storage/av/，
 	// GetAttributeViewDataPath 只查全局路径会漏；filelock.Copy 会拷密文）。
-	avData, readErr := av.ReadAttributeViewData(avID)
+	var avData []byte
+	var readErr error
+	if boxID != "" {
+		avData, readErr = av.ReadAttributeViewDataInBox(avID, boxID)
+	} else {
+		avData, readErr = av.ReadAttributeViewData(avID)
+	}
 	if readErr != nil {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		return
@@ -2359,9 +2404,15 @@ func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[st
 		}
 	}
 
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+	var attrView *av.AttributeView
+	var parseErr error
+	if boxID != "" {
+		attrView, parseErr = av.ParseAttributeViewInBox(avID, boxID)
+	} else {
+		attrView, parseErr = av.ParseAttributeView(avID)
+	}
+	if parseErr != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, parseErr)
 		return
 	}
 
@@ -2374,8 +2425,14 @@ func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[st
 						continue
 					}
 
-					destPath := filepath.Join(exportFolder, asset.Content)
-					srcPath := assetPathMap[asset.Content]
+					destPath := filepath.Join(exportFolder, AssetPathWithoutQuery(asset.Content))
+					srcPath := ""
+					if boxID != "" {
+						srcPath, _ = GetAssetAbsPathInBox(asset.Content, boxID)
+					}
+					if "" == srcPath {
+						srcPath = assetPathMap[AssetPathWithoutQuery(asset.Content)]
+					}
 					if "" == srcPath {
 						logging.LogWarnf("get asset [%s] abs path failed", asset.Content)
 						continue
@@ -2390,16 +2447,22 @@ func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[st
 	}
 
 	// 级联导出关联列关联的数据库
-	exportRelationAvs(avID, exportStorageAvDir)
+	exportRelationAvs(avID, boxID, exportStorageAvDir)
 }
 
-func exportRelationAvs(avID, exportStorageAvDir string) {
+func exportRelationAvs(avID, boxID, exportStorageAvDir string) {
 	avIDs := hashset.New()
-	walkRelationAvs(avID, avIDs)
+	walkRelationAvs(avID, boxID, avIDs)
 
 	for _, v := range avIDs.Values() {
 		relAvID := v.(string)
-		relAvData, readErr := av.ReadAttributeViewData(relAvID)
+		var relAvData []byte
+		var readErr error
+		if boxID != "" {
+			relAvData, readErr = av.ReadAttributeViewDataInBox(relAvID, boxID)
+		} else {
+			relAvData, readErr = av.ReadAttributeViewData(relAvID)
+		}
 		if readErr != nil {
 			logging.LogErrorf("read relation attribute view [%s] failed: %s", relAvID, readErr)
 			continue
@@ -2413,12 +2476,17 @@ func exportRelationAvs(avID, exportStorageAvDir string) {
 	}
 }
 
-func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
+func walkRelationAvs(avID, boxID string, exportAvIDs *hashset.Set) {
 	if exportAvIDs.Contains(avID) {
 		return
 	}
 
-	attrView, _ := av.ParseAttributeView(avID)
+	var attrView *av.AttributeView
+	if boxID != "" {
+		attrView, _ = av.ParseAttributeViewInBox(avID, boxID)
+	} else {
+		attrView, _ = av.ParseAttributeView(avID)
+	}
 	if nil == attrView {
 		return
 	}
@@ -2431,7 +2499,7 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 				break
 			}
 
-			walkRelationAvs(keyValues.Key.Relation.AvID, exportAvIDs)
+			walkRelationAvs(keyValues.Key.Relation.AvID, boxID, exportAvIDs)
 		}
 	}
 }
@@ -2705,7 +2773,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					return ast.WalkSkipChildren
 				}
 
-				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode)
+				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode, tree.Box)
 				unlinks = append(unlinks, n)
 				return status
 			} else if n.IsTextMarkType("tag") {
@@ -3132,7 +3200,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 									mdTableCell.AppendChild(img)
 									img.SetIALAttr("style", "max-height: 128px;")
 
-									width, height := GetAssetImgSize(a.Content)
+									width, height := GetAssetImgSizeInBox(a.Content, tree.Box)
 									if height > 128 {
 										img.SetIALAttr("height", "128px")
 										newWidth := int(float64(width) * (128.0 / float64(height)))
@@ -3529,18 +3597,32 @@ type refAsFootnotes struct {
 	refAnchorText string
 }
 
-func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int) ast.WalkStatus {
+func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int, boxID string) ast.WalkStatus {
 	p := refID[:strings.LastIndex(refID, "/")]
-	absPath, err := GetAssetAbsPath(p)
+	absPath, err := GetAssetAbsPathInBox(p, boxID)
 	if err != nil {
 		logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
 		return ast.WalkSkipChildren
 	}
 	sya := absPath + ".sya"
-	syaData, err := os.ReadFile(sya)
-	if err != nil {
-		logging.LogErrorf("read file [%s] failed: %s", sya, err)
+	syaData, readErr := os.ReadFile(sya)
+	if readErr != nil {
+		logging.LogErrorf("read file [%s] failed: %s", sya, readErr)
 		return ast.WalkSkipChildren
+	}
+	// 加密 box 的 .sya 是密文，需先解密
+	if IsEncryptedBox(boxID) {
+		dek, dekErr := GetDEKIfUnlocked(boxID)
+		if dekErr != nil {
+			logging.LogWarnf("get DEK for file annotation [%s] failed: %s", sya, dekErr)
+			return ast.WalkSkipChildren
+		}
+		plain, decErr := DecryptAsset(boxID, filepath.Base(sya), dek, syaData)
+		if decErr != nil {
+			logging.LogWarnf("decrypt file annotation [%s] failed: %s", sya, decErr)
+			return ast.WalkSkipChildren
+		}
+		syaData = plain
 	}
 	syaJSON := map[string]any{}
 	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); err != nil {
@@ -3646,17 +3728,16 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		}
 
 		// 解析导出后的标准 Markdown，汇总 assets
+		boxID := tree.Box
 		tree = parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
 		removeAssetsID(tree, assetsOldNew, assetsNewOld)
 
 		newAssets := getAssetsLinkDests(tree.Root, false)
 		for _, newAsset := range newAssets {
 			newAsset = string(html.DecodeDestination([]byte(newAsset)))
-			if strings.Contains(newAsset, "?") {
-				newAsset = newAsset[:strings.LastIndex(newAsset, "?")]
-			}
+			cleanNewAsset := AssetPathWithoutQuery(newAsset)
 
-			if !strings.HasPrefix(newAsset, "assets/") {
+			if !strings.HasPrefix(cleanNewAsset, "assets/") {
 				continue
 			}
 
@@ -3666,18 +3747,28 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 			spaceEncodedNewAsset := strings.ReplaceAll(newAsset, " ", "%20")
 			oldAsset := assetsNewOld[spaceEncodedNewAsset]
 			if "" == oldAsset {
+				spaceEncodedCleanNewAsset := strings.ReplaceAll(cleanNewAsset, " ", "%20")
+				oldAsset = assetsNewOld[spaceEncodedCleanNewAsset]
+			}
+			if "" == oldAsset {
 				logging.LogWarnf("get asset old path for new asset [%s] failed", spaceEncodedNewAsset)
 				continue
 			}
 
 			spaceDecodedOldAsset := strings.ReplaceAll(oldAsset, "%20", " ")
-			srcPath := assetsPathMap[spaceDecodedOldAsset]
+			srcPath := ""
+			if IsEncryptedBox(boxID) {
+				srcPath, _ = GetAssetAbsPathInBox(spaceDecodedOldAsset, boxID)
+			}
+			if "" == srcPath {
+				srcPath = assetsPathMap[AssetPathWithoutQuery(spaceDecodedOldAsset)]
+			}
 			if "" == srcPath {
 				logging.LogWarnf("get asset [%s] abs path failed", spaceDecodedOldAsset)
 				continue
 			}
 
-			destPath := filepath.Join(writeFolder, newAsset)
+			destPath := filepath.Join(writeFolder, cleanNewAsset)
 			if copyErr := copyAssetDecryptIfEncrypted(srcPath, destPath); copyErr != nil {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, copyErr)
 				continue

@@ -39,7 +39,7 @@ func readRelations(boxID string) (avRels map[string][]string) {
 		return
 	}
 	if boxID != "" {
-		dec, decErr := decryptAVData(boxID, data)
+		dec, decErr := decryptAVData(boxID, "relation", data)
 		if decErr != nil {
 			logging.LogErrorf("decrypt attribute view relations failed: %s", decErr)
 			return
@@ -66,7 +66,7 @@ func writeRelations(boxID string, avRels map[string][]string) {
 		return
 	}
 	if boxID != "" {
-		enc, encErr := encryptAVData(boxID, data)
+		enc, encErr := encryptAVData(boxID, "relation", data)
 		if encErr != nil {
 			logging.LogErrorf("encrypt attribute view relations failed: %s", encErr)
 			return

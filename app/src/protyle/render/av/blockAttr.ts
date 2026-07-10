@@ -126,7 +126,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<svg class="av__checkbox"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
             break;
         case "template":
-            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.template.content}</div>`;
+            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${window.DOMPurify.sanitize(value.template.content)}</div>`;
             break;
         case "email":
             html = `<input value="${escapeAttr(value.email.content)}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">

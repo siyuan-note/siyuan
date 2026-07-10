@@ -30,9 +30,9 @@ import (
 // filesys 不能直接 import model（会形成 model → filesys → model 循环依赖），故采用回调注入。
 var DEKProvider func(boxID string) ([]byte, error)
 
-// encryptData 若 boxID 是已解锁的加密 box，用 fileKey（DEK 派生子密钥）加密 data 并绑定 boxID 为 AAD；
-// 非加密笔记本原样返回；加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
-func encryptData(boxID string, data []byte) ([]byte, error) {
+// encryptData 若 boxID 是已解锁的加密 box，用 fileKey（DEK 派生子密钥）加密 data，
+// AAD 绑定 boxID + 相对路径；非加密笔记本原样返回；加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
+func encryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
 	}
@@ -44,11 +44,12 @@ func encryptData(boxID string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	return util.EncryptWithAAD(fileKey, data, []byte(boxID))
+	aad := "siyuan:v1:file:" + boxID + ":" + relativePath
+	return util.EncryptWithAAD(fileKey, data, []byte(aad))
 }
 
 // decryptData 对应解密。非加密笔记本原样返回；加密但未解锁时返回 error，拒绝读盘。
-func decryptData(boxID string, data []byte) ([]byte, error) {
+func decryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
 	}
@@ -60,7 +61,8 @@ func decryptData(boxID string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	return util.DecryptWithAAD(fileKey, data, []byte(boxID))
+	aad := "siyuan:v1:file:" + boxID + ":" + relativePath
+	return util.DecryptWithAAD(fileKey, data, []byte(aad))
 }
 
 // docIALBoxID 从 .sy 绝对路径反推 boxID，供 DocIAL 判断是否需整体解密。

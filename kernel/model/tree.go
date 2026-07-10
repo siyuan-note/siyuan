@@ -176,7 +176,9 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 			err = dekErr
 			return
 		}
-		if data, err = DecryptFile(boxID, dek, data); err != nil {
+		// 从绝对路径推导 box 内相对路径作为 AAD
+		relPath := filepath.ToSlash(strings.TrimPrefix(localPath, filepath.Join(util.DataDir, boxID)+string(os.PathSeparator)))
+		if data, err = DecryptFile(boxID, relPath, dek, data); err != nil {
 			logging.LogErrorf("decrypt tree [path=%s] failed: %s", localPath, err)
 			return
 		}

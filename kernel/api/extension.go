@@ -33,7 +33,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -47,10 +46,17 @@ func extensionCopy(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	dom := form.Value["dom"][0]
 	assets := filepath.Join(util.DataDir, "assets")
+	boxID := ""
 	if notebookVal := form.Value["notebook"]; 0 < len(notebookVal) {
-		assets = filepath.Join(util.DataDir, notebookVal[0], "assets")
-		if !gulu.File.IsDir(assets) {
-			assets = filepath.Join(util.DataDir, "assets")
+		nb := notebookVal[0]
+		if model.IsEncryptedBox(nb) {
+			boxID = nb
+			assets = filepath.Join(util.DataDir, nb, "assets")
+		} else {
+			assets = filepath.Join(util.DataDir, nb, "assets")
+			if !gulu.File.IsDir(assets) {
+				assets = filepath.Join(util.DataDir, "assets")
+			}
 		}
 	}
 
@@ -159,15 +165,19 @@ func extensionCopy(c *gin.Context) {
 			fName += ext
 		}
 
-		fName = util.AssetName(fName, ast.NewNodeID())
-		writePath := filepath.Join(assets, fName)
-		if err = filelock.WriteFile(writePath, data); err != nil {
+		// 统一通过 storeAssetForBox 写入，加密 box 自动脱敏 + 加密落盘 + 追加 ?box=
+		storedName, storeErr := model.StoreAssetForBox(boxID, assets, fName, data)
+		if storeErr != nil {
 			ret.Code = -1
-			ret.Msg = err.Error()
+			ret.Msg = storeErr.Error()
 			break
 		}
 
-		uploaded[unescaped] = "assets/" + fName
+		assetURL := "assets/" + storedName
+		if boxID != "" {
+			assetURL += "?box=" + boxID
+		}
+		uploaded[unescaped] = assetURL
 	}
 
 	luteEngine := util.NewLute()
@@ -234,7 +244,7 @@ func extensionCopy(c *gin.Context) {
 			return s
 		})
 
-		tree, withMath = model.HTML2Tree(dom, luteEngine)
+		tree, withMath = model.HTML2Tree(dom, luteEngine, boxID)
 	} else {
 		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	}

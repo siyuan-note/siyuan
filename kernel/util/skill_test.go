@@ -215,10 +215,10 @@ func TestNormalizeSkillURL(t *testing.T) {
 // 含点（域名）、含冒号、带 scheme 的都不应走简写分支。
 func TestNormalizeSkillURLOwnerRepoBoundary(t *testing.T) {
 	bad := []string{
-		"example.com",        // 不是 owner/repo
-		"a/b/c",              // 多于一个斜杠
-		"https://foo/bar",    // 含 scheme（应走 URL 分支，但属于合法 URL 不报错）
-		"/abs/path",          // 绝对路径
+		"example.com",     // 不是 owner/repo
+		"a/b/c",           // 多于一个斜杠
+		"https://foo/bar", // 含 scheme（应走 URL 分支，但属于合法 URL 不报错）
+		"/abs/path",       // 绝对路径
 	}
 	for _, in := range bad {
 		// 这些输入要么报错，要么走 URL 分支；只要不 panic、不误判为 codeload 即可

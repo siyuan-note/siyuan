@@ -386,7 +386,7 @@ func copyFile(c *gin.Context) {
 		return
 	}
 
-	src, err := model.GetAssetAbsPath(src)
+	src, err := model.GetAssetAbsPathInBox(src, "")
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", src, err)
 		ret.Code = -1

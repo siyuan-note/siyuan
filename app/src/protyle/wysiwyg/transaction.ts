@@ -501,10 +501,6 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     removeFoldHeading(item);
                 }
             });
-            // undo 会走 transaction
-            if (isUndo) {
-                return;
-            }
             if (operation.retData) {
                 operation.retData.forEach((item: string) => {
                     let embedElement: HTMLElement | false;

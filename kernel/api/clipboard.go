@@ -70,11 +70,17 @@ func writeFilePath(c *gin.Context) {
 		return
 	}
 
-	absPath, err := model.GetAssetAbsPath(pathArg)
+	absPath, err := model.GetAssetAbsPathInBox(pathArg, "")
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", pathArg, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+	if model.IsEncryptedAssetPath(absPath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}

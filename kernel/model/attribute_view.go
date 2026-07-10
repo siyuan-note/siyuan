@@ -1658,7 +1658,7 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 	// 加密笔记本的 AV 是密文，需先解密再处理（av.DecryptAVData 内部按 box 加密/已解锁路由）
 	if avBoxID != "" && IsEncryptedBox(avBoxID) {
 		var decErr error
-		data, decErr = av.DecryptAVData(avBoxID, data)
+		data, decErr = av.DecryptAVData(avBoxID, avID, data)
 		if decErr != nil {
 			logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, decErr)
 			err = decErr
@@ -1698,7 +1698,7 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 	if avBoxID != "" {
 		newAvPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", newAvID+".json")
 		var encErr error
-		data, encErr = av.EncryptAVData(avBoxID, data)
+		data, encErr = av.EncryptAVData(avBoxID, newAvID, data)
 		if encErr != nil {
 			logging.LogErrorf("encrypt attribute view [%s] failed: %s", newAvID, encErr)
 			err = encErr

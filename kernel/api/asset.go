@@ -46,7 +46,7 @@ func statAsset(c *gin.Context) {
 	var p string
 	if strings.HasPrefix(path, "assets/") {
 		var err error
-		p, err = model.GetAssetAbsPath(path)
+		p, err = model.GetAssetAbsPathInBox(path, "")
 		if err != nil {
 			ret.Code = 1
 			return
@@ -290,7 +290,7 @@ func setFileAnnotation(c *gin.Context) {
 				ret.Msg = dekErr.Error()
 				return
 			}
-			enc, encErr := model.EncryptAsset(boxID, dek, writeData)
+			enc, encErr := model.EncryptAsset(boxID, filepath.Base(writePath), dek, writeData)
 			if encErr != nil {
 				ret.Code = -1
 				ret.Msg = encErr.Error()
@@ -345,7 +345,7 @@ func getFileAnnotation(c *gin.Context) {
 			ret.Msg = dekErr.Error()
 			return
 		}
-		plain, decErr := model.DecryptAsset(boxID, dek, data)
+		plain, decErr := model.DecryptAsset(boxID, filepath.Base(readPath), dek, data)
 		if decErr != nil {
 			ret.Code = -1
 			ret.Msg = decErr.Error()
@@ -359,14 +359,14 @@ func getFileAnnotation(c *gin.Context) {
 }
 
 func resolveFileAnnotationAbsPath(assetRelPath string) (ret string, err error) {
+	// .sya 在 URL 末尾，例如 assets/a.pdf?box=<id>.sya
+	// TrimSuffix 去掉 .sya 得到 assets/a.pdf?box=<id>，保留 query 供 box-aware 解析
 	filePath := strings.TrimSuffix(assetRelPath, ".sya")
-	absPath, err := model.GetAssetAbsPath(filePath)
+	absPath, err := model.GetAssetAbsPathInBox(filePath, "")
 	if err != nil {
 		return
 	}
-	dir := filepath.Dir(absPath)
-	base := filepath.Base(assetRelPath)
-	ret = filepath.Join(dir, base)
+	ret = absPath + ".sya"
 	return
 }
 
@@ -431,10 +431,16 @@ func resolveAssetPath(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-	p, err := model.GetAssetAbsPath(path)
+	p, err := model.GetAssetAbsPathInBox(path, "")
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 3000}
+		return
+	}
+	if model.IsEncryptedAssetPath(p) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
 		ret.Data = map[string]any{"closeTimeout": 3000}
 		return
 	}

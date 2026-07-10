@@ -56,9 +56,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
+func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse.Tree, withMath bool) {
 	htmlStr = gulu.Str.RemovePUA(htmlStr)
 	assetDirPath := filepath.Join(util.DataDir, "assets")
+	if boxID != "" {
+		assetDirPath = filepath.Join(util.DataDir, boxID, "assets")
+		_ = os.MkdirAll(assetDirPath, 0755)
+	}
 	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -85,7 +89,7 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 						}
 					}
 				} else if bytes.Contains(n.Tokens, []byte("<svg")) {
-					processHTMLBlockSvgImg(n, assetDirPath)
+					processHTMLBlockSvgImg(n, assetDirPath, boxID)
 				}
 			}
 		case ast.NodeText:
@@ -99,7 +103,7 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 		case ast.NodeLinkDest:
 			dest := n.TokensStr()
 			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-				processBase64Img(n, dest, assetDirPath)
+				processBase64Img(n, dest, assetDirPath, boxID)
 			}
 		}
 		return ast.WalkContinue
@@ -413,8 +417,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if readErr != nil {
 				return readErr
 			}
+			avID := strings.TrimSuffix(d.Name(), ".json")
 			// av.EncryptAVData 内部按 box 是否加密/已解锁路由，加密笔记本用 avKey+AAD
-			enc, encErr := av.EncryptAVData(boxID, src)
+			enc, encErr := av.EncryptAVData(boxID, avID, src)
 			if encErr != nil {
 				return encErr
 			}
@@ -472,7 +477,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				return
 			}
 			var encErr error
-			data, encErr = EncryptFile(boxID, dek, data)
+			data, encErr = EncryptFile(boxID, tree.Path, dek, data)
 			if encErr != nil {
 				logging.LogErrorf("encrypt import .sy failed: %s", encErr)
 				return
@@ -804,6 +809,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 // updateImportedAssetRefs 遍历树的 assets 引用路径，将原始文件名替换为脱敏文件名。
 // 覆盖：链接 href、图片 src、data-src、音视频 src、文件标注等。
 func updateImportedAssetRefs(tree *parse.Tree, assetNameMap map[string]string) {
+	boxSuffix := ""
+	if IsEncryptedBox(tree.Box) {
+		boxSuffix = "?box=" + tree.Box
+	}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -812,26 +821,26 @@ func updateImportedAssetRefs(tree *parse.Tree, assetNameMap map[string]string) {
 		case ast.NodeLink:
 			// 链接 dest
 			dest := string(n.Tokens)
-			if updated := replaceAssetName(dest, assetNameMap); updated != dest {
+			if updated := replaceAssetName(dest, assetNameMap, boxSuffix); updated != dest {
 				n.Tokens = []byte(updated)
 			}
 		case ast.NodeImage:
 			// 图片 src 在 LinkDest 子节点
 			if dest := n.ChildByType(ast.NodeLinkDest); nil != dest {
 				src := string(dest.Tokens)
-				if updated := replaceAssetName(src, assetNameMap); updated != src {
+				if updated := replaceAssetName(src, assetNameMap, boxSuffix); updated != src {
 					dest.Tokens = []byte(updated)
 				}
 			}
 		case ast.NodeAudio, ast.NodeVideo:
 			src := n.TokensStr()
-			if updated := replaceAssetName(src, assetNameMap); updated != src {
+			if updated := replaceAssetName(src, assetNameMap, boxSuffix); updated != src {
 				n.Tokens = []byte(updated)
 			}
 		case ast.NodeTextMark:
 			// 行级文本标记里的 data-href（附件链接）
 			if "" != n.TextMarkAHref {
-				if updated := replaceAssetName(n.TextMarkAHref, assetNameMap); updated != n.TextMarkAHref {
+				if updated := replaceAssetName(n.TextMarkAHref, assetNameMap, boxSuffix); updated != n.TextMarkAHref {
 					n.TextMarkAHref = updated
 				}
 			}
@@ -840,8 +849,8 @@ func updateImportedAssetRefs(tree *parse.Tree, assetNameMap map[string]string) {
 	})
 }
 
-// replaceAssetName 在 assets 路径中替换原始文件名为脱敏文件名。
-func replaceAssetName(path string, assetNameMap map[string]string) string {
+// replaceAssetName 在 assets 路径中替换原始文件名为脱敏文件名，并按需追加 box query。
+func replaceAssetName(path string, assetNameMap map[string]string, boxSuffix string) string {
 	if !strings.Contains(path, "assets/") {
 		return path
 	}
@@ -850,6 +859,10 @@ func replaceAssetName(path string, assetNameMap map[string]string) string {
 		idx := strings.LastIndex(path, original)
 		if idx > 0 && strings.Contains(path[idx:], original) {
 			path = path[:idx] + diskName + path[idx+len(original):]
+			// 替换后如果没有 box query，补上
+			if boxSuffix != "" && !strings.Contains(path, "?box=") {
+				path += boxSuffix
+			}
 		}
 	}
 	return path
@@ -987,12 +1000,21 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				existName := assetsDone[currentPath]
 				var name string
 				if "" == existName {
-					name = filepath.Base(currentPath)
-					name = util.FilterUploadFileName(name)
-					name = util.AssetName(name, ast.NewNodeID())
-					assetTargetPath := filepath.Join(util.DataDir, "assets", name)
-					if err = filelock.Copy(currentPath, assetTargetPath); err != nil {
-						logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", currentPath, assetTargetPath, err)
+					baseName := filepath.Base(currentPath)
+					baseName = util.FilterUploadFileName(baseName)
+					data, readErr := os.ReadFile(currentPath)
+					if readErr != nil {
+						logging.LogErrorf("read asset [%s] failed: %s", currentPath, readErr)
+						return nil
+					}
+					assetDirForBox := filepath.Join(util.DataDir, "assets")
+					if boxID != "" {
+						assetDirForBox = filepath.Join(util.DataDir, boxID, "assets")
+						_ = os.MkdirAll(assetDirForBox, 0755)
+					}
+					name, err = storeAssetForBox(boxID, assetDirForBox, baseName, data)
+					if err != nil {
+						logging.LogErrorf("store asset [%s] for box [%s] failed: %s", currentPath, boxID, err)
 						return nil
 					}
 					assetsDone[currentPath] = name
@@ -1112,7 +1134,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				}
 
 				if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-					processBase64Img(n, dest, assetDirPath)
+					processBase64Img(n, dest, assetDirPath, boxID)
 					return ast.WalkContinue
 				}
 
@@ -1184,9 +1206,17 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					name = existName
 				}
 				if ast.NodeLinkDest == n.Type {
-					n.Tokens = []byte("assets/" + name)
+					assetURL := "assets/" + name
+					if IsEncryptedBox(boxID) {
+						assetURL += "?box=" + boxID
+					}
+					n.Tokens = []byte(assetURL)
 				} else {
-					n.TextMarkAHref = "assets/" + name
+					assetURL := "assets/" + name
+					if IsEncryptedBox(boxID) {
+						assetURL += "?box=" + boxID
+					}
+					n.TextMarkAHref = assetURL
 				}
 				return ast.WalkContinue
 			})
@@ -1265,7 +1295,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-				processBase64Img(n, dest, assetDirPath)
+				processBase64Img(n, dest, assetDirPath, boxID)
 				return ast.WalkContinue
 			}
 
@@ -1298,22 +1328,48 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			existName := assetsDone[absolutePath]
 			var name string
 			if "" == existName {
-				name = filepath.Base(absolutePath)
-				name = util.FilterUploadFileName(name)
-				name = util.AssetName(name, ast.NewNodeID())
-				assetTargetPath := filepath.Join(assetDirPath, name)
-				if err = filelock.Copy(absolutePath, assetTargetPath); err != nil {
-					logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
-					return ast.WalkContinue
+				baseName := filepath.Base(absolutePath)
+				if IsEncryptedBox(boxID) {
+					// 加密笔记本：文件名脱敏 + 内容加密
+					ext := filepath.Ext(baseName)
+					blockID := ast.NewNodeID()
+					name = encryptedAssetName(ext, blockID)
+					writeAssetNameMapping(boxID, name, baseName)
+					assetTargetPath := filepath.Join(assetDirPath, name)
+					src, readErr := filelock.ReadFile(absolutePath)
+					if readErr != nil {
+						logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
+						return ast.WalkContinue
+					}
+					if err = writeAssetFile(assetTargetPath, bytes.NewReader(src), boxID); err != nil {
+						logging.LogErrorf("write encrypted asset [%s] failed: %s", assetTargetPath, err)
+						return ast.WalkContinue
+					}
+				} else {
+					name = util.FilterUploadFileName(baseName)
+					name = util.AssetName(name, ast.NewNodeID())
+					assetTargetPath := filepath.Join(assetDirPath, name)
+					if err = filelock.Copy(absolutePath, assetTargetPath); err != nil {
+						logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
+						return ast.WalkContinue
+					}
 				}
 				assetsDone[absolutePath] = name
 			} else {
 				name = existName
 			}
 			if ast.NodeLinkDest == n.Type {
-				n.Tokens = []byte("assets/" + name)
+				assetURL := "assets/" + name
+				if IsEncryptedBox(boxID) {
+					assetURL += "?box=" + boxID
+				}
+				n.Tokens = []byte(assetURL)
 			} else {
-				n.TextMarkAHref = "assets/" + name
+				assetURL := "assets/" + name
+				if IsEncryptedBox(boxID) {
+					assetURL += "?box=" + boxID
+				}
+				n.TextMarkAHref = assetURL
 			}
 			return ast.WalkContinue
 		})
@@ -1432,7 +1488,7 @@ func htmlBlock2Media(tree *parse.Tree) {
 	})
 }
 
-func processHTMLBlockSvgImg(n *ast.Node, assetDirPath string) {
+func processHTMLBlockSvgImg(n *ast.Node, assetDirPath, boxID string) {
 	re := regexp.MustCompile(`(?i)<svg[^>]*>(.*?)</svg>`)
 	matches := re.FindStringSubmatch(string(n.Tokens))
 	if 1 >= len(matches) {
@@ -1440,13 +1496,16 @@ func processHTMLBlockSvgImg(n *ast.Node, assetDirPath string) {
 	}
 
 	svgContent := matches[0]
-	name := util.AssetName("image.svg", ast.NewNodeID())
-	writePath := filepath.Join(assetDirPath, name)
-	if err := filelock.WriteFile(writePath, []byte(svgContent)); err != nil {
-		logging.LogErrorf("write svg asset file [%s] failed: %s", writePath, err)
+	name, err := storeAssetForBox(boxID, assetDirPath, "image.svg", []byte(svgContent))
+	if err != nil {
+		logging.LogErrorf("store svg asset for box [%s] failed: %s", boxID, err)
 		return
 	}
 
+	assetURL := "assets/" + name
+	if boxID != "" && IsEncryptedBox(boxID) {
+		assetURL += "?box=" + boxID
+	}
 	n.Type = ast.NodeParagraph
 	img := &ast.Node{Type: ast.NodeImage}
 	img.AppendChild(&ast.Node{Type: ast.NodeBang})
@@ -1454,14 +1513,11 @@ func processHTMLBlockSvgImg(n *ast.Node, assetDirPath string) {
 	img.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte("image")})
 	img.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
 	img.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-	img.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("assets/" + name)})
+	img.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(assetURL)})
 	img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 	n.AppendChild(img)
 }
-func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
-	base64TmpDir := filepath.Join(util.TempDir, "base64")
-	os.MkdirAll(base64TmpDir, 0755)
-
+func processBase64Img(n *ast.Node, dest string, assetDirPath, boxID string) {
 	sep := strings.Index(dest, ";base64,")
 	str := strings.TrimSpace(dest[sep+8:])
 	re := regexp.MustCompile(`(?i)%0A`)
@@ -1505,37 +1561,40 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 		name = alt.TokensStr() + ext
 	}
 	name = util.FilterUploadFileName(name)
-	name = util.AssetName(name, ast.NewNodeID())
 
-	tmp := filepath.Join(base64TmpDir, name)
-	tmpFile, openErr := os.OpenFile(tmp, os.O_RDWR|os.O_CREATE, 0644)
-	if nil != openErr {
-		logging.LogErrorf("open temp file [%s] failed: %s", tmp, openErr)
-		return
-	}
-
-	var encodeErr error
+	var data []byte
 	switch typ {
-	case "image/png":
-		encodeErr = png.Encode(tmpFile, img)
-	case "image/jpeg":
-		encodeErr = jpeg.Encode(tmpFile, img, &jpeg.Options{Quality: 100})
 	case "image/svg+xml":
-		_, encodeErr = tmpFile.Write(unbased)
+		data = unbased
+	default:
+		var buf bytes.Buffer
+		switch typ {
+		case "image/png":
+			encodeErr := png.Encode(&buf, img)
+			if nil != encodeErr {
+				logging.LogErrorf("encode png image failed: %s", encodeErr)
+				return
+			}
+		case "image/jpeg":
+			encodeErr := jpeg.Encode(&buf, img, &jpeg.Options{Quality: 100})
+			if nil != encodeErr {
+				logging.LogErrorf("encode jpeg image failed: %s", encodeErr)
+				return
+			}
+		}
+		data = buf.Bytes()
 	}
-	if nil != encodeErr {
-		logging.LogErrorf("encode base64 image failed: %s", encodeErr)
-		tmpFile.Close()
-		return
-	}
-	tmpFile.Close()
 
-	assetTargetPath := filepath.Join(assetDirPath, name)
-	if err := filelock.Copy(tmp, assetTargetPath); err != nil {
-		logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", tmp, assetTargetPath, err)
+	diskName, err := storeAssetForBox(boxID, assetDirPath, name, data)
+	if err != nil {
+		logging.LogErrorf("store base64 image for box [%s] failed: %s", boxID, err)
 		return
 	}
-	n.Tokens = []byte("assets/" + name)
+	assetURL := "assets/" + diskName
+	if boxID != "" && IsEncryptedBox(boxID) {
+		assetURL += "?box=" + boxID
+	}
+	n.Tokens = []byte(assetURL)
 }
 
 func htmlBlock2Inline(tree *parse.Tree) {

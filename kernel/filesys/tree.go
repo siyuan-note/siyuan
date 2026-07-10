@@ -145,19 +145,21 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 }
 
 // ValidateBoxRelativePath 校验 box 内相对路径是否安全。
-// 拒绝 ..、绝对路径、盘符，确保最终路径位于 <DataDir>/<boxID> 内。
+// 拒绝 ..、绝对路径，确保最终路径位于 <DataDir>/<boxID> 内。
+// 允许路径以 / 开头（如 /20230101/xxx.sy），会自动标准化再去掉前导斜杠。
 func ValidateBoxRelativePath(boxID, p string) (string, error) {
 	p = filepath.ToSlash(p)
-	if strings.HasPrefix(p, "..") || strings.Contains(p, "/../") || strings.HasSuffix(p, "/..") || p == ".." {
-		return "", fmt.Errorf("path [%s] must not contain '..'", p)
+	// 记录原始路径用于 IsSubPath 校验
+	origP := p
+	// 标准化：去掉前导 /
+	p = strings.TrimPrefix(p, "/")
+	if strings.HasPrefix(p, "..") || strings.Contains(p, "/../") || strings.HasSuffix(p, "/..") || p == ".." || p == "." {
+		return "", fmt.Errorf("path [%s] must not contain '..'", origP)
 	}
-	if strings.HasPrefix(p, "/") {
-		return "", fmt.Errorf("path [%s] must be relative", p)
-	}
-	resolved := filepath.Join(util.DataDir, boxID, p)
+	resolved := filepath.Join(util.DataDir, boxID, origP)
 	boxRoot := filepath.Join(util.DataDir, boxID)
 	if !gulu.File.IsSubPath(boxRoot, resolved) {
-		return "", fmt.Errorf("path [%s] escapes box directory", p)
+		return "", fmt.Errorf("path [%s] escapes box directory", origP)
 	}
 	return p, nil
 }

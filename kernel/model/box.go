@@ -275,8 +275,13 @@ func (box *Box) validateBoxPath(p string) (string, error) {
 }
 
 func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
-	if _, err = box.validateBoxPath(p + "/placeholder"); err != nil {
-		return
+	if "/" == p {
+		p = ""
+	}
+	if p != "" {
+		if _, err = box.validateBoxPath(p); err != nil {
+			return
+		}
 	}
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	if strings.HasSuffix(p, ".sy") {

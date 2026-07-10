@@ -200,6 +200,7 @@ func extensionCopy(c *gin.Context) {
 			md = string(bodyData)
 			luteEngine.SetIndentCodeBlock(true) // 链滴支持缩进代码块，因此需要开启
 			tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+			tree.Box = boxID
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if ast.NodeInlineMath == n.Type {
 					withMath = true

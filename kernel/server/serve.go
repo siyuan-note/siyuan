@@ -895,12 +895,18 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 // history 路径格式：<historyDir>/<datePrefix>/<boxID>/<relativePath>。
 func extractHistoryRelPath(absPath, boxID string) string {
 	absPath = filepath.ToSlash(absPath)
-	idx := strings.Index(absPath, "/"+boxID+"/")
-	if idx < 0 {
+	historyDir := filepath.ToSlash(util.HistoryDir)
+	rel, err := filepath.Rel(historyDir, absPath)
+	if err != nil {
 		return ""
 	}
-	rel := absPath[idx+len("/"+boxID+"/"):]
-	return rel
+	rel = filepath.ToSlash(rel)
+	// rel 格式：<datePrefix>/<boxID>/<relativePath>
+	parts := strings.SplitN(rel, "/", 3)
+	if len(parts) < 3 || parts[1] != boxID {
+		return ""
+	}
+	return parts[2]
 }
 
 func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool {

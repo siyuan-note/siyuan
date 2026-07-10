@@ -425,19 +425,33 @@ func NewAttributeView(id string) (ret *AttributeView) {
 }
 
 func GetAttributeViewName(avID string) (ret string, err error) {
-	avJSONPath := GetAttributeViewDataPath(avID)
+	// 通过 fallback 查找 AV 定义的真实路径（普通 box 全局，加密笔记本笔记本级）
+	avJSONPath, boxID := FindAttributeViewPath(avID)
+	if avJSONPath == "" {
+		avJSONPath = GetAttributeViewDataPath(avID)
+		boxID = ""
+	}
 	if !filelock.IsExist(avJSONPath) {
 		return
 	}
 
-	return GetAttributeViewNameByPath(avJSONPath)
+	return getAttributeViewNameByPathInBox(avJSONPath, boxID)
 }
 
-func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
+func getAttributeViewNameByPathInBox(avJSONPath, boxID string) (ret string, err error) {
 	data, err := filelock.ReadFile(avJSONPath)
 	if err != nil {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avJSONPath, err)
 		return
+	}
+	if boxID != "" {
+		avID := strings.TrimSuffix(filepath.Base(avJSONPath), filepath.Ext(avJSONPath))
+		plain, decErr := decryptAVData(boxID, avID, data)
+		if decErr != nil {
+			logging.LogErrorf("decrypt attribute view [%s] failed: %s", avJSONPath, decErr)
+			return "", decErr
+		}
+		data = plain
 	}
 
 	val := jsoniter.Get(data, "name")
@@ -446,6 +460,11 @@ func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
 	}
 	ret = val.ToString()
 	return
+}
+
+// GetAttributeViewNameByPath 从指定路径读取 AV 名称（不加密，普通 box 兼容入口）。
+func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
+	return getAttributeViewNameByPathInBox(avJSONPath, "")
 }
 
 func GetAttributeViewContent(avID string) (content string) {
@@ -495,7 +514,11 @@ func getAttributeViewContent0(attrView *AttributeView) (content string) {
 }
 
 func IsAttributeViewExist(avID string) bool {
-	avJSONPath := GetAttributeViewDataPath(avID)
+	// 通过 fallback 查找（普通 box 全局，加密笔记本笔记本级）
+	avJSONPath, _ := FindAttributeViewPath(avID)
+	if avJSONPath == "" {
+		avJSONPath = GetAttributeViewDataPath(avID)
+	}
 	return filelock.IsExist(avJSONPath)
 }
 

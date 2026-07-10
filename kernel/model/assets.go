@@ -707,6 +707,10 @@ func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
 		}
 		return p, nil
 	}
+	// 非加密 box 的资源可能回退到全局 data/assets（兼容旧笔记本结构）
+	if !IsEncryptedBox(boxID) {
+		return GetAssetAbsPathWithOpt(relativePath, false)
+	}
 	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }
 

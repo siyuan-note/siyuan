@@ -456,6 +456,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, tree := range trees {
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 		syPath := filepath.Join(unzipRootPath, tree.Path)
+		// 加密前确定最终文件名：tree.ID + ".sy"，确保加密 AAD 用的是最终 box-relative path
+		finalSyName := tree.ID + ".sy"
+		finalRelPath := filepath.ToSlash(filepath.Join(filepath.Dir(tree.Path), finalSyName))
 		treenode.UpgradeSpec(tree)
 		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		data := renderer.Render()
@@ -477,7 +480,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				return
 			}
 			var encErr error
-			data, encErr = EncryptFile(boxID, tree.Path, dek, data)
+			data, encErr = EncryptFile(boxID, finalRelPath, dek, data)
 			if encErr != nil {
 				logging.LogErrorf("encrypt import .sy failed: %s", encErr)
 				return
@@ -487,11 +490,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			logging.LogErrorf("write .sy [%s] failed: %s", syPath, err)
 			return
 		}
-		newSyPath := filepath.Join(filepath.Dir(syPath), tree.ID+".sy")
+		newSyPath := filepath.Join(filepath.Dir(syPath), finalSyName)
 		if err = filelock.Rename(syPath, newSyPath); err != nil {
 			logging.LogErrorf("rename .sy from [%s] to [%s] failed: %s", syPath, newSyPath, err)
 			return
 		}
+		tree.Path = finalRelPath
 	}
 
 	// 合并 sort.json

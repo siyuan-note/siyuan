@@ -87,10 +87,13 @@ func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
 	// 从解析到的绝对路径反推有效 boxID，不轻信传入参数（路径可能通过 ?box= 指定了不同 box）
 	effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath)
 	if effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
+		HoldBoxReadLock(effectiveBoxID)
 		dek, dekErr := GetDEKIfUnlocked(effectiveBoxID)
 		if dekErr != nil {
+			ReleaseBoxReadLock(effectiveBoxID)
 			return nil, dekErr
 		}
+		defer ReleaseBoxReadLock(effectiveBoxID)
 		diskName := filepath.Base(AssetPathWithoutQuery(relativePath))
 		plain, decErr := DecryptAsset(effectiveBoxID, diskName, dek, data)
 		if decErr != nil {

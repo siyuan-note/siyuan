@@ -50,6 +50,32 @@ var ErrWrappedDEKCorrupted = errors.New("wrapped DEK corrupted or key mismatch")
 // 避免 ChangeMasterPassword 枚举与 CreateEncryptedBox 并发导致新笔记本用旧 KEK 但 verifier 已切换的不可恢复状态。
 var notebookCryptoMu sync.Mutex
 
+// boxLifecycleLocks 为每个 box 提供一个 RWMutex，协调锁定操作与在途解密请求。
+// 在途解密请求持读锁，LockBox 持写锁，确保锁定后不会有新的解密输出。
+var boxLifecycleLocks = sync.Map{} // map[string]*sync.RWMutex
+
+func acquireBoxReadLock(boxID string) {
+	muI, _ := boxLifecycleLocks.LoadOrStore(boxID, &sync.RWMutex{})
+	muI.(*sync.RWMutex).RLock()
+}
+
+func releaseBoxReadLock(boxID string) {
+	if muI, ok := boxLifecycleLocks.Load(boxID); ok {
+		muI.(*sync.RWMutex).RUnlock()
+	}
+}
+
+func acquireBoxWriteLock(boxID string) {
+	muI, _ := boxLifecycleLocks.LoadOrStore(boxID, &sync.RWMutex{})
+	muI.(*sync.RWMutex).Lock()
+}
+
+func releaseBoxWriteLock(boxID string) {
+	if muI, ok := boxLifecycleLocks.Load(boxID); ok {
+		muI.(*sync.RWMutex).Unlock()
+	}
+}
+
 // NotebookCryptoMuLock 锁定 notebookCryptoMu，供 api 层读取一致的状态快照。
 func NotebookCryptoMuLock() { notebookCryptoMu.Lock() }
 
@@ -704,6 +730,13 @@ func IsBoxUnlocked(boxID string) bool {
 // 关闭即删 db 文件：加密索引可由 box.Index() 全量重建，文件无需持久化；
 // 同时避免关闭后残留旧索引数据导致下次解锁叠加重复行。
 func LockBox(boxID string) {
+	// 获取写锁，等待所有在途解密操作完成，确保锁定后不会继续输出明文
+	acquireBoxWriteLock(boxID)
+	defer releaseBoxWriteLock(boxID)
+
+	// 排空事务队列，避免在途 write 在缓存清理后写回旧数据
+	FlushTxQueue()
+
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {
 		zeroAndClear(dek)
@@ -1143,6 +1176,17 @@ func GetDEKIfUnlocked(boxID string) ([]byte, error) {
 	return ret, nil
 }
 
+// HoldBoxReadLock 获取 box 读锁，防止 LockBox 在持锁期间清除缓存/临时文件。
+// 调用方完成解密输出后必须调 ReleaseBoxReadLock。
+func HoldBoxReadLock(boxID string) {
+	acquireBoxReadLock(boxID)
+}
+
+// ReleaseBoxReadLock 释放 HoldBoxReadLock 获取的 box 读锁。
+func ReleaseBoxReadLock(boxID string) {
+	releaseBoxReadLock(boxID)
+}
+
 // extractBoxIDFromPath 从 data 目录下的绝对路径反推 boxID。
 // 路径形如 <DataDir>/<boxID>/...，切出紧跟在 DataDir 后的一段。
 // 若路径不在 DataDir 下或格式不符，返回空字符串。
@@ -1305,6 +1349,8 @@ func removeNotebookCryptBackup(boxID string) {
 func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	boxID := ExtractBoxIDFromAssetsPath(srcPath)
 	if boxID != "" && IsEncryptedBox(boxID) {
+		HoldBoxReadLock(boxID)
+		defer ReleaseBoxReadLock(boxID)
 		dek, err := GetDEKIfUnlocked(boxID)
 		if err != nil {
 			// 加密笔记本未解锁：fail-closed，拒绝复制（不复制密文，避免泄漏无效文件）

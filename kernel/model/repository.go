@@ -672,6 +672,9 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
 	if !IsEncryptedBox(boxID) {
 		return data
 	}
+	// 持读锁，防止 LockBox 在解密期间清 DEK/缓存
+	HoldBoxReadLock(boxID)
+	defer ReleaseBoxReadLock(boxID)
 	dek, err := GetDEKIfUnlocked(boxID)
 	if err != nil {
 		return data // 加密笔记本未解锁：返回原数据

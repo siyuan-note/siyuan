@@ -28,7 +28,11 @@ import (
 // sql / treenode 的路由函数据此 fail-closed：加密笔记本未解锁时绝不回退全局库。
 func init() {
 	filesys.DEKProvider = GetDEKIfUnlocked
+	filesys.DEKLockAcquire = HoldBoxReadLock
+	filesys.DEKLockRelease = ReleaseBoxReadLock
 	av.AVDEKProvider = GetDEKIfUnlocked
+	av.AVLockAcquire = HoldBoxReadLock
+	av.AVLockRelease = ReleaseBoxReadLock
 	av.AVEncryptedBoxIDs = treenode.GetOpenedEncryptedBoxIDs
 	av.AVIsEncryptedBox = IsEncryptedBox
 	sql.IsEncryptedBoxFn = IsEncryptedBox

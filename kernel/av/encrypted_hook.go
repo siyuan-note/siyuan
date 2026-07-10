@@ -23,6 +23,11 @@ import (
 // 返回 (nil, nil) 表示该 box 非加密或未解锁——此时 AV 定义明文存储，对普通笔记本透明。
 var AVDEKProvider func(boxID string) ([]byte, error)
 
+// AVLockAcquire / AVLockRelease 由 model 层注入，在获取 DEK 前后持 box 读锁，
+// 防止 LockBox 在 AV 加解密期间清除缓存。非加密 box 的注入为空时不影响行为。
+var AVLockAcquire func(boxID string)
+var AVLockRelease func(boxID string)
+
 // AVEncryptedBoxIDs 由 model 层注入，返回所有已打开的加密 boxID 列表。
 // 供 AV 路径 fallback 时遍历查找。
 var AVEncryptedBoxIDs func() []string
@@ -268,6 +273,10 @@ func encryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 	if AVDEKProvider == nil {
 		return data, nil
 	}
+	if AVLockAcquire != nil {
+		AVLockAcquire(boxID)
+		defer AVLockRelease(boxID)
+	}
 	dek, err := AVDEKProvider(boxID)
 	if err != nil {
 		return nil, err // 加密但未解锁，拒绝写盘避免明文泄漏
@@ -283,6 +292,10 @@ func encryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 func decryptAVData(boxID, avID string, data []byte) ([]byte, error) {
 	if AVDEKProvider == nil {
 		return data, nil
+	}
+	if AVLockAcquire != nil {
+		AVLockAcquire(boxID)
+		defer AVLockRelease(boxID)
 	}
 	dek, err := AVDEKProvider(boxID)
 	if err != nil {

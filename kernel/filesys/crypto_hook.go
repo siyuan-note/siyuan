@@ -30,6 +30,11 @@ import (
 // filesys 不能直接 import model（会形成 model → filesys → model 循环依赖），故采用回调注入。
 var DEKProvider func(boxID string) ([]byte, error)
 
+// DEKLockAcquire / DEKLockRelease 由 model 层注入，在获取 DEK 前后持 box 读锁，
+// 防止 LockBox 在加解密期间清除缓存。非加密 box 的注入为空时不影响行为。
+var DEKLockAcquire func(boxID string)
+var DEKLockRelease func(boxID string)
+
 // normalizeRelPath 标准化 box 内相对路径用于 AAD：去掉前导 /、统一为正斜杠。
 func normalizeRelPath(p string) string {
 	p = filepath.ToSlash(p)
@@ -42,6 +47,10 @@ func normalizeRelPath(p string) string {
 func encryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
+	}
+	if DEKLockAcquire != nil {
+		DEKLockAcquire(boxID)
+		defer DEKLockRelease(boxID)
 	}
 	dek, err := DEKProvider(boxID)
 	if err != nil {
@@ -59,6 +68,10 @@ func encryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 func decryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
+	}
+	if DEKLockAcquire != nil {
+		DEKLockAcquire(boxID)
+		defer DEKLockRelease(boxID)
 	}
 	dek, err := DEKProvider(boxID)
 	if err != nil {

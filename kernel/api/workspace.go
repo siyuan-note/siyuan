@@ -171,13 +171,47 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
-	if gulu.File.IsDir(path) {
-		err := os.RemoveAll(path)
-		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+
+	// 硬边界：只允许删除已登记的工作空间目录，禁止删除当前工作空间和任意路径
+	cleanPath, absErr := filepath.Abs(path)
+	if absErr != nil {
+		ret.Code = -1
+		ret.Msg = absErr.Error()
+		return
+	}
+	if cleanPath == util.WorkspaceDir {
+		ret.Code = -1
+		ret.Msg = "cannot remove current workspace"
+		return
+	}
+	if !util.IsWorkspaceDir(cleanPath) {
+		ret.Code = -1
+		ret.Msg = "path is not a workspace directory"
+		return
+	}
+	knownPaths, err := util.ReadWorkspacePaths()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	isKnown := false
+	for _, known := range knownPaths {
+		if known == cleanPath {
+			isKnown = true
+			break
 		}
+	}
+	if !isKnown {
+		ret.Code = -1
+		ret.Msg = "path is not a registered workspace"
+		return
+	}
+
+	if err := os.RemoveAll(cleanPath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 
 	logging.LogInfof("removed workspace [%s] physically", path)

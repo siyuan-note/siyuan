@@ -837,16 +837,11 @@ export class WYSIWYG {
                     tips.push({el: tip, child});
                 });
                 // 份额池：每个子块占 100 的份额（一位小数），总和恒为 100
-                // 从子块 style.width 的 calc 百分比恢复，无 width 的用实测宽度估算
-                // 最大余数法取整确保总和精确 = 100，跨拖拽起始显示一致
-                const rawPcts = sbChildren.map(child => {
-                    const m = child.style.width.match(/^calc\(([\d.]+)%/);
-                    return m ? parseFloat(m[1]) : child.getBoundingClientRect().width / sbWidth * 100;
-                });
-                const totalRaw = rawPcts.reduce((s, p) => s + p, 0) || 1;
-                const normalized = rawPcts.map(p => p / totalRaw * 100);
-                // 以 0.1 为最小单位（×10 后取整），最大余数法分配，再 /10 回到一位小数
-                const scaled = normalized.map(p => p * 10);
+                // 从子块实测宽度按比例分配，与 calc 百分比无关（calc 含 gap 补偿，坐标系不同）
+                // 最大余数法取整确保总和精确 = 100，拖拽中实时更新两侧份额
+                const rawPcts = sbChildren.map(child => child.getBoundingClientRect().width);
+                const totalWidth = rawPcts.reduce((s, w) => s + w, 0) || 1;
+                const scaled = rawPcts.map(w => w / totalWidth * 1000);
                 const shares = scaled.map(p => Math.floor(p));
                 const deficit = 1000 - shares.reduce((s, p) => s + p, 0);
                 const remainders = scaled
@@ -887,8 +882,9 @@ export class WYSIWYG {
                     previousElement.style.flex = "none";
                     nextElement.style.width = newRightWidth + "px";
                     nextElement.style.flex = "none";
-                    // 更新份额池：左块份额 = 当前宽度占比 × 1000（一位小数精度），右块 = 1000 - 左块 - 其他块份额
-                    const newLeftShare = Math.max(1, Math.round(newLeftWidth / sbWidth * 1000));
+                    // 更新份额池：左块份额 = 当前宽度 / 子块总宽度 × 1000，右块 = 1000 - 左块 - 其他块份额
+                    // 分母用子块宽度之和（不含手柄），与 mousedown 初始化一致
+                    const newLeftShare = Math.max(1, Math.round(newLeftWidth / totalWidth * 1000));
                     const othersSum = shares.reduce((s, p, i) => i === leftIdx || i === rightIdx ? s : s + p, 0);
                     shares[leftIdx] = newLeftShare;
                     shares[rightIdx] = Math.max(1, 1000 - othersSum - newLeftShare);

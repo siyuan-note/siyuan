@@ -13,12 +13,8 @@
           display: none;
         }
 
-        .b3-list-item__graphic {
-          padding-right: 5px;
-        }
-
-        .config__tab-title {
-          height: 25px;
+        .b3-list-item {
+          width: 24px;
         }
       }
     }
@@ -58,8 +54,7 @@
       & > .b3-button,
       & > .b3-tooltips,
       & > .b3-form__icona,
-      & > .fn__size200,
-      .searchByKeyLabel {
+      & > .fn__size200, {
         flex: 1 1 100%;
         width: 100%;
         max-width: 100%;
@@ -111,6 +106,10 @@
         margin-left: 0 !important;
         text-align: center;
       }
+    }
+
+    &__tab-head .b3-text-field {
+      display: none;
     }
   }
 

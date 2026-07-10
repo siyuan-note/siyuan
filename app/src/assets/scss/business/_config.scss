@@ -127,15 +127,16 @@
         flex: 1;
         min-height: 0;
         overflow-y: auto;
-        margin: 0;
+        margin: 0 -12px 0 0;
+        padding-right: 12px;
         list-style: none;
       }
 
       .config__tab-title {
         display: flex;
         align-items: center;
-        height: 32px;
-        margin-bottom: 8px;
+        height: 21px;
+        margin-bottom: 16px;
       }
 
       .b3-list-item {
@@ -143,10 +144,7 @@
         margin: 8px;
 
         &__graphic {
-          margin-right: 2px;
-          padding: 0 8px 0 4px;
-          height: 16px;
-          width: 16px;
+          padding: 0 6px 0 4px;
         }
       }
     }

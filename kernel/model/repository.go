@@ -658,10 +658,11 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	return
 }
 
-// decryptRepoDataIfNeeded 判断仓库数据是否属于加密笔记本，如果是则按路径提取 boxID 解密。
+// decryptRepoDataIfNeeded 判断仓库数据是否属于加密笔记本，如果是则按路径类型分流解密。
 // file.Path 格式：/<boxID>/...
+// .sy → DecryptFile，assets/* → DecryptAsset，storage/av/*.json → av.DecryptAVData。
+// 其他文件或解锁失败时返回原数据（调用方 fallback）。
 func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
-	// 从路径提取 boxID
 	relPath := strings.TrimPrefix(filePath, "/")
 	parts := strings.SplitN(relPath, "/", 2)
 	if len(parts) < 1 || !ast.IsNodeIDPattern(parts[0]) {
@@ -673,15 +674,32 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) []byte {
 	}
 	dek, err := GetDEKIfUnlocked(boxID)
 	if err != nil {
-		return data // 加密笔记本未解锁：同步快照解析返回原数据（调用方解析失败时按文件名回退）
+		return data // 加密笔记本未解锁：返回原数据
 	}
-	// repo 路径格式：/<boxID>/<relativePath>，parts[1] 为 box 内相对路径作为 AAD
-	boxRelPath := ""
-	if len(parts) >= 2 {
-		boxRelPath = parts[1]
+	if len(parts) < 2 {
+		return data
 	}
-	plain, err := DecryptFile(boxID, boxRelPath, dek, data)
-	if err != nil {
+	boxRelPath := parts[1]
+	// 按路径类型分流
+	if strings.HasPrefix(boxRelPath, "assets/") {
+		diskName := filepath.Base(boxRelPath)
+		plain, decErr := DecryptAsset(boxID, diskName, dek, data)
+		if decErr != nil {
+			return data
+		}
+		return plain
+	}
+	if strings.HasPrefix(boxRelPath, "storage/av/") && strings.HasSuffix(boxRelPath, ".json") {
+		avID := strings.TrimSuffix(filepath.Base(boxRelPath), ".json")
+		plain, decErr := av.DecryptAVData(boxID, avID, data)
+		if decErr != nil {
+			return data
+		}
+		return plain
+	}
+	// .sy 和其他文件用 file 子密钥 + 相对路径 AAD
+	plain, decErr := DecryptFile(boxID, boxRelPath, dek, data)
+	if decErr != nil {
 		return data
 	}
 	return plain
@@ -769,6 +787,15 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 
 	// 加密笔记本的 .sy 在仓库里是密文，按路径提取 boxID 解密
 	data = decryptRepoDataIfNeeded(data, file.Path)
+	// 如果加密 box 已锁定，decryptRepoDataIfNeeded 返回原密文，应拒绝导出
+	repoRel := strings.TrimPrefix(file.Path, "/")
+	repoParts := strings.SplitN(repoRel, "/", 2)
+	if len(repoParts) >= 1 && ast.IsNodeIDPattern(repoParts[0]) && IsEncryptedBox(repoParts[0]) {
+		if _, dekErr := GetDEKIfUnlocked(repoParts[0]); dekErr != nil {
+			err = errors.New(Conf.Language(314))
+			return
+		}
+	}
 
 	name := path.Base(file.Path)
 	exportDir := filepath.Join(util.TempDir, "export", "repo")

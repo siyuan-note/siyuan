@@ -124,8 +124,10 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	ret = filesys.DocIAL(filePath)
 	if 1 > len(ret) {
 		// 加密笔记本的 .sy 解密失败（DEK 未缓存或 box 未解锁）时不应视为损坏，
-		// 否则文件会被 moveCorruptedData 移走导致数据丢失
-		if IsEncryptedBox(box.ID) {
+		// 否则文件会被 moveCorruptedData 移走导致数据丢失。
+		// 使用解析后的文件路径反查实际 boxID（可能因 symlink 或路径穿越指向加密 box）
+		actualBoxID := ExtractBoxIDFromAssetsPath(filePath)
+		if (actualBoxID != "" && IsEncryptedBox(actualBoxID)) || IsEncryptedBox(box.ID) {
 			logging.LogWarnf("properties not found in encrypted file [%s], skip moveCorruptedData", filePath)
 			return nil
 		}

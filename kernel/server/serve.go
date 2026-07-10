@@ -1141,6 +1141,10 @@ type encryptedBoxAwareWebdavFS struct {
 
 func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
 	rel := filepath.ToSlash(name)
+	// 阻止访问 temp/ 目录（包含已解密的导出、repo 快照等）
+	if strings.HasPrefix(rel, "temp/") || strings.Contains(rel, "/temp/") {
+		return true
+	}
 	if idx := strings.Index(rel, "/data/"); idx >= 0 {
 		candidate := rel[idx+len("/data/"):]
 		if slashIdx := strings.Index(candidate, "/"); slashIdx > 0 {

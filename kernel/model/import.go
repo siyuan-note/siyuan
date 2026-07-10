@@ -302,11 +302,16 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 
 		// 加密笔记本的 AV 定义不能拷到全局目录（明文泄漏 + 路由冲突），
-		// 后续由笔记本级 AV 拷贝逻辑处理
+		// 需要先加密写入 <boxID>/storage/av/，后续 mirror/relation 操作才能正确路由
 		if !IsEncryptedBox(boxID) {
 			targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
 			if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
 				logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
+			}
+		} else {
+			// 加密笔记本：先把 AV 定义加密写入笔记本级目录，建立 box 映射后 mirror/relation 才能正确路由
+			if err = encryptBoxAVFiles(boxID, storageAvDir); err != nil {
+				return
 			}
 		}
 
@@ -400,40 +405,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	// storage 文件夹已在上方处理，所以这里删除源 storage 文件夹，避免后面被拷贝到导入目录下 targetDir
-	// 加密笔记本需要先把 AV 定义加密拷贝到笔记本级目录，再删源 storage
-	if IsEncryptedBox(boxID) && gulu.File.IsExist(storageAvDir) {
-		boxAVDir := filepath.Join(util.DataDir, boxID, "storage", "av")
-		if err = os.MkdirAll(boxAVDir, 0755); err != nil {
-			return
-		}
-		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, walkErr error) error {
-			if walkErr != nil || d == nil || d.IsDir() {
-				return walkErr
-			}
-			if !strings.HasSuffix(d.Name(), ".json") {
-				return nil
-			}
-			src, readErr := os.ReadFile(path)
-			if readErr != nil {
-				return readErr
-			}
-			avID := strings.TrimSuffix(d.Name(), ".json")
-			// av.EncryptAVData 内部按 box 是否加密/已解锁路由，加密笔记本用 avKey+AAD
-			enc, encErr := av.EncryptAVData(boxID, avID, src)
-			if encErr != nil {
-				return encErr
-			}
-			return os.WriteFile(filepath.Join(boxAVDir, d.Name()), enc, 0644)
-		})
-	}
-
-	// 普通笔记本拷贝到全局 storage/av/（加密笔记本已在上面处理）
-	if !IsEncryptedBox(boxID) {
-		targetStorageAvDir := filepath.Join(util.DataDir, "storage", "av")
-		if copyErr := filelock.Copy(storageAvDir, targetStorageAvDir); nil != copyErr {
-			logging.LogErrorf("copy storage av dir from [%s] to [%s] failed: %s", storageAvDir, targetStorageAvDir, copyErr)
-		}
-	}
+	// 加密笔记本已在上面完成 notebook 级 AV 拷贝，安全删除
 
 	if removeErr := os.RemoveAll(storage); nil != removeErr {
 		logging.LogErrorf("remove temp storage av dir [%s] failed: %s", storage, removeErr)
@@ -1599,6 +1571,38 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath, boxID string) {
 		assetURL += "?box=" + boxID
 	}
 	n.Tokens = []byte(assetURL)
+}
+
+// encryptBoxAVFiles 把临时目录中的 AV 定义文件加密写入加密笔记本级目录。
+// 写入后通过 SetAVBoxID 建立 AV 归属映射，确保后续 mirror/relation 操作正确路由。
+func encryptBoxAVFiles(boxID, storageAvDir string) error {
+	if !IsEncryptedBox(boxID) || !gulu.File.IsExist(storageAvDir) {
+		return nil
+	}
+	boxAVDir := filepath.Join(util.DataDir, boxID, "storage", "av")
+	if err := os.MkdirAll(boxAVDir, 0755); err != nil {
+		return err
+	}
+	return filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil || d == nil || d.IsDir() {
+			return walkErr
+		}
+		if !strings.HasSuffix(d.Name(), ".json") {
+			return nil
+		}
+		src, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		avID := strings.TrimSuffix(d.Name(), ".json")
+		// 加密写入前建立 box 映射，mirror/relation 操作即可正确路由
+		av.SetAVBoxID(avID, boxID)
+		enc, encErr := av.EncryptAVData(boxID, avID, src)
+		if encErr != nil {
+			return encErr
+		}
+		return os.WriteFile(filepath.Join(boxAVDir, d.Name()), enc, 0644)
+	})
 }
 
 func htmlBlock2Inline(tree *parse.Tree) {

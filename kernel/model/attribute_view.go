@@ -3544,10 +3544,51 @@ func (tx *Transaction) doSetAttrViewFilters(operation *Operation) (ret *TxErr) {
 	return
 }
 
+// avParseView 根据 blockID 推导 box 上下文，使用 box-aware 或全局 AV 解析。
+func avParseView(avID, blockID string) (*av.AttributeView, error) {
+	boxID := deriveAVBoxID(blockID)
+	if boxID != "" {
+		return av.ParseAttributeViewInBox(avID, boxID)
+	}
+	return av.ParseAttributeView(avID)
+}
+
+// avSaveView 根据 blockID 推导 box 上下文，使用 box-aware 或全局 AV 保存。
+func avSaveView(attrView *av.AttributeView, blockID string) error {
+	boxID := deriveAVBoxID(blockID)
+	if boxID != "" {
+		_, parseErr := av.ParseAttributeViewInBox(attrView.ID, boxID)
+		if parseErr == nil {
+			return av.SaveAttributeView(attrView)
+		}
+	}
+	return av.SaveAttributeView(attrView)
+}
+
+// deriveAVBoxID 通过 blockID 反查所在 box。blockID 为空或不是加密 box 时返回空串。
+func deriveAVBoxID(blockID string) string {
+	if blockID == "" {
+		return ""
+	}
+	bt := treenode.GetBlockTree(blockID)
+	if bt == nil {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBT := treenode.GetBlockTreeInBox(blockID, encBoxID); encBT != nil {
+				bt = encBT
+				break
+			}
+		}
+	}
+	if bt == nil || !IsEncryptedBox(bt.BoxID) {
+		return ""
+	}
+	return bt.BoxID
+}
+
 // SetAttrViewFilters 用新的过滤规则数组整体替换指定视图的过滤规则，并持久化。
 // data 为 JSON 反序列化前的 []any（通常是前端传来的过滤节点树）。
 func SetAttrViewFilters(avID, blockID string, data []any) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, blockID)
 	if err != nil {
 		return
 	}
@@ -3579,7 +3620,7 @@ func SetAttrViewFilters(avID, blockID string, data []any) (err error) {
 		return
 	}
 
-	err = av.SaveAttributeView(attrView)
+	err = avSaveView(attrView, blockID)
 	return
 }
 
@@ -3594,7 +3635,7 @@ func (tx *Transaction) doSetAttrViewSorts(operation *Operation) (ret *TxErr) {
 // SetAttrViewSorts 用新的排序规则数组整体替换指定视图的排序规则，并持久化。
 // data 为 JSON 反序列化前的 []any。
 func SetAttrViewSorts(avID, blockID string, data []any) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, blockID)
 	if err != nil {
 		return
 	}
@@ -3615,7 +3656,7 @@ func SetAttrViewSorts(avID, blockID string, data []any) (err error) {
 	}
 	view.Sorts = newSorts
 
-	err = av.SaveAttributeView(attrView)
+	err = avSaveView(attrView, blockID)
 	return
 }
 

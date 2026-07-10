@@ -1988,6 +1988,17 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				boxID := parts[0]
 
 				absPath := filepath.Join(util.TempDir, "repo", "sync", "conflicts", mergeResult.Time.Format("2006-01-02-150405"), file.Path)
+				// 加密笔记本的冲突 .sy 在临时目录里是密文，loadTree 无法从 temp 路径反推 box 解密
+				if IsEncryptedBox(boxID) {
+					raw, readErr := os.ReadFile(absPath)
+					if readErr == nil {
+						data := decryptRepoDataIfNeeded(raw, file.Path)
+						if writeErr := os.WriteFile(absPath, data, 0644); writeErr != nil {
+							logging.LogErrorf("decrypt conflicted file [%s] failed: %s", absPath, writeErr)
+							continue
+						}
+					}
+				}
 				tree, loadTreeErr := loadTree(absPath, luteEngine)
 				if nil != loadTreeErr {
 					logging.LogErrorf("load conflicted file [%s] failed: %s", absPath, loadTreeErr)

@@ -40,7 +40,8 @@ import (
 func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
-	// 加密笔记本的 AV 定义存笔记本级路径，通过 blockID 反查 boxID 并预设归属
+	// 加密笔记本的 AV 定义存笔记本级路径，通过 blockID 反查 boxID
+	avBoxID := ""
 	if "" != blockID {
 		bt := treenode.GetBlockTree(blockID)
 		if nil == bt {
@@ -52,12 +53,18 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 			}
 		}
 		if nil != bt && IsEncryptedBox(bt.BoxID) {
-			av.SetAVBoxID(avID, bt.BoxID)
+			avBoxID = bt.BoxID
 		}
 	}
 
 	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密笔记本笔记本级）
-	existPath, _ := av.FindAttributeViewPath(avID)
+	// 已知 box 时直接用 InBox 查找，避免全局 pending 映射被并发覆盖
+	var existPath string
+	if avBoxID != "" {
+		existPath, _ = av.FindAttributeViewPathInBox(avID, avBoxID)
+	} else {
+		existPath, _ = av.FindAttributeViewPath(avID)
+	}
 	if "" == existPath {
 		// fallback 找不到时按全局路径检查（首次创建场景）
 		existPath = av.GetAttributeViewDataPath(avID)
@@ -73,6 +80,11 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 			return
 		}
 
+		// 加密笔记本首次创建：仅设置 pending 用于 SaveAttributeView 路径路由，创建后立即清除
+		if avBoxID != "" {
+			av.SetAVBoxID(avID, avBoxID)
+			defer av.SetAVBoxID(avID, "") // 创建完成立即清除，避免污染后续路由
+		}
 		attrView = av.NewAttributeView(avID)
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -80,7 +92,12 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		}
 	}
 
-	attrView, err = av.ParseAttributeView(avID)
+	// 已知 box 时直接用 InBox 解析，不依赖全局 pending 状态
+	if avBoxID != "" {
+		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
+	} else {
+		attrView, err = av.ParseAttributeView(avID)
+	}
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return

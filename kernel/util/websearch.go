@@ -28,15 +28,15 @@ import (
 )
 
 const (
-	defaultExaURL      = "https://mcp.exa.ai/mcp"
-	maxWebSearchChars  = 50000
+	defaultExaURL     = "https://mcp.exa.ai/mcp"
+	maxWebSearchChars = 50000
 )
 
 type mcpRequest struct {
-	JSONRPC string      `json:"jsonrpc"`
-	ID      int         `json:"id"`
-	Method  string      `json:"method"`
-	Params  mcpParams   `json:"params"`
+	JSONRPC string    `json:"jsonrpc"`
+	ID      int       `json:"id"`
+	Method  string    `json:"method"`
+	Params  mcpParams `json:"params"`
 }
 
 type mcpParams struct {

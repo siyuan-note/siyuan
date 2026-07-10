@@ -370,5 +370,3 @@ func init() {
 	documentCmd.AddCommand(documentInfoCmd)
 	documentCmd.AddCommand(documentSearchCmd)
 }
-
-

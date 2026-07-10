@@ -355,7 +355,7 @@ var blockUpdateCmd = &cobra.Command{
 	},
 }
 
-	var blockDeleteCmd = &cobra.Command{
+var blockDeleteCmd = &cobra.Command{
 	Use:   "delete --id <id>",
 	Short: "Delete block",
 	RunE: func(cmd *cobra.Command, args []string) error {

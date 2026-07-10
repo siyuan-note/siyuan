@@ -33,6 +33,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -254,6 +255,14 @@ func heading2Doc(c *gin.Context) {
 
 	srcHeadingID := arg["srcHeadingID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
+
+	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
+	if bt := treenode.GetBlockTree(srcHeadingID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
 	var targetPath string
 	if arg["targetPath"] != nil {
 		targetPath = arg["targetPath"].(string)
@@ -297,6 +306,15 @@ func li2Doc(c *gin.Context) {
 
 	srcListItemID := arg["srcListItemID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
+
+	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
+	if bt := treenode.GetBlockTree(srcListItemID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+
 	var targetPath string
 	if arg["targetPath"] != nil {
 		targetPath = arg["targetPath"].(string)

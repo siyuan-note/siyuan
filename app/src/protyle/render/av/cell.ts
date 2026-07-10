@@ -35,10 +35,9 @@ const renderCellURL = (urlContent: string) => {
         }
     } catch (e) {
         // 不是 url 地址
-        host = Lute.EscapeHTMLStr(urlContent);
     }
-    // https://github.com/siyuan-note/siyuan/issues/9291
-    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${escapeAttr(urlContent)}"><span>${host}</span><span class="ft__on-surface">${suffix}</span></span>`;
+    // host 统一在输出处转义，避免非 http 协议（如 asd:<img...>）绕过 https://github.com/siyuan-note/siyuan/issues/9291
+    return `<span class="av__celltext av__celltext--url" data-type="url" data-href="${escapeAttr(urlContent)}"><span>${Lute.EscapeHTMLStr(host)}</span><span class="ft__on-surface">${Lute.EscapeHTMLStr(suffix)}</span></span>`;
 };
 
 export const getCellText = (cellElement: HTMLElement | false) => {
@@ -957,7 +956,8 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
 export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = true, type: TAVView = "table") => {
     let text = "";
     if ("template" === cellValue.type) {
-        text = `<span class="av__celltext">${cellValue ? (cellValue.template.content || "") : ""}</span>`;
+        // 使用 DOMPurify 过滤危险标签和事件属性，保留安全的 HTML 格式 https://github.com/siyuan-note/siyuan/issues/18169
+        text = `<span class="av__celltext">${cellValue ? window.DOMPurify.sanitize(cellValue.template.content || "") : ""}</span>`;
     } else if ("text" === cellValue.type) {
         text = `<span class="av__celltext">${cellValue ? Lute.EscapeHTMLStr(cellValue.text.content || "") : ""}</span>`;
     } else if (["email", "phone"].includes(cellValue.type)) {
@@ -1059,11 +1059,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
 const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
     let text = "";
     if (["text"].includes(cellValue.type)) {
-        text = cellValue ? (cellValue[cellValue.type as "text"].content || "") : "";
+        text = cellValue ? Lute.EscapeHTMLStr(cellValue[cellValue.type as "text"].content || "") : "";
     } else if (["email", "phone"].includes(cellValue.type)) {
         const emailContent = cellValue ? cellValue[cellValue.type as "email"].content : "";
         if (emailContent) {
-            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${emailContent}</span>`;
+            text = `<span class="av__celltext av__celltext--url" data-type="${cellValue.type}">${Lute.EscapeHTMLStr(emailContent)}</span>`;
         }
     } else if ("url" === cellValue.type) {
         const urlContent = cellValue?.url?.content || "";

@@ -111,6 +111,10 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 		return nil
 	}
 
+	if _, err := box.validateBoxPath(p); err != nil {
+		return nil
+	}
+
 	ret = cache.GetDocIAL(p)
 	if nil != ret {
 		return ret

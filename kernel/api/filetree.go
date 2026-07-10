@@ -1076,6 +1076,14 @@ func listDocsByPath(c *gin.Context) {
 
 	notebook := arg["notebook"].(string)
 	p := arg["path"].(string)
+
+	// 越界校验：拒绝 .. 和绝对路径，防止跨 box 遍历
+	if strings.Contains(p, "..") || filepath.IsAbs(p) {
+		ret.Code = -1
+		ret.Msg = "path must not contain '..' and must be relative"
+		return
+	}
+
 	sortParam := arg["sort"]
 	sortMode := util.SortModeUnassigned
 	if nil != sortParam {

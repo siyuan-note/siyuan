@@ -269,7 +269,15 @@ func (box *Box) saveConf0(data []byte) error {
 	return nil
 }
 
+// validateBoxPath 校验 box 内相对路径，拒绝 .. 和绝对路径，确保最终路径在 <DataDir>/<boxID>/ 内。
+func (box *Box) validateBoxPath(p string) (string, error) {
+	return filesys.ValidateBoxRelativePath(box.ID, p)
+}
+
 func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
+	if _, err = box.validateBoxPath(p + "/placeholder"); err != nil {
+		return
+	}
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	if strings.HasSuffix(p, ".sy") {
 		dir := strings.TrimSuffix(p, ".sy")
@@ -324,6 +332,9 @@ func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
 }
 
 func (box *Box) Stat(p string) (ret *FileInfo) {
+	if _, err := box.validateBoxPath(p); err != nil {
+		return
+	}
 	absPath := filepath.Join(util.DataDir, box.ID, p)
 	info, err := os.Stat(absPath)
 	if err != nil {
@@ -342,10 +353,16 @@ func (box *Box) Stat(p string) (ret *FileInfo) {
 }
 
 func (box *Box) Exist(p string) bool {
+	if _, err := box.validateBoxPath(p); err != nil {
+		return false
+	}
 	return filelock.IsExist(filepath.Join(util.DataDir, box.ID, p))
 }
 
 func (box *Box) Mkdir(path string) error {
+	if _, err := box.validateBoxPath(path); err != nil {
+		return err
+	}
 	if err := os.Mkdir(filepath.Join(util.DataDir, box.ID, path), 0755); err != nil {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
 		logging.LogErrorf("mkdir [path=%s] in box [%s] failed: %s", path, box.ID, err)
@@ -356,6 +373,9 @@ func (box *Box) Mkdir(path string) error {
 }
 
 func (box *Box) MkdirAll(path string) error {
+	if _, err := box.validateBoxPath(path); err != nil {
+		return err
+	}
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, path), 0755); err != nil {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
 		logging.LogErrorf("mkdir all [path=%s] in box [%s] failed: %s", path, box.ID, err)
@@ -366,6 +386,12 @@ func (box *Box) MkdirAll(path string) error {
 }
 
 func (box *Box) Move(oldPath, newPath string) error {
+	if _, err := box.validateBoxPath(oldPath); err != nil {
+		return err
+	}
+	if _, err := box.validateBoxPath(newPath); err != nil {
+		return err
+	}
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	fromPath := filepath.Join(boxLocalPath, oldPath)
 	toPath := filepath.Join(boxLocalPath, newPath)
@@ -387,6 +413,9 @@ func (box *Box) Move(oldPath, newPath string) error {
 }
 
 func (box *Box) Remove(path string) error {
+	if _, err := box.validateBoxPath(path); err != nil {
+		return err
+	}
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	filePath := filepath.Join(boxLocalPath, path)
 	if err := filelock.Remove(filePath); err != nil {
@@ -399,6 +428,7 @@ func (box *Box) Remove(path string) error {
 }
 
 func (box *Box) ListFiles(path string) (ret []*FileInfo) {
+	// ListFiles 委托给 Ls，后者已有 validateBoxPath
 	fis, _, err := box.Ls(path)
 	if err != nil {
 		return

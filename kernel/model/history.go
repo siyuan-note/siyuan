@@ -267,9 +267,8 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 }
 
 func RollbackDocHistory(historyPath string) (err error) {
-	historyPath = filepath.Join(util.WorkspaceDir, historyPath)
-	if !gulu.File.IsExist(historyPath) {
-		logging.LogWarnf("doc history [%s] not exist", historyPath)
+	historyPath, err = validateHistoryPath(historyPath)
+	if err != nil {
 		return
 	}
 
@@ -493,9 +492,8 @@ func getRollbackDockPath(boxID, historyPath string, workingDoc *treenode.BlockTr
 }
 
 func RollbackAssetsHistory(historyPath string) (err error) {
-	historyPath = filepath.Join(util.WorkspaceDir, historyPath)
-	if !gulu.File.IsExist(historyPath) {
-		logging.LogWarnf("assets history [%s] not exist", historyPath)
+	historyPath, err = validateHistoryPath(historyPath)
+	if err != nil {
 		return
 	}
 
@@ -522,10 +520,26 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	return nil
 }
 
+// validateHistoryPath 校验历史路径是否位于工作区内且属于历史目录。
+// 拒绝路径穿越攻击（..、绝对路径等）。返回规范化的绝对路径。
+func validateHistoryPath(historyPath string) (string, error) {
+	p := filepath.Join(util.WorkspaceDir, historyPath)
+	if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
+		return "", fmt.Errorf("history path [%s] is not in workspace", historyPath)
+	}
+	if !gulu.File.IsExist(p) {
+		return "", fmt.Errorf("history path [%s] not exist", historyPath)
+	}
+	rel, err := filepath.Rel(util.HistoryDir, p)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		return "", fmt.Errorf("history path [%s] is not under history directory", historyPath)
+	}
+	return p, nil
+}
+
 func RollbackNotebookHistory(historyPath string) (err error) {
-	historyPath = filepath.Join(util.WorkspaceDir, historyPath)
-	if !gulu.File.IsExist(historyPath) {
-		logging.LogWarnf("notebook history [%s] not exist", historyPath)
+	historyPath, err = validateHistoryPath(historyPath)
+	if err != nil {
 		return
 	}
 
@@ -543,10 +557,13 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 }
 
 func RollbackAttributeViewHistory(historyPath string) (err error) {
-	historyPath = filepath.Join(util.WorkspaceDir, historyPath)
-	if !gulu.File.IsExist(historyPath) {
-		logging.LogWarnf("av history [%s] not exist", historyPath)
+	historyPath, err = validateHistoryPath(historyPath)
+	if err != nil {
 		return
+	}
+	// 验证目标文件必须是 AV 定义文件
+	if !strings.HasSuffix(historyPath, ".json") || !strings.Contains(filepath.ToSlash(historyPath), "/storage/av/") {
+		return fmt.Errorf("invalid AV history path [%s]", historyPath)
 	}
 
 	from := historyPath

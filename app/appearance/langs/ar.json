@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "يؤدي تصدير محتوى دفتر ملاحظات مشفر إلى إنشاء ملفات غير مشفرة يمكن لأي شخص لديه حق الوصول قراءتها. هل تريد المتابعة؟",
 	"passwordStrengthWeak": "قوة كلمة المرور: ضعيفة",
 	"passwordStrengthMedium": "قوة كلمة المرور: متوسطة",
 	"passwordStrengthStrong": "قوة كلمة المرور: قوية",

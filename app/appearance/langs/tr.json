@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Şifreli not defteri içeriğini dışa aktarmak, erişimi olan herkesin okuyabileceği şifrelenmemiş dosyalar oluşturur. Devam edilsin mi?",
 	"passwordStrengthWeak": "Parola gücü: zayıf",
 	"passwordStrengthMedium": "Parola gücü: orta",
 	"passwordStrengthStrong": "Parola gücü: güçlü",

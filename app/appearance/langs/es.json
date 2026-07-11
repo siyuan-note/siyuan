@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Al exportar contenido de cuadernos cifrados se crean archivos sin cifrar que cualquiera con acceso puede leer. ¿Continuar?",
 	"passwordStrengthWeak": "Seguridad de la contraseña: débil",
 	"passwordStrengthMedium": "Seguridad de la contraseña: media",
 	"passwordStrengthStrong": "Seguridad de la contraseña: alta",

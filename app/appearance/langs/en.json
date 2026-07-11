@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Exporting encrypted notebook content creates unencrypted files that can be read by anyone with access to them. Continue?",
 	"passwordStrengthWeak": "Password strength: weak",
 	"passwordStrengthMedium": "Password strength: medium",
 	"passwordStrengthStrong": "Password strength: strong",

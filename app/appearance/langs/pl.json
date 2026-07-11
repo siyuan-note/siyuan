@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Eksportowanie zawartości zaszyfrowanego notatnika tworzy niezaszyfrowane pliki, które może odczytać każda osoba mająca do nich dostęp. Kontynuować?",
 	"passwordStrengthWeak": "Siła hasła: słaba",
 	"passwordStrengthMedium": "Siła hasła: średnia",
 	"passwordStrengthStrong": "Siła hasła: silna",

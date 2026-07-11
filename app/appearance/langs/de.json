@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Beim Export verschlüsselter Notizbuchinhalte werden unverschlüsselte Dateien erstellt, die jeder mit Zugriff lesen kann. Fortfahren?",
 	"passwordStrengthWeak": "Passwortstärke: schwach",
 	"passwordStrengthMedium": "Passwortstärke: mittel",
 	"passwordStrengthStrong": "Passwortstärke: stark",

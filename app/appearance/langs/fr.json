@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "L’exportation du contenu d’un notebook chiffré crée des fichiers non chiffrés lisibles par toute personne y ayant accès. Continuer ?",
 	"passwordStrengthWeak": "Robustesse du mot de passe : faible",
 	"passwordStrengthMedium": "Robustesse du mot de passe : moyenne",
 	"passwordStrengthStrong": "Robustesse du mot de passe : élevée",

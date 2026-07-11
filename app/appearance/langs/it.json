@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "L’esportazione del contenuto di un notebook crittografato crea file non crittografati leggibili da chiunque vi abbia accesso. Continuare?",
 	"passwordStrengthWeak": "Robustezza della password: debole",
 	"passwordStrengthMedium": "Robustezza della password: media",
 	"passwordStrengthStrong": "Robustezza della password: elevata",

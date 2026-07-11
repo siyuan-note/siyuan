@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Het exporteren van versleutelde notitieboekinhoud maakt onversleutelde bestanden die iedereen met toegang kan lezen. Doorgaan?",
 	"passwordStrengthWeak": "Wachtwoordsterkte: zwak",
 	"passwordStrengthMedium": "Wachtwoordsterkte: gemiddeld",
 	"passwordStrengthStrong": "Wachtwoordsterkte: sterk",

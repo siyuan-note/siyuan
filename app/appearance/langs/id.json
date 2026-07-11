@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Mengekspor konten buku catatan terenkripsi membuat file tanpa enkripsi yang dapat dibaca siapa pun yang memiliki akses. Lanjutkan?",
 	"passwordStrengthWeak": "Kekuatan kata sandi: lemah",
 	"passwordStrengthMedium": "Kekuatan kata sandi: sedang",
 	"passwordStrengthStrong": "Kekuatan kata sandi: kuat",

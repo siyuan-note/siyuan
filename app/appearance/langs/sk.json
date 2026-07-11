@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Export obsahu šifrovaného poznámkového bloku vytvorí nešifrované súbory, ktoré môže čítať ktokoľvek s prístupom. Pokračovať?",
 	"passwordStrengthWeak": "Sila hesla: slabá",
 	"passwordStrengthMedium": "Sila hesla: stredná",
 	"passwordStrengthStrong": "Sila hesla: silná",

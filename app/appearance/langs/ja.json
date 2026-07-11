@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "暗号化ノートブックの内容をエクスポートすると、アクセスできる人なら誰でも読める暗号化されていないファイルが作成されます。続行しますか？",
 	"passwordStrengthWeak": "パスワードの強度：弱い",
 	"passwordStrengthMedium": "パスワードの強度：普通",
 	"passwordStrengthStrong": "パスワードの強度：強い",

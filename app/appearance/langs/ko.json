@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "암호화된 노트북 내용을 내보내면 접근 가능한 모든 사람이 읽을 수 있는 암호화되지 않은 파일이 생성됩니다. 계속하시겠습니까?",
 	"passwordStrengthWeak": "비밀번호 강도: 약함",
 	"passwordStrengthMedium": "비밀번호 강도: 보통",
 	"passwordStrengthStrong": "비밀번호 강도: 강함",

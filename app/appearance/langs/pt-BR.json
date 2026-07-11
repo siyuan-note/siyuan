@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "Exportar conteúdo de um notebook criptografado cria arquivos sem criptografia que qualquer pessoa com acesso pode ler. Continuar?",
 	"passwordStrengthWeak": "Força da senha: fraca",
 	"passwordStrengthMedium": "Força da senha: média",
 	"passwordStrengthStrong": "Força da senha: forte",

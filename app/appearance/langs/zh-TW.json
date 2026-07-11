@@ -1,4 +1,5 @@
 {
+	"encryptedExportRiskTip": "匯出加密筆記本內容會產生未加密檔案，任何可存取這些檔案的人都能讀取。確定繼續嗎？",
 	"passwordStrengthWeak": "密碼強度：弱",
 	"passwordStrengthMedium": "密碼強度：中等",
 	"passwordStrengthStrong": "密碼強度：強",

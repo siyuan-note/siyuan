@@ -18,6 +18,9 @@ package util
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"testing"
 )
 
@@ -64,6 +67,16 @@ func TestAESGCMRoundTrip(t *testing.T) {
 	if !bytes.Equal(plaintext, pt) {
 		t.Fatalf("round-trip mismatch: got %q want %q", pt, plaintext)
 	}
+	if !bytes.Equal(ct[:len(encryptionMagic)], encryptionMagic[:]) {
+		t.Fatalf("ciphertext is missing the encryption envelope magic")
+	}
+	if ct[len(encryptionMagic)] != EncryptionSpec {
+		t.Fatalf("ciphertext spec mismatch: got %d want %d", ct[len(encryptionMagic)], EncryptionSpec)
+	}
+	nonce, nonceErr := EncryptionNonce(ct)
+	if nonceErr != nil || len(nonce) != 12 {
+		t.Fatalf("extract envelope nonce failed: nonce=%d err=%v", len(nonce), nonceErr)
+	}
 }
 
 // TestAESGCMSamePlaintextDifferentCiphertext 验证同一明文多次加密结果不同（随机 nonce）。
@@ -107,12 +120,73 @@ func TestAESGCMTamperedCiphertext(t *testing.T) {
 	}
 }
 
+// TestAESGCMEnvelopeHeaderTampering 验证信封头参与认证，篡改后不能被当作有效密文读取。
+func TestAESGCMEnvelopeHeaderTampering(t *testing.T) {
+	key, _ := GenerateDEK()
+	ct, _ := Encrypt(key, []byte("header integrity"))
+	ct[len(encryptionMagic)] ^= 0x01
+	if _, err := Decrypt(key, ct); err == nil {
+		t.Fatalf("Decrypt of ciphertext with tampered envelope header should fail")
+	}
+}
+
 // TestAESGCMInvalidKeyLength 验证非 32 字节密钥被拒绝。
 func TestAESGCMInvalidKeyLength(t *testing.T) {
 	shortKey := []byte("too-short")
 	if _, err := Encrypt(shortKey, []byte("x")); err == nil {
 		t.Fatalf("Encrypt with short key should fail")
 	}
+}
+
+// TestAESGCMLegacyCiphertextCompatibility 验证旧 nonce||ciphertext||tag 格式仍可解密，保证升级后已有数据可读。
+func TestAESGCMLegacyCiphertextCompatibility(t *testing.T) {
+	key, _ := GenerateDEK()
+	plaintext := []byte("legacy encrypted notebook data")
+	legacy, err := encryptLegacyForTest(key, plaintext, nil)
+	if err != nil {
+		t.Fatalf("create legacy ciphertext failed: %v", err)
+	}
+	got, err := Decrypt(key, legacy)
+	if err != nil {
+		t.Fatalf("decrypt legacy ciphertext failed: %v", err)
+	}
+	if !bytes.Equal(got, plaintext) {
+		t.Fatalf("legacy round-trip mismatch")
+	}
+}
+
+// TestAESGCMLegacyCiphertextWithAADCompatibility 验证旧版带 AAD 的文件/资源密文仍可读取。
+func TestAESGCMLegacyCiphertextWithAADCompatibility(t *testing.T) {
+	key, _ := GenerateDEK()
+	plaintext := []byte("legacy encrypted asset")
+	aad := []byte("siyuan:v1:asset:box:assets/file.png")
+	legacy, err := encryptLegacyForTest(key, plaintext, aad)
+	if err != nil {
+		t.Fatalf("create legacy ciphertext failed: %v", err)
+	}
+	got, err := DecryptWithAAD(key, legacy, aad)
+	if err != nil {
+		t.Fatalf("decrypt legacy ciphertext with AAD failed: %v", err)
+	}
+	if !bytes.Equal(got, plaintext) {
+		t.Fatalf("legacy AAD round-trip mismatch")
+	}
+}
+
+func encryptLegacyForTest(key, plaintext, aad []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err = rand.Read(nonce); err != nil {
+		return nil, err
+	}
+	return gcm.Seal(nonce, nonce, plaintext, aad), nil
 }
 
 // TestGenerateSaltUnique 验证生成的 salt 足够随机（两次调用结果不同）。

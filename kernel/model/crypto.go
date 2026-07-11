@@ -528,13 +528,17 @@ func EnableEncryptedNotebook(password string) error {
 	if err != nil {
 		return err
 	}
+	verifierNonce, nonceErr := util.EncryptionNonce(verifierCT)
+	if nonceErr != nil {
+		return nonceErr
+	}
 
 	Conf.m.Lock()
 	Conf.NotebookCrypto.Enabled = true
 	Conf.NotebookCrypto.MasterSalt = salt
 	Conf.NotebookCrypto.KDFParams = params
 	Conf.NotebookCrypto.KEKVerifier = verifierCT
-	Conf.NotebookCrypto.VerifierNonce = verifierCT[:12]
+	Conf.NotebookCrypto.VerifierNonce = verifierNonce
 	Conf.m.Unlock()
 
 	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
@@ -920,9 +924,18 @@ func WrapNewDEK(kek []byte) (*conf.BoxEncryption, []byte, error) {
 	}
 	return &conf.BoxEncryption{
 		WrappedDEK: wrapped,
-		WrapNonce:  wrapped[:12],
+		WrapNonce:  mustEncryptionNonce(wrapped),
 		CreatedAt:  time.Now().UnixMilli(),
 	}, dek, nil
+}
+
+// mustEncryptionNonce 从刚刚成功生成的密文中提取 nonce。生成密文格式错误属于内部不变量被破坏，直接终止执行。
+func mustEncryptionNonce(ciphertext []byte) []byte {
+	nonce, err := util.EncryptionNonce(ciphertext)
+	if err != nil {
+		panic("extract encryption nonce failed: " + err.Error())
+	}
+	return nonce
 }
 
 // UnwrapDEK 从 BoxEncryption 解出 DEK 并缓存到内存，供后续 GetDEK 使用。
@@ -1023,7 +1036,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		entries = append(entries, migrationBoxEntry{
 			BoxID:         id,
 			NewWrappedDEK: newWrapped,
-			NewWrapNonce:  newWrapped[:12],
+			NewWrapNonce:  mustEncryptionNonce(newWrapped),
 		})
 	}
 
@@ -1032,7 +1045,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	mig := &masterPasswordMigration{
 		OldVerifier:      nc.KEKVerifier,
 		NewVerifier:      newVerifier,
-		NewVerifierNonce: newVerifier[:12],
+		NewVerifierNonce: mustEncryptionNonce(newVerifier),
 		NewKDFParams:     newParamsJSON,
 		Boxes:            entries,
 	}
@@ -1043,7 +1056,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	// Phase 2: 切换全局 verifier
 	Conf.m.Lock()
 	Conf.NotebookCrypto.KEKVerifier = newVerifier
-	Conf.NotebookCrypto.VerifierNonce = newVerifier[:12]
+	Conf.NotebookCrypto.VerifierNonce = mustEncryptionNonce(newVerifier)
 	Conf.NotebookCrypto.KDFParams = params
 	Conf.m.Unlock()
 

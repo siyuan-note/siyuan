@@ -18,9 +18,12 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -217,5 +220,158 @@ func TestUnmount0ClearsDEKForUnmountedEncryptedBox(t *testing.T) {
 	// 验证 DEK 已被清除
 	if IsBoxUnlocked(boxID) {
 		t.Fatalf("DEK should be cleared for unlocked encrypted box")
+	}
+}
+
+// TestLockAllBoxesConcurrentReads 验证 LockAllBoxes 与并发读操作（持 box 读锁）正确串行化。
+func TestLockAllBoxesConcurrentReads(t *testing.T) {
+	// 注入 3 个 box 的 DEK
+	boxes := []string{"concurrent-a", "concurrent-b", "concurrent-c"}
+	for _, id := range boxes {
+		dek, _ := util.GenerateDEK()
+		setDEKForTest(id, dek)
+	}
+
+	// 启动 goroutine 持续获取读锁（模拟在途解密操作）
+	stop := make(chan struct{})
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+					for _, id := range boxes {
+						HoldBoxReadLock(id)
+						time.Sleep(time.Microsecond)
+						ReleaseBoxReadLock(id)
+					}
+				}
+			}
+		}()
+	}
+
+	time.Sleep(10 * time.Millisecond) // 给 goroutine 时间开始获取读锁
+	LockAllBoxes()
+	close(stop)
+	wg.Wait()
+
+	for _, id := range boxes {
+		if IsBoxUnlocked(id) {
+			t.Fatalf("box %q should be locked after concurrent LockAllBoxes", id)
+		}
+	}
+}
+
+// TestBackupUpgradeFromSpec0 验证旧格式备份（Spec=0）能被正确升级。
+func TestBackupUpgradeFromSpec0(t *testing.T) {
+	origDataDir := util.DataDir
+	tempDir := t.TempDir()
+	util.DataDir = tempDir
+	defer func() { util.DataDir = origDataDir }()
+
+	// 写 Spec=0 旧格式备份（模拟同步/导入带来的旧备份）
+	oldBackup := &conf.NotebookCrypto{
+		Enabled:     true,
+		MasterSalt:  []byte("oldsalt1234567890"),
+		KEKVerifier: []byte("test-verifier"),
+	}
+	backupPath := filepath.Join(tempDir, ".siyuan", "notebook-crypto-backup.json")
+	os.MkdirAll(filepath.Dir(backupPath), 0755)
+	data, _ := json.Marshal(oldBackup)
+	os.WriteFile(backupPath, data, 0644)
+
+	// 加载：应识别为 Spec=0 并升级
+	nc, err := loadNotebookCryptoBackup()
+	if err != nil {
+		t.Fatalf("loadNotebookCryptoBackup failed: %v", err)
+	}
+	if nc.Spec != 1 {
+		t.Fatalf("expected Spec=1 after upgrade, got %d", nc.Spec)
+	}
+
+	// 写入升级后的备份（prepareBackupForWrite 会补全 Checksum 和 Generation）
+	prepareBackupForWrite(nc)
+	backupDir := filepath.Join(tempDir, ".siyuan")
+	os.MkdirAll(backupDir, 0755)
+	data, _ = json.Marshal(nc)
+	os.WriteFile(backupPath, data, 0644)
+
+	// 重新加载，校验和应通过
+	nc2, err := loadNotebookCryptoBackup()
+	if err != nil {
+		t.Fatalf("reload backup failed: %v", err)
+	}
+	if nc2.Generation < 1 {
+		t.Fatalf("expected Generation>=1, got %d", nc2.Generation)
+	}
+	if nc2.Checksum == "" {
+		t.Fatalf("expected non-empty Checksum after write")
+	}
+}
+
+// TestBackupChecksumCorruption 验证校验和可检测备份损坏。
+func TestBackupChecksumCorruption(t *testing.T) {
+	origDataDir := util.DataDir
+	tempDir := t.TempDir()
+	util.DataDir = tempDir
+	defer func() { util.DataDir = origDataDir }()
+
+	// 创建有效备份
+	nc := &conf.NotebookCrypto{
+		Enabled:    true,
+		MasterSalt: []byte("corrupt-test-salt12"),
+	}
+	prepareBackupForWrite(nc)
+	backupPath := filepath.Join(tempDir, ".siyuan", "notebook-crypto-backup.json")
+	os.MkdirAll(filepath.Dir(backupPath), 0755)
+	data, _ := json.Marshal(nc)
+	os.WriteFile(backupPath, data, 0644)
+
+	// 验证正常加载
+	nc1, err := loadNotebookCryptoBackup()
+	if err != nil {
+		t.Fatalf("loadNotebookCryptoBackup should succeed with valid backup: %v", err)
+	}
+	if nc1.Spec != 1 {
+		t.Fatalf("expected Spec=1, got %d", nc1.Spec)
+	}
+
+	// 篡改 MasterSalt 一个字节
+	nc.MasterSalt[0] ^= 0xFF
+	// 不更新 Checksum（模拟磁盘损坏）
+	data, _ = json.Marshal(nc)
+	os.WriteFile(backupPath, data, 0644)
+
+	// 应检测到损坏
+	_, err = loadNotebookCryptoBackup()
+	if err == nil {
+		t.Fatalf("loadNotebookCryptoBackup should fail with corrupted backup")
+	}
+}
+
+// TestBackupKEKMACVerification 验证 KEKMAC 认证码正确性。
+func TestBackupKEKMACVerification(t *testing.T) {
+	nc := &conf.NotebookCrypto{
+		Enabled:    true,
+		MasterSalt: []byte("kekmac-test-salt12"),
+	}
+	prepareBackupForWrite(nc)
+
+	correctKek, _ := util.GenerateDEK()
+	nc.KEKMAC = computeKEKMAC(nc, correctKek)
+
+	// 正确 KEK 验证通过
+	if !verifyKEKMAC(nc, correctKek) {
+		t.Fatalf("verifyKEKMAC should pass with correct KEK")
+	}
+
+	// 错误 KEK 验证失败
+	wrongKek, _ := util.GenerateDEK()
+	if verifyKEKMAC(nc, wrongKek) {
+		t.Fatalf("verifyKEKMAC should fail with wrong KEK")
 	}
 }

@@ -25,7 +25,7 @@ type NotebookCrypto struct {
 	MasterSalt    []byte            `json:"masterSalt"`    // 主密码 Argon2id 派生的 salt，全局唯一
 	KDFParams     util.Argon2Params `json:"kdfParams"`     // Argon2id 参数，落盘以便跨平台一致派生
 	KEKVerifier   []byte            `json:"kekVerifier"`   // 用 KEK 经 AES-GCM 加密的固定魔数，用于离线校验主密码
-	VerifierNonce []byte            `json:"verifierNonce"` // verifier 的 GCM nonce（Encrypt 返回值的前 12 字节）
+	VerifierNonce []byte            `json:"verifierNonce"` // verifier 的 GCM nonce（从加密信封中提取）
 
 	// 备份完整性字段（Spec>=1）
 	// Spec 表示备份规范版本。Generation 单调递增。Checksum 防损坏。KEKMAC 需主密码验证。

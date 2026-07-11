@@ -17,6 +17,7 @@
 package util
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -26,6 +27,16 @@ import (
 
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/crypto/hkdf"
+)
+
+var encryptionMagic = [4]byte{'S', 'E', 'N', 'C'}
+
+const (
+	// EncryptionSpec 表示 AES-GCM 密文信封规范版本。旧版密文没有信封头，读取时保持兼容。
+	EncryptionSpec byte = 1
+
+	encryptionAlgorithmAES256GCM byte = 1
+	encryptionEnvelopeHeaderSize      = len(encryptionMagic) + 3 // magic + spec + algorithm + nonce length
 )
 
 // Argon2Params 是 Argon2id 密钥派生函数的参数。参数本身不是秘密，会随配置落盘，以便跨平台一致地派生密钥。
@@ -80,47 +91,40 @@ func DeriveKey(password string, salt []byte, p Argon2Params) []byte {
 	return argon2.IDKey([]byte(password), salt, p.Iterations, p.Memory, p.Parallelism, p.KeyLength)
 }
 
-// Encrypt 用 AES-256-GCM 加密。每次调用生成随机 12 字节 nonce 并 prepend 到密文前，因此同一明文多次加密结果不同。
-// 返回格式：nonce(12B) || ciphertext || GCM tag(16B)。
+// Encrypt 用 AES-256-GCM 加密。每次调用生成随机 nonce，因此同一明文多次加密结果不同。
+// 返回格式：magic(4B) || spec(1B) || algorithm(1B) || nonceLength(1B) || nonce || ciphertext || GCM tag(16B)。
 func Encrypt(key, plaintext []byte) ([]byte, error) {
-	if len(key) != 32 {
-		return nil, errors.New("Encrypt requires a 32-byte (AES-256) key")
-	}
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, err
-	}
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err := rand.Read(nonce); err != nil {
-		return nil, err
-	}
-	// Seal 会把 nonce 前置，一次性产出 nonce||ciphertext||tag
-	return gcm.Seal(nonce, nonce, plaintext, nil), nil
+	return encryptGCM(key, plaintext, nil, "Encrypt")
 }
 
-// Decrypt 对应 Encrypt 的解密。密钥错误或密文被篡改时返回错误（GCM 自带完整性校验）。
+// Decrypt 对应 Encrypt 的解密。兼容旧版 nonce||ciphertext||tag 格式。
+// 密钥错误或密文被篡改时返回错误（GCM 自带完整性校验）。
 func Decrypt(key, ciphertext []byte) ([]byte, error) {
-	if len(key) != 32 {
-		return nil, errors.New("Decrypt requires a 32-byte (AES-256) key")
+	return decryptGCM(key, ciphertext, nil, "Decrypt")
+}
+
+// EncryptionNonce 从 AES-GCM 密文中提取 nonce，兼容旧版无信封头格式。
+func EncryptionNonce(ciphertext []byte) ([]byte, error) {
+	if hasEncryptionMagic(ciphertext) {
+		if len(ciphertext) < encryptionEnvelopeHeaderSize {
+			return nil, errors.New("encrypted envelope too short")
+		}
+		if ciphertext[len(encryptionMagic)] != EncryptionSpec {
+			return nil, errors.New("unsupported encrypted envelope spec")
+		}
+		if ciphertext[len(encryptionMagic)+1] != encryptionAlgorithmAES256GCM {
+			return nil, errors.New("unsupported encrypted envelope algorithm")
+		}
+		nonceLength := int(ciphertext[len(encryptionMagic)+2])
+		if nonceLength == 0 || len(ciphertext) < encryptionEnvelopeHeaderSize+nonceLength {
+			return nil, errors.New("invalid encrypted envelope nonce length")
+		}
+		return append([]byte(nil), ciphertext[encryptionEnvelopeHeaderSize:encryptionEnvelopeHeaderSize+nonceLength]...), nil
 	}
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
+	if len(ciphertext) < 12 {
+		return nil, errors.New("ciphertext too short to extract nonce")
 	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, err
-	}
-	nonceSize := gcm.NonceSize()
-	if len(ciphertext) < nonceSize {
-		return nil, errors.New("ciphertext too short")
-	}
-	nonce, ct := ciphertext[:nonceSize], ciphertext[nonceSize:]
-	return gcm.Open(nil, nonce, ct, nil)
+	return append([]byte(nil), ciphertext[:12]...), nil
 }
 
 // DeriveSubKey 用 HKDF-SHA256 从主 DEK 派生用途隔离的子密钥。
@@ -140,30 +144,20 @@ func DeriveSubKey(dek []byte, purpose string) []byte {
 // EncryptWithAAD 用 AES-256-GCM 加密并绑定 AAD（附加认证数据）。
 // AAD 不被加密，但参与 GCM 认证——解密时必须提供相同 AAD，否则认证失败。
 // 把用途/boxID/路径等元数据放入 AAD，可防止同 box 内密文被替换用途或路径（bind 到上下文）。
-// 返回格式：nonce(12B) || ciphertext || GCM tag(16B)，与 Encrypt 一致但 AAD 参与校验。
+// 返回格式与 Encrypt 一致，但 AAD 参与校验。
 func EncryptWithAAD(key, plaintext, aad []byte) ([]byte, error) {
-	if len(key) != 32 {
-		return nil, errors.New("EncryptWithAAD requires a 32-byte (AES-256) key")
-	}
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, err
-	}
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err := rand.Read(nonce); err != nil {
-		return nil, err
-	}
-	return gcm.Seal(nonce, nonce, plaintext, aad), nil
+	return encryptGCM(key, plaintext, aad, "EncryptWithAAD")
 }
 
-// DecryptWithAAD 对应 EncryptWithAAD 的解密，AAD 不匹配或密文被篡改时返回错误。
+// DecryptWithAAD 对应 EncryptWithAAD 的解密，兼容旧版 nonce||ciphertext||tag 格式。
+// AAD 不匹配或密文被篡改时返回错误。
 func DecryptWithAAD(key, ciphertext, aad []byte) ([]byte, error) {
+	return decryptGCM(key, ciphertext, aad, "DecryptWithAAD")
+}
+
+func encryptGCM(key, plaintext, aad []byte, operation string) ([]byte, error) {
 	if len(key) != 32 {
-		return nil, errors.New("DecryptWithAAD requires a 32-byte (AES-256) key")
+		return nil, errors.New(operation + " requires a 32-byte (AES-256) key")
 	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -174,11 +168,68 @@ func DecryptWithAAD(key, ciphertext, aad []byte) ([]byte, error) {
 		return nil, err
 	}
 	nonceSize := gcm.NonceSize()
-	if len(ciphertext) < nonceSize {
+	nonce := make([]byte, nonceSize)
+	if _, err = rand.Read(nonce); err != nil {
+		return nil, err
+	}
+	envelope := make([]byte, encryptionEnvelopeHeaderSize, encryptionEnvelopeHeaderSize+nonceSize+len(plaintext)+gcm.Overhead())
+	copy(envelope, encryptionMagic[:])
+	envelope[len(encryptionMagic)] = EncryptionSpec
+	envelope[len(encryptionMagic)+1] = encryptionAlgorithmAES256GCM
+	envelope[len(encryptionMagic)+2] = byte(nonceSize)
+	envelope = append(envelope, nonce...)
+	return gcm.Seal(envelope, nonce, plaintext, envelopeAAD(envelope[:encryptionEnvelopeHeaderSize], aad)), nil
+}
+
+func decryptGCM(key, ciphertext, aad []byte, operation string) ([]byte, error) {
+	if len(key) != 32 {
+		return nil, errors.New(operation + " requires a 32-byte (AES-256) key")
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+	nonceSize := gcm.NonceSize()
+	if hasEncryptionMagic(ciphertext) {
+		if len(ciphertext) < encryptionEnvelopeHeaderSize {
+			return nil, errors.New("encrypted envelope too short")
+		}
+		if ciphertext[len(encryptionMagic)] != EncryptionSpec {
+			return nil, errors.New("unsupported encrypted envelope spec")
+		}
+		if ciphertext[len(encryptionMagic)+1] != encryptionAlgorithmAES256GCM {
+			return nil, errors.New("unsupported encrypted envelope algorithm")
+		}
+		if int(ciphertext[len(encryptionMagic)+2]) != nonceSize {
+			return nil, errors.New("invalid encrypted envelope nonce length")
+		}
+		if len(ciphertext) < encryptionEnvelopeHeaderSize+nonceSize+gcm.Overhead() {
+			return nil, errors.New("encrypted envelope too short")
+		}
+		nonce := ciphertext[encryptionEnvelopeHeaderSize : encryptionEnvelopeHeaderSize+nonceSize]
+		ct := ciphertext[encryptionEnvelopeHeaderSize+nonceSize:]
+		return gcm.Open(nil, nonce, ct, envelopeAAD(ciphertext[:encryptionEnvelopeHeaderSize], aad))
+	}
+	if len(ciphertext) < nonceSize+gcm.Overhead() {
 		return nil, errors.New("ciphertext too short")
 	}
 	nonce, ct := ciphertext[:nonceSize], ciphertext[nonceSize:]
 	return gcm.Open(nil, nonce, ct, aad)
+}
+
+func hasEncryptionMagic(ciphertext []byte) bool {
+	return len(ciphertext) >= len(encryptionMagic) && bytes.Equal(ciphertext[:len(encryptionMagic)], encryptionMagic[:])
+}
+
+// envelopeAAD 把公开信封头和调用方 AAD 一并纳入 GCM 认证，防止规范或算法标识被篡改。
+func envelopeAAD(header, aad []byte) []byte {
+	ret := make([]byte, 0, len(header)+len(aad))
+	ret = append(ret, header...)
+	return append(ret, aad...)
 }
 
 // GenerateSalt 生成随机 salt（16 字节）。

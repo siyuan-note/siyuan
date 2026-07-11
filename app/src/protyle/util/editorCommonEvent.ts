@@ -767,6 +767,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         document.onmouseup = null;
     });
     editorElement.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
+        // lite 模式不落盘，拖拽块时强制复制语义（避免移动操作删除源块）。
+        const isCopyDrag = protyle.lite || event.ctrlKey;
         counter = 0;
         hideDragTip();
         window.siyuan.dragTitle = "";
@@ -828,7 +830,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             }
-            if (event.altKey) {
+            if (event.altKey || (event.shiftKey && protyle.lite)) {
+                // 引用：getRefText → Md2BlockDOM((id 'text'))
+                // lite 模式下 Shift（原嵌入块）也走引用，避免依赖后端 SQL 查询的嵌入块。
                 let html = "";
                 for (let i = 0; i < selectedIds.length; i++) {
                     const response = await fetchSyncPost("/api/block/getRefText", {id: selectedIds[i]});
@@ -1204,9 +1208,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const anchorBlock = contentBlocks.length > 0 ? contentBlocks[contentBlocks.length - 1] : null;
                             if (anchorBlock) {
                                 // 插到最后一个内容块之后：moveTo 会把段落放在子列表之前，形成列表项内容
-                                dragSame(protyle, sourceElements, anchorBlock, true, event.ctrlKey);
+                                dragSame(protyle, sourceElements, anchorBlock, true, isCopyDrag);
                             } else {
-                                dragSame(protyle, sourceElements, contentLi, isBottom, event.ctrlKey);
+                                dragSame(protyle, sourceElements, contentLi, isBottom, isCopyDrag);
                             }
                             liGapIntercepted = true;
                         }
@@ -1226,7 +1230,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (nestedTarget) {
                             // 拖拽自身子列表项到父项位置时，nestedTarget 可能就是源项自身，需跳过避免自己拖到自己
                             if (!sourceElements.includes(nestedTarget)) {
-                                dragSame(protyle, sourceElements, nestedTarget, isBottom, event.ctrlKey);
+                                dragSame(protyle, sourceElements, nestedTarget, isBottom, isCopyDrag);
                             }
                         } else {
                             // 目标列表项无嵌套子列表：定位其最后一个内容块，在其后插入，
@@ -1236,18 +1240,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const lastContentBlock = contentBlocks[contentBlocks.length - 1];
                             if (lastContentBlock) {
                                 // 嵌套列表始终创建在最后一个内容块之后
-                                dragSame(protyle, sourceElements, lastContentBlock, true, event.ctrlKey);
+                                dragSame(protyle, sourceElements, lastContentBlock, true, isCopyDrag);
                             } else {
-                                dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
+                                dragSame(protyle, sourceElements, targetElement, isBottom, isCopyDrag);
                             }
                         }
                     } else if (targetElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" &&
                         targetElement.parentElement.getAttribute("data-sb-layout") === "col") {
                         if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
                             // Mac 上 ⌘ 无法进行拖拽
-                            dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), event.ctrlKey);
+                            dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), isCopyDrag);
                         } else {
-                            dragSb(protyle, sourceElements, targetElement, isBottom, "row", event.ctrlKey);
+                            dragSb(protyle, sourceElements, targetElement, isBottom, "row", isCopyDrag);
                         }
                     } else {
                         // 列表项拖到列表容器边缘时禁止形成横向超级块（列表块拖到列表边缘可形成超级块）
@@ -1257,9 +1261,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             (targetClass.includes("dragover__left") || targetClass.includes("dragover__right"))) {
                             // 列表项拖到列表左右边缘：无操作
                         } else if (targetClass.includes("dragover__left") || targetClass.includes("dragover__right")) {
-                            dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), "col", event.ctrlKey);
+                            dragSb(protyle, sourceElements, targetElement, targetClass.includes("dragover__right"), "col", isCopyDrag);
                         } else {
-                            dragSame(protyle, sourceElements, targetElement, isBottom, event.ctrlKey);
+                            dragSame(protyle, sourceElements, targetElement, isBottom, isCopyDrag);
                         }
                     }
 
@@ -1535,11 +1539,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 提示文案：修饰键显示对应操作，无修饰键显示插入位置
         const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
         let action: string;
-        if (event.altKey) {
+        if (event.altKey || (event.shiftKey && protyle.lite)) {
+            // Alt=引用；lite 模式 Shift 也为引用
             action = window.siyuan.languages.dragTipRef;
         } else if (event.shiftKey) {
             action = window.siyuan.languages.dragTipEmbed;
-        } else if (event.ctrlKey) {
+        } else if (event.ctrlKey || protyle.lite) {
+            // Ctrl=创建副本；lite 模式无修饰键也为复制
             action = window.siyuan.languages.duplicate;
         } else if (isChild) {
             action = window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText);
@@ -1594,13 +1600,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (isAvTarget) {
                 // 拖到数据库视图：绑定为记录
                 action = window.siyuan.languages.addToDatabase;
-            } else if (event.ctrlKey) {
-                // Ctrl=创建副本
-                action = window.siyuan.languages.duplicate;
-            } else if (event.altKey) {
+            } else if (event.altKey || (event.shiftKey && protyle.lite)) {
+                // Alt=引用；lite 模式 Shift 也为引用（原嵌入块改为引用）
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
                 action = window.siyuan.languages.dragTipEmbed;
+            } else if (event.ctrlKey || protyle.lite) {
+                // Ctrl=创建副本；lite 模式无修饰键也为复制（不移动源块）
+                action = window.siyuan.languages.duplicate;
             } else {
                 action = window.siyuan.languages.move;
             }

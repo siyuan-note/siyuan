@@ -15,8 +15,7 @@ import {getAgentLute} from "../../../protyle/render/setLute";
 import {setPanelFocus} from "../../util";
 import {escapeAriaLabel, escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
-import {fetchPost, fetchSyncPost} from "../../../util/fetch";
-import {Constants} from "../../../constants";
+import {fetchPost} from "../../../util/fetch";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
@@ -302,8 +301,7 @@ export class AgentChat extends Model {
             // 内容变化时刷新发送按钮可用性（含用户输入、IME、程序化 clear 等所有 doc 变更）。
             this.updateSendButtonState();
         });
-        // 支持从编辑器块标或文档面板拖拽块到输入框，效果等同于 @ 引用。
-        this.bindComposerDragDrop();
+        // 块拖拽由 protyle 统一处理（复制块/引用/嵌入块→引用），无需自定义 drop handler。
         this.sessionPanel = new AgentSessionPanel(
             this.sessionMenuBtn,
             this.parent.panelElement,
@@ -367,65 +365,6 @@ export class AgentChat extends Model {
         if (!existing) {
             openSetting(this.app, "ai");
         }
-    }
-
-    // 绑定输入框的块拖拽：从编辑器块标或文档面板拖拽块到输入框，插入 @ 引用（mention chip）。
-    // 与 @ 搜索的 label 来源一致——用 getRefText API 按 block ID 查询引用文本。
-    private bindComposerDragDrop() {
-        this.composerHost.addEventListener("dragover", (e: DragEvent) => {
-            if (!e.dataTransfer) { return; }
-            // 仅接受块标拖拽（SIYUAN_DROP_GUTTER）和文档面板拖拽（SIYUAN_DROP_FILE）。
-            let canDrop = false;
-            for (const type of e.dataTransfer.types) {
-                if (type.startsWith(Constants.SIYUAN_DROP_GUTTER) || type === Constants.SIYUAN_DROP_FILE) {
-                    canDrop = true;
-                    break;
-                }
-            }
-            if (canDrop) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "copy";
-            }
-        });
-        this.composerHost.addEventListener("drop", async (e: DragEvent) => {
-            if (!e.dataTransfer || !this.composer) { return; }
-            const blockIds: string[] = [];
-            // 块标拖拽：从 MIME type key 提取所有 block ID（gutterTypes[2]）。
-            for (const type of e.dataTransfer.types) {
-                if (type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                    const gutterTypes = type.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
-                    const ids = (gutterTypes[2] || "").split(",").filter(Boolean);
-                    blockIds.push(...ids);
-                    break;
-                }
-            }
-            // 文档面板拖拽：数据值是逗号分隔的 doc ID，全部收集。
-            if (blockIds.length === 0) {
-                const fileData = e.dataTransfer.getData(Constants.SIYUAN_DROP_FILE);
-                if (fileData) {
-                    blockIds.push(...fileData.split(",").filter(Boolean));
-                }
-            }
-            if (blockIds.length === 0) { return; }
-            e.preventDefault();
-            e.stopPropagation();
-            // 用 getRefText API 并行获取每个块的引用文本作为 label（与 @ 搜索一致），
-            // 失败时回退到 blockId。
-            const mentions: Array<{id: string; label: string}> = [];
-            await Promise.all(blockIds.map(async (id) => {
-                let label = id;
-                try {
-                    const resp = await fetchSyncPost("/api/block/getRefText", {id});
-                    if (resp && resp.data) {
-                        label = resp.data;
-                    }
-                } catch {
-                    label = id;
-                }
-                mentions.push({id, label});
-            }));
-            this.composer.insertMentions(mentions);
-        });
     }
 
     // 将外部块引用以 mention chip 形式追加到发送框末尾，等价于拖拽块到发送框或在框内 @ 搜索选块。

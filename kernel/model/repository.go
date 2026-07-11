@@ -495,7 +495,8 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 						return
 					}
 				}
-				file.Path = file.Path[strings.Index(file.Path, "assets/"):]
+				// 保留 boxID 前缀，确保 LockBox 清理和 serveRepoDiff 加密校验能命中
+				file.Path = path.Join(repoBoxID, file.Path[strings.Index(file.Path, "assets/"):])
 				if util.IsDisplayableAsset(file.Path) {
 					dir, f := filepath.Split(file.Path)
 					tempRepoDiffDir := filepath.Join(util.TempDir, "repo", "diff", dir)

@@ -364,7 +364,13 @@ func PushReloadProtyle(rootID string) {
 	BroadcastByType("protyle", "reload", 0, "", rootID)
 }
 
-func PushSetRefDynamicText(rootID, blockID, defBlockID, refText string) {
+func PushSetRefDynamicText(rootID, blockID, defBlockID, refText, boxID string) {
+	// 加密笔记本锁定后丢弃延迟广播，避免泄漏明文 refText
+	if ReloadDocInfoGuard != nil && boxID != "" {
+		if !ReloadDocInfoGuard(boxID) {
+			return
+		}
+	}
 	BroadcastByType("main", "setRefDynamicText", 0, "", map[string]any{"rootID": rootID, "blockID": blockID, "defBlockID": defBlockID, "refText": refText})
 }
 

@@ -417,8 +417,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             const enabled = response.data.enabled;
             switchElement.checked = enabled;
             actionsElement.classList.toggle("fn__none", !enabled);
-            // 导入入口仅在未启用时可见（已启用时导入会覆盖现有 salt，由后端防呆拒绝）
-            importElement.classList.toggle("fn__none", enabled);
+            importElement.classList.remove("fn__none");
         });
     };
     refresh();

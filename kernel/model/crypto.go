@@ -196,20 +196,19 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 		return errors.New(Conf.Language(317))
 	}
 
-	Conf.m.RLock()
-	enabled := Conf.NotebookCrypto.Enabled
-	Conf.m.RUnlock()
-	if enabled {
-		// 本机已启用：覆盖会改变 salt，孤立现有 WrappedDEK（数据永久锁死）
-		return errors.New(Conf.Language(312))
-	}
-
 	// 用导入的 salt + 用户输入的主密码派生 KEK，校验能否解开备份里的 verifier
 	params, validErr := util.ValidateArgon2Params(nc.KDFParams)
 	if validErr != nil {
 		return errors.New(Conf.Language(317))
 	}
 	kek := util.DeriveKey(password, nc.MasterSalt, params)
+	defer zeroAndClear(kek)
+	if nc.Spec >= 1 && nc.Checksum != "" && nc.Checksum != computeBackupChecksum(nc) {
+		return errors.New(Conf.Language(317))
+	}
+	if nc.Spec >= 1 && len(nc.KEKMAC) > 0 && !verifyKEKMAC(nc, kek) {
+		return errors.New(Conf.Language(317))
+	}
 	decrypted, dErr := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
 	if dErr != nil || string(decrypted) != string(kekVerifierMagic) {
 		return errors.New(Conf.Language(311)) // 主密码错误

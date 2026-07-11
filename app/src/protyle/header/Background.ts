@@ -16,7 +16,7 @@ import {assetMenu} from "../../menus/protyle";
 import {previewImages} from "../preview/image";
 import {Menu} from "../../plugin/Menu";
 import {escapeHtml} from "../../util/escape";
-import {fetchCoverData} from "./coverData";
+import {fetchCoverData, getCategoryLabel} from "./coverData";
 
 const bgs = [
     "background:radial-gradient(black 3px, transparent 4px),radial-gradient(black 3px, transparent 4px),linear-gradient(#fff 4px, transparent 0),linear-gradient(45deg, transparent 74px, transparent 75px, #a4a4a4 75px, #a4a4a4 76px, transparent 77px, transparent 109px),linear-gradient(-45deg, transparent 75px, transparent 76px, #a4a4a4 76px, #a4a4a4 77px, transparent 78px, transparent 109px),#fff;background-size: 109px 109px, 109px 109px,100% 6px, 109px 109px, 109px 109px;background-position: 54px 55px, 0px 0px, 0px 0px, 0px 0px, 0px 0px;",
@@ -316,9 +316,9 @@ export class Background {
                         };
 
                         const buildTabs = (activeCategory: string): string => {
-                            let tabs = `<span class="b3-chip b3-chip--hover${activeCategory === "all" ? " b3-chip--current" : ""}" data-category="all">全部</span>`;
+                            let tabs = `<span class="b3-chip b3-chip--hover${activeCategory === "all" ? " b3-chip--current" : ""}" data-category="all">${window.siyuan.languages.coverAll}</span>`;
                             for (const cat of categories) {
-                                tabs += `<span class="b3-chip b3-chip--hover${activeCategory === cat ? " b3-chip--current" : ""}" data-category="${cat}">${cat}</span>`;
+                                tabs += `<span class="b3-chip b3-chip--hover${activeCategory === cat ? " b3-chip--current" : ""}" data-category="${cat}">${getCategoryLabel(cat)}</span>`;
                             }
                             return `<div class="b3-cover__tabs">${tabs}</div>`;
                         };

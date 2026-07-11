@@ -43,7 +43,7 @@ const SEARCH_QUERIES = [
     { query: "architecture light shadow geometry", label: "光影几何" },
     { query: "winding road path journey landscape", label: "路与远方" },
     { query: "autumn fall leaves colorful forest", label: "秋色落叶" },
-    { query: "flower field bloom lavender tulip", label: "花海特写" },
+    { query: "neon lights night city vibrant colorful", label: "灯红酒绿" },
     { query: "desert sand dune arid landscape", label: "沙漠戈壁" },
     { query: "aurora borealis northern lights sky", label: "极光天象" },
     { query: "morning mist fog valley mountain", label: "晨雾氤氲" },
@@ -52,7 +52,7 @@ const SEARCH_QUERIES = [
     { query: "calm lake reflection mirror water still", label: "静谧水面" },
     { query: "chinese garden pavilion architecture", label: "中式园林" },
     { query: "karst mountain mist landscape china", label: "水墨山水" },
-    { query: "bamboo ancient chinese temple pagoda", label: "翠竹古建" },
+    { query: "wildlife animal deer fox bird nature", label: "动物生灵" },
 ];
 const PER_QUERY = Math.ceil(TOTAL / SEARCH_QUERIES.length);
 

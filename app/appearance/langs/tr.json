@@ -2097,6 +2097,7 @@
 		"317": "Geçersiz anahtar yedek dosyası",
 		"318": "Şifrelenmiş not defteri meta verileri hasar görmüş, lütfen yedeği kontrol edin",
 		"319": "Not defteri şifrelenmemiş",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "Access to encrypted notebook data is not supported via this API"
 	}
 	}

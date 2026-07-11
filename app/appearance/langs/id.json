@@ -2097,6 +2097,7 @@
 		"317": "File cadangan kunci tidak valid",
 		"318": "Metadata buku catatan terenkripsi rusak, harap periksa cadangan",
 		"319": "Buku catatan tidak terenkripsi",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "Access to encrypted notebook data is not supported via this API"
 	}
 	}

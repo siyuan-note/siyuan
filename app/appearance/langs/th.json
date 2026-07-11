@@ -2097,6 +2097,7 @@
 		"317": "ไฟล์สำรองข้อมูลคีย์ไม่ถูกต้อง",
 		"318": "ข้อมูลเมตาการเข้ารหัสสมุดบันทึกเสียหาย โปรดตรวจสอบข้อมูลสำรอง",
 		"319": "สมุดบันทึกไม่ได้เข้ารหัส",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "Access to encrypted notebook data is not supported via this API"
 	}
 	}

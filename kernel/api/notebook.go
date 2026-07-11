@@ -656,20 +656,35 @@ func changeMasterPassword(c *gin.Context) {
 	}
 }
 
-// getEncryptedNotebookStatus 返回加密笔记本功能的启用状态。
+// getEncryptedNotebookStatus 返回加密笔记本功能的启用状态和各笔记本解锁信息。
 func getEncryptedNotebookStatus(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
 	model.NotebookCryptoMuLock()
-	count := len(model.ListAllEncryptedBoxIDs())
+	boxIDs := model.ListAllEncryptedBoxIDs()
 	enabled := model.NotebookCryptoEnabled()
 	model.NotebookCryptoMuUnlock()
 	pendingMigration, migrationBoxes := model.MasterPasswordMigrationStatus()
 
+	boxes := make([]map[string]any, 0, len(boxIDs))
+	for _, id := range boxIDs {
+		box := model.Conf.Box(id)
+		name := ""
+		if box != nil {
+			name = box.Name
+		}
+		boxes = append(boxes, map[string]any{
+			"id":       id,
+			"name":     name,
+			"unlocked": model.IsBoxUnlocked(id),
+		})
+	}
+
 	ret.Data = map[string]any{
 		"enabled":          enabled,
-		"count":            count,
+		"count":            len(boxIDs),
+		"boxes":            boxes,
 		"migrationPending": pendingMigration,
 		"migrationBoxes":   migrationBoxes,
 	}

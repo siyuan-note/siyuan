@@ -2097,6 +2097,7 @@
 		"317": "Nieprawidłowy plik kopii zapasowej klucza",
 		"318": "Metadane szyfrowania notesu są uszkodzone, sprawdź kopię zapasową",
 		"319": "Notes nie jest zaszyfrowany",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "Access to encrypted notebook data is not supported via this API"
 	}
 	}

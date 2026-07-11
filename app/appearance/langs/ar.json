@@ -2097,6 +2097,7 @@
 		"317": "ملف نسخة احتياطية من مفتاح التشفير غير صالح",
 		"318": "تلف بيانات تشفير دفتر الملاحظات، يرجى التحقق من النسخة الاحتياطية",
 		"319": "دفتر الملاحظات غير مشفر",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "Access to encrypted notebook data is not supported via this API"
 	}
 	}

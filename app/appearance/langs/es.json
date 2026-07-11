@@ -2097,6 +2097,7 @@
 		"317": "Archivo de copia de seguridad de la clave no válido",
 		"318": "Los metadatos de cifrado del cuaderno están dañados, verifique la copia de seguridad",
 		"319": "El cuaderno no está cifrado",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "El acceso a datos de cuadernos cifrados no está soportado a través de esta API"
 	}
 	}

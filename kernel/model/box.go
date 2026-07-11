@@ -61,6 +61,7 @@ type Box struct {
 	FlashcardCount    int `json:"flashcardCount"`
 
 	Encrypted bool `json:"encrypted"` // 是否为加密笔记本
+	Unlocked  bool `json:"unlocked"`  // 加密笔记本是否已解锁（DEK 在内存），非加密笔记本恒为 false
 }
 
 func StatJob() {
@@ -168,9 +169,10 @@ func ListNotebooks() (ret []*Box, err error) {
 			Icon:      icon,
 			Sort:      boxConf.Sort,
 			SortMode:  boxConf.SortMode,
-			Closed:    boxConf.Closed,
-			Encrypted: boxConf.Encrypted,
-		}
+		Closed:    boxConf.Closed,
+		Encrypted: boxConf.Encrypted,
+		Unlocked:  IsBoxUnlocked(id),
+	}
 
 		if !isExistConf {
 			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647

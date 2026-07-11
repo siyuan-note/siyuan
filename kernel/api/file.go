@@ -169,8 +169,8 @@ func globalCopyFiles(c *gin.Context) {
 		}
 
 		if rejectEncryptedBoxPath(absSrc) {
-			ret.Code = -1
-			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			ret.Code = -3
+			ret.Msg = model.Conf.Language(321)
 			return
 		}
 
@@ -213,8 +213,8 @@ func globalCopyFiles(c *gin.Context) {
 	for _, src := range srcs {
 		dest := filepath.Join(destDir, filepath.Base(src))
 		if rejectEncryptedBoxPath(dest) {
-			ret.Code = -1
-			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			ret.Code = -3
+			ret.Msg = model.Conf.Language(321)
 			return
 		}
 		// 拒绝目标已存在的 symlink：os.Create 会跟随 symlink，可能写入加密笔记本内部
@@ -290,8 +290,8 @@ func workspaceCopyFiles(c *gin.Context) {
 			return
 		}
 		if rejectEncryptedBoxPath(absSrc) {
-			ret.Code = -1
-			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			ret.Code = -3
+			ret.Msg = model.Conf.Language(321)
 			return
 		}
 		absSrcs = append(absSrcs, absSrc)
@@ -333,8 +333,8 @@ func workspaceCopyFiles(c *gin.Context) {
 	for _, absSrc := range absSrcs {
 		dest := filepath.Join(destDir, filepath.Base(absSrc))
 		if rejectEncryptedBoxPath(dest) {
-			ret.Code = -1
-			ret.Msg = "copying encrypted notebook files is not supported via this API"
+			ret.Code = -3
+			ret.Msg = model.Conf.Language(321)
 			return
 		}
 		if li, lerr := os.Lstat(dest); lerr == nil && li.Mode()&os.ModeSymlink != 0 {
@@ -467,8 +467,8 @@ func getFile(c *gin.Context) {
 	// 加密笔记本的任何文件都不允许通过原始文件 API 读取（不只 .sy）：
 	// 密文对插件无意义，且可能被误解析或泄漏；合法读取走专用 API（已加密感知）
 	if rejectEncryptedBoxPath(fileAbsPath) {
-		ret.Code = -1
-		ret.Msg = "access to encrypted notebook files is not supported via this API"
+		ret.Code = -3
+		ret.Msg = model.Conf.Language(321)
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
@@ -633,8 +633,8 @@ func readDir(c *gin.Context) {
 	// 加密笔记本的任何目录都不允许通过原始文件 API 枚举（不只 .sy）：
 	// 目录结构、文档 ID、随机化资产名和时间戳可能泄漏信息；合法读取走专用 API（已加密感知）
 	if rejectEncryptedBoxPath(dirAbsPath) {
-		ret.Code = -1
-		ret.Msg = "access to encrypted notebook files is not supported via this API"
+		ret.Code = -3
+		ret.Msg = model.Conf.Language(321)
 		return
 	}
 	info, err := os.Stat(dirAbsPath)
@@ -730,8 +730,8 @@ func renameFile(c *gin.Context) {
 	}
 	// 加密笔记本的文件不允许通过原始文件 API 重命名（会破坏加密存储结构/跨 box 搬运密文）
 	if rejectEncryptedBoxPath(srcAbsPath) || rejectEncryptedBoxPath(destAbsPath) {
-		ret.Code = -1
-		ret.Msg = "renaming encrypted notebook files is not supported via this API"
+		ret.Code = -3
+		ret.Msg = model.Conf.Language(321)
 		return
 	}
 	if filelock.IsExist(destAbsPath) {
@@ -804,8 +804,8 @@ func removeFile(c *gin.Context) {
 	}
 	// 加密笔记本的文件不允许通过原始文件 API 删除（破坏加密存储结构）
 	if rejectEncryptedBoxPath(fileAbsPath) {
-		ret.Code = -1
-		ret.Msg = "removing encrypted notebook files is not supported via this API"
+		ret.Code = -3
+		ret.Msg = model.Conf.Language(321)
 		return
 	}
 	_, err = os.Stat(fileAbsPath)
@@ -856,8 +856,8 @@ func putFile(c *gin.Context) {
 	// 加密笔记本的任何文件都不允许通过原始文件 API 写入（不只 .sy）：
 	// 明文写入会破坏密文格式或污染加密存储；合法写入走专用 API（已加密感知）
 	if rejectEncryptedBoxPath(fileAbsPath) {
-		ret.Code = -1
-		ret.Msg = "writing to encrypted notebook files is not supported via this API"
+		ret.Code = -3
+		ret.Msg = model.Conf.Language(321)
 		return
 	}
 

@@ -2097,6 +2097,7 @@
 		"317": "अमान्य कुंजी बैकअप फ़ाइल",
 		"318": "एन्क्रिप्टेड नोटबुक मेटाडेटा क्षतिग्रस्त है, कृपया बैकअप जांचें",
 		"319": "नोटबुक एन्क्रिप्टेड नहीं है",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "Access to encrypted notebook data is not supported via this API"
 	}
 	}

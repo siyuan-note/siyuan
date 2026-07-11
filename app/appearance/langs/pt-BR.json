@@ -2097,6 +2097,7 @@
 		"317": "Arquivo de backup da chave inválido",
 		"318": "Metadados de criptografia do caderno estão danificados, verifique o backup",
 		"319": "O caderno não está criptografado",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "O acesso a dados de notebooks criptografados não é suportado via esta API"
 	}
 	}

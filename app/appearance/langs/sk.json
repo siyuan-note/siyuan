@@ -2097,6 +2097,7 @@
 		"317": "Neplatný súbor zálohy kľúča",
 		"318": "Metaúdaje šifrovania poznámkového bloku sú poškodené, skontrolujte zálohu",
 		"319": "Poznámkový blok nie je šifrovaný",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "Access to encrypted notebook data is not supported via this API"
 	}
 	}

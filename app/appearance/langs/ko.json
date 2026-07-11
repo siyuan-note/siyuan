@@ -2097,6 +2097,7 @@
 		"317": "잘못된 키 백업 파일",
 		"318": "암호화된 노트북 메타데이터가 손상되었습니다. 백업을 확인하세요",
 		"319": "노트북이 암호화되지 않았습니다",
-		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
+		"321": "이 API를 통해 암호화된 노트북의 데이터를 조작할 수 없습니다"
 	}
 	}

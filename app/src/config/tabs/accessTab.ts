@@ -431,7 +431,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             });
             const pwdInput = passwordDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
             passwordDialog.element.querySelector(".b3-button--cancel")?.addEventListener("click", () => {
-                passwordDialog.close();
+                passwordDialog.destroy();
             });
             passwordDialog.element.querySelector(".b3-button--text")?.addEventListener("click", () => {
                 const password = pwdInput.value.trim();
@@ -451,7 +451,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                         return;
                     }
                     showMessage(window.siyuan.languages.importNotebookCryptoBackupTip);
-                    passwordDialog.close();
+                    passwordDialog.destroy();
                     refresh();
                 });
             });

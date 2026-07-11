@@ -606,6 +606,10 @@ func exportMdHTML(c *gin.Context) {
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
 		folderName := "htmlmd-" + id + "-" + util.CurrentTimeSecondsStr()
+		// 加密笔记本的导出临时目录归入 boxID 子目录，确保 LockBox 能清理和服务端可校验锁定状态
+		if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
+			folderName = bt.BoxID + "/" + folderName
+		}
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
 		name, content := model.ExportMarkdownHTML(id, tmpDir, false, false)
 		ret.Data = map[string]any{
@@ -783,6 +787,10 @@ func exportHTML(c *gin.Context) {
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
 		folderName := "html-" + id + "-" + util.CurrentTimeSecondsStr()
+		// 加密笔记本的导出临时目录归入 boxID 子目录，确保 LockBox 能清理和服务端可校验锁定状态
+		if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
+			folderName = bt.BoxID + "/" + folderName
+		}
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
 		name, content, _ := model.ExportHTML(id, tmpDir, pdf, keepFold, merge)
 		ret.Data = map[string]any{

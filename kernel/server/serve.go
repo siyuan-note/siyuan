@@ -34,6 +34,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
@@ -356,6 +357,16 @@ func serveExport(ginServer *gin.Engine) {
 		if !gulu.File.IsSubPath(exportBaseDir, fullPath) {
 			c.Status(http.StatusUnauthorized)
 			return
+		}
+
+		// 加密笔记本锁定后拒绝访问其导出临时目录
+		if parts := strings.SplitN(strings.TrimPrefix(decodedPath, "/"), "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
+			model.HoldBoxReadLock(parts[0])
+			defer model.ReleaseBoxReadLock(parts[0])
+			if _, dekErr := model.GetDEKIfUnlocked(parts[0]); dekErr != nil {
+				c.Status(http.StatusForbidden)
+				return
+			}
 		}
 
 		if util.IsSensitivePath(fullPath) {

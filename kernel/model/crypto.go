@@ -776,9 +776,12 @@ func LockBox(boxID string) {
 			}
 		}
 	}
-	// 清理临时导出目录中的 repo 导出（无法按 box 单独区分，锁定时统一清理）
+	// 清理临时导出目录中的 repo 导出和加密 box 的临时导出（htmlmd/html/PDF）
 	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", "repo")); rmErr != nil {
 		logging.LogWarnf("remove export/repo dir for box [%s] failed: %s", boxID, rmErr)
+	}
+	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", boxID)); rmErr != nil {
+		logging.LogWarnf("remove export/[%s] dir failed: %s", boxID, rmErr)
 	}
 	// 清理动态引用锚文本缓存
 	treenode.RemoveDynamicRefTexts(boxID)

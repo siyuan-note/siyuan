@@ -95,6 +95,10 @@ func resolvePath(rel string) (string, error) {
 	if boxID, encrypted := rejectEncryptedPath(abs); encrypted {
 		return "", fmt.Errorf("path belongs to encrypted notebook [%s]: %s", boxID, rel)
 	}
+	// 防止 symlink 逃逸工作区：解析符号链接后再次检查
+	if resolved := util.ResolveLongestExistingParent(abs); resolved != abs && !gulu.File.IsSubPath(util.WorkspaceDir, resolved) {
+		return "", fmt.Errorf("symlink escapes workspace: %s", rel)
+	}
 	return abs, nil
 }
 
@@ -104,39 +108,14 @@ func rejectEncryptedPath(absPath string) (boxID string, encrypted bool) {
 	if boxID != "" && model.IsEncryptedBox(boxID) {
 		return boxID, true
 	}
-	// 防止 symlink 绕过：找到最长已存在的父路径，解析 symlink 后拼回剩余路径，再检查
-	if resolved := resolveLongestExistingParent(absPath); resolved != absPath {
+	// 防止 symlink 绕过：解析最长已存在的父路径，再检查
+	if resolved := util.ResolveLongestExistingParent(absPath); resolved != absPath {
 		boxID = model.ExtractBoxIDFromAssetsPath(resolved)
 		if boxID != "" && model.IsEncryptedBox(boxID) {
 			return boxID, true
 		}
 	}
 	return "", false
-}
-
-// resolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
-func resolveLongestExistingParent(absPath string) string {
-	cleaned := filepath.Clean(absPath)
-	dir := cleaned
-	for {
-		if _, err := os.Lstat(dir); err == nil {
-			break
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			return cleaned
-		}
-		dir = parent
-	}
-	if dir == cleaned {
-		return cleaned
-	}
-	resolved, err := filepath.EvalSymlinks(dir)
-	if err != nil {
-		return cleaned
-	}
-	remaining, _ := filepath.Rel(dir, cleaned)
-	return filepath.Join(resolved, remaining)
 }
 
 func fileList(args map[string]interface{}) (CallToolResult, error) {

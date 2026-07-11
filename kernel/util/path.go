@@ -542,3 +542,37 @@ func isSensitivePath(p string) bool {
 	}
 	return false
 }
+
+// ResolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
+// 例如 absPath = /workspace/data/link/newdir/file，其中 /workspace/data/link 是指向
+// /workspace/data/<encBoxID>/ 的 symlink，newdir/file 尚不存在：
+// 返回 /workspace/data/<encBoxID>/newdir/file。
+func ResolveLongestExistingParent(absPath string) string {
+	cleaned := filepath.Clean(absPath)
+	dir := cleaned
+	for {
+		if _, err := os.Lstat(dir); err == nil {
+			break
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return cleaned
+		}
+		dir = parent
+	}
+	if dir == cleaned {
+		if resolved, err := filepath.EvalSymlinks(cleaned); err == nil {
+			return resolved
+		}
+		return cleaned
+	}
+	if dir == "/" || dir == "." {
+		return cleaned
+	}
+	resolvedDir, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return cleaned
+	}
+	remaining := strings.TrimPrefix(cleaned, dir)
+	return resolvedDir + remaining
+}

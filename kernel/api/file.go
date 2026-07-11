@@ -53,7 +53,7 @@ func rejectEncryptedBoxPath(absPath string) bool {
 		return true
 	}
 	// 找最长已存在的父路径，解析 symlink 后拼回剩余路径
-	resolved := resolveLongestExistingParent(absPath)
+	resolved := util.ResolveLongestExistingParent(absPath)
 	if resolved != absPath {
 		boxID = model.ExtractBoxIDFromAssetsPath(resolved)
 		if boxID != "" && model.IsEncryptedBox(boxID) {
@@ -92,45 +92,6 @@ func copyDecryptedAsset(src, dest string) error {
 		return writeErr
 	}
 	return nil
-}
-
-// resolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
-// 例如 absPath = /workspace/data/link/newdir/file，其中 /workspace/data/link 是指向
-// /workspace/data/<encBoxID>/ 的 symlink，newdir/file 尚不存在：
-// 返回 /workspace/data/<encBoxID>/newdir/file。
-func resolveLongestExistingParent(absPath string) string {
-	cleaned := filepath.Clean(absPath)
-	// 从完整路径逐级向上找第一个存在的路径
-	dir := cleaned
-	for {
-		if _, err := os.Lstat(dir); err == nil {
-			break
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			// 已到卷根/UNC 根（Windows 盘符如 Z:\ 或 Unix /），不再上溯
-			return cleaned
-		}
-		dir = parent
-	}
-	if dir == cleaned {
-		// 完整路径已存在，直接 EvalSymlinks
-		if resolved, err := filepath.EvalSymlinks(cleaned); err == nil {
-			return resolved
-		}
-		return cleaned
-	}
-	if dir == "/" || dir == "." {
-		return cleaned // 没有已存在的父路径，无法解析
-	}
-	// 解析已存在的父路径的 symlink
-	resolvedDir, err := filepath.EvalSymlinks(dir)
-	if err != nil {
-		return cleaned
-	}
-	// 拼回剩余的不存在部分
-	remaining := strings.TrimPrefix(cleaned, dir)
-	return resolvedDir + remaining
 }
 
 func getUniqueFilename(c *gin.Context) {

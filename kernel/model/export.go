@@ -93,7 +93,12 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 
 	name := tree.Root.IALAttr("title") + "-" + util.CurrentTimeSecondsStr() + ".txt"
 	name = util.FilterFileName(name)
-	exportFolder := filepath.Join(util.TempDir, "export", "code")
+	exportFolder := filepath.Join(util.TempDir, "export")
+	// 加密笔记本的导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
+	if IsEncryptedBox(tree.Box) {
+		exportFolder = filepath.Join(exportFolder, tree.Box)
+	}
+	exportFolder = filepath.Join(exportFolder, "code")
 	if err = os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
@@ -107,7 +112,12 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 		return
 	}
 
-	filePath = "/export/code/" + url.PathEscape(name)
+	// 加密笔记本的导出 URL 归入 boxID 子路径，确保服务端校验锁定状态
+	fPath := "/export/"
+	if IsEncryptedBox(tree.Box) {
+		fPath += tree.Box + "/"
+	}
+	filePath = fPath + "code/" + url.PathEscape(name)
 	return
 }
 
@@ -149,7 +159,12 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
 	av.Sort(table, attrView)
 
-	exportFolder := filepath.Join(util.TempDir, "export", "csv", name)
+	exportFolder := filepath.Join(util.TempDir, "export")
+	// 加密笔记本的导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
+	if avBoxID != "" {
+		exportFolder = filepath.Join(exportFolder, avBoxID)
+	}
+	exportFolder = filepath.Join(exportFolder, "csv", name)
 	if err = os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("mkdir [%s] failed: %s", exportFolder, err)
 		return
@@ -327,7 +342,12 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	if nil != removeErr {
 		logging.LogErrorf("remove export folder [%s] failed: %s", exportFolder, removeErr)
 	}
-	zipPath = "/export/csv/" + url.PathEscape(filepath.Base(zipPath))
+	// 加密笔记本的导出 URL 归入 boxID 子路径，确保服务端校验锁定状态
+	if avBoxID != "" {
+		zipPath = "/export/" + avBoxID + "/csv/" + url.PathEscape(filepath.Base(zipPath))
+	} else {
+		zipPath = "/export/csv/" + url.PathEscape(filepath.Base(zipPath))
+	}
 	return
 }
 

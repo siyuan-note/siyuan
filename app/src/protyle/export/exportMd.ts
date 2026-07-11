@@ -167,7 +167,7 @@ export const exportMarkdownZip = async(options: IExportMdOptions) => {
         }
         };
         if (encrypted) {
-            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);
+            confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);
             return;
         }
         exportMarkdown();

@@ -35,6 +35,10 @@ var AVEncryptedBoxIDs func() []string
 // AVIsEncryptedBox 由 model 层注入，判断 boxID 是否为加密笔记本。
 var AVIsEncryptedBox func(boxID string) bool
 
+// AVGetBlockBoxID 由 model 层注入，返回 blockID 所在的 boxID（查 blocktree）。
+// 用于镜像写入时校验源块与 AV 定义是否处于同一加密边界。
+var AVGetBlockBoxID func(blockID string) string
+
 // pendingAVBox 记录首次创建的 AV 归属哪个加密 box。
 // handler 层创建 AV 前调 SetAVBoxID(avID, boxID)，SaveAttributeView 时
 // findAttributeViewPath 会先查 pending 映射，找到则写入对应加密笔记本路径。

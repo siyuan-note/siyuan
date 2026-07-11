@@ -35,6 +35,13 @@ func init() {
 	av.AVLockRelease = ReleaseBoxReadLock
 	av.AVEncryptedBoxIDs = treenode.GetOpenedEncryptedBoxIDs
 	av.AVIsEncryptedBox = IsEncryptedBox
+	av.AVGetBlockBoxID = func(blockID string) string {
+		bt := treenode.GetBlockTree(blockID)
+		if nil == bt {
+			return ""
+		}
+		return bt.BoxID
+	}
 	sql.IsEncryptedBoxFn = IsEncryptedBox
 	treenode.IsEncryptedBoxFn = IsEncryptedBox
 }

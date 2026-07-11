@@ -57,6 +57,7 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 | **Deleted notebook history** | Supported | Supported (entire directory backed up as ciphertext before deletion; restored verbatim) |
 | **Embedding vectorization / semantic search** | Participates | Does not participate (encrypted data never enters the global block_embeddings table; the embedding pipeline reads only the global SQLite database — independent of lock state) |
 | **Agents / AI chat / MCP** | Can read content, can search | Available when unlocked (can read blocks, list docs, search within notebook); unreachable when locked (see §13). Global search / semantic search not included |
+| **Kernel CLI** | Can operate on workspace data | Does not support encrypted notebooks or their files, whether locked or unlocked |
 | **Flashcards / spaced repetition** | Participates | Not supported (feature limitation) |
 | **Bookmarks** | Participates (global aggregation) | Not supported (feature limitation) |
 | **Tags** | Participates (global aggregation) | Not supported (feature limitation) |
@@ -247,7 +248,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 ## 12. Security Boundary
 
-**Security premise**: An encrypted notebook is **only secure when it is closed (locked)**. When closed, the DEK is not in memory, the encrypted SQLite database has been deleted, all plaintext caches have been cleared, and only ciphertext remains on disk — no path (including authenticated APIs, plugins, AI/LLM, MCP) can read plaintext. **When open (unlocked), the DEK is in memory**, and at that point every authenticated caller — APIs, third-party plugins, AI/LLM (including MCP, agents, semantic search) — can read plaintext content just like a normal notebook. Encryption protects "data at rest" and "unreachability when locked"; it **does not protect "visibility to authenticated callers while unlocked"**. Therefore: while unlocked, treat it as "a normal notebook in use"; the only protection is **locking after use**.
+**Security premise**: An encrypted notebook is **only secure when it is closed (locked)**. When closed, the DEK is not in memory, the encrypted SQLite database has been deleted, all plaintext caches have been cleared, and only ciphertext remains on disk — no path (including authenticated APIs, plugins, AI/LLM, MCP) can read plaintext. **When open (unlocked), the DEK is in memory**, and at that point authenticated application callers — APIs, third-party plugins, AI/LLM (including MCP, agents, semantic search) — can read plaintext content just like a normal notebook. The kernel CLI is an explicit exception: it rejects encrypted notebooks and their raw files regardless of lock state. Encryption protects "data at rest" and "unreachability when locked"; it **does not protect "visibility to authenticated callers while unlocked"**. Therefore: while unlocked, treat it as "a normal notebook in use"; the only protection is **locking after use**.
 
 **Protected (ciphertext on disk)**:
 - `.sy` document body (encrypted)
@@ -267,6 +268,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 **API protection**:
 - `/api/file/getFile`, `/api/file/putFile`, `/api/file/copyFile`, `/api/file/renameFile`, `/api/file/removeFile`: refuse to read/write any file under an encrypted box (not just .sy), preventing ciphertext leakage or plaintext corruption; legitimate reads/writes go through dedicated APIs (encryption-aware).
+- Kernel CLI: rejects encrypted notebook/block targets and direct paths below `<workspace>/data/<encrypted-boxID>/`; it cannot be used to unlock, read, write, export, or manipulate encrypted notebook data.
 
 ## 13. AI / LLM Reachability
 
@@ -323,7 +325,7 @@ An encrypted notebook is an island; some features are unimplemented because of t
 - **Lock**: Closing the notebook equals locking (DEK cleared + encrypted SQLite database deleted + plaintext caches cleared). **Locking after use** is the most important security habit — it minimizes the key's exposure time in memory
 - **After restart**: All encrypted notebooks are force-closed; you must re-enter the master password to unlock (the DEK lives only in memory and is lost on restart)
 
-> Important: An encrypted notebook is **only fully secure when locked**. While unlocked, every authenticated caller (APIs, plugins, AI/LLM including MCP) can read plaintext just like a normal notebook (see §12 Security premise).
+> Important: An encrypted notebook is **only fully secure when locked**. While unlocked, authenticated application callers (APIs, plugins, AI/LLM including MCP) can read plaintext just like a normal notebook; the kernel CLI always rejects encrypted-notebook operations (see §12 Security premise).
 
 ### Changing the master password
 Go to **Settings → Access authorization → Change master password**. Changing the password only re-wraps each box's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.

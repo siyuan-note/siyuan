@@ -290,7 +290,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event) && !window.siyuan.config.readonly) {
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event) && !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
         if (protyle.title?.editElement.contains(range.startContainer)) {
             quickMakeCard(protyle, [protyle.title.element]);
         } else {
@@ -612,7 +612,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         }
     });
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
         if (isFile) {
             const id = liElements[0].getAttribute("data-node-id");
             fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
@@ -627,7 +627,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event) && !isEncryptedBox(notebookId)) {
         if (ids.length > 0) {
             transaction(undefined, [{
                 action: "addFlashcards",

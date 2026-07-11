@@ -215,6 +215,10 @@ func GetFlashcardNotebooks() (ret []*Box) {
 	deckBlockIDs := deck.GetBlockIDs()
 	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
+		// 加密笔记本不支持闪卡，不在闪卡笔记本列表中展示
+		if IsEncryptedBox(box.ID) {
+			continue
+		}
 		newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 		if 0 < flashcardCount {
 			box.NewFlashcardCount = newFlashcardCount
@@ -778,6 +782,10 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 		if nil == bt {
 			continue
 		}
+		// 加密笔记本不支持闪卡，移除时也跳过，避免无谓写入加密 tree
+		if IsEncryptedBox(bt.BoxID) {
+			continue
+		}
 
 		rootIDs = append(rootIDs, bt.RootID)
 		blockRoots[blockID] = bt.RootID
@@ -884,6 +892,10 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 	for _, blockID := range blockIDs {
 		bt := treenode.GetBlockTree(blockID)
 		if nil == bt {
+			continue
+		}
+		// 闪卡是全局调度与存储，加密笔记本不支持闪卡，跳过其块避免明文复习计划落盘全局 riff
+		if IsEncryptedBox(bt.BoxID) {
 			continue
 		}
 

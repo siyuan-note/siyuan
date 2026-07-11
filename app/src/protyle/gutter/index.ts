@@ -1125,7 +1125,7 @@ export class Gutter {
             this.genWidths(selectsElement, protyle);
             // this.genHeights(selectsElement, protyle);
         }
-        if (!window.siyuan.config.readonly) {
+        if (!window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "separator_quickMakeCard",
                 type: "separator"
@@ -2363,7 +2363,7 @@ export class Gutter {
                 }
             }).element);
         }
-        if (type !== "NodeThematicBreak" && !window.siyuan.config.readonly) {
+        if (type !== "NodeThematicBreak" && !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
             const isCardMade = nodeElement.hasAttribute(Constants.CUSTOM_RIFF_DECKS);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: isCardMade ? "removeCard" : "quickMakeCard",

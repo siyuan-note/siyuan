@@ -172,6 +172,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 }).element);
             }
             const isCardMade = !!response.data.ial[Constants.CUSTOM_RIFF_DECKS];
+            if (!isEncryptedBox(protyle.notebookId)) {
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
                 iconHTML: "",
@@ -225,6 +226,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 icon: "iconRiffCard",
                 submenu: riffCardMenu,
             }).element);
+            }
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "search",

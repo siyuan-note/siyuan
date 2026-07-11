@@ -257,7 +257,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             submenu: subMenu,
         }).element);
     }
-    if (!window.siyuan.config.readonly) {
+    if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "riffCard",
             label: window.siyuan.languages.riffCard,
@@ -535,7 +535,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 });
             }
         }).element);
-        if (!window.siyuan.config.readonly) {
+        if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
             const riffCardMenu = [{
                 id: "spaceRepetition",
                 iconHTML: "",

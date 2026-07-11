@@ -950,8 +950,6 @@ func GetDEK(boxID string) ([]byte, error) {
 	}
 	ret := make([]byte, len(dek))
 	copy(ret, dek)
-	// 更新自动锁定访问时间戳，每次加解密操作都刷新闲置计时
-	touchBoxAccess(boxID)
 	return ret, nil
 }
 
@@ -1560,6 +1558,35 @@ func zeroAndClear(key []byte) {
 func touchBoxAccess(boxID string) {
 	if val, ok := boxLastAccess.Load(boxID); ok {
 		val.(*atomic.Int64).Store(time.Now().UnixNano())
+	}
+}
+
+// TouchUnlockedEncryptedBoxes 仅供真实用户交互触发，刷新当前已解锁笔记本的闲置计时。
+func TouchUnlockedEncryptedBoxes() {
+	now := time.Now().UnixNano()
+	cachedDEKsLock.RLock()
+	boxIDs := make([]string, 0, len(cachedDEKs))
+	for boxID := range cachedDEKs {
+		boxIDs = append(boxIDs, boxID)
+	}
+	cachedDEKsLock.RUnlock()
+	for _, boxID := range boxIDs {
+		if val, ok := boxLastAccess.Load(boxID); ok {
+			val.(*atomic.Int64).Store(now)
+		}
+	}
+}
+
+// LockAllEncryptedBoxes 锁定当前已解锁的所有加密笔记本。
+func LockAllEncryptedBoxes() {
+	cachedDEKsLock.RLock()
+	boxIDs := make([]string, 0, len(cachedDEKs))
+	for boxID := range cachedDEKs {
+		boxIDs = append(boxIDs, boxID)
+	}
+	cachedDEKsLock.RUnlock()
+	for _, boxID := range boxIDs {
+		Unmount(boxID)
 	}
 }
 

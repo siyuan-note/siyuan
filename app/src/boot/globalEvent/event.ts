@@ -13,8 +13,31 @@ import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
 import {cancelManualTouch, initTouchDragBridge, isLastPointerMouse} from "../../util/touchDragBridge";
 import {isWindow} from "../../util/functions";
 import {getDockByType} from "../../layout/tabUtil";
+import {fetchPost} from "../../util/fetch";
 
 export const initWindowEvent = (app: App) => {
+	let lastEncryptedNotebookTouch = 0;
+	const touchEncryptedNotebooks = () => {
+		const now = Date.now();
+		if (now - lastEncryptedNotebookTouch < 30000) {
+			return;
+		}
+		lastEncryptedNotebookTouch = now;
+		fetchPost("/api/notebook/touchEncryptedNotebooks", {});
+	};
+	const lockEncryptedNotebooks = () => {
+		fetchPost("/api/notebook/lockEncryptedNotebooks", {});
+	};
+	window.addEventListener("pointerdown", touchEncryptedNotebooks, {passive: true});
+	window.addEventListener("keydown", touchEncryptedNotebooks);
+	document.addEventListener("touchstart", touchEncryptedNotebooks, {passive: true});
+	window.addEventListener("blur", lockEncryptedNotebooks);
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) {
+			lockEncryptedNotebooks();
+		}
+	});
+
     document.body.addEventListener("mouseleave", () => {
         if (window.siyuan.layout.leftDock) {
             window.siyuan.layout.leftDock.hideDock();

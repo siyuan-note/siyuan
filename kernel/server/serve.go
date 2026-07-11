@@ -698,7 +698,7 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		// 硬边界：拒绝路径遍历
-		if strings.Contains(requestPath, "..") || filepath.IsAbs(requestPath) {
+		if strings.Contains(requestPath, "..") {
 			context.Status(http.StatusForbidden)
 			return
 		}

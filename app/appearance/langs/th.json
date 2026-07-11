@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "นำเข้าการสำรองข้อมูลคีย์แล้ว ต่อจากนี้โปรดใช้รหัสผ่านหลักที่ตรงกับคีย์นี้เพื่อปลดล็อก",
 	"importNotebookCryptoBackup": "นำเข้าการสำรองข้อมูลคีย์",
 	"desktopModeRestartTip": "แอปจะปิดโดยอัตโนมัติหลังจากเปลี่ยน โปรดเปิดใหม่ด้วยตนเอง",
-	"aiEdit": "แก้ไขอัจฉริยะ",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "บริการ MCP ของเอเจนต์",
 	"configGroupEmbedding": "โมเดลฝังตัว",
 	"addToAgent": "เพิ่มไปยังแชทเอเจนต์",

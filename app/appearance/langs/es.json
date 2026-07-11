@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Copia de seguridad de la clave importada, en adelante utiliza la contraseña maestra correspondiente a esta clave para desbloquear",
 	"importNotebookCryptoBackup": "Importar copia de seguridad de la clave",
 	"desktopModeRestartTip": "La aplicación se cerrará automáticamente después del cambio. Por favor, reiníciela manualmente.",
-	"aiEdit": "Edición inteligente",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Servicio MCP del agente",
 	"configGroupEmbedding": "Modelo de incrustación",
 	"addToAgent": "Añadir al chat del agente",

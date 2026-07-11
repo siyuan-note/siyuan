@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "키 백업을 가져왔습니다. 이제부터 이 키에 해당하는 마스터 비밀번호를 사용하여 잠금을 해제하세요",
 	"importNotebookCryptoBackup": "키 백업 가져오기",
 	"desktopModeRestartTip": "변경 후 앱이 자동으로 종료됩니다. 수동으로 다시 시작해 주세요.",
-	"aiEdit": "스마트 편집",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "에이전트 MCP 서비스",
 	"configGroupEmbedding": "임베딩 모델",
 	"addToAgent": "에이전트 대화에 추가",

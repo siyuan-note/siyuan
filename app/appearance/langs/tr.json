@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Anahtar yedeği içe aktarıldı, bu andan itibaren kilidi açmak için lütfen bu anahtara karşılık gelen ana parolayı kullanın",
 	"importNotebookCryptoBackup": "Anahtar yedeğini içe aktar",
 	"desktopModeRestartTip": "Değişiklikten sonra uygulama otomatik olarak kapanacaktır. Lütfen elle yeniden başlatın.",
-	"aiEdit": "Akıllı Düzenleme",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Ajan MCP Hizmeti",
 	"configGroupEmbedding": "Gömme Modeli",
 	"addToAgent": "Ajan sohbetine ekle",

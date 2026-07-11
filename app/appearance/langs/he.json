@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "גיבוי מפתח יובא, מעתה נא להשתמש בסיסמה הראשית התואמת למפתח זה כדי לבטל נעילה",
 	"importNotebookCryptoBackup": "ייבא גיבוי מפתח",
 	"desktopModeRestartTip": "האפליקציה תיסגר אוטומטית לאחר השינוי, נא להפעיל אותה מחדש באופן ידני",
-	"aiEdit": "עריכה חכמה",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "שירות MCP של הסוכן",
 	"configGroupEmbedding": "מודל הטמעה",
 	"addToAgent": "הוסף לצ'אט הסוכן",

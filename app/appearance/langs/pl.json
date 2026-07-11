@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Importowano kopię zapasową klucza, od teraz używaj głównego hasła odpowiadającego temu kluczowi, aby odblokować",
 	"importNotebookCryptoBackup": "Importuj kopię zapasową klucza",
 	"desktopModeRestartTip": "Aplikacja zostanie automatycznie zamknięta po zmianie. Uruchom ją ponownie ręcznie.",
-	"aiEdit": "Inteligentna edycja",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Usługa MCP agenta",
 	"configGroupEmbedding": "Model osadzania",
 	"addToAgent": "Dodaj do czatu agenta",

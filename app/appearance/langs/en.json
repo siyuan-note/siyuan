@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Key backup imported, please use the master password corresponding to this key to unlock from now on",
 	"importNotebookCryptoBackup": "Import key backup",
 	"desktopModeRestartTip": "The app will close automatically after the change, please restart it manually",
-	"aiEdit": "Smart Edit",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Agent MCP Service",
 	"configGroupEmbedding": "Embedding Model",
 	"addToAgent": "Add to Agent Chat",

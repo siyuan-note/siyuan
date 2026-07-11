@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Schlüsselsicherung importiert, bitte verwenden Sie danach das zu diesem Schlüssel gehörende Masterpasswort zum Entsperren",
 	"importNotebookCryptoBackup": "Schlüsselsicherung importieren",
 	"desktopModeRestartTip": "Die App wird nach der Änderung automatisch geschlossen. Bitte starten Sie sie manuell neu.",
-	"aiEdit": "Intelligentes Bearbeiten",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Agent-MCP-Dienst",
 	"configGroupEmbedding": "Embedding-Modell",
 	"addToAgent": "Zum Agenten-Chat hinzufügen",

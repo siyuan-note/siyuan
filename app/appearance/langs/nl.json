@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Sleutelback-up geïmporteerd, gebruik vanaf nu het hoofdwachtwoord dat bij deze sleutel hoort om te ontgrendelen",
 	"importNotebookCryptoBackup": "Sleutelback-up importeren",
 	"desktopModeRestartTip": "De app wordt na de wijziging automatisch gesloten. Start deze handmatig opnieuw op.",
-	"aiEdit": "Slim bewerken",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Agent-MCP-service",
 	"configGroupEmbedding": "Embedding-model",
 	"addToAgent": "Toevoegen aan agent-chat",

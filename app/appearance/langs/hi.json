@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "कुंजी बैकअप आयात किया गया, अब से अनलॉक करने के लिए कृपया इस कुंजी से संबंधित मास्टर पासवर्ड का उपयोग करें",
 	"importNotebookCryptoBackup": "कुंजी बैकअप आयात करें",
 	"desktopModeRestartTip": "बदलाव के बाद ऐप स्वचालित रूप से बंद हो जाएगा, कृपया इसे मैन्युअल रूप से पुनर्प्रारंभ करें",
-	"aiEdit": "स्मार्ट संपादन",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "एजेंट MCP सेवा",
 	"configGroupEmbedding": "एम्बेडिंग मॉडल",
 	"addToAgent": "एजेंट चैट में जोड़ें",

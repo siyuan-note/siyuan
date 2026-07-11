@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "تم استيراد نسخة احتياطية من مفتاح التشفير، يرجى استخدام كلمة المرور الرئيسية المقابلة لهذا المفتاح لفتحها لاحقا",
 	"importNotebookCryptoBackup": "استيراد نسخة احتياطية من مفتاح التشفير",
 	"desktopModeRestartTip": "سيتم إغلاق التطبيق تلقائيًا بعد التعديل، يرجى إعادة تشغيله يدويًا",
-	"aiEdit": "تحرير ذكي",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "خدمة MCP للوكيل",
 	"configGroupEmbedding": "نموذج التضمين",
 	"addToAgent": "إضافة إلى محادثة الوكيل",

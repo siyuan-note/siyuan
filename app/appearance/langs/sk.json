@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Záloha kľúča importovaná, od teraz na odomknutie používajte hlavné heslo zodpovedajúce tomuto kľúču",
 	"importNotebookCryptoBackup": "Importovať zálohu kľúča",
 	"desktopModeRestartTip": "Po zmene sa aplikácia automaticky zavrie. Reštartujte ju manuálne.",
-	"aiEdit": "Inteligentná úprava",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Služba MCP agenta",
 	"configGroupEmbedding": "Model vnorenia",
 	"addToAgent": "Pridať do konverzácie s agentom",

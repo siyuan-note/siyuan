@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "キーバックアップをインポートしました。以降はこのキーに対応するマスターパスワードを使用してロックを解除してください",
 	"importNotebookCryptoBackup": "キーバックアップをインポート",
 	"desktopModeRestartTip": "変更後、アプリは自動的に終了します。手動で再起動してください。",
-	"aiEdit": "スマート編集",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "エージェント MCP サービス",
 	"configGroupEmbedding": "埋め込みモデル",
 	"addToAgent": "エージェント会話に追加",

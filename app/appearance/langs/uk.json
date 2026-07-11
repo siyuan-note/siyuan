@@ -4,7 +4,7 @@
 	"importNotebookCryptoBackupTip": "Резервну копію ключа імпортовано, надалі використовуйте головний пароль, що відповідає цьому ключу, для розблокування",
 	"importNotebookCryptoBackup": "Імпортувати резервну копію ключа",
 	"desktopModeRestartTip": "Після зміни застосунок автоматично закриється. Перезапустіть його вручну.",
-	"aiEdit": "Розумне редагування",
+	"aiEdit": "AI Edit",
 	"configGroupMcp": "Служба MCP агента",
 	"configGroupEmbedding": "Модель вбудовування",
 	"addToAgent": "Додати до чату агента",

@@ -13,6 +13,7 @@ import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
 import {getScreenWidth, isInMobileApp, saveExportFile, setStorageVal} from "../util/compatibility";
 import {getFrontend} from "../../util/functions";
+import {isEncryptedBox} from "../../util/pathName";
 
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
@@ -702,12 +703,18 @@ ${getSnippetJS()}
     });
 };
 
-const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubdocs?: boolean) => {
+const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubdocs?: boolean, confirmed = false) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
     }, async (response) => {
         if (response.code === 3) {
             showMessage(response.msg);
+            return;
+        }
+        if (!confirmed && isEncryptedBox(response.data.box)) {
+            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, () => {
+                getExportPath(option, removeAssets, mergeSubdocs, true);
+            });
             return;
         }
         let exportType = "HTML (SiYuan)";

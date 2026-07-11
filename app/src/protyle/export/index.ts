@@ -697,7 +697,7 @@ ${getIconScript(servePath)}
 </script>
 ${getSnippetJS()}
 </body></html>`;
-    fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
+	    fetchPost("/api/export/exportTempContent", {content: html, id}, (response) => {
         ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
     });
 };

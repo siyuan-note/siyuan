@@ -638,11 +638,21 @@ func exportTempContent(c *gin.Context) {
 		return
 	}
 
-	var content string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("content", &content, true, false)) {
+	var content, id string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("content", &content, true, false),
+		util.BindJsonArg("id", &id, false, false),
+	) {
 		return
 	}
-	tmpExport := filepath.Join(util.TempDir, "export", "temp")
+	tmpExport := filepath.Join(util.TempDir, "export")
+	// 加密笔记本的临时导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
+	if id != "" {
+		if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
+			tmpExport = filepath.Join(tmpExport, bt.BoxID)
+		}
+	}
+	tmpExport = filepath.Join(tmpExport, "temp")
 	if err := os.MkdirAll(tmpExport, 0755); err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -656,7 +666,19 @@ func exportTempContent(c *gin.Context) {
 		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
-	urlPath := path.Join("/export/temp/", filepath.Base(p))
+	baseName := filepath.Base(p)
+	urlPath := "/export/"
+	if boxID := func() string {
+		if id != "" {
+			if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
+				return bt.BoxID
+			}
+		}
+		return ""
+	}(); boxID != "" {
+		urlPath += boxID + "/"
+	}
+	urlPath = path.Join(urlPath, "temp", baseName)
 	ret.Data = map[string]any{
 		"url": util.ServerURL.Scheme + "://" + util.LocalHost + ":" + util.ServerPort + urlPath,
 	}

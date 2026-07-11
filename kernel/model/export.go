@@ -1630,7 +1630,13 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 				logging.LogWarnf("read encrypted asset [%s] failed: %s", sourceURI, readErr)
 				continue
 			}
-			embedPath = filepath.Join(util.TempDir, "export", "pdf-assets", gulu.Rand.String(7)+"-"+filepath.Base(AssetPathWithoutQuery(sourceURI)))
+			// 加密笔记本的临时资源归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
+			pdfAssetsDir := filepath.Join(util.TempDir, "export", assetBoxID, "pdf-assets")
+			if mkErr := os.MkdirAll(pdfAssetsDir, 0755); mkErr != nil {
+				logging.LogWarnf("mkdir pdf-assets [%s] failed: %s", pdfAssetsDir, mkErr)
+				continue
+			}
+			embedPath = filepath.Join(pdfAssetsDir, gulu.Rand.String(7)+"-"+filepath.Base(AssetPathWithoutQuery(sourceURI)))
 			if writeErr := filelock.WriteFile(embedPath, plain); nil != writeErr {
 				logging.LogWarnf("write temp embedded asset [%s] failed: %s", embedPath, writeErr)
 				continue

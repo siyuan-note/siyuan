@@ -21,6 +21,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // init 把加密相关的回调注入各底层包，让它们能查询 box 的 DEK / 加密状态。
@@ -44,4 +45,11 @@ func init() {
 	}
 	sql.IsEncryptedBoxFn = IsEncryptedBox
 	treenode.IsEncryptedBoxFn = IsEncryptedBox
+	util.ReloadDocInfoGuard = func(boxID string) bool {
+		// 加密笔记本锁定后丢弃延迟 reloadDocInfo 广播，防止明文元数据泄漏
+		if !IsEncryptedBox(boxID) {
+			return true
+		}
+		return IsBoxUnlocked(boxID)
+	}
 }

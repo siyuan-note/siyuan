@@ -154,6 +154,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	}
 
 	docInfo := map[string]any{
+		"box":          tree.Box,
 		"rootID":       tree.ID,
 		"name":         tree.Root.IALAttr("title"),
 		"alias":        tree.Root.IALAttr("alias"),

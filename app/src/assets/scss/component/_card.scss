@@ -100,8 +100,13 @@
   &__card {
     aspect-ratio: 3 / 1;
     min-height: 100px;
-    background-size: cover;
-    background-position: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
     &:hover {
       opacity: 0.86;

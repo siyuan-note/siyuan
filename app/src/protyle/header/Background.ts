@@ -311,7 +311,7 @@ export class Background {
                             const covers = category === "all" ? allCovers : (coversByCategory.get(category) || []);
                             return covers.map(c => {
                                 const url = `/appearance/covers/${c.file}`;
-                                return `<div class="b3-card b3-cover__card" data-src="${url}" style="background-image:url('${url}');background-size:cover;background-position:center"></div>`;
+                                return `<div class="b3-card b3-cover__card" data-src="${url}"><img src="${url}" loading="lazy"></div>`;
                             }).join("");
                         };
 

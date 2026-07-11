@@ -92,16 +92,9 @@
 
   &__tabs {
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    flex-wrap: wrap;
     padding: 16px 16px 0;
     gap: 8px;
-    -webkit-overflow-scrolling: touch;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
 
   &__card {
     aspect-ratio: 3 / 1;

@@ -86,3 +86,31 @@
     }
   }
 }
+
+// 题头图封面选择
+.b3-cover {
+
+  &__tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 16px 16px 0;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  &__card {
+    aspect-ratio: 3 / 1;
+    min-height: 100px;
+    background-size: cover;
+    background-position: center;
+
+    &:hover {
+      opacity: 0.86;
+    }
+  }
+}

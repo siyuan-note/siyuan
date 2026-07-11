@@ -80,6 +80,7 @@
     "safer-buffer": "^2.1.2",
     "sass": "^1.89.2",
     "sass-loader": "^16.0.5",
+    "sharp": "^0.35.3",
     "tsx": "^4.22.4",
     "typescript": "^4.9.5",
     "webpack": "^5.104.1",

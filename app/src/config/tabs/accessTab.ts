@@ -518,7 +518,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
 
 const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) => {
     const dialog = new Dialog({
-        title: window.siyuan.languages.setMasterPassword,
+        title: "🔐 " + window.siyuan.languages.setMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
     <div class="password-strength fn__none"></div>
@@ -571,7 +571,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
 
 const openChangeMasterPasswordDialog = () => {
     const dialog = new Dialog({
-        title: window.siyuan.languages.changeMasterPassword,
+        title: "🔐 " + window.siyuan.languages.changeMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.oldMasterPassword}" class="b3-text-field fn__block">
     <div class="fn__hr"></div>

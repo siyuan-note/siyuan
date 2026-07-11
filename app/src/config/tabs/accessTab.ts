@@ -337,7 +337,7 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
         html: () =>
             // 开关行：结构与标准 group.switch 一致（label + config-item + b3-switch fn__flex-center）
             `<label class="fn__flex b3-label config-item">
-    ${genConfigItemMainHtml(window.siyuan.languages.enableEncryptedNotebook, window.siyuan.languages.encryptedNotebookTip + "<br>" + window.siyuan.languages.featurePreview)}
+	    ${genConfigItemMainHtml(window.siyuan.languages.enableEncryptedNotebook, window.siyuan.languages.encryptedNotebookTip + "<br><span class=\"ft__error\">" + window.siyuan.languages.encryptedNotebookRiskTip + "</span><br>" + window.siyuan.languages.featurePreview)}
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="encryptedNotebookSwitch" type="checkbox">
 </label>
@@ -500,6 +500,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
     <button class="b3-button b3-button--text" disabled>${window.siyuan.languages.confirm}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
+        destroyCallback: onCancel,
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     const inputs = dialog.element.querySelectorAll("input");
@@ -511,7 +512,6 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
     });
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
-        onCancel();
     });
     confirmBtn.addEventListener("click", async () => {
         const pwd1 = (inputs[0] as HTMLInputElement).value;

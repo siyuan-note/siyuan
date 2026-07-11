@@ -24,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "修改主密碼完畢",
 	"oldMasterPassword": "舊主密碼",
 	"newMasterPassword": "新主密碼",
-	"encryptedNotebookRiskTip": "加密僅保護靜態資料——忘記主密碼則內容無法恢復。加密筆記本解鎖開啟期間，AI 智能體、插件、MCP 工具、API 等均能讀取其中內容，與一般筆記本無異。",
+	"encryptedNotebookRiskTip": "忘記主密碼則內容無法恢復；加密筆記本解鎖開啟期間，AI 智能體、插件、MCP 工具、API 等均能讀取其中內容，與一般筆記本無異",
 	"newEncryptedNotebook": "新建加密筆記本",
 	"unlockEncryptedNotebook": "🔓 解鎖 ${x}",
 	"unlocking": "解鎖中……",

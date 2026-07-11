@@ -793,14 +793,14 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		sql.RemoveEncryptedDBFile(boxID) // 清理已创建的 content db 文件，避免遗留空加密库
 		return err
 	}
-		cachedDEKs[boxID] = dek
+	cachedDEKs[boxID] = dek
 
-		// 初始化自动锁定访问时间戳，记录解锁时刻
-		newVal := &atomic.Int64{}
-		newVal.Store(time.Now().UnixNano())
-		boxLastAccess.Store(boxID, newVal)
+	// 初始化自动锁定访问时间戳，记录解锁时刻
+	newVal := &atomic.Int64{}
+	newVal.Store(time.Now().UnixNano())
+	boxLastAccess.Store(boxID, newVal)
 
-		// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
+	// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil ||
@@ -847,6 +847,7 @@ func LockBox(boxID string) {
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
 func lockBoxHeld(boxID string) {
+	RevokeManagedEncryptedExportsForBox(boxID)
 
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {
@@ -1537,14 +1538,14 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		sql.CloseEncryptedDB(id)
 		return "", err
 	}
-		cachedDEKs[id] = dek
+	cachedDEKs[id] = dek
 
-		// 初始化自动锁定访问时间戳，与 UnlockBox 对称
-		newVal := &atomic.Int64{}
-		newVal.Store(time.Now().UnixNano())
-		boxLastAccess.Store(id, newVal)
+	// 初始化自动锁定访问时间戳，与 UnlockBox 对称
+	newVal := &atomic.Int64{}
+	newVal.Store(time.Now().UnixNano())
+	boxLastAccess.Store(id, newVal)
 
-		IncSync()
+	IncSync()
 	return id, nil
 }
 

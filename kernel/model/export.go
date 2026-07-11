@@ -712,9 +712,16 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 	}
 
 	// 加密笔记本的物理导出目录使用随机标识，mainName 仅用于用户可见的压缩包名称和包内顶层目录。
-	exportID := gulu.Rand.String(7)
+	exportID, err := newManagedEncryptedExportID()
+	if err != nil {
+		return "", err
+	}
 	exportFolderPath := filepath.Join(exportBasePath, exportID)
-	zipFileName := util.FilterFileName(mainName) + ".zip"
+	zipBaseName := util.FilterFileName(filepath.Base(mainName))
+	if zipBaseName == "" {
+		zipBaseName = "resources"
+	}
+	zipFileName := zipBaseName + ".zip"
 	zipFilePath := filepath.Join(exportBasePath, exportID+"-"+zipFileName)
 	if encryptedBoxID == "" {
 		// 保持普通资源导出的既有物理路径与返回值兼容。
@@ -756,7 +763,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 		return
 	}
 
-	if err = zip.AddDirectory(mainName, exportFolderPath); err != nil {
+	if err = zip.AddDirectory(zipBaseName, exportFolderPath); err != nil {
 		logging.LogErrorf("create export zip [%s] failed: %s", exportFolderPath, err)
 		return
 	}
@@ -767,7 +774,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 	exportFilePath = path.Join("temp", "export")
 	if encryptedBoxID != "" {
-		exportFilePath = path.Join(exportFilePath, encryptedBoxID, "resources", filepath.Base(zipFilePath))
+		exportFilePath = path.Join("temp", "export", registerManagedEncryptedExport(encryptedBoxID, zipFilePath))
 	} else {
 		exportFilePath = path.Join(exportFilePath, filepath.Base(zipFilePath))
 	}

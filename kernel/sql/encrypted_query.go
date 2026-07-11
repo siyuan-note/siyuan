@@ -31,7 +31,7 @@ import (
 
 // GetBlockInBox 按 id 在指定 box 的 db 里查 block。boxID 为空则查全局 db。
 func GetBlockInBox(id, boxID string) (ret *Block) {
-	ret = getBlockCache(id)
+	ret = getBlockCacheInBox(id, boxID)
 	if nil != ret {
 		return
 	}

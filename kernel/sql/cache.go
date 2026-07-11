@@ -18,6 +18,7 @@ package sql
 
 import (
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -43,10 +44,34 @@ var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 	NumCounters: 100000,
 	MaxCost:     10240,
 	BufferItems: 64,
+	OnExit: func(value interface{}) {
+		if entry, ok := value.(*blockCacheEntry); ok {
+			removeBlockCacheKey(entry.block.ID, entry.key)
+		}
+	},
 })
+
+var blockCacheKeys = map[string]map[string]struct{}{}
+var blockCacheKeysMu sync.Mutex
+
+type blockCacheEntry struct {
+	key   string
+	block *Block
+}
+
+// blockCacheKey 为加密笔记本使用 box 维度缓存键；普通笔记本保持原有全局键，避免影响既有查询路径。
+func blockCacheKey(id, boxID string) string {
+	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) {
+		return boxID + "\x00" + id
+	}
+	return id
+}
 
 func ClearCache() {
 	blockCache.Clear()
+	blockCacheKeysMu.Lock()
+	blockCacheKeys = map[string]map[string]struct{}{}
+	blockCacheKeysMu.Unlock()
 	clearRefCache()
 }
 
@@ -62,24 +87,62 @@ func putBlockCache(block *Block) {
 	}
 	cloned.Content = strings.ReplaceAll(cloned.Content, search.SearchMarkLeft, "")
 	cloned.Content = strings.ReplaceAll(cloned.Content, search.SearchMarkRight, "")
-	blockCache.Set(cloned.ID, cloned, 1)
+	key := blockCacheKey(cloned.ID, cloned.Box)
+	addBlockCacheKey(cloned.ID, key)
+	if !blockCache.Set(key, &blockCacheEntry{key: key, block: cloned}, 1) {
+		removeBlockCacheKey(cloned.ID, key)
+	}
 }
 
 func getBlockCache(id string) (ret *Block) {
+	return getBlockCacheInBox(id, "")
+}
+
+func getBlockCacheInBox(id, boxID string) (ret *Block) {
 	if cacheDisabled {
 		return
 	}
 
-	b, _ := blockCache.Get(id)
+	b, _ := blockCache.Get(blockCacheKey(id, boxID))
 	if nil != b {
-		ret = b.(*Block)
+		if entry, ok := b.(*blockCacheEntry); ok {
+			ret = entry.block
+		}
 	}
 	return
 }
 
 func removeBlockCache(id string) {
-	blockCache.Del(id)
+	blockCacheKeysMu.Lock()
+	keys := blockCacheKeys[id]
+	delete(blockCacheKeys, id)
+	blockCacheKeysMu.Unlock()
+	for key := range keys {
+		blockCache.Del(key)
+	}
 	removeRefCacheByDefID(id)
+}
+
+func addBlockCacheKey(id, key string) {
+	blockCacheKeysMu.Lock()
+	defer blockCacheKeysMu.Unlock()
+	keys := blockCacheKeys[id]
+	if keys == nil {
+		keys = map[string]struct{}{}
+		blockCacheKeys[id] = keys
+	}
+	keys[key] = struct{}{}
+}
+
+func removeBlockCacheKey(id, key string) {
+	blockCacheKeysMu.Lock()
+	defer blockCacheKeysMu.Unlock()
+	if keys := blockCacheKeys[id]; keys != nil {
+		delete(keys, key)
+		if len(keys) == 0 {
+			delete(blockCacheKeys, id)
+		}
+	}
 }
 
 var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute)

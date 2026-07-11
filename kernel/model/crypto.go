@@ -27,7 +27,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -48,12 +47,8 @@ var kekVerifierMagic = []byte("siyuan-enc-v1")
 
 const boxEncryptionSpec = 1
 
-// ErrWrappedDEKCorrupted 表示 WrappedDEK 解密失败（密钥不匹配或数据损坏）。
-// 底层 crypto 函数返回此错误，API 层需要展示用户文案时转换成 Conf.Language(316)。
-var ErrWrappedDEKCorrupted = errors.New("wrapped DEK corrupted or key mismatch")
-
-// ErrMasterPasswordMigrationPending 表示改密已切换全局 verifier，但部分笔记本配置尚待恢复。
-var ErrMasterPasswordMigrationPending = errors.New("master password migration is pending; restart the kernel to complete recovery")
+// errMasterPasswordMigrationPending 表示改密已切换全局 verifier，但部分笔记本配置尚待恢复。
+var errMasterPasswordMigrationPending = errors.New("master password migration is pending")
 
 // notebookCryptoMu 串行化加密笔记本的控制面操作（Enable/Disable/Create/ChangeMasterPassword/Import/restore 等），
 // 避免 ChangeMasterPassword 枚举与 CreateEncryptedBox 并发导致新笔记本用旧 KEK 但 verifier 已切换的不可恢复状态。
@@ -841,7 +836,6 @@ func LockBox(boxID string) {
 }
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
-// 由 LockBox（单 box）和 LockAllBoxes（全 box）共用，确保生命周期串行化一致。
 func lockBoxHeld(boxID string) {
 
 	cachedDEKsLock.Lock()
@@ -892,45 +886,6 @@ func lockBoxHeld(boxID string) {
 	treenode.RemoveDynamicRefTexts(boxID)
 }
 
-// LockAllBoxes 清除所有已缓存的 DEK 并删除所有加密 db 文件。退出登录或全局锁定时调用。
-func LockAllBoxes() {
-	// 快照当前已解锁的 boxID，排序后逐个取得写锁，避免多锁顺序不一致导致死锁
-	cachedDEKsLock.Lock()
-	boxIDs := make([]string, 0, len(cachedDEKs))
-	for id := range cachedDEKs {
-		boxIDs = append(boxIDs, id)
-	}
-	cachedDEKsLock.Unlock()
-	sort.Strings(boxIDs)
-
-	for _, boxID := range boxIDs {
-		FlushTxQueue()
-		acquireBoxWriteLock(boxID)
-		lockBoxHeld(boxID)
-		releaseBoxWriteLock(boxID)
-	}
-
-	// 所有 box 的 per-box 清理完成后，执行全局缓存和共享临时目录清理
-	cache.ClearTreeCache()
-	sql.ClearCache()
-	cache.ClearDocsIAL()
-	cache.ClearBlocksIAL()
-	cache.ClearAVCache()
-	treenode.ClearDynamicRefTexts()
-	ResetVirtualBlockRefCache()
-	// 清理所有 repo 临时目录中的解密文件
-	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "repo")); rmErr != nil {
-		logging.LogErrorf("remove repo directory failed: %s", rmErr)
-	}
-	// 清理临时导出目录（锁定后不应继续提供明文导出下载）
-	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", "repo")); rmErr != nil {
-		logging.LogWarnf("remove export/repo dir failed: %s", rmErr)
-	}
-	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export")); rmErr != nil {
-		logging.LogErrorf("remove export directory failed: %s", rmErr)
-	}
-}
-
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。
 // KEK 由调用方临时派生（不来自全局缓存），调用方负责使用后丢弃。
 // 同时返回原始 DEK，供调用方在创建场景下直接开 db 缓存，省去再次 Argon2id 派生。
@@ -969,22 +924,6 @@ func mustEncryptionNonce(ciphertext []byte) []byte {
 		panic("extract encryption nonce failed: " + err.Error())
 	}
 	return nonce
-}
-
-// UnwrapDEK 从 BoxEncryption 解出 DEK 并缓存到内存，供后续 GetDEK 使用。
-// 仅在 KEK 已通过 UnlockBox 缓存 DEK 的场景之外使用（如改密流程内部）。
-func UnwrapDEK(boxID string, enc *conf.BoxEncryption, kek []byte) error {
-	if enc == nil || len(enc.WrappedDEK) == 0 {
-		return errors.New("no encrypted key material for box")
-	}
-	dek, err := decryptWrappedDEK(boxID, enc, kek)
-	if err != nil {
-		return ErrWrappedDEKCorrupted
-	}
-	cachedDEKsLock.Lock()
-	cachedDEKs[boxID] = dek
-	cachedDEKsLock.Unlock()
-	return nil
 }
 
 // GetDEK 取已缓存的 DEK。返回副本，避免外部零化影响缓存。
@@ -1111,26 +1050,31 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 				boxConf.Encrypted = true
 				boxConf.BoxCrypt = backup
 				if saveErr := box.SaveConf(boxConf); saveErr != nil {
-					return fmt.Errorf("%w: rebuild encrypted conf from backup [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, saveErr)
+					return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+						fmt.Sprintf(Conf.Language(320), entry.BoxID+": rebuild encrypted conf from backup failed: "+saveErr.Error()))
 				}
 			} else {
-				return fmt.Errorf("%w: cannot apply migration for box [%s]: conf missing and no valid backup", ErrMasterPasswordMigrationPending, entry.BoxID)
+				return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+					fmt.Sprintf(Conf.Language(320), entry.BoxID+": conf missing and no valid backup"))
 			}
 		}
 		boxConf.BoxCrypt.WrappedDEK = entry.NewWrappedDEK
 		boxConf.BoxCrypt.Spec = entry.NewSpec
 		boxConf.BoxCrypt.WrapNonce = entry.NewWrapNonce
 		if err = box.SaveConf(boxConf); err != nil {
-			return fmt.Errorf("%w: save conf for notebook [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, err)
+			return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+				fmt.Sprintf(Conf.Language(320), entry.BoxID+": save conf failed: "+err.Error()))
 		}
 		if err = writeNotebookCryptBackup(entry.BoxID, boxConf.BoxCrypt); err != nil {
-			return fmt.Errorf("%w: update notebook crypt backup [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, err)
+			return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+				fmt.Sprintf(Conf.Language(320), entry.BoxID+": update notebook crypt backup failed: "+err.Error()))
 		}
 	}
 
 	// Phase 4: 先持久化全局备份，再清除 manifest，确保崩溃后可恢复
 	if err = saveNotebookCryptoBackup(); err != nil {
-		return fmt.Errorf("%w: save notebook crypto backup failed: %v", ErrMasterPasswordMigrationPending, err)
+		return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+			fmt.Sprintf(Conf.Language(320), "save notebook crypto backup failed: "+err.Error()))
 	}
 	removeMasterPasswordMigration()
 	return nil

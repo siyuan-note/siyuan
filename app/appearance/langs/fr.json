@@ -2094,6 +2094,7 @@
 		"316": "Échec du déchiffrement : clé incorrecte ou données corrompues",
 		"317": "Fichier de sauvegarde de clé invalide",
 		"318": "Les métadonnées de chiffrement du carnet sont endommagées, veuillez vérifier la sauvegarde",
-		"319": "Le carnet n'est pas chiffré"
+		"319": "Le carnet n'est pas chiffré",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

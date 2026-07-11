@@ -2094,6 +2094,7 @@
 		"316": "Decryption failed: incorrect key or corrupted data",
 		"317": "Invalid key backup file",
 		"318": "Encrypted notebook metadata is damaged, please check backup",
-		"319": "Notebook is not encrypted"
+		"319": "Notebook is not encrypted",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

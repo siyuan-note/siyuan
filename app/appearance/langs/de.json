@@ -2094,6 +2094,7 @@
 		"316": "Entschlüsselung fehlgeschlagen: falscher Schlüssel oder beschädigte Daten",
 		"317": "Ungültige Schlüsselsicherungsdatei",
 		"318": "Verschlüsselungsmetadaten des Notizbuchs beschädigt, bitte Backup prüfen",
-		"319": "Notizbuch ist nicht verschlüsselt"
+		"319": "Notizbuch ist nicht verschlüsselt",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

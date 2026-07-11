@@ -2094,6 +2094,7 @@
 		"316": "Dekripsi gagal: kunci salah atau data rusak",
 		"317": "File cadangan kunci tidak valid",
 		"318": "Metadata buku catatan terenkripsi rusak, harap periksa cadangan",
-		"319": "Buku catatan tidak terenkripsi"
+		"319": "Buku catatan tidak terenkripsi",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

@@ -2094,6 +2094,7 @@
 		"316": "Decrittazione non riuscita: chiave errata o dati danneggiati",
 		"317": "File di backup della chiave non valido",
 		"318": "I metadati di crittografia del blocco appunti sono danneggiati, controlla il backup",
-		"319": "Il blocco appunti non è crittografato"
+		"319": "Il blocco appunti non è crittografato",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

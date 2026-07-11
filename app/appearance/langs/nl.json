@@ -2094,6 +2094,7 @@
 		"316": "Ontsleuteling mislukt: onjuiste sleutel of beschadigde gegevens",
 		"317": "Ongeldig sleutelback-upbestand",
 		"318": "Versleutelde notitieboekmetadata is beschadigd, controleer de back-up",
-		"319": "Notitieboek is niet versleuteld"
+		"319": "Notitieboek is niet versleuteld",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

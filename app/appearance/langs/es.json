@@ -2094,6 +2094,7 @@
 		"316": "Error al descifrar: clave incorrecta o datos dañados",
 		"317": "Archivo de copia de seguridad de la clave no válido",
 		"318": "Los metadatos de cifrado del cuaderno están dañados, verifique la copia de seguridad",
-		"319": "El cuaderno no está cifrado"
+		"319": "El cuaderno no está cifrado",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

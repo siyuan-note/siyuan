@@ -2094,6 +2094,7 @@
 		"316": "Falha na descriptografia: chave incorreta ou dados corrompidos",
 		"317": "Arquivo de backup da chave inválido",
 		"318": "Metadados de criptografia do caderno estão danificados, verifique o backup",
-		"319": "O caderno não está criptografado"
+		"319": "O caderno não está criptografado",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

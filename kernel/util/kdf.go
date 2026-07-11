@@ -68,14 +68,14 @@ func ValidateArgon2Params(p Argon2Params) (Argon2Params, error) {
 	if p.KeyLength != 32 {
 		return p, errors.New("Argon2id KeyLength must be 32")
 	}
-	if p.Memory < 16*1024 {
-		return p, errors.New("Argon2id Memory too low (minimum 16 MB)")
+	if p.Memory < 64*1024 {
+		return p, errors.New("Argon2id Memory too low (minimum 64 MB)")
 	}
 	if p.Memory > 256*1024 {
 		return p, errors.New("Argon2id Memory too high (maximum 256 MB)")
 	}
-	if p.Iterations < 2 {
-		return p, errors.New("Argon2id Iterations too low (minimum 2)")
+	if p.Iterations < 3 {
+		return p, errors.New("Argon2id Iterations too low (minimum 3)")
 	}
 	if p.Iterations > 10 {
 		return p, errors.New("Argon2id Iterations too high (maximum 10)")

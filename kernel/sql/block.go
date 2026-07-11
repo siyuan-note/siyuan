@@ -153,8 +153,8 @@ func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
 	return
 }
 
-func indexNode(tx *sql.Tx, id string) (err error) {
-	bt := treenode.GetBlockTree(id)
+func indexNode(tx *sql.Tx, id, boxID string) (err error) {
+	bt := treenode.GetBlockTreeInBox(id, boxID)
 	if nil == bt {
 		return
 	}

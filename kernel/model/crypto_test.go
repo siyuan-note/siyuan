@@ -95,7 +95,7 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 	kek, _ := util.GenerateDEK()
 	defer LockAllBoxes()
 
-	boxEnc, _, err := WrapNewDEK(kek)
+	boxEnc, _, err := WrapNewDEK("wrap-roundtrip-box", kek)
 	if err != nil {
 		t.Fatalf("WrapNewDEK failed: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 // TestUnwrapDEKWithWrongKEK 验证用错误的 KEK 解包失败（GCM MAC 校验）。
 func TestUnwrapDEKWithWrongKEK(t *testing.T) {
 	kek1, _ := util.GenerateDEK()
-	boxEnc, _, _ := WrapNewDEK(kek1)
+	boxEnc, _, _ := WrapNewDEK("wrong-kek-box", kek1)
 
 	kek2, _ := util.GenerateDEK()
 	defer LockAllBoxes()
@@ -134,8 +134,8 @@ func TestWrapNewDEKProducesUniqueDEKs(t *testing.T) {
 	kek, _ := util.GenerateDEK()
 	defer LockAllBoxes()
 
-	enc1, dek1, _ := WrapNewDEK(kek)
-	enc2, dek2, _ := WrapNewDEK(kek)
+	enc1, dek1, _ := WrapNewDEK("uniq-box-1", kek)
+	enc2, dek2, _ := WrapNewDEK("uniq-box-2", kek)
 
 	// WrapNewDEK 现在同时返回原始 DEK，可直接比对随机性
 	if bytes.Equal(dek1, dek2) {
@@ -157,13 +157,13 @@ func TestBoxEncryptionRoundTripViaUtil(t *testing.T) {
 	kek, _ := util.GenerateDEK()
 	originalDEK, _ := util.GenerateDEK()
 
-	wrapped, _ := util.Encrypt(kek, originalDEK)
+	wrapped, _ := util.EncryptWithAAD(kek, originalDEK, wrappedDEKAAD(""))
 	boxEnc := &conf.BoxEncryption{
 		WrappedDEK: wrapped,
 		WrapNonce:  wrapped[:12],
 	}
 
-	recoveredDEK, err := util.Decrypt(kek, boxEnc.WrappedDEK)
+	recoveredDEK, err := decryptWrappedDEK("", boxEnc, kek)
 	if err != nil {
 		t.Fatalf("Decrypt wrapped DEK failed: %v", err)
 	}

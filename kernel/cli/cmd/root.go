@@ -176,6 +176,9 @@ func rejectEncryptedNotebookCLI(cmd *cobra.Command, args []string) error {
 				return fmt.Errorf("CLI does not support files in encrypted notebooks")
 			}
 		}
+		if pathFlag := cmd.Flags().Lookup("path"); pathFlag != nil && pathFlag.Value.String() != "" && isEncryptedNotebookWorkspacePath(pathFlag.Value.String()) {
+			return fmt.Errorf("CLI does not support files in encrypted notebooks")
+		}
 	}
 	if cmd.Parent() == assetCmd {
 		if pathFlag := cmd.Flags().Lookup("path"); pathFlag != nil && pathFlag.Value.String() != "" {

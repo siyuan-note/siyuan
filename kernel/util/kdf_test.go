@@ -26,7 +26,7 @@ import (
 
 // TestArgon2KDFConsistency 验证同一 password+salt+params 多次派生结果一致。
 func TestArgon2KDFConsistency(t *testing.T) {
-	params := Argon2Params{Memory: 8 * 1024, Iterations: 1, Parallelism: 1, KeyLength: 32}
+	params := Argon2Params{Memory: 64 * 1024, Iterations: 3, Parallelism: 1, KeyLength: 32}
 	salt := []byte("0123456789abcdef")
 	k1 := DeriveKey("password", salt, params)
 	k2 := DeriveKey("password", salt, params)
@@ -40,7 +40,7 @@ func TestArgon2KDFConsistency(t *testing.T) {
 
 // TestArgon2KDFDifferentPasswords 验证不同密码派生出不同密钥。
 func TestArgon2KDFDifferentPasswords(t *testing.T) {
-	params := Argon2Params{Memory: 8 * 1024, Iterations: 1, Parallelism: 1, KeyLength: 32}
+	params := Argon2Params{Memory: 64 * 1024, Iterations: 3, Parallelism: 1, KeyLength: 32}
 	salt := []byte("0123456789abcdef")
 	k1 := DeriveKey("password1", salt, params)
 	k2 := DeriveKey("password2", salt, params)

@@ -44,20 +44,20 @@ var (
 
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
-	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets
+	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets/index_node
 	indexTree                     *parse.Tree // index/rename/move
 	upsertTree                    *parse.Tree // upsert/update_refs/delete_refs
 	removeTreeBox, removeTreePath string      // delete
 	removeTreeID                  string      // delete_id
 	removeTreeIDs                 []string    // delete_ids
-	box                           string      // delete_box/delete_box_refs/index
+	box                           string      // delete_box/delete_box_refs/index/index_node
 	block                         *Block      // update_block_content
 	id                            string      // index_node
 	removeAssetHashes             []string    // delete_assets
 }
 
 // boxID 从 op 提取目标 boxID，供 beginTxForBox 路由到加密 db 或全局 db。
-// delete_ids/delete_assets/index_node 无 box 上下文，返回空串 → 走全局 db。
+// delete_ids/delete_assets 无 box 上下文，返回空串 → 走全局 db。
 func (op *dbQueueOperation) boxID() string {
 	switch op.action {
 	case "index", "rename", "move":
@@ -70,7 +70,7 @@ func (op *dbQueueOperation) boxID() string {
 		}
 	case "delete", "delete_id":
 		return op.removeTreeBox
-	case "delete_box", "delete_box_refs":
+	case "delete_box", "delete_box_refs", "index_node":
 		return op.box
 	case "update_block_content":
 		if op.block != nil {
@@ -300,7 +300,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 	case "delete_assets":
 		err = deleteAssetsByHashes(tx, op.removeAssetHashes)
 	case "index_node":
-		err = indexNode(tx, op.id)
+		err = indexNode(tx, op.id, op.box)
 	default:
 		msg := fmt.Sprintf("unknown operation [%s]", op.action)
 		logging.LogErrorf(msg)
@@ -313,7 +313,11 @@ func IndexNodeQueue(id string) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	newOp := &dbQueueOperation{id: id, inQueueTime: time.Now(), action: "index_node"}
+	boxID := ""
+	if bt := treenode.GetBlockTree(id); bt != nil {
+		boxID = bt.BoxID
+	}
+	newOp := &dbQueueOperation{id: id, box: boxID, inQueueTime: time.Now(), action: "index_node"}
 	for i, op := range operationQueue {
 		if "index_node" == op.action && op.id == id {
 			operationQueue[i] = newOp

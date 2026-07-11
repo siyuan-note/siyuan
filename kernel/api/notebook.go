@@ -641,10 +641,13 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 	count := len(model.ListAllEncryptedBoxIDs())
 	enabled := model.NotebookCryptoEnabled()
 	model.NotebookCryptoMuUnlock()
+	pendingMigration, migrationBoxes := model.MasterPasswordMigrationStatus()
 
 	ret.Data = map[string]any{
-		"enabled": enabled,
-		"count":   count,
+		"enabled":          enabled,
+		"count":            count,
+		"migrationPending": pendingMigration,
+		"migrationBoxes":   migrationBoxes,
 	}
 }
 

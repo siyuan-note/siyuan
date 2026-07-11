@@ -46,9 +46,14 @@ import (
 // kekVerifierMagic 是写入 KEKVerifier 的固定魔数。启用时用 KEK 加密它，校验主密码时解密比对。
 var kekVerifierMagic = []byte("siyuan-enc-v1")
 
+const boxEncryptionSpec = 1
+
 // ErrWrappedDEKCorrupted 表示 WrappedDEK 解密失败（密钥不匹配或数据损坏）。
 // 底层 crypto 函数返回此错误，API 层需要展示用户文案时转换成 Conf.Language(316)。
 var ErrWrappedDEKCorrupted = errors.New("wrapped DEK corrupted or key mismatch")
+
+// ErrMasterPasswordMigrationPending 表示改密已切换全局 verifier，但部分笔记本配置尚待恢复。
+var ErrMasterPasswordMigrationPending = errors.New("master password migration is pending; restart the kernel to complete recovery")
 
 // notebookCryptoMu 串行化加密笔记本的控制面操作（Enable/Disable/Create/ChangeMasterPassword/Import/restore 等），
 // 避免 ChangeMasterPassword 枚举与 CreateEncryptedBox 并发导致新笔记本用旧 KEK 但 verifier 已切换的不可恢复状态。
@@ -209,7 +214,7 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 		return errors.New(Conf.Language(317))
 	}
 	kek := util.DeriveKey(password, nc.MasterSalt, params)
-	decrypted, dErr := util.Decrypt(kek, nc.KEKVerifier)
+	decrypted, dErr := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
 	if dErr != nil || string(decrypted) != string(kekVerifierMagic) {
 		return errors.New(Conf.Language(311)) // 主密码错误
 	}
@@ -288,14 +293,14 @@ func verifyKEKAgainstExistingBoxes(kek []byte) bool {
 		if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
 			return false // ListAllEncryptedBoxIDs 认定为加密但无可用 key material → fail-closed
 		}
-		if _, dErr := util.Decrypt(kek, boxCrypt.WrappedDEK); dErr == nil {
+		if _, dErr := decryptWrappedDEK(id, boxCrypt, kek); dErr == nil {
 			continue // 解密成功
 		}
 		// conf 的 WrappedDEK 无法解密：尝试 backup（与解锁路径 fallback 一致）
 		backup, bErr := readNotebookCryptBackup(id)
 		if bErr == nil && backup != nil && len(backup.WrappedDEK) > 0 &&
 			!bytes.Equal(backup.WrappedDEK, boxCrypt.WrappedDEK) {
-			if _, err2 := util.Decrypt(kek, backup.WrappedDEK); err2 == nil {
+			if _, err2 := decryptWrappedDEK(id, backup, kek); err2 == nil {
 				continue // backup 解密成功
 			}
 		}
@@ -347,6 +352,7 @@ type masterPasswordMigration struct {
 
 type migrationBoxEntry struct {
 	BoxID         string `json:"boxID"`
+	NewSpec       int    `json:"newSpec"`
 	NewWrappedDEK []byte `json:"newWrappedDEK"`
 	NewWrapNonce  []byte `json:"newWrapNonce"`
 }
@@ -388,6 +394,18 @@ func removeMasterPasswordMigration() {
 	if err := filelock.Remove(p); err != nil && !os.IsNotExist(err) {
 		logging.LogErrorf("remove master password migration failed: %s", err)
 	}
+}
+
+// MasterPasswordMigrationStatus 返回是否存在待完成的改密迁移及受影响的笔记本。
+func MasterPasswordMigrationStatus() (pending bool, boxIDs []string) {
+	mig, err := readMasterPasswordMigration()
+	if err != nil || mig == nil {
+		return false, nil
+	}
+	for _, entry := range mig.Boxes {
+		boxIDs = append(boxIDs, entry.BoxID)
+	}
+	return true, boxIDs
 }
 
 // recoverMasterPasswordMigration 在启动时检测并完成中断的改密迁移。
@@ -436,6 +454,7 @@ func recoverMasterPasswordMigration() {
 				continue
 			}
 			boxConf.BoxCrypt.WrappedDEK = entry.NewWrappedDEK
+			boxConf.BoxCrypt.Spec = entry.NewSpec
 			boxConf.BoxCrypt.WrapNonce = entry.NewWrapNonce
 			if saveErr := box.SaveConf(boxConf); saveErr != nil {
 				logging.LogErrorf("recover box conf [%s] failed: %s", entry.BoxID, saveErr)
@@ -522,9 +541,10 @@ func EnableEncryptedNotebook(password string) error {
 		return validErr
 	}
 	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
 
 	// 用 KEK 加密固定魔数作为校验值，落盘后供后续 UnlockBox 离线校验
-	verifierCT, err := util.Encrypt(kek, kekVerifierMagic)
+	verifierCT, err := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
 	if err != nil {
 		return err
 	}
@@ -633,7 +653,7 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 		return nil, errors.New(Conf.Language(317))
 	}
 	kek = util.DeriveKey(password, backup.MasterSalt, params)
-	decrypted, dErr := util.Decrypt(kek, backup.KEKVerifier)
+	decrypted, dErr := util.DecryptWithAAD(kek, backup.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
 	if dErr != nil || string(decrypted) != string(kekVerifierMagic) {
 		// 主密码错误（或备份损坏），不能恢复
 		return nil, errors.New(Conf.Language(311))
@@ -685,7 +705,7 @@ func deriveKEK(password string) ([]byte, error) {
 	}
 	kek := util.DeriveKey(password, nc.MasterSalt, params)
 
-	decrypted, err := util.Decrypt(kek, nc.KEKVerifier)
+	decrypted, err := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
 	if err != nil {
 		return nil, errors.New(Conf.Language(311))
 	}
@@ -705,7 +725,7 @@ func decryptBoxCrypt(boxID string, kek []byte) (dek []byte, boxCrypt *conf.BoxEn
 		return nil, nil, fmt.Errorf("no encrypted key material for box [%s]", boxID)
 	}
 
-	dek, err = util.Decrypt(kek, boxCrypt.WrappedDEK)
+	dek, err = decryptWrappedDEK(boxID, boxCrypt, kek)
 	if err == nil {
 		return dek, boxCrypt, nil
 	}
@@ -714,7 +734,7 @@ func decryptBoxCrypt(boxID string, kek []byte) (dek []byte, boxCrypt *conf.BoxEn
 	backup, bErr := readNotebookCryptBackup(boxID)
 	if bErr == nil && backup != nil && len(backup.WrappedDEK) > 0 &&
 		!bytes.Equal(backup.WrappedDEK, boxCrypt.WrappedDEK) {
-		dek, err = util.Decrypt(kek, backup.WrappedDEK)
+		dek, err = decryptWrappedDEK(boxID, backup, kek)
 		if err == nil {
 			// backup 解密成功：修复 conf + 刷新 backup
 			box := &Box{ID: boxID}
@@ -754,6 +774,7 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 	if err != nil {
 		return err
 	}
+	defer zeroAndClear(kek)
 
 	// 用 decryptBoxCrypt 统一处理解密 + backup fallback + conf 修复
 	dek, trustedCrypt, err := decryptBoxCrypt(boxID, kek)
@@ -913,20 +934,32 @@ func LockAllBoxes() {
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。
 // KEK 由调用方临时派生（不来自全局缓存），调用方负责使用后丢弃。
 // 同时返回原始 DEK，供调用方在创建场景下直接开 db 缓存，省去再次 Argon2id 派生。
-func WrapNewDEK(kek []byte) (*conf.BoxEncryption, []byte, error) {
+func WrapNewDEK(boxID string, kek []byte) (*conf.BoxEncryption, []byte, error) {
 	dek, err := util.GenerateDEK()
 	if err != nil {
 		return nil, nil, err
 	}
-	wrapped, err := util.Encrypt(kek, dek)
+	wrapped, err := util.EncryptWithAAD(kek, dek, wrappedDEKAAD(boxID))
 	if err != nil {
 		return nil, nil, err
 	}
 	return &conf.BoxEncryption{
+		Spec:       boxEncryptionSpec,
 		WrappedDEK: wrapped,
 		WrapNonce:  mustEncryptionNonce(wrapped),
 		CreatedAt:  time.Now().UnixMilli(),
 	}, dek, nil
+}
+
+func wrappedDEKAAD(boxID string) []byte {
+	return []byte("siyuan:v1:wrapped-dek:" + boxID)
+}
+
+func decryptWrappedDEK(boxID string, enc *conf.BoxEncryption, kek []byte) ([]byte, error) {
+	if enc.Spec >= boxEncryptionSpec {
+		return util.DecryptWithAAD(kek, enc.WrappedDEK, wrappedDEKAAD(boxID))
+	}
+	return util.DecryptWithAAD(kek, enc.WrappedDEK, wrappedDEKAAD(boxID))
 }
 
 // mustEncryptionNonce 从刚刚成功生成的密文中提取 nonce。生成密文格式错误属于内部不变量被破坏，直接终止执行。
@@ -944,7 +977,7 @@ func UnwrapDEK(boxID string, enc *conf.BoxEncryption, kek []byte) error {
 	if enc == nil || len(enc.WrappedDEK) == 0 {
 		return errors.New("no encrypted key material for box")
 	}
-	dek, err := util.Decrypt(kek, enc.WrappedDEK)
+	dek, err := decryptWrappedDEK(boxID, enc, kek)
 	if err != nil {
 		return ErrWrappedDEKCorrupted
 	}
@@ -1005,6 +1038,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	if err != nil {
 		return err
 	}
+	defer zeroAndClear(oldKEK)
 
 	Conf.m.Lock()
 	nc := Conf.NotebookCrypto
@@ -1015,7 +1049,8 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		return validErr
 	}
 	newKEK := util.DeriveKey(newPassword, nc.MasterSalt, params)
-	newVerifier, err := util.Encrypt(newKEK, kekVerifierMagic)
+	defer zeroAndClear(newKEK)
+	newVerifier, err := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
 	if err != nil {
 		return err
 	}
@@ -1029,12 +1064,13 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		if dErr != nil {
 			return errors.New(Conf.Language(316) + " [box=" + id + "]")
 		}
-		newWrapped, nErr := util.Encrypt(newKEK, dek)
+		newWrapped, nErr := util.EncryptWithAAD(newKEK, dek, wrappedDEKAAD(id))
 		if nErr != nil {
 			return nErr
 		}
 		entries = append(entries, migrationBoxEntry{
 			BoxID:         id,
+			NewSpec:       boxEncryptionSpec,
 			NewWrappedDEK: newWrapped,
 			NewWrapNonce:  mustEncryptionNonce(newWrapped),
 		})
@@ -1075,25 +1111,26 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 				boxConf.Encrypted = true
 				boxConf.BoxCrypt = backup
 				if saveErr := box.SaveConf(boxConf); saveErr != nil {
-					return fmt.Errorf("rebuild encrypted conf from backup [%s] failed: %w", entry.BoxID, saveErr)
+					return fmt.Errorf("%w: rebuild encrypted conf from backup [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, saveErr)
 				}
 			} else {
-				return fmt.Errorf("cannot apply migration for box [%s]: conf missing and no valid backup", entry.BoxID)
+				return fmt.Errorf("%w: cannot apply migration for box [%s]: conf missing and no valid backup", ErrMasterPasswordMigrationPending, entry.BoxID)
 			}
 		}
 		boxConf.BoxCrypt.WrappedDEK = entry.NewWrappedDEK
+		boxConf.BoxCrypt.Spec = entry.NewSpec
 		boxConf.BoxCrypt.WrapNonce = entry.NewWrapNonce
 		if err = box.SaveConf(boxConf); err != nil {
-			return fmt.Errorf("save conf for notebook [%s] failed: %w", entry.BoxID, err)
+			return fmt.Errorf("%w: save conf for notebook [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, err)
 		}
 		if err = writeNotebookCryptBackup(entry.BoxID, boxConf.BoxCrypt); err != nil {
-			return fmt.Errorf("update notebook crypt backup [%s] failed: %w", entry.BoxID, err)
+			return fmt.Errorf("%w: update notebook crypt backup [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, err)
 		}
 	}
 
 	// Phase 4: 先持久化全局备份，再清除 manifest，确保崩溃后可恢复
 	if err = saveNotebookCryptoBackup(); err != nil {
-		return fmt.Errorf("save notebook crypto backup failed: %w", err)
+		return fmt.Errorf("%w: save notebook crypto backup failed: %v", ErrMasterPasswordMigrationPending, err)
 	}
 	removeMasterPasswordMigration()
 	return nil
@@ -1488,11 +1525,7 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 	if err != nil {
 		return "", err
 	}
-
-	enc, dek, err := WrapNewDEK(kek)
-	if err != nil {
-		return "", err
-	}
+	defer zeroAndClear(kek)
 
 	id, err = CreateBox(name)
 	if err != nil {
@@ -1512,6 +1545,11 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 			id = ""
 		}
 	}()
+
+	enc, dek, err := WrapNewDEK(id, kek)
+	if err != nil {
+		return "", err
+	}
 
 	box := &Box{ID: id}
 	boxConf := box.GetConf()

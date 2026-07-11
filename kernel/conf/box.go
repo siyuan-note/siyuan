@@ -37,9 +37,10 @@ type BoxConf struct {
 
 // BoxEncryption 维护单个加密笔记本的密钥包络参数。WrappedDEK 是用全局 KEK 加密后的 DEK，本身可落盘。
 type BoxEncryption struct {
-	WrappedDEK []byte `json:"wrappedDEK"` // 用 KEK 经 AES-GCM 加密后的 DEK
-	WrapNonce  []byte `json:"wrapNonce"`  // 包络用的 GCM nonce（从加密信封中提取）
-	CreatedAt  int64  `json:"createdAt"`  // 创建时间，单位毫秒，便于未来按时间轮换密钥
+	Spec       int    `json:"spec,omitempty"` // 包络规范版本，1 表示 WrappedDEK 已绑定 boxID AAD
+	WrappedDEK []byte `json:"wrappedDEK"`     // 用 KEK 经 AES-GCM 加密后的 DEK
+	WrapNonce  []byte `json:"wrapNonce"`      // 包络用的 GCM nonce（从加密信封中提取）
+	CreatedAt  int64  `json:"createdAt"`      // 创建时间，单位毫秒，便于未来按时间轮换密钥
 }
 
 func NewBoxConf() *BoxConf {

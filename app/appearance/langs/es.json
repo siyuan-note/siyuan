@@ -2088,7 +2088,7 @@
 		"310": "La función de cuaderno cifrado no está habilitada",
 		"311": "Contraseña maestra incorrecta",
 		"312": "La función de cuaderno cifrado ya está habilitada",
-		"313": "No se admite mover documentos a través de los límites del cuaderno cifrado",
+		"313": "Los cuadernos cifrados no admiten esta operación",
 		"314": "Por favor, desbloquee primero el cuaderno cifrado",
 		"315": "Ya existen cuadernos cifrados pero falta la copia de seguridad de la clave maestra. Restaure el conf.json original o el archivo de copia de seguridad para volver a habilitarlo",
 		"316": "Error al descifrar: clave incorrecta o datos dañados",

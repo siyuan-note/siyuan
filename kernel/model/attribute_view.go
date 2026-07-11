@@ -3018,7 +3018,7 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		if blockViewID == viewID {
 			attrs[av.NodeAttrView] = attrView.ViewID
 			node.AttributeViewType = string(view.LayoutType)
-			oldAttrs, e := setNodeAttrs0(node, attrs)
+			oldAttrs, e := setNodeAttrs0(node, attrs, "")
 			if nil != e {
 				logging.LogErrorf("set node attrs failed: %s", e)
 				continue
@@ -6117,7 +6117,7 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 				attrs[av.NodeAttrViewNames] = avNames
 			}
 
-			oldAttrs, setErr := setNodeAttrs0(node, attrs)
+			oldAttrs, setErr := setNodeAttrs0(node, attrs, "")
 			if nil != setErr {
 				continue
 			}

@@ -2088,7 +2088,7 @@
 		"310": "La funzione del blocco note crittografato non è abilitata",
 		"311": "Password principale errata",
 		"312": "La funzione del blocco note crittografato è già abilitata",
-		"313": "Lo spostamento di documenti attraverso i confini del blocco note crittografato non è supportato",
+		"313": "I quaderni crittografati non supportano questa operazione",
 		"314": "Sblocca prima il blocco note crittografato",
 		"315": "Esistono già blocchi note crittografati ma manca il backup della chiave principale. Ripristinare il conf.json originale o il file di backup per riabilitare",
 		"316": "Decrittazione non riuscita: chiave errata o dati danneggiati",

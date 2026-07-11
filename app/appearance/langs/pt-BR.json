@@ -2088,7 +2088,7 @@
 		"310": "O recurso de caderno criptografado não está habilitado",
 		"311": "Senha mestra incorreta",
 		"312": "O recurso de caderno criptografado já está habilitado",
-		"313": "Não há suporte para mover documentos entre fronteiras de cadernos criptografados",
+		"313": "Notebooks criptografados não suportam esta operação",
 		"314": "Por favor, desbloqueie primeiro o caderno criptografado",
 		"315": "Já existem cadernos criptografados mas o backup da chave mestre está ausente. Restaure o conf.json original ou o arquivo de backup para reativar",
 		"316": "Falha na descriptografia: chave incorreta ou dados corrompidos",

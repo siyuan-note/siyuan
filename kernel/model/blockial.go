@@ -160,7 +160,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 		}
 
 		attrs := blockAttr["attrs"].(map[string]string)
-		oldAttrs, e := setNodeAttrs0(node, attrs)
+		oldAttrs, e := setNodeAttrs0(node, attrs, tree.Box)
 		if nil != e {
 			return e
 		}
@@ -203,7 +203,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 }
 
 func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
-	oldAttrs, err := setNodeAttrs0(node, nameValues)
+	oldAttrs, err := setNodeAttrs0(node, nameValues, tree.Box)
 	if err != nil {
 		return
 	}
@@ -249,7 +249,7 @@ func attrsAffectRefText(nameValues map[string]string) bool {
 }
 
 func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
-	oldAttrs, err := setNodeAttrs0(node, nameValues)
+	oldAttrs, err := setNodeAttrs0(node, nameValues, tree.Box)
 	if err != nil {
 		return
 	}
@@ -262,7 +262,17 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 	return
 }
 
-func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[string]string, err error) {
+func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (oldAttrs map[string]string, err error) {
+	// 加密笔记本不支持书签和标签（依赖全局 SQLite 聚合，加密笔记本是孤岛）
+	if IsEncryptedBox(boxID) && boxID != "" {
+		for name := range nameValues {
+			switch strings.ToLower(name) {
+			case "bookmark", "tags":
+				err = errors.New(Conf.Language(313))
+				return
+			}
+		}
+	}
 	oldAttrs = parse.IAL2Map(node.KramdownIAL)
 	newAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
 

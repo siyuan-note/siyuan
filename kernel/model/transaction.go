@@ -1883,7 +1883,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	if _, setErr := setNodeAttrs0(node, attrs); nil != setErr {
+	if _, setErr := setNodeAttrs0(node, attrs, tree.Box); nil != setErr {
 		logging.LogErrorf("set attrs failed: %s", setErr)
 		return &TxErr{code: TxErrCodePushMsg, msg: setErr.Error(), id: id}
 	}

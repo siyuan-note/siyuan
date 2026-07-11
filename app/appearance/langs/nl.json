@@ -2088,7 +2088,7 @@
 		"310": "Functie voor versleuteld notitieboek is niet ingeschakeld",
 		"311": "Onjuist hoofdwachtwoord",
 		"312": "Functie voor versleuteld notitieboek is al ingeschakeld",
-		"313": "Het verplaatsen van documenten over versleutelde notitieboekgrenzen wordt niet ondersteund",
+		"313": "Encrypted notebooks do not support this operation",
 		"314": "Ontgrendel eerst het versleutelde notitieboek",
 		"315": "Er bestaan al versleutelde notitieboeken maar de back-up van de hoofdsleutel ontbreekt. Herstel de originele conf.json of het back-upbestand om opnieuw in te schakelen",
 		"316": "Ontsleuteling mislukt: onjuiste sleutel of beschadigde gegevens",

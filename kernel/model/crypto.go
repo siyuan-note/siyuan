@@ -18,6 +18,9 @@ package model
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -90,6 +93,55 @@ func NotebookCryptoMuUnlock() { notebookCryptoMu.Unlock() }
 // MasterSalt/KEKVerifier 设计为可明文（salt 不保密，verifier 是密文），备份文件按明文 JSON 存储。
 func notebookCryptoBackupPath() string {
 	return filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+}
+
+// computeBackupChecksum 计算 NotebookCrypto 备份的 SHA-256 校验和。
+func computeBackupChecksum(nc *conf.NotebookCrypto) string {
+	tmp := *nc
+	tmp.Checksum = ""
+	tmp.KEKMAC = nil
+	data, _ := json.Marshal(tmp)
+	h := sha256.Sum256(data)
+	return hex.EncodeToString(h[:])
+}
+
+// computeKEKMAC 用 KEK 计算备份的 HMAC-SHA256 认证码。
+func computeKEKMAC(nc *conf.NotebookCrypto, kek []byte) []byte {
+	tmp := *nc
+	tmp.KEKMAC = nil
+	data, _ := json.Marshal(tmp)
+	mac := hmac.New(sha256.New, kek)
+	mac.Write(data)
+	return mac.Sum(nil)
+}
+
+// verifyKEKMAC 用 KEK 验证备份的 HMAC-SHA256 认证码。
+func verifyKEKMAC(nc *conf.NotebookCrypto, kek []byte) bool {
+	if nc == nil || len(nc.KEKMAC) == 0 || len(kek) == 0 {
+		return false
+	}
+	expected := computeKEKMAC(nc, kek)
+	return hmac.Equal(expected, nc.KEKMAC)
+}
+
+// prepareBackupForWrite 为写入准备备份元数据字段（Spec/Generation/BackupID/CreatedAt/Checksum）。
+func prepareBackupForWrite(nc *conf.NotebookCrypto) {
+	conf.UpgradeSpec(nc) // 按需升级旧格式
+	nc.Generation++
+	if nc.BackupID == "" {
+		nc.BackupID = util.RandString(16)
+	}
+	nc.CreatedAt = time.Now().Unix()
+	nc.Checksum = computeBackupChecksum(nc)
+}
+
+// atomicWriteFile 原子写入：先写 .tmp 再 rename，防止半写入文件残留。
+func atomicWriteFile(path string, data []byte) error {
+	tmpPath := path + ".tmp"
+	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
+		return err
+	}
+	return os.Rename(tmpPath, path)
 }
 
 // ExportNotebookCryptoBackup 把密钥备份文件复制到 export 目录，返回可下载的相对路径。
@@ -183,35 +235,41 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 
 // saveNotebookCryptoBackup 把当前 NotebookCrypto（含 MasterSalt/KEKVerifier/KDFParams）备份到 DataDir。
 func saveNotebookCryptoBackup() error {
-	Conf.m.RLock()
-	nc := *Conf.NotebookCrypto // 值拷贝，避免持锁写文件
-	Conf.m.RUnlock()
-	data, err := json.Marshal(nc)
-	if err != nil {
-		return fmt.Errorf("marshal notebook crypto backup failed: %w", err)
-	}
+	Conf.m.Lock()
+	nc := *Conf.NotebookCrypto // 值拷贝
+	prepareBackupForWrite(&nc)
+	Conf.NotebookCrypto.Spec = nc.Spec
+	Conf.NotebookCrypto.BackupID = nc.BackupID
+	Conf.NotebookCrypto.Generation = nc.Generation
+	Conf.NotebookCrypto.CreatedAt = nc.CreatedAt
+	Conf.NotebookCrypto.Checksum = nc.Checksum
+	Conf.m.Unlock()
 	backupPath := notebookCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		return fmt.Errorf("mkdir notebook crypto backup dir failed: %w", err)
 	}
-	if err := filelock.WriteFile(backupPath, data); err != nil {
+	data, err := json.Marshal(nc)
+	if err != nil {
+		return fmt.Errorf("marshal notebook crypto backup failed: %w", err)
+	}
+	if err := atomicWriteFile(backupPath, data); err != nil {
 		return fmt.Errorf("write notebook crypto backup failed: %w", err)
 	}
 	return nil
 }
 
 // writeNotebookCryptoBackupData 将指定的 NotebookCrypto 写入备份文件（不依赖 Conf.NotebookCrypto）。
-// 供 ImportNotebookCryptoBackup 等先写备份再提交 conf 的场景使用。
 func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto) error {
-	data, err := json.Marshal(nc)
-	if err != nil {
-		return fmt.Errorf("marshal notebook crypto backup failed: %w", err)
-	}
+	prepareBackupForWrite(nc)
 	backupPath := notebookCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		return fmt.Errorf("mkdir notebook crypto backup dir failed: %w", err)
 	}
-	if err := filelock.WriteFile(backupPath, data); err != nil {
+	data, err := json.Marshal(nc)
+	if err != nil {
+		return fmt.Errorf("marshal notebook crypto backup failed: %w", err)
+	}
+	if err := atomicWriteFile(backupPath, data); err != nil {
 		return fmt.Errorf("write notebook crypto backup failed: %w", err)
 	}
 	return nil
@@ -259,6 +317,15 @@ func loadNotebookCryptoBackup() (*conf.NotebookCrypto, error) {
 	if err := json.Unmarshal(data, nc); err != nil {
 		return nil, err
 	}
+	// Spec>=1：校验 Checksum，防止备份文件损坏
+	if nc.Spec >= 1 && nc.Checksum != "" {
+		expected := computeBackupChecksum(nc)
+		if nc.Checksum != expected {
+			logging.LogWarnf("notebook crypto backup checksum mismatch: expected %s, got %s", expected, nc.Checksum)
+			return nil, errors.New("notebook crypto backup is corrupted (checksum mismatch)")
+		}
+	}
+	conf.UpgradeSpec(nc) // 按需升级旧格式到当前规范
 	return nc, nil
 }
 
@@ -567,6 +634,10 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 		// 主密码错误（或备份损坏），不能恢复
 		return nil, errors.New(Conf.Language(311))
 	}
+	// Spec>=1 时验证 KEKMAC：用 KEK 校验备份内容未被篡改
+	if backup.Spec >= 1 && !verifyKEKMAC(backup, kek) {
+		return nil, errors.New(Conf.Language(316))
+	}
 
 	// 若有加密笔记本，校验 KEK 能解密其 WrappedDEK（防止 salt 不匹配的备份导致数据锁死）
 	if !verifyKEKAgainstExistingBoxes(kek) {
@@ -579,6 +650,12 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 	*Conf.NotebookCrypto = *backup
 	Conf.m.Unlock()
 	Conf.Save()
+	// 恢复成功后重写备份（补全 KEKMAC，升级旧备份为 Spec=1）
+	go func() {
+		nc := *backup
+		nc.KEKMAC = computeKEKMAC(&nc, kek)
+		_ = writeNotebookCryptoBackupData(&nc)
+	}()
 	logging.LogInfof("notebook crypto restored from backup (e.g. after sync to a new device)")
 	return kek, nil
 }

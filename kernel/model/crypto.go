@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -490,6 +491,10 @@ var (
 	cachedDEKsLock sync.RWMutex
 )
 
+// boxLastAccess 记录每个加密笔记本最近一次加解密访问时间（unix 纳秒），供自动锁定 cron 使用。
+// key: boxID, value: *atomic.Int64。UnlockBox 成功时初始化，GetDEK 每次成功读取时更新，lockBoxHeld 清理。
+var boxLastAccess sync.Map
+
 // EnableEncryptedNotebook 启用加密笔记本功能：生成 MasterSalt、派生 KEK、写入校验值并持久化。
 // 重复调用（已启用）返回错误，避免覆盖现有加密笔记本的密钥参数。
 // KEK 不缓存——启用后用户需对每个加密笔记本单独调 UnlockBox 解锁。
@@ -788,9 +793,14 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		sql.RemoveEncryptedDBFile(boxID) // 清理已创建的 content db 文件，避免遗留空加密库
 		return err
 	}
-	cachedDEKs[boxID] = dek
+		cachedDEKs[boxID] = dek
 
-	// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
+		// 初始化自动锁定访问时间戳，记录解锁时刻
+		newVal := &atomic.Int64{}
+		newVal.Store(time.Now().UnixNano())
+		boxLastAccess.Store(boxID, newVal)
+
+		// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil ||
@@ -844,6 +854,9 @@ func lockBoxHeld(boxID string) {
 		delete(cachedDEKs, boxID)
 	}
 	cachedDEKsLock.Unlock()
+
+	// 清理自动锁定访问时间戳
+	boxLastAccess.Delete(boxID)
 
 	// 仅在 backup 缺失时从 conf 补写。正常流程中 CreateEncryptedBox/UnlockBox/ChangeMasterPassword
 	// 已刷新 backup，此处不再用未经解密验证的 BoxCrypt 覆盖已有 backup，
@@ -937,6 +950,8 @@ func GetDEK(boxID string) ([]byte, error) {
 	}
 	ret := make([]byte, len(dek))
 	copy(ret, dek)
+	// 更新自动锁定访问时间戳，每次加解密操作都刷新闲置计时
+	touchBoxAccess(boxID)
 	return ret, nil
 }
 
@@ -1522,9 +1537,14 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		sql.CloseEncryptedDB(id)
 		return "", err
 	}
-	cachedDEKs[id] = dek
+		cachedDEKs[id] = dek
 
-	IncSync()
+		// 初始化自动锁定访问时间戳，与 UnlockBox 对称
+		newVal := &atomic.Int64{}
+		newVal.Store(time.Now().UnixNano())
+		boxLastAccess.Store(id, newVal)
+
+		IncSync()
 	return id, nil
 }
 
@@ -1533,4 +1553,53 @@ func zeroAndClear(key []byte) {
 	for i := range key {
 		key[i] = 0
 	}
+}
+
+// touchBoxAccess 更新指定加密 notebook 的最后访问时间戳（unix 纳秒），供自动锁定 cron 使用。
+// 热路径（每次加解密），仅做无锁 Load + atomic Store，不阻塞 DEK 缓存读写。
+func touchBoxAccess(boxID string) {
+	if val, ok := boxLastAccess.Load(boxID); ok {
+		val.(*atomic.Int64).Store(time.Now().UnixNano())
+	}
+}
+
+// AutoLockIdleEncryptedBoxesJob 检查所有已解锁的加密 notebook，将闲置超时的自动锁定。
+// 由 cron 每分钟调用。阈值由 NotebookCrypto.AutoLockMinutes 控制（0 = 禁用）。
+func AutoLockIdleEncryptedBoxesJob() {
+	Conf.m.RLock()
+	threshold := Conf.NotebookCrypto.AutoLockMinutes
+	Conf.m.RUnlock()
+	if threshold <= 0 {
+		return
+	}
+
+	now := time.Now().UnixNano()
+	thresholdNs := int64(time.Duration(threshold) * time.Minute)
+
+	cachedDEKsLock.RLock()
+	boxIDs := make([]string, 0, len(cachedDEKs))
+	for id := range cachedDEKs {
+		boxIDs = append(boxIDs, id)
+	}
+	cachedDEKsLock.RUnlock()
+
+	for _, boxID := range boxIDs {
+		if val, ok := boxLastAccess.Load(boxID); ok {
+			lastAccess := val.(*atomic.Int64).Load()
+			if now-lastAccess >= thresholdNs {
+				logging.LogInfof("auto-locking idle encrypted notebook [%s]", boxID)
+				Unmount(boxID)
+			}
+		}
+	}
+}
+
+// SetAutoLockMinutes 设置加密笔记本自动锁定闲置分钟数。0 表示禁用。
+func SetAutoLockMinutes(minutes int) {
+	if minutes < 0 {
+		minutes = 0
+	}
+	Conf.m.Lock()
+	Conf.NotebookCrypto.AutoLockMinutes = minutes
+	Conf.m.Unlock()
 }

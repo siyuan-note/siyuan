@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Automatische Sperre",
+	"encryptedNotebookAutoLockDesc": "Verschlüsselte Notizbücher nach angegebenen Minuten Inaktivität automatisch sperren, Anzeigen, Bearbeiten oder Durchsuchen verschlüsselter Inhalte setzt den Timer zurück, auf 0 zum Deaktivieren",
 	"exportNotebookCryptoBackupTip": "Schlüsselsicherung exportiert, bitte an einem sicheren Ort aufbewahren",
 	"exportNotebookCryptoBackup": "Schlüsselsicherung exportieren",
 	"importNotebookCryptoBackupTip": "Schlüsselsicherung importiert, bitte verwenden Sie danach das zu diesem Schlüssel gehörende Masterpasswort zum Entsperren",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Master-Passwort geändert",
 	"oldMasterPassword": "Altes Master-Passwort",
 	"newMasterPassword": "Neues Master-Passwort",
-	"encryptedNotebookRiskTip": "Der verschlüsselte Inhalt kann nicht wiederhergestellt werden, wenn das Master-Passwort verloren geht. Stellen Sie sicher, dass Sie es sich merken",
+	"encryptedNotebookRiskTip": "Verschlüsselung schützt ruhende Daten — Inhalte können nicht wiederhergestellt werden, wenn das Master-Passwort verloren geht. Wenn ein verschlüsseltes Notizbuch entsperrt ist, können KI-Agenten, Plugins, MCP-Tools und APIs dessen Inhalte lesen, genau wie bei jedem anderen Notizbuch.",
 	"newEncryptedNotebook": "Neues verschlüsseltes Notizbuch",
 	"unlockEncryptedNotebook": "🔓 Entsperren ${x}",
 	"unlocking": "Wird entsperrt...",

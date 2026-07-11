@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Bloqueo automático",
+	"encryptedNotebookAutoLockDesc": "Bloquear automáticamente los cuadernos cifrados tras los minutos de inactividad especificados, ver, editar o buscar contenido cifrado reinicia el temporizador, 0 para desactivar",
 	"exportNotebookCryptoBackupTip": "Copia de seguridad de la clave exportada, guárdala en un lugar seguro",
 	"exportNotebookCryptoBackup": "Exportar copia de seguridad de la clave",
 	"importNotebookCryptoBackupTip": "Copia de seguridad de la clave importada, en adelante utiliza la contraseña maestra correspondiente a esta clave para desbloquear",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Contraseña maestra cambiada",
 	"oldMasterPassword": "Contraseña maestra antigua",
 	"newMasterPassword": "Contraseña maestra nueva",
-	"encryptedNotebookRiskTip": "El contenido cifrado no se puede recuperar si se pierde la contraseña maestra. Asegúrese de recordarla",
+	"encryptedNotebookRiskTip": "El cifrado protege los datos en reposo — el contenido no se puede recuperar si se pierde la contraseña maestra. Cuando un cuaderno cifrado está desbloqueado, los agentes de IA, plugins, herramientas MCP y APIs pueden leer su contenido, igual que cualquier otro cuaderno.",
 	"newEncryptedNotebook": "Nuevo cuaderno cifrado",
 	"unlockEncryptedNotebook": "🔓 Desbloquear ${x}",
 	"unlocking": "Desbloqueando...",

@@ -605,6 +605,30 @@ func lockBox(c *gin.Context) {
 	model.Unmount(notebook)
 }
 
+// setNotebookCryptoAutoLock 设置加密笔记本自动锁定闲置分钟数。
+func setNotebookCryptoAutoLock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var autoLockMinutes float64
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("autoLockMinutes", &autoLockMinutes, true, false)) {
+		return
+	}
+
+	minutes := int(autoLockMinutes)
+	if minutes < 0 {
+		minutes = 0
+	}
+
+	model.SetAutoLockMinutes(minutes)
+	model.Conf.Save()
+}
+
 // changeMasterPassword 修改加密笔记本的主密码。
 // 用旧密码校验后，用新密码派生新 KEK，重新加密 verifier 和所有加密笔记本的 WrappedDEK。
 // 必须在所有加密笔记本都已锁定（DEK 不在内存）的状态下调用。

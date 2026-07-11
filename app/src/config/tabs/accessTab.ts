@@ -366,6 +366,14 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
 </div>`,
         afterMount: mountEncryptedNotebook,
     });
+    group.number("notebookCrypto.autoLockMinutes", {
+        title: window.siyuan.languages.encryptedNotebookAutoLock,
+        desc: window.siyuan.languages.encryptedNotebookAutoLockDesc,
+        min: 0,
+        save: (value) => {
+            fetchPost("/api/notebook/setNotebookCryptoAutoLock", {autoLockMinutes: value});
+        },
+    });
 };
 
 const mountEncryptedNotebook = (root: HTMLElement) => {

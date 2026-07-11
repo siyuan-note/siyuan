@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "自动锁定",
+	"encryptedNotebookAutoLockDesc": "闲置指定分钟后自动锁定加密笔记本，浏览、编辑、搜索加密内容会重置计时，设置为 0 表示禁用自动锁定",
 	"exportNotebookCryptoBackupTip": "密钥已导出，请妥善保管",
 	"exportNotebookCryptoBackup": "导出密钥",
 	"importNotebookCryptoBackupTip": "密钥已导入，后续请使用该密钥对应的主密码解锁",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "修改主密码完毕",
 	"oldMasterPassword": "旧主密码",
 	"newMasterPassword": "新主密码",
-	"encryptedNotebookRiskTip": "加密笔记本的内容在忘记主密码后无法恢复，请务必牢记主密码",
+	"encryptedNotebookRiskTip": "加密仅保护静态数据——忘记主密码则内容无法恢复。加密笔记本解锁打开期间，AI 智能体、插件、MCP 工具、API 等均能读取其中内容，与普通笔记本无异。",
 	"newEncryptedNotebook": "新建加密笔记本",
 	"unlockEncryptedNotebook": "🔓 解锁 ${x}",
 	"unlocking": "解锁中……",

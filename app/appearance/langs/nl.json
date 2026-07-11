@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Automatisch vergrendelen",
+	"encryptedNotebookAutoLockDesc": "Versleutelde notitieboeken automatisch vergrendelen na opgegeven minuten inactiviteit, bekijken, bewerken of doorzoeken van versleutelde inhoud reset de timer, 0 om uit te schakelen",
 	"exportNotebookCryptoBackupTip": "Sleutelback-up geëxporteerd, bewaar deze op een veilige plek",
 	"exportNotebookCryptoBackup": "Sleutelback-up exporteren",
 	"importNotebookCryptoBackupTip": "Sleutelback-up geïmporteerd, gebruik vanaf nu het hoofdwachtwoord dat bij deze sleutel hoort om te ontgrendelen",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Hoofdwachtwoord gewijzigd",
 	"oldMasterPassword": "Oud hoofdwachtwoord",
 	"newMasterPassword": "Nieuw hoofdwachtwoord",
-	"encryptedNotebookRiskTip": "De versleutelde inhoud kan niet worden hersteld als het hoofdwachtwoord verloren is. Zorg ervoor dat u het onthoudt",
+	"encryptedNotebookRiskTip": "Encryptie beschermt data in rust — inhoud kan niet worden hersteld als het hoofdwachtwoord verloren gaat. Wanneer een versleuteld notitieboek is ontgrendeld, kunnen AI-agents, plugins, MCP-tools en APIs de inhoud lezen, net als elk ander notitieboek.",
 	"newEncryptedNotebook": "Nieuw versleuteld notitieboek",
 	"unlockEncryptedNotebook": "🔓 Ontgrendelen ${x}",
 	"unlocking": "Ontgrendelen...",

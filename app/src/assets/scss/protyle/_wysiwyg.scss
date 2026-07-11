@@ -788,9 +788,6 @@
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
     @include mixin.text-clamp(1);
     opacity: .38;
-    font-size: 16px;
-    height: 26px;
-    line-height: 26px;
 
     .protyle-attr {
       opacity: 0;

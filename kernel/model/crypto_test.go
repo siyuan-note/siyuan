@@ -18,8 +18,11 @@ package model
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -163,5 +166,56 @@ func TestBoxEncryptionRoundTripViaUtil(t *testing.T) {
 	}
 	if !bytes.Equal(originalDEK, recoveredDEK) {
 		t.Fatalf("DEK round-trip mismatch")
+	}
+}
+
+// TestUnmount0ClearsDEKForUnmountedEncryptedBox 验证安全修复：加密笔记本在
+// "已解锁（DEK 在内存）但未挂载（不在 GetOpenedBoxes）"的状态下调用 unmount0，
+// DEK 仍应被清除，否则锁定后认证 API 仍可读取明文。
+// 直接测试 clearDEKIfUnlockedEncryptedBox（unmount0 在 box==nil 分支调用的清理逻辑），
+// 避免依赖未初始化的全局 Conf。
+func TestUnmount0ClearsDEKForUnmountedEncryptedBox(t *testing.T) {
+	boxID := "unmount-unlocked-test-box"
+
+	// 临时替换 DataDir，创建加密 box 的 conf.json，让 IsEncryptedBox 返回 true
+	origDataDir := util.DataDir
+	tempDir := t.TempDir()
+	util.DataDir = tempDir
+	defer func() {
+		util.DataDir = origDataDir
+		LockAllBoxes() // 测试后清理所有 DEK 缓存
+	}()
+
+	// 写入加密 box 的 conf.json
+	confDir := filepath.Join(tempDir, boxID, ".siyuan")
+	if err := os.MkdirAll(confDir, 0755); err != nil {
+		t.Fatalf("mkdir conf dir failed: %v", err)
+	}
+	boxConf := conf.NewBoxConf()
+	boxConf.Encrypted = true
+	boxConf.Closed = true // 未挂载（关闭状态）
+	confData, _ := gulu.JSON.MarshalIndentJSON(boxConf, "", "  ")
+	if err := os.WriteFile(filepath.Join(confDir, "conf.json"), confData, 0644); err != nil {
+		t.Fatalf("write conf.json failed: %v", err)
+	}
+
+	// 确认 IsEncryptedBox 返回 true
+	if !IsEncryptedBox(boxID) {
+		t.Fatalf("precondition failed: IsEncryptedBox should return true")
+	}
+
+	// 注入 DEK 模拟已解锁状态
+	dek, _ := util.GenerateDEK()
+	setDEKForTest(boxID, dek)
+	if !IsBoxUnlocked(boxID) {
+		t.Fatalf("precondition failed: box should be unlocked after setDEKForTest")
+	}
+
+	// 调用清理逻辑（unmount0 在 box 未挂载分支调用的函数）
+	clearDEKIfUnlockedEncryptedBox(boxID)
+
+	// 验证 DEK 已被清除
+	if IsBoxUnlocked(boxID) {
+		t.Fatalf("DEK should be cleared for unlocked encrypted box")
 	}
 }

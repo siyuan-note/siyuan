@@ -219,9 +219,21 @@ func Unmount(boxID string) {
 	util.PushEvent(evt)
 }
 
+// clearDEKIfUnlockedEncryptedBox 清除已解锁但未挂载的加密笔记本的 DEK。
+// unmount0 在 box 未挂载（Conf.Box 返回 nil）时调用，覆盖 unlockBox 解锁后未 mount 即 lock 的场景：
+// 此时 DEK 仍在内存，若不清除，锁定后认证 API 仍可读取明文。
+func clearDEKIfUnlockedEncryptedBox(boxID string) {
+	if IsEncryptedBox(boxID) && IsBoxUnlocked(boxID) {
+		ClearDEK(boxID)
+	}
+}
+
 func unmount0(boxID string) {
 	box := Conf.Box(boxID)
 	if nil == box {
+		// 笔记本未挂载（Closed）。若它是已解锁的加密笔记本（DEK 在内存），
+		// 仍需 ClearDEK 清除残留密钥材料，否则锁定后认证 API 仍可读取明文。
+		clearDEKIfUnlockedEncryptedBox(boxID)
 		return
 	}
 

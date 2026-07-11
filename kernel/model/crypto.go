@@ -536,13 +536,6 @@ func restoreNotebookCryptoConfigFromBackup() {
 	}
 	backup.KDFParams = params
 
-	// 若有加密笔记本存在，不在无主密码的路径提交启用状态；backup 文件已就位，
-	// 等用户解锁时走带密码的恢复路径（含现有 box WrappedDEK 校验）。
-	if len(ListAllEncryptedBoxIDs()) > 0 {
-		logging.LogInfof("notebook crypto backup found but deferred restore (encrypted notebooks exist, waiting for unlock)")
-		return
-	}
-
 	backup.Enabled = true
 	Conf.m.Lock()
 	*Conf.NotebookCrypto = *backup

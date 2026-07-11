@@ -1173,9 +1173,22 @@ func (fs *encryptedBoxAwareWebdavFS) isEncryptedBoxPath(name string) bool {
 	if parts[0] == "temp" {
 		return true
 	}
-	// 阻止访问 data/<encryptedBoxID>/ 目录
+	// 阻止访问 data/<encryptedBoxID>/ 目录（字面路径）
 	if len(parts) >= 2 && parts[0] == "data" && model.IsEncryptedBox(parts[1]) {
 		return true
+	}
+	// 防止 symlink 绕过：解析最长已存在父路径的符号链接后再次检查
+	absPath := filepath.Join(util.WorkspaceDir, name)
+	if resolved := util.ResolveLongestExistingParent(absPath); resolved != absPath {
+		resolvedRel, _ := filepath.Rel(util.WorkspaceDir, resolved)
+		resolvedRel = filepath.ToSlash(resolvedRel)
+		resolvedParts := strings.Split(resolvedRel, "/")
+		if len(resolvedParts) >= 1 && resolvedParts[0] == "temp" {
+			return true
+		}
+		if len(resolvedParts) >= 2 && resolvedParts[0] == "data" && model.IsEncryptedBox(resolvedParts[1]) {
+			return true
+		}
 	}
 	return false
 }

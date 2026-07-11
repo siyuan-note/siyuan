@@ -416,6 +416,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
         fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
             const enabled = response.data.enabled;
             switchElement.checked = enabled;
+            window.siyuan.config.notebookCrypto.enabled = enabled;
             actionsElement.classList.toggle("fn__none", !enabled);
             importElement.classList.remove("fn__none");
         });

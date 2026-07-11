@@ -311,6 +311,72 @@ An encrypted notebook is an island; some features are unimplemented because of t
 - **Noticeable latency**: Unlock ~1s, large-asset browsing (full decrypt per request with no cache), first access after lock (cold start).
 - **Zero impact on normal notebooks**: Encryption and routing logic short-circuits for non-encrypted boxes.
 
+## 17. Threat Model and Security Scope
+
+This feature protects data-at-rest confidentiality and the inaccessibility of a locked notebook. The design assumes an attacker may obtain current or historical ciphertext from the workspace, sync service, or backup media, but does not know the master password and cannot control the running application or operating system while the user has unlocked a notebook. AES-GCM provides confidentiality and integrity verification for an individual encrypted object; it does not by itself provide availability, rollback protection, or deletion of retained ciphertext copies.
+
+The following are outside this feature's security boundary and must be stated in product UI and user documentation:
+
+- While a notebook is unlocked, authenticated application callers such as APIs, plugins, MCP, and AI/LLM, as well as a local attacker able to read the application process memory, may obtain plaintext.
+- Files intentionally exported by the user, clipboard contents, screenshots, printouts, content shared with third parties, and plaintext files saved outside the workspace are protected by the user.
+- OS swap, hibernation images, crash dumps, filesystem snapshots, and malware are not absolutely protected by clearing application memory; locking performs best-effort cleanup only within the application's control.
+- A sync service or backup holder may retain, delete, replace, or roll back ciphertext. Replacement and rollback can cause denial of service or data rollback; they cannot decrypt valid ciphertext without the master password.
+
+"Only ciphertext remains after locking" applies only to kernel-managed workspace files, temporary files, and caches. It does not include files deliberately exported to an external location or promise erasure of historical blocks retained by the underlying storage medium.
+
+## 18. State Machine and Concurrency Rules
+
+Each encrypted notebook independently has one of these states: `Locked`, `Unlocking`, `Unlocked`, `Locking`, and `Error`. Every encrypted notebook must start as `Locked`; encrypted notebooks must not exist while the global encryption feature is disabled.
+
+| Transition | Preconditions | Invariants after success | Failure handling |
+|---|---|---|---|
+| `Locked → Unlocking → Unlocked` | Master password verification succeeds | DEK exists only in memory; dedicated databases are open; notebook-specific entry points are allowed | Clear derived KEK/DEK, close opened handles, return to `Locked` |
+| `Unlocked → Locking → Locked` | Stop accepting new requests for the notebook | Tasks have completed or been cancelled; caches, plaintext temporary files, database connections, and DEK are cleared | Continue to deny access if cleanup partly fails; record the error and retry before the next startup |
+| `Unlocked → Error` | Ciphertext authentication fails, database opening fails, or an invariant is violated | Immediately deny reads and writes; never fall back to a normal-notebook path | Close resources and retain diagnostics without plaintext; the user can only lock or unlock again |
+| Change master password | All encrypted notebooks are `Locked` | All WrappedDEKs and the backup update as one transaction | Keep old configuration and backup usable; no notebook becomes unlockable only by the new password |
+
+Unlock, lock, export, sync, indexing, history restore, and deletion of the same notebook must be serialized by one boxID-scoped mutex. Once locking starts, running tasks must be cancelled or finish at a safe boundary; they must not create plaintext temporary files, publish plaintext results, or reopen database connections after locking completes.
+
+## 19. Ciphertext, Key, and Database Format
+
+Every persistent encrypted object must use a versioned envelope containing at least a format version, algorithm identifier, cryptographically random nonce unique for the same DEK, ciphertext, and authentication tag. Additional authenticated data binds boxID, object type, and logical relative path, preventing valid ciphertext from being substituted into another notebook, type, or path. Rename or migration creates a new envelope rather than merely moving ciphertext.
+
+The implementation derives purpose-separated subkeys from each box's DEK through a KDF with fixed domain separators, at least for file content, asset-name mappings, database files, and the WrappedDEK authentication context. KDF parameters, envelope version, and database configuration are stored with ciphertext to enable migration; a new version is written only after old data verifies successfully, and a failed migration must not delete the old copy.
+
+The SQLCipher main database, WAL, SHM, rollback journal, temporary files, and backup copies are protected objects. They must remain in controlled directories and use the same key domain. Locking, crash recovery, and history snapshots enumerate these companion files; unencrypted SQLite pages, query results, or diagnostics must never be written to a global temporary directory.
+
+## 20. Backup, Recovery, and Metadata Policy
+
+`notebook-crypto-backup.json` is recovery material, not a secret, but its integrity and freshness must be handled separately. It contains a format version, backup ID, creation time, monotonic generation, and content digest. Recovery must not silently overwrite enabled configuration; when disabled and several candidates exist, display their origin and generation for the user to choose. A malformed backup, generation rollback, or backup incompatible with existing encrypted notebooks enters an error state instead of generating a new MasterSalt.
+
+Sync endpoints and offline backups are storage that may be lost, copied, or rolled back but cannot read plaintext. Before the master password is entered, trustworthy authentication based on the KEK cannot be established; the system can validate structure and the verifier after unlock only. A successful sync restore must not be presented as proof that the source is trusted. Users should keep at least one independent, versioned key backup and understand that losing the master password or every matching MasterSalt backup is unrecoverable.
+
+| Category | May be exposed |
+|---|---|
+| Document body, attribute values, original asset names, database cells, index text | No |
+| boxID, directory structure, file count, ciphertext size, modification time, asset extension, block-ID time information | Yes |
+| Notebook name, icon, sorting, document title/count, relation count, tags, bookmarks, history and snapshot names | Must not be exposed while locked by default; if compatibility requires exposure, list each field here and explain it in the UI |
+
+## 21. Feature Boundaries, Plaintext Temporaries, and Interface Rules
+
+Unsupported flashcards, bookmarks, tags, asset rename, unused-asset cleanup, and unused-database cleanup must be handled uniformly by the frontend, HTTP API, plugin API, MCP, and import paths: return an explicit "unsupported" error for encrypted-notebook targets and create no global index, global attribute, or deferred task. Existing legacy data must not be loaded, aggregated, or written back. Error codes and localized messages remain stable for callers.
+
+Every raw entry point that might bypass dedicated read/write paths must be registered and reject encrypted-notebook directories, including file APIs, kernel CLI, MCP file tools, WebDAV, plugin file interfaces, export download URLs, preview URLs, and background tasks. Adding an entry point requires review of whether it can read, write, copy, rename, delete, or enumerate an encrypted directory.
+
+Exports have two classes: a user-selected external destination may contain plaintext after a risk prompt; kernel-managed previews, conversions, downloads, and intermediates may exist only in a boxID-scoped controlled temporary directory and be served with minimum privilege. Locking, cancellation, failure, application exit, and export completion must clean up kernel-managed plaintext; after locking, prior download URLs, preview URLs, and asynchronous results become invalid. Logs, error reports, thumbnails, OCR/conversion output, and clipboard handling follow the same rule: do not contain plaintext by default unless the user explicitly sends content to an external program.
+
+## 22. Security Acceptance Matrix
+
+| Scenario | Expected result |
+|---|---|
+| Access while locked through UI, HTTP, file APIs, CLI, MCP, WebDAV, plugins, and background tasks | Cannot read, write, copy, delete, or enumerate encrypted content; returns no plaintext, ciphertext, or title-inferable error |
+| Unlock, lock, application restart, and authentication failure | DEK and database connections exist only in `Unlocked`; no plaintext cache or usable handle remains after failure or restart |
+| Lock concurrent with export, preview, sync, indexing, or history restore | No plaintext task continues after lock; controlled temporary files and access tokens are removed or invalidated |
+| Refs, moves, mirrors, assets, and database operations between an encrypted box and a normal box or another encrypted box | Island boundaries hold; rejection creates no partial files, global indexes, or relation data |
+| Disk inspection of files, assets, databases, WAL/SHM, history, snapshots, logs, and temporary directories | No readable body, asset contents, original asset names, or plaintext SQLite pages in kernel-managed locations |
+| Ciphertext tampering, path substitution, nonce reuse, backup corruption/rollback, and multi-device conflicts | Authentication or format validation fails safely; never fall back to a normal path, generate replacement key material, or silently overwrite configuration |
+| Master-password change and migration to a new DEK | WrappedDEKs and backup update atomically; old-password exposure warning is accurate; data and history are verifiably readable before and after migration |
+
 ## 16. Usage Guide
 
 ### First-time enablement

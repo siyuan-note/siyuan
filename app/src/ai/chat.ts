@@ -6,7 +6,7 @@ import {fillContent} from "./actions";
 export const AIChat = (protyle: IProtyle, element: Element) => {
     const dialog = new Dialog({
         title: "✨ " + window.siyuan.languages.aiWriting,
-        content: `<div class="b3-dialog__content"><textarea class="b3-text-field fn__block"></textarea></div>
+        content: `<div class="b3-dialog__content fn__flex"><textarea class="b3-text-field fn__flex-1" style="resize:none"></textarea></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>

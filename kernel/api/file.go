@@ -65,6 +65,10 @@ func rejectEncryptedBoxPath(absPath string) bool {
 
 // copyDecryptedAsset 将加密 asset 解密后复制到目标路径（dest 必须在工作区外）。
 func copyDecryptedAsset(src, dest string) error {
+	// 安全守卫：dest 必须在工作区外，防止解密后的明文落入工作区普通目录
+	if gulu.File.IsSubPath(util.WorkspaceDir, dest) {
+		return fmt.Errorf("refuse to write decrypted asset inside workspace")
+	}
 	boxID := model.ExtractBoxIDFromAssetsPath(src)
 	if boxID == "" || !model.IsEncryptedBox(boxID) {
 		return fmt.Errorf("source is not an encrypted asset")
@@ -423,10 +427,10 @@ func copyFile(c *gin.Context) {
 	}
 
 	// 加密笔记本的文件不允许通过原始文件 API 复制（src 读出密文/明文，dest 写入破坏加密存储）
-	// 例外：dest 在工作区外时允许解密复制（用户导出的场景）
+	// 例外：dest 在工作区外且非加密 box 时允许解密复制（用户导出的场景）
 	if rejectEncryptedBoxPath(src) || rejectEncryptedBoxPath(dest) {
-		if !rejectEncryptedBoxPath(dest) {
-			// dest 在工作区外，允许解密后复制
+		if !rejectEncryptedBoxPath(dest) && !gulu.File.IsSubPath(util.WorkspaceDir, dest) {
+			// dest 在工作区外且非加密 box，允许解密后复制
 			if err = copyDecryptedAsset(src, dest); err != nil {
 				ret.Code = -1
 				ret.Msg = err.Error()

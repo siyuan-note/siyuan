@@ -365,6 +365,8 @@ func initWorkspaceDir(workspaceArg string) {
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 	os.RemoveAll(filepath.Join(TempDir, "repo"))
+	// export 目录仅保存内核管理的临时导出文件。启动后所有加密笔记本均为锁定状态，不能保留上次异常退出的明文导出。
+	os.RemoveAll(filepath.Join(TempDir, "export"))
 	os.Setenv("TMPDIR", osTmpDir)
 	os.Setenv("TEMP", osTmpDir)
 	os.Setenv("TMP", osTmpDir)

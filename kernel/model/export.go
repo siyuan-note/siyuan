@@ -695,12 +695,42 @@ func exportData(exportFolder string) (zipPath string, err error) {
 func ExportResources(resourcePaths []string, mainName string) (exportFilePath string, err error) {
 	FlushTxQueue()
 
-	// 用于导出的临时文件夹完整路径
-	exportFolderPath := filepath.Join(util.TempDir, "export", mainName)
+	encryptedBoxID, detectErr := exportResourcesEncryptedBox(resourcePaths)
+	if detectErr != nil {
+		return "", detectErr
+	}
+
+	exportBasePath := filepath.Join(util.TempDir, "export")
+	if encryptedBoxID != "" {
+		// 加密资源导出全程持有读锁。LockBox 会等待导出结束后再删除该 box 的导出目录，避免锁定后写回明文。
+		HoldBoxReadLock(encryptedBoxID)
+		defer ReleaseBoxReadLock(encryptedBoxID)
+		if _, dekErr := GetDEKIfUnlocked(encryptedBoxID); dekErr != nil {
+			return "", errors.New(Conf.Language(314))
+		}
+		exportBasePath = filepath.Join(exportBasePath, encryptedBoxID, "resources")
+	}
+
+	// 加密笔记本的物理导出目录使用随机标识，mainName 仅用于用户可见的压缩包名称和包内顶层目录。
+	exportID := gulu.Rand.String(7)
+	exportFolderPath := filepath.Join(exportBasePath, exportID)
+	zipFileName := util.FilterFileName(mainName) + ".zip"
+	zipFilePath := filepath.Join(exportBasePath, exportID+"-"+zipFileName)
+	if encryptedBoxID == "" {
+		// 保持普通资源导出的既有物理路径与返回值兼容。
+		exportFolderPath = filepath.Join(exportBasePath, mainName)
+		zipFilePath = exportFolderPath + ".zip"
+	}
 	if err = os.MkdirAll(exportFolderPath, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
+	defer func() {
+		os.RemoveAll(exportFolderPath)
+		if err != nil {
+			os.Remove(zipFilePath)
+		}
+	}()
 
 	// 将需要导出的文件/文件夹复制到临时文件夹
 	for _, resourcePath := range resourcePaths {
@@ -713,11 +743,6 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 		resourceBaseName := filepath.Base(resourceFullPath)                   // 资源名称
 		resourceCopyPath := filepath.Join(exportFolderPath, resourceBaseName) // 资源副本完整路径
-		// 加密笔记本未解锁时拒绝导出（copyAssetDecryptIfEncrypted 锁定时复制密文，这里提前拦截避免产出无效文件）
-		if resBoxID := ExtractBoxIDFromAssetsPath(resourceFullPath); resBoxID != "" && IsEncryptedBox(resBoxID) && !IsBoxUnlocked(resBoxID) {
-			err = errors.New(Conf.Language(314))
-			return
-		}
 		if err = copyAssetDecryptIfEncrypted(resourceFullPath, resourceCopyPath); err != nil {
 			logging.LogErrorf("copy resource will be exported from [%s] to [%s] failed: %s", resourcePath, resourceCopyPath, err)
 			err = fmt.Errorf(Conf.Language(14), err.Error())
@@ -725,7 +750,6 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 		}
 	}
 
-	zipFilePath := exportFolderPath + ".zip" // 导出的 *.zip 文件完整路径
 	zip, err := gulu.Zip.Create(zipFilePath)
 	if err != nil {
 		logging.LogErrorf("create export zip [%s] failed: %s", zipFilePath, err)
@@ -741,9 +765,42 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 		logging.LogErrorf("close export zip failed: %s", err)
 	}
 
-	os.RemoveAll(exportFolderPath)
+	exportFilePath = path.Join("temp", "export")
+	if encryptedBoxID != "" {
+		exportFilePath = path.Join(exportFilePath, encryptedBoxID, "resources", filepath.Base(zipFilePath))
+	} else {
+		exportFilePath = path.Join(exportFilePath, filepath.Base(zipFilePath))
+	}
+	return
+}
 
-	exportFilePath = path.Join("temp", "export", mainName+".zip") // 导出的 *.zip 文件相对于工作区目录的路径
+// exportResourcesEncryptedBox 校验资源导出是否跨越加密边界，并返回唯一允许的加密来源 boxID。
+func exportResourcesEncryptedBox(resourcePaths []string) (encryptedBoxID string, err error) {
+	hasNormalResource := false
+	for _, resourcePath := range resourcePaths {
+		resourceFullPath := filepath.Join(util.WorkspaceDir, resourcePath)
+		if !util.IsAbsPathInWorkspace(resourceFullPath) {
+			return "", errors.New("resource path [" + resourcePath + "] is not in workspace")
+		}
+		boxID := ExtractBoxIDFromAssetsPath(resourceFullPath)
+		if boxID == "" || !IsEncryptedBox(boxID) {
+			hasNormalResource = true
+			continue
+		}
+
+		assetsPath := filepath.Join(util.DataDir, boxID, "assets")
+		if !gulu.File.IsSubPath(assetsPath, resourceFullPath) {
+			return "", errors.New("exporting non-asset files from encrypted notebooks is not supported")
+		}
+		if encryptedBoxID == "" {
+			encryptedBoxID = boxID
+		} else if encryptedBoxID != boxID {
+			return "", errors.New("exporting resources across encrypted notebook boundaries is not supported")
+		}
+	}
+	if encryptedBoxID != "" && hasNormalResource {
+		return "", errors.New("exporting encrypted and normal notebook resources together is not supported")
+	}
 	return
 }
 

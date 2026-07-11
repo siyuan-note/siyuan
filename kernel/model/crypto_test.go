@@ -375,3 +375,112 @@ func TestBackupKEKMACVerification(t *testing.T) {
 		t.Fatalf("verifyKEKMAC should fail with wrong KEK")
 	}
 }
+
+// TestLockBoxConcurrentReads 验证 LockBox（单 box）能与在途读锁正确串行化。
+func TestLockBoxConcurrentReads(t *testing.T) {
+	LockAllBoxes() // 清理初始状态
+	boxID := "concurrent-single-box"
+	dek, _ := util.GenerateDEK()
+	setDEKForTest(boxID, dek)
+
+	stop := make(chan struct{})
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+					HoldBoxReadLock(boxID)
+					time.Sleep(time.Microsecond)
+					ReleaseBoxReadLock(boxID)
+				}
+			}
+		}()
+	}
+
+	time.Sleep(10 * time.Millisecond)
+	LockBox(boxID)
+	close(stop)
+	wg.Wait()
+
+	if IsBoxUnlocked(boxID) {
+		t.Fatalf("box should be locked after concurrent LockBox")
+	}
+}
+
+// TestLockBoxClearsTempDirs 验证 LockBox 删除 per-box 临时目录。
+func TestLockBoxClearsTempDirs(t *testing.T) {
+	boxID := "temp-cleanup-box"
+	dek, _ := util.GenerateDEK()
+	setDEKForTest(boxID, dek)
+
+	origTempDir := util.TempDir
+	tempDir := t.TempDir()
+	util.TempDir = tempDir
+	defer func() {
+		util.TempDir = origTempDir
+		LockAllBoxes()
+	}()
+
+	// 创建模拟临时目录和文件
+	exportDir := filepath.Join(tempDir, "export", boxID)
+	repoDiffDir := filepath.Join(tempDir, "repo", "diff", boxID)
+	repoRollbackDir := filepath.Join(tempDir, "repo", "rollback", boxID)
+	for _, d := range []string{exportDir, repoDiffDir, repoRollbackDir} {
+		if err := os.MkdirAll(d, 0755); err != nil {
+			t.Fatalf("mkdir %s failed: %v", d, err)
+		}
+		if err := os.WriteFile(filepath.Join(d, "test.txt"), []byte("test"), 0644); err != nil {
+			t.Fatalf("write test file failed: %v", err)
+		}
+	}
+
+	LockBox(boxID)
+
+	for _, d := range []string{exportDir, repoDiffDir, repoRollbackDir} {
+		if _, err := os.Stat(d); !os.IsNotExist(err) {
+			t.Fatalf("temp dir %s should be removed by LockBox", d)
+		}
+	}
+}
+
+// TestLockAllBoxesClearsGlobalTempDirs 验证 LockAllBoxes 清理全局临时目录。
+func TestLockAllBoxesClearsGlobalTempDirs(t *testing.T) {
+	// 注入少量 DEK 确保 LockAllBoxes 走 per-box + global 清理路径
+	for _, id := range []string{"global-cleanup-a", "global-cleanup-b"} {
+		dek, _ := util.GenerateDEK()
+		setDEKForTest(id, dek)
+	}
+
+	origTempDir := util.TempDir
+	tempDir := t.TempDir()
+	util.TempDir = tempDir
+	defer func() {
+		util.TempDir = origTempDir
+	}()
+
+	// 创建全局临时目录
+	exportDir := filepath.Join(tempDir, "export", "repo")
+	repoDir := filepath.Join(tempDir, "repo", "sync", "conflicts", "test-timestamp", "global-cleanup-a")
+	for _, d := range []string{exportDir, repoDir} {
+		if err := os.MkdirAll(d, 0755); err != nil {
+			t.Fatalf("mkdir %s failed: %v", d, err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(repoDir, "test.txt"), []byte("test"), 0644); err != nil {
+		t.Fatalf("write test file failed: %v", err)
+	}
+
+	LockAllBoxes()
+
+	// 全局 temp 目录应该被清空
+	for _, d := range []string{filepath.Join(tempDir, "export"), filepath.Join(tempDir, "repo")} {
+		if _, err := os.Stat(d); !os.IsNotExist(err) {
+			t.Fatalf("global temp dir %s should be removed by LockAllBoxes", d)
+		}
+	}
+}

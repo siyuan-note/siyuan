@@ -26,6 +26,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
@@ -41,6 +42,9 @@ func absPath(rel string) (string, error) {
 	abs := filepath.Join(util.WorkspaceDir, rel)
 	if !gulu.File.IsSubPath(util.WorkspaceDir, abs) {
 		return "", fmt.Errorf("path escapes workspace: %s", rel)
+	}
+	if boxID := model.EncryptedRawPathBoxID(abs); boxID != "" {
+		return "", fmt.Errorf("path belongs to encrypted notebook [%s]: %s", boxID, rel)
 	}
 	return abs, nil
 }

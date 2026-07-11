@@ -90,13 +90,13 @@ func listDocTree(c *gin.Context) {
 
 	p := arg["path"].(string)
 	p = strings.TrimSuffix(p, ".sy")
-	// 越界校验：拒绝 .. 和绝对路径，确保路径位于 <data>/<notebook>/ 内
+	// 越界校验：拒绝 .. 和绝对路径，确保路径位于 <data>/<notebook>/ 内。
 	if idx := strings.Index(p, ".."); idx >= 0 {
 		ret.Code = -1
 		ret.Msg = "path must not contain '..'"
 		return
 	}
-	if filepath.IsAbs(p) {
+	if filepath.IsAbs(p) && p != "/" {
 		ret.Code = -1
 		ret.Msg = "path must be relative"
 		return
@@ -1107,7 +1107,7 @@ func listDocsByPath(c *gin.Context) {
 	p := arg["path"].(string)
 
 	// 越界校验：拒绝 .. 和绝对路径，防止跨 box 遍历
-	if strings.Contains(p, "..") || filepath.IsAbs(p) {
+	if strings.Contains(p, "..") || (filepath.IsAbs(p) && p != "/") {
 		ret.Code = -1
 		ret.Msg = "path must not contain '..' and must be relative"
 		return

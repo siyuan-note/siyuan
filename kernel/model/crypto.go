@@ -196,20 +196,19 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 		return errors.New(Conf.Language(317))
 	}
 
-	Conf.m.RLock()
-	enabled := Conf.NotebookCrypto.Enabled
-	Conf.m.RUnlock()
-	if enabled {
-		// 本机已启用：覆盖会改变 salt，孤立现有 WrappedDEK（数据永久锁死）
-		return errors.New(Conf.Language(312))
-	}
-
 	// 用导入的 salt + 用户输入的主密码派生 KEK，校验能否解开备份里的 verifier
 	params, validErr := util.ValidateArgon2Params(nc.KDFParams)
 	if validErr != nil {
 		return errors.New(Conf.Language(317))
 	}
 	kek := util.DeriveKey(password, nc.MasterSalt, params)
+	defer zeroAndClear(kek)
+	if nc.Spec >= 1 && nc.Checksum != "" && nc.Checksum != computeBackupChecksum(nc) {
+		return errors.New(Conf.Language(317))
+	}
+	if nc.Spec >= 1 && len(nc.KEKMAC) > 0 && !verifyKEKMAC(nc, kek) {
+		return errors.New(Conf.Language(317))
+	}
 	decrypted, dErr := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
 	if dErr != nil || string(decrypted) != string(kekVerifierMagic) {
 		return errors.New(Conf.Language(311)) // 主密码错误
@@ -793,14 +792,14 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		sql.RemoveEncryptedDBFile(boxID) // 清理已创建的 content db 文件，避免遗留空加密库
 		return err
 	}
-		cachedDEKs[boxID] = dek
+	cachedDEKs[boxID] = dek
 
-		// 初始化自动锁定访问时间戳，记录解锁时刻
-		newVal := &atomic.Int64{}
-		newVal.Store(time.Now().UnixNano())
-		boxLastAccess.Store(boxID, newVal)
+	// 初始化自动锁定访问时间戳，记录解锁时刻
+	newVal := &atomic.Int64{}
+	newVal.Store(time.Now().UnixNano())
+	boxLastAccess.Store(boxID, newVal)
 
-		// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
+	// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil ||
@@ -847,6 +846,7 @@ func LockBox(boxID string) {
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
 func lockBoxHeld(boxID string) {
+	RevokeManagedEncryptedExportsForBox(boxID)
 
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {
@@ -1537,14 +1537,14 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		sql.CloseEncryptedDB(id)
 		return "", err
 	}
-		cachedDEKs[id] = dek
+	cachedDEKs[id] = dek
 
-		// 初始化自动锁定访问时间戳，与 UnlockBox 对称
-		newVal := &atomic.Int64{}
-		newVal.Store(time.Now().UnixNano())
-		boxLastAccess.Store(id, newVal)
+	// 初始化自动锁定访问时间戳，与 UnlockBox 对称
+	newVal := &atomic.Int64{}
+	newVal.Store(time.Now().UnixNano())
+	boxLastAccess.Store(id, newVal)
 
-		IncSync()
+	IncSync()
 	return id, nil
 }
 

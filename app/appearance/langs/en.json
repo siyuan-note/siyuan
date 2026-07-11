@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Password strength: weak",
+	"passwordStrengthMedium": "Password strength: medium",
+	"passwordStrengthStrong": "Password strength: strong",
+	"weakPasswordConfirmTitle": "Weak password",
+	"weakPasswordConfirmTip": "This password is weak and may be vulnerable to brute-force attacks. Do you want to use it anyway?",
 	"encryptedNotebookAutoLock": "Auto-lock after idle",
 	"encryptedNotebookAutoLockDesc": "Automatically lock encrypted notebooks after specified idle minutes, viewing, editing, or searching encrypted content resets the timer, set to 0 to disable auto-lock",
 	"exportNotebookCryptoBackupTip": "Key backup exported, please keep it somewhere safe",

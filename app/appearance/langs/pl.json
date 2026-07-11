@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Siła hasła: słaba",
+	"passwordStrengthMedium": "Siła hasła: średnia",
+	"passwordStrengthStrong": "Siła hasła: silna",
+	"weakPasswordConfirmTitle": "Słabe hasło",
+	"weakPasswordConfirmTip": "To hasło jest słabe i może być podatne na ataki siłowe. Czy mimo to chcesz go użyć?",
 	"encryptedNotebookAutoLock": "Automatyczna blokada",
 	"encryptedNotebookAutoLockDesc": "Automatycznie blokuj zaszyfrowane notatniki po określonych minutach bezczynności, przeglądanie, edytowanie lub wyszukiwanie zaszyfrowanej treści resetuje licznik, 0 wyłącza",
 	"exportNotebookCryptoBackupTip": "Wyeksportowano kopię zapasową klucza, przechowaj ją w bezpiecznym miejscu",

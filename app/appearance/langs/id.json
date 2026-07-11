@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Kekuatan kata sandi: lemah",
+	"passwordStrengthMedium": "Kekuatan kata sandi: sedang",
+	"passwordStrengthStrong": "Kekuatan kata sandi: kuat",
+	"weakPasswordConfirmTitle": "Kata sandi lemah",
+	"weakPasswordConfirmTip": "Kata sandi ini lemah dan mungkin rentan terhadap serangan brute force. Tetap gunakan?",
 	"encryptedNotebookAutoLock": "Kunci otomatis",
 	"encryptedNotebookAutoLockDesc": "Kunci otomatis buku catatan terenkripsi setelah menit tidak aktif yang ditentukan, melihat, mengedit, atau mencari konten terenkripsi mengatur ulang timer, atur 0 untuk menonaktifkan",
 	"exportNotebookCryptoBackupTip": "Cadangan kunci diekspor, simpan di tempat yang aman",

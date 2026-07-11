@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "पासवर्ड की क्षमता: कमजोर",
+	"passwordStrengthMedium": "पासवर्ड की क्षमता: मध्यम",
+	"passwordStrengthStrong": "पासवर्ड की क्षमता: मजबूत",
+	"weakPasswordConfirmTitle": "कमजोर पासवर्ड",
+	"weakPasswordConfirmTip": "यह पासवर्ड कमजोर है और ब्रूट-फोर्स हमलों के प्रति संवेदनशील हो सकता है। क्या फिर भी इसका उपयोग करना है?",
 	"encryptedNotebookAutoLock": "स्वतः लॉक",
 	"encryptedNotebookAutoLockDesc": "निर्दिष्ट निष्क्रिय मिनटों के बाद एन्क्रिप्टेड नोटबुक को स्वचालित रूप से लॉक करें, एन्क्रिप्टेड सामग्री देखने, संपादित करने या खोजने से टाइमर रीसेट होता है, 0 से अक्षम करें",
 	"exportNotebookCryptoBackupTip": "कुंजी बैकअप निर्यात किया गया, कृपया इसे सुरक्षित स्थान पर रखें",

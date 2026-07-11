@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Robustezza della password: debole",
+	"passwordStrengthMedium": "Robustezza della password: media",
+	"passwordStrengthStrong": "Robustezza della password: elevata",
+	"weakPasswordConfirmTitle": "Password debole",
+	"weakPasswordConfirmTip": "Questa password è debole e potrebbe essere vulnerabile agli attacchi brute-force. Vuoi usarla comunque?",
 	"encryptedNotebookAutoLock": "Blocco automatico",
 	"encryptedNotebookAutoLockDesc": "Blocca automaticamente i notebook crittografati dopo i minuti di inattività specificati, visualizzare, modificare o cercare contenuti crittografati ripristina il timer, 0 per disattivare",
 	"exportNotebookCryptoBackupTip": "Backup della chiave esportato, conservalo in un luogo sicuro",

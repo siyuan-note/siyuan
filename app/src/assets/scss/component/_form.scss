@@ -136,6 +136,56 @@
   }
 }
 
+.password-strength {
+  position: relative;
+  margin-top: 10px;
+  padding-top: 8px;
+  color: var(--b3-theme-on-surface);
+  font-size: 12px;
+  --password-strength-color: var(--b3-theme-error);
+
+  &::before,
+  &::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    border-radius: 2px;
+    content: "";
+  }
+
+  &::before {
+    width: 100%;
+    background-color: var(--b3-theme-surface-lighter);
+  }
+
+  &::after {
+    width: 33%;
+    background-color: var(--password-strength-color);
+    transition: width var(--b3-transition);
+  }
+
+  &[data-strength="weak"] {
+    --password-strength-color: var(--b3-theme-error);
+  }
+
+  &[data-strength="medium"] {
+    --password-strength-color: var(--b3-theme-secondary);
+
+    &::after {
+      width: 66%;
+    }
+  }
+
+  &[data-strength="strong"] {
+    --password-strength-color: var(--b3-theme-success);
+
+    &::after {
+      width: 100%;
+    }
+  }
+}
+
 .b3-label {
   border-bottom: 1px solid var(--b3-border-color);
   padding: 16px 24px;

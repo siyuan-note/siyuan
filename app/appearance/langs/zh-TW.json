@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "密碼強度：弱",
+	"passwordStrengthMedium": "密碼強度：中等",
+	"passwordStrengthStrong": "密碼強度：強",
+	"weakPasswordConfirmTitle": "密碼強度較弱",
+	"weakPasswordConfirmTip": "此密碼強度較弱，可能被暴力破解。確定仍要使用嗎？",
 	"encryptedNotebookAutoLock": "自動鎖定",
 	"encryptedNotebookAutoLockDesc": "閒置指定分鐘後自動鎖定加密筆記本，瀏覽、編輯、搜尋加密內容會重置計時，設定為 0 表示禁用自動鎖定",
 	"exportNotebookCryptoBackupTip": "金鑰已匯出，請妥善保管",

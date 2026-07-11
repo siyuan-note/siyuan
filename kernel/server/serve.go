@@ -361,9 +361,19 @@ func serveExport(ginServer *gin.Engine) {
 
 		// 加密笔记本锁定后拒绝访问其导出临时目录
 		if parts := strings.SplitN(strings.TrimPrefix(decodedPath, "/"), "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
-			model.HoldBoxReadLock(parts[0])
-			defer model.ReleaseBoxReadLock(parts[0])
-			if _, dekErr := model.GetDEKIfUnlocked(parts[0]); dekErr != nil {
+			boxID, artifact, ok := model.ResolveManagedEncryptedExport(decodedPath)
+			if !ok || boxID != parts[0] {
+				c.Status(http.StatusNotFound)
+				return
+			}
+			fullPath = artifact
+			if !gulu.File.IsSubPath(exportBaseDir, fullPath) {
+				c.Status(http.StatusForbidden)
+				return
+			}
+			model.HoldBoxReadLock(boxID)
+			defer model.ReleaseBoxReadLock(boxID)
+			if _, dekErr := model.GetDEKIfUnlocked(boxID); dekErr != nil {
 				c.Status(http.StatusForbidden)
 				return
 			}

@@ -594,6 +594,19 @@ const getViewIDByAVElement = (avElement: HTMLElement): string | null => {
         || null;
 };
 
+// 通过渲染数据判断条目是否存在，避免虚拟滚动/分页下条目被 trim 出 DOM 导致误判
+const isItemInData = (data: IAV, itemID: string): boolean => {
+    const view = data.view as IAVTable & IAVGallery;
+    if (view.groups?.length > 0) {
+        return view.groups.some((group: IAVTable & IAVGallery) => {
+            const items = data.viewType === "table" ? group.rows : group.cards;
+            return items?.some((item: IAVRow | IAVGalleryItem) => item.id === itemID);
+        });
+    }
+    const items = data.viewType === "table" ? view.rows : view.cards;
+    return items?.some((item: IAVRow | IAVGalleryItem) => item.id === itemID);
+};
+
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewName") {
         getAVElements(protyle, operation.id).forEach((item) => {
@@ -801,7 +814,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
             }
             const hasGhost = item.querySelector('[data-type="ghost"]');
-            avRender(item, protyle, () => {
+            avRender(item, protyle, (data: IAV) => {
                 if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {
                     if (operation.context?.message) {
                         showMessage(operation.context.message);
@@ -830,8 +843,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                             }
                         }
                         operation.srcs.find((srcItem) => {
-                            if (!item.querySelector(`.av__body [data-id="${srcItem.itemID}"]`) &&
-                                !item.querySelector(`.av__body [data-dtype="block"] .av__celltext--ref[data-id="${srcItem.id}"]`)) {
+                            // 虚拟滚动/分页下条目可能不在 DOM 中，需通过渲染数据判断是否被过滤
+                            if (!isItemInData(data, srcItem.itemID)) {
                                 showMessage(window.siyuan.languages.insertRowTip);
                                 return true;
                             }

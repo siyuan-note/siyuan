@@ -277,6 +277,17 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 	if strings.HasSuffix(file.Path, ".sy") {
 		boxID := strings.TrimPrefix(file.Path, "/")
 		boxID = strings.Split(boxID, "/")[0]
+		origBoxID := boxID // 保留原始 boxID 用于加密边界校验
+
+		// 加密笔记本的快照回滚要求原笔记本已挂载：
+		// WriteTree 根据 tree.Box 判断是否加密落盘。若原笔记本未挂载导致
+		// getRollbackBox fallback 到普通 Rollback 笔记本，解密后的 .sy 将被 WriteTree
+		// 以明文落盘，违反加密笔记本"数据不跨边界"的约束。
+		if IsEncryptedBox(origBoxID) && nil == Conf.Box(origBoxID) {
+			logging.LogErrorf("rollback encrypted repo snapshot requires notebook [%s] to be mounted", origBoxID)
+			err = errors.New(Conf.Language(314))
+			return
+		}
 
 		var box *Box
 		var needResetTree bool

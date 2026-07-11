@@ -34,6 +34,7 @@ const getIconScript = (servePath: string) => {
 export const saveExport = (option: IExportOptions) => {
     /// #if BROWSER
     if (["html", "htmlmd"].includes(option.type)) {
+        const startExport = () => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         // 浏览器环境：先调用 API 生成资源文件，再在前端生成完整的 HTML
         const url = option.type === "htmlmd" ? "/api/export/exportMdHTML" : "/api/export/exportHTML";
@@ -58,6 +59,14 @@ export const saveExport = (option: IExportOptions) => {
                 // 与导出 .sy.zip/markdown.zip/图片一致，统一走 saveExportFile，以便移动端原生 App 调用 JSAndroid.saveExportFile 等接口保存到本地
                 saveExportFile(zipResponse.data.zip, msgId);
             });
+        });
+        };
+        fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
+            if (response.code === 0 && isEncryptedBox(response.data.box)) {
+                confirmDialog(window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, startExport);
+                return;
+            }
+            startExport();
         });
         return;
     }

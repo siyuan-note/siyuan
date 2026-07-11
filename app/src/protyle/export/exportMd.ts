@@ -1,8 +1,10 @@
 import {Constants} from "../../constants";
 import {Dialog} from "../../dialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
+import {isEncryptedBox} from "../../util/pathName";
 import {saveExportFile} from "../util/compatibility";
 
 // 导出参数对话框 https://github.com/siyuan-note/siyuan/issues/17031
@@ -142,14 +144,18 @@ interface IExportMdOptionsPayload {
 export const exportMarkdownZip = async(options: IExportMdOptions) => {
     let showSubDocs = true;
     let showRelatedDocs = true;
+    let encrypted = false;
     if (options.id) {
         // 查询文档是否有子文档、引用及绑定的数据库，无则隐藏对应配置项 #17031
         const docInfo = await fetchSyncPost("/api/block/getDocInfo", {id: options.id});
         const data = docInfo.data;
         showSubDocs = 0 < data.subFileCount;
         showRelatedDocs = 0 < (data.refCount || 0) || 0 < (data.attrViews?.length || 0);
+        const blockInfo = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
+        encrypted = blockInfo.code === 0 && isEncryptedBox(blockInfo.data.box);
     }
     openExportOptionsDialog(params => {
+        const exportMarkdown = () => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         const cb = (response: IWebSocketData) => saveExportFile(response.data.zip, msgId);
         if (options.id) {
@@ -159,5 +165,11 @@ export const exportMarkdownZip = async(options: IExportMdOptions) => {
         } else {
             fetchPost("/api/export/exportNotebookMd", {notebook: options.notebook, ...params}, cb);
         }
+        };
+        if (encrypted) {
+            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);
+            return;
+        }
+        exportMarkdown();
     }, showSubDocs, showRelatedDocs);
 };

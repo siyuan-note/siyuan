@@ -47,20 +47,7 @@ const errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
 // 避免密文泄漏给插件或明文破坏加密格式。
 // 防止 symlink 绕过：找到最长已存在的父路径，解析 symlink 后拼回剩余路径，再检查是否落入加密 box。
 func rejectEncryptedBoxPath(absPath string) bool {
-	// 先检查字面路径
-	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
-	if boxID != "" && model.IsEncryptedBox(boxID) {
-		return true
-	}
-	// 找最长已存在的父路径，解析 symlink 后拼回剩余路径
-	resolved := util.ResolveLongestExistingParent(absPath)
-	if resolved != absPath {
-		boxID = model.ExtractBoxIDFromAssetsPath(resolved)
-		if boxID != "" && model.IsEncryptedBox(boxID) {
-			return true
-		}
-	}
-	return false
+	return model.EncryptedRawPathBoxID(absPath) != ""
 }
 
 // copyDecryptedAsset 将加密 asset 解密后复制到目标路径（dest 必须在工作区外）。

@@ -1446,13 +1446,15 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     newNotebook();
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconLock",
-                label: window.siyuan.languages.newEncryptedNotebook,
-                click: () => {
-                    newEncryptedNotebook();
-                }
-            }).element);
+            if (window.siyuan.config.notebookCrypto?.enabled) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    icon: "iconLock",
+                    label: window.siyuan.languages.newEncryptedNotebook,
+                    click: () => {
+                        newEncryptedNotebook();
+                    }
+                }).element);
+            }
         }
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconRefresh",

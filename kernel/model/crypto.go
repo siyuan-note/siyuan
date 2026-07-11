@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -723,16 +724,23 @@ func IsBoxUnlocked(boxID string) bool {
 }
 
 // LockBox 清除指定笔记本的 DEK 并删除其加密 db 文件。Unmount 单个加密笔记本或手动锁定时调用。
-// 同时清空所有明文缓存（树/Block/IAL/AV），避免明文在内存中残留。
-// 关闭即删 db 文件：加密索引可由 box.Index() 全量重建，文件无需持久化；
-// 同时避免关闭后残留旧索引数据导致下次解锁叠加重复行。
 func LockBox(boxID string) {
-	// 事务可能需要获取该 box 的读锁才能完成加密写入，必须在取得写锁前排空队列，避免互相等待。
 	FlushTxQueue()
-
-	// 获取写锁，等待所有在途解密操作完成，确保锁定后不会继续输出明文
 	acquireBoxWriteLock(boxID)
-	defer releaseBoxWriteLock(boxID)
+	lockBoxHeld(boxID)
+	releaseBoxWriteLock(boxID)
+	// 单 box 锁定后需要刷新全局缓存（树/Block/IAL/AV）
+	cache.ClearTreeCache()
+	sql.ClearCache()
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
+	cache.ClearAVCache()
+	ResetVirtualBlockRefCache()
+}
+
+// lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
+// 由 LockBox（单 box）和 LockAllBoxes（全 box）共用，确保生命周期串行化一致。
+func lockBoxHeld(boxID string) {
 
 	cachedDEKsLock.Lock()
 	if dek, ok := cachedDEKs[boxID]; ok {
@@ -756,12 +764,6 @@ func LockBox(boxID string) {
 
 	sql.RemoveEncryptedDBFile(boxID)
 	treenode.RemoveEncryptedBlockTreeDBFile(boxID)
-	// 清空明文缓存：锁定后任何加密笔记本的明文都不应残留内存
-	cache.ClearTreeCache()
-	sql.ClearCache()
-	cache.ClearDocsIAL()
-	cache.ClearBlocksIAL()
-	cache.ClearAVCache()
 	// 清理 repo 临时目录中该加密 box 的解密文件（diff/rollback/sync conflicts）
 	repoDirs := []string{
 		filepath.Join(util.TempDir, "repo", "diff", boxID),
@@ -780,46 +782,51 @@ func LockBox(boxID string) {
 			}
 		}
 	}
-	// 清理临时导出目录中的 repo 导出和加密 box 的临时导出（htmlmd/html/PDF）
-	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", "repo")); rmErr != nil {
-		logging.LogWarnf("remove export/repo dir for box [%s] failed: %s", boxID, rmErr)
-	}
+	// 清理临时导出目录中该加密 box 的临时导出（htmlmd/html/PDF）
 	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", boxID)); rmErr != nil {
 		logging.LogWarnf("remove export/[%s] dir failed: %s", boxID, rmErr)
 	}
 	// 清理动态引用锚文本缓存
 	treenode.RemoveDynamicRefTexts(boxID)
-	// 清理虚拟引用关键字缓存
-	ResetVirtualBlockRefCache()
 }
 
 // LockAllBoxes 清除所有已缓存的 DEK 并删除所有加密 db 文件。退出登录或全局锁定时调用。
-// 与 LockBox 一致采用"关闭即删 db 文件"策略，避免残留旧索引数据。
 func LockAllBoxes() {
+	// 快照当前已解锁的 boxID，排序后逐个取得写锁，避免多锁顺序不一致导致死锁
 	cachedDEKsLock.Lock()
-	for id, dek := range cachedDEKs {
-		zeroAndClear(dek)
-		delete(cachedDEKs, id)
+	boxIDs := make([]string, 0, len(cachedDEKs))
+	for id := range cachedDEKs {
+		boxIDs = append(boxIDs, id)
 	}
 	cachedDEKsLock.Unlock()
-	// 删除所有已打开的加密 db 文件（关闭连接 + 删文件），清空明文缓存避免残留
-	sql.RemoveAllEncryptedDBFiles()
-	treenode.RemoveAllEncryptedBlockTreeDBFiles()
+	sort.Strings(boxIDs)
+
+	for _, boxID := range boxIDs {
+		FlushTxQueue()
+		acquireBoxWriteLock(boxID)
+		lockBoxHeld(boxID)
+		releaseBoxWriteLock(boxID)
+	}
+
+	// 所有 box 的 per-box 清理完成后，执行全局缓存和共享临时目录清理
 	cache.ClearTreeCache()
 	sql.ClearCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
 	cache.ClearAVCache()
+	treenode.ClearDynamicRefTexts()
+	ResetVirtualBlockRefCache()
 	// 清理所有 repo 临时目录中的解密文件
 	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "repo")); rmErr != nil {
 		logging.LogErrorf("remove repo directory failed: %s", rmErr)
 	}
 	// 清理临时导出目录（锁定后不应继续提供明文导出下载）
+	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", "repo")); rmErr != nil {
+		logging.LogWarnf("remove export/repo dir failed: %s", rmErr)
+	}
 	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export")); rmErr != nil {
 		logging.LogErrorf("remove export directory failed: %s", rmErr)
 	}
-	// 清理所有动态引用锚文本缓存
-	treenode.ClearDynamicRefTexts()
 }
 
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。

@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"maps"
 	"net/http"
 	"net/url"
@@ -736,6 +737,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 		os.RemoveAll(exportFolderPath)
 		if err != nil {
 			os.Remove(zipFilePath)
+			os.Remove(zipFilePath + ".partial")
 		}
 	}()
 
@@ -750,26 +752,40 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 		resourceBaseName := filepath.Base(resourceFullPath)                   // 资源名称
 		resourceCopyPath := filepath.Join(exportFolderPath, resourceBaseName) // 资源副本完整路径
-		if err = copyAssetDecryptIfEncrypted(resourceFullPath, resourceCopyPath); err != nil {
+		if err = copyExportResource(resourceFullPath, resourceCopyPath); err != nil {
 			logging.LogErrorf("copy resource will be exported from [%s] to [%s] failed: %s", resourcePath, resourceCopyPath, err)
 			err = fmt.Errorf(Conf.Language(14), err.Error())
 			return
 		}
 	}
 
-	zip, err := gulu.Zip.Create(zipFilePath)
+	zipPartialPath := zipFilePath + ".partial"
+	zip, err := gulu.Zip.Create(zipPartialPath)
 	if err != nil {
 		logging.LogErrorf("create export zip [%s] failed: %s", zipFilePath, err)
 		return
 	}
+	zipClosed := false
+	defer func() {
+		if !zipClosed {
+			_ = zip.Close()
+		}
+	}()
 
 	if err = zip.AddDirectory(zipBaseName, exportFolderPath); err != nil {
 		logging.LogErrorf("create export zip [%s] failed: %s", exportFolderPath, err)
 		return
 	}
 
-	if err = zip.Close(); err != nil {
+	err = zip.Close()
+	zipClosed = true
+	if err != nil {
 		logging.LogErrorf("close export zip failed: %s", err)
+		return
+	}
+	if err = os.Rename(zipPartialPath, zipFilePath); err != nil {
+		logging.LogErrorf("publish export zip [%s] failed: %s", zipFilePath, err)
+		return
 	}
 
 	exportFilePath = path.Join("temp", "export")
@@ -779,6 +795,74 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 		exportFilePath = path.Join(exportFilePath, filepath.Base(zipFilePath))
 	}
 	return
+}
+
+// copyExportResource 复制导出资源，目录逐文件处理以避免将加密资源作为普通文件读取。
+func copyExportResource(source, destination string) error {
+	info, err := os.Lstat(source)
+	if err != nil {
+		return err
+	}
+	if info.Mode()&os.ModeSymlink != 0 {
+		return errors.New("exporting symbolic links is not supported")
+	}
+	if !info.IsDir() {
+		return copyExportFile(source, destination)
+	}
+
+	return filepath.WalkDir(source, func(current string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			return errors.New("exporting symbolic links is not supported")
+		}
+		relativePath, relErr := filepath.Rel(source, current)
+		if relErr != nil {
+			return relErr
+		}
+		target := filepath.Join(destination, relativePath)
+		if entry.IsDir() {
+			return os.MkdirAll(target, 0755)
+		}
+		if !entry.Type().IsRegular() {
+			return errors.New("exporting special files is not supported")
+		}
+		return copyExportFile(current, target)
+	})
+}
+
+// copyExportFile 复制单个导出文件，并在加密资源存在名称映射时恢复用户可见名称。
+func copyExportFile(source, destination string) error {
+	boxID := ExtractBoxIDFromAssetsPath(source)
+	if boxID != "" && IsEncryptedBox(boxID) {
+		diskName := filepath.Base(source)
+		if diskName == ".names.json" {
+			return nil
+		}
+		if originalName := LookupAssetOriginalName(boxID, diskName); originalName != "" {
+			fileName := util.FilterFileName(filepath.Base(originalName))
+			if fileName != "" && fileName != "." {
+				destination = uniqueExportFilePath(filepath.Join(filepath.Dir(destination), fileName))
+			}
+		}
+	}
+	return copyAssetDecryptIfEncrypted(source, destination)
+}
+
+// uniqueExportFilePath 在同一导出目录中为同名文件生成稳定的序号后缀。
+func uniqueExportFilePath(destination string) string {
+	if _, err := os.Lstat(destination); err != nil {
+		return destination
+	}
+	extension := filepath.Ext(destination)
+	base := strings.TrimSuffix(destination, extension)
+	for index := 2; ; index++ {
+		candidate := fmt.Sprintf("%s (%d)%s", base, index, extension)
+		if _, err := os.Lstat(candidate); err != nil {
+			return candidate
+		}
+	}
 }
 
 // exportResourcesEncryptedBox 校验资源导出是否跨越加密边界，并返回唯一允许的加密来源 boxID。

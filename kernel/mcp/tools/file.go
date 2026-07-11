@@ -98,14 +98,45 @@ func resolvePath(rel string) (string, error) {
 	return abs, nil
 }
 
-// rejectEncryptedPath 检查路径是否属于加密笔记本（含 symlink 绕过）。
-// 返回 boxID 和是否为加密 box。
+// rejectEncryptedPath 检查路径是否属于加密笔记本（含 symlink 绕过），返回 boxID 和是否为加密 box。
 func rejectEncryptedPath(absPath string) (boxID string, encrypted bool) {
 	boxID = model.ExtractBoxIDFromAssetsPath(absPath)
 	if boxID != "" && model.IsEncryptedBox(boxID) {
 		return boxID, true
 	}
+	// 防止 symlink 绕过：找到最长已存在的父路径，解析 symlink 后拼回剩余路径，再检查
+	if resolved := resolveLongestExistingParent(absPath); resolved != absPath {
+		boxID = model.ExtractBoxIDFromAssetsPath(resolved)
+		if boxID != "" && model.IsEncryptedBox(boxID) {
+			return boxID, true
+		}
+	}
 	return "", false
+}
+
+// resolveLongestExistingParent 解析 absPath 中最长已存在部分的 symlink，拼回剩余路径。
+func resolveLongestExistingParent(absPath string) string {
+	cleaned := filepath.Clean(absPath)
+	dir := cleaned
+	for {
+		if _, err := os.Lstat(dir); err == nil {
+			break
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return cleaned
+		}
+		dir = parent
+	}
+	if dir == cleaned {
+		return cleaned
+	}
+	resolved, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return cleaned
+	}
+	remaining, _ := filepath.Rel(dir, cleaned)
+	return filepath.Join(resolved, remaining)
 }
 
 func fileList(args map[string]interface{}) (CallToolResult, error) {

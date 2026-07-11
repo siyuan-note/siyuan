@@ -660,6 +660,10 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		return errors.New("no encrypted key material for box")
 	}
 
+	// 获取 box 写锁，与 LockBox/unmount0 串行化，防止并发锁/解锁导致 db/DEK 状态不一致
+	acquireBoxWriteLock(boxID)
+	defer releaseBoxWriteLock(boxID)
+
 	// 加锁与改密/创建等控制面操作串行化，确保读 verifier + 自动恢复 + 解密 + conf 修复都在同一临界区
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()

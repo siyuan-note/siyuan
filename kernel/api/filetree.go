@@ -77,6 +77,17 @@ func listDocTree(c *gin.Context) {
 		return
 	}
 
+	// 加密笔记本锁定时拒绝直接列举磁盘目录，防止泄漏文档 ID、层级和数量
+	if model.IsEncryptedBox(notebook) {
+		model.HoldBoxReadLock(notebook)
+		defer model.ReleaseBoxReadLock(notebook)
+		if _, dekErr := model.GetDEKIfUnlocked(notebook); dekErr != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
+	}
+
 	p := arg["path"].(string)
 	p = strings.TrimSuffix(p, ".sy")
 	// 越界校验：拒绝 .. 和绝对路径，确保路径位于 <data>/<notebook>/ 内

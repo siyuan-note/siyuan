@@ -17,14 +17,31 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"path/filepath"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// rejectEncryptedArchivePath 检查路径是否落入加密笔记本目录（含 symlink 绕过），是则返回错误。
+func rejectEncryptedArchivePath(absPath string) error {
+	boxID := model.ExtractBoxIDFromAssetsPath(absPath)
+	if boxID != "" && model.IsEncryptedBox(boxID) {
+		return fmt.Errorf("path belongs to encrypted notebook [%s]", boxID)
+	}
+	if resolved := util.ResolveLongestExistingParent(absPath); resolved != absPath {
+		boxID = model.ExtractBoxIDFromAssetsPath(resolved)
+		if boxID != "" && model.IsEncryptedBox(boxID) {
+			return fmt.Errorf("symlink resolves into encrypted notebook [%s]", boxID)
+		}
+	}
+	return nil
+}
 
 func zip(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -48,8 +65,18 @@ func zip(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
 	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -106,8 +133,18 @@ func unzip(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

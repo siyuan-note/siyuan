@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "パスワードの強度：弱い",
+	"passwordStrengthMedium": "パスワードの強度：普通",
+	"passwordStrengthStrong": "パスワードの強度：強い",
+	"weakPasswordConfirmTitle": "弱いパスワード",
+	"weakPasswordConfirmTip": "このパスワードは弱く、総当たり攻撃によって破られるおそれがあります。それでも使用しますか？",
 	"encryptedNotebookAutoLock": "自動ロック",
 	"encryptedNotebookAutoLockDesc": "指定した分数操作がない場合に暗号化ノートブックを自動ロックします、暗号化コンテンツの閲覧・編集・検索でタイマーがリセットされます、0 で無効",
 	"exportNotebookCryptoBackupTip": "キーバックアップをエクスポートしました。安全な場所に保管してください",

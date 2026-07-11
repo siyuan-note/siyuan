@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Надёжность пароля: низкая",
+	"passwordStrengthMedium": "Надёжность пароля: средняя",
+	"passwordStrengthStrong": "Надёжность пароля: высокая",
+	"weakPasswordConfirmTitle": "Слабый пароль",
+	"weakPasswordConfirmTip": "Этот пароль слабый и может быть уязвим для атак перебором. Всё равно использовать его?",
 	"encryptedNotebookAutoLock": "Автоблокировка",
 	"encryptedNotebookAutoLockDesc": "Автоблокировка зашифрованных записных книжек после указанных минут бездействия, просмотр, редактирование или поиск зашифрованного контента сбрасывает таймер, 0 для отключения",
 	"exportNotebookCryptoBackupTip": "Резервная копия ключа экспортирована, храните её в надёжном месте",

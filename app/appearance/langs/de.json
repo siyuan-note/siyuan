@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Passwortstärke: schwach",
+	"passwordStrengthMedium": "Passwortstärke: mittel",
+	"passwordStrengthStrong": "Passwortstärke: stark",
+	"weakPasswordConfirmTitle": "Schwaches Passwort",
+	"weakPasswordConfirmTip": "Dieses Passwort ist schwach und könnte durch Brute-Force-Angriffe geknackt werden. Möchten Sie es trotzdem verwenden?",
 	"encryptedNotebookAutoLock": "Automatische Sperre",
 	"encryptedNotebookAutoLockDesc": "Verschlüsselte Notizbücher nach angegebenen Minuten Inaktivität automatisch sperren, Anzeigen, Bearbeiten oder Durchsuchen verschlüsselter Inhalte setzt den Timer zurück, auf 0 zum Deaktivieren",
 	"exportNotebookCryptoBackupTip": "Schlüsselsicherung exportiert, bitte an einem sicheren Ort aufbewahren",

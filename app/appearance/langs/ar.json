@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "قوة كلمة المرور: ضعيفة",
+	"passwordStrengthMedium": "قوة كلمة المرور: متوسطة",
+	"passwordStrengthStrong": "قوة كلمة المرور: قوية",
+	"weakPasswordConfirmTitle": "كلمة مرور ضعيفة",
+	"weakPasswordConfirmTip": "كلمة المرور هذه ضعيفة وقد تكون عرضة لهجمات التخمين. هل تريد استخدامها على أي حال؟",
 	"encryptedNotebookAutoLock": "القفل التلقائي",
 	"encryptedNotebookAutoLockDesc": "قفل تلقائي لدفاتر الملاحظات المشفرة بعد دقائق الخمول المحددة، عرض المحتوى المشفر أو تحريره أو البحث فيه يعيد ضبط المؤقت، 0 للتعطيل",
 	"exportNotebookCryptoBackupTip": "تم تصدير نسخة احتياطية من مفتاح التشفير، يرجى حفظها في مكان آمن",

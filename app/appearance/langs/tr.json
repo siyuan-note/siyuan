@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Parola gücü: zayıf",
+	"passwordStrengthMedium": "Parola gücü: orta",
+	"passwordStrengthStrong": "Parola gücü: güçlü",
+	"weakPasswordConfirmTitle": "Zayıf parola",
+	"weakPasswordConfirmTip": "Bu parola zayıf ve kaba kuvvet saldırılarına karşı savunmasız olabilir. Yine de kullanmak istiyor musunuz?",
 	"encryptedNotebookAutoLock": "Otomatik kilitleme",
 	"encryptedNotebookAutoLockDesc": "Belirtilen dakika işlem yapılmadığında şifreli not defterlerini otomatik kilitle, şifreli içeriği görüntüleme, düzenleme veya arama zamanlayıcıyı sıfırlar, 0 ile devre dışı bırak",
 	"exportNotebookCryptoBackupTip": "Anahtar yedeği dışa aktarıldı, lütfen güvenli bir yerde saklayın",

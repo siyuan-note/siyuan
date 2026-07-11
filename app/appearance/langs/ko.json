@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "비밀번호 강도: 약함",
+	"passwordStrengthMedium": "비밀번호 강도: 보통",
+	"passwordStrengthStrong": "비밀번호 강도: 강함",
+	"weakPasswordConfirmTitle": "취약한 비밀번호",
+	"weakPasswordConfirmTip": "이 비밀번호는 취약하며 무차별 대입 공격에 노출될 수 있습니다. 그래도 사용하시겠습니까?",
 	"encryptedNotebookAutoLock": "자동 잠금",
 	"encryptedNotebookAutoLockDesc": "지정된 시간 동안 사용하지 않으면 암호화된 노트북을 자동으로 잠급니다, 암호화된 콘텐츠를 보거나 편집하거나 검색하면 타이머가 재설정됩니다, 0으로 설정하면 비활성화",
 	"exportNotebookCryptoBackupTip": "키 백업을 내보냈습니다. 안전한 곳에 보관하세요",

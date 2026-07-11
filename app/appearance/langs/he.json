@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "חוזק הסיסמה: חלש",
+	"passwordStrengthMedium": "חוזק הסיסמה: בינוני",
+	"passwordStrengthStrong": "חוזק הסיסמה: חזק",
+	"weakPasswordConfirmTitle": "סיסמה חלשה",
+	"weakPasswordConfirmTip": "סיסמה זו חלשה ועלולה להיות פגיעה להתקפות כוח גס. האם להשתמש בה בכל זאת?",
 	"encryptedNotebookAutoLock": "נעילה אוטומטית",
 	"encryptedNotebookAutoLockDesc": "נעילה אוטומטית של מחברות מוצפנות לאחר דקות חוסר פעילות שצוינו, צפייה, עריכה או חיפוש בתוכן מוצפן מאפסים את הטיימר, 0 לביטול",
 	"exportNotebookCryptoBackupTip": "גיבוי מפתח יוצא, נא לשמור אותו במקום בטוח",

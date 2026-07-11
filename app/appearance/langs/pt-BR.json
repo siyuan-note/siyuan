@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Força da senha: fraca",
+	"passwordStrengthMedium": "Força da senha: média",
+	"passwordStrengthStrong": "Força da senha: forte",
+	"weakPasswordConfirmTitle": "Senha fraca",
+	"weakPasswordConfirmTip": "Esta senha é fraca e pode ser vulnerável a ataques de força bruta. Deseja usá-la mesmo assim?",
 	"encryptedNotebookAutoLock": "Bloqueio automático",
 	"encryptedNotebookAutoLockDesc": "Bloquear automaticamente notebooks criptografados após os minutos de inatividade especificados, visualizar, editar ou pesquisar conteúdo criptografado redefine o temporizador, 0 para desativar",
 	"exportNotebookCryptoBackupTip": "Backup da chave exportado, guarde-o em um local seguro",

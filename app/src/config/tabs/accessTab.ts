@@ -1,6 +1,7 @@
 import type {SettingTabBuilder} from "../setting/builder";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {isBrowser, isMobile} from "../../util/functions";
 import {showMessage} from "../../dialog/message";
@@ -12,6 +13,37 @@ import {openByMobile} from "../../editor/openLink";
 import {genConfigItemMainHtml} from "../render/fragments";
 import {renderPublishAuthAccounts, savePublish, sendAccessSetting, updatePublishConfig} from "./accessRuntime";
 import {sendAppSetting} from "./appRuntime";
+import zxcvbn = require("zxcvbn");
+
+const getPasswordStrength = (password: string) => {
+    const score = zxcvbn(password).score;
+    if (score <= 1) {
+        return "weak";
+    }
+    if (score === 2) {
+        return "medium";
+    }
+    return "strong";
+};
+
+const updatePasswordStrength = (element: HTMLElement, password: string) => {
+    if (!password) {
+        element.classList.add("fn__none");
+        return;
+    }
+    const strength = getPasswordStrength(password);
+    element.classList.remove("fn__none");
+    element.setAttribute("data-strength", strength);
+    element.textContent = window.siyuan.languages[`passwordStrength${strength[0].toUpperCase()}${strength.slice(1)}`];
+};
+
+const confirmWeakPassword = (password: string, confirm: () => void) => {
+    if (getPasswordStrength(password) !== "weak") {
+        confirm();
+        return;
+    }
+    confirmDialog(window.siyuan.languages.weakPasswordConfirmTitle, window.siyuan.languages.weakPasswordConfirmTip, confirm);
+};
 
 const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("authentication", window.siyuan.languages.authentication);
@@ -490,6 +522,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
         title: window.siyuan.languages.setMasterPassword,
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
+    <div class="password-strength fn__none"></div>
     <div class="fn__hr"></div>
     <input type="password" placeholder="${window.siyuan.languages.confirmMasterPassword}" class="b3-text-field fn__block">
     <div class="fn__hr--b"></div>
@@ -506,14 +539,16 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
     const inputs = dialog.element.querySelectorAll("input");
     const confirmBtn = btnsElement[1] as HTMLButtonElement;
     const riskCheckbox = dialog.element.querySelector("#encRiskConfirm") as HTMLInputElement;
+    const passwordStrength = dialog.element.querySelector(".password-strength") as HTMLElement;
     (inputs[0] as HTMLInputElement).focus();
+    inputs[0].addEventListener("input", () => updatePasswordStrength(passwordStrength, inputs[0].value));
     riskCheckbox.addEventListener("change", () => {
         confirmBtn.disabled = !riskCheckbox.checked;
     });
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
     });
-    confirmBtn.addEventListener("click", async () => {
+    confirmBtn.addEventListener("click", () => {
         const pwd1 = (inputs[0] as HTMLInputElement).value;
         const pwd2 = (inputs[1] as HTMLInputElement).value;
         if (!pwd1) {
@@ -524,12 +559,14 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
-        const response = await fetchSyncPost("/api/notebook/enableEncryptedNotebooks", {password: pwd1});
-        if (response.code === 0) {
-            showMessage(window.siyuan.languages.encryptedNotebookEnabled);
-            dialog.destroy();
-            onSuccess();
-        }
+        confirmWeakPassword(pwd1, async () => {
+            const response = await fetchSyncPost("/api/notebook/enableEncryptedNotebooks", {password: pwd1});
+            if (response.code === 0) {
+                showMessage(window.siyuan.languages.encryptedNotebookEnabled);
+                dialog.destroy();
+                onSuccess();
+            }
+        });
     });
 };
 
@@ -540,6 +577,7 @@ const openChangeMasterPasswordDialog = () => {
     <input type="password" placeholder="${window.siyuan.languages.oldMasterPassword}" class="b3-text-field fn__block">
     <div class="fn__hr"></div>
     <input type="password" placeholder="${window.siyuan.languages.newMasterPassword}" class="b3-text-field fn__block">
+    <div class="password-strength fn__none"></div>
     <div class="fn__hr"></div>
     <input type="password" placeholder="${window.siyuan.languages.confirmMasterPassword}" class="b3-text-field fn__block">
 </div>
@@ -551,10 +589,12 @@ const openChangeMasterPasswordDialog = () => {
     });
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     const inputs = dialog.element.querySelectorAll("input");
+    const passwordStrength = dialog.element.querySelector(".password-strength") as HTMLElement;
+    inputs[1].addEventListener("input", () => updatePasswordStrength(passwordStrength, inputs[1].value));
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
     });
-    btnsElement[1].addEventListener("click", async () => {
+    btnsElement[1].addEventListener("click", () => {
         const oldPwd = (inputs[0] as HTMLInputElement).value;
         const newPwd = (inputs[1] as HTMLInputElement).value;
         const confirmPwd = (inputs[2] as HTMLInputElement).value;
@@ -565,13 +605,15 @@ const openChangeMasterPasswordDialog = () => {
             showMessage(window.siyuan.languages.passwordNoMatch);
             return;
         }
-        const response = await fetchSyncPost("/api/notebook/changeMasterPassword", {
-            oldPassword: oldPwd,
-            newPassword: newPwd
+        confirmWeakPassword(newPwd, async () => {
+            const response = await fetchSyncPost("/api/notebook/changeMasterPassword", {
+                oldPassword: oldPwd,
+                newPassword: newPwd
+            });
+            if (response.code === 0) {
+                showMessage(window.siyuan.languages.changeMasterPasswordSuccessTip);
+                dialog.destroy();
+            }
         });
-        if (response.code === 0) {
-            showMessage(window.siyuan.languages.changeMasterPasswordSuccessTip);
-            dialog.destroy();
-        }
     });
 };

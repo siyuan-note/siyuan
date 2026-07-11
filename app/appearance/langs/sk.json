@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Sila hesla: slabá",
+	"passwordStrengthMedium": "Sila hesla: stredná",
+	"passwordStrengthStrong": "Sila hesla: silná",
+	"weakPasswordConfirmTitle": "Slabé heslo",
+	"weakPasswordConfirmTip": "Toto heslo je slabé a môže byť zraniteľné voči útokom hrubou silou. Chcete ho napriek tomu použiť?",
 	"encryptedNotebookAutoLock": "Automatické uzamknutie",
 	"encryptedNotebookAutoLockDesc": "Automaticky uzamknúť šifrované poznámkové bloky po určených minútach nečinnosti, prezeranie, úprava alebo vyhľadávanie šifrovaného obsahu resetuje časovač, 0 vypína",
 	"exportNotebookCryptoBackupTip": "Záloha kľúča exportovaná, uložte ju na bezpečné miesto",

@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Seguridad de la contraseña: débil",
+	"passwordStrengthMedium": "Seguridad de la contraseña: media",
+	"passwordStrengthStrong": "Seguridad de la contraseña: alta",
+	"weakPasswordConfirmTitle": "Contraseña débil",
+	"weakPasswordConfirmTip": "Esta contraseña es débil y podría ser vulnerable a ataques de fuerza bruta. ¿Desea usarla de todos modos?",
 	"encryptedNotebookAutoLock": "Bloqueo automático",
 	"encryptedNotebookAutoLockDesc": "Bloquear automáticamente los cuadernos cifrados tras los minutos de inactividad especificados, ver, editar o buscar contenido cifrado reinicia el temporizador, 0 para desactivar",
 	"exportNotebookCryptoBackupTip": "Copia de seguridad de la clave exportada, guárdala en un lugar seguro",

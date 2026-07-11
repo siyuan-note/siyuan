@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Wachtwoordsterkte: zwak",
+	"passwordStrengthMedium": "Wachtwoordsterkte: gemiddeld",
+	"passwordStrengthStrong": "Wachtwoordsterkte: sterk",
+	"weakPasswordConfirmTitle": "Zwak wachtwoord",
+	"weakPasswordConfirmTip": "Dit wachtwoord is zwak en kan kwetsbaar zijn voor brute-forceaanvallen. Wilt u het toch gebruiken?",
 	"encryptedNotebookAutoLock": "Automatisch vergrendelen",
 	"encryptedNotebookAutoLockDesc": "Versleutelde notitieboeken automatisch vergrendelen na opgegeven minuten inactiviteit, bekijken, bewerken of doorzoeken van versleutelde inhoud reset de timer, 0 om uit te schakelen",
 	"exportNotebookCryptoBackupTip": "Sleutelback-up geëxporteerd, bewaar deze op een veilige plek",

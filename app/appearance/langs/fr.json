@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Robustesse du mot de passe : faible",
+	"passwordStrengthMedium": "Robustesse du mot de passe : moyenne",
+	"passwordStrengthStrong": "Robustesse du mot de passe : élevée",
+	"weakPasswordConfirmTitle": "Mot de passe faible",
+	"weakPasswordConfirmTip": "Ce mot de passe est faible et peut être vulnérable aux attaques par force brute. Voulez-vous tout de même l’utiliser ?",
 	"encryptedNotebookAutoLock": "Verrouillage automatique",
 	"encryptedNotebookAutoLockDesc": "Verrouiller automatiquement les notebooks chiffrés après le nombre de minutes d'inactivité spécifié, consulter, modifier ou rechercher du contenu chiffré réinitialise le minuteur, régler sur 0 pour désactiver",
 	"exportNotebookCryptoBackupTip": "Sauvegarde de clé exportée, veuillez la conserver en lieu sûr",

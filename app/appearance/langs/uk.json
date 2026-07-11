@@ -1,4 +1,9 @@
 {
+	"passwordStrengthWeak": "Надійність пароля: низька",
+	"passwordStrengthMedium": "Надійність пароля: середня",
+	"passwordStrengthStrong": "Надійність пароля: висока",
+	"weakPasswordConfirmTitle": "Слабкий пароль",
+	"weakPasswordConfirmTip": "Цей пароль слабкий і може бути вразливим до атак перебором. Усе одно використати його?",
 	"encryptedNotebookAutoLock": "Автоблокування",
 	"encryptedNotebookAutoLockDesc": "Автоблокування зашифрованих записників після вказаних хвилин бездіяльності, перегляд, редагування або пошук зашифрованого вмісту скидає таймер, 0 вимикає",
 	"exportNotebookCryptoBackupTip": "Резервну копію ключа експортовано, зберігайте її в надійному місці",

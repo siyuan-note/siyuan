@@ -287,6 +287,16 @@ func RollbackDocHistory(historyPath string) (err error) {
 	boxID := parts[1]
 	origBoxID := boxID // 保留原始 boxID 用于解密（getRollbackBox 可能返回不同的 box）
 
+	// 加密笔记本的历史回滚要求原笔记本已挂载：
+	// WriteTree 根据 tree.Box 判断是否加密落盘。若原笔记本未挂载导致
+	// getRollbackBox fallback 到普通 Rollback 笔记本，解密后的 .sy 将被 WriteTree
+	// 以明文落盘，违反"WriteTree auto-encrypts on write-back"的设计承诺。
+	if IsEncryptedBox(origBoxID) && nil == Conf.Box(origBoxID) {
+		logging.LogErrorf("rollback encrypted doc history requires notebook [%s] to be mounted", origBoxID)
+		err = errors.New(Conf.Language(314))
+		return
+	}
+
 	box, needResetTree, err := getRollbackBox(boxID)
 	if err != nil {
 		logging.LogErrorf("get rollback box [%s] failed: %s", boxID, err)

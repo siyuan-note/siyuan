@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Verrouillage automatique",
+	"encryptedNotebookAutoLockDesc": "Verrouiller automatiquement les notebooks chiffrés après le nombre de minutes d'inactivité spécifié, consulter, modifier ou rechercher du contenu chiffré réinitialise le minuteur, régler sur 0 pour désactiver",
 	"exportNotebookCryptoBackupTip": "Sauvegarde de clé exportée, veuillez la conserver en lieu sûr",
 	"exportNotebookCryptoBackup": "Exporter la sauvegarde de clé",
 	"importNotebookCryptoBackupTip": "Sauvegarde de clé importée, veuillez utiliser le mot de passe maître correspondant à cette clé pour déverrouiller par la suite",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Mot de passe maître modifié",
 	"oldMasterPassword": "Ancien mot de passe maître",
 	"newMasterPassword": "Nouveau mot de passe maître",
-	"encryptedNotebookRiskTip": "Le contenu chiffré ne peut pas être récupéré si le mot de passe maître est perdu. Assurez-vous de vous en souvenir",
+	"encryptedNotebookRiskTip": "Le chiffrement protège les données au repos — le contenu ne peut pas être récupéré en cas de perte du mot de passe maître. Lorsqu'un notebook chiffré est déverrouillé, les agents IA, plugins, outils MCP et API peuvent lire son contenu, comme n'importe quel autre notebook.",
 	"newEncryptedNotebook": "Nouveau carnet chiffré",
 	"unlockEncryptedNotebook": "🔓 Déverrouiller ${x}",
 	"unlocking": "Déverrouillage...",
@@ -2094,6 +2096,7 @@
 		"316": "Échec du déchiffrement : clé incorrecte ou données corrompues",
 		"317": "Fichier de sauvegarde de clé invalide",
 		"318": "Les métadonnées de chiffrement du carnet sont endommagées, veuillez vérifier la sauvegarde",
-		"319": "Le carnet n'est pas chiffré"
+		"319": "Le carnet n'est pas chiffré",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

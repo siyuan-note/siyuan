@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Auto-lock after idle",
+	"encryptedNotebookAutoLockDesc": "Automatically lock encrypted notebooks after specified idle minutes, viewing, editing, or searching encrypted content resets the timer, set to 0 to disable auto-lock",
 	"exportNotebookCryptoBackupTip": "Key backup exported, please keep it somewhere safe",
 	"exportNotebookCryptoBackup": "Export key backup",
 	"importNotebookCryptoBackupTip": "Key backup imported, please use the master password corresponding to this key to unlock from now on",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Master password changed",
 	"oldMasterPassword": "Old master password",
 	"newMasterPassword": "New master password",
-	"encryptedNotebookRiskTip": "The encrypted content cannot be recovered if the master password is lost. Please make sure you remember it",
+	"encryptedNotebookRiskTip": "Encryption protects data at rest — content cannot be recovered if the master password is lost. When an encrypted notebook is unlocked, AI agents, plugins, MCP tools, and APIs can read its content, same as any other notebook.",
 	"newEncryptedNotebook": "New encrypted notebook",
 	"unlockEncryptedNotebook": "🔓 Unlock ${x}",
 	"unlocking": "Unlocking...",
@@ -2094,6 +2096,7 @@
 		"316": "Decryption failed: incorrect key or corrupted data",
 		"317": "Invalid key backup file",
 		"318": "Encrypted notebook metadata is damaged, please check backup",
-		"319": "Notebook is not encrypted"
+		"319": "Notebook is not encrypted",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

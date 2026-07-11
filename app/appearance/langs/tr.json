@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Otomatik kilitleme",
+	"encryptedNotebookAutoLockDesc": "Belirtilen dakika işlem yapılmadığında şifreli not defterlerini otomatik kilitle, şifreli içeriği görüntüleme, düzenleme veya arama zamanlayıcıyı sıfırlar, 0 ile devre dışı bırak",
 	"exportNotebookCryptoBackupTip": "Anahtar yedeği dışa aktarıldı, lütfen güvenli bir yerde saklayın",
 	"exportNotebookCryptoBackup": "Anahtar yedeğini dışa aktar",
 	"importNotebookCryptoBackupTip": "Anahtar yedeği içe aktarıldı, bu andan itibaren kilidi açmak için lütfen bu anahtara karşılık gelen ana parolayı kullanın",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Ana parola değiştirildi",
 	"oldMasterPassword": "Eski ana şifre",
 	"newMasterPassword": "Yeni ana şifre",
-	"encryptedNotebookRiskTip": "Ana parola kaybolursa şifreli içerik kurtarılamaz. Parolayı hatırladığınızdan emin olun",
+	"encryptedNotebookRiskTip": "Şifreleme, durağan verileri korur — ana parola kaybolursa içerik kurtarılamaz. Şifreli bir not defterinin kilidi açıkken, AI ajanları, eklentiler, MCP araçları ve API'ler, diğer tüm not defterleri gibi içeriğini okuyabilir.",
 	"newEncryptedNotebook": "Yeni şifreli not defteri",
 	"unlockEncryptedNotebook": "🔓 Kilidini Aç ${x}",
 	"unlocking": "Kilit açılıyor...",
@@ -2094,6 +2096,7 @@
 		"316": "Şifre çözme başarısız: yanlış anahtar veya bozuk veriler",
 		"317": "Geçersiz anahtar yedek dosyası",
 		"318": "Şifrelenmiş not defteri meta verileri hasar görmüş, lütfen yedeği kontrol edin",
-		"319": "Not defteri şifrelenmemiş"
+		"319": "Not defteri şifrelenmemiş",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

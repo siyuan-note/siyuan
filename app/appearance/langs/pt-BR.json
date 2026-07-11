@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Bloqueio automático",
+	"encryptedNotebookAutoLockDesc": "Bloquear automaticamente notebooks criptografados após os minutos de inatividade especificados, visualizar, editar ou pesquisar conteúdo criptografado redefine o temporizador, 0 para desativar",
 	"exportNotebookCryptoBackupTip": "Backup da chave exportado, guarde-o em um local seguro",
 	"exportNotebookCryptoBackup": "Exportar backup da chave",
 	"importNotebookCryptoBackupTip": "Backup da chave importado, a partir de agora use a senha mestra correspondente a esta chave para desbloquear",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Senha mestra alterada",
 	"oldMasterPassword": "Senha mestra antiga",
 	"newMasterPassword": "Nova senha mestra",
-	"encryptedNotebookRiskTip": "O conteúdo criptografado não pode ser recuperado se a senha mestra for perdida. Certifique-se de lembrá-la",
+	"encryptedNotebookRiskTip": "A criptografia protege dados em repouso — o conteúdo não pode ser recuperado se a senha mestra for perdida. Quando um notebook criptografado está desbloqueado, agentes de IA, plugins, ferramentas MCP e APIs podem ler seu conteúdo, como qualquer outro notebook.",
 	"newEncryptedNotebook": "Novo caderno criptografado",
 	"unlockEncryptedNotebook": "🔓 Desbloquear ${x}",
 	"unlocking": "Desbloqueando...",
@@ -2094,6 +2096,7 @@
 		"316": "Falha na descriptografia: chave incorreta ou dados corrompidos",
 		"317": "Arquivo de backup da chave inválido",
 		"318": "Metadados de criptografia do caderno estão danificados, verifique o backup",
-		"319": "O caderno não está criptografado"
+		"319": "O caderno não está criptografado",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "נעילה אוטומטית",
+	"encryptedNotebookAutoLockDesc": "נעילה אוטומטית של מחברות מוצפנות לאחר דקות חוסר פעילות שצוינו, צפייה, עריכה או חיפוש בתוכן מוצפן מאפסים את הטיימר, 0 לביטול",
 	"exportNotebookCryptoBackupTip": "גיבוי מפתח יוצא, נא לשמור אותו במקום בטוח",
 	"exportNotebookCryptoBackup": "ייצא גיבוי מפתח",
 	"importNotebookCryptoBackupTip": "גיבוי מפתח יובא, מעתה נא להשתמש בסיסמה הראשית התואמת למפתח זה כדי לבטל נעילה",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "הסיסמה הראשית שונתה",
 	"oldMasterPassword": "סיסמה ראשית ישנה",
 	"newMasterPassword": "סיסמה ראשית חדשה",
-	"encryptedNotebookRiskTip": "לא ניתן לשחזר תוכן מוצפן אם הסיסמה הראשית אובדת. ודא שאתה זוכר אותה",
+	"encryptedNotebookRiskTip": "ההצפנה מגנה על נתונים במנוחה — לא ניתן לשחזר תוכן אם הסיסמה הראשית אבדה. כאשר מחברת מוצפנת אינה נעולה, סוכני AI, תוספים, כלי MCP ו-API יכולים לקרוא את תוכנה, כמו כל מחברת אחרת.",
 	"newEncryptedNotebook": "פנקס מוצפן חדש",
 	"unlockEncryptedNotebook": "🔓 בטל נעילה ${x}",
 	"unlocking": "פותח...",
@@ -2094,6 +2096,7 @@
 		"316": "פענוח נכשל: מפתח שגוי או נתונים פגומים",
 		"317": "קובץ גיבוי מפתח לא תקין",
 		"318": "נתוני ההצפנה של המחברת פגומים, אנא בדוק את הגיבוי",
-		"319": "המחברת אינה מוצפנת"
+		"319": "המחברת אינה מוצפנת",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

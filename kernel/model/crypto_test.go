@@ -39,10 +39,10 @@ func setDEKForTest(boxID string, dek []byte) {
 
 // TestIsBoxUnlockedLifecycle 验证 DEK 缓存的存在/缺失状态。
 func TestIsBoxUnlockedLifecycle(t *testing.T) {
-	LockAllBoxes() // 确保初始干净
+	LockBox("lifecycle-test-box") // 确保初始干净
 	boxID := "lifecycle-test-box"
 	if IsBoxUnlocked(boxID) {
-		t.Fatalf("box should not be unlocked after LockAllBoxes")
+		t.Fatalf("box should not be unlocked after LockBox")
 	}
 	dek, _ := util.GenerateDEK()
 	setDEKForTest(boxID, dek)
@@ -52,21 +52,6 @@ func TestIsBoxUnlockedLifecycle(t *testing.T) {
 	LockBox(boxID)
 	if IsBoxUnlocked(boxID) {
 		t.Fatalf("box should be locked after LockBox")
-	}
-}
-
-// TestLockAllBoxes 验证 LockAllBoxes 清空所有 DEK。
-func TestLockAllBoxes(t *testing.T) {
-	dek1, _ := util.GenerateDEK()
-	dek2, _ := util.GenerateDEK()
-	setDEKForTest("box-a", dek1)
-	setDEKForTest("box-b", dek2)
-
-	LockAllBoxes()
-	for _, id := range []string{"box-a", "box-b"} {
-		if IsBoxUnlocked(id) {
-			t.Fatalf("box %q should be locked after LockAllBoxes", id)
-		}
 	}
 }
 
@@ -93,7 +78,7 @@ func TestGetDEKReturnsErrorAfterLock(t *testing.T) {
 // TestWrapNewDEKRoundTrip 验证用 KEK 生成 DEK → 包络 → 解包 → 还原。
 func TestWrapNewDEKRoundTrip(t *testing.T) {
 	kek, _ := util.GenerateDEK()
-	defer LockAllBoxes()
+	defer LockBox("wrap-roundtrip-box")
 
 	boxEnc, _, err := WrapNewDEK("wrap-roundtrip-box", kek)
 	if err != nil {
@@ -103,52 +88,40 @@ func TestWrapNewDEKRoundTrip(t *testing.T) {
 		t.Fatalf("BoxEncryption fields malformed: wrappedDEK=%d wrapNonce=%d", len(boxEnc.WrappedDEK), len(boxEnc.WrapNonce))
 	}
 
-	boxID := "wrap-roundtrip-box"
-	if err := UnwrapDEK(boxID, boxEnc, kek); err != nil {
-		t.Fatalf("UnwrapDEK failed: %v", err)
-	}
-	dek, err := GetDEK(boxID)
+	dek, err := decryptWrappedDEK("wrap-roundtrip-box", boxEnc, kek)
 	if err != nil {
-		t.Fatalf("GetDEK failed: %v", err)
+		t.Fatalf("decryptWrappedDEK failed: %v", err)
 	}
 	if len(dek) != 32 {
 		t.Fatalf("expected 32-byte DEK, got %d", len(dek))
 	}
 }
 
-// TestUnwrapDEKWithWrongKEK 验证用错误的 KEK 解包失败（GCM MAC 校验）。
-func TestUnwrapDEKWithWrongKEK(t *testing.T) {
+// TestDecryptWrappedDEKWithWrongKEK 验证用错误的 KEK 解密 WrappedDEK 失败（GCM MAC 校验）。
+func TestDecryptWrappedDEKWithWrongKEK(t *testing.T) {
 	kek1, _ := util.GenerateDEK()
 	boxEnc, _, _ := WrapNewDEK("wrong-kek-box", kek1)
 
 	kek2, _ := util.GenerateDEK()
-	defer LockAllBoxes()
+	defer LockBox("wrong-kek-box")
 
-	if err := UnwrapDEK("wrong-kek-box", boxEnc, kek2); err == nil {
-		t.Fatalf("UnwrapDEK with wrong KEK should fail")
+	if _, err := decryptWrappedDEK("wrong-kek-box", boxEnc, kek2); err == nil {
+		t.Fatalf("decryptWrappedDEK with wrong KEK should fail")
 	}
 }
 
 // TestWrapNewDEKProducesUniqueDEKs 验证两次调用 WrapNewDEK 生成不同的 DEK（随机性）。
 func TestWrapNewDEKProducesUniqueDEKs(t *testing.T) {
 	kek, _ := util.GenerateDEK()
-	defer LockAllBoxes()
+	defer LockBox("uniq-box-1")
+	defer LockBox("uniq-box-2")
 
-	enc1, dek1, _ := WrapNewDEK("uniq-box-1", kek)
-	enc2, dek2, _ := WrapNewDEK("uniq-box-2", kek)
+	_, dek1, _ := WrapNewDEK("uniq-box-1", kek)
+	_, dek2, _ := WrapNewDEK("uniq-box-2", kek)
 
-	// WrapNewDEK 现在同时返回原始 DEK，可直接比对随机性
+	// WrapNewDEK 同时返回原始 DEK，可直接比对随机性
 	if bytes.Equal(dek1, dek2) {
 		t.Fatalf("two WrapNewDEK calls produced identical DEKs (not random?)")
-	}
-
-	// 同时验证包络后解包能还原出相同的 DEK
-	UnwrapDEK("uniq-box-1", enc1, kek)
-	UnwrapDEK("uniq-box-2", enc2, kek)
-	unwrappedDek1, _ := GetDEK("uniq-box-1")
-	unwrappedDek2, _ := GetDEK("uniq-box-2")
-	if !bytes.Equal(unwrappedDek1, dek1) || !bytes.Equal(unwrappedDek2, dek2) {
-		t.Fatalf("UnwrapDEK did not restore the original DEK")
 	}
 }
 
@@ -186,7 +159,7 @@ func TestUnmount0ClearsDEKForUnmountedEncryptedBox(t *testing.T) {
 	util.DataDir = tempDir
 	defer func() {
 		util.DataDir = origDataDir
-		LockAllBoxes() // 测试后清理所有 DEK 缓存
+		LockBox("unmount-unlocked-test-box") // 测试后清理 DEK 缓存
 	}()
 
 	// 写入加密 box 的 conf.json
@@ -220,49 +193,6 @@ func TestUnmount0ClearsDEKForUnmountedEncryptedBox(t *testing.T) {
 	// 验证 DEK 已被清除
 	if IsBoxUnlocked(boxID) {
 		t.Fatalf("DEK should be cleared for unlocked encrypted box")
-	}
-}
-
-// TestLockAllBoxesConcurrentReads 验证 LockAllBoxes 与并发读操作（持 box 读锁）正确串行化。
-func TestLockAllBoxesConcurrentReads(t *testing.T) {
-	// 注入 3 个 box 的 DEK
-	boxes := []string{"concurrent-a", "concurrent-b", "concurrent-c"}
-	for _, id := range boxes {
-		dek, _ := util.GenerateDEK()
-		setDEKForTest(id, dek)
-	}
-
-	// 启动 goroutine 持续获取读锁（模拟在途解密操作）
-	stop := make(chan struct{})
-	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for {
-				select {
-				case <-stop:
-					return
-				default:
-					for _, id := range boxes {
-						HoldBoxReadLock(id)
-						time.Sleep(time.Microsecond)
-						ReleaseBoxReadLock(id)
-					}
-				}
-			}
-		}()
-	}
-
-	time.Sleep(10 * time.Millisecond) // 给 goroutine 时间开始获取读锁
-	LockAllBoxes()
-	close(stop)
-	wg.Wait()
-
-	for _, id := range boxes {
-		if IsBoxUnlocked(id) {
-			t.Fatalf("box %q should be locked after concurrent LockAllBoxes", id)
-		}
 	}
 }
 
@@ -378,7 +308,7 @@ func TestBackupKEKMACVerification(t *testing.T) {
 
 // TestLockBoxConcurrentReads 验证 LockBox（单 box）能与在途读锁正确串行化。
 func TestLockBoxConcurrentReads(t *testing.T) {
-	LockAllBoxes() // 清理初始状态
+	LockBox("concurrent-single-box") // 清理初始状态
 	boxID := "concurrent-single-box"
 	dek, _ := util.GenerateDEK()
 	setDEKForTest(boxID, dek)
@@ -423,7 +353,7 @@ func TestLockBoxClearsTempDirs(t *testing.T) {
 	util.TempDir = tempDir
 	defer func() {
 		util.TempDir = origTempDir
-		LockAllBoxes()
+		LockBox("temp-cleanup-box")
 	}()
 
 	// 创建模拟临时目录和文件
@@ -444,43 +374,6 @@ func TestLockBoxClearsTempDirs(t *testing.T) {
 	for _, d := range []string{exportDir, repoDiffDir, repoRollbackDir} {
 		if _, err := os.Stat(d); !os.IsNotExist(err) {
 			t.Fatalf("temp dir %s should be removed by LockBox", d)
-		}
-	}
-}
-
-// TestLockAllBoxesClearsGlobalTempDirs 验证 LockAllBoxes 清理全局临时目录。
-func TestLockAllBoxesClearsGlobalTempDirs(t *testing.T) {
-	// 注入少量 DEK 确保 LockAllBoxes 走 per-box + global 清理路径
-	for _, id := range []string{"global-cleanup-a", "global-cleanup-b"} {
-		dek, _ := util.GenerateDEK()
-		setDEKForTest(id, dek)
-	}
-
-	origTempDir := util.TempDir
-	tempDir := t.TempDir()
-	util.TempDir = tempDir
-	defer func() {
-		util.TempDir = origTempDir
-	}()
-
-	// 创建全局临时目录
-	exportDir := filepath.Join(tempDir, "export", "repo")
-	repoDir := filepath.Join(tempDir, "repo", "sync", "conflicts", "test-timestamp", "global-cleanup-a")
-	for _, d := range []string{exportDir, repoDir} {
-		if err := os.MkdirAll(d, 0755); err != nil {
-			t.Fatalf("mkdir %s failed: %v", d, err)
-		}
-	}
-	if err := os.WriteFile(filepath.Join(repoDir, "test.txt"), []byte("test"), 0644); err != nil {
-		t.Fatalf("write test file failed: %v", err)
-	}
-
-	LockAllBoxes()
-
-	// 全局 temp 目录应该被清空
-	for _, d := range []string{filepath.Join(tempDir, "export"), filepath.Join(tempDir, "repo")} {
-		if _, err := os.Stat(d); !os.IsNotExist(err) {
-			t.Fatalf("global temp dir %s should be removed by LockAllBoxes", d)
 		}
 	}
 }

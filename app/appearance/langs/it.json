@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Blocco automatico",
+	"encryptedNotebookAutoLockDesc": "Blocca automaticamente i notebook crittografati dopo i minuti di inattività specificati, visualizzare, modificare o cercare contenuti crittografati ripristina il timer, 0 per disattivare",
 	"exportNotebookCryptoBackupTip": "Backup della chiave esportato, conservalo in un luogo sicuro",
 	"exportNotebookCryptoBackup": "Esporta backup della chiave",
 	"importNotebookCryptoBackupTip": "Backup della chiave importato, da ora in poi usa la password principale corrispondente a questa chiave per sbloccare",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Password principale modificata",
 	"oldMasterPassword": "Vecchia password principale",
 	"newMasterPassword": "Nuova password principale",
-	"encryptedNotebookRiskTip": "Il contenuto crittografato non può essere recuperato se si perde la password principale. Assicurati di ricordarla",
+	"encryptedNotebookRiskTip": "La crittografia protegge i dati a riposo — il contenuto non può essere recuperato in caso di perdita della password principale. Quando un notebook crittografato è sbloccato, agenti AI, plugin, strumenti MCP e API possono leggere il suo contenuto, come qualsiasi altro notebook.",
 	"newEncryptedNotebook": "Nuovo blocco note crittografato",
 	"unlockEncryptedNotebook": "🔓 Sblocca ${x}",
 	"unlocking": "Sblocco in corso...",
@@ -2094,6 +2096,7 @@
 		"316": "Decrittazione non riuscita: chiave errata o dati danneggiati",
 		"317": "File di backup della chiave non valido",
 		"318": "I metadati di crittografia del blocco appunti sono danneggiati, controlla il backup",
-		"319": "Il blocco appunti non è crittografato"
+		"319": "Il blocco appunti non è crittografato",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

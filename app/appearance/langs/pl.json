@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Automatyczna blokada",
+	"encryptedNotebookAutoLockDesc": "Automatycznie blokuj zaszyfrowane notatniki po określonych minutach bezczynności, przeglądanie, edytowanie lub wyszukiwanie zaszyfrowanej treści resetuje licznik, 0 wyłącza",
 	"exportNotebookCryptoBackupTip": "Wyeksportowano kopię zapasową klucza, przechowaj ją w bezpiecznym miejscu",
 	"exportNotebookCryptoBackup": "Eksportuj kopię zapasową klucza",
 	"importNotebookCryptoBackupTip": "Importowano kopię zapasową klucza, od teraz używaj głównego hasła odpowiadającego temu kluczowi, aby odblokować",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Zmieniono hasło główne",
 	"oldMasterPassword": "Stare główne hasło",
 	"newMasterPassword": "Nowe główne hasło",
-	"encryptedNotebookRiskTip": "Zaszyfrowanej treści nie można odzyskać w przypadku utraty hasła głównego. Upewnij się, że je zapamiętasz",
+	"encryptedNotebookRiskTip": "Szyfrowanie chroni dane w spoczynku — zawartość nie może zostać odzyskana w przypadku utraty hasła głównego. Gdy zaszyfrowany notatnik jest odblokowany, agenci AI, wtyczki, narzędzia MCP i API mogą odczytywać jego zawartość, tak jak każdy inny notatnik.",
 	"newEncryptedNotebook": "Nowy zaszyfrowany notatnik",
 	"unlockEncryptedNotebook": "🔓 Odblokuj ${x}",
 	"unlocking": "Odblokowywanie...",
@@ -2094,6 +2096,7 @@
 		"316": "Odszyfrowanie nie powiodło się: nieprawidłowy klucz lub uszkodzone dane",
 		"317": "Nieprawidłowy plik kopii zapasowej klucza",
 		"318": "Metadane szyfrowania notesu są uszkodzone, sprawdź kopię zapasową",
-		"319": "Notes nie jest zaszyfrowany"
+		"319": "Notes nie jest zaszyfrowany",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

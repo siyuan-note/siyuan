@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "自動鎖定",
+	"encryptedNotebookAutoLockDesc": "閒置指定分鐘後自動鎖定加密筆記本，瀏覽、編輯、搜尋加密內容會重置計時，設定為 0 表示禁用自動鎖定",
 	"exportNotebookCryptoBackupTip": "金鑰已匯出，請妥善保管",
 	"exportNotebookCryptoBackup": "匯出金鑰",
 	"importNotebookCryptoBackupTip": "金鑰已匯入，後續請使用該金鑰對應的主密碼解鎖",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "修改主密碼完畢",
 	"oldMasterPassword": "舊主密碼",
 	"newMasterPassword": "新主密碼",
-	"encryptedNotebookRiskTip": "加密筆記本的內容在忘記主密碼後無法恢復，請務必牢記主密碼",
+	"encryptedNotebookRiskTip": "加密僅保護靜態資料——忘記主密碼則內容無法恢復。加密筆記本解鎖開啟期間，AI 智能體、插件、MCP 工具、API 等均能讀取其中內容，與一般筆記本無異。",
 	"newEncryptedNotebook": "新建加密筆記本",
 	"unlockEncryptedNotebook": "🔓 解鎖 ${x}",
 	"unlocking": "解鎖中……",
@@ -2094,6 +2096,7 @@
 		"316": "解密失敗：金鑰不正確或資料已損壞",
 		"317": "金鑰備份檔案無效",
 		"318": "加密筆記本元數據已損壞，請檢查備份文件",
-		"319": "筆記本未加密"
+		"319": "筆記本未加密",
+		"320": "修改主密碼部分失敗，請重啟思源以完成恢復。詳情：%s"
 	}
 	}

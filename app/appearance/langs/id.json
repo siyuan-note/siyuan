@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Kunci otomatis",
+	"encryptedNotebookAutoLockDesc": "Kunci otomatis buku catatan terenkripsi setelah menit tidak aktif yang ditentukan, melihat, mengedit, atau mencari konten terenkripsi mengatur ulang timer, atur 0 untuk menonaktifkan",
 	"exportNotebookCryptoBackupTip": "Cadangan kunci diekspor, simpan di tempat yang aman",
 	"exportNotebookCryptoBackup": "Ekspor cadangan kunci",
 	"importNotebookCryptoBackupTip": "Cadangan kunci diimpor, selanjutnya silakan gunakan kata sandi utama yang sesuai dengan kunci ini untuk membuka kunci",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Kata sandi utama diubah",
 	"oldMasterPassword": "Kata sandi utama lama",
 	"newMasterPassword": "Kata sandi utama baru",
-	"encryptedNotebookRiskTip": "Konten terenkripsi tidak dapat dipulihkan jika kata sandi utama hilang. Pastikan Anda mengingatnya",
+	"encryptedNotebookRiskTip": "Enkripsi melindungi data saat diam — konten tidak dapat dipulihkan jika kata sandi utama hilang. Saat buku catatan terenkripsi tidak terkunci, agen AI, plugin, alat MCP, dan API dapat membaca kontennya, sama seperti buku catatan lainnya.",
 	"newEncryptedNotebook": "Buku catatan terenkripsi baru",
 	"unlockEncryptedNotebook": "🔓 Buka ${x}",
 	"unlocking": "Membuka...",
@@ -2094,6 +2096,7 @@
 		"316": "Dekripsi gagal: kunci salah atau data rusak",
 		"317": "File cadangan kunci tidak valid",
 		"318": "Metadata buku catatan terenkripsi rusak, harap periksa cadangan",
-		"319": "Buku catatan tidak terenkripsi"
+		"319": "Buku catatan tidak terenkripsi",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

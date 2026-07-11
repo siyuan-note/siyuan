@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookAutoLock": "Automatické uzamknutie",
+	"encryptedNotebookAutoLockDesc": "Automaticky uzamknúť šifrované poznámkové bloky po určených minútach nečinnosti, prezeranie, úprava alebo vyhľadávanie šifrovaného obsahu resetuje časovač, 0 vypína",
 	"exportNotebookCryptoBackupTip": "Záloha kľúča exportovaná, uložte ju na bezpečné miesto",
 	"exportNotebookCryptoBackup": "Exportovať zálohu kľúča",
 	"importNotebookCryptoBackupTip": "Záloha kľúča importovaná, od teraz na odomknutie používajte hlavné heslo zodpovedajúce tomuto kľúču",
@@ -22,7 +24,7 @@
 	"changeMasterPasswordSuccessTip": "Hlavné heslo bolo zmenené",
 	"oldMasterPassword": "Staré hlavné heslo",
 	"newMasterPassword": "Nové hlavné heslo",
-	"encryptedNotebookRiskTip": "Šifrovaný obsah nie je možné obnoviť, ak sa stratí hlavné heslo. Uistite sa, že si ho zapamätáte",
+	"encryptedNotebookRiskTip": "Šifrovanie chráni dáta v pokoji — obsah nie je možné obnoviť v prípade straty hlavného hesla. Keď je šifrovaný poznámkový blok odomknutý, AI agenti, pluginy, MCP nástroje a API môžu čítať jeho obsah, rovnako ako akýkoľvek iný poznámkový blok.",
 	"newEncryptedNotebook": "Nový šifrovaný zápisník",
 	"unlockEncryptedNotebook": "🔓 Odomknúť ${x}",
 	"unlocking": "Odomkýna sa...",
@@ -2094,6 +2096,7 @@
 		"316": "Dešifrovanie zlyhalo: nesprávny kľúč alebo poškodené údaje",
 		"317": "Neplatný súbor zálohy kľúča",
 		"318": "Metaúdaje šifrovania poznámkového bloku sú poškodené, skontrolujte zálohu",
-		"319": "Poznámkový blok nie je šifrovaný"
+		"319": "Poznámkový blok nie je šifrovaný",
+		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s"
 	}
 	}

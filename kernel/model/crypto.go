@@ -27,9 +27,9 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -48,12 +48,8 @@ var kekVerifierMagic = []byte("siyuan-enc-v1")
 
 const boxEncryptionSpec = 1
 
-// ErrWrappedDEKCorrupted 表示 WrappedDEK 解密失败（密钥不匹配或数据损坏）。
-// 底层 crypto 函数返回此错误，API 层需要展示用户文案时转换成 Conf.Language(316)。
-var ErrWrappedDEKCorrupted = errors.New("wrapped DEK corrupted or key mismatch")
-
-// ErrMasterPasswordMigrationPending 表示改密已切换全局 verifier，但部分笔记本配置尚待恢复。
-var ErrMasterPasswordMigrationPending = errors.New("master password migration is pending; restart the kernel to complete recovery")
+// errMasterPasswordMigrationPending 表示改密已切换全局 verifier，但部分笔记本配置尚待恢复。
+var errMasterPasswordMigrationPending = errors.New("master password migration is pending")
 
 // notebookCryptoMu 串行化加密笔记本的控制面操作（Enable/Disable/Create/ChangeMasterPassword/Import/restore 等），
 // 避免 ChangeMasterPassword 枚举与 CreateEncryptedBox 并发导致新笔记本用旧 KEK 但 verifier 已切换的不可恢复状态。
@@ -495,6 +491,10 @@ var (
 	cachedDEKsLock sync.RWMutex
 )
 
+// boxLastAccess 记录每个加密笔记本最近一次加解密访问时间（unix 纳秒），供自动锁定 cron 使用。
+// key: boxID, value: *atomic.Int64。UnlockBox 成功时初始化，GetDEK 每次成功读取时更新，lockBoxHeld 清理。
+var boxLastAccess sync.Map
+
 // EnableEncryptedNotebook 启用加密笔记本功能：生成 MasterSalt、派生 KEK、写入校验值并持久化。
 // 重复调用（已启用）返回错误，避免覆盖现有加密笔记本的密钥参数。
 // KEK 不缓存——启用后用户需对每个加密笔记本单独调 UnlockBox 解锁。
@@ -793,9 +793,14 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		sql.RemoveEncryptedDBFile(boxID) // 清理已创建的 content db 文件，避免遗留空加密库
 		return err
 	}
-	cachedDEKs[boxID] = dek
+		cachedDEKs[boxID] = dek
 
-	// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
+		// 初始化自动锁定访问时间戳，记录解锁时刻
+		newVal := &atomic.Int64{}
+		newVal.Store(time.Now().UnixNano())
+		boxLastAccess.Store(boxID, newVal)
+
+		// 修复 conf.json：若 conf 未正确标记加密状态则修正（例如从 backup 解锁后）
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil ||
@@ -841,7 +846,6 @@ func LockBox(boxID string) {
 }
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
-// 由 LockBox（单 box）和 LockAllBoxes（全 box）共用，确保生命周期串行化一致。
 func lockBoxHeld(boxID string) {
 
 	cachedDEKsLock.Lock()
@@ -850,6 +854,9 @@ func lockBoxHeld(boxID string) {
 		delete(cachedDEKs, boxID)
 	}
 	cachedDEKsLock.Unlock()
+
+	// 清理自动锁定访问时间戳
+	boxLastAccess.Delete(boxID)
 
 	// 仅在 backup 缺失时从 conf 补写。正常流程中 CreateEncryptedBox/UnlockBox/ChangeMasterPassword
 	// 已刷新 backup，此处不再用未经解密验证的 BoxCrypt 覆盖已有 backup，
@@ -892,45 +899,6 @@ func lockBoxHeld(boxID string) {
 	treenode.RemoveDynamicRefTexts(boxID)
 }
 
-// LockAllBoxes 清除所有已缓存的 DEK 并删除所有加密 db 文件。退出登录或全局锁定时调用。
-func LockAllBoxes() {
-	// 快照当前已解锁的 boxID，排序后逐个取得写锁，避免多锁顺序不一致导致死锁
-	cachedDEKsLock.Lock()
-	boxIDs := make([]string, 0, len(cachedDEKs))
-	for id := range cachedDEKs {
-		boxIDs = append(boxIDs, id)
-	}
-	cachedDEKsLock.Unlock()
-	sort.Strings(boxIDs)
-
-	for _, boxID := range boxIDs {
-		FlushTxQueue()
-		acquireBoxWriteLock(boxID)
-		lockBoxHeld(boxID)
-		releaseBoxWriteLock(boxID)
-	}
-
-	// 所有 box 的 per-box 清理完成后，执行全局缓存和共享临时目录清理
-	cache.ClearTreeCache()
-	sql.ClearCache()
-	cache.ClearDocsIAL()
-	cache.ClearBlocksIAL()
-	cache.ClearAVCache()
-	treenode.ClearDynamicRefTexts()
-	ResetVirtualBlockRefCache()
-	// 清理所有 repo 临时目录中的解密文件
-	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "repo")); rmErr != nil {
-		logging.LogErrorf("remove repo directory failed: %s", rmErr)
-	}
-	// 清理临时导出目录（锁定后不应继续提供明文导出下载）
-	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", "repo")); rmErr != nil {
-		logging.LogWarnf("remove export/repo dir failed: %s", rmErr)
-	}
-	if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export")); rmErr != nil {
-		logging.LogErrorf("remove export directory failed: %s", rmErr)
-	}
-}
-
 // WrapNewDEK 用给定 KEK 生成随机 DEK 并包络，返回 BoxEncryption 元数据。
 // KEK 由调用方临时派生（不来自全局缓存），调用方负责使用后丢弃。
 // 同时返回原始 DEK，供调用方在创建场景下直接开 db 缓存，省去再次 Argon2id 派生。
@@ -971,22 +939,6 @@ func mustEncryptionNonce(ciphertext []byte) []byte {
 	return nonce
 }
 
-// UnwrapDEK 从 BoxEncryption 解出 DEK 并缓存到内存，供后续 GetDEK 使用。
-// 仅在 KEK 已通过 UnlockBox 缓存 DEK 的场景之外使用（如改密流程内部）。
-func UnwrapDEK(boxID string, enc *conf.BoxEncryption, kek []byte) error {
-	if enc == nil || len(enc.WrappedDEK) == 0 {
-		return errors.New("no encrypted key material for box")
-	}
-	dek, err := decryptWrappedDEK(boxID, enc, kek)
-	if err != nil {
-		return ErrWrappedDEKCorrupted
-	}
-	cachedDEKsLock.Lock()
-	cachedDEKs[boxID] = dek
-	cachedDEKsLock.Unlock()
-	return nil
-}
-
 // GetDEK 取已缓存的 DEK。返回副本，避免外部零化影响缓存。
 // filesys/assets/db 加解密时调用。
 func GetDEK(boxID string) ([]byte, error) {
@@ -998,6 +950,8 @@ func GetDEK(boxID string) ([]byte, error) {
 	}
 	ret := make([]byte, len(dek))
 	copy(ret, dek)
+	// 更新自动锁定访问时间戳，每次加解密操作都刷新闲置计时
+	touchBoxAccess(boxID)
 	return ret, nil
 }
 
@@ -1111,26 +1065,31 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 				boxConf.Encrypted = true
 				boxConf.BoxCrypt = backup
 				if saveErr := box.SaveConf(boxConf); saveErr != nil {
-					return fmt.Errorf("%w: rebuild encrypted conf from backup [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, saveErr)
+					return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+						fmt.Sprintf(Conf.Language(320), entry.BoxID+": rebuild encrypted conf from backup failed: "+saveErr.Error()))
 				}
 			} else {
-				return fmt.Errorf("%w: cannot apply migration for box [%s]: conf missing and no valid backup", ErrMasterPasswordMigrationPending, entry.BoxID)
+				return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+					fmt.Sprintf(Conf.Language(320), entry.BoxID+": conf missing and no valid backup"))
 			}
 		}
 		boxConf.BoxCrypt.WrappedDEK = entry.NewWrappedDEK
 		boxConf.BoxCrypt.Spec = entry.NewSpec
 		boxConf.BoxCrypt.WrapNonce = entry.NewWrapNonce
 		if err = box.SaveConf(boxConf); err != nil {
-			return fmt.Errorf("%w: save conf for notebook [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, err)
+			return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+				fmt.Sprintf(Conf.Language(320), entry.BoxID+": save conf failed: "+err.Error()))
 		}
 		if err = writeNotebookCryptBackup(entry.BoxID, boxConf.BoxCrypt); err != nil {
-			return fmt.Errorf("%w: update notebook crypt backup [%s] failed: %v", ErrMasterPasswordMigrationPending, entry.BoxID, err)
+			return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+				fmt.Sprintf(Conf.Language(320), entry.BoxID+": update notebook crypt backup failed: "+err.Error()))
 		}
 	}
 
 	// Phase 4: 先持久化全局备份，再清除 manifest，确保崩溃后可恢复
 	if err = saveNotebookCryptoBackup(); err != nil {
-		return fmt.Errorf("%w: save notebook crypto backup failed: %v", ErrMasterPasswordMigrationPending, err)
+		return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+			fmt.Sprintf(Conf.Language(320), "save notebook crypto backup failed: "+err.Error()))
 	}
 	removeMasterPasswordMigration()
 	return nil
@@ -1578,9 +1537,14 @@ func CreateEncryptedBox(name, password string) (id string, err error) {
 		sql.CloseEncryptedDB(id)
 		return "", err
 	}
-	cachedDEKs[id] = dek
+		cachedDEKs[id] = dek
 
-	IncSync()
+		// 初始化自动锁定访问时间戳，与 UnlockBox 对称
+		newVal := &atomic.Int64{}
+		newVal.Store(time.Now().UnixNano())
+		boxLastAccess.Store(id, newVal)
+
+		IncSync()
 	return id, nil
 }
 
@@ -1589,4 +1553,53 @@ func zeroAndClear(key []byte) {
 	for i := range key {
 		key[i] = 0
 	}
+}
+
+// touchBoxAccess 更新指定加密 notebook 的最后访问时间戳（unix 纳秒），供自动锁定 cron 使用。
+// 热路径（每次加解密），仅做无锁 Load + atomic Store，不阻塞 DEK 缓存读写。
+func touchBoxAccess(boxID string) {
+	if val, ok := boxLastAccess.Load(boxID); ok {
+		val.(*atomic.Int64).Store(time.Now().UnixNano())
+	}
+}
+
+// AutoLockIdleEncryptedBoxesJob 检查所有已解锁的加密 notebook，将闲置超时的自动锁定。
+// 由 cron 每分钟调用。阈值由 NotebookCrypto.AutoLockMinutes 控制（0 = 禁用）。
+func AutoLockIdleEncryptedBoxesJob() {
+	Conf.m.RLock()
+	threshold := Conf.NotebookCrypto.AutoLockMinutes
+	Conf.m.RUnlock()
+	if threshold <= 0 {
+		return
+	}
+
+	now := time.Now().UnixNano()
+	thresholdNs := int64(time.Duration(threshold) * time.Minute)
+
+	cachedDEKsLock.RLock()
+	boxIDs := make([]string, 0, len(cachedDEKs))
+	for id := range cachedDEKs {
+		boxIDs = append(boxIDs, id)
+	}
+	cachedDEKsLock.RUnlock()
+
+	for _, boxID := range boxIDs {
+		if val, ok := boxLastAccess.Load(boxID); ok {
+			lastAccess := val.(*atomic.Int64).Load()
+			if now-lastAccess >= thresholdNs {
+				logging.LogInfof("auto-locking idle encrypted notebook [%s]", boxID)
+				Unmount(boxID)
+			}
+		}
+	}
+}
+
+// SetAutoLockMinutes 设置加密笔记本自动锁定闲置分钟数。0 表示禁用。
+func SetAutoLockMinutes(minutes int) {
+	if minutes < 0 {
+		minutes = 0
+	}
+	Conf.m.Lock()
+	Conf.NotebookCrypto.AutoLockMinutes = minutes
+	Conf.m.Unlock()
 }

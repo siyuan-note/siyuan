@@ -42,7 +42,7 @@ const confirmWeakPassword = (password: string, confirm: () => void) => {
         confirm();
         return;
     }
-    confirmDialog(window.siyuan.languages.weakPasswordConfirmTitle, window.siyuan.languages.weakPasswordConfirmTip, confirm);
+    confirmDialog("⚠️ " + window.siyuan.languages.weakPasswordConfirmTitle, window.siyuan.languages.weakPasswordConfirmTip, confirm);
 };
 
 const registerAccessAuthGroup = (tab: SettingTabBuilder) => {

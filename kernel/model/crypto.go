@@ -425,7 +425,7 @@ func recoverMasterPasswordMigration() {
 		for _, entry := range mig.Boxes {
 			box := &Box{ID: entry.BoxID}
 			boxConf := box.GetConf()
-			if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
+			if !boxConf.Encrypted || boxConf.BoxCrypt == nil {
 				// conf 缺失/损坏：尝试从 per-notebook backup 重建
 				backup, bErr := readNotebookCryptBackup(entry.BoxID)
 				if bErr == nil && backup != nil && len(backup.WrappedDEK) > 0 {
@@ -437,8 +437,22 @@ func recoverMasterPasswordMigration() {
 						return // 保留 manifest
 					}
 				} else {
-					logging.LogErrorf("cannot apply migration for box [%s]: conf missing and no valid backup", entry.BoxID)
-					return // 保留 manifest
+					// conf 与 backup 均不可用：manifest 是该 box 加密密钥的权威来源（NewWrappedDEK/NewWrapNonce/NewSpec），
+					// 直接从 manifest 重建 BoxCrypt，避免 conf+backup 双缺失时永久循环失败。boxConf 的非加密元数据
+					// （Name 等）此时已随 conf 丢失，恢复为默认值，但 box 的文档树（.sy 文件）不受影响，数据可达性得以保全。
+					logging.LogWarnf("rebuild encrypted box [%s] from migration manifest (conf and backup both unavailable)", entry.BoxID)
+					boxConf = box.GetConf()
+					boxConf.Encrypted = true
+					boxConf.BoxCrypt = &conf.BoxEncryption{
+						WrappedDEK: entry.NewWrappedDEK,
+						WrapNonce:  entry.NewWrapNonce,
+						Spec:       entry.NewSpec,
+						CreatedAt:  time.Now().UnixMilli(),
+					}
+					if saveErr := box.SaveConf(boxConf); saveErr != nil {
+						logging.LogErrorf("rebuild encrypted conf from manifest [%s] failed: %s", entry.BoxID, saveErr)
+						return // 保留 manifest
+					}
 				}
 			}
 			// 若 WrappedDEK 已匹配则跳过写 conf，但仍需确保 per-notebook backup 是最新的
@@ -1058,7 +1072,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	for _, entry := range entries {
 		box := &Box{ID: entry.BoxID}
 		boxConf := box.GetConf()
-		if boxConf == nil || !boxConf.Encrypted || boxConf.BoxCrypt == nil {
+		if !boxConf.Encrypted || boxConf.BoxCrypt == nil {
 			// conf 缺失/损坏：尝试从 per-notebook backup 重建
 			backup, bErr := readNotebookCryptBackup(entry.BoxID)
 			if bErr == nil && backup != nil && len(backup.WrappedDEK) > 0 {
@@ -1070,8 +1084,21 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 						fmt.Sprintf(Conf.Language(320), entry.BoxID+": rebuild encrypted conf from backup failed: "+saveErr.Error()))
 				}
 			} else {
-				return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
-					fmt.Sprintf(Conf.Language(320), entry.BoxID+": conf missing and no valid backup"))
+				// conf 与 backup 均不可用：manifest 是该 box 加密密钥的权威来源，直接从 entry 重建 BoxCrypt，
+				// 避免改密因瞬时 conf 损坏而中断（详见 recoverMasterPasswordMigration 中的对称处理）。
+				logging.LogWarnf("rebuild encrypted box [%s] from migration entry (conf and backup both unavailable)", entry.BoxID)
+				boxConf = box.GetConf()
+				boxConf.Encrypted = true
+				boxConf.BoxCrypt = &conf.BoxEncryption{
+					WrappedDEK: entry.NewWrappedDEK,
+					WrapNonce:  entry.NewWrapNonce,
+					Spec:       entry.NewSpec,
+					CreatedAt:  time.Now().UnixMilli(),
+				}
+				if saveErr := box.SaveConf(boxConf); saveErr != nil {
+					return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
+						fmt.Sprintf(Conf.Language(320), entry.BoxID+": rebuild encrypted conf from migration entry failed: "+saveErr.Error()))
+				}
 			}
 		}
 		boxConf.BoxCrypt.WrappedDEK = entry.NewWrappedDEK

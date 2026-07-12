@@ -3779,14 +3779,14 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlock
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)
@@ -3828,6 +3828,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 
 			msg := fmt.Sprintf(Conf.language(269), util.EscapeHTML(getAttrViewName(attrView)))
 			util.PushMsg(msg, 5000)
+			src["itemID"] = blockValue.BlockID
 			return
 		}
 	}

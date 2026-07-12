@@ -136,9 +136,10 @@ func prepareBackupForWrite(nc *conf.NotebookCrypto) {
 	nc.Checksum = computeBackupChecksum(nc)
 }
 
-// atomicWriteFile 原子写入：先写 .tmp 再 rename，防止半写入文件残留。
+// atomicWriteFile 原子写入：先写带随机后缀的临时文件再 rename，防止半写入文件残留，
+// 同时避免多个写者竞争同一固定 tmp 文件名造成 lost update。
 func atomicWriteFile(path string, data []byte) error {
-	tmpPath := path + ".tmp"
+	tmpPath := path + "." + gulu.Rand.String(7) + ".tmp"
 	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
 		return err
 	}
@@ -673,12 +674,14 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 	*Conf.NotebookCrypto = *backup
 	Conf.m.Unlock()
 	Conf.Save()
-	// 恢复成功后重写备份（补全 KEKMAC，升级旧备份为 Spec=1）
-	go func() {
-		nc := *backup
-		nc.KEKMAC = computeKEKMAC(&nc, kek)
-		_ = writeNotebookCryptoBackupData(&nc)
-	}()
+	// 恢复成功后同步重写备份（补全 KEKMAC，升级旧备份为 Spec=1）。
+	// 调用方已持有 notebookCryptoMu，且 writeNotebookCryptoBackupData 不再申请该锁，故无死锁；
+	// 同步写避免与 ChangeMasterPassword 的并发备份写竞争同一文件（lost update 导致 verifier 被回退）。
+	nc := *backup
+	nc.KEKMAC = computeKEKMAC(&nc, kek)
+	if err := writeNotebookCryptoBackupData(&nc); err != nil {
+		logging.LogWarnf("rewrite notebook crypto backup after restore failed: %s", err)
+	}
 	logging.LogInfof("notebook crypto restored from backup (e.g. after sync to a new device)")
 	return kek, nil
 }

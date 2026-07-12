@@ -127,7 +127,7 @@ func verifyKEKMAC(nc *conf.NotebookCrypto, kek []byte) bool {
 
 // prepareBackupForWrite 为写入准备备份元数据字段（Spec/BackupID/CreatedAt/Checksum）。
 func prepareBackupForWrite(nc *conf.NotebookCrypto) {
-	conf.UpgradeSpec(nc) // 按需升级旧格式
+	nc.Spec = conf.CurrentNotebookCryptoSpec
 	if nc.BackupID == "" {
 		nc.BackupID = util.RandString(16)
 	}
@@ -334,15 +334,18 @@ func loadNotebookCryptoBackup() (*conf.NotebookCrypto, error) {
 	if err := json.Unmarshal(data, nc); err != nil {
 		return nil, err
 	}
-	// Spec>=1：校验 Checksum，防止备份文件损坏
-	if nc.Spec >= 1 && nc.Checksum != "" {
-		expected := computeBackupChecksum(nc)
-		if nc.Checksum != expected {
-			logging.LogWarnf("notebook crypto backup checksum mismatch: expected %s, got %s", expected, nc.Checksum)
-			return nil, errors.New("notebook crypto backup is corrupted (checksum mismatch)")
-		}
+	conf.UpgradeSpec(nc)
+	if nc.Spec != conf.CurrentNotebookCryptoSpec {
+		return nil, fmt.Errorf("unsupported notebook crypto backup spec [%d]", nc.Spec)
 	}
-	conf.UpgradeSpec(nc) // 按需升级旧格式到当前规范
+	if nc.Checksum == "" {
+		return nil, errors.New("notebook crypto backup checksum is missing")
+	}
+	expected := computeBackupChecksum(nc)
+	if nc.Checksum != expected {
+		logging.LogWarnf("notebook crypto backup checksum mismatch: expected %s, got %s", expected, nc.Checksum)
+		return nil, errors.New("notebook crypto backup is corrupted (checksum mismatch)")
+	}
 	return nc, nil
 }
 

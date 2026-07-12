@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -196,47 +197,28 @@ func TestUnmount0ClearsDEKForUnmountedEncryptedBox(t *testing.T) {
 	}
 }
 
-// TestBackupUpgradeFromSpec0 验证旧格式备份（Spec=0）能被正确升级。
-func TestBackupUpgradeFromSpec0(t *testing.T) {
-	origDataDir := util.DataDir
-	tempDir := t.TempDir()
-	util.DataDir = tempDir
-	defer func() { util.DataDir = origDataDir }()
+// TestBackupRejectsUnsupportedSpec 验证非当前版本的备份被明确拒绝，不执行静默升级或降级。
+func TestBackupRejectsUnsupportedSpec(t *testing.T) {
+	for _, spec := range []int{0, conf.CurrentNotebookCryptoSpec + 1} {
+		t.Run(fmt.Sprintf("spec-%d", spec), func(t *testing.T) {
+			origDataDir := util.DataDir
+			util.DataDir = t.TempDir()
+			defer func() { util.DataDir = origDataDir }()
 
-	// 写 Spec=0 旧格式备份（模拟同步/导入带来的旧备份）
-	oldBackup := &conf.NotebookCrypto{
-		Enabled:     true,
-		MasterSalt:  []byte("oldsalt1234567890"),
-		KEKVerifier: []byte("test-verifier"),
-	}
-	backupPath := filepath.Join(tempDir, ".siyuan", "notebook-crypto-backup.json")
-	os.MkdirAll(filepath.Dir(backupPath), 0755)
-	data, _ := json.Marshal(oldBackup)
-	os.WriteFile(backupPath, data, 0644)
+			backup := &conf.NotebookCrypto{Spec: spec}
+			backupPath := filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+			if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
+				t.Fatal(err)
+			}
+			data, _ := json.Marshal(backup)
+			if err := os.WriteFile(backupPath, data, 0644); err != nil {
+				t.Fatal(err)
+			}
 
-	// 加载：应识别为 Spec=0 并升级
-	nc, err := loadNotebookCryptoBackup()
-	if err != nil {
-		t.Fatalf("loadNotebookCryptoBackup failed: %v", err)
-	}
-	if nc.Spec != 1 {
-		t.Fatalf("expected Spec=1 after upgrade, got %d", nc.Spec)
-	}
-
-	// 写入升级后的备份（prepareBackupForWrite 会补全 Checksum）
-	prepareBackupForWrite(nc)
-	backupDir := filepath.Join(tempDir, ".siyuan")
-	os.MkdirAll(backupDir, 0755)
-	data, _ = json.Marshal(nc)
-	os.WriteFile(backupPath, data, 0644)
-
-	// 重新加载，校验和应通过
-	nc2, err := loadNotebookCryptoBackup()
-	if err != nil {
-		t.Fatalf("reload backup failed: %v", err)
-	}
-	if nc2.Checksum == "" {
-		t.Fatalf("expected non-empty Checksum after write")
+			if _, err := loadNotebookCryptoBackup(); err == nil {
+				t.Fatalf("unsupported notebook crypto spec [%d] should be rejected", spec)
+			}
+		})
 	}
 }
 

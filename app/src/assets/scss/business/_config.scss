@@ -12,9 +12,12 @@
 
   &__tab-container {
     overflow: auto;
-    scrollbar-gutter: stable;
     box-sizing: border-box;
     height: 100%;
+
+    &[data-name="keymap"] {
+      scrollbar-gutter: stable;
+    }
 
     .b3-label:not(.b3-label--inner) {
       margin: 0 16px;

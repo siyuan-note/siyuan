@@ -4,7 +4,7 @@ import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
-import {getContenteditableElement, hasNextSibling, hasPreviousSibling, isNotEditBlock} from "./getBlock";
+import {getContenteditableElement, fixAdjacentTags, hasNextSibling, hasPreviousSibling, isNotEditBlock} from "./getBlock";
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
@@ -146,6 +146,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             refElement.setAttribute("data-subtype", "s");
         }
     }
+    // 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
+    fixAdjacentTags(editElement);
     let html = blockElement.outerHTML;
     let focusHR = false;
     if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {
@@ -183,6 +185,16 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 html = blockElement.outerHTML;
             }
         }
+        // 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
+        // 使用迭代替换处理多个连续相邻标签（全局正则无法匹配重叠情况）
+        // 若中间含有 <wbr>（光标标记），替换后需保留 <wbr>，否则 focusByWbr 无法定位光标
+        let prevHTML: string;
+        do {
+            prevHTML = html;
+            html = html.replace(/(data-type="tag[^"]*">[\s\S]*?<\/span>)((?:\u200b|<wbr>)*)(<span data-type="tag[^"]*">)/, (match, before, between, after) => {
+                return before + (between.indexOf("<wbr>") > -1 ? " <wbr>" : " ") + after;
+            });
+        } while (html !== prevHTML);
         html = protyle.lute.SpinBlockDOM(html);
     }
     // 在数学公式输入框中撤销到最后一步，再继续撤销会撤销编辑器正文内容，从而出发 input 事件

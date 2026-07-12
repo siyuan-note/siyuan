@@ -343,3 +343,31 @@ export const getPreviousFileLi = (current: Element) => {
     }
     return false;
 };
+
+// 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
+export const fixAdjacentTags = (editableElement: Element) => {
+    if (!editableElement) {
+        return;
+    }
+    let node: Node = editableElement.firstChild;
+    while (node) {
+        const next: Node = node.nextSibling;
+        if (node.nodeType !== 3) {
+            const tagSpan = node as HTMLElement;
+            if (tagSpan.tagName === "SPAN" &&
+                (tagSpan.getAttribute("data-type") || "").split(" ").includes("tag")) {
+                // 向后查找跳过 ZWSP 文本节点和 <wbr> 后的下一个节点
+                let after = next;
+                while (after && ((after.nodeType === 3 && after.textContent === Constants.ZWSP) ||
+                    (after.nodeType === 1 && (after as HTMLElement).tagName === "WBR"))) {
+                    after = after.nextSibling;
+                }
+                if (after && after.nodeType !== 3 && (after as HTMLElement).tagName === "SPAN" &&
+                    ((after as HTMLElement).getAttribute("data-type") || "").split(" ").includes("tag")) {
+                    tagSpan.after(" ");
+                }
+            }
+        }
+        node = next;
+    }
+};

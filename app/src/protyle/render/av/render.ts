@@ -728,12 +728,11 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewShowIcon") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
-            item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
-                if (operation.data) {
-                    cellItem.classList.remove("fn__none");
-                } else {
-                    cellItem.classList.add("fn__none");
-                }
+            item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji').forEach(cellItem => {
+                cellItem.classList.toggle("fn__none", !operation.data);
+            });
+            item.querySelectorAll('.av__cell[data-dtype="relation"] .av__cell--relation').forEach(cellItem => {
+                cellItem.firstElementChild.classList.toggle("fn__none", !operation.data);
             });
         });
         return;

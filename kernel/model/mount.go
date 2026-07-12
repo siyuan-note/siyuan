@@ -171,6 +171,16 @@ func RemoveBox(boxID string) (err error) {
 		}
 	}
 
+	// 加密笔记本删除前先清理导出临时目录并撤销托管下载注册表。
+	// 必须在 filelock.Remove 之前执行：若 box 目录删除失败导致提前 return，导出清理仍已完成，
+	// 避免明文产物在 IsEncryptedBox 返回 false 后被 fail-open 下载
+	if isEncrypted {
+		if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", boxID)); rmErr != nil {
+			logging.LogWarnf("remove export/[%s] dir failed: %s", boxID, rmErr)
+		}
+		RevokeManagedEncryptedExportsForBox(boxID)
+	}
+
 	if err = filelock.Remove(localPath); err != nil {
 		return
 	}

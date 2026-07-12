@@ -34,7 +34,6 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/ast"
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
@@ -359,10 +358,11 @@ func serveExport(ginServer *gin.Engine) {
 			return
 		}
 
-		// 加密笔记本锁定后拒绝访问其导出临时目录
-		if parts := strings.SplitN(strings.TrimPrefix(decodedPath, "/"), "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
+		// 加密导出受控路径（<boxID>/<kind>/<file>）：按注册表无条件校验，不依赖 IsEncryptedBox。
+		// 笔记本删除后 IsEncryptedBox 返回 false，若以它为门控会 fail-open 暴露明文产物。
+		if model.IsManagedEncryptedExportPath(decodedPath) {
 			boxID, artifact, ok := model.ResolveManagedEncryptedExport(decodedPath)
-			if !ok || boxID != parts[0] {
+			if !ok {
 				c.Status(http.StatusNotFound)
 				return
 			}

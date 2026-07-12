@@ -303,6 +303,43 @@ func TestBackupKEKMACVerification(t *testing.T) {
 	}
 }
 
+// TestBackupMACRoundTrip 验证 writeNotebookCryptoBackupData(nc, kek) 写入的备份，
+// 重新加载后 verifyKEKMAC 能通过——即 MAC 在 prepareBackupForWrite 之后计算（顺序正确）。
+func TestBackupMACRoundTrip(t *testing.T) {
+	origDataDir := util.DataDir
+	tempDir := t.TempDir()
+	util.DataDir = tempDir
+	defer func() { util.DataDir = origDataDir }()
+
+	password := "round-trip-test"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	nc := &conf.NotebookCrypto{
+		Enabled:     true,
+		MasterSalt:  salt,
+		KDFParams:   params,
+		KEKVerifier: verifierCT,
+	}
+
+	// 通过 writeNotebookCryptoBackupData 写入（内部 prepareBackupForWrite 后计算 MAC）
+	if err := writeNotebookCryptoBackupData(nc, kek); err != nil {
+		t.Fatalf("writeNotebookCryptoBackupData failed: %v", err)
+	}
+
+	// 重新加载，验证 Checksum 和 MAC 均通过
+	loaded, err := loadNotebookCryptoBackup()
+	if err != nil {
+		t.Fatalf("loadNotebookCryptoBackup failed: %v", err)
+	}
+	if loaded.Spec >= 1 && len(loaded.KEKMAC) > 0 && !verifyKEKMAC(loaded, kek) {
+		t.Fatalf("verifyKEKMAC failed on round-trip backup (MAC was computed in wrong order)")
+	}
+}
+
 // TestLockBoxConcurrentReads 验证 LockBox（单 box）能与在途读锁正确串行化。
 func TestLockBoxConcurrentReads(t *testing.T) {
 	LockBox("concurrent-single-box") // 清理初始状态

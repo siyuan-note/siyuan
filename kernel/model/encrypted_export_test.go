@@ -13,7 +13,7 @@ func TestManagedEncryptedExportRevocation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	relativePath := registerManagedEncryptedExport(boxID, artifact)
+	relativePath := registerManagedEncryptedExport(boxID, "resources", artifact)
 	resolvedBoxID, resolvedArtifact, ok := ResolveManagedEncryptedExport("/" + relativePath)
 	if !ok || resolvedBoxID != boxID || resolvedArtifact != artifact {
 		t.Fatalf("managed export was not resolved correctly: box=%q artifact=%q ok=%t", resolvedBoxID, resolvedArtifact, ok)

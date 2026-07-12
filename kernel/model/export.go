@@ -790,7 +790,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 	exportFilePath = path.Join("temp", "export")
 	if encryptedBoxID != "" {
-		exportFilePath = path.Join("temp", "export", registerManagedEncryptedExport(encryptedBoxID, zipFilePath))
+		exportFilePath = path.Join("temp", "export", registerManagedEncryptedExport(encryptedBoxID, "resources", zipFilePath))
 	} else {
 		exportFilePath = path.Join(exportFilePath, filepath.Base(zipFilePath))
 	}
@@ -2135,7 +2135,7 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 	}
 
 	defBlockIDs, docPaths := prepareExportTrees(docPaths)
-	zipPath = exportPandocConvertZip(baseFolderName, docPaths, defBlockIDs, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(block.BoxID, baseFolderName, docPaths, defBlockIDs, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -2161,7 +2161,7 @@ func ExportNotebookMarkdown(boxID string) (zipPath string) {
 	}
 
 	defBlockIDs, docPaths := prepareExportTrees(docPaths)
-	zipPath = exportPandocConvertZip(box.Name, docPaths, defBlockIDs, "", "", ".md")
+	zipPath = exportPandocConvertZip(boxID, box.Name, docPaths, defBlockIDs, "", "", ".md")
 	return
 }
 
@@ -2280,7 +2280,28 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	baseFolderName = path.Join(dir, name)
 	box := Conf.Box(boxID)
 
+	// 加密笔记本的导出全程持读锁，并把明文中间目录与产物写到 temp/export/<boxID>/sy/<exportID>/ 受控目录下，
+	// 以便 LockBox 清理与托管下载校验。普通笔记本保持既有以 boxName 为名的导出路径，行为不变。
+	encrypted := IsEncryptedBox(boxID)
+	var exportID string
+	if encrypted {
+		HoldBoxReadLock(boxID)
+		defer ReleaseBoxReadLock(boxID)
+		if _, dekErr := GetDEKIfUnlocked(boxID); dekErr != nil {
+			logging.LogErrorf("export .sy.zip of encrypted box [%s] failed: locked", boxID)
+			return
+		}
+		var idErr error
+		exportID, idErr = newManagedEncryptedExportID()
+		if idErr != nil {
+			logging.LogErrorf("new export id failed: %s", idErr)
+			return
+		}
+	}
 	exportDir := filepath.Join(util.TempDir, "export", baseFolderName)
+	if encrypted {
+		exportDir = filepath.Join(util.TempDir, "export", boxID, "sy", exportID)
+	}
 	if err := os.MkdirAll(exportDir, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
@@ -2533,8 +2554,15 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 	}
 
+	// 加密笔记本先写 .partial 再原子 rename，并把产物登记为托管下载令牌；普通笔记本保持原行为。
+	zipBaseName := baseFolderName + ".sy.zip"
 	zipPath = exportDir + ".sy.zip"
-	zip, err := gulu.Zip.Create(zipPath)
+	zipPartialPath := zipPath + ".partial"
+	if encrypted {
+		zipPath = filepath.Join(util.TempDir, "export", boxID, "sy", exportID+"-"+zipBaseName)
+		zipPartialPath = zipPath + ".partial"
+	}
+	zip, err := gulu.Zip.Create(zipPartialPath)
 	if err != nil {
 		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, err)
 		return ""
@@ -2552,9 +2580,17 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export .sy.zip failed: %s", err)
 	}
+	if err = os.Rename(zipPartialPath, zipPath); err != nil {
+		logging.LogErrorf("publish export .sy.zip [%s] failed: %s", zipPath, err)
+		return ""
+	}
 
 	os.RemoveAll(exportDir)
-	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	if encrypted {
+		zipPath = "/export/" + registerManagedEncryptedExport(boxID, "sy", zipPath)
+	} else {
+		zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	}
 	return
 }
 
@@ -3834,7 +3870,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	return ast.WalkSkipChildren
 }
 
-func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []string, pandocFrom, pandocTo, ext string) (zipPath string) {
+func exportPandocConvertZip(boxID, baseFolderName string, docPaths, defBlockIDs []string, pandocFrom, pandocTo, ext string) (zipPath string) {
 	defer util.ClearPushProgress(100)
 
 	dir, name := path.Split(baseFolderName)
@@ -3846,7 +3882,28 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 	}
 	baseFolderName = path.Join(dir, name)
 
+	// 加密笔记本的导出全程持读锁，并把明文中间目录与产物写到 temp/export/<boxID>/markdown/<exportID>/ 受控目录下，
+	// 以便 LockBox 清理与托管下载校验。普通笔记本保持既有以 baseFolderName 为名的导出路径，行为不变。
+	encrypted := IsEncryptedBox(boxID)
+	var exportID string
+	if encrypted {
+		HoldBoxReadLock(boxID)
+		defer ReleaseBoxReadLock(boxID)
+		if _, dekErr := GetDEKIfUnlocked(boxID); dekErr != nil {
+			logging.LogErrorf("export markdown of encrypted box [%s] failed: locked", boxID)
+			return
+		}
+		var idErr error
+		exportID, idErr = newManagedEncryptedExportID()
+		if idErr != nil {
+			logging.LogErrorf("new export id failed: %s", idErr)
+			return
+		}
+	}
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
+	if encrypted {
+		exportFolder = filepath.Join(util.TempDir, "export", boxID, "markdown", exportID)
+	}
 	os.RemoveAll(exportFolder)
 	if err := os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
@@ -3904,7 +3961,7 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		}
 
 		// 解析导出后的标准 Markdown，汇总 assets
-		boxID := tree.Box
+		treeBoxID := tree.Box
 		tree = parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
 		removeAssetsID(tree, assetsOldNew, assetsNewOld)
 
@@ -3933,8 +3990,8 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 
 			spaceDecodedOldAsset := strings.ReplaceAll(oldAsset, "%20", " ")
 			srcPath := ""
-			if IsEncryptedBox(boxID) {
-				srcPath, _ = GetAssetAbsPathInBox(spaceDecodedOldAsset, boxID)
+			if IsEncryptedBox(treeBoxID) {
+				srcPath, _ = GetAssetAbsPathInBox(spaceDecodedOldAsset, treeBoxID)
 			}
 			if "" == srcPath {
 				srcPath = assetsPathMap[AssetPathWithoutQuery(spaceDecodedOldAsset)]
@@ -3966,8 +4023,15 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(docPaths), name)))
 	}
 
+	// 加密笔记本先写 .partial 再原子 rename，并把产物登记为托管下载令牌；普通笔记本保持原行为。
+	zipBaseName := baseFolderName + ext + ".zip"
 	zipPath = exportFolder + ".zip"
-	zip, err := gulu.Zip.Create(zipPath)
+	zipPartialPath := zipPath + ".partial"
+	if encrypted {
+		zipPath = filepath.Join(util.TempDir, "export", boxID, "markdown", exportID+"-"+zipBaseName)
+		zipPartialPath = zipPath + ".partial"
+	}
+	zip, err := gulu.Zip.Create(zipPartialPath)
 	if err != nil {
 		logging.LogErrorf("create export markdown zip [%s] failed: %s", exportFolder, err)
 		return ""
@@ -4000,9 +4064,17 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export markdown zip failed: %s", err)
 	}
+	if err = os.Rename(zipPartialPath, zipPath); err != nil {
+		logging.LogErrorf("publish export markdown zip [%s] failed: %s", zipPath, err)
+		return ""
+	}
 
 	os.RemoveAll(exportFolder)
-	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	if encrypted {
+		zipPath = "/export/" + registerManagedEncryptedExport(boxID, "markdown", zipPath)
+	} else {
+		zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
+	}
 	return
 }
 

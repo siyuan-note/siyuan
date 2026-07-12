@@ -1635,12 +1635,13 @@ func AutoLockIdleEncryptedBoxesJob() {
 			elapsed := now - lastAccess
 			if elapsed >= thresholdNs {
 				logging.LogInfof("auto-locking idle encrypted notebook [%s] (elapsed=%ds, threshold=%dm)", boxID, elapsed/1e9, threshold)
-				Unmount(boxID)
-				// 自动锁定会关闭正在编辑的文档，推一条提示避免用户以为崩溃
+				// 先取笔记本名称再 Unmount：Unmount 会关闭笔记本，之后 Conf.Box 返回 nil 导致提示显示 boxID
 				boxName := boxID
 				if box := Conf.Box(boxID); nil != box {
 					boxName = box.Name
 				}
+				Unmount(boxID)
+				// 自动锁定会关闭正在编辑的文档，推一条提示避免用户以为崩溃
 				util.PushMsg(fmt.Sprintf(Conf.Language(322), boxName), 0)
 			}
 		}

@@ -502,8 +502,7 @@ func disableEncryptedNotebooks(c *gin.Context) {
 }
 
 // createEncryptedNotebook 创建一个新的加密笔记本。前置：加密功能已启用。
-// 创建时需提供主密码（用于派生 KEK 包络 DEK）。创建后笔记本处于锁定状态，
-// 调用方需再调 unlockBox + openNotebook 才能打开。
+// 创建时需提供主密码（用于派生 KEK 包络 DEK）。创建成功后内核已原子完成挂载。
 func createEncryptedNotebook(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -528,14 +527,30 @@ func createEncryptedNotebook(c *gin.Context) {
 		return
 	}
 
+	// 创建时 DEK 已缓存 + 加密 db 已打开，此处直接挂载；失败则锁定回滚，避免 DEK 残留
+	if _, mountErr := model.Mount(id); mountErr != nil {
+		model.LockBox(id)
+		ret.Code = -1
+		ret.Msg = mountErr.Error()
+		return
+	}
+
+	box := model.Conf.GetBox(id)
+	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
+	evt.Data = map[string]any{
+		"box":     box,
+		"existed": true,
+	}
+	util.PushEvent(evt)
+
 	ret.Data = map[string]any{
-		"notebook": model.Conf.GetBox(id),
+		"notebook": box,
 	}
 }
 
-// unlockBox 用主密码派生 KEK 并解出指定加密笔记本的 DEK，缓存到内存。
+// unlockNotebook 用主密码派生 KEK 并解出指定加密笔记本的 DEK，缓存到内存。
 // 解锁后该笔记本即可被 Mount。每次调用跑一次 Argon2id（约 1 秒）。
-func unlockBox(c *gin.Context) {
+func unlockNotebook(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -575,8 +590,75 @@ func unlockBox(c *gin.Context) {
 	}
 }
 
-// lockBox 锁定指定加密笔记本：清除其 DEK 缓存并 Unmount。
-func lockBox(c *gin.Context) {
+// unlockAndOpenNotebook 原子化解锁并挂载加密笔记本：UnlockBox 成功后立即 Mount，
+// Mount 失败则 LockBox 回滚（清除 DEK），避免 DEK 残留在内存但笔记本未挂载的不一致状态。
+func unlockAndOpenNotebook(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var notebook, password string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("notebook", &notebook, true, true),
+		util.BindJsonArg("password", &password, true, true),
+	) {
+		return
+	}
+
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	boxCrypt, err := model.GetBoxEncryption(notebook)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(318)
+		return
+	}
+	if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(319)
+		return
+	}
+
+	if err := model.UnlockBox(notebook, password, boxCrypt); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	// 解锁成功后立即挂载；失败则回滚锁定，清除 DEK 避免残留
+	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
+	defer util.PushClearMsg(msgId)
+	if _, mountErr := model.Mount(notebook); mountErr != nil {
+		model.LockBox(notebook)
+		ret.Code = -1
+		ret.Msg = mountErr.Error()
+		return
+	}
+
+	box := model.Conf.Box(notebook)
+	if nil == box {
+		model.LockBox(notebook)
+		ret.Code = -1
+		ret.Msg = "opened notebook [" + notebook + "] not found"
+		return
+	}
+
+	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
+	evt.Data = map[string]any{
+		"box":     box,
+		"existed": true,
+	}
+	util.PushEvent(evt)
+}
+
+// lockNotebook 锁定指定加密笔记本：清除其 DEK 缓存并 Unmount。
+func lockNotebook(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 

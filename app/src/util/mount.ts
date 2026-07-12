@@ -181,10 +181,7 @@ export const newEncryptedNotebook = () => {
                 password
             });
             if (response.code === 0) {
-                // 内核创建时已解锁（DEK 已缓存 + 加密 db 已打开），直接挂载
-                fetchPost("/api/notebook/openNotebook", {
-                    notebook: response.data.notebook.id
-                });
+                // createEncryptedNotebook 内核已原子完成创建+挂载，无需再单独 openNotebook
                 dialog.destroy();
             } else {
                 btnsElement[1].disabled = false;
@@ -221,15 +218,12 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
             return false;
         }
         btnsElement[1].disabled = true;
-        // 先解锁（派生 KEK + 解 DEK + 打开加密 db，Argon2id 约耗时 1 秒），成功后再挂载
-        const response = await fetchSyncPost("/api/notebook/unlockBox", {
+        // 原子化解锁并挂载：UnlockBox 成功后立即 Mount，Mount 失败则后端自动 LockBox 回滚，避免 DEK 残留
+        const response = await fetchSyncPost("/api/notebook/unlockAndOpenNotebook", {
             notebook: notebookId,
             password
         });
         if (response.code === 0) {
-            fetchPost("/api/notebook/openNotebook", {
-                notebook: notebookId
-            });
             dialog.destroy();
         } else {
             btnsElement[1].disabled = false;

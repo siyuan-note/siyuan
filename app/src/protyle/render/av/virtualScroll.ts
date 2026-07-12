@@ -295,6 +295,40 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     });
 };
 
+// 读取虚拟滚动渲染窗口。insertAttrViewBlockAnimation/insertGalleryItemAnimation 插入的 ghost 占位行
+// 没有 data-index，会污染 renderedEnd，需跳过；同时内核按 previousID 决定新行在数据中的位置，
+// 需据此扩展渲染窗口让新行立即可见，否则虚拟滚动下新行会落在窗口外不渲染。
+export const getBodyVirtualData = (bodyEl: HTMLElement, endSelector: string, firstRowIndex: number): IAVVirtualData => {
+    // 末尾标记前可能存在连续 ghost 行，向前回溯找到真实末行
+    let lastRow = bodyEl.querySelector(endSelector).previousElementSibling as HTMLElement;
+    while (lastRow && !lastRow.getAttribute("data-index")) {
+        lastRow = lastRow.previousElementSibling as HTMLElement;
+    }
+    let renderedStart = firstRowIndex;
+    let renderedEnd = parseInt(lastRow?.getAttribute("data-index") || "");
+    const ghostElements = bodyEl.querySelectorAll('[data-type="ghost"]');
+    if (ghostElements.length > 0) {
+        // 连续 ghost 行紧跟同一 previousElement，取首个 ghost 前最近的非 ghost 元素确定新行插入点
+        let prev = (ghostElements[0] as HTMLElement).previousElementSibling as HTMLElement;
+        while (prev && prev.getAttribute("data-type") === "ghost") {
+            prev = prev.previousElementSibling as HTMLElement;
+        }
+        const prevIndex = prev?.getAttribute("data-index");
+        if (prevIndex) {
+            renderedEnd = Math.max(renderedEnd, parseInt(prevIndex) + ghostElements.length);
+        } else {
+            // previousElement 为表头（previousID 为空），新行插在数据最前面
+            renderedStart = 0;
+            renderedEnd = Math.max(renderedEnd, ghostElements.length - 1);
+        }
+    }
+    return {
+        renderedStart,
+        renderedEnd,
+        topSpacerHeight: bodyEl.querySelector(".av__spacer")?.clientHeight || 0,
+    };
+};
+
 const getBodyData = (bodyEl: HTMLElement) => {
     const avEl = bodyEl.closest(".av") as HTMLElement;
     if (!avEl) return null;

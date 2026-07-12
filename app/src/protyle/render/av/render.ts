@@ -19,7 +19,7 @@ import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
-import {initVirtualScroll} from "./virtualScroll";
+import {getBodyVirtualData, initVirtualScroll} from "./virtualScroll";
 
 interface IIds {
     groupId: string,
@@ -462,11 +462,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             if (!item.querySelector(".av__row") || e.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
                 return;
             }
-            virtualData[item.getAttribute("data-group-id") || "all"] = ({
-                renderedStart: parseInt(item.querySelectorAll(".av__row")[1].getAttribute("data-index")),
-                renderedEnd: parseInt(item.querySelector(".av__row--util").previousElementSibling.getAttribute("data-index")),
-                topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
-            });
+            virtualData[item.getAttribute("data-group-id") || "all"] = getBodyVirtualData(
+                item, ".av__row--util", parseInt(item.querySelectorAll(".av__row")[1].getAttribute("data-index")));
         });
         const headerTransformElement = e.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
         const footerTransformElement = e.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;

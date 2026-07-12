@@ -7,7 +7,7 @@ import {bindAvSearch} from "../search";
 import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
-import {initVirtualScroll} from "../virtualScroll";
+import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
 import {getRowHTML} from "../row";
 
 interface IIds {
@@ -192,11 +192,8 @@ export const renderGallery = async (options: {
         if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
             return;
         }
-        virtualData[item.getAttribute("data-group-id") || "all"] = ({
-            renderedStart: parseInt(item.querySelector(".av__gallery-item").getAttribute("data-index")),
-            renderedEnd: parseInt(item.querySelector(".av__gallery-add").previousElementSibling.getAttribute("data-index")),
-            topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
-        });
+        const firstItemIndex = parseInt(item.querySelector(".av__gallery-item:not([data-type=ghost])").getAttribute("data-index"));
+        virtualData[item.getAttribute("data-group-id") || "all"] = getBodyVirtualData(item, ".av__gallery-add", firstItemIndex);
     });
     const resetData = {
         isSearching: searchInputElement && document.activeElement === searchInputElement,

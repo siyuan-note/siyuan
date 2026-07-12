@@ -6,6 +6,7 @@ import {avRender, genTabHeaderHTML} from "../render";
 import {afterRenderGallery, renderGallery} from "../gallery/render";
 import {escapeHtml} from "../../../../util/escape";
 import {getRowHTML} from "../row";
+import {getBodyVirtualData} from "../virtualScroll";
 
 interface IIds {
     groupId: string,
@@ -94,11 +95,8 @@ export const renderKanban = async (options: {
         if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
             return;
         }
-        virtualData[item.getAttribute("data-group-id")] = ({
-            renderedStart: parseInt(item.querySelector(".av__gallery-item").getAttribute("data-index")),
-            renderedEnd: parseInt(item.querySelector(".av__gallery-add").previousElementSibling.getAttribute("data-index")),
-            topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
-        });
+        const firstItemIndex = parseInt(item.querySelector(".av__gallery-item:not([data-type=ghost])").getAttribute("data-index"));
+        virtualData[item.getAttribute("data-group-id")] = getBodyVirtualData(item, ".av__gallery-add", firstItemIndex);
     });
     const resetData = {
         isSearching: searchInputElement && document.activeElement === searchInputElement,

@@ -729,9 +729,6 @@ const initKernel = (workspace, port, lang, safeMode) => {
         if (workspace && "" !== workspace) {
             cmds.push("--workspace", workspace);
         }
-        if (port && "" !== port) {
-            cmds.push("--port", port);
-        }
         if (lang && "" !== lang) {
             cmds.push("--lang", lang);
         }

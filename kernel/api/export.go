@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
@@ -994,6 +995,28 @@ func copyExportFile(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = "invalid source path"
 		return
+	}
+
+	// 加密笔记本的导出产物位于 temp/export/<boxID>/... 受控目录，复制前同样需校验：
+	// 该 box 必须处于解锁状态、且产物仍登记在托管下载表中（锁定后会被清除并撤销）。
+	// relativePath 去掉 "/export/" 前缀以与 serveExport 的守卫及托管注册 key（<boxID>/kind/<name>）对齐。
+	relativeExportPath := strings.TrimPrefix(srcPath, "/export/")
+	relativeExportPath = strings.TrimPrefix(relativeExportPath, "export/")
+	if parts := strings.SplitN(strings.TrimPrefix(relativeExportPath, "/"), "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
+		boxID, _, ok := model.ResolveManagedEncryptedExport(relativeExportPath)
+		if !ok || boxID != parts[0] {
+			ret.Code = -1
+			ret.Msg = "export file is not available"
+			return
+		}
+		model.HoldBoxReadLock(boxID)
+		if _, dekErr := model.GetDEKIfUnlocked(boxID); dekErr != nil {
+			model.ReleaseBoxReadLock(boxID)
+			ret.Code = -1
+			ret.Msg = "encrypted notebook locked"
+			return
+		}
+		defer model.ReleaseBoxReadLock(boxID)
 	}
 
 	if util.IsSensitivePath(dest) {

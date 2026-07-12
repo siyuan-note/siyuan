@@ -568,3 +568,46 @@ func insertLocalAssets(c *gin.Context) {
 		"succMap": succMap,
 	}
 }
+
+func insertCover(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	name := arg["name"].(string)
+	// 防止路径穿越：只允许文件名，不能含分隔符或 ..
+	name = filepath.Base(name)
+	if "" == name || "." == name || ".." == name {
+		ret.Code = -1
+		ret.Msg = "invalid name"
+		return
+	}
+
+	srcPath := filepath.Join(util.AppearancePath, "covers", name)
+	if gulu.File.IsDir(srcPath) {
+		ret.Code = -1
+		ret.Msg = "invalid cover"
+		return
+	}
+	if _, statErr := os.Stat(srcPath); nil != statErr {
+		ret.Code = -1
+		ret.Msg = "cover not found"
+		return
+	}
+
+	id := arg["id"].(string)
+	succMap, err := model.InsertLocalAssets(id, []string{srcPath}, true)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]any{
+		"succMap": succMap,
+	}
+}

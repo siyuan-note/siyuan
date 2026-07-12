@@ -1,7 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {getContenteditableElement, getParentBlock} from "../wysiwyg/getBlock";
+import {getContenteditableElement, getParentBlock, fixAdjacentTags} from "../wysiwyg/getBlock";
 import {
     fixTableRange,
     focusBlock,
@@ -472,6 +472,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.querySelector("wbr")?.remove();
+            // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
+            fixAdjacentTags(getContenteditableElement(blockElement));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
             input(protyle, blockElement as HTMLElement, range);
             return;

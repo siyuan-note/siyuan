@@ -45,8 +45,10 @@ func newManagedEncryptedExportID() (string, error) {
 	return hex.EncodeToString(random), nil
 }
 
-func registerManagedEncryptedExport(boxID, artifact string) string {
-	relativePath := path.Join(boxID, "resources", filepath.Base(artifact))
+// registerManagedEncryptedExport 登记一个加密笔记本的导出产物，返回相对路径作为下载令牌。
+// kind 标识产物来源（resources/sy/markdown），仅影响注册 key 的分段，解析与撤销均按 boxID 前缀匹配。
+func registerManagedEncryptedExport(boxID, kind, artifact string) string {
+	relativePath := path.Join(boxID, kind, filepath.Base(artifact))
 	managedEncryptedExports.Lock()
 	managedEncryptedExports.jobs[relativePath] = managedEncryptedExport{
 		boxID:     boxID,

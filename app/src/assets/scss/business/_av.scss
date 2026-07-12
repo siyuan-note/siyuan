@@ -867,7 +867,7 @@
           border: 0;
           background-color: var(--b3-menu-background);
           flex: 1;
-          height: 30px;
+          height: 32px;
           color: var(--b3-theme-on-background);
         }
       }
@@ -882,7 +882,7 @@
 
       &__label {
         overflow: hidden;
-        min-height: 30px;
+        min-height: 28px;
       }
 
       &__item {

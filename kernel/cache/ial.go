@@ -143,6 +143,20 @@ func GetBlockIALInBox(id, boxID string) (ret map[string]string) {
 	return ial.(map[string]string)
 }
 
+// GetBlockIALWithBoxFallback 先查 box-aware key，未命中再回退到 bare key。
+//
+// 写入端存在两套键命名空间：部分路径写 box-aware key（PutBlockIALInBox，用于加密笔记本隔离），
+// 部分历史路径仍写 bare key（PutBlockIAL）。读取端若只查其一会漏掉另一侧的更新，因此这里按
+// box-aware 优先、bare key 回退的顺序查询，与 treenode.GetDynamicRefText 的回退策略保持一致。
+func GetBlockIALWithBoxFallback(id, boxID string) (ret map[string]string) {
+	if "" != boxID {
+		if ret = GetBlockIALInBox(id, boxID); nil != ret {
+			return
+		}
+	}
+	return GetBlockIAL(id)
+}
+
 func RemoveBlockIAL(id string) {
 	blockIALCacheKeysMu.Lock()
 	keys := blockIALCacheKeys[id]

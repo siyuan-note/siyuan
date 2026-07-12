@@ -6117,11 +6117,11 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 				attrs[av.NodeAttrViewNames] = avNames
 			}
 
-			oldAttrs, setErr := setNodeAttrs0(node, attrs, "")
+			oldAttrs, setErr := setNodeAttrs0(node, attrs, bt.BoxID)
 			if nil != setErr {
 				continue
 			}
-			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+			cache.PutBlockIALInBox(node.ID, bt.BoxID, parse.IAL2Map(node.KramdownIAL))
 			pushBlockAttrs(oldAttrs, node)
 			if "" != avNames {
 				node.RemoveIALAttr(av.NodeAttrViewNames)

@@ -362,7 +362,11 @@ func BatchGetBlockAttrsWitTrees(ids []string, trees map[string]*parse.Tree) (ret
 
 	hitCache := true
 	for _, id := range ids {
-		ial := cache.GetBlockIAL(id)
+		boxID := ""
+		if tree := trees[id]; nil != tree {
+			boxID = tree.Box
+		}
+		ial := cache.GetBlockIALWithBoxFallback(id, boxID)
 		if nil != ial {
 			ret[id] = ial
 			continue
@@ -390,7 +394,11 @@ func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
 
 	hitCache := true
 	for _, id := range ids {
-		ial := cache.GetBlockIAL(id)
+		boxID := ""
+		if bt := treenode.GetBlockTree(id); nil != bt {
+			boxID = bt.BoxID
+		}
+		ial := cache.GetBlockIALWithBoxFallback(id, boxID)
 		if nil != ial {
 			ret[id] = ial
 			continue
@@ -416,12 +424,24 @@ func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
 
 func GetBlockAttrs(id string) (ret map[string]string) {
 	ret = map[string]string{}
-	if cached := cache.GetBlockIAL(id); nil != cached {
+	// 写入端部分路径用 box-aware key、部分用 bare key，这里按 box-aware 优先、bare key 回退查询，
+	// 避免漏掉任一命名空间的更新（如块绑定数据库后写 box-aware key，但旧 bare key 仍是绑定前旧值）。
+	bt := treenode.GetBlockTree(id)
+	boxID := ""
+	if nil != bt {
+		boxID = bt.BoxID
+	}
+	if cached := cache.GetBlockIALWithBoxFallback(id, boxID); nil != cached {
 		ret = cached
 		return
 	}
 
-	tree := loadTreeByBlockID(id)
+	var tree *parse.Tree
+	if nil != bt {
+		tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	} else {
+		tree = loadTreeByBlockID(id)
+	}
 	if nil == tree {
 		return
 	}
@@ -433,7 +453,7 @@ func GetBlockAttrs(id string) (ret map[string]string) {
 func getBlockAttrsFromTree(id string, tree *parse.Tree) (ret map[string]string) {
 	ret = map[string]string{}
 
-	ial := cache.GetBlockIAL(id)
+	ial := cache.GetBlockIALWithBoxFallback(id, tree.Box)
 	if nil != ial {
 		for k, v := range ial {
 			ret[k] = v
@@ -450,7 +470,7 @@ func getBlockAttrsFromTree(id string, tree *parse.Tree) (ret map[string]string) 
 	for _, kv := range node.KramdownIAL {
 		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
 	}
-	cache.PutBlockIAL(id, ret)
+	cache.PutBlockIALInBox(id, tree.Box, ret)
 	return
 }
 

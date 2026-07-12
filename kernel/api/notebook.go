@@ -629,7 +629,7 @@ func setNotebookCryptoAutoLock(c *gin.Context) {
 	model.Conf.Save()
 }
 
-// touchEncryptedNotebooks 由前端真实用户交互调用，刷新已解锁加密笔记本的闲置计时。
+// touchEncryptedNotebooks 由前端真实用户交互或 headless 客户端显式保活调用，刷新已解锁加密笔记本的闲置计时。
 func touchEncryptedNotebooks(c *gin.Context) {
 	model.TouchUnlockedEncryptedBoxes()
 	c.JSON(http.StatusOK, gulu.Ret.NewResult())

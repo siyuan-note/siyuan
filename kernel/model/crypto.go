@@ -490,9 +490,8 @@ func recoverMasterPasswordMigration() {
 	}
 }
 
-// hasEncryptedNotebook 检查是否已存在加密笔记本（即便功能未启用/已禁用，只要磁盘上有加密 box）。
-// 包括 conf 损坏但存在 per-notebook backup 的 box。EnableEncryptedNotebook 的防呆守卫用：
-// 存在加密笔记本时禁止重新生成 MasterSalt（会孤立旧 WrappedDEK）。
+// hasEncryptedNotebook 检查数据目录中是否存在加密笔记本，不依赖全局加密功能是否启用。
+// EnableEncryptedNotebook 用它避免重新生成 MasterSalt，从而孤立旧 WrappedDEK。
 func hasEncryptedNotebook() bool {
 	return len(ListAllEncryptedBoxIDs()) > 0
 }
@@ -505,8 +504,8 @@ var (
 	cachedDEKsLock sync.RWMutex
 )
 
-// boxLastAccess 记录每个加密笔记本最近一次加解密访问时间（unix 纳秒），供自动锁定 cron 使用。
-// key: boxID, value: *atomic.Int64。UnlockBox 成功时初始化，GetDEK 每次成功读取时更新，lockBoxHeld 清理。
+// boxLastAccess 记录每个加密笔记本最近一次真实用户交互或显式保活时间（unix 纳秒），供自动锁定 cron 使用。
+// key: boxID, value: *atomic.Int64。UnlockBox 成功时初始化，Unmount 时清理。
 var boxLastAccess sync.Map
 
 // EnableEncryptedNotebook 启用加密笔记本功能：生成 MasterSalt、派生 KEK、写入校验值并持久化。
@@ -1458,15 +1457,6 @@ func readNotebookCryptBackup(boxID string) (*conf.BoxEncryption, error) {
 	return &crypt, nil
 }
 
-// removeNotebookCryptBackup 清除加密笔记本的 BoxCrypt 备份。
-// 关闭/锁定/删除加密笔记本时调用，避免残留过期备份数据。
-func removeNotebookCryptBackup(boxID string) {
-	backupPath := notebookCryptBackupPath(boxID)
-	if err := filelock.Remove(backupPath); err != nil && !os.IsNotExist(err) {
-		logging.LogErrorf("remove notebook crypt backup [%s] failed: %s", backupPath, err)
-	}
-}
-
 func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	boxID := ExtractBoxIDFromAssetsPath(srcPath)
 	if boxID != "" && IsEncryptedBox(boxID) {
@@ -1583,15 +1573,7 @@ func zeroAndClear(key []byte) {
 	}
 }
 
-// touchBoxAccess 更新指定加密 notebook 的最后访问时间戳（unix 纳秒），供自动锁定 cron 使用。
-// 热路径（每次加解密），仅做无锁 Load + atomic Store，不阻塞 DEK 缓存读写。
-func touchBoxAccess(boxID string) {
-	if val, ok := boxLastAccess.Load(boxID); ok {
-		val.(*atomic.Int64).Store(time.Now().UnixNano())
-	}
-}
-
-// TouchUnlockedEncryptedBoxes 仅供真实用户交互触发，刷新当前已解锁笔记本的闲置计时。
+// TouchUnlockedEncryptedBoxes 由真实用户交互或 headless 客户端的显式保活调用，刷新当前已解锁笔记本的闲置计时。
 func TouchUnlockedEncryptedBoxes() {
 	now := time.Now().UnixNano()
 	cachedDEKsLock.RLock()

@@ -415,6 +415,11 @@ func (searcher *AssetsSearcher) FullIndex() {
 			return nil
 		}
 
+		// 加密笔记本的 asset 是密文，跳过全量内容索引（避免密文污染搜索索引、泄漏文件名集合）
+		if IsEncryptedAssetPath(absPath) {
+			return nil
+		}
+
 		ext := filepath.Ext(absPath)
 		parser := searcher.GetParser(ext)
 		if nil == parser {

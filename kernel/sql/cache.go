@@ -196,10 +196,6 @@ func removeRefCacheByDefID(defID string) {
 	defIDRefsCache.Delete(refCacheKey(defID, ""))
 }
 
-func removeRefCacheByDefIDInBox(defID, boxID string) {
-	defIDRefsCache.Delete(refCacheKey(defID, boxID))
-}
-
 func clearRefCache() {
 	defIDRefsCache.Flush()
 }

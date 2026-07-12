@@ -512,18 +512,6 @@ func RemoveDynamicRefTexts(boxID string) {
 	})
 }
 
-func RemoveDynamicRefTextsByDefID(defBlockID string) {
-	DynamicRefTexts.Delete(defBlockID)
-}
-
-// ClearDynamicRefTexts 清空所有动态引用锚文本缓存。
-func ClearDynamicRefTexts() {
-	DynamicRefTexts.Range(func(k, _ any) bool {
-		DynamicRefTexts.Delete(k)
-		return true
-	})
-}
-
 func IsChartCodeBlockCode(code *ast.Node) bool {
 	if nil == code.Previous || ast.NodeCodeBlockFenceInfoMarker != code.Previous.Type || 1 > len(code.Previous.CodeBlockInfo) {
 		return false

@@ -575,6 +575,13 @@ func exportDocx(c *gin.Context) {
 		return
 	}
 
+	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
+	if rejectEncryptedBoxPath(savePath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		return
+	}
+
 	fullPath, err := model.ExportDocx(id, savePath, removeAssets, merge)
 	if err != nil {
 		ret.Code = 1
@@ -619,6 +626,13 @@ func exportMdHTML(c *gin.Context) {
 			"content": content,
 			"folder":  folderName,
 		}
+		return
+	}
+
+	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
+	if rejectEncryptedBoxPath(savePath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
 		return
 	}
 
@@ -822,6 +836,13 @@ func exportHTML(c *gin.Context) {
 			"content": content,
 			"folder":  folderName,
 		}
+		return
+	}
+
+	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
+	if rejectEncryptedBoxPath(savePath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
 		return
 	}
 

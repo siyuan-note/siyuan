@@ -223,6 +223,34 @@ func TestModel(apiKey, apiBaseURL, model string, timeout int) (available []strin
 	return
 }
 
+// TestEmbeddingModel 测试嵌入模型可用性，发送极简文本并返回首个向量维度。
+// 返回值：matched 表示是否连通成功，dimensions 为返回的向量维度（便于核对配置），
+// err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
+func TestEmbeddingModel(apiKey, apiBaseURL, model string, dimensions, timeout int) (matched bool, dims int, err error) {
+	if 1 > timeout {
+		timeout = 30
+	}
+	client := NewOpenAIClient(apiKey, apiBaseURL)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	defer cancel()
+
+	// 用极简文本发一次 embedding 请求，验证连通性、鉴权与模型可用性
+	resp, err := client.CreateEmbeddings(ctx, openai.EmbeddingRequestStrings{
+		Input:      []string{"1"},
+		Model:      openai.EmbeddingModel(model),
+		Dimensions: dimensions, // 0 时因 omitempty 不发送，等同于用模型默认维度
+	})
+	if nil != err {
+		logging.LogErrorf("test embedding model [%s] failed: %s", model, err)
+		return
+	}
+	matched = true
+	if 0 < len(resp.Data) {
+		dims = len(resp.Data[0].Embedding)
+	}
+	return
+}
+
 // ListAvailableModels 拉取 Provider 的可用模型清单（GET /v1/models），仅返回模型 ID 列表。
 // 用于填充前端模型名称下拉框。不支持该端点的服务会返回错误，由调用方回退为手动输入。
 func ListAvailableModels(apiKey, apiBaseURL string, timeout int) (models []string, err error) {

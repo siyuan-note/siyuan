@@ -1,4 +1,6 @@
 {
+	"testConnectionFailMsg": "接続に失敗しました：${msg}",
+	"testConnectionSuccessDimensions": "接続成功（次元 ${dimensions}）",
 	"masterPasswordMigrationPending": "マスターパスワードの移行が進行中",
 	"coverWildlife": "野生動物",
 	"coverInkWashLandscape": "水墨山水",

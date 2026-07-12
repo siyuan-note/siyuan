@@ -1,4 +1,6 @@
 {
+	"testConnectionFailMsg": "Pripojenie zlyhalo: ${msg}",
+	"testConnectionSuccessDimensions": "Pripojenie úspešné (rozmery ${dimensions})",
 	"masterPasswordMigrationPending": "Prebieha migrácia hlavného hesla",
 	"coverWildlife": "Wildlife",
 	"coverInkWashLandscape": "Ink Wash Landscape",

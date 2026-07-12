@@ -1,4 +1,6 @@
 {
+	"testConnectionFailMsg": "Error de conexión: ${msg}",
+	"testConnectionSuccessDimensions": "Conexión exitosa (dimensiones ${dimensions})",
 	"masterPasswordMigrationPending": "Migración de contraseña maestra en progreso",
 	"coverWildlife": "Vida salvaje",
 	"coverInkWashLandscape": "Pintura a tinta",

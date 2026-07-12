@@ -1,4 +1,6 @@
 {
+	"testConnectionFailMsg": "Bağlantı başarısız: ${msg}",
+	"testConnectionSuccessDimensions": "Bağlantı başarılı (boyutlar ${dimensions})",
 	"masterPasswordMigrationPending": "Ana parola geçişi devam ediyor",
 	"coverWildlife": "Vahşi Yaşam",
 	"coverInkWashLandscape": "Mürekkep Manzara",

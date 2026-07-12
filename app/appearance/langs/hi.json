@@ -1,4 +1,6 @@
 {
+	"testConnectionFailMsg": "कनेक्शन विफल: ${msg}",
+	"testConnectionSuccessDimensions": "कनेक्शन सफल (आयाम ${dimensions})",
 	"masterPasswordMigrationPending": "मास्टर पासवर्ड माइग्रेशन प्रगति पर है",
 	"coverWildlife": "Wildlife",
 	"coverInkWashLandscape": "Ink Wash Landscape",

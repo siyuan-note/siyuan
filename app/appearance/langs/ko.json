@@ -1,4 +1,6 @@
 {
+	"testConnectionFailMsg": "연결 실패: ${msg}",
+	"testConnectionSuccessDimensions": "연결 성공(차원 ${dimensions})",
 	"masterPasswordMigrationPending": "마스터 비밀번호 마이그레이션 진행 중",
 	"coverWildlife": "야생 동물",
 	"coverInkWashLandscape": "수묵 산수",

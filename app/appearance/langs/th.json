@@ -1,4 +1,6 @@
 {
+	"testConnectionFailMsg": "การเชื่อมต่อล้มเหลว: ${msg}",
+	"testConnectionSuccessDimensions": "เชื่อมต่อสำเร็จ (มิติ ${dimensions})",
 	"masterPasswordMigrationPending": "กำลังย้ายรหัสผ่านหลัก",
 	"coverWildlife": "Wildlife",
 	"coverInkWashLandscape": "Ink Wash Landscape",

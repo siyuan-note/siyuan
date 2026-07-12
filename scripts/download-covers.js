@@ -35,24 +35,24 @@ const OUT_DIR = path.resolve(__dirname, "..", getArg("dir", "app/appearance/cove
 
 // 搜索类别：每类取等量图片
 const SEARCH_QUERIES = [
-    { query: "epic mountain landscape photography", label: "自然风景" },
-    { query: "city night skyline blue hour", label: "城市夜景" },
-    { query: "classical architecture cathedral historic", label: "古典建筑" },
-    { query: "cozy reading nook books candle", label: "阅读时光" },
-    { query: "zen garden minimal calm aesthetic", label: "禅意留白" },
-    { query: "architecture light shadow geometry", label: "光影几何" },
-    { query: "winding road path journey landscape", label: "路与远方" },
-    { query: "autumn fall leaves colorful forest", label: "秋色落叶" },
-    { query: "neon lights night city vibrant colorful", label: "灯红酒绿" },
-    { query: "desert sand dune arid landscape", label: "沙漠戈壁" },
-    { query: "aurora borealis northern lights sky", label: "极光天象" },
-    { query: "morning mist fog valley mountain", label: "晨雾氤氲" },
-    { query: "countryside rural farm meadow peaceful", label: "田园乡村" },
-    { query: "tea ceremony calligraphy writing desk", label: "茶道文房" },
-    { query: "calm lake reflection mirror water still", label: "静谧水面" },
-    { query: "chinese garden pavilion architecture", label: "中式园林" },
-    { query: "karst mountain mist landscape china", label: "水墨山水" },
-    { query: "wildlife animal deer fox bird nature", label: "动物生灵" },
+    { query: "epic mountain landscape photography", label: "自然风景", key: "coverNature" },
+    { query: "city night skyline blue hour", label: "城市夜景", key: "coverCityNight" },
+    { query: "classical architecture cathedral historic", label: "古典建筑", key: "coverClassicalArchitecture" },
+    { query: "cozy reading nook books candle", label: "阅读时光", key: "coverReadingNook" },
+    { query: "zen garden minimal calm aesthetic", label: "禅意留白", key: "coverZenMinimal" },
+    { query: "architecture light shadow geometry", label: "光影几何", key: "coverLightGeometry" },
+    { query: "winding road path journey landscape", label: "路与远方", key: "coverRoadAhead" },
+    { query: "autumn fall leaves colorful forest", label: "秋色落叶", key: "coverAutumnLeaves" },
+    { query: "neon lights night city vibrant colorful", label: "灯红酒绿", key: "coverNeonNights" },
+    { query: "desert sand dune arid landscape", label: "沙漠戈壁", key: "coverDesert" },
+    { query: "aurora borealis northern lights sky", label: "极光天象", key: "coverAurora" },
+    { query: "morning mist fog valley mountain", label: "晨雾氤氲", key: "coverMistyMorning" },
+    { query: "countryside rural farm meadow peaceful", label: "田园乡村", key: "coverCountryside" },
+    { query: "tea ceremony calligraphy writing desk", label: "茶道文房", key: "coverTeaCeremony" },
+    { query: "calm lake reflection mirror water still", label: "静谧水面", key: "coverStillWater" },
+    { query: "chinese garden pavilion architecture", label: "中式园林", key: "coverChineseGarden" },
+    { query: "karst mountain mist landscape china", label: "水墨山水", key: "coverInkWashLandscape" },
+    { query: "wildlife animal deer fox bird nature", label: "动物生灵", key: "coverWildlife" },
 ];
 const PER_QUERY = Math.ceil(TOTAL / SEARCH_QUERIES.length);
 
@@ -124,7 +124,7 @@ async function main() {
     const seen = new Set();
     let allPhotos = [];
 
-    for (const { query, label } of SEARCH_QUERIES) {
+    for (const { query, label, key } of SEARCH_QUERIES) {
         console.log(`🔍 搜索「${label}」...`);
         const photos = await searchPhotos(query, PER_QUERY * 2); // 多取一些，去重后有足够余量
         // 去重：全局 ID + 类内摄影师
@@ -135,7 +135,7 @@ async function main() {
             if (categoryPhotographers.has(p.photographer)) continue; // 同一类别避免同一摄影师
             seen.add(p.id);
             categoryPhotographers.add(p.photographer);
-            p._category = label;
+            p._category = key;
             categoryPhotos.push(p);
         }
         // 每个类别取 PER_QUERY 张

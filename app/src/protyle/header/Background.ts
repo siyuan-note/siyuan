@@ -311,7 +311,7 @@ export class Background {
                             const covers = category === "all" ? allCovers : (coversByCategory.get(category) || []);
                             return covers.map(c => {
                                 const url = `/appearance/covers/${c.file}`;
-                                return `<div class="b3-card b3-cover__card" data-src="${url}"><img src="${url}" loading="lazy"></div>`;
+                                return `<div class="b3-card b3-cover__card" data-name="${c.file}"><img src="${url}" loading="lazy"></div>`;
                             }).join("");
                         };
 
@@ -345,12 +345,19 @@ export class Background {
                                 dialog.element.querySelector(".b3-dialog__body")!.scrollTop = 0;
                             } else if (target.closest(".b3-cover__card")) {
                                 const card = target.closest(".b3-cover__card") as HTMLElement;
-                                const src = card.getAttribute("data-src");
-                                this.ial["title-img"] = `background-image:url("${src}")`;
-                                this.render(this.ial, protyle.block.rootID);
-                                fetchPost("/api/attr/setBlockAttrs", {
+                                const name = card.getAttribute("data-name");
+                                fetchPost("/api/asset/insertCover", {
                                     id: protyle.block.rootID,
-                                    attrs: {"title-img": this.ial["title-img"]}
+                                    name
+                                }, (response) => {
+                                    const succMap = response.data.succMap;
+                                    const url = succMap[Object.keys(succMap)[0]];
+                                    this.ial["title-img"] = `background-image:url("${url}")`;
+                                    this.render(this.ial, protyle.block.rootID);
+                                    fetchPost("/api/attr/setBlockAttrs", {
+                                        id: protyle.block.rootID,
+                                        attrs: {"title-img": this.ial["title-img"]}
+                                    });
                                 });
                                 dialog.destroy();
                             }
@@ -367,15 +374,27 @@ export class Background {
                     fetchCoverData().then((coverData) => {
                         if (coverData && coverData.allCovers.length > 0) {
                             const randomCover = coverData.allCovers[getRandom(0, coverData.allCovers.length - 1)];
-                            this.ial["title-img"] = `background-image:url("/appearance/covers/${randomCover.file}")`;
+                            fetchPost("/api/asset/insertCover", {
+                                id: protyle.block.rootID,
+                                name: randomCover.file
+                            }, (response) => {
+                                const succMap = response.data.succMap;
+                                const url = succMap[Object.keys(succMap)[0]];
+                                this.ial["title-img"] = `background-image:url("${url}")`;
+                                this.render(this.ial, protyle.block.rootID);
+                                fetchPost("/api/attr/setBlockAttrs", {
+                                    id: protyle.block.rootID,
+                                    attrs: {"title-img": this.ial["title-img"]}
+                                });
+                            });
                         } else {
                             this.ial["title-img"] = bgs[getRandom(0, bgs.length - 1)];
+                            this.render(this.ial, protyle.block.rootID);
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {"title-img": this.ial["title-img"]}
+                            });
                         }
-                        this.render(this.ial, protyle.block.rootID);
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {"title-img": this.ial["title-img"]}
-                        });
                     });
                     event.preventDefault();
                     event.stopPropagation();

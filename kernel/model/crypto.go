@@ -1596,19 +1596,6 @@ func TouchUnlockedEncryptedBoxes() {
 	}
 }
 
-// LockAllEncryptedBoxes 锁定当前已解锁的所有加密笔记本。
-func LockAllEncryptedBoxes() {
-	cachedDEKsLock.RLock()
-	boxIDs := make([]string, 0, len(cachedDEKs))
-	for boxID := range cachedDEKs {
-		boxIDs = append(boxIDs, boxID)
-	}
-	cachedDEKsLock.RUnlock()
-	for _, boxID := range boxIDs {
-		Unmount(boxID)
-	}
-}
-
 // AutoLockIdleEncryptedBoxesJob 检查所有已解锁的加密 notebook，将闲置超时的自动锁定。
 // 由 cron 每分钟调用。阈值由 NotebookCrypto.AutoLockMinutes 控制（0 = 禁用）。
 func AutoLockIdleEncryptedBoxesJob() {

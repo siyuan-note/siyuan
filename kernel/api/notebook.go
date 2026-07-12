@@ -635,12 +635,6 @@ func touchEncryptedNotebooks(c *gin.Context) {
 	c.JSON(http.StatusOK, gulu.Ret.NewResult())
 }
 
-// lockEncryptedNotebooks 在应用进入后台或失焦时锁定所有已解锁的加密笔记本。
-func lockEncryptedNotebooks(c *gin.Context) {
-	model.LockAllEncryptedBoxes()
-	c.JSON(http.StatusOK, gulu.Ret.NewResult())
-}
-
 // changeMasterPassword 修改加密笔记本的主密码。
 // 用旧密码校验后，用新密码派生新 KEK，重新加密 verifier 和所有加密笔记本的 WrappedDEK。
 // 必须在所有加密笔记本都已锁定（DEK 不在内存）的状态下调用。

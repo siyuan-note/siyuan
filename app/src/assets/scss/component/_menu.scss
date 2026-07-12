@@ -150,22 +150,12 @@
     }
   }
 
-  &--list {
-    overflow: auto;
-    // https://github.com/siyuan-note/siyuan/issues/11919
-    max-height: calc(60vh + 18px);
-
-    .b3-menu__items {
-      max-height: 60vh;
-    }
-
-    .b3-menu__label {
-      @include mixin.text-clamp(1);
-      max-width: 30vw;
-      white-space: nowrap;
-      overflow: hidden;
-      -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
-    }
+  &--list .b3-menu__label {
+    @include mixin.text-clamp(1);
+    max-width: 30vw;
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
   }
 
   &__items {

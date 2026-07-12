@@ -382,6 +382,9 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
         </button>
     </div>
 </div>
+<div class="b3-label config-item fn__none" id="encryptedNotebookMigrationAlert">
+    <div class="ft__error">${window.siyuan.languages.masterPasswordMigrationPending}</div>
+</div>
 <div class="b3-label config-item fn__none" id="encryptedNotebookActions">
     <div class="fn__flex fn__flex-center config-wrap">
         <div class="fn__flex-1"></div>
@@ -412,6 +415,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
     const switchElement = root.querySelector("#encryptedNotebookSwitch") as HTMLInputElement;
     const actionsElement = root.querySelector("#encryptedNotebookActions");
     const importElement = root.querySelector("#encryptedNotebookImport");
+    const migrationAlertElement = root.querySelector("#encryptedNotebookMigrationAlert");
     const refresh = () => {
         fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
             const enabled = response.data.enabled;
@@ -419,12 +423,13 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             window.siyuan.config.notebookCrypto.enabled = enabled;
             actionsElement.classList.toggle("fn__none", !enabled);
             importElement.classList.remove("fn__none");
+            migrationAlertElement.classList.toggle("fn__none", !response.data.migrationPending);
         });
     };
     refresh();
 
     actionsElement.querySelector("#changeMasterPasswordBtn")?.addEventListener("click", () => {
-        openChangeMasterPasswordDialog();
+        openChangeMasterPasswordDialog(refresh);
     });
 
     actionsElement.querySelector("#exportCryptoBackupBtn")?.addEventListener("click", () => {
@@ -570,7 +575,7 @@ const openEnableEncryptedDialog = (onSuccess: () => void, onCancel: () => void) 
     });
 };
 
-const openChangeMasterPasswordDialog = () => {
+const openChangeMasterPasswordDialog = (onChanged?: () => void) => {
     const dialog = new Dialog({
         title: "🔐 " + window.siyuan.languages.changeMasterPassword,
         content: `<div class="b3-dialog__content">
@@ -613,6 +618,9 @@ const openChangeMasterPasswordDialog = () => {
             if (response.code === 0) {
                 showMessage(window.siyuan.languages.changeMasterPasswordSuccessTip);
                 dialog.destroy();
+            } else {
+                showMessage(response.msg, 6000, "error");
+                onChanged?.();
             }
         });
     });

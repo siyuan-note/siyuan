@@ -52,7 +52,7 @@
 	"encryptedNotebookRiskTip": "マスターパスワードを紛失するとコンテンツは復元できません；暗号化ノートブックのロック解除中は、AIエージェント、プラグイン、MCPツール、APIなどがそのコンテンツを読み取ることができます",
 	"newEncryptedNotebook": "新規暗号化ノートブック",
 	"unlockEncryptedNotebook": "🔓 ロック解除 ${x}",
-	"unlocking": "ロック解除中……",
+	"unlocking": "ロック解除中...",
 	"incorrectMasterPassword": "マスターパスワードが正しくありません",
 	"mcpStatusConnected": "接続済み",
 	"mcpStatusConnecting": "接続中",
@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "自動ズーム",
 	"pageScaleActual": "実際のサイズ",
 	"thumbPageTitle": "ページ {{page}}",
-	"loading": "読み込み中…",
+	"loading": "読み込み中...",
 	"toggleSidebarNotification2Title": "サイドバーの切り替え (ドキュメントにアウトライン/添付ファイル/レイヤーが含まれている場合)",
 	"toggleSidebarTitle": "サイドバーの切り替え",
 	"loadingError": "PDF の読み込み中にエラーが発生しました",
@@ -2123,6 +2123,7 @@
 		"318": "暗号化ノートブックのメタデータが破損しています。バックアップを確認してください",
 		"319": "ノートブックは暗号化されていません",
 		"320": "マスターパスワードの変更が一部失敗しました。復旧を完了するにはSiYuanを再起動してください。詳細: %s",
-		"321": "この API では暗号化ノートブックのデータ操作はサポートされていません"
+		"321": "この API では暗号化ノートブックのデータ操作はサポートされていません",
+		"322": "暗号化ノートブック [%s] は操作がないため自動的にロックされました"
 	}
 	}

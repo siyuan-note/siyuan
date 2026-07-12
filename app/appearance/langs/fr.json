@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Zoom automatique",
 	"pageScaleActual": "Taille réelle",
 	"thumbPageTitle": "Page {{page}}",
-	"loading": "Chargement…",
+	"loading": "Chargement...",
 	"toggleSidebarNotification2Title": "Afficher/Masquer le panneau latéral (le document contient des signets/pièces jointes/calques)",
 	"toggleSidebarTitle": "Afficher/Masquer le panneau latéral",
 	"loadingError": "Une erreur s'est produite lors du chargement du fichier PDF.",
@@ -2123,6 +2123,7 @@
 		"318": "Les métadonnées de chiffrement du carnet sont endommagées, veuillez vérifier la sauvegarde",
 		"319": "Le carnet n'est pas chiffré",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "L'accès aux données d'un notebook chiffré n'est pas pris en charge via cette API"
+		"321": "L'accès aux données d'un notebook chiffré n'est pas pris en charge via cette API",
+		"322": "Le notebook chiffré [%s] a été verrouillé automatiquement pour inactivité"
 	}
 	}

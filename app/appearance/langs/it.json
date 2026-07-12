@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Zoom automatico",
 	"pageScaleActual": "Dimensioni reali",
 	"thumbPageTitle": "Pagina {{page}}",
-	"loading": "Caricamento…",
+	"loading": "Caricamento...",
 	"toggleSidebarNotification2Title": "Attiva/disattiva barra laterale (il documento contiene contorno/allegati/livelli)",
 	"toggleSidebarTitle": "Attiva/disattiva barra laterale",
 	"loadingError": "Si è verificato un errore durante il caricamento del PDF.",
@@ -2123,6 +2123,7 @@
 		"318": "I metadati di crittografia del blocco appunti sono danneggiati, controlla il backup",
 		"319": "Il blocco appunti non è crittografato",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "L'accesso ai dati dei notebook crittografati non è supportato tramite questa API"
+		"321": "L'accesso ai dati dei notebook crittografati non è supportato tramite questa API",
+		"322": "Il notebook crittografato [%s] è stato bloccato automaticamente per inattività"
 	}
 	}

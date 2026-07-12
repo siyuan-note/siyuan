@@ -148,6 +148,8 @@ export const newEncryptedNotebook = () => {
     <input placeholder="${window.siyuan.languages.notebookName}" class="b3-text-field fn__block">
     <div class="fn__hr"></div>
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
+    <div class="fn__hr--b"></div>
+    <div>${window.siyuan.languages.encryptedNotebookRiskTip}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -173,6 +175,7 @@ export const newEncryptedNotebook = () => {
                 showMessage(window.siyuan.languages.masterPassword);
                 return false;
             }
+            btnsElement[1].disabled = true;
             const response = await fetchSyncPost("/api/notebook/createEncryptedNotebook", {
                 name: replaceFileName(name),
                 password
@@ -183,6 +186,8 @@ export const newEncryptedNotebook = () => {
                     notebook: response.data.notebook.id
                 });
                 dialog.destroy();
+            } else {
+                btnsElement[1].disabled = false;
             }
         });
     });
@@ -193,6 +198,8 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         title: window.siyuan.languages.unlockEncryptedNotebook.replace("${x}", name),
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
+    <div class="fn__hr--b"></div>
+    <div>${window.siyuan.languages.encryptedNotebookRiskTip}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -213,6 +220,7 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         if (!password) {
             return false;
         }
+        btnsElement[1].disabled = true;
         // 先解锁（派生 KEK + 解 DEK + 打开加密 db，Argon2id 约耗时 1 秒），成功后再挂载
         const response = await fetchSyncPost("/api/notebook/unlockBox", {
             notebook: notebookId,
@@ -223,6 +231,10 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
                 notebook: notebookId
             });
             dialog.destroy();
+        } else {
+            btnsElement[1].disabled = false;
+            inputElement.value = "";
+            inputElement.focus();
         }
     });
 };

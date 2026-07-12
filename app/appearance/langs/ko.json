@@ -52,7 +52,7 @@
 	"encryptedNotebookRiskTip": "마스터 암호를 분실하면 콘텐츠를 복구할 수 없습니다; 암호화된 노트북이 잠금 해제된 동안에는 AI 에이전트, 플러그인, MCP 도구, API 등이 콘텐츠를 읽을 수 있습니다",
 	"newEncryptedNotebook": "새 암호화 노트",
 	"unlockEncryptedNotebook": "🔓 잠금 해제 ${x}",
-	"unlocking": "잠금 해제 중…",
+	"unlocking": "잠금 해제 중...",
 	"incorrectMasterPassword": "마스터 비밀번호가 올바르지 않습니다",
 	"mcpStatusConnected": "연결됨",
 	"mcpStatusConnecting": "연결 중",
@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "자동 줌",
 	"pageScaleActual": "실제 크기",
 	"thumbPageTitle": "페이지 {{page}}",
-	"loading": "로드 중…",
+	"loading": "로드 중...",
 	"toggleSidebarNotification2Title": "사이드바 토글 (문서에 개요/첨부파일/레이어 포함)",
 	"toggleSidebarTitle": "사이드바 토글",
 	"loadingError": "PDF를 로드하는 동안 오류가 발생했습니다.",
@@ -2123,6 +2123,7 @@
 		"318": "암호화된 노트북 메타데이터가 손상되었습니다. 백업을 확인하세요",
 		"319": "노트북이 암호화되지 않았습니다",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "이 API를 통해 암호화된 노트북의 데이터를 조작할 수 없습니다"
+		"321": "이 API를 통해 암호화된 노트북의 데이터를 조작할 수 없습니다",
+		"322": "암호화된 노트북 [%s]이(가) 장시간 미사용으로 자동 잠금되었습니다"
 	}
 	}

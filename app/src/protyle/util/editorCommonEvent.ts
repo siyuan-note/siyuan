@@ -1224,7 +1224,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
 
                     // 拖拽整个列表块（NodeList）到列表项时，展开为其下的列表项，避免形成 list>list 非法嵌套
-                    if (isListItemSource && targetElement.classList.contains("list")) {
+                    // 但当目标是超级块（col 布局）内的列表块时，列表块本身是超级块的一个列单元，
+                    // 应走列重排（dragSame）而非展开，否则 targetElement 被改写为 .li 后无法命中列重排分支
+                    const isColSbChildList = targetElement.parentElement?.getAttribute("data-type") === "NodeSuperBlock" &&
+                        targetElement.parentElement?.getAttribute("data-sb-layout") === "col";
+                    if (isListItemSource && targetElement.classList.contains("list") &&
+                        !(gutterTypes[0] === "nodelist" && isColSbChildList)) {
                         const targetListItem = getTargetListItem(targetElement, isBottom);
                         if (targetListItem) {
                             targetElement = targetListItem;
@@ -1939,6 +1944,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if ((isFirstBlock && event.clientX < childRect.left + 8) ||
                     (isLastBlock && event.clientX > childRect.right - 8)) {
                     targetElement = ancestorSb;
+                }
+                // 整个列表块（NodeList）拖到 col 超级块内时，列表块本身是一列单元。
+                // 命中点落在某列 .list 的后代（.li/.p）时需把 targetElement 提升为该 .list，
+                // 否则左右边缘指示线会错误地落在内部列表项前（无法表达"插入到该列左/右"）
+                if (gutterTypes[0] === "nodelist" &&
+                    ancestorSb.getAttribute("data-sb-layout") === "col" &&
+                    targetElement !== ancestorSb) {
+                    const colList = targetElement.closest(".list") as HTMLElement;
+                    if (colList && ancestorSb === colList.parentElement) {
+                        targetElement = colList;
+                    }
                 }
             }
         }

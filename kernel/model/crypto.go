@@ -234,13 +234,16 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 }
 
 // saveNotebookCryptoBackup 把当前 NotebookCrypto（含 MasterSalt/KEKVerifier/KDFParams）备份到 DataDir。
-// kek 非 nil 时在 Checksum 定型后计算 KEKMAC；kek 为 nil（如启动回填、无密码恢复）则不写 MAC。
+// kek 非 nil 时在 Checksum 定型后计算 KEKMAC；kek 为 nil（如启动回填、无密码恢复）时清零 KEKMAC，
+// 避免 prepareBackupForWrite 更新 Checksum/CreatedAt 后保留旧 MAC 导致 stale（后续恢复必失败）。
 func saveNotebookCryptoBackup(kek []byte) error {
 	Conf.m.Lock()
 	nc := *Conf.NotebookCrypto // 值拷贝
 	prepareBackupForWrite(&nc)
 	if nil != kek {
 		nc.KEKMAC = computeKEKMAC(&nc, kek)
+	} else {
+		nc.KEKMAC = nil // Checksum/CreatedAt 已更新，旧 MAC 必失效，清零使恢复路径跳过 MAC 检查
 	}
 	Conf.NotebookCrypto.Spec = nc.Spec
 	Conf.NotebookCrypto.BackupID = nc.BackupID
@@ -263,11 +266,14 @@ func saveNotebookCryptoBackup(kek []byte) error {
 }
 
 // writeNotebookCryptoBackupData 将指定的 NotebookCrypto 写入备份文件（不依赖 Conf.NotebookCrypto）。
-// kek 非 nil 时在 Checksum 定型后计算 KEKMAC，保证落盘 MAC 与落盘内容一致；kek 为 nil 则不写 MAC。
+// kek 非 nil 时在 Checksum 定型后计算 KEKMAC，保证落盘 MAC 与落盘内容一致；kek 为 nil 时清零 KEKMAC，
+// 避免 Checksum/CreatedAt 更新后保留旧 MAC 导致 stale。
 func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto, kek []byte) error {
 	prepareBackupForWrite(nc)
 	if nil != kek {
 		nc.KEKMAC = computeKEKMAC(nc, kek)
+	} else {
+		nc.KEKMAC = nil
 	}
 	backupPath := notebookCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
@@ -649,6 +655,9 @@ func restoreNotebookCryptoConfigFromBackup() {
 	backup.KDFParams = params
 
 	backup.Enabled = true
+	// 自动恢复无主密码，无法验证 MAC。清零 KEKMAC 避免 stale MAC 阻断后续密码恢复路径。
+	// 首次输入主密码时 tryRestoreNotebookCryptoFromBackupLocked 会重新校验并补全 MAC。
+	backup.KEKMAC = nil
 	Conf.m.Lock()
 	*Conf.NotebookCrypto = *backup
 	Conf.m.Unlock()

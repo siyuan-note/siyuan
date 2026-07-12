@@ -347,7 +347,7 @@ The SQLCipher main database, WAL, SHM, rollback journal, temporary files, and ba
 
 ## 20. Backup, Recovery, and Metadata Policy
 
-`notebook-crypto-backup.json` is recovery material, not a secret, but its integrity and freshness must be handled separately. It contains a format version, backup ID, creation time, monotonic generation, and content digest. Recovery must not silently overwrite enabled configuration; when disabled and several candidates exist, display their origin and generation for the user to choose. A malformed backup, generation rollback, or backup incompatible with existing encrypted notebooks enters an error state instead of generating a new MasterSalt.
+`notebook-crypto-backup.json` is recovery material, not a secret, but its integrity and freshness must be handled separately. It contains a format version, backup ID, creation time, and content digest. Recovery must not silently overwrite enabled configuration. A malformed backup or a backup incompatible with existing encrypted notebooks enters an error state instead of generating a new MasterSalt.
 
 Sync endpoints and offline backups are storage that may be lost, copied, or rolled back but cannot read plaintext. Before the master password is entered, trustworthy authentication based on the KEK cannot be established; the system can validate structure and the verifier after unlock only. A successful sync restore must not be presented as proof that the source is trusted. Users should keep at least one independent, versioned key backup and understand that losing the master password or every matching MasterSalt backup is unrecoverable.
 
@@ -374,7 +374,7 @@ Exports have two classes: a user-selected external destination may contain plain
 | Lock concurrent with export, preview, sync, indexing, or history restore | No plaintext task continues after lock; controlled temporary files and access tokens are removed or invalidated |
 | Refs, moves, mirrors, assets, and database operations between an encrypted box and a normal box or another encrypted box | Island boundaries hold; rejection creates no partial files, global indexes, or relation data |
 | Disk inspection of files, assets, databases, WAL/SHM, history, snapshots, logs, and temporary directories | No readable body, asset contents, original asset names, or plaintext SQLite pages in kernel-managed locations |
-| Ciphertext tampering, path substitution, nonce reuse, backup corruption/rollback, and multi-device conflicts | Authentication or format validation fails safely; never fall back to a normal path, generate replacement key material, or silently overwrite configuration |
+| Ciphertext tampering, path substitution, nonce reuse, and backup corruption | Authentication or format validation fails safely; never fall back to a normal path, generate replacement key material, or silently overwrite configuration |
 | Master-password change and migration to a new DEK | WrappedDEKs and backup update atomically; old-password exposure warning is accurate; data and history are verifiably readable before and after migration |
 
 ## 16. Usage Guide

@@ -125,10 +125,9 @@ func verifyKEKMAC(nc *conf.NotebookCrypto, kek []byte) bool {
 	return hmac.Equal(expected, nc.KEKMAC)
 }
 
-// prepareBackupForWrite 为写入准备备份元数据字段（Spec/Generation/BackupID/CreatedAt/Checksum）。
+// prepareBackupForWrite 为写入准备备份元数据字段（Spec/BackupID/CreatedAt/Checksum）。
 func prepareBackupForWrite(nc *conf.NotebookCrypto) {
 	conf.UpgradeSpec(nc) // 按需升级旧格式
-	nc.Generation++
 	if nc.BackupID == "" {
 		nc.BackupID = util.RandString(16)
 	}
@@ -241,7 +240,6 @@ func saveNotebookCryptoBackup() error {
 	prepareBackupForWrite(&nc)
 	Conf.NotebookCrypto.Spec = nc.Spec
 	Conf.NotebookCrypto.BackupID = nc.BackupID
-	Conf.NotebookCrypto.Generation = nc.Generation
 	Conf.NotebookCrypto.CreatedAt = nc.CreatedAt
 	Conf.NotebookCrypto.Checksum = nc.Checksum
 	Conf.m.Unlock()

@@ -223,7 +223,7 @@ func TestBackupUpgradeFromSpec0(t *testing.T) {
 		t.Fatalf("expected Spec=1 after upgrade, got %d", nc.Spec)
 	}
 
-	// 写入升级后的备份（prepareBackupForWrite 会补全 Checksum 和 Generation）
+	// 写入升级后的备份（prepareBackupForWrite 会补全 Checksum）
 	prepareBackupForWrite(nc)
 	backupDir := filepath.Join(tempDir, ".siyuan")
 	os.MkdirAll(backupDir, 0755)
@@ -234,9 +234,6 @@ func TestBackupUpgradeFromSpec0(t *testing.T) {
 	nc2, err := loadNotebookCryptoBackup()
 	if err != nil {
 		t.Fatalf("reload backup failed: %v", err)
-	}
-	if nc2.Generation < 1 {
-		t.Fatalf("expected Generation>=1, got %d", nc2.Generation)
 	}
 	if nc2.Checksum == "" {
 		t.Fatalf("expected non-empty Checksum after write")

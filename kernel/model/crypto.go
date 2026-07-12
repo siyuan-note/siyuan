@@ -1457,15 +1457,6 @@ func readNotebookCryptBackup(boxID string) (*conf.BoxEncryption, error) {
 	return &crypt, nil
 }
 
-// removeNotebookCryptBackup 清除加密笔记本的 BoxCrypt 备份。
-// 关闭/锁定/删除加密笔记本时调用，避免残留过期备份数据。
-func removeNotebookCryptBackup(boxID string) {
-	backupPath := notebookCryptBackupPath(boxID)
-	if err := filelock.Remove(backupPath); err != nil && !os.IsNotExist(err) {
-		logging.LogErrorf("remove notebook crypt backup [%s] failed: %s", backupPath, err)
-	}
-}
-
 func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	boxID := ExtractBoxIDFromAssetsPath(srcPath)
 	if boxID != "" && IsEncryptedBox(boxID) {

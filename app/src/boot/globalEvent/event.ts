@@ -25,18 +25,9 @@ export const initWindowEvent = (app: App) => {
 		lastEncryptedNotebookTouch = now;
 		fetchPost("/api/notebook/touchEncryptedNotebooks", {});
 	};
-	const lockEncryptedNotebooks = () => {
-		fetchPost("/api/notebook/lockEncryptedNotebooks", {});
-	};
 	window.addEventListener("pointerdown", touchEncryptedNotebooks, {passive: true});
 	window.addEventListener("keydown", touchEncryptedNotebooks);
 	document.addEventListener("touchstart", touchEncryptedNotebooks, {passive: true});
-	window.addEventListener("blur", lockEncryptedNotebooks);
-	document.addEventListener("visibilitychange", () => {
-		if (document.hidden) {
-			lockEncryptedNotebooks();
-		}
-	});
 
     document.body.addEventListener("mouseleave", () => {
         if (window.siyuan.layout.leftDock) {

@@ -1613,8 +1613,9 @@ func AutoLockIdleEncryptedBoxesJob() {
 	for _, boxID := range boxIDs {
 		if val, ok := boxLastAccess.Load(boxID); ok {
 			lastAccess := val.(*atomic.Int64).Load()
-			if now-lastAccess >= thresholdNs {
-				logging.LogInfof("auto-locking idle encrypted notebook [%s]", boxID)
+			elapsed := now - lastAccess
+			if elapsed >= thresholdNs {
+				logging.LogInfof("auto-locking idle encrypted notebook [%s] (elapsed=%ds, threshold=%dm)", boxID, elapsed/1e9, threshold)
 				Unmount(boxID)
 			}
 		}

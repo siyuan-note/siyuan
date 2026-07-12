@@ -35,10 +35,6 @@ func docIALCacheKey(p, boxID string) string {
 	return boxID + "\x00" + p
 }
 
-func PutDocIAL(p string, ial map[string]string) {
-	PutDocIALInBox(p, "", ial)
-}
-
 func PutDocIALInBox(p, boxID string, ial map[string]string) {
 	key := docIALCacheKey(p, boxID)
 	docIALCache.Set(key, ial, 128)
@@ -51,10 +47,6 @@ func PutDocIALInBox(p, boxID string, ial map[string]string) {
 		docIALCacheKeys[p] = keys
 	}
 	keys[key] = struct{}{}
-}
-
-func GetDocIAL(p string) (ret map[string]string) {
-	return GetDocIALInBox(p, "")
 }
 
 func GetDocIALInBox(p, boxID string) (ret map[string]string) {

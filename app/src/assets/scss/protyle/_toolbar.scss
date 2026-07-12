@@ -86,6 +86,20 @@
       left: 0;
       width: 100vw;
     }
+
+    // 行号栏与文本域共同的滚动容器，二者同高，由父层统一滚动，避免 JS 同步滚动
+    &__scroll {
+      overflow: auto;
+      flex: 1;
+      min-height: 0;
+      border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
+    }
+
+    .protyle-linenumber__rows {
+      line-height: 20px;
+      padding: 4px 8px;
+      position: static;
+    }
   }
 
   &-font {

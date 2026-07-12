@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Automatyczne powiększenie",
 	"pageScaleActual": "Rzeczywisty rozmiar",
 	"thumbPageTitle": "Strona {{page}}",
-	"loading": "Ładowanie…",
+	"loading": "Ładowanie...",
 	"toggleSidebarNotification2Title": "Przełącz pasek boczny (dokument zawiera zarys/załączniki/warstwy)",
 	"toggleSidebarTitle": "Przełącz pasek boczny",
 	"loadingError": "Wystąpił błąd podczas ładowania PDF.",
@@ -2123,6 +2123,7 @@
 		"318": "Metadane szyfrowania notesu są uszkodzone, sprawdź kopię zapasową",
 		"319": "Notes nie jest zaszyfrowany",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Access to encrypted notebook data is not supported via this API"
+		"321": "Access to encrypted notebook data is not supported via this API",
+		"322": "Zaszyfrowany notatnik [%s] został automatycznie zablokowany z powodu braku aktywności"
 	}
 	}

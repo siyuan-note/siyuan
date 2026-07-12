@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Автоматическое масштабирование",
 	"pageScaleActual": "Фактический размер",
 	"thumbPageTitle": "Страница {{page}}",
-	"loading": "Загрузка…",
+	"loading": "Загрузка...",
 	"toggleSidebarNotification2Title": "Переключить боковую панель (документ содержит план/вложения/слои)",
 	"toggleSidebarTitle": "Переключить боковую панель",
 	"loadingError": "Произошла ошибка при загрузке PDF.",
@@ -2123,6 +2123,7 @@
 		"318": "Метаданные шифрования блокнота повреждены, проверьте резервную копию",
 		"319": "Блокнот не зашифрован",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Access to encrypted notebook data is not supported via this API"
+		"321": "Access to encrypted notebook data is not supported via this API",
+		"322": "Зашифрованный блокнот [%s] автоматически заблокирован из-за бездействия"
 	}
 	}

@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "التكبير/التصغير التلقائي",
 	"pageScaleActual": "الحجم الفعلي",
 	"thumbPageTitle": "‫الصفحة {{page}}‬",
-	"loading": "جاري التحميل…",
+	"loading": "جاري التحميل...",
 	"toggleSidebarNotification2Title": "تبديل الشريط الجانبي (الخطوط العريضة/المرفقات/الطبقات من الملف)",
 	"toggleSidebarTitle": "تبديل الشريط الجانبي",
 	"loadingError": "‫حدث خطأ أثناء تحميل PDF.‬",
@@ -2123,6 +2123,7 @@
 		"318": "تلف بيانات تشفير دفتر الملاحظات، يرجى التحقق من النسخة الاحتياطية",
 		"319": "دفتر الملاحظات غير مشفر",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Access to encrypted notebook data is not supported via this API"
+		"321": "Access to encrypted notebook data is not supported via this API",
+		"322": "تم قفل دفتر التشفير [%s] تلقائياً بسبب عدم النشاط"
 	}
 	}

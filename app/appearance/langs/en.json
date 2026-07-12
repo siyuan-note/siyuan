@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Automatic Zoom",
 	"pageScaleActual": "Actual Size",
 	"thumbPageTitle": "Page {{page}}",
-	"loading": "Loading…",
+	"loading": "Loading...",
 	"toggleSidebarNotification2Title": "Toggle Sidebar (document contains outline/attachments/layers)",
 	"toggleSidebarTitle": "Toggle Sidebar",
 	"loadingError": "An error occurred while loading the PDF.",
@@ -2123,6 +2123,7 @@
 		"318": "Encrypted notebook metadata is damaged, please check backup",
 		"319": "Notebook is not encrypted",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Access to encrypted notebook data is not supported via this API"
+		"321": "Access to encrypted notebook data is not supported via this API",
+		"322": "Encrypted notebook [%s] has been automatically locked due to inactivity"
 	}
 	}

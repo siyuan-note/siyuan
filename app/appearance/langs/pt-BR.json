@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Zoom Automático",
 	"pageScaleActual": "Tamanho Real",
 	"thumbPageTitle": "Página {{page}}",
-	"loading": "Carregando…",
+	"loading": "Carregando...",
 	"toggleSidebarNotification2Title": "Alternar Barra Lateral (documento contém esboço/anexos/camadas)",
 	"toggleSidebarTitle": "Alternar Barra Lateral",
 	"loadingError": "Ocorreu um erro ao carregar o PDF.",
@@ -2123,6 +2123,7 @@
 		"318": "Metadados de criptografia do caderno estão danificados, verifique o backup",
 		"319": "O caderno não está criptografado",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "O acesso a dados de notebooks criptografados não é suportado via esta API"
+		"321": "O acesso a dados de notebooks criptografados não é suportado via esta API",
+		"322": "O notebook criptografado [%s] foi bloqueado automaticamente por inatividade"
 	}
 	}

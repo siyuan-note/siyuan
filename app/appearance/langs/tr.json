@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Otomatik yakınlaştır",
 	"pageScaleActual": "Gerçek boyut",
 	"thumbPageTitle": "Sayfa {{page}}",
-	"loading": "Yükleniyor…",
+	"loading": "Yükleniyor...",
 	"toggleSidebarNotification2Title": "Kenar çubuğunu aç/kapat (belgede taslak/ekler/katmanlar var)",
 	"toggleSidebarTitle": "Kenar çubuğunu aç/kapat",
 	"loadingError": "PDF yüklenirken bir hata oluştu.",
@@ -2123,6 +2123,7 @@
 		"318": "Şifrelenmiş not defteri meta verileri hasar görmüş, lütfen yedeği kontrol edin",
 		"319": "Not defteri şifrelenmemiş",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Access to encrypted notebook data is not supported via this API"
+		"321": "Access to encrypted notebook data is not supported via this API",
+		"322": "Şifreli not defteri [%s] hareketsizlik nedeniyle otomatik olarak kilitlendi"
 	}
 	}

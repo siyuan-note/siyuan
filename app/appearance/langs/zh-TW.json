@@ -52,7 +52,7 @@
 	"encryptedNotebookRiskTip": "忘記主密碼則內容無法恢復；加密筆記本解鎖開啟期間，AI 智能體、插件、MCP 工具、API 等均能讀取其中內容，與一般筆記本無異",
 	"newEncryptedNotebook": "新建加密筆記本",
 	"unlockEncryptedNotebook": "🔓 解鎖 ${x}",
-	"unlocking": "解鎖中……",
+	"unlocking": "解鎖中...",
 	"incorrectMasterPassword": "主密碼錯誤",
 	"mcpStatusConnected": "已連接",
 	"mcpStatusConnecting": "連接中",
@@ -201,7 +201,7 @@
 	"calcResultTemplate": "範本",
 	"rollupTemplateTip": "範例：.action{divf (countif .values \"gt\" 0) (len .values)}",
 	"agentChatBusy": "該會話正在其他實例對話中",
-	"agentMirrorStreaming": "其他實例正在對話中…",
+	"agentMirrorStreaming": "其他實例正在對話中...",
 	"rollbackCompleted": "已完成回滾",
 	"snapshotAutoCreated": "已自動創建資料快照",
 	"agentThinkingDoneTime": "已思考 %s",
@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "自動縮放",
 	"pageScaleActual": "實際大小",
 	"thumbPageTitle": "第 {{page}} 頁",
-	"loading": "正在載入…",
+	"loading": "正在載入...",
 	"toggleSidebarNotification2Title": "切換側欄（文檔所含的大綱/附件/圖層）",
 	"toggleSidebarTitle": "切換側欄",
 	"loadingError": "載入 PDF 時發生錯誤。",
@@ -2123,6 +2123,7 @@
 		"318": "加密筆記本元數據已損壞，請檢查備份文件",
 		"319": "筆記本未加密",
 		"320": "修改主密碼部分失敗，請重啟思源以完成恢復。詳情：%s",
-		"321": "不支援透過此 API 操作加密筆記本內的資料"
+		"321": "不支援透過此 API 操作加密筆記本內的資料",
+		"322": "加密筆記本 [%s] 因長時間未操作已自動鎖定"
 	}
 	}

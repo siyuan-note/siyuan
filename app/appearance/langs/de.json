@@ -87,7 +87,7 @@
 	"safeModeTip": "🛡️ Der abgesicherte Modus ist aktiviert (Code-Snippets, Plug-ins, benutzerdefiniertes Design und Icon sind deaktiviert)",
 	"gutterTipBacklink": "Klicken <span class='ft__on-surface'>oder</span> ⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>Ziehen ${x} <span class='ft__on-surface'>Position verschieben</span><br>⌘Klick⌥→ <span class='ft__on-surface'>Öffnen</span>",
 	"testConnection": "Verbindung testen",
-	"testConnectionTesting": "Wird getestet …",
+	"testConnectionTesting": "Wird getestet ...",
 	"testConnectionSuccess": "Verbindung erfolgreich",
 	"testConnectionFail": "Verbindung fehlgeschlagen",
 	"testConnectionFailModelRequired": "Bitte den Modellnamen eingeben",
@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "Automatischer Zoom",
 	"pageScaleActual": "Tatsächliche Größe",
 	"thumbPageTitle": "Seite {{page}}",
-	"loading": "Laden…",
+	"loading": "Laden...",
 	"toggleSidebarNotification2Title": "Seitenleiste umschalten (Dokument enthält Gliederung/Anhänge/Layer)",
 	"toggleSidebarTitle": "Seitenleiste umschalten",
 	"loadingError": "Beim Laden des PDFs ist ein Fehler aufgetreten.",
@@ -2123,6 +2123,7 @@
 		"318": "Verschlüsselungsmetadaten des Notizbuchs beschädigt, bitte Backup prüfen",
 		"319": "Notizbuch ist nicht verschlüsselt",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Der Zugriff auf verschlüsselte Notizbuchdaten wird über diese API nicht unterstützt"
+		"321": "Der Zugriff auf verschlüsselte Notizbuchdaten wird über diese API nicht unterstützt",
+		"322": "Verschlüsseltes Notizbuch [%s] wurde wegen Inaktivität automatisch gesperrt"
 	}
 	}

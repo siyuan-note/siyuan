@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "זום אוטומטי",
 	"pageScaleActual": "גודל בפועל",
 	"thumbPageTitle": "עמוד {{page}}",
-	"loading": "טוען…",
+	"loading": "טוען...",
 	"toggleSidebarNotification2Title": "החלף את הסרגל הצדדי (המסמך מכיל סקירה/קבצים מצורפים/שכבות)",
 	"toggleSidebarTitle": "החלף את הסרגל הצדדי",
 	"loadingError": "אירעה שגיאה בעת טעינת ה-PDF.",
@@ -2123,6 +2123,7 @@
 		"318": "נתוני ההצפנה של המחברת פגומים, אנא בדוק את הגיבוי",
 		"319": "המחברת אינה מוצפנת",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Access to encrypted notebook data is not supported via this API"
+		"321": "Access to encrypted notebook data is not supported via this API",
+		"322": "המחברת המוצפנת [%s] נעלה אוטומטית עקב חוסר פעילות"
 	}
 	}

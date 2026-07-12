@@ -1142,7 +1142,7 @@
 	"pageScaleAuto": "स्वचालित ज़ूम",
 	"pageScaleActual": "वास्तविक आकार",
 	"thumbPageTitle": "पृष्ठ {{page}}",
-	"loading": "लोड हो रहा है…",
+	"loading": "लोड हो रहा है...",
 	"toggleSidebarNotification2Title": "साइडबार टॉगल करें (दस्तावेज़ में रूपरेखा/अटैचमेंट/लेयर हैं)",
 	"toggleSidebarTitle": "साइडबार टॉगल करें",
 	"loadingError": "PDF लोड करते समय एक त्रुटि हुई।",
@@ -2123,6 +2123,7 @@
 		"318": "एन्क्रिप्टेड नोटबुक मेटाडेटा क्षतिग्रस्त है, कृपया बैकअप जांचें",
 		"319": "नोटबुक एन्क्रिप्टेड नहीं है",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
-		"321": "Access to encrypted notebook data is not supported via this API"
+		"321": "Access to encrypted notebook data is not supported via this API",
+		"322": "एन्क्रिप्टेड नोटबुक [%s] निष्क्रियता के कारण स्वचालित रूप से लॉक हो गया है"
 	}
 	}

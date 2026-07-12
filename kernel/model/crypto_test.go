@@ -303,6 +303,100 @@ func TestBackupKEKMACVerification(t *testing.T) {
 	}
 }
 
+// TestDeriveKEKRejectsTamperedBackupMAC 验证 verifier 正确但备份 MAC 被篡改时仍拒绝派生。
+func TestDeriveKEKRejectsTamperedBackupMAC(t *testing.T) {
+	origDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = origDataDir }()
+
+	password := "authenticated-backup-test"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	nc := conf.NotebookCrypto{
+		Enabled:     true,
+		MasterSalt:  salt,
+		KDFParams:   params,
+		KEKVerifier: verifier,
+		Spec:        1,
+		KEKMAC:      []byte("tampered"),
+	}
+	prepareBackupForWrite(&nc)
+	nc.KEKMAC = []byte("tampered")
+	backupPath := filepath.Join(util.DataDir, ".siyuan", "notebook-crypto-backup.json")
+	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	backupData, _ := json.Marshal(&nc)
+	if err := os.WriteFile(backupPath, backupData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = &nc
+	defer func() { Conf = originalConf }()
+
+	if derived, err := deriveKEK(password); err == nil {
+		zeroAndClear(derived)
+		t.Fatalf("deriveKEK should reject a backup with an invalid KEKMAC")
+	}
+}
+
+// TestDeriveKEKAllowsLocalAutoLockChange 验证本机修改自动锁定时间不会使已认证的密钥备份失效。
+func TestDeriveKEKAllowsLocalAutoLockChange(t *testing.T) {
+	origDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = origDataDir }()
+
+	password := "local-auto-lock-test"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+	verifier, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	backup := &conf.NotebookCrypto{
+		Enabled:         true,
+		MasterSalt:      salt,
+		KDFParams:       params,
+		KEKVerifier:     verifier,
+		AutoLockMinutes: 5,
+	}
+	if err := writeNotebookCryptoBackupData(backup, kek); err != nil {
+		t.Fatal(err)
+	}
+
+	local := *backup
+	local.AutoLockMinutes = 30
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = &local
+	defer func() { Conf = originalConf }()
+
+	derived, err := deriveKEK(password)
+	if err != nil {
+		t.Fatalf("deriveKEK rejected a local AutoLockMinutes change: %v", err)
+	}
+	zeroAndClear(derived)
+}
+
+// TestDeepCopyBoxEncryptionPreservesSpec 验证保存笔记本配置前的深拷贝不会丢失包络版本。
+func TestDeepCopyBoxEncryptionPreservesSpec(t *testing.T) {
+	src := &conf.BoxEncryption{Spec: 1, WrappedDEK: []byte{1, 2}, WrapNonce: []byte{3, 4}, CreatedAt: 5}
+	got := DeepCopyBoxEncryption(src)
+	if got.Spec != src.Spec {
+		t.Fatalf("BoxEncryption.Spec changed during deep copy: got %d want %d", got.Spec, src.Spec)
+	}
+}
+
+// TestUnknownBlockRefFailsClosed 验证普通库无法定位定义块时按跨边界处理，防止锁定加密块 ID 被写入全局库。
+func TestUnknownBlockRefFailsClosed(t *testing.T) {
+	if !normalBoxBlockRefCrossesBoundary(nil) {
+		t.Fatalf("an unresolved block reference should fail closed")
+	}
+}
+
 // TestBackupMACRoundTrip 验证 writeNotebookCryptoBackupData(nc, kek) 写入的备份，
 // 重新加载后 verifyKEKMAC 能通过——即 MAC 在 prepareBackupForWrite 之后计算（顺序正确）。
 func TestBackupMACRoundTrip(t *testing.T) {

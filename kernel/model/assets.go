@@ -1055,6 +1055,12 @@ func RemoveUnusedAsset(p string) (ret string) {
 		return absPath
 	}
 
+	// 加密笔记本的资源不参与未引用清理（与批量版 RemoveUnusedAssets 经 UnusedAssets 的排除一致），
+	// 否则未解锁时 admin 可删加密 box 的资源，破坏可用性且留下悬空的文件名映射。
+	if IsEncryptedAssetPath(absPath) {
+		return absPath
+	}
+
 	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)

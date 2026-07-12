@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -227,6 +228,11 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 			refreshDynamicRefText(node, tree)
 		}()
 	}
+	if attrsAffectAvBlock(nameValues) {
+		go func() {
+			updateAttributeViewBlockText(map[string]*ast.Node{node.ID: node})
+		}()
+	}
 	return
 }
 
@@ -242,6 +248,24 @@ func attrsAffectRefText(nameValues map[string]string) bool {
 	for name := range nameValues {
 		switch strings.ToLower(name) {
 		case "name", "title":
+			return true
+		}
+	}
+	return false
+}
+
+// attrsAffectAvBlock 判断本次属性变更是否可能影响数据库（属性视图）主键块的显示。
+//
+// 数据库主键块的 icon 和 content 由 getNodeAvBlockText 从块的 icon、name、
+// custom-sy-av-s-text-<avID> 属性派生，这些属性变更时需调用 updateAttributeViewBlockText
+// 同步到 AV JSON，否则数据库视图中显示的图标/内容不会更新。
+func attrsAffectAvBlock(nameValues map[string]string) bool {
+	for name := range nameValues {
+		lowerName := strings.ToLower(name)
+		if "icon" == lowerName || "name" == lowerName {
+			return true
+		}
+		if strings.HasPrefix(lowerName, av.NodeAttrViewStaticText) {
 			return true
 		}
 	}

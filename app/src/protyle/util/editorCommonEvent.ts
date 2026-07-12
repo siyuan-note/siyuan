@@ -54,6 +54,40 @@ import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 
+const convertListItemSubtype = (listItem: Element, subtype: string) => {
+    const actionElement = listItem.querySelector(".protyle-action");
+    if (!actionElement || !["u", "o", "t"].includes(subtype)) {
+        return;
+    }
+    if (subtype === "o") {
+        actionElement.outerHTML = '<div contenteditable="false" draggable="true" class="protyle-action protyle-action--order">1.</div>';
+        listItem.setAttribute("data-marker", "1.");
+        listItem.removeAttribute("data-task");
+    } else if (subtype === "t") {
+        actionElement.outerHTML = '<div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+        listItem.setAttribute("data-marker", "*");
+        listItem.setAttribute("data-task", " ");
+    } else {
+        actionElement.outerHTML = '<div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>';
+        listItem.setAttribute("data-marker", "*");
+        listItem.removeAttribute("data-task");
+    }
+    listItem.setAttribute("data-subtype", subtype);
+    listItem.classList.remove("protyle-task--done");
+    listItem.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+};
+
+const getTargetListItem = (targetElement: Element, isBottom: boolean) => {
+    if (targetElement.classList.contains("li")) {
+        return targetElement as HTMLElement;
+    }
+    if (targetElement.classList.contains("list")) {
+        const listItems = targetElement.querySelectorAll(":scope > .li");
+        return (isBottom ? listItems[listItems.length - 1] : listItems[0]) as HTMLElement;
+    }
+    return targetElement.closest(".li") as HTMLElement;
+};
+
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
                       isSameDoc: boolean, position: InsertPosition, isCopy: boolean) => {
@@ -65,8 +99,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     let tempTargetElement = targetElement;
     let isSameLi = true;
     sourceElements.find(item => {
-        if (!item.classList.contains("li") || !targetElement.classList.contains("li") ||
-            targetElement.getAttribute("data-subtype") !== item.getAttribute("data-subtype")) {
+        if (!item.classList.contains("li") || !targetElement.classList.contains("li")) {
             isSameLi = false;
             return true;
         }
@@ -112,6 +145,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     }
     for (let index = sourceElements.length - 1; index >= 0; index--) {
         const item = sourceElements[index];
+        const originalSubtype = item.getAttribute("data-subtype");
         const id = item.getAttribute("data-node-id");
         const parentID = getParentBlock(item).getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID;
         if (item.getAttribute("data-type") === "NodeListItem" && !newListId && !isSameLi) {
@@ -172,6 +206,12 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 e.setAttribute("data-node-id", newId);
                 e.setAttribute("updated", newId.split("-")[0]);
             });
+            const targetSubtype = targetElement.getAttribute("data-subtype");
+            if (copyElement.getAttribute("data-type") === "NodeListItem" &&
+                targetElement.getAttribute("data-type") === "NodeListItem" && targetSubtype &&
+                copyElement.getAttribute("data-subtype") !== targetSubtype) {
+                convertListItemSubtype(copyElement, targetSubtype);
+            }
             if (newListId) {
                 newListElement.insertAdjacentElement("afterbegin", copyElement);
                 doOperations.push({
@@ -308,9 +348,27 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
         }
 
+        if (!isCopy && item.getAttribute("data-type") === "NodeListItem" && targetElement.getAttribute("data-type") === "NodeListItem") {
+            const targetSubtype = targetElement.getAttribute("data-subtype");
+            if (targetSubtype && item.getAttribute("data-subtype") !== targetSubtype) {
+                const originalHTML = item.outerHTML;
+                convertListItemSubtype(item, targetSubtype);
+                doOperations.push({
+                    action: "update",
+                    id,
+                    data: item.outerHTML,
+                });
+                undoOperations.push({
+                    action: "update",
+                    id,
+                    data: originalHTML,
+                });
+            }
+        }
+
         if (newListId && (index === 0 ||
             sourceElements[index - 1].getAttribute("data-type") !== "NodeListItem" ||
-            sourceElements[index - 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype"))
+            sourceElements[index - 1].getAttribute("data-subtype") !== originalSubtype)
         ) {
             if (position === "beforebegin") {
                 tempTargetElement = newListElement;
@@ -807,7 +865,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
-        const targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover__bottom--sibling, .dragover__top--sibling, .dragover__bottom--child, .dragover__top--child");
+        let targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover__bottom--sibling, .dragover__top--sibling, .dragover__bottom--child, .dragover__top--child");
         if (targetElement) {
             targetElement.classList.remove("dragover");
             targetElement.removeAttribute("select-start");
@@ -1114,16 +1172,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             return;
                         }
                         // targetElement 可能是列表项的子块（如 .p）或列表容器（.list），需找到对应 .li 再判断
-                        let targetLi: HTMLElement;
-                        if (targetElement.classList.contains("li")) {
-                            targetLi = targetElement as HTMLElement;
-                        } else if (targetElement.classList.contains("list")) {
-                            // 列表容器底部：取最后一个 .li（拖到列表末尾）
-                            const lis = targetElement.querySelectorAll(":scope > .li");
-                            targetLi = isBottom ? lis[lis.length - 1] as HTMLElement : lis[0] as HTMLElement;
-                        } else {
-                            targetLi = targetElement.closest(".li") as HTMLElement;
-                        }
+                        const targetLi = getTargetListItem(targetElement, isBottom);
                         if (targetLi) {
                             const isNoOpDrop = sourceElements.some(source =>
                                 source === targetLi ||                                              // 拖到自身
@@ -1175,6 +1224,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
 
                     // 拖拽整个列表块（NodeList）到列表项时，展开为其下的列表项，避免形成 list>list 非法嵌套
+                    if (isListItemSource && targetElement.classList.contains("list")) {
+                        const targetListItem = getTargetListItem(targetElement, isBottom);
+                        if (targetListItem) {
+                            targetElement = targetListItem;
+                        }
+                    }
+
                     if (targetElement.getAttribute("data-type") === "NodeListItem") {
                         const expandedElements: Element[] = [];
                         sourceElements.forEach(item => {
@@ -2208,11 +2264,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (gutterTypes[0] === "nodelistitem" && "NodeListItem" === targetElement.getAttribute("data-type")) {
-                if (gutterTypes[1] !== targetElement.getAttribute("data-subtype")) {
-                    // 排除类型不同的列表项
-                    clearDragoverElement(dragoverElement);
-                    return;
-                }
                 // 选中非列表不能拖拽到列表中 https://github.com/siyuan-note/siyuan/issues/13822
                 const notLiItem = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).find((item: HTMLElement) => {
                     if (!item.classList.contains("li")) {
@@ -2224,7 +2275,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return;
                 }
             }
-            if (gutterTypes[0] !== "nodelistitem" && targetElement.getAttribute("data-type") === "NodeListItem") {
+            if (!["nodelistitem", "nodelist"].includes(gutterTypes[0]) && targetElement.getAttribute("data-type") === "NodeListItem") {
                 // 非列表项不能拖入列表项周围
                 clearDragoverElement(dragoverElement);
                 return;

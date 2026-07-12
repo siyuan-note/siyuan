@@ -29,13 +29,12 @@ type NotebookCrypto struct {
 	AutoLockMinutes int               `json:"autoLockMinutes"` // 加密笔记本自动锁定闲置分钟数，0 表示禁用，默认 5
 
 	// 备份完整性字段（Spec>=1）
-	// Spec 表示备份规范版本。Generation 单调递增。Checksum 防损坏。KEKMAC 需主密码验证。
-	Spec       int    `json:"spec,omitempty"`       // 备份规范版本（见 CurrentNotebookCryptoSpec）
-	BackupID   string `json:"backupID,omitempty"`   // 备份唯一标识（UUID）
-	Generation uint64 `json:"generation,omitempty"` // 单调递增世代
-	CreatedAt  int64  `json:"createdAt,omitempty"`  // 备份创建/更新时间（unix 秒）
-	Checksum   string `json:"checksum,omitempty"`   // SHA-256 校验和
-	KEKMAC     []byte `json:"kekMAC,omitempty"`     // KEK HMAC-SHA256（需主密码验证）
+	// Spec 表示备份规范版本。Checksum 防损坏。KEKMAC 需主密码验证。
+	Spec      int    `json:"spec,omitempty"`      // 备份规范版本（见 CurrentNotebookCryptoSpec）
+	BackupID  string `json:"backupID,omitempty"`  // 备份唯一标识（UUID）
+	CreatedAt int64  `json:"createdAt,omitempty"` // 备份创建/更新时间（unix 秒）
+	Checksum  string `json:"checksum,omitempty"`  // SHA-256 校验和
+	KEKMAC    []byte `json:"kekMAC,omitempty"`    // KEK HMAC-SHA256（需主密码验证）
 }
 
 // NewNotebookCrypto 创建带默认 Argon2id 参数的 NotebookCrypto。

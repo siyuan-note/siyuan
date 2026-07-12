@@ -125,10 +125,9 @@ func verifyKEKMAC(nc *conf.NotebookCrypto, kek []byte) bool {
 	return hmac.Equal(expected, nc.KEKMAC)
 }
 
-// prepareBackupForWrite 为写入准备备份元数据字段（Spec/Generation/BackupID/CreatedAt/Checksum）。
+// prepareBackupForWrite 为写入准备备份元数据字段（Spec/BackupID/CreatedAt/Checksum）。
 func prepareBackupForWrite(nc *conf.NotebookCrypto) {
 	conf.UpgradeSpec(nc) // 按需升级旧格式
-	nc.Generation++
 	if nc.BackupID == "" {
 		nc.BackupID = util.RandString(16)
 	}
@@ -224,7 +223,7 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 	nc.Enabled = true
 
 	// 先写 backup，再提交 conf；backup 失败时 conf 尚未改变，可重试
-	if err := writeNotebookCryptoBackupData(nc); err != nil {
+	if err := writeNotebookCryptoBackupData(nc, kek); err != nil {
 		return fmt.Errorf("failed to persist key backup: %w", err)
 	}
 	Conf.m.Lock()
@@ -235,15 +234,19 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 }
 
 // saveNotebookCryptoBackup 把当前 NotebookCrypto（含 MasterSalt/KEKVerifier/KDFParams）备份到 DataDir。
-func saveNotebookCryptoBackup() error {
+// kek 非 nil 时在 Checksum 定型后计算 KEKMAC；kek 为 nil（如启动回填、无密码恢复）则不写 MAC。
+func saveNotebookCryptoBackup(kek []byte) error {
 	Conf.m.Lock()
 	nc := *Conf.NotebookCrypto // 值拷贝
 	prepareBackupForWrite(&nc)
+	if nil != kek {
+		nc.KEKMAC = computeKEKMAC(&nc, kek)
+	}
 	Conf.NotebookCrypto.Spec = nc.Spec
 	Conf.NotebookCrypto.BackupID = nc.BackupID
-	Conf.NotebookCrypto.Generation = nc.Generation
 	Conf.NotebookCrypto.CreatedAt = nc.CreatedAt
 	Conf.NotebookCrypto.Checksum = nc.Checksum
+	Conf.NotebookCrypto.KEKMAC = nc.KEKMAC // 保持 Conf 与备份文件的 KEKMAC 一致
 	Conf.m.Unlock()
 	backupPath := notebookCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
@@ -260,8 +263,12 @@ func saveNotebookCryptoBackup() error {
 }
 
 // writeNotebookCryptoBackupData 将指定的 NotebookCrypto 写入备份文件（不依赖 Conf.NotebookCrypto）。
-func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto) error {
+// kek 非 nil 时在 Checksum 定型后计算 KEKMAC，保证落盘 MAC 与落盘内容一致；kek 为 nil 则不写 MAC。
+func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto, kek []byte) error {
 	prepareBackupForWrite(nc)
+	if nil != kek {
+		nc.KEKMAC = computeKEKMAC(nc, kek)
+	}
 	backupPath := notebookCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		return fmt.Errorf("mkdir notebook crypto backup dir failed: %w", err)
@@ -477,7 +484,7 @@ func recoverMasterPasswordMigration() {
 		}
 		// 持久化全局 conf + backup，再清除 manifest
 		Conf.Save()
-		if err = saveNotebookCryptoBackup(); err != nil {
+		if err = saveNotebookCryptoBackup(nil); err != nil {
 			logging.LogErrorf("save notebook crypto backup failed: %s", err)
 			return // 保留 manifest
 		}
@@ -576,7 +583,7 @@ func EnableEncryptedNotebook(password string) error {
 
 	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
 	Conf.Save()
-	if err := saveNotebookCryptoBackup(); err != nil {
+	if err := saveNotebookCryptoBackup(kek); err != nil {
 		// 备份写失败则回滚启用状态，避免 UI 显示启用成功但恢复链条缺失
 		logging.LogErrorf("save notebook crypto backup failed: %s", err)
 		Conf.m.Lock()
@@ -671,8 +678,9 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 		// 主密码错误（或备份损坏），不能恢复
 		return nil, errors.New(Conf.Language(311))
 	}
-	// Spec>=1 时验证 KEKMAC：用 KEK 校验备份内容未被篡改
-	if backup.Spec >= 1 && !verifyKEKMAC(backup, kek) {
+	// Spec>=1 时验证 KEKMAC：用 KEK 校验备份内容未被篡改。
+	// len(KEKMAC)==0 时跳过（兼容旧备份/启动回填等无 MAC 写入），与 ImportNotebookCryptoBackup 的门控一致
+	if backup.Spec >= 1 && len(backup.KEKMAC) > 0 && !verifyKEKMAC(backup, kek) {
 		return nil, errors.New(Conf.Language(316))
 	}
 
@@ -691,8 +699,7 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 	// 调用方已持有 notebookCryptoMu，且 writeNotebookCryptoBackupData 不再申请该锁，故无死锁；
 	// 同步写避免与 ChangeMasterPassword 的并发备份写竞争同一文件（lost update 导致 verifier 被回退）。
 	nc := *backup
-	nc.KEKMAC = computeKEKMAC(&nc, kek)
-	if err := writeNotebookCryptoBackupData(&nc); err != nil {
+	if err := writeNotebookCryptoBackupData(&nc, kek); err != nil {
 		logging.LogWarnf("rewrite notebook crypto backup after restore failed: %s", err)
 	}
 	logging.LogInfof("notebook crypto restored from backup (e.g. after sync to a new device)")
@@ -1114,7 +1121,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	}
 
 	// Phase 4: 先持久化全局备份，再清除 manifest，确保崩溃后可恢复
-	if err = saveNotebookCryptoBackup(); err != nil {
+	if err = saveNotebookCryptoBackup(newKEK); err != nil {
 		return fmt.Errorf("%w: %s", errMasterPasswordMigrationPending,
 			fmt.Sprintf(Conf.Language(320), "save notebook crypto backup failed: "+err.Error()))
 	}
@@ -1589,19 +1596,6 @@ func TouchUnlockedEncryptedBoxes() {
 	}
 }
 
-// LockAllEncryptedBoxes 锁定当前已解锁的所有加密笔记本。
-func LockAllEncryptedBoxes() {
-	cachedDEKsLock.RLock()
-	boxIDs := make([]string, 0, len(cachedDEKs))
-	for boxID := range cachedDEKs {
-		boxIDs = append(boxIDs, boxID)
-	}
-	cachedDEKsLock.RUnlock()
-	for _, boxID := range boxIDs {
-		Unmount(boxID)
-	}
-}
-
 // AutoLockIdleEncryptedBoxesJob 检查所有已解锁的加密 notebook，将闲置超时的自动锁定。
 // 由 cron 每分钟调用。阈值由 NotebookCrypto.AutoLockMinutes 控制（0 = 禁用）。
 func AutoLockIdleEncryptedBoxesJob() {
@@ -1628,12 +1622,13 @@ func AutoLockIdleEncryptedBoxesJob() {
 			elapsed := now - lastAccess
 			if elapsed >= thresholdNs {
 				logging.LogInfof("auto-locking idle encrypted notebook [%s] (elapsed=%ds, threshold=%dm)", boxID, elapsed/1e9, threshold)
-				Unmount(boxID)
-				// 自动锁定会关闭正在编辑的文档，推一条提示避免用户以为崩溃
+				// 先取笔记本名称再 Unmount：Unmount 会关闭笔记本，之后 Conf.Box 返回 nil 导致提示显示 boxID
 				boxName := boxID
 				if box := Conf.Box(boxID); nil != box {
 					boxName = box.Name
 				}
+				Unmount(boxID)
+				// 自动锁定会关闭正在编辑的文档，推一条提示避免用户以为崩溃
 				util.PushMsg(fmt.Sprintf(Conf.Language(322), boxName), 0)
 			}
 		}

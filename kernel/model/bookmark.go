@@ -68,7 +68,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == bookmark {
 				node.RemoveIALAttr("bookmark")
-				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}
@@ -140,7 +140,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == oldBookmark {
 				node.SetIALAttr("bookmark", newBookmark)
-				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}

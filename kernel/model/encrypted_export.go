@@ -22,8 +22,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/88250/lute/ast"
 )
 
 type managedEncryptedExport struct {
@@ -59,6 +62,11 @@ func registerManagedEncryptedExport(boxID, kind, artifact string) string {
 	return relativePath
 }
 
+// RegisterManagedEncryptedExport 是 registerManagedEncryptedExport 的导出包装，供 api 层调用。
+func RegisterManagedEncryptedExport(boxID, kind, artifact string) string {
+	return registerManagedEncryptedExport(boxID, kind, artifact)
+}
+
 // ResolveManagedEncryptedExport 返回仍有效的加密导出产物，未登记、已撤销或过期的路径均不可下载。
 func ResolveManagedEncryptedExport(relativePath string) (boxID, artifact string, ok bool) {
 	relativePath = path.Clean("/" + relativePath)
@@ -89,4 +97,26 @@ func RevokeManagedEncryptedExportsForBox(boxID string) {
 			delete(managedEncryptedExports.jobs, relativePath)
 		}
 	}
+}
+
+// IsManagedEncryptedExportPath 判断相对路径是否属于加密导出受控范围（<boxID>/<kind>/<file> 结构）。
+// 只要路径首段是合法 boxID 格式即视为受控，不依赖 box 是否仍存在（笔记本删除后仍需按注册表拒绝，
+// 避免因 IsEncryptedBox 返回 false 而 fail-open 暴露明文产物）。
+func IsManagedEncryptedExportPath(relativePath string) bool {
+	relativePath = path.Clean("/" + relativePath)
+	parts := strings.SplitN(strings.TrimPrefix(relativePath, "/"), "/", 3)
+	return len(parts) >= 1 && ast.IsNodeIDPattern(parts[0])
+}
+
+// ResolveManagedExportForMobile 供移动端 GetExportFilePath 调用，校验托管 token 有效且 box 已解锁。
+// 任一条件不满足返回 ("", false)（fail-closed），防止移动端绕过注册表直接读取明文导出产物。
+func ResolveManagedExportForMobile(relativePath string) (absPath string, ok bool) {
+	boxID, artifact, resolved := ResolveManagedEncryptedExport(relativePath)
+	if !resolved {
+		return "", false
+	}
+	if _, dekErr := GetDEKIfUnlocked(boxID); dekErr != nil {
+		return "", false
+	}
+	return artifact, true
 }

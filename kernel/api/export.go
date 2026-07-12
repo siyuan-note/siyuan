@@ -28,7 +28,6 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
@@ -691,9 +690,12 @@ func exportTempContent(c *gin.Context) {
 		}
 		return ""
 	}(); boxID != "" {
-		urlPath += boxID + "/"
+		// 加密笔记本的临时导出产物须注册到托管表，否则服务端守卫（IsManagedEncryptedExportPath）会拒绝下载
+		token := model.RegisterManagedEncryptedExport(boxID, "temp", p)
+		urlPath += token
+	} else {
+		urlPath = path.Join(urlPath, "temp", baseName)
 	}
-	urlPath = path.Join(urlPath, "temp", baseName)
 	ret.Data = map[string]any{
 		"url": util.ServerURL.Scheme + "://" + util.LocalHost + ":" + util.ServerPort + urlPath,
 	}
@@ -1018,14 +1020,14 @@ func copyExportFile(c *gin.Context) {
 		return
 	}
 
-	// 加密笔记本的导出产物位于 temp/export/<boxID>/... 受控目录，复制前同样需校验：
-	// 该 box 必须处于解锁状态、且产物仍登记在托管下载表中（锁定后会被清除并撤销）。
+	// 加密导出受控路径（<boxID>/<kind>/<file>）：按注册表无条件校验，不依赖 IsEncryptedBox。
+	// 笔记本删除后 IsEncryptedBox 返回 false，若以它为门控会 fail-open 暴露明文产物。
 	// relativePath 去掉 "/export/" 前缀以与 serveExport 的守卫及托管注册 key（<boxID>/kind/<name>）对齐。
 	relativeExportPath := strings.TrimPrefix(srcPath, "/export/")
 	relativeExportPath = strings.TrimPrefix(relativeExportPath, "export/")
-	if parts := strings.SplitN(strings.TrimPrefix(relativeExportPath, "/"), "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
+	if model.IsManagedEncryptedExportPath(relativeExportPath) {
 		boxID, _, ok := model.ResolveManagedEncryptedExport(relativeExportPath)
-		if !ok || boxID != parts[0] {
+		if !ok {
 			ret.Code = -1
 			ret.Msg = "export file is not available"
 			return

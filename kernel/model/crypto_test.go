@@ -223,7 +223,7 @@ func TestBackupUpgradeFromSpec0(t *testing.T) {
 		t.Fatalf("expected Spec=1 after upgrade, got %d", nc.Spec)
 	}
 
-	// 写入升级后的备份（prepareBackupForWrite 会补全 Checksum 和 Generation）
+	// 写入升级后的备份（prepareBackupForWrite 会补全 Checksum）
 	prepareBackupForWrite(nc)
 	backupDir := filepath.Join(tempDir, ".siyuan")
 	os.MkdirAll(backupDir, 0755)
@@ -234,9 +234,6 @@ func TestBackupUpgradeFromSpec0(t *testing.T) {
 	nc2, err := loadNotebookCryptoBackup()
 	if err != nil {
 		t.Fatalf("reload backup failed: %v", err)
-	}
-	if nc2.Generation < 1 {
-		t.Fatalf("expected Generation>=1, got %d", nc2.Generation)
 	}
 	if nc2.Checksum == "" {
 		t.Fatalf("expected non-empty Checksum after write")
@@ -303,6 +300,43 @@ func TestBackupKEKMACVerification(t *testing.T) {
 	wrongKek, _ := util.GenerateDEK()
 	if verifyKEKMAC(nc, wrongKek) {
 		t.Fatalf("verifyKEKMAC should fail with wrong KEK")
+	}
+}
+
+// TestBackupMACRoundTrip 验证 writeNotebookCryptoBackupData(nc, kek) 写入的备份，
+// 重新加载后 verifyKEKMAC 能通过——即 MAC 在 prepareBackupForWrite 之后计算（顺序正确）。
+func TestBackupMACRoundTrip(t *testing.T) {
+	origDataDir := util.DataDir
+	tempDir := t.TempDir()
+	util.DataDir = tempDir
+	defer func() { util.DataDir = origDataDir }()
+
+	password := "round-trip-test"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	nc := &conf.NotebookCrypto{
+		Enabled:     true,
+		MasterSalt:  salt,
+		KDFParams:   params,
+		KEKVerifier: verifierCT,
+	}
+
+	// 通过 writeNotebookCryptoBackupData 写入（内部 prepareBackupForWrite 后计算 MAC）
+	if err := writeNotebookCryptoBackupData(nc, kek); err != nil {
+		t.Fatalf("writeNotebookCryptoBackupData failed: %v", err)
+	}
+
+	// 重新加载，验证 Checksum 和 MAC 均通过
+	loaded, err := loadNotebookCryptoBackup()
+	if err != nil {
+		t.Fatalf("loadNotebookCryptoBackup failed: %v", err)
+	}
+	if loaded.Spec >= 1 && len(loaded.KEKMAC) > 0 && !verifyKEKMAC(loaded, kek) {
+		t.Fatalf("verifyKEKMAC failed on round-trip backup (MAC was computed in wrong order)")
 	}
 }
 

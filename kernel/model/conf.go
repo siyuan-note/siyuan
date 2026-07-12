@@ -561,7 +561,7 @@ func InitConf() {
 	if Conf.NotebookCrypto.Enabled {
 		if _, err := os.Stat(notebookCryptoBackupPath()); err != nil && os.IsNotExist(err) {
 			if Conf.NotebookCrypto.MasterSalt != nil && len(Conf.NotebookCrypto.MasterSalt) > 0 {
-				if err := saveNotebookCryptoBackup(); err != nil {
+				if err := saveNotebookCryptoBackup(nil); err != nil {
 					logging.LogErrorf("backfill notebook crypto backup failed: %s", err)
 				} else {
 					logging.LogInfof("backfilled notebook crypto backup for existing enabled setup")

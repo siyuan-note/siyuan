@@ -184,7 +184,7 @@ func indexBox(boxID string) {
 		avNodes = append(avNodes, tree.Root.ChildrenByType(ast.NodeAttributeView)...)
 		lock.Unlock()
 
-		cache.PutDocIAL(file.path, docIAL)
+		cache.PutDocIALInBox(file.path, tree.Box, docIAL)
 		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(tree)
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))

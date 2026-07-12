@@ -835,7 +835,7 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 
 		tx.writeTree(tree)
 
-		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
+		cache.PutBlockIALInBox(blockID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 		pushBlockAttrs(oldAttrs, node)
 	}
 
@@ -933,7 +933,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 
 		tx.writeTree(tree)
 
-		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
+		cache.PutBlockIALInBox(blockID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 		pushBlockAttrs(oldAttrs, node)
 	}
 

@@ -627,7 +627,14 @@ func EnableEncryptedNotebook(password string) error {
 		return nil
 	}
 
-	// 不存在加密笔记本：正常生成新 MasterSalt
+	// 防呆：历史目录中存在已删除加密笔记本的历史快照时，禁止重新生成 MasterSalt。
+	// 这些历史的恢复仍依赖原 MasterSalt/KEKVerifier，生成新 salt 会让其永久锁死（违反设计 §4.1
+	// “内核可枚举的加密恢复数据存在时禁止重新生成 MasterSalt”）。此时应先恢复全局密钥备份或清除历史。
+	if HasEncryptedNotebookHistory() {
+		return errors.New(Conf.Language(323))
+	}
+
+	// 不存在加密笔记本且无历史依赖：正常生成新 MasterSalt
 	salt, err := util.GenerateSalt()
 	if err != nil {
 		return err

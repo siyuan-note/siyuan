@@ -510,8 +510,17 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 if (response.data.count > 0) {
                     showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", response.data.count), 4000);
                     switchElement.checked = true;
+                } else if (response.data.hasHistoryDependency) {
+                    // 已删除加密笔记本的历史仍依赖当前密钥备份，禁用会让其永久锁死（详见设计 §19）
+                    showMessage(window.siyuan.languages["_kernel"]["323"], 6000, "error");
+                    switchElement.checked = true;
                 } else {
-                    fetchPost("/api/notebook/disableEncryptedNotebooks", {}, () => {
+                    // 用 sync 调用以便后端因任何原因拒绝时回滚开关，避免 UI 与后端状态不一致
+                    fetchSyncPost("/api/notebook/disableEncryptedNotebooks", {}).then((res: IWebSocketData) => {
+                        if (res.code === -1) {
+                            switchElement.checked = true; // processMessage 已弹出错误，这里只回滚开关
+                            return;
+                        }
                         showMessage(window.siyuan.languages.encryptedNotebookDisabled);
                         refresh();
                     });

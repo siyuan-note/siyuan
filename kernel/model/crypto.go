@@ -511,7 +511,7 @@ func hasEncryptedNotebook() bool {
 	return len(ListAllEncryptedBoxIDs()) > 0
 }
 
-// hasEncryptedNotebookHistory 检查历史目录中是否存在加密笔记本的历史快照。
+// HasEncryptedNotebookHistory 检查历史目录中是否存在加密笔记本的历史快照。
 // 笔记本删除后其 box 目录（含 .siyuan/conf.json 和 notebook-crypt-backup.json）会被
 // 原样密文备份到历史目录（RemoveBox 的 filelock.Copy），但此时 IsEncryptedBox 已返回 false
 // （box 目录已删）。因此 DisableEncryptedNotebook 不能只靠 ListAllEncryptedBoxIDs 判定——
@@ -521,7 +521,7 @@ func hasEncryptedNotebook() bool {
 // 判定信号：历史条目 <HistoryDir>/<ts>-<op>/<boxID>/.siyuan/ 下存在
 // notebook-crypt-backup.json（专为 box 删除后的恢复设计），或 conf.json 标记 Encrypted=true。
 // boxID 用 ast.IsNodeIDPattern 校验，避免误判 assets/storage 等非 box 目录。
-func hasEncryptedNotebookHistory() bool {
+func HasEncryptedNotebookHistory() bool {
 	entries, err := os.ReadDir(util.HistoryDir)
 	if err != nil {
 		return false // 历史目录不存在或不可读 → 无依赖
@@ -679,7 +679,7 @@ func DisableEncryptedNotebook() error {
 	}
 	// 检查历史目录中是否存在已删除加密笔记本的历史快照：其恢复仍依赖当前 MasterSalt/KEKVerifier，
 	// 删除备份前必须先清除这些历史（详见设计 §19）
-	if hasEncryptedNotebookHistory() {
+	if HasEncryptedNotebookHistory() {
 		return errors.New(Conf.Language(323))
 	}
 

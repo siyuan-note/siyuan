@@ -753,6 +753,9 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 	enabled := model.NotebookCryptoEnabled()
 	model.NotebookCryptoMuUnlock()
 	pendingMigration, migrationBoxes := model.MasterPasswordMigrationStatus()
+	// 历史目录中是否存在已删除加密笔记本的历史快照：其恢复依赖当前密钥备份，
+	// 存在时前端禁用入口应拦截（与 DisableEncryptedNotebook 的后端检查对齐）
+	hasHistoryDependency := model.HasEncryptedNotebookHistory()
 
 	boxes := make([]map[string]any, 0, len(boxIDs))
 	for _, id := range boxIDs {
@@ -769,11 +772,12 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"enabled":          enabled,
-		"count":            len(boxIDs),
-		"boxes":            boxes,
-		"migrationPending": pendingMigration,
-		"migrationBoxes":   migrationBoxes,
+		"enabled":              enabled,
+		"count":                len(boxIDs),
+		"boxes":                boxes,
+		"migrationPending":     pendingMigration,
+		"migrationBoxes":       migrationBoxes,
+		"hasHistoryDependency": hasHistoryDependency,
 	}
 }
 

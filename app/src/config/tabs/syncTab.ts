@@ -209,14 +209,15 @@ const mountRepoKey = (root: HTMLElement) => {
     root.querySelector("#importKey")?.addEventListener("click", () => {
         const passwordDialog = new Dialog({
             title: "🔑 " + window.siyuan.languages.key,
-            content: `<div class="b3-dialog__content">
-    <textarea spellcheck="false" style="resize: vertical;" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}"></textarea>
+            content: `<div class="b3-dialog__content" style="display:flex">
+    <textarea spellcheck="false" style="resize: none;flex:1" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}"></textarea>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
             width: "520px",
+            height: "260px",
         });
         passwordDialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
         const textAreaElement = passwordDialog.element.querySelector("textarea");

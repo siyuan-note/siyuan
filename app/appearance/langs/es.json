@@ -2135,6 +2135,7 @@
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "El acceso a datos de cuadernos cifrados no está soportado a través de esta API",
 		"322": "El cuaderno cifrado [%s] se ha bloqueado automáticamente por inactividad",
-		"323": "No se pueden desactivar los cuadernos cifrados: el historial de cuadernos eliminados aún depende de la copia de seguridad de claves actual. Borre ese historial primero"
+		"323": "No se pueden desactivar los cuadernos cifrados: el historial de cuadernos eliminados aún depende de la copia de seguridad de claves actual. Borre ese historial primero",
+		"324": "No se puede importar una copia de seguridad de claves mientras los cuadernos cifrados estén activados. Desactívelos primero"
 	}
 	}

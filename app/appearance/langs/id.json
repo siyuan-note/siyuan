@@ -2135,6 +2135,7 @@
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "Notebook terenkripsi [%s] telah dikunci otomatis karena tidak aktif",
-		"323": "Tidak dapat menonaktifkan notebook terenkripsi: riwayat notebook yang dihapus masih bergantung pada cadangan kunci saat ini. Hapus riwayat tersebut terlebih dahulu"
+		"323": "Tidak dapat menonaktifkan notebook terenkripsi: riwayat notebook yang dihapus masih bergantung pada cadangan kunci saat ini. Hapus riwayat tersebut terlebih dahulu",
+		"324": "Tidak dapat mengimpor cadangan kunci saat notebook terenkripsi diaktifkan. Nonaktifkan terlebih dahulu"
 	}
 	}

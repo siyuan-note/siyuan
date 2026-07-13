@@ -185,9 +185,20 @@ func ExportNotebookCryptoBackup() (downloadPath string, err error) {
 // 防呆：本机已启用加密笔记本时拒绝导入，避免覆盖现有 salt/verifier 孤立现有 WrappedDEK。
 // ImportNotebookCryptoBackup 接收用户导入的密钥备份文件内容（JSON 字节）+ 主密码，
 // 校验主密码能解开备份里的 verifier 后才写回配置。防止 crafted 备份设置弱 KDFParams 等攻击。
+// 本机已启用时拒绝（详见设计 §4.1）：导入会用导入备份的 MasterSalt/KEKVerifier 覆盖当前配置，
+// 若有现存加密笔记本其 WrappedDEK 将被新 KEK 孤立（数据锁死）；即使无现存笔记本也拒绝，
+// 避免覆盖后旧主密码失效造成用户困惑。换密钥材料应走“先禁用再导入”。
 func ImportNotebookCryptoBackup(data []byte, password string) error {
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+
+	// 已启用即拒绝（对齐设计 §4.1，与 api handler 注释一致）
+	Conf.m.RLock()
+	enabled := Conf.NotebookCrypto.Enabled
+	Conf.m.RUnlock()
+	if enabled {
+		return errors.New(Conf.Language(324))
+	}
 
 	nc := &conf.NotebookCrypto{}
 	if err := json.Unmarshal(data, nc); err != nil {

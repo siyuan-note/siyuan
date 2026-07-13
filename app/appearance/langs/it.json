@@ -2135,6 +2135,7 @@
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "L'accesso ai dati dei notebook crittografati non è supportato tramite questa API",
 		"322": "Il notebook crittografato [%s] è stato bloccato automaticamente per inattività",
-		"323": "Impossibile disabilitare i notebook crittografati: la cronologia dei notebook eliminati dipende ancora dal backup delle chiavi attuale. Cancella prima quella cronologia"
+		"323": "Impossibile disabilitare i notebook crittografati: la cronologia dei notebook eliminati dipende ancora dal backup delle chiavi attuale. Cancella prima quella cronologia",
+		"324": "Impossibile importare un backup delle chiavi mentre i notebook crittografati sono attivi. Disattivali prima"
 	}
 	}

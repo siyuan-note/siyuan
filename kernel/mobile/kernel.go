@@ -68,21 +68,21 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if "" == accountToken || "" == transactionID {
 		retCode = -6
 		retMsg = "invalid parameters"
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	if 36 != len(accountToken) {
 		retCode = -6
 		retMsg = fmt.Sprintf("invalid accountToken [%s]", accountToken)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	if util.ContainerIOS != util.Container {
 		retCode = -3
 		retMsg = fmt.Sprintf("invalid container [%s]", util.Container)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -90,7 +90,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if nil == user || "" == user.UserToken {
 		retCode = -4
 		retMsg = "account not logged in"
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -98,7 +98,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if "0" != cloudRegionArg && "1" != cloudRegionArg {
 		retCode = -1
 		retMsg = fmt.Sprintf("invalid cloud region [%s]", cloudRegionArg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -106,7 +106,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if util.CurrentCloudRegion != cloudRegion {
 		retCode = -1
 		retMsg = fmt.Sprintf("invalid cloud region [cloudRegionArg=%s, currentRegion=%d]", cloudRegionArg, util.CurrentCloudRegion)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -114,7 +114,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if user.UserId != userID {
 		retCode = -5
 		retMsg = fmt.Sprintf("invalid user [userID=%s, accountToken=%s]", user.UserId, accountToken)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -126,74 +126,74 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if nil != reqErr {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed: %s", reqErr)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if http.StatusUnauthorized == resp.StatusCode || http.StatusForbidden == resp.StatusCode {
 		retCode = -4
 		retMsg = fmt.Sprintf("verify app store transaction failed [sc=%d]", resp.StatusCode)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if http.StatusOK != resp.StatusCode {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed [sc=%d]", resp.StatusCode)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	if -1 == result.Code {
 		retCode = -5
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -3 == result.Code {
 		retCode = -6
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -2 == result.Code {
 		retCode = -8
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -4 == result.Code {
 		retCode = -8
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -5 == result.Code {
 		retCode = -7
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -6 == result.Code {
 		retCode = -9
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -64 == result.Code {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if 0 != result.Code {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	retCode = 0
 	retMsg = fmt.Sprintf("verify app store transaction [%s] success", transactionID)
-	logging.LogInfof(retMsg)
+	logging.LogInfof("%s", retMsg)
 	return
 }
 

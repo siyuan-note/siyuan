@@ -20,6 +20,7 @@ import (
 	"database/sql"
 
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 )
 
 type Ref struct {
@@ -38,13 +39,15 @@ type Ref struct {
 }
 
 func upsertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
+	// 删除前先保留旧 refs 的 id 映射，重建时命中业务键则复用，避免每次重建刷新 id 而打乱“最近引用”排序
+	refIDs := queryRefIDsByPath(tx, tree.Box, tree.Path)
 	if err = deleteRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
 	if err = deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
-	err = insertRefs(tx, tree)
+	err = insertRefs(tx, tree, refIDs)
 	return
 }
 
@@ -58,8 +61,8 @@ func deleteRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 	return
 }
 
-func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
-	refs, fileAnnotationRefs := refsFromTree(tree)
+func insertRefs(tx *sql.Tx, tree *parse.Tree, refIDs map[string]string) (err error) {
+	refs, fileAnnotationRefs := refsFromTree(tree, refIDs)
 	if err = insertBlockRefs(tx, refs); err != nil {
 		return
 	}
@@ -67,4 +70,24 @@ func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 		return
 	}
 	return err
+}
+
+// queryRefIDsByPath 返回某篇文档现有 refs 的业务键→id 映射，用于重建时复用旧 id 以稳定“最近引用”排序。
+func queryRefIDsByPath(tx *sql.Tx, box, path string) (ret map[string]string) {
+	rows, err := queryTx(tx, "SELECT id, block_id, def_block_id FROM refs WHERE box = ? AND path = ?", box, path)
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	ret = map[string]string{}
+	for rows.Next() {
+		var id, blockID, defBlockID string
+		if err = rows.Scan(&id, &blockID, &defBlockID); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret[blockID+"\x00"+defBlockID] = id
+	}
+	return
 }

@@ -279,6 +279,9 @@ export class MobileFiles extends Model {
             }
 
             if (state.isDragging) {
+                // 进入拖拽后阻止原生滚动，避免列表伴随手指滚动
+                event.preventDefault();
+                event.stopPropagation();
                 state.ghostElement.style.left = `${touch.clientX}px`;
                 state.ghostElement.style.top = `${touch.clientY}px`;
 

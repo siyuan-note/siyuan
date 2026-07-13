@@ -502,11 +502,9 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
     switchElement.addEventListener("change", () => {
         if (switchElement.checked) {
             // 切到 ON：弹设密码框
-            openEnableEncryptedDialog(() => {
-                refresh();
-            }, () => {
-                switchElement.checked = false; // 取消则恢复
-            });
+            // onSuccess/onCancel 都用 refresh：开关状态以后端 enabled 真相为准，
+            // 避免成功后 destroy 的 setTimeout 回调把开关错误地翻回 OFF（曾因 onCancel 直接置 false 而覆盖成功态）
+            openEnableEncryptedDialog(refresh, refresh);
         } else {
             // 切到 OFF：没有加密笔记本时允许关闭
             fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {

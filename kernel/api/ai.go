@@ -124,8 +124,12 @@ func testEmbeddingModel(c *gin.Context) {
 
 	embedding := model.Conf.AI.Embedding
 	if nil == embedding || "" == embedding.APIKey || "" == embedding.BaseURL || "" == embedding.Name {
-		ret.Code = -1
-		ret.Msg = "embedding model not configured"
+		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
+		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
+		ret.Data = map[string]any{
+			"matched": false,
+			"msg":     "embedding model not configured",
+		}
 		return
 	}
 
@@ -151,8 +155,12 @@ func testRerankModel(c *gin.Context) {
 
 	rerank := model.Conf.AI.Rerank
 	if nil == rerank || "" == rerank.APIKey || "" == rerank.Endpoint || "" == rerank.Name {
-		ret.Code = -1
-		ret.Msg = "rerank model not configured"
+		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
+		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
+		ret.Data = map[string]any{
+			"matched": false,
+			"msg":     "rerank model not configured",
+		}
 		return
 	}
 

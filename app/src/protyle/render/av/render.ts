@@ -459,11 +459,14 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const virtualData: { [key: string]: IAVVirtualData } = {};
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
             pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-            if (!item.querySelector(".av__row") || e.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
+            // 守卫只保证至少 1 个 .av__row，但首行索引取的是 [1]（首个数据行，[0] 为表头）。
+            // 虚拟滚动 trim 后某分组可能只剩表头，[1] 不存在时需跳过，避免解引用 undefined.getAttribute
+            const secondRow = item.querySelectorAll(".av__row")[1] as HTMLElement;
+            if (!secondRow || e.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
                 return;
             }
             virtualData[item.getAttribute("data-group-id") || "all"] = getBodyVirtualData(
-                item, ".av__row--util", parseInt(item.querySelectorAll(".av__row")[1].getAttribute("data-index")));
+                item, ".av__row--util", parseInt(secondRow.getAttribute("data-index")));
         });
         const headerTransformElement = e.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
         const footerTransformElement = e.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;

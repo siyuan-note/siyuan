@@ -39,7 +39,13 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     const bottomLimit = elementRect.bottom + buffer;
     const blockRect = blockElement.getBoundingClientRect();
 
-    const protyle = dataStore.get(blockElement.getAttribute("data-av-id") + blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)).protyle;
+    // AV 重渲/新增分组/局部更新未走完整 initVirtualScroll 时 dataStore 可能缺失，跳过本次 trim，
+    // 等下次 initVirtualScroll 重新登记后再处理，避免解引用 undefined.protyle
+    const stored = dataStore.get(blockElement.getAttribute("data-av-id") + blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW));
+    if (!stored) {
+        return;
+    }
+    const protyle = stored.protyle;
     const isScrollingUp = lastScrollTop && lastScrollTop > protyle.contentElement.scrollTop;
     lastScrollTop = protyle.contentElement.scrollTop;
 
@@ -51,6 +57,11 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     const bodies = blockElement.querySelectorAll(".av__body:not(.fn__none)") as NodeListOf<HTMLElement>;
     bodies.forEach((bodyEl: HTMLElement) => {
         const state = bodyStates.get(bodyEl);
+        // body 尚未在 initVirtualScroll 中登记（重渲/新增分组/局部更新未走完整流程），
+        // WeakMap 查不到则跳过本次 trim，避免解引用 undefined.view
+        if (!state) {
+            return;
+        }
         const dataRows = type === "table" ? (state.view as IAVTable).rows : (state.view as IAVKanban).cards;
         let currentRows;
         let bottomElement;
@@ -325,7 +336,10 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
 // 需据此扩展渲染窗口让新行立即可见，否则虚拟滚动下新行会落在窗口外不渲染。
 export const getBodyVirtualData = (bodyEl: HTMLElement, endSelector: string, firstRowIndex: number): IAVVirtualData => {
     // 末尾标记前可能存在连续 ghost 行，向前回溯找到真实末行
-    let lastRow = bodyEl.querySelector(endSelector).previousElementSibling as HTMLElement;
+    // 末尾标记（.av__row--util / .av__gallery-add）缺失时（重渲竞态）直接回退到 firstRowIndex，
+    // 避免解引用 null.previousElementSibling
+    const endMarker = bodyEl.querySelector(endSelector);
+    let lastRow = endMarker ? endMarker.previousElementSibling as HTMLElement : null;
     while (lastRow && !lastRow.getAttribute("data-index")) {
         lastRow = lastRow.previousElementSibling as HTMLElement;
     }

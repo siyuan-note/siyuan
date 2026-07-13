@@ -211,7 +211,9 @@ export class MobileOutline extends Model {
 
     // 大纲拖拽排序：原生触摸事件实现，长按门槛避免与列表滚动冲突，排序逻辑对齐桌面端 Outline.bindSort
     private bindSort() {
-        const contentRect = () => this.element.getBoundingClientRect();
+        // 滚动容器为列表本体（不含顶部工具栏），否则边缘滚动判定会把工具栏算进可视区导致拖到列表顶/底部不滚动
+        const scrollElement = this.tree.element;
+        const contentRect = () => scrollElement.getBoundingClientRect();
         this.element.addEventListener("touchstart", (event: TouchEvent) => {
             if (window.siyuan.config.readonly) return;
             if (this.element.getAttribute("data-loading") === "true") return;
@@ -267,7 +269,7 @@ export class MobileOutline extends Model {
             event.stopPropagation();
             state.ghostElement.style.top = touch.clientY + "px";
             state.ghostElement.style.left = touch.clientX + "px";
-            dragOverScroll({clientY: touch.clientY} as MouseEvent, contentRect(), this.element);
+            dragOverScroll({clientY: touch.clientY} as MouseEvent, contentRect(), scrollElement);
 
             // 通过 elementFromPoint 定位手指下的目标项
             const target = document.elementFromPoint(touch.clientX, touch.clientY);

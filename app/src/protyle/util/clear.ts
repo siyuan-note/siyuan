@@ -1,5 +1,6 @@
 import {updateHeader} from "../render/av/row";
 import {resetAVRowSelect} from "../render/av/virtualScroll";
+import {hasClosestByClassName} from "./hasClosest";
 import {Constants} from "../../constants";
 
 export const clearBlockElement = (element: Element, keepRefcount = false) => {
@@ -40,8 +41,9 @@ export const clearSelect = (types: ("av" | "img" | "cell" | "row" | "galleryItem
         });
     }
     if (types.includes("galleryItem")) {
+        const clearedBodies = new Set<HTMLElement>();
         element.querySelectorAll(".av__gallery-item--select").forEach((item: HTMLElement) => {
-            item.classList.remove("av__gallery-item--select");
+            clearGalleryItem(item, clearedBodies);
         });
     }
     if (types.includes("av")) {
@@ -56,9 +58,11 @@ export const clearSelect = (types: ("av" | "img" | "cell" | "row" | "galleryItem
                     clearedBodies.add(bodyEl);
                 }
                 updateHeader(item);
+            } else if (item.classList.contains("av__gallery-item--select")) {
+                clearGalleryItem(item, clearedBodies);
             } else {
                 item.querySelector(".av__drag-fill")?.remove();
-                item.classList.remove("av__cell--select", "av__cell--active", "av__gallery-item--select");
+                item.classList.remove("av__cell--select", "av__cell--active");
             }
         });
     }
@@ -68,4 +72,14 @@ export const clearSelect = (types: ("av" | "img" | "cell" | "row" | "galleryItem
         });
     }
 
+};
+
+const clearGalleryItem = (item: HTMLElement, clearedBodies: Set<HTMLElement>) => {
+    item.classList.remove("av__gallery-item--select");
+    const bodyEl = hasClosestByClassName(item, "av__body") as HTMLElement;
+    if (bodyEl && !clearedBodies.has(bodyEl)) {
+        resetAVRowSelect(bodyEl, []);
+        clearedBodies.add(bodyEl);
+    }
+    updateHeader(item);
 };

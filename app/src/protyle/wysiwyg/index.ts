@@ -79,7 +79,8 @@ import {removeSearchMark} from "../toolbar/util";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
-import {selectRow, stickyRow} from "../render/av/row";
+import {selectRow, stickyRow, updateHeader} from "../render/av/row";
+import {updateAVRowSelect} from "../render/av/virtualScroll";
 import {showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -613,9 +614,17 @@ export class WYSIWYG {
                             break;
                         }
                     }
-                    previousList.concat(nextList).forEach(item => {
+                    // 锚点卡片及范围内卡片统一选中并同步虚拟滚动选中快照
+                    const shiftSelectItems = [galleryItemElement].concat(previousList as HTMLElement[]).concat(nextList as HTMLElement[]);
+                    shiftSelectItems.forEach(item => {
                         item.classList.add("av__gallery-item--select");
+                        const galleryBodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
+                        const galleryRowId = item.getAttribute("data-id");
+                        if (galleryBodyElement && galleryRowId) {
+                            updateAVRowSelect(galleryBodyElement, galleryRowId, true);
+                        }
                     });
+                    updateHeader(galleryItemElement);
                     event.preventDefault();
                 } else if (startElement && endElement && startElement !== endElement) {
                     let toDown = true;
@@ -721,7 +730,13 @@ export class WYSIWYG {
                 const rowElement = hasClosestByClassName(target, "av__row");
                 if (!hasSelectClassElement && (galleryItemElement || (rowElement && !rowElement.classList.contains("av__row--header")))) {
                     if (galleryItemElement) {
-                        galleryItemElement.classList.toggle("av__gallery-item--select");
+                        const galleryBodyElement = hasClosestByClassName(galleryItemElement, "av__body") as HTMLElement;
+                        const galleryRowId = galleryItemElement.getAttribute("data-id");
+                        if (galleryBodyElement && galleryRowId) {
+                            updateAVRowSelect(galleryBodyElement, galleryRowId,
+                                galleryItemElement.classList.toggle("av__gallery-item--select"));
+                        }
+                        updateHeader(galleryItemElement);
                     } else if (rowElement) {
                         selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                     }

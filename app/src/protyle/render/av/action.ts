@@ -383,6 +383,12 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             clearSelect(["galleryItem"], blockElement);
         }
         rowElement.classList.add("av__gallery-item--select");
+        const bodyElement = hasClosestByClassName(rowElement, "av__body") as HTMLElement;
+        const rowId = rowElement.getAttribute("data-id");
+        if (bodyElement && rowId) {
+            updateAVRowSelect(bodyElement, rowId, true);
+        }
+        updateHeader(rowElement);
     }
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");

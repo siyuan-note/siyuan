@@ -8,7 +8,7 @@ import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
 import {getBodyVirtualData, initVirtualScroll} from "../virtualScroll";
-import {getRowHTML} from "../row";
+import {getRowHTML, updateHeader} from "../row";
 
 interface IIds {
     groupId: string,
@@ -118,6 +118,11 @@ export const afterRenderGallery = (options: ITableOptions) => {
             itemElement.classList.add("av__gallery-item--select");
         }
     });
+    // 重渲后恢复的选中态需刷新计数器显示
+    const restoredItem = options.blockElement.querySelector(".av__gallery-item--select") as HTMLElement;
+    if (restoredItem) {
+        updateHeader(restoredItem);
+    }
     options.resetData.editIds.find(selectId => {
         let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
         if (!itemElement) {

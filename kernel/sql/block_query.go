@@ -231,34 +231,6 @@ func queryAliases(searchIgnoreLines []string) (ret []string) {
 	return
 }
 
-func queryDocIDsByTitle(title string, excludeIDs []string) (ret []string) {
-	ret = []string{}
-	notIn := "('" + strings.Join(excludeIDs, "','") + "')"
-
-	sqlStmt := "SELECT id FROM blocks WHERE type = 'd' AND content LIKE ? AND id NOT IN " + notIn + " LIMIT ?"
-	if caseSensitive {
-		sqlStmt = "SELECT id FROM blocks WHERE type = 'd' AND content = ? AND id NOT IN " + notIn + " LIMIT ?"
-	}
-	rows, err := query(sqlStmt, title, 32)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-
-	set := hashset.New()
-	for rows.Next() {
-		var id string
-		rows.Scan(&id)
-		set.Add(id)
-	}
-
-	for _, v := range set.Values() {
-		ret = append(ret, v.(string))
-	}
-	return
-}
-
 func queryDocTitles(searchIgnoreLines []string) (ret []string) {
 	ret = []string{}
 	sqlStmt := "SELECT content FROM blocks WHERE type = 'd'"

@@ -793,46 +793,23 @@
     }
 
     &.list {
-      height: 34px;
-
-      .li:first-child {
-        overflow: hidden;
-        height: 34px;
-      }
-    }
-
-    &[data-type="NodeBlockQueryEmbed"] {
-      height: 42px;
-
-      .protyle-wysiwyg__embed {
-        height: 34px;
-        overflow: hidden;
-      }
+      height: 1.625em;
     }
 
     &.av {
-      height: 109px;
+      height: 4.8em;
     }
 
     &.sb,
-    &.table {
-      height: 36px;
-    }
-
-    &.bq {
-      height: 42px;
-
-      & > div:first-child {
-        font-size: 16px;
-        height: 26px;
-        line-height: 26px;
-        overflow: hidden;
-      }
+    &.table,
+    &.bq,
+    &[data-type="NodeBlockQueryEmbed"] {
+      height: calc(1.625em + 12px);
     }
 
     &.code-block {
       line-height: 1.625;
-      height: 25px;
+      height: 1.625em;
 
       .protyle-action__language {
         opacity: .86;

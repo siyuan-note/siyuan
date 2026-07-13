@@ -1,6 +1,5 @@
 import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
-import {isWindow} from "../util/functions";
 import {lockScreen} from "../dialog/processSystem";
 import {App} from "../index";
 
@@ -24,7 +23,7 @@ export const onWindowsMsg = (ipcData: IWebSocketData, app: App) => {
                 document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(tabItem => {
                     tabItem.remove();
                 });
-            } else if (isWindow()) {
+            } else {
                 document.querySelectorAll(".layout-tab-bar--readonly .fn__flex-1").forEach((item: HTMLElement) => {
                     if (item.getBoundingClientRect().top <= 0) {
                         if (ipcData.data === "addRegionStyle") {

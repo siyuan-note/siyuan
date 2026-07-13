@@ -834,6 +834,10 @@ func (box *Box) generateDocHistory0() {
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
 			} else {
+				// loadTree 不设置 tree.Box，这里补上：generateAvHistoryInTree 依据 tree.Box 判定是否
+				// 加密笔记本并据此选择历史目标路径（<boxID>/storage/av vs 全局 storage/av），
+				// tree.Box 为空会把加密笔记本的密文 AV 错误拷到全局历史路径
+				tree.Box = box.ID
 				generateAvHistoryInTree(tree, historyDir)
 			}
 		}

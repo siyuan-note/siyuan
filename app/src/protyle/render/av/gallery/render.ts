@@ -192,7 +192,13 @@ export const renderGallery = async (options: {
         if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
             return;
         }
-        const firstItemIndex = parseInt(item.querySelector(".av__gallery-item:not([data-type=ghost])").getAttribute("data-index"));
+        // 守卫只保证至少 1 个 .av__gallery-item，但首行索引用 :not([data-type=ghost]) 过滤。
+        // body 内全是 ghost 占位行（插入动画进行中）时查询返回 null，需跳过避免解引用 null.getAttribute
+        const firstItem = item.querySelector(".av__gallery-item:not([data-type=ghost])") as HTMLElement;
+        if (!firstItem) {
+            return;
+        }
+        const firstItemIndex = parseInt(firstItem.getAttribute("data-index"));
         virtualData[item.getAttribute("data-group-id") || "all"] = getBodyVirtualData(item, ".av__gallery-add", firstItemIndex);
     });
     const resetData = {

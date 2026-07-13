@@ -485,3 +485,136 @@ func TestLockBoxClearsTempDirs(t *testing.T) {
 		}
 	}
 }
+
+// TestEncryptFileAADBoundToBaseNameNotPath 验证 .sy 密文 AAD 绑定稳定文件基名而非父目录。
+// 同一基名、不同父目录加密出的密文，可用任一父目录路径解密；基名变化或 box 变化则解密失败。
+// 这是同 box 内移动文档可原样 Rename 密文（不重新封装）的密码学保证。
+func TestEncryptFileAADBoundToBaseNameNotPath(t *testing.T) {
+	boxID := "20240101120000-boxaaaaa"
+	dek, _ := util.GenerateDEK()
+	base := "20240101120000-1a2b3c4.sy"
+	plain := []byte(`{"ID":"20240101120000-1a2b3c4","Properties":{"title":"doc"}}`)
+
+	// 用父目录 A 加密
+	ct, err := EncryptFile(boxID, "/20240101120000-parentA/"+base, dek, plain)
+	if err != nil {
+		t.Fatalf("EncryptFile failed: %v", err)
+	}
+
+	// 用父目录 B（及裸基名）解密：必须成功——AAD 只绑基名
+	if got, err := DecryptFile(boxID, "/20240101120000-parentB/"+base, dek, ct); err != nil {
+		t.Fatalf("decrypt with different parent dir should succeed: %v", err)
+	} else if string(got) != string(plain) {
+		t.Fatalf("decrypted content mismatch")
+	}
+	if got, err := DecryptFile(boxID, base, dek, ct); err != nil {
+		t.Fatalf("decrypt with bare base name should succeed: %v", err)
+	} else if string(got) != string(plain) {
+		t.Fatalf("decrypted content mismatch")
+	}
+
+	// 用不同基名解密：必须失败——AAD 绑定基名
+	otherBase := "20240101120000-zzzzzzz.sy"
+	if _, err := DecryptFile(boxID, otherBase, dek, ct); err == nil {
+		t.Fatal("decrypt with different base name must fail")
+	}
+
+	// 用不同 boxID 解密：必须失败——AAD 绑定 boxID
+	otherBox := "20240101120000-otherbox"
+	if _, err := DecryptFile(otherBox, base, dek, ct); err == nil {
+		t.Fatal("decrypt with different boxID must fail")
+	}
+}
+
+// TestEncryptFileRejectsInvalidBaseName 验证非法基名（非 .sy、非节点 ID）直接拒绝加密，
+// 不产生可用于落盘的密文，避免把任意路径当 AAD 绑定物。
+func TestEncryptFileRejectsInvalidBaseName(t *testing.T) {
+	boxID := "20240101120000-boxaaaaa"
+	dek, _ := util.GenerateDEK()
+	plain := []byte("test")
+
+	if _, err := EncryptFile(boxID, "/dir/random.txt", dek, plain); err == nil {
+		t.Fatal("should reject non-.sy extension")
+	}
+	if _, err := EncryptFile(boxID, "/dir/notanid.sy", dek, plain); err == nil {
+		t.Fatal("should reject non-node-id stem")
+	}
+}
+
+// TestDecryptFileRejectsInvalidBaseName 验证解密路径同样拒绝非法基名。
+func TestDecryptFileRejectsInvalidBaseName(t *testing.T) {
+	boxID := "20240101120000-boxaaaaa"
+	dek, _ := util.GenerateDEK()
+	ct := []byte("ciphertext-bytes")
+
+	if _, err := DecryptFile(boxID, "/dir/random.txt", dek, ct); err == nil {
+		t.Fatal("should reject non-.sy extension on decrypt")
+	}
+	if _, err := DecryptFile(boxID, "/dir/notanid.sy", dek, ct); err == nil {
+		t.Fatal("should reject non-node-id stem on decrypt")
+	}
+}
+
+// TestEnabledWithoutBackupReturnsRecoveryError 验证「已启用但密钥备份缺失」不锁死全部笔记本：
+// 启动回填已删除（无 KEK 生成的备份 KEKMAC 必空，会被解锁路径拒绝），deriveKEK 在此情形返回
+// 恢复提示（Language 315，引导用户导入匹配备份），而非误报密钥损坏（316），且不在磁盘制造无效备份。
+func TestEnabledWithoutBackupReturnsRecoveryError(t *testing.T) {
+	origDataDir := util.DataDir
+	tempDir := t.TempDir()
+	util.DataDir = tempDir
+	defer func() { util.DataDir = origDataDir }()
+
+	password := "recovery-test-pw"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+
+	// 构造本机已启用、本机 verifier 有效的配置（主密码能派生出可用 KEK），但不写备份文件
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	nc := &conf.NotebookCrypto{
+		Enabled:     true,
+		MasterSalt:  salt,
+		KDFParams:   params,
+		KEKVerifier: verifierCT,
+	}
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = nc
+	defer func() { Conf = originalConf }()
+
+	_, err := deriveKEK(password)
+	if err == nil {
+		t.Fatal("deriveKEK should fail when enabled but backup is missing")
+	}
+	// 主密码正确（verifier 通过），故不应报「密码错」（311）或「密钥损坏」（316），
+	// 而应报「需恢复」（315）引导用户导入匹配备份
+	if err.Error() != Conf.Language(315) {
+		t.Fatalf("expected recovery hint (Language 315), got: %v", err)
+	}
+
+	// 关键：不在磁盘制造无效备份——备份文件应仍不存在
+	if _, statErr := os.Stat(notebookCryptoBackupPath()); !os.IsNotExist(statErr) {
+		t.Fatalf("backup file should not be generated during deriveKEK; stat err=%v", statErr)
+	}
+}
+
+// TestSaveNotebookCryptoBackupRejectsNilKEK 验证无 KEK 时拒绝生成备份（收口）：
+// nil KEK 生成的备份 KEKMAC 必空，会被解锁/恢复路径拒绝，等于制造无法解锁的状态。
+func TestSaveNotebookCryptoBackupRejectsNilKEK(t *testing.T) {
+	origDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = origDataDir }()
+
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	defer func() { Conf = originalConf }()
+
+	if err := saveNotebookCryptoBackup(nil); err == nil {
+		t.Fatal("saveNotebookCryptoBackup(nil) should be rejected")
+	}
+	if err := writeNotebookCryptoBackupData(Conf.NotebookCrypto, nil); err == nil {
+		t.Fatal("writeNotebookCryptoBackupData(nc, nil) should be rejected")
+	}
+}

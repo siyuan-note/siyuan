@@ -528,10 +528,11 @@ func createEncryptedNotebook(c *gin.Context) {
 	}
 
 	// 创建时 DEK 已缓存 + 加密 db 已打开，此处直接挂载；失败则锁定回滚，避免 DEK 残留
-	if _, mountErr := model.Mount(id); mountErr != nil {
+	existed, err := model.Mount(id)
+	if err != nil {
 		model.LockBox(id)
 		ret.Code = -1
-		ret.Msg = mountErr.Error()
+		ret.Msg = err.Error()
 		return
 	}
 
@@ -539,7 +540,7 @@ func createEncryptedNotebook(c *gin.Context) {
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"box":     box,
-		"existed": true,
+		"existed": existed,
 	}
 	util.PushEvent(evt)
 
@@ -634,10 +635,11 @@ func unlockAndOpenNotebook(c *gin.Context) {
 	// 解锁成功后立即挂载；失败则回滚锁定，清除 DEK 避免残留
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
 	defer util.PushClearMsg(msgId)
-	if _, mountErr := model.Mount(notebook); mountErr != nil {
+	existed, err := model.Mount(notebook)
+	if err != nil {
 		model.LockBox(notebook)
 		ret.Code = -1
-		ret.Msg = mountErr.Error()
+		ret.Msg = err.Error()
 		return
 	}
 
@@ -652,7 +654,7 @@ func unlockAndOpenNotebook(c *gin.Context) {
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]any{
 		"box":     box,
-		"existed": true,
+		"existed": existed,
 	}
 	util.PushEvent(evt)
 }

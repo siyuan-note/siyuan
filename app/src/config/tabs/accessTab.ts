@@ -373,29 +373,27 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="encryptedNotebookSwitch" type="checkbox">
 </label>
-<div class="b3-label config-item fn__none" id="encryptedNotebookImport">
-    <div class="fn__flex fn__flex-center config-wrap">
-        <div class="fn__flex-1"></div>
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="importCryptoBackupBtn">
-            <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
-            ${window.siyuan.languages.importNotebookCryptoBackup}
-        </button>
-    </div>
-</div>
 <div class="b3-label config-item fn__none" id="encryptedNotebookMigrationAlert">
     <div class="ft__error">${window.siyuan.languages.masterPasswordMigrationPending}</div>
 </div>
 <div class="b3-label config-item fn__none" id="encryptedNotebookActions">
     <div class="fn__flex fn__flex-center config-wrap">
         <div class="fn__flex-1"></div>
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="changeMasterPasswordBtn">
-            <svg class="svg"><use xlink:href="#iconLock"></use></svg>
-            ${window.siyuan.languages.changeMasterPassword}
-        </button>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportCryptoBackupBtn">
-            <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
-            ${window.siyuan.languages.exportNotebookCryptoBackup}
+        <div class="fn__flex fn__flex-center" id="encryptedNotebookEnabledActions">
+            <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="changeMasterPasswordBtn">
+                <svg class="svg"><use xlink:href="#iconLock"></use></svg>
+                ${window.siyuan.languages.changeMasterPassword}
+            </button>
+            <span class="fn__space"></span>
+            <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportCryptoBackupBtn">
+                <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
+                ${window.siyuan.languages.exportNotebookCryptoBackup}
+            </button>
+            <span class="fn__space"></span>
+        </div>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="importCryptoBackupBtn">
+            <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
+            ${window.siyuan.languages.importNotebookCryptoBackup}
         </button>
     </div>
 </div>`,
@@ -414,15 +412,16 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
 const mountEncryptedNotebook = (root: HTMLElement) => {
     const switchElement = root.querySelector("#encryptedNotebookSwitch") as HTMLInputElement;
     const actionsElement = root.querySelector("#encryptedNotebookActions");
-    const importElement = root.querySelector("#encryptedNotebookImport");
+    const enabledActionsElement = root.querySelector("#encryptedNotebookEnabledActions");
     const migrationAlertElement = root.querySelector("#encryptedNotebookMigrationAlert");
     const refresh = () => {
         fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
             const enabled = response.data.enabled;
             switchElement.checked = enabled;
             window.siyuan.config.notebookCrypto.enabled = enabled;
-            actionsElement.classList.toggle("fn__none", !enabled);
-            importElement.classList.remove("fn__none");
+            // 导入密钥始终可见，修改主密码/导出密钥仅在启用时可见
+            enabledActionsElement.classList.toggle("fn__none", !enabled);
+            actionsElement.classList.remove("fn__none");
             migrationAlertElement.classList.toggle("fn__none", !response.data.migrationPending);
         });
     };
@@ -443,7 +442,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
         });
     });
 
-    importElement.querySelector("#importCryptoBackupBtn")?.addEventListener("click", () => {
+    actionsElement.querySelector("#importCryptoBackupBtn")?.addEventListener("click", () => {
         // 用隐藏 file input 选备份文件，multipart 上传导入
         const fileInput = document.createElement("input");
         fileInput.type = "file";

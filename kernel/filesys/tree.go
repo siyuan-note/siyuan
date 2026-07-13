@@ -522,6 +522,13 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (d
 	}
 
 	if pathID := util.GetTreeID(p); pathID != ret.Root.ID {
+		if encryptedBox(boxID) {
+			// 加密 .sy：基名 ID（pathID）必须与解密后的根块 ID 一致。不一致说明密文被替换、
+			// 文件名被篡改或 AAD 认证被绕过，不得静默修正——fail-closed，符合加密笔记本威胁模型。
+			err = fmt.Errorf("encrypted .sy [%s]: base id [%s] != root id [%s]", p, pathID, ret.Root.ID)
+			logging.LogErrorf("%s", err)
+			return
+		}
 		needFix = true
 		logging.LogInfof("reset tree id from [%s] to [%s]", ret.Root.ID, pathID)
 		ret.Root.ID = pathID

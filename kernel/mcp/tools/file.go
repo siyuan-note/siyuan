@@ -99,6 +99,12 @@ func resolvePath(rel string) (string, error) {
 	if resolved := util.ResolveLongestExistingParent(abs); resolved != abs && !gulu.File.IsSubPath(util.WorkspaceDir, resolved) {
 		return "", fmt.Errorf("symlink escapes workspace: %s", rel)
 	}
+	// 禁止访问配置文件 conf/conf.json（含 accessAuthCode/api.token/cookieKey 等明文凭据），
+	// 对齐 HTTP 文件 API 的既定黑名单（见 kernel/api/file.go 的 refuseToAccess）。
+	confPath := filepath.Join(util.ConfDir, "conf.json")
+	if abs == confPath {
+		return "", fmt.Errorf("access to conf.json is forbidden")
+	}
 	return abs, nil
 }
 

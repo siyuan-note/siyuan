@@ -26,11 +26,13 @@ import (
 )
 
 func Serve(ginServer *gin.Engine) {
-	ginServer.POST("/mcp", model.CheckAuth, handlePost)
-	ginServer.GET("/mcp", model.CheckAuth, func(c *gin.Context) {
+	// MCP 工具暴露任意工作区文件读写删、SQL、插件分发等管理级原语，必须要求管理员角色，
+	// 否则 Publish 匿名模式注入的 RoleReader JWT 可经此链路越权调用全部工具。
+	ginServer.POST("/mcp", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, handlePost)
+	ginServer.GET("/mcp", model.CheckAuth, model.CheckAdminRole, func(c *gin.Context) {
 		c.Status(http.StatusMethodNotAllowed)
 	})
-	ginServer.DELETE("/mcp", model.CheckAuth, handleDelete)
+	ginServer.DELETE("/mcp", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, handleDelete)
 }
 
 func handlePost(c *gin.Context) {

@@ -17,6 +17,7 @@
 package filesys
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -35,15 +36,53 @@ var DEKProvider func(boxID string) ([]byte, error)
 var DEKLockAcquire func(boxID string)
 var DEKLockRelease func(boxID string)
 
-// normalizeRelPath 标准化 box 内相对路径用于 AAD：去掉前导 /、统一为正斜杠。
-func normalizeRelPath(p string) string {
-	p = filepath.ToSlash(p)
+// SyObjectBase 从 box 内相对路径提取稳定文件基名并校验合法性。
+// 接受形如 <rootID>.sy 的基名：扩展名必须是 .sy，且 stem 是合法节点 ID。
+// 非法扩展名或非节点 ID 模式返回错误，避免把任意路径当 AAD 绑定物产生不可解密的数据。
+// 由 filesys、model 历史查看/回滚、import 等所有 .sy 加解密路径共同使用，保证 AAD 一致。
+func SyObjectBase(relativePath string) (string, error) {
+	p := filepath.ToSlash(relativePath)
 	p = strings.TrimPrefix(p, "/")
-	return p
+	base := p
+	if idx := strings.LastIndex(p, "/"); idx >= 0 {
+		base = p[idx+1:]
+	}
+	if !strings.HasSuffix(base, ".sy") {
+		return "", fmt.Errorf("invalid .sy base name [%s]: must end with .sy", base)
+	}
+	stem := strings.TrimSuffix(base, ".sy")
+	if !ast.IsNodeIDPattern(stem) {
+		return "", fmt.Errorf("invalid .sy base name [%s]: stem is not a node ID", base)
+	}
+	return base, nil
+}
+
+// SyAAD 构造 .sy 密文的 AAD：siyuan:v1:file:<boxID>:<稳定文件基名>。
+// 父目录不进 AAD——同 box 内文件名不变的移动允许原样 Rename 密文，内容/box/类型/对象 ID 仍受认证。
+func SyAAD(boxID, relativePath string) (string, error) {
+	base, err := SyObjectBase(relativePath)
+	if err != nil {
+		return "", err
+	}
+	return "siyuan:v1:file:" + boxID + ":" + base, nil
+}
+
+// encryptedBox 判断 boxID 是否为已解锁的加密 box，供 filesys 内部分流（如静默修正禁用）。
+// 通过 DEKProvider 探测：返回非 nil dek 即加密且已解锁。
+func encryptedBox(boxID string) bool {
+	if DEKProvider == nil {
+		return false
+	}
+	if DEKLockAcquire != nil {
+		DEKLockAcquire(boxID)
+		defer DEKLockRelease(boxID)
+	}
+	dek, err := DEKProvider(boxID)
+	return err == nil && dek != nil
 }
 
 // encryptData 若 boxID 是已解锁的加密 box，用 fileKey（DEK 派生子密钥）加密 data，
-// AAD 绑定 boxID + 相对路径；非加密笔记本原样返回；加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
+// AAD 绑定 boxID + 稳定文件基名（不含父目录）；非加密笔记本原样返回；加密但未解锁时返回 error，拒绝写盘（防止明文泄漏）。
 func encryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 	if DEKProvider == nil {
 		return data, nil
@@ -60,7 +99,10 @@ func encryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad := "siyuan:v1:file:" + boxID + ":" + normalizeRelPath(relativePath)
+	aad, err := SyAAD(boxID, relativePath)
+	if err != nil {
+		return nil, err
+	}
 	return util.EncryptWithAAD(fileKey, data, []byte(aad))
 }
 
@@ -81,7 +123,10 @@ func decryptData(boxID, relativePath string, data []byte) ([]byte, error) {
 		return data, nil // 非加密 box
 	}
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad := "siyuan:v1:file:" + boxID + ":" + normalizeRelPath(relativePath)
+	aad, err := SyAAD(boxID, relativePath)
+	if err != nil {
+		return nil, err
+	}
 	return util.DecryptWithAAD(fileKey, data, []byte(aad))
 }
 

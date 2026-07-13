@@ -24,6 +24,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"strings"
 	"time"
 
 	"github.com/siyuan-note/logging"
@@ -226,7 +227,68 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 		return
 	}
 
+	// 匿名发布模式下，匿名访问者只能访问公开内容；管理类路径（MCP、配置、系统、导入导出、
+	// 同步、仓库、插件分发等）必须拒绝，否则会注入 RoleReader JWT 后被内核侧误判为合法调用。
+	if isPublishAdminPath(request.URL.Path) {
+		return &http.Response{
+			StatusCode: http.StatusUnauthorized,
+			Status:     http.StatusText(http.StatusUnauthorized),
+			Proto:      request.Proto,
+			ProtoMajor: request.ProtoMajor,
+			ProtoMinor: request.ProtoMinor,
+			Request:    request,
+			Header:     http.Header{},
+			Body:       http.NoBody,
+			Close:      false,
+		}, nil
+	}
+
 	request.Header.Set(model.XAuthTokenKey, model.GetBasicAuthAccount("").Token)
 	response, err = publishRoundTripper.RoundTrip(request)
 	return
+}
+
+// isPublishAdminPath 判断请求路径是否属于管理类（写/敏感）路径，匿名发布模式下必须拒绝。
+// 公开浏览所需的读端点（/api/file/getFile、/api/filetree/getDoc、/assets/、/appearance/、/stage/ 等）
+// 不在此列表内，内核侧各 handler 已用 IsReadOnlyRoleContext 做角色级读过滤。
+func isPublishAdminPath(path string) bool {
+	// 精确匹配的管理路径前缀（带斜杠后缀，避免误伤 /api/system/version 等公开读端点）
+	for _, prefix := range []string{
+		"/mcp",
+		"/api/setting/",
+		"/api/system/",
+		"/api/import/",
+		"/api/export/",
+		"/api/archive/",
+		"/api/query/",
+		"/api/sqlite/",
+		"/api/bazaar/",
+		"/api/plugin/",
+		"/api/petal/",
+		"/api/repo/",
+		"/api/sync/",
+		"/api/history/",
+		"/api/ai/",
+		"/api/account/",
+		"/api/cloud/",
+		"/api/transactions",
+		"/webdav",
+		"/caldav",
+		"/carddav",
+		"/.well-known/caldav",
+		"/.well-known/carddav",
+		"/debug/pprof/",
+		"/plugin/private/",
+	} {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	// /api/file/* 中仅写/敏感端点拒绝，保留 getFile 等读端点供公开渲染使用
+	switch path {
+	case "/api/file/putFile", "/api/file/copyFile", "/api/file/globalCopyFiles",
+		"/api/file/workspaceCopyFiles", "/api/file/removeFile", "/api/file/renameFile", "/api/file/readDir":
+		return true
+	}
+	return false
 }

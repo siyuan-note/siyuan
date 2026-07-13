@@ -555,20 +555,11 @@ func InitConf() {
 		Conf.NotebookCrypto = conf.NewNotebookCrypto()
 	}
 
-	// 存量升级补偿：早期版本启用加密笔记本时未生成密钥备份。若本机已启用但备份文件缺失，
-	// 启动时补生成一次，让存量用户也能在 conf.json 丢失/同步到新设备时恢复（详见 §4.1）。
-	// 新用户走 EnableEncryptedNotebook 已会生成备份，此处不重复写入。
-	if Conf.NotebookCrypto.Enabled {
-		if _, err := os.Stat(notebookCryptoBackupPath()); err != nil && os.IsNotExist(err) {
-			if Conf.NotebookCrypto.MasterSalt != nil && len(Conf.NotebookCrypto.MasterSalt) > 0 {
-				if err := saveNotebookCryptoBackup(nil); err != nil {
-					logging.LogErrorf("backfill notebook crypto backup failed: %s", err)
-				} else {
-					logging.LogInfof("backfilled notebook crypto backup for existing enabled setup")
-				}
-			}
-		}
-	}
+	// 注意：此处不在启动时为已启用但备份缺失的情形回填密钥备份。无 KEK 生成的备份 KEKMAC 必为空，
+	// 而 deriveKEK/恢复路径强制要求 KEKMAC 有效，回填会导致该机永远无法解锁（自相矛盾）。
+	// 当前格式备份必须由主密码验证后生成（见 EnableEncryptedNotebook / tryRestoreNotebookCryptoFromBackupLocked）。
+	// Enabled=true 但备份缺失/无效属配置不完整，解锁时由 deriveKEK 返回恢复提示（Language 315），
+	// 引导用户导入匹配的备份文件后重新验证主密码。
 
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()

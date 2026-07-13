@@ -70,7 +70,7 @@ require (
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/shirou/gopsutil/v4 v4.26.6
 	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
-	github.com/siyuan-note/dejavu v0.0.0-20260702062755-e88890c3d80b
+	github.com/siyuan-note/dejavu v0.0.0-20260713055600-25feffa85c65
 	github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f
 	github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce
 	github.com/siyuan-note/filelock v0.0.0-20260411141728-bf44452627c0
@@ -82,7 +82,7 @@ require (
 	github.com/spf13/cast v1.10.0
 	github.com/spf13/cobra v1.10.2
 	github.com/steambap/captcha v1.4.1
-	github.com/studio-b12/gowebdav v0.12.0
+	github.com/studio-b12/gowebdav v0.13.0
 	github.com/vanng822/css v1.0.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342
@@ -111,8 +111,8 @@ require (
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.42.1 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.14 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.32.27 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.19.26 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.32.29 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.19.28 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.30 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.30 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.30 // indirect
@@ -121,11 +121,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.23 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.30 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.31 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.104.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.2.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.31.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.36.8 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.43.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.105.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.4.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.32.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.37.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.44.0 // indirect
 	github.com/aws/smithy-go v1.27.3 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
@@ -184,7 +184,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/qiniu/go-sdk/v7 v7.26.14 // indirect
+	github.com/qiniu/go-sdk/v7 v7.26.15 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.60.0 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect

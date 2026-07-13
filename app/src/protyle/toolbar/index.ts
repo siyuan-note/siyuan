@@ -1182,7 +1182,12 @@ export class Toolbar {
                 return;
             }
         });
+        const resizeObserver = new ResizeObserver(() => {
+            renderTextareaLineNumber();
+        });
+        resizeObserver.observe(this.subElement);
         this.subElementCloseCB = () => {
+            resizeObserver.disconnect();
             const noChange = !renderElement.parentElement || protyle.disabled ||
                 (textElement.value && oldTextValue === textElement.value);
             let inlineLastNode: Element;

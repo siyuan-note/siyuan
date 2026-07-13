@@ -125,7 +125,7 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 6. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
 7. **Git:**
    - **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
-   - When you do commit, follow the style of recent commits (gitmoji prefix + subject)
+   - When you do commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; do not fabricate one
 
 ---

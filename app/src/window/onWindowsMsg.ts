@@ -25,7 +25,7 @@ export const onWindowsMsg = (ipcData: IWebSocketData, app: App) => {
                 });
             } else {
                 document.querySelectorAll(".layout-tab-bar--readonly .fn__flex-1").forEach((item: HTMLElement) => {
-                    if (item.getBoundingClientRect().top <= 0) {
+                    if (item.getBoundingClientRect().top <= 6) {
                         if (ipcData.data === "addRegionStyle") {
                             (item.style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";
                         } else if (ipcData.data === "removeRegionStyle") {

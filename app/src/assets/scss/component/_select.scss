@@ -53,6 +53,7 @@
         padding: 8px;
         scrollbar-width: thin;
         scrollbar-color: var(--b3-scroll-color) transparent;
+        app-region: no-drag;
       }
 
       &::picker-icon {

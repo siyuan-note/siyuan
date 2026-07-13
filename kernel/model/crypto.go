@@ -200,6 +200,12 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 		return errors.New(Conf.Language(324))
 	}
 
+	// 历史目录中存在已删除加密笔记本的历史时拒绝导入：导入会用新 MasterSalt 覆盖当前配置，
+	// 这些历史的恢复仍依赖原 MasterSalt，覆盖后永久锁死（与 EnableEncryptedNotebook 的对称守卫一致）
+	if HasEncryptedNotebookHistory() {
+		return errors.New(Conf.Language(323))
+	}
+
 	nc := &conf.NotebookCrypto{}
 	if err := json.Unmarshal(data, nc); err != nil {
 		return errors.New(Conf.Language(317))

@@ -497,14 +497,15 @@ func SetIndexAssetPath(b bool) {
 	indexAssetPath = b
 }
 
-func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
+func refsFromTree(tree *parse.Tree, refIDs map[string]string) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
+	// refIDs 为某篇文档现有 refs 的业务键→id 映射，命中时复用旧 id 以稳定“最近引用”排序，传 nil 表示不复用。
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
 			return ast.WalkContinue
 		}
 
 		if treenode.IsBlockRef(n) {
-			ref := buildRef(tree, n)
+			ref := buildRef(tree, n, refIDs)
 			if !isRepeatedRef(refs, ref) {
 				refs = append(refs, ref)
 			}
@@ -537,7 +538,7 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 			}
 			fileAnnotationRefs = append(fileAnnotationRefs, ref)
 		} else if treenode.IsEmbedBlockRef(n) {
-			ref := buildEmbedRef(tree, n)
+			ref := buildEmbedRef(tree, n, refIDs)
 			if !isRepeatedRef(refs, ref) {
 				refs = append(refs, ref)
 			}
@@ -557,7 +558,7 @@ func isRepeatedRef(refs []*Ref, ref *Ref) bool {
 	return false
 }
 
-func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
+func buildRef(tree *parse.Tree, refNode *ast.Node, refIDs map[string]string) *Ref {
 	// 多个类型可能会导致渲染的 Markdown 不正确，所以这里只保留 block-ref 类型
 	tmpTyp := refNode.TextMarkType
 	refNode.TextMarkType = "block-ref"
@@ -573,8 +574,15 @@ func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
 		defBlockPath = defBlock.Path
 	}
 	parentBlock := treenode.ParentBlock(refNode)
+	// 命中已有业务键时复用旧 id，避免重建索引时刷新 id 而打乱“最近引用”排序
+	id := ast.NewNodeID()
+	if nil != refIDs {
+		if oldID := refIDs[parentBlock.ID+"\x00"+defBlockID]; "" != oldID {
+			id = oldID
+		}
+	}
 	return &Ref{
-		ID:               ast.NewNodeID(),
+		ID:               id,
 		DefBlockID:       defBlockID,
 		DefBlockParentID: defBlockParentID,
 		DefBlockRootID:   defBlockRootID,
@@ -589,7 +597,7 @@ func buildRef(tree *parse.Tree, refNode *ast.Node) *Ref {
 	}
 }
 
-func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node) *Ref {
+func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node, refIDs map[string]string) *Ref {
 	defBlockID := getEmbedRef(embedNode)
 	var defBlockParentID, defBlockRootID, defBlockPath string
 	defBlock := treenode.GetBlockTreeInBox(defBlockID, tree.Box)
@@ -599,8 +607,15 @@ func buildEmbedRef(tree *parse.Tree, embedNode *ast.Node) *Ref {
 		defBlockPath = defBlock.Path
 	}
 
+	// 命中已有业务键时复用旧 id，避免重建索引时刷新 id 而打乱“最近引用”排序
+	id := ast.NewNodeID()
+	if nil != refIDs {
+		if oldID := refIDs[embedNode.ID+"\x00"+defBlockID]; "" != oldID {
+			id = oldID
+		}
+	}
 	return &Ref{
-		ID:               ast.NewNodeID(),
+		ID:               id,
 		DefBlockID:       defBlockID,
 		DefBlockParentID: defBlockParentID,
 		DefBlockRootID:   defBlockRootID,

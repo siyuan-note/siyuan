@@ -178,7 +178,7 @@ func GetRefsCacheByDefIDInBox(defID, boxID string) (ret []*Ref) {
 }
 
 func CacheRef(tree *parse.Tree, refNode *ast.Node) {
-	ref := buildRef(tree, refNode)
+	ref := buildRef(tree, refNode, nil)
 	putRefCache(tree.Box, ref)
 }
 

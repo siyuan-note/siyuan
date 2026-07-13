@@ -143,6 +143,31 @@ func testEmbeddingModel(c *gin.Context) {
 	ret.Data = result
 }
 
+// testRerankModel 测试重排模型可用性。直接读取已保存的 Rerank 配置，
+// 用极简 query+documents 发一次重排请求验证连通性与鉴权。
+func testRerankModel(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	rerank := model.Conf.AI.Rerank
+	if nil == rerank || "" == rerank.APIKey || "" == rerank.Endpoint || "" == rerank.Name {
+		ret.Code = -1
+		ret.Msg = "rerank model not configured"
+		return
+	}
+
+	matched, err := util.TestRerankModel(rerank.APIKey, rerank.Endpoint, rerank.Name, rerank.Timeout)
+	// 测试结果统一以 code=0 返回，具体成败信息放在 data 中由前端控制展示
+	result := map[string]any{
+		"matched": matched,
+	}
+	if nil != err {
+		result["msg"] = err.Error()
+		logging.LogErrorf("test rerank model [%s] failed: %s", rerank.Name, err)
+	}
+	ret.Data = result
+}
+
 // listModels 拉取指定 Provider 的可用模型清单（GET /v1/models），用于填充前端模型名称下拉框。
 // 不支持该端点的服务会返回错误，由前端回退为手动输入。
 func listModels(c *gin.Context) {

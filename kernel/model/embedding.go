@@ -458,7 +458,13 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		numWorkers = 1
 	}
 
+	// 向量召回候选数：启用重排时至少召回 candidateCount 条，保证重排有足够候选精排；否则只取当前页所需。
 	topK := page * pageSize
+	if isRerankEnabled() {
+		if cc := rerankCandidateCount(); cc > topK {
+			topK = cc
+		}
+	}
 	h := &scoredHeap{}
 	heap.Init(h)
 
@@ -554,25 +560,33 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		result[i] = heap.Pop(h).(scoredBlock)
 	}
 
+	// 按向量相似度降序取出全部候选块 ID。重排启用时 result 已是 topK（含 candidateCount）；
+	// 未启用时 result 即当前页所需，后续分页逻辑统一处理。
+	var candidateIDs []string
+	for _, s := range result {
+		candidateIDs = append(candidateIDs, s.id)
+	}
+
+	sqlBlocks := sql.GetBlocks(candidateIDs)
+
+	// 重排：对 query 与候选块文本逐对精排，失败则降级保留向量相似度原序，不阻断搜索。
+	// 注意 GetBlocks 的返回顺序未必与 candidateIDs 一致，重排以返回的 sqlBlocks 为准。
+	sqlBlocks = rerankSqlBlocks(query, sqlBlocks)
+
 	offset := (page - 1) * pageSize
-	if offset >= len(result) {
+	if offset >= len(sqlBlocks) {
 		pageCount = (matchedBlockCount + pageSize - 1) / pageSize
 		return
 	}
 
 	end := offset + pageSize
-	if end > len(result) {
-		end = len(result)
+	if end > len(sqlBlocks) {
+		end = len(sqlBlocks)
 	}
 
-	var topIDs []string
-	for i := offset; i < end; i++ {
-		topIDs = append(topIDs, result[i].id)
-	}
-
-	sqlBlocks := sql.GetBlocks(topIDs)
 	rootIDSet := map[string]bool{}
-	for _, b := range sqlBlocks {
+	for i := offset; i < end; i++ {
+		b := sqlBlocks[i]
 		rootIDSet[b.RootID] = true
 		blocks = append(blocks, fromSQLBlock(b, "", 36))
 	}
@@ -584,6 +598,48 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 func isEmbeddingEnabled() bool {
 	return nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
+}
+
+// rerankSqlBlocks 用重排模型对候选块按 query 逐对精排。未启用或调用失败时原样返回（降级为向量相似度排序）。
+// 重排服务以块的 Content（嵌入向量所代表的纯文本）作为文档文本，跨页排序一致：rerank 对每个
+// query-doc 对独立打分，分数不随候选集大小变化。
+func rerankSqlBlocks(query string, sqlBlocks []*sql.Block) []*sql.Block {
+	if !isRerankEnabled() || len(sqlBlocks) < 2 {
+		return sqlBlocks
+	}
+
+	documents := make([]string, len(sqlBlocks))
+	for i, b := range sqlBlocks {
+		documents[i] = b.Content
+	}
+
+	// topN=0 表示不传 top_n，要求服务端返回全部文档评分，避免被服务端 top_n 上限截断
+	indices, _, err := util.Rerank(query, documents, rerankKey(), rerankEndpoint(), rerankModel(), 0, rerankTimeout())
+	if nil != err {
+		logging.LogErrorf("rerank failed, fallback to vector similarity order: %s", err)
+		return sqlBlocks
+	}
+	if len(indices) != len(sqlBlocks) {
+		// 服务端返回数量与输入不符，按原序降级，避免错位
+		logging.LogErrorf("rerank returned %d indices for %d documents, fallback", len(indices), len(sqlBlocks))
+		return sqlBlocks
+	}
+
+	// 防御重复 index：服务端不应返回重复下标，但若出现则降级，避免某些块丢失、某些块重复
+	seen := make(map[int]bool, len(indices))
+	for _, idx := range indices {
+		if seen[idx] {
+			logging.LogErrorf("rerank returned duplicate index %d, fallback", idx)
+			return sqlBlocks
+		}
+		seen[idx] = true
+	}
+
+	reranked := make([]*sql.Block, len(indices))
+	for i, idx := range indices {
+		reranked[i] = sqlBlocks[idx]
+	}
+	return reranked
 }
 
 // ReindexEmbedding 清空嵌入向量表并触发后台索引器重新计算所有块。异步执行：只入队任务后立即返回。

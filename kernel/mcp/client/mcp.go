@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
@@ -241,13 +242,17 @@ func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession,
 	transport := &mcp.StreamableClientTransport{
 		Endpoint: server.URL,
 	}
+	// 所有 MCP HTTP 出站请求统一带上 SiYuan UA，便于第三方 MCP server 识别客户端身份
+	uaBase := httpclient.NewUserAgentRoundTripper(http.DefaultTransport)
 	if len(server.Headers) > 0 {
 		transport.HTTPClient = &http.Client{
 			Transport: &headerRoundTripper{
-				base:    http.DefaultTransport,
+				base:    uaBase,
 				headers: server.Headers,
 			},
 		}
+	} else {
+		transport.HTTPClient = &http.Client{Transport: uaBase}
 	}
 
 	connectCtx, connectCancel := context.WithTimeout(context.Background(), serverTimeout(server))

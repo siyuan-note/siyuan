@@ -393,7 +393,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 func writeTreeByWriteFile(filePath string, data []byte) (err error) {
 	if err = filelock.WriteFile(filePath, data); err != nil {
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-		logging.LogErrorf(msg)
+		logging.LogErrorf("%s", msg)
 		err = errors.New(msg)
 		return
 	}

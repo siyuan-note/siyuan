@@ -30,6 +30,7 @@ import (
 type AI struct {
 	MCP       *MCP        `json:"mcp"`
 	Embedding *Embedding  `json:"embedding"`
+	Rerank    *Rerank     `json:"rerank"`
 	Agent     *Agent      `json:"agent"`
 	Editing   *Editing    `json:"editing"`
 	Providers []*Provider `json:"providers"`
@@ -63,6 +64,19 @@ type Embedding struct {
 	Name       string `json:"name"`
 	Timeout    int    `json:"timeout"`
 	Dimensions int    `json:"dimensions"` // 输出向量维度，仅 text-embedding-3 及以上模型支持；0 表示用模型默认值（不传该参数）
+}
+
+// Rerank 配置语义搜索结果的重排模型。重排在向量召回后对 query 与候选文档逐对精排，
+// 采用主流重排服务的 /rerank 协议（OpenAI 官方暂无 rerank API）。
+// 各服务商端点路径不一（Jina /v1/rerank、阿里云 /v1/reranks 等），故 Endpoint 为完整端点地址。
+type Rerank struct {
+	ID             string `json:"id"`
+	Enabled        bool   `json:"enabled"`
+	APIKey         string `json:"apiKey"`
+	Endpoint       string `json:"endpoint"` // 完整重排端点 URL，按目标模型文档填写
+	Name           string `json:"name"`
+	Timeout        int    `json:"timeout"`
+	CandidateCount int    `json:"candidateCount"` // 向量召回后送入重排的候选文档数，默认 30；越大越准但越慢
 }
 
 type Provider struct {
@@ -104,6 +118,10 @@ func defaultEmbedding() *Embedding {
 	return &Embedding{Timeout: 30}
 }
 
+func defaultRerank() *Rerank {
+	return &Rerank{Timeout: 30, CandidateCount: 30}
+}
+
 func defaultAgent() *Agent {
 	return &Agent{
 		SessionTimeout:      600,
@@ -128,6 +146,7 @@ func NewAI() *AI {
 		Providers: []*Provider{},
 		MCP:       &MCP{Servers: []MCPServer{}},
 		Embedding: defaultEmbedding(),
+		Rerank:    defaultRerank(),
 		Agent:     defaultAgent(),
 		Editing:   defaultEditing(),
 	}
@@ -213,6 +232,19 @@ func NewAI() *AI {
 			BaseURL: embeddingBaseURL,
 			Name:    embeddingModel,
 			Timeout: 30,
+		}
+	}
+
+	rerankKey := os.Getenv("SIYUAN_OPENAI_RERANK_API_KEY")
+	rerankEndpoint := os.Getenv("SIYUAN_OPENAI_RERANK_ENDPOINT")
+	rerankModel := os.Getenv("SIYUAN_OPENAI_RERANK_MODEL")
+	if "" != rerankKey && "" != rerankEndpoint && "" != rerankModel {
+		ai.Rerank = &Rerank{
+			APIKey:         rerankKey,
+			Endpoint:       rerankEndpoint,
+			Name:           rerankModel,
+			Timeout:        30,
+			CandidateCount: 30,
 		}
 	}
 
@@ -366,6 +398,20 @@ func (ai *AI) Normalize() {
 	if !ast.IsNodeIDPattern(ai.Embedding.ID) {
 		ai.Embedding.ID = ast.NewNodeID()
 	}
+	if ai.Rerank == nil {
+		ai.Rerank = defaultRerank()
+	}
+	if ai.Rerank.Timeout < 1 {
+		ai.Rerank.Timeout = 30
+	}
+	if ai.Rerank.CandidateCount < 5 {
+		ai.Rerank.CandidateCount = 5
+	} else if ai.Rerank.CandidateCount > 100 {
+		ai.Rerank.CandidateCount = 100
+	}
+	if !ast.IsNodeIDPattern(ai.Rerank.ID) {
+		ai.Rerank.ID = ast.NewNodeID()
+	}
 }
 
 func (ai *AI) DecryptAPIKeys() {
@@ -390,6 +436,15 @@ func (ai *AI) DecryptAPIKeys() {
 			ai.Embedding.APIKey = string(plain)
 		}
 	}
+	if ai.Rerank != nil && ai.Rerank.APIKey != "" {
+		dec := util.AESDecrypt(ai.Rerank.APIKey)
+		if dec == nil {
+			return
+		}
+		if plain, err := hex.DecodeString(string(dec)); err == nil {
+			ai.Rerank.APIKey = string(plain)
+		}
+	}
 }
 
 func (ai *AI) EncryptAPIKeys() {
@@ -401,6 +456,9 @@ func (ai *AI) EncryptAPIKeys() {
 	}
 	if ai.Embedding != nil && ai.Embedding.APIKey != "" {
 		ai.Embedding.APIKey = util.AESEncrypt(ai.Embedding.APIKey)
+	}
+	if ai.Rerank != nil && ai.Rerank.APIKey != "" {
+		ai.Rerank.APIKey = util.AESEncrypt(ai.Rerank.APIKey)
 	}
 }
 

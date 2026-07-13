@@ -428,7 +428,14 @@ func insertFileAnnotationRefs0(tx *sql.Tx, bulk []*FileAnnotationRef) (err error
 
 func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
-	refs, fileAnnotationRefs := refsFromTree(tree)
+	// 对已存在文档的修复性重建也会走到这里，先按篇删除避免产生重复 refs 行
+	if err = deleteRefsByPathTx(tx, tree.Box, tree.Path); err != nil {
+		return
+	}
+	if err = deleteFileAnnotationRefsByPathTx(tx, tree.Box, tree.Path); err != nil {
+		return
+	}
+	refs, fileAnnotationRefs := refsFromTree(tree, nil)
 	err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)
 	return
 }
@@ -475,6 +482,8 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error
 	if err = deleteAttributesByRootID(tx, tree.ID); err != nil {
 		return
 	}
+	// 删除前先保留旧 refs 的 id 映射，重建时命中业务键则复用，避免每次重建刷新 id 而打乱“最近引用”排序
+	refIDs := queryRefIDsByPath(tx, tree.Box, tree.Path)
 	if err = deleteRefsByPathTx(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
@@ -482,7 +491,7 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error
 		return
 	}
 
-	refs, fileAnnotationRefs := refsFromTree(tree)
+	refs, fileAnnotationRefs := refsFromTree(tree, refIDs)
 	if err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs); err != nil {
 		return
 	}

@@ -208,23 +208,71 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
 export const copyPNGByLink = (link: string) => {
     if (isInAndroid()) {
         window.JSAndroid.writeImageClipboard(link);
-    } else {
+        return;
+    }
+    // 通过 fetch 拿到 blob 后再写入剪贴板，避免跨域图片直接 drawImage 污染 canvas 导致 toBlob 失败
+    // （浏览器访问 Docker 部署时常见，报错：Tainted canvases may not be exported）
+    const writePNGBlob = (blob: Blob) => {
+        try {
+            navigator.clipboard.write([
+                new ClipboardItem({
+                    // @ts-ignore
+                    ["image/png"]: blob
+                })
+            ]).catch(() => {
+                showMessage(window.siyuan.languages.clipboardPermissionDenied);
+            });
+        } catch (e) {
+            // http 等非安全上下文下 navigator.clipboard 可能为 undefined，这里会同步抛错
+            showMessage(window.siyuan.languages.clipboardPermissionDenied);
+        }
+    };
+    // 把任意图片 blob 画进 canvas 再导出为 PNG；blob URL 为同源，不会污染 canvas
+    const blobToPNGClipboard = (blob: Blob) => {
+        if (blob.type === "image/png") {
+            writePNGBlob(blob);
+            return;
+        }
+        const objectURL = URL.createObjectURL(blob);
         const canvas = document.createElement("canvas");
         const tempElement = document.createElement("img");
         tempElement.onload = (e: Event & { target: HTMLImageElement }) => {
-            canvas.width = e.target.width;
-            canvas.height = e.target.height;
-            canvas.getContext("2d").drawImage(e.target, 0, 0, e.target.width, e.target.height);
+            canvas.width = e.target.naturalWidth;
+            canvas.height = e.target.naturalHeight;
+            canvas.getContext("2d").drawImage(e.target, 0, 0);
+            URL.revokeObjectURL(objectURL);
+            canvas.toBlob((pngBlob) => {
+                if (pngBlob) {
+                    writePNGBlob(pngBlob);
+                }
+            }, "image/png", 1);
+        };
+        tempElement.onerror = () => {
+            URL.revokeObjectURL(objectURL);
+        };
+        tempElement.src = objectURL;
+    };
+    fetch(link).then(async (response) => {
+        if (!response.ok) {
+            throw new Error(response.statusText);
+        }
+        blobToPNGClipboard(await response.blob());
+    }).catch(() => {
+        // fetch 失败时回退：以 CORS 模式加载后再导出（需目标服务器返回 ACAO）
+        const canvas = document.createElement("canvas");
+        const tempElement = document.createElement("img");
+        tempElement.crossOrigin = "anonymous";
+        tempElement.onload = (e: Event & { target: HTMLImageElement }) => {
+            canvas.width = e.target.naturalWidth;
+            canvas.height = e.target.naturalHeight;
+            canvas.getContext("2d").drawImage(e.target, 0, 0);
             canvas.toBlob((blob) => {
-                navigator.clipboard.write([
-                    new ClipboardItem({
-                        // @ts-ignore
-                        ["image/png"]: blob
-                    })
-                ]);
+                if (blob) {
+                    writePNGBlob(blob);
+                }
             }, "image/png", 1);
         };
         tempElement.src = link;
-    }
+    });
 };
 

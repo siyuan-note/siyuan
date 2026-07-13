@@ -1,4 +1,7 @@
 {
+	"testConnectionFailMsg": "החיבור נכשל: ${msg}",
+	"testConnectionSuccessDimensions": "החיבור הצליח (ממדים ${dimensions})",
+	"masterPasswordMigrationPending": "מעבר סיסמה ראשית בתהליך",
 	"coverWildlife": "Wildlife",
 	"coverInkWashLandscape": "Ink Wash Landscape",
 	"coverChineseGarden": "Chinese Garden",

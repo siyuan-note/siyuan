@@ -1,4 +1,7 @@
 {
+	"testConnectionFailMsg": "Connection failed: ${msg}",
+	"testConnectionSuccessDimensions": "Connection successful (dimensions ${dimensions})",
+	"masterPasswordMigrationPending": "Master password migration in progress",
 	"coverWildlife": "Wildlife",
 	"coverInkWashLandscape": "Ink Wash Landscape",
 	"coverChineseGarden": "Chinese Garden",

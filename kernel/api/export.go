@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
@@ -729,9 +730,27 @@ func exportBrowserHTML(c *gin.Context) {
 		return
 	}
 
+	// 检测是否来自加密笔记本：folder 形如 <boxID>/<folderName>
+	boxID := ""
+	if parts := strings.SplitN(folder, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
+		boxID = parts[0]
+	}
+
 	zipFileName := util.FilterFileName(name) + ".zip"
-	zipPath := filepath.Join(util.TempDir, "export", zipFileName)
-	zip, err := gulu.Zip.Create(zipPath)
+	var zipAbsPath string
+	if boxID != "" {
+		// 加密笔记本的导出 ZIP 写入 boxID 子目录，并注册托管 token
+		zipAbsPath = filepath.Join(util.TempDir, "export", boxID, "html", gulu.Rand.String(7)+"-"+zipFileName)
+		if err := os.MkdirAll(filepath.Dir(zipAbsPath), 0755); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	} else {
+		zipAbsPath = filepath.Join(util.TempDir, "export", zipFileName)
+	}
+
+	zip, err := gulu.Zip.Create(zipAbsPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -756,7 +775,12 @@ func exportBrowserHTML(c *gin.Context) {
 
 	os.RemoveAll(tmpDir)
 
-	zipURL := "/export/" + url.PathEscape(filepath.Base(zipPath))
+	var zipURL string
+	if boxID != "" {
+		zipURL = "/export/" + model.RegisterManagedEncryptedExport(boxID, "html", zipAbsPath)
+	} else {
+		zipURL = "/export/" + url.PathEscape(filepath.Base(zipAbsPath))
+	}
 	ret.Data = map[string]any{
 		"zip": zipURL,
 	}

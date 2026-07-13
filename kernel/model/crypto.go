@@ -127,7 +127,7 @@ func verifyKEKMAC(nc *conf.NotebookCrypto, kek []byte) bool {
 
 // prepareBackupForWrite 为写入准备备份元数据字段（Spec/BackupID/CreatedAt/Checksum）。
 func prepareBackupForWrite(nc *conf.NotebookCrypto) {
-	conf.UpgradeSpec(nc) // 按需升级旧格式
+	nc.Spec = conf.CurrentNotebookCryptoSpec
 	if nc.BackupID == "" {
 		nc.BackupID = util.RandString(16)
 	}
@@ -201,12 +201,15 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 	if validErr != nil {
 		return errors.New(Conf.Language(317))
 	}
-	kek := util.DeriveKey(password, nc.MasterSalt, params)
-	defer zeroAndClear(kek)
-	if nc.Spec >= 1 && nc.Checksum != "" && nc.Checksum != computeBackupChecksum(nc) {
+	if nc.Spec != conf.CurrentNotebookCryptoSpec || nc.Checksum == "" || len(nc.KEKMAC) == 0 {
 		return errors.New(Conf.Language(317))
 	}
-	if nc.Spec >= 1 && len(nc.KEKMAC) > 0 && !verifyKEKMAC(nc, kek) {
+	kek := util.DeriveKey(password, nc.MasterSalt, params)
+	defer zeroAndClear(kek)
+	if nc.Checksum != computeBackupChecksum(nc) {
+		return errors.New(Conf.Language(317))
+	}
+	if !verifyKEKMAC(nc, kek) {
 		return errors.New(Conf.Language(317))
 	}
 	decrypted, dErr := util.DecryptWithAAD(kek, nc.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
@@ -234,13 +237,16 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 }
 
 // saveNotebookCryptoBackup 把当前 NotebookCrypto（含 MasterSalt/KEKVerifier/KDFParams）备份到 DataDir。
-// kek 非 nil 时在 Checksum 定型后计算 KEKMAC；kek 为 nil（如启动回填、无密码恢复）则不写 MAC。
+// kek 非 nil 时在 Checksum 定型后计算 KEKMAC；kek 为 nil（如启动回填、无密码恢复）时清零 KEKMAC，
+// 避免 prepareBackupForWrite 更新 Checksum/CreatedAt 后保留旧 MAC 导致 stale（后续恢复必失败）。
 func saveNotebookCryptoBackup(kek []byte) error {
 	Conf.m.Lock()
 	nc := *Conf.NotebookCrypto // 值拷贝
 	prepareBackupForWrite(&nc)
 	if nil != kek {
 		nc.KEKMAC = computeKEKMAC(&nc, kek)
+	} else {
+		nc.KEKMAC = nil // Checksum/CreatedAt 已更新，旧 MAC 必失效，清零使恢复路径跳过 MAC 检查
 	}
 	Conf.NotebookCrypto.Spec = nc.Spec
 	Conf.NotebookCrypto.BackupID = nc.BackupID
@@ -263,11 +269,14 @@ func saveNotebookCryptoBackup(kek []byte) error {
 }
 
 // writeNotebookCryptoBackupData 将指定的 NotebookCrypto 写入备份文件（不依赖 Conf.NotebookCrypto）。
-// kek 非 nil 时在 Checksum 定型后计算 KEKMAC，保证落盘 MAC 与落盘内容一致；kek 为 nil 则不写 MAC。
+// kek 非 nil 时在 Checksum 定型后计算 KEKMAC，保证落盘 MAC 与落盘内容一致；kek 为 nil 时清零 KEKMAC，
+// 避免 Checksum/CreatedAt 更新后保留旧 MAC 导致 stale。
 func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto, kek []byte) error {
 	prepareBackupForWrite(nc)
 	if nil != kek {
 		nc.KEKMAC = computeKEKMAC(nc, kek)
+	} else {
+		nc.KEKMAC = nil
 	}
 	backupPath := notebookCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
@@ -325,15 +334,18 @@ func loadNotebookCryptoBackup() (*conf.NotebookCrypto, error) {
 	if err := json.Unmarshal(data, nc); err != nil {
 		return nil, err
 	}
-	// Spec>=1：校验 Checksum，防止备份文件损坏
-	if nc.Spec >= 1 && nc.Checksum != "" {
-		expected := computeBackupChecksum(nc)
-		if nc.Checksum != expected {
-			logging.LogWarnf("notebook crypto backup checksum mismatch: expected %s, got %s", expected, nc.Checksum)
-			return nil, errors.New("notebook crypto backup is corrupted (checksum mismatch)")
-		}
+	conf.UpgradeSpec(nc)
+	if nc.Spec != conf.CurrentNotebookCryptoSpec {
+		return nil, fmt.Errorf("unsupported notebook crypto backup spec [%d]", nc.Spec)
 	}
-	conf.UpgradeSpec(nc) // 按需升级旧格式到当前规范
+	if nc.Checksum == "" {
+		return nil, errors.New("notebook crypto backup checksum is missing")
+	}
+	expected := computeBackupChecksum(nc)
+	if nc.Checksum != expected {
+		logging.LogWarnf("notebook crypto backup checksum mismatch: expected %s, got %s", expected, nc.Checksum)
+		return nil, errors.New("notebook crypto backup is corrupted (checksum mismatch)")
+	}
 	return nc, nil
 }
 
@@ -482,14 +494,10 @@ func recoverMasterPasswordMigration() {
 				return // 保留 manifest
 			}
 		}
-		// 持久化全局 conf + backup，再清除 manifest
+		// 持久化全局 conf。此时没有新密码派生出的 KEK，不能为新备份生成可信 MAC，
+		// 因此保留迁移清单和旧备份，待用户首次输入新密码后校验全部 WrappedDEK，再完成备份切换。
 		Conf.Save()
-		if err = saveNotebookCryptoBackup(nil); err != nil {
-			logging.LogErrorf("save notebook crypto backup failed: %s", err)
-			return // 保留 manifest
-		}
-		removeMasterPasswordMigration()
-		logging.LogInfof("master password migration recovered successfully")
+		logging.LogInfof("master password migration data recovered, waiting for the new password to authenticate the backup")
 	} else {
 		// Phase 2 未完成：清除 manifest，保留旧 verifier + 旧 WrappedDEK，状态一致
 		removeMasterPasswordMigration()
@@ -676,16 +684,19 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 	decrypted, dErr := util.DecryptWithAAD(kek, backup.KEKVerifier, []byte("siyuan:v1:kek-verifier"))
 	if dErr != nil || string(decrypted) != string(kekVerifierMagic) {
 		// 主密码错误（或备份损坏），不能恢复
+		zeroAndClear(kek)
 		return nil, errors.New(Conf.Language(311))
 	}
-	// Spec>=1 时验证 KEKMAC：用 KEK 校验备份内容未被篡改。
-	// len(KEKMAC)==0 时跳过（兼容旧备份/启动回填等无 MAC 写入），与 ImportNotebookCryptoBackup 的门控一致
-	if backup.Spec >= 1 && len(backup.KEKMAC) > 0 && !verifyKEKMAC(backup, kek) {
+	// 当前格式的备份必须携带有效 KEKMAC；缺失与不匹配都按篡改处理。
+	if backup.Spec != conf.CurrentNotebookCryptoSpec || backup.Checksum == "" ||
+		len(backup.KEKMAC) == 0 || !verifyKEKMAC(backup, kek) {
+		zeroAndClear(kek)
 		return nil, errors.New(Conf.Language(316))
 	}
 
 	// 若有加密笔记本，校验 KEK 能解密其 WrappedDEK（防止 salt 不匹配的备份导致数据锁死）
 	if !verifyKEKAgainstExistingBoxes(kek) {
+		zeroAndClear(kek)
 		return nil, errors.New(Conf.Language(316)) // 密钥不匹配
 	}
 
@@ -709,7 +720,7 @@ func tryRestoreNotebookCryptoFromBackupLocked(password string) (kek []byte, err 
 // deriveKEK 从主密码派生 KEK 并校验。校验失败返回错误。KEK 仅在函数作用域内有效，调用方负责使用。
 func deriveKEK(password string) ([]byte, error) {
 	Conf.m.RLock()
-	nc := Conf.NotebookCrypto
+	nc := *Conf.NotebookCrypto
 	Conf.m.RUnlock()
 
 	if !nc.Enabled {
@@ -733,6 +744,36 @@ func deriveKEK(password string) ([]byte, error) {
 	}
 	if string(decrypted) != string(kekVerifierMagic) {
 		return nil, errors.New(Conf.Language(311))
+	}
+
+	// 正常配置必须通过 KEKMAC 认证，不能把“MAC 缺失”当作兼容路径，否则同步端攻击者可删除 MAC、
+	// 重算无密钥 Checksum 后篡改 AutoLockMinutes 等安全配置。
+	mig, migErr := readMasterPasswordMigration()
+	migrationPending := migErr == nil && mig != nil && bytes.Equal(nc.KEKVerifier, mig.NewVerifier)
+	if !migrationPending {
+		backup, backupErr := loadNotebookCryptoBackup()
+		backupMatchesConf := backupErr == nil && backup != nil &&
+			bytes.Equal(backup.MasterSalt, nc.MasterSalt) &&
+			bytes.Equal(backup.KEKVerifier, nc.KEKVerifier) &&
+			backup.KDFParams == nc.KDFParams
+		if !backupMatchesConf || backup.Spec != conf.CurrentNotebookCryptoSpec || backup.Checksum == "" ||
+			len(backup.KEKMAC) == 0 || !verifyKEKMAC(backup, kek) {
+			zeroAndClear(kek)
+			return nil, errors.New(Conf.Language(316))
+		}
+	}
+
+	if migrationPending {
+		// 崩溃恢复后的首次新密码验证：确认所有笔记本都已切换到新 KEK，再生成带认证的全局备份并结束迁移。
+		if !verifyKEKAgainstExistingBoxes(kek) {
+			zeroAndClear(kek)
+			return nil, errMasterPasswordMigrationPending
+		}
+		if err = saveNotebookCryptoBackup(kek); err != nil {
+			zeroAndClear(kek)
+			return nil, fmt.Errorf("%w: %v", errMasterPasswordMigrationPending, err)
+		}
+		removeMasterPasswordMigration()
 	}
 	return kek, nil
 }
@@ -1199,6 +1240,7 @@ func DeepCopyBoxEncryption(src *conf.BoxEncryption) *conf.BoxEncryption {
 		return nil
 	}
 	return &conf.BoxEncryption{
+		Spec:       src.Spec,
 		WrappedDEK: append([]byte(nil), src.WrappedDEK...),
 		WrapNonce:  append([]byte(nil), src.WrapNonce...),
 		CreatedAt:  src.CreatedAt,
@@ -1272,9 +1314,15 @@ func IsBlockRefCrossingBoundary(srcBoxID, defBlockID string) bool {
 		}
 	}
 	if nil == bt {
-		return false // def 块不存在（可能是新建块的临时态），不拦
+		// 普通库未命中且锁定的加密 blocktree 不可查询时必须 fail-closed，否则只要知道加密块 ID，
+		// 就能在加密笔记本锁定后把跨边界引用写入全局明文数据库。同一事务树内的新块由调用方单独放行。
+		return normalBoxBlockRefCrossesBoundary(nil)
 	}
-	return IsEncryptedBox(bt.BoxID)
+	return normalBoxBlockRefCrossesBoundary(bt)
+}
+
+func normalBoxBlockRefCrossesBoundary(bt *treenode.BlockTree) bool {
+	return bt == nil || IsEncryptedBox(bt.BoxID)
 }
 
 // IsEncryptedAssetPath 判断给定 asset 绝对路径是否属于加密笔记本。

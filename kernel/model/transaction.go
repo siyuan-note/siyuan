@@ -1731,12 +1731,22 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 // 返回被降级的引用数。
 func degradeCrossBoundaryBlockRefs(root *ast.Node, srcBox string) int {
 	degraded := 0
+	localBlockIDs := map[string]struct{}{}
+	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.IsBlock() && n.ID != "" {
+			localBlockIDs[n.ID] = struct{}{}
+		}
+		return ast.WalkContinue
+	})
 	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
 
 		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
+			if _, local := localBlockIDs[n.TextMarkBlockRefID]; local {
+				return ast.WalkContinue
+			}
 			if IsBlockRefCrossingBoundary(srcBox, n.TextMarkBlockRefID) {
 				logging.LogWarnf("block ref crosses encrypted boundary, src box [%s] -> def block [%s], degrade to text", srcBox, n.TextMarkBlockRefID)
 				n.TextMarkBlockRefID = ""

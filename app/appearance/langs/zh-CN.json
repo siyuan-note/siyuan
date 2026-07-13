@@ -1,4 +1,7 @@
 {
+	"testConnectionFailMsg": "连接失败：${msg}",
+	"testConnectionSuccessDimensions": "连接成功（维度 ${dimensions}）",
+	"masterPasswordMigrationPending": "主密码迁移进行中",
 	"coverWildlife": "动物生灵",
 	"coverInkWashLandscape": "水墨山水",
 	"coverChineseGarden": "中式园林",

@@ -15,6 +15,7 @@ import {
     genEmbeddingStatsHtml,
     getEmbeddingStatsKeywords,
     mountEmbeddingStatsBlock,
+    mountEmbeddingTestBtn,
 } from "./aiUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
@@ -137,6 +138,7 @@ const registerAiEmbeddingGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.apiModel,
         desc: window.siyuan.languages.apiModelTip,
         mode: "input-text",
+        afterMount: mountEmbeddingTestBtn,
     });
     group.number("ai.embedding.dimensions", {
         title: window.siyuan.languages.apiDimensions,

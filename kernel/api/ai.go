@@ -116,6 +116,33 @@ func testModel(c *gin.Context) {
 	ret.Data = result
 }
 
+// testEmbeddingModel 测试嵌入模型可用性。直接读取已保存的 Embedding 配置，
+// 发送极简文本 embedding 请求验证连通性与鉴权，并返回向量维度便于核对。
+func testEmbeddingModel(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	embedding := model.Conf.AI.Embedding
+	if nil == embedding || "" == embedding.APIKey || "" == embedding.BaseURL || "" == embedding.Name {
+		ret.Code = -1
+		ret.Msg = "embedding model not configured"
+		return
+	}
+
+	matched, dims, err := util.TestEmbeddingModel(embedding.APIKey, embedding.BaseURL, embedding.Name, embedding.Dimensions, embedding.Timeout)
+	// 测试结果统一以 code=0 返回，具体成败信息放在 data 中由前端控制展示，
+	// 避免触发统一的错误消息提示导致按钮状态无法恢复
+	result := map[string]any{
+		"matched":    matched,
+		"dimensions": dims,
+	}
+	if nil != err {
+		result["msg"] = err.Error()
+		logging.LogErrorf("test embedding model [%s] failed: %s", embedding.Name, err)
+	}
+	ret.Data = result
+}
+
 // listModels 拉取指定 Provider 的可用模型清单（GET /v1/models），用于填充前端模型名称下拉框。
 // 不支持该端点的服务会返回错误，由前端回退为手动输入。
 func listModels(c *gin.Context) {

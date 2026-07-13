@@ -69,199 +69,161 @@ import (
 func ExportCodeBlock(blockID string) (filePath string, err error) {
 	// Supports exporting a code block as a file https://github.com/siyuan-note/siyuan/pull/16774
 
-	tree, _ := LoadTreeByBlockID(blockID)
-	if nil == tree {
-		err = ErrBlockNotFound
-		return
-	}
+	err = withExportReadLockByBlockID(blockID, func() error {
+		tree, _ := LoadTreeByBlockID(blockID)
+		if nil == tree {
+			return ErrBlockNotFound
+		}
 
-	node := treenode.GetNodeInTree(tree, blockID)
-	if nil == node {
-		err = ErrBlockNotFound
-		return
-	}
+		node := treenode.GetNodeInTree(tree, blockID)
+		if nil == node {
+			return ErrBlockNotFound
+		}
 
-	if ast.NodeCodeBlock != node.Type {
-		err = errors.New("not a code block")
-		return
-	}
+		if ast.NodeCodeBlock != node.Type {
+			return errors.New("not a code block")
+		}
 
-	code := node.ChildByType(ast.NodeCodeBlockCode)
-	if nil == code {
-		err = errors.New("code block has no code node")
-		return
-	}
+		code := node.ChildByType(ast.NodeCodeBlockCode)
+		if nil == code {
+			return errors.New("code block has no code node")
+		}
 
-	name := tree.Root.IALAttr("title") + "-" + util.CurrentTimeSecondsStr() + ".txt"
-	name = util.FilterFileName(name)
-	exportFolder := filepath.Join(util.TempDir, "export")
-	// 加密笔记本的导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
-	if IsEncryptedBox(tree.Box) {
-		exportFolder = filepath.Join(exportFolder, tree.Box)
-	}
-	exportFolder = filepath.Join(exportFolder, "code")
-	if err = os.MkdirAll(exportFolder, 0755); err != nil {
-		logging.LogErrorf("create export temp folder failed: %s", err)
-		return
-	}
+		name := tree.Root.IALAttr("title") + "-" + util.CurrentTimeSecondsStr() + ".txt"
+		name = util.FilterFileName(name)
+		exportFolder := filepath.Join(util.TempDir, "export")
+		// 加密笔记本的导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
+		if IsEncryptedBox(tree.Box) {
+			exportFolder = filepath.Join(exportFolder, tree.Box)
+		}
+		exportFolder = filepath.Join(exportFolder, "code")
+		if mkdirErr := os.MkdirAll(exportFolder, 0755); mkdirErr != nil {
+			return mkdirErr
+		}
 
-	code.Tokens = bytes.ReplaceAll(code.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
+		code.Tokens = bytes.ReplaceAll(code.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
 
-	writePath := filepath.Join(exportFolder, name)
-	err = filelock.WriteFile(writePath, code.Tokens)
-	if nil != err {
-		return
-	}
+		writePath := filepath.Join(exportFolder, name)
+		if writeErr := filelock.WriteFile(writePath, code.Tokens); writeErr != nil {
+			return writeErr
+		}
 
-	// 加密笔记本的导出 URL 归入 boxID 子路径，确保服务端校验锁定状态
-	fPath := "/export/"
-	if IsEncryptedBox(tree.Box) {
-		fPath += tree.Box + "/"
-	}
-	filePath = fPath + "code/" + url.PathEscape(name)
+		// 加密笔记本的导出须注册托管 token，否则服务端守卫拒绝下载
+		if IsEncryptedBox(tree.Box) {
+			filePath = "/export/" + registerManagedEncryptedExport(tree.Box, "code", writePath)
+		} else {
+			filePath = "/export/code/" + url.PathEscape(name)
+		}
+		return nil
+	})
 	return
 }
 
 func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
-	avBoxID := ""
-	if bt := treenode.GetBlockTree(blockID); nil != bt && IsEncryptedBox(bt.BoxID) {
-		avBoxID = bt.BoxID
-		av.SetAVBoxID(avID, avBoxID)
-	}
+	err = withExportReadLockByBlockID(blockID, func() error {
+		avBoxID := ""
+		if bt := treenode.GetBlockTree(blockID); nil != bt && IsEncryptedBox(bt.BoxID) {
+			avBoxID = bt.BoxID
+			av.SetAVBoxID(avID, avBoxID)
+		}
 
-	var attrView *av.AttributeView
-	if avBoxID != "" {
-		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
-	} else {
-		attrView, err = av.ParseAttributeView(avID)
-	}
-	if err != nil {
-		return
-	}
+		var attrView *av.AttributeView
+		if avBoxID != "" {
+			attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
+		} else {
+			attrView, err = av.ParseAttributeView(avID)
+		}
+		if err != nil {
+			return err
+		}
 
-	node, _, err := getNodeByBlockID(nil, blockID)
-	if nil == node {
-		return
-	}
-	viewID := node.IALAttr(av.NodeAttrView)
-	view, err := attrView.GetCurrentView(viewID)
-	if err != nil {
-		return
-	}
+		node, _, nodeErr := getNodeByBlockID(nil, blockID)
+		if nil == node {
+			return nodeErr
+		}
+		viewID := node.IALAttr(av.NodeAttrView)
+		view, viewErr := attrView.GetCurrentView(viewID)
+		if viewErr != nil {
+			return viewErr
+		}
 
-	name := util.FilterFileName(getAttrViewName(attrView))
-	table := getAttrViewTable(attrView, view, "")
+		name := util.FilterFileName(getAttrViewName(attrView))
+		table := getAttrViewTable(attrView, view, "")
 
-	// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
-	cachedAttrViews := map[string]*av.AttributeView{}
-	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
-	av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
-	av.Sort(table, attrView)
+		// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
+		cachedAttrViews := map[string]*av.AttributeView{}
+		rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
+		av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
+		av.Sort(table, attrView)
 
-	exportFolder := filepath.Join(util.TempDir, "export")
-	// 加密笔记本的导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
-	if avBoxID != "" {
-		exportFolder = filepath.Join(exportFolder, avBoxID)
-	}
-	exportFolder = filepath.Join(exportFolder, "csv", name)
-	if err = os.MkdirAll(exportFolder, 0755); err != nil {
-		logging.LogErrorf("mkdir [%s] failed: %s", exportFolder, err)
-		return
-	}
-	csvPath := filepath.Join(exportFolder, name+".csv")
+		exportFolder := filepath.Join(util.TempDir, "export")
+		// 加密笔记本的导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
+		if avBoxID != "" {
+			exportFolder = filepath.Join(exportFolder, avBoxID)
+		}
+		exportFolder = filepath.Join(exportFolder, "csv", name)
+		if mkdirErr := os.MkdirAll(exportFolder, 0755); mkdirErr != nil {
+			return mkdirErr
+		}
+		csvPath := filepath.Join(exportFolder, name+".csv")
 
-	f, err := os.OpenFile(csvPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		logging.LogErrorf("open [%s] failed: %s", csvPath, err)
-		return
-	}
+		f, openErr := os.OpenFile(csvPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+		if openErr != nil {
+			return openErr
+		}
 
-	if _, err = f.WriteString("\xEF\xBB\xBF"); err != nil { // 写入 UTF-8 BOM，避免使用 Microsoft Excel 打开乱码
-		logging.LogErrorf("write UTF-8 BOM to [%s] failed: %s", csvPath, err)
-		f.Close()
-		return
-	}
+		if _, err = f.WriteString("\xEF\xBB\xBF"); err != nil { // 写入 UTF-8 BOM，避免使用 Microsoft Excel 打开乱码
+			f.Close()
+			return err
+		}
 
-	writer := csv.NewWriter(f)
-	var header []string
-	for _, col := range table.Columns {
-		header = append(header, col.Name)
-	}
-	if err = writer.Write(header); err != nil {
-		logging.LogErrorf("write csv header [%s] failed: %s", header, err)
-		f.Close()
-		return
-	}
+		writer := csv.NewWriter(f)
+		var header []string
+		for _, col := range table.Columns {
+			header = append(header, col.Name)
+		}
+		if err = writer.Write(header); err != nil {
+			f.Close()
+			return err
+		}
 
-	var assets []string
-	rowNum := 1
-	for _, row := range table.Rows {
-		var rowVal []string
-		for _, cell := range row.Cells {
-			var val string
-			if nil != cell.Value {
-				if av.KeyTypeDate == cell.Value.Type {
-					if nil != cell.Value.Date {
-						cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime, cell.Value.Date.HasEndDate)
-					}
-				} else if av.KeyTypeCreated == cell.Value.Type {
-					if nil != cell.Value.Created {
-						key, _ := attrView.GetKey(cell.Value.KeyID)
-						isNotTime := false
-						if nil != key && nil != key.Created {
-							isNotTime = !key.Created.IncludeTime
+		var assets []string
+		rowNum := 1
+		for _, row := range table.Rows {
+			var rowVal []string
+			for _, cell := range row.Cells {
+				var val string
+				if nil != cell.Value {
+					if av.KeyTypeDate == cell.Value.Type {
+						if nil != cell.Value.Date {
+							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime, cell.Value.Date.HasEndDate)
 						}
-
-						cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone, isNotTime)
-					}
-				} else if av.KeyTypeUpdated == cell.Value.Type {
-					if nil != cell.Value.Updated {
-						key, _ := attrView.GetKey(cell.Value.KeyID)
-						isNotTime := false
-						if nil != key && nil != key.Updated {
-							isNotTime = !key.Updated.IncludeTime
-						}
-
-						cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone, isNotTime)
-					}
-				} else if av.KeyTypeMAsset == cell.Value.Type {
-					if nil != cell.Value.MAsset {
-						buf := &bytes.Buffer{}
-						for _, a := range cell.Value.MAsset {
-							if av.AssetTypeImage == a.Type {
-								buf.WriteString("![")
-								buf.WriteString(a.Name)
-								buf.WriteString("](")
-								buf.WriteString(a.Content)
-								buf.WriteString(") ")
-								if util.IsAssetLinkDest([]byte(a.Content), true) {
-									assets = append(assets, a.Content)
-								}
-							} else if av.AssetTypeFile == a.Type {
-								buf.WriteString("[")
-								buf.WriteString(a.Name)
-								buf.WriteString("](")
-								buf.WriteString(a.Content)
-								buf.WriteString(") ")
-								if util.IsAssetLinkDest([]byte(a.Content), true) {
-									assets = append(assets, a.Content)
-								}
-							} else {
-								buf.WriteString(a.Content)
-								buf.WriteString(" ")
+					} else if av.KeyTypeCreated == cell.Value.Type {
+						if nil != cell.Value.Created {
+							key, _ := attrView.GetKey(cell.Value.KeyID)
+							isNotTime := false
+							if nil != key && nil != key.Created {
+								isNotTime = !key.Created.IncludeTime
 							}
+
+							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone, isNotTime)
 						}
-						val = strings.TrimSpace(buf.String())
-					}
-				} else if av.KeyTypeLineNumber == cell.Value.Type {
-					val = strconv.Itoa(rowNum)
-				} else if av.KeyTypeRollup == cell.Value.Type {
-					for _, content := range cell.Value.Rollup.Contents {
-						if av.KeyTypeMAsset == content.Type {
+					} else if av.KeyTypeUpdated == cell.Value.Type {
+						if nil != cell.Value.Updated {
+							key, _ := attrView.GetKey(cell.Value.KeyID)
+							isNotTime := false
+							if nil != key && nil != key.Updated {
+								isNotTime = !key.Updated.IncludeTime
+							}
+
+							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone, isNotTime)
+						}
+					} else if av.KeyTypeMAsset == cell.Value.Type {
+						if nil != cell.Value.MAsset {
 							buf := &bytes.Buffer{}
-							for _, a := range content.MAsset {
+							for _, a := range cell.Value.MAsset {
 								if av.AssetTypeImage == a.Type {
 									buf.WriteString("![")
 									buf.WriteString(a.Name)
@@ -287,68 +249,97 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 							}
 							val = strings.TrimSpace(buf.String())
 						}
+					} else if av.KeyTypeLineNumber == cell.Value.Type {
+						val = strconv.Itoa(rowNum)
+					} else if av.KeyTypeRollup == cell.Value.Type {
+						for _, content := range cell.Value.Rollup.Contents {
+							if av.KeyTypeMAsset == content.Type {
+								buf := &bytes.Buffer{}
+								for _, a := range content.MAsset {
+									if av.AssetTypeImage == a.Type {
+										buf.WriteString("![")
+										buf.WriteString(a.Name)
+										buf.WriteString("](")
+										buf.WriteString(a.Content)
+										buf.WriteString(") ")
+										if util.IsAssetLinkDest([]byte(a.Content), true) {
+											assets = append(assets, a.Content)
+										}
+									} else if av.AssetTypeFile == a.Type {
+										buf.WriteString("[")
+										buf.WriteString(a.Name)
+										buf.WriteString("](")
+										buf.WriteString(a.Content)
+										buf.WriteString(") ")
+										if util.IsAssetLinkDest([]byte(a.Content), true) {
+											assets = append(assets, a.Content)
+										}
+									} else {
+										buf.WriteString(a.Content)
+										buf.WriteString(" ")
+									}
+								}
+								val = strings.TrimSpace(buf.String())
+							}
+						}
+					}
+
+					if "" == val {
+						val = cell.Value.String(true)
 					}
 				}
 
-				if "" == val {
-					val = cell.Value.String(true)
-				}
+				rowVal = append(rowVal, val)
 			}
-
-			rowVal = append(rowVal, val)
+			if err = writer.Write(rowVal); err != nil {
+				logging.LogErrorf("write csv row [%s] failed: %s", rowVal, err)
+				f.Close()
+				return err
+			}
+			rowNum++
 		}
-		if err = writer.Write(rowVal); err != nil {
-			logging.LogErrorf("write csv row [%s] failed: %s", rowVal, err)
+		writer.Flush()
+
+		for _, asset := range assets {
+			srcAbsPath, getErr := GetAssetAbsPathInBox(asset, avBoxID)
+			if getErr != nil {
+				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, getErr)
+				continue
+			}
+			targetAbsPath := filepath.Join(exportFolder, AssetPathWithoutQuery(asset))
+			if copyErr := copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); copyErr != nil {
+				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, copyErr)
+			}
+		}
+
+		absZipPath := exportFolder + ".db.zip"
+		zip, createErr := gulu.Zip.Create(absZipPath)
+		if createErr != nil {
 			f.Close()
-			return
+			return createErr
 		}
-		rowNum++
-	}
-	writer.Flush()
 
-	for _, asset := range assets {
-		srcAbsPath, getErr := GetAssetAbsPathInBox(asset, avBoxID)
-		if getErr != nil {
-			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, getErr)
-			continue
+		if err = zip.AddDirectory("", exportFolder); err != nil {
+			f.Close()
+			return err
 		}
-		targetAbsPath := filepath.Join(exportFolder, AssetPathWithoutQuery(asset))
-		if copyErr := copyAssetDecryptIfEncrypted(srcAbsPath, targetAbsPath); copyErr != nil {
-			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, copyErr)
+
+		if err = zip.Close(); err != nil {
+			f.Close()
+			return err
 		}
-	}
 
-	zipPath = exportFolder + ".db.zip"
-	zip, err := gulu.Zip.Create(zipPath)
-	if err != nil {
-		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
 		f.Close()
-		return
-	}
+		os.RemoveAll(exportFolder)
 
-	if err = zip.AddDirectory("", exportFolder); err != nil {
-		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
-		f.Close()
-		return
-	}
-
-	if err = zip.Close(); err != nil {
-		logging.LogErrorf("close export .db.zip failed: %s", err)
-		f.Close()
-		return
-	}
-
-	f.Close()
-	removeErr := os.RemoveAll(exportFolder)
-	if nil != removeErr {
-		logging.LogErrorf("remove export folder [%s] failed: %s", exportFolder, removeErr)
-	}
-	// 加密笔记本的导出 URL 归入 boxID 子路径，确保服务端校验锁定状态
-	if avBoxID != "" {
-		zipPath = "/export/" + avBoxID + "/csv/" + url.PathEscape(filepath.Base(zipPath))
-	} else {
-		zipPath = "/export/csv/" + url.PathEscape(filepath.Base(zipPath))
-	}
+		// 加密笔记本的导出须注册托管 token，否则服务端守卫拒绝下载
+		if avBoxID != "" {
+			zipPath = "/export/" + registerManagedEncryptedExport(avBoxID, "csv", absZipPath)
+		} else {
+			zipPath = "/export/csv/" + url.PathEscape(filepath.Base(absZipPath))
+		}
+		return nil
+	})
 	return
 }
 
@@ -744,12 +735,8 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 		zipBaseName = "resources"
 	}
 	zipFileName := zipBaseName + ".zip"
+	// 普通和加密导出统一使用随机 exportID 作为物理目录，zipBaseName 仅用于 ZIP 内顶层目录名和下载文件名
 	zipFilePath := filepath.Join(exportBasePath, exportID+"-"+zipFileName)
-	if encryptedBoxID == "" {
-		// 普通资源导出使用经净化的 zipBaseName 拼接物理路径，避免 mainName 含 ../ 导致路径穿越
-		exportFolderPath = filepath.Join(exportBasePath, zipBaseName)
-		zipFilePath = exportFolderPath + ".zip"
-	}
 	if err = os.MkdirAll(exportFolderPath, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return

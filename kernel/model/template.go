@@ -362,14 +362,18 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	}
 
 	var nodesNeedAppendChild, unlinks []*ast.Node
+	// 模板内部块旧 ID 到新 ID 的映射，用于成套改写模板内部的自引用
+	blockIDs := map[string]string{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
 
 		if "" != n.ID {
-			// 重新生成 ID
+			// 重新生成 ID，并记录旧 ID 到新 ID 的映射，用于后续成套改写模板内部的自引用
+			oldID := n.ID
 			n.ID = ast.NewNodeID()
+			blockIDs[oldID] = n.ID
 			n.SetIALAttr("id", n.ID)
 			n.RemoveIALAttr(av.NodeAttrNameAvs)
 
@@ -384,27 +388,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 			nodesNeedAppendChild = append(nodesNeedAppendChild, n)
 		}
 
-		if n.IsTextMarkType("block-ref") {
-			if refText := n.Text(); "" == refText {
-				refText = strings.TrimSpace(sql.GetRefText(n.TextMarkBlockRefID))
-				if "" != refText {
-					treenode.SetDynamicBlockRefText(n, refText)
-				} else {
-					unlinks = append(unlinks, n)
-				}
-			}
-		} else if ast.NodeBlockRef == n.Type {
-			if refText := n.Text(); "" == refText {
-				if refID := n.ChildByType(ast.NodeBlockRefID); nil != refID {
-					refText = strings.TrimSpace(sql.GetRefText(refID.TokensStr()))
-					if "" != refText {
-						treenode.SetDynamicBlockRefText(n, refText)
-					} else {
-						unlinks = append(unlinks, n)
-					}
-				}
-			}
-		} else if n.IsTextMarkType("inline-math") {
+		if n.IsTextMarkType("inline-math") {
 			if n.ParentIs(ast.NodeTableCell) {
 				// 表格中的公式中带有管道符时使用 HTML 实体替换管道符 Improve the handling of inline-math containing `|` in the table https://github.com/siyuan-note/siyuan/issues/9227
 				n.TextMarkInlineMathContent = strings.ReplaceAll(n.TextMarkInlineMathContent, "|", "&#124;")
@@ -461,6 +445,63 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 			}
 		}
 
+		return ast.WalkContinue
+	})
+
+	// 用映射成套改写模板内部的自引用，并补全指向外部块的引用锚文本
+	// 仅命中 blockIDs 的引用（模板内部块）才会改写 ID；未命中的（外部块）保持不变
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsTextMarkType("block-ref") {
+			defID := n.TextMarkBlockRefID
+			if newDefID, internal := blockIDs[defID]; internal {
+				// 模板内部自引用：成套改写为新 ID
+				n.TextMarkBlockRefID = newDefID
+			} else {
+				// 外部引用：保持 ID 不变，补全空锚文本
+				if refText := n.Text(); "" == refText {
+					refText = strings.TrimSpace(sql.GetRefText(defID))
+					if "" != refText {
+						treenode.SetDynamicBlockRefText(n, refText)
+					} else {
+						unlinks = append(unlinks, n)
+					}
+				}
+			}
+		} else if ast.NodeBlockRef == n.Type {
+			// 兼容遗留块引用节点
+			if refID := n.ChildByType(ast.NodeBlockRefID); nil != refID {
+				defID := refID.TokensStr()
+				if newDefID, internal := blockIDs[defID]; internal {
+					// 模板内部自引用：成套改写为新 ID
+					refID.Tokens = []byte(newDefID)
+				} else {
+					// 外部引用：保持 ID 不变，补全空锚文本
+					if refText := n.Text(); "" == refText {
+						refText = strings.TrimSpace(sql.GetRefText(defID))
+						if "" != refText {
+							treenode.SetDynamicBlockRefText(n, refText)
+						} else {
+							unlinks = append(unlinks, n)
+						}
+					}
+				}
+			}
+		} else if treenode.IsBlockLink(n) {
+			// 块超链接指向模板内部块时成套改写
+			defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+			if newDefID, internal := blockIDs[defID]; internal {
+				n.TextMarkAHref = "siyuan://blocks/" + newDefID
+			}
+		} else if ast.NodeBlockQueryEmbedScript == n.Type {
+			// 嵌入块查询脚本中引用模板内部块时成套改写
+			for oldID, newID := range blockIDs {
+				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(oldID), []byte(newID))
+			}
+		}
 		return ast.WalkContinue
 	})
 	for _, n := range nodesNeedAppendChild {

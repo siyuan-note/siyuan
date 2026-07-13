@@ -1,4 +1,7 @@
 {
+	"testConnectionFailMsg": "Verbinding mislukt: ${msg}",
+	"testConnectionSuccessDimensions": "Verbinding geslaagd (dimensies ${dimensions})",
+	"masterPasswordMigrationPending": "Migratie van hoofdwachtwoord is bezig",
 	"coverWildlife": "Wilde dieren",
 	"coverInkWashLandscape": "Inktwaslandschap",
 	"coverChineseGarden": "Chinese tuin",

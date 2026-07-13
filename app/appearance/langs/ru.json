@@ -1,4 +1,7 @@
 {
+	"testConnectionFailMsg": "Ошибка подключения: ${msg}",
+	"testConnectionSuccessDimensions": "Подключение успешно (измерений: ${dimensions})",
+	"masterPasswordMigrationPending": "Выполняется миграция мастер-пароля",
 	"coverWildlife": "Дикая природа",
 	"coverInkWashLandscape": "Тушевой пейзаж",
 	"coverChineseGarden": "Китайский сад",

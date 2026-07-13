@@ -1,4 +1,7 @@
 {
+	"testConnectionFailMsg": "فشل الاتصال: ${msg}",
+	"testConnectionSuccessDimensions": "نجح الاتصال (الأبعاد ${dimensions})",
+	"masterPasswordMigrationPending": "جارٍ ترحيل كلمة المرور الرئيسية",
 	"coverWildlife": "Wildlife",
 	"coverInkWashLandscape": "Ink Wash Landscape",
 	"coverChineseGarden": "Chinese Garden",

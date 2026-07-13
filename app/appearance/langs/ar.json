@@ -2134,6 +2134,7 @@
 		"319": "دفتر الملاحظات غير مشفر",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "Access to encrypted notebook data is not supported via this API",
-		"322": "تم قفل دفتر التشفير [%s] تلقائياً بسبب عدم النشاط"
+		"322": "تم قفل دفتر التشفير [%s] تلقائياً بسبب عدم النشاط",
+		"323": "تعذر تعطيل دفاتر التشفير: ما زال سجل الدفاتر المحذوفة يعتمد على نسخة المفتاح الاحتياطية الحالية. امسح هذا السجل أولاً"
 	}
 	}

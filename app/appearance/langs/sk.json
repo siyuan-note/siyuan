@@ -2134,6 +2134,7 @@
 		"319": "Poznámkový blok nie je šifrovaný",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "Access to encrypted notebook data is not supported via this API",
-		"322": "Šifrovaný zápisník [%s] bol automaticky uzamknutý z dôvodu nečinnosti"
+		"322": "Šifrovaný zápisník [%s] bol automaticky uzamknutý z dôvodu nečinnosti",
+		"323": "Nie je možné zakázať šifrované zápisníky: história zmazaných zápisníkov stále závisí od aktuálnej zálohy kľúčov. Najprv túto históriu vymažte"
 	}
 	}

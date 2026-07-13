@@ -511,6 +511,66 @@ func hasEncryptedNotebook() bool {
 	return len(ListAllEncryptedBoxIDs()) > 0
 }
 
+// hasEncryptedNotebookHistory 检查历史目录中是否存在加密笔记本的历史快照。
+// 笔记本删除后其 box 目录（含 .siyuan/conf.json 和 notebook-crypt-backup.json）会被
+// 原样密文备份到历史目录（RemoveBox 的 filelock.Copy），但此时 IsEncryptedBox 已返回 false
+// （box 目录已删）。因此 DisableEncryptedNotebook 不能只靠 ListAllEncryptedBoxIDs 判定——
+// 已删除加密笔记本的历史仍依赖当前 MasterSalt/KEKVerifier 才能恢复，禁用并删除备份会让这些
+// 历史永久锁死，违反设计 §19。本函数扫描历史目录识别这类依赖。
+//
+// 判定信号：历史条目 <HistoryDir>/<ts>-<op>/<boxID>/.siyuan/ 下存在
+// notebook-crypt-backup.json（专为 box 删除后的恢复设计），或 conf.json 标记 Encrypted=true。
+// boxID 用 ast.IsNodeIDPattern 校验，避免误判 assets/storage 等非 box 目录。
+func hasEncryptedNotebookHistory() bool {
+	entries, err := os.ReadDir(util.HistoryDir)
+	if err != nil {
+		return false // 历史目录不存在或不可读 → 无依赖
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		// 历史快照目录：<ts>-<op>，其下是各 boxID 子目录
+		snapshotDir := filepath.Join(util.HistoryDir, entry.Name())
+		boxEntries, readErr := os.ReadDir(snapshotDir)
+		if readErr != nil {
+			continue
+		}
+		for _, boxEntry := range boxEntries {
+			if !boxEntry.IsDir() || !ast.IsNodeIDPattern(boxEntry.Name()) {
+				continue
+			}
+			if isEncryptedHistoryBoxDir(filepath.Join(snapshotDir, boxEntry.Name())) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// isEncryptedHistoryBoxDir 判断历史目录中的 boxID 子目录是否属于加密笔记本。
+// 优先看 notebook-crypt-backup.json（删除前随 box 目录整体备份，是加密身份的权威标识），
+// 再 fallback 到 conf.json 的 Encrypted 标志。
+func isEncryptedHistoryBoxDir(boxDir string) bool {
+	siyuanDir := filepath.Join(boxDir, ".siyuan")
+	if filelock.IsExist(filepath.Join(siyuanDir, "notebook-crypt-backup.json")) {
+		return true
+	}
+	confPath := filepath.Join(siyuanDir, "conf.json")
+	if !filelock.IsExist(confPath) {
+		return false
+	}
+	data, err := filelock.ReadFile(confPath)
+	if err != nil {
+		return false
+	}
+	var boxConf conf.BoxConf
+	if err = gulu.JSON.UnmarshalJSON(data, &boxConf); err != nil {
+		return false
+	}
+	return boxConf.Encrypted
+}
+
 // cachedDEKs 缓存已解锁加密笔记本的 DEK，按 boxID 索引。
 // KEK 不全局缓存（"严格每笔记本单独解锁"语义）：UnlockBox 临时派生 KEK 解出 DEK 后即丢弃 KEK，
 // 仅保留 per-box DEK 供后续读写加解密。
@@ -606,7 +666,8 @@ func EnableEncryptedNotebook(password string) error {
 	return nil
 }
 
-// DisableEncryptedNotebook 关闭加密笔记本功能。前置：不能有加密笔记本存在。
+// DisableEncryptedNotebook 关闭加密笔记本功能。前置：不能有加密笔记本存在，
+// 且不能有依赖当前密钥备份的已删除笔记本历史（否则禁用并删除备份会让这些历史永久锁死，违反 §19）。
 // 清除全局加密配置（MasterSalt/KEKVerifier），KEK/DEK 不再可用。
 func DisableEncryptedNotebook() error {
 	notebookCryptoMu.Lock()
@@ -615,6 +676,11 @@ func DisableEncryptedNotebook() error {
 	// 检查是否还有加密笔记本（含 conf 损坏但存在备份的）
 	if ids := ListAllEncryptedBoxIDs(); len(ids) > 0 {
 		return errors.New("cannot disable encrypted notebook feature while encrypted notebooks exist, remove them first")
+	}
+	// 检查历史目录中是否存在已删除加密笔记本的历史快照：其恢复仍依赖当前 MasterSalt/KEKVerifier，
+	// 删除备份前必须先清除这些历史（详见设计 §19）
+	if hasEncryptedNotebookHistory() {
+		return errors.New(Conf.Language(323))
 	}
 
 	Conf.m.Lock()
@@ -827,13 +893,14 @@ func UnlockBox(boxID string, password string, boxEnc *conf.BoxEncryption) error 
 		return errors.New("no encrypted key material for box")
 	}
 
+	// 全局配置锁先于笔记本生命周期锁获取（设计 §17 锁顺序约定），避免与持子系统锁后回取配置锁的路径死锁。
+	// notebookCryptoMu 持锁期间调用的 deriveKEK/conf 修复只申请 Conf.m/cachedDEKsLock，不回取 box 生命周期锁。
+	notebookCryptoMu.Lock()
+	defer notebookCryptoMu.Unlock()
+
 	// 获取 box 写锁，与 LockBox/unmount0 串行化，防止并发锁/解锁导致 db/DEK 状态不一致
 	acquireBoxWriteLock(boxID)
 	defer releaseBoxWriteLock(boxID)
-
-	// 加锁与改密/创建等控制面操作串行化，确保读 verifier + 自动恢复 + 解密 + conf 修复都在同一临界区
-	notebookCryptoMu.Lock()
-	defer notebookCryptoMu.Unlock()
 
 	kek, err := deriveKEK(password)
 	if err != nil {

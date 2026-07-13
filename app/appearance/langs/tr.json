@@ -2134,6 +2134,7 @@
 		"319": "Not defteri şifrelenmemiş",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "Access to encrypted notebook data is not supported via this API",
-		"322": "Şifreli not defteri [%s] hareketsizlik nedeniyle otomatik olarak kilitlendi"
+		"322": "Şifreli not defteri [%s] hareketsizlik nedeniyle otomatik olarak kilitlendi",
+		"323": "Şifreli not defterleri devre dışı bırakılamıyor: silinen defterlerin geçmişi hâlâ geçerli anahtar yedeğine bağlı. Önce bu geçmişi temizleyin"
 	}
 	}

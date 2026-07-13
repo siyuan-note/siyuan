@@ -374,7 +374,12 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 						continue
 					}
 					f.Close()
-					writeAssetNameMapping(tree.Box, diskName, name)
+					// 映射写失败则回滚已写的 asset 密文，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
+					if mapErr := writeAssetNameMapping(tree.Box, diskName, name); mapErr != nil {
+						logging.LogErrorf("write asset name mapping for [%s] failed: %s", name, mapErr)
+						_ = filelock.Remove(writePath)
+						continue
+					}
 					name = diskName
 				} else {
 					name = util.AssetName(name, ast.NewNodeID())
@@ -501,7 +506,12 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 						logging.LogErrorf("write encrypted network asset [%s] failed: %s", writePath, err)
 						continue
 					}
-					writeAssetNameMapping(tree.Box, diskName, name)
+					// 映射写失败则回滚已写的 asset 密文，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
+					if mapErr := writeAssetNameMapping(tree.Box, diskName, name); mapErr != nil {
+						logging.LogErrorf("write asset name mapping for [%s] failed: %s", name, mapErr)
+						_ = filelock.Remove(writePath)
+						continue
+					}
 					name = diskName
 				} else {
 					name = util.AssetName(name, ast.NewNodeID())

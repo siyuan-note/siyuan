@@ -610,7 +610,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 					ext := filepath.Ext(originalName)
 					blockID := ast.NewNodeID()
 					diskName := encryptedAssetName(ext, blockID)
-					writeAssetNameMapping(boxID, diskName, originalName)
+					// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
+					if mapErr := writeAssetNameMapping(boxID, diskName, originalName); mapErr != nil {
+						return mapErr
+					}
 					assetNameMap[originalName] = diskName
 					// 读取明文内容 → 加密 → 写入脱敏文件名
 					src, readErr := filelock.ReadFile(path)
@@ -1158,7 +1161,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 						ext := filepath.Ext(baseName)
 						blockID := ast.NewNodeID()
 						name = encryptedAssetName(ext, blockID)
-						writeAssetNameMapping(boxID, name, baseName)
+						// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
+						if mapErr := writeAssetNameMapping(boxID, name, baseName); mapErr != nil {
+							logging.LogErrorf("write asset name mapping for [%s] failed: %s", baseName, mapErr)
+							return ast.WalkContinue
+						}
 						assetTargetPath := filepath.Join(assetDirPath, name)
 						src, readErr := filelock.ReadFile(absolutePath)
 						if readErr != nil {
@@ -1311,7 +1318,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					ext := filepath.Ext(baseName)
 					blockID := ast.NewNodeID()
 					name = encryptedAssetName(ext, blockID)
-					writeAssetNameMapping(boxID, name, baseName)
+					// 映射写入失败则不写 asset，避免产出"孤儿密文 asset 无映射"（详见设计文档 §7）
+					if mapErr := writeAssetNameMapping(boxID, name, baseName); mapErr != nil {
+						logging.LogErrorf("write asset name mapping for [%s] failed: %s", baseName, mapErr)
+						return ast.WalkContinue
+					}
 					assetTargetPath := filepath.Join(assetDirPath, name)
 					src, readErr := filelock.ReadFile(absolutePath)
 					if readErr != nil {
@@ -1352,6 +1363,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		})
 
 		reassignIDUpdated(tree, id, updated)
+		// 兜底校验：禁止跨加密边界块引（导入的 Markdown 可能含跨边界引用）
+		degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
 		importTrees = append(importTrees, tree)
 	}
 

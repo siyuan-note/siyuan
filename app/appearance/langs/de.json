@@ -2134,6 +2134,7 @@
 		"319": "Notizbuch ist nicht verschlüsselt",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "Der Zugriff auf verschlüsselte Notizbuchdaten wird über diese API nicht unterstützt",
-		"322": "Verschlüsseltes Notizbuch [%s] wurde wegen Inaktivität automatisch gesperrt"
+		"322": "Verschlüsseltes Notizbuch [%s] wurde wegen Inaktivität automatisch gesperrt",
+		"323": "Verschlüsselte Notizbücher können nicht deaktiviert werden: Der Verlauf gelöschter Notizbücher hängt noch vom aktuellen Schlüssel-Backup ab. Löschen Sie diesen Verlauf zuerst"
 	}
 	}

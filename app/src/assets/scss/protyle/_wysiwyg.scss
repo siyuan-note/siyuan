@@ -190,7 +190,6 @@
         word-break: keep-all;
         height: calc(1.625em + 8px);
         line-height: calc(1.625em + 8px);
-        touch-action: none;
 
         & ~ [data-type="NodeHeading"] {
           &.h1 {

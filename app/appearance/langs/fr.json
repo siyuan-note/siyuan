@@ -2134,6 +2134,7 @@
 		"319": "Le carnet n'est pas chiffré",
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "L'accès aux données d'un notebook chiffré n'est pas pris en charge via cette API",
-		"322": "Le notebook chiffré [%s] a été verrouillé automatiquement pour inactivité"
+		"322": "Le notebook chiffré [%s] a été verrouillé automatiquement pour inactivité",
+		"323": "Impossible de désactiver les notebooks chiffrés : l'historique des notebooks supprimés dépend encore de la sauvegarde de clés actuelle. Effacez d'abord cet historique"
 	}
 	}

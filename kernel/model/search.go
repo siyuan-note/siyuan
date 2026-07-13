@@ -336,7 +336,7 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 	}
 
 	if "" == keyword {
-		// 查询为空时默认的块引排序规则按最近引用优先 https://github.com/siyuan-note/siyuan/issues/3218
+		// 查询为空时默认的块引排序规则按最近使用优先 https://github.com/siyuan-note/siyuan/issues/3218
 
 		typeFilter := Conf.Search.TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()

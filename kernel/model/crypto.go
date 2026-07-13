@@ -238,17 +238,18 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 }
 
 // saveNotebookCryptoBackup 把当前 NotebookCrypto（含 MasterSalt/KEKVerifier/KDFParams）备份到 DataDir。
-// kek 非 nil 时在 Checksum 定型后计算 KEKMAC；kek 为 nil（如启动回填、无密码恢复）时清零 KEKMAC，
-// 避免 prepareBackupForWrite 更新 Checksum/CreatedAt 后保留旧 MAC 导致 stale（后续恢复必失败）。
+// kek 必须非 nil：在 Checksum 定型后计算 KEKMAC 并落盘，保证恢复路径可通过 MAC 校验。
+// 无 KEK 生成的备份 KEKMAC 必为空，会被 deriveKEK/恢复路径拒绝，等于制造无法解锁的状态（详见设计 §19）。
 func saveNotebookCryptoBackup(kek []byte) error {
+	if kek == nil {
+		// 无 KEK 时不得生成当前格式备份：KEKMAC 缺失会被 deriveKEK/恢复路径拒绝，
+		// 生成即等于制造无法解锁的状态。
+		return errors.New("cannot generate notebook crypto backup without KEK")
+	}
 	Conf.m.Lock()
 	nc := *Conf.NotebookCrypto // 值拷贝
 	prepareBackupForWrite(&nc)
-	if nil != kek {
-		nc.KEKMAC = computeKEKMAC(&nc, kek)
-	} else {
-		nc.KEKMAC = nil // Checksum/CreatedAt 已更新，旧 MAC 必失效，清零使恢复路径跳过 MAC 检查
-	}
+	nc.KEKMAC = computeKEKMAC(&nc, kek)
 	Conf.NotebookCrypto.Spec = nc.Spec
 	Conf.NotebookCrypto.BackupID = nc.BackupID
 	Conf.NotebookCrypto.CreatedAt = nc.CreatedAt
@@ -270,15 +271,13 @@ func saveNotebookCryptoBackup(kek []byte) error {
 }
 
 // writeNotebookCryptoBackupData 将指定的 NotebookCrypto 写入备份文件（不依赖 Conf.NotebookCrypto）。
-// kek 非 nil 时在 Checksum 定型后计算 KEKMAC，保证落盘 MAC 与落盘内容一致；kek 为 nil 时清零 KEKMAC，
-// 避免 Checksum/CreatedAt 更新后保留旧 MAC 导致 stale。
+// kek 必须非 nil：在 Checksum 定型后计算 KEKMAC，保证落盘 MAC 与落盘内容一致。
 func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto, kek []byte) error {
-	prepareBackupForWrite(nc)
-	if nil != kek {
-		nc.KEKMAC = computeKEKMAC(nc, kek)
-	} else {
-		nc.KEKMAC = nil
+	if kek == nil {
+		return errors.New("cannot generate notebook crypto backup without KEK")
 	}
+	prepareBackupForWrite(nc)
+	nc.KEKMAC = computeKEKMAC(nc, kek)
 	backupPath := notebookCryptoBackupPath()
 	if err := os.MkdirAll(filepath.Dir(backupPath), 0755); err != nil {
 		return fmt.Errorf("mkdir notebook crypto backup dir failed: %w", err)
@@ -759,8 +758,10 @@ func deriveKEK(password string) ([]byte, error) {
 			backup.KDFParams == nc.KDFParams
 		if !backupMatchesConf || backup.Spec != conf.CurrentNotebookCryptoSpec || backup.Checksum == "" ||
 			len(backup.KEKMAC) == 0 || !verifyKEKMAC(backup, kek) {
+			// 主密码已通过本地 verifier 验证（走到这里说明 kek 正确），但备份缺失或 KEKMAC 无效：
+			// 属配置不完整而非密码错或密钥损坏，引导用户导入匹配的备份文件恢复（Language 315）。
 			zeroAndClear(kek)
-			return nil, errors.New(Conf.Language(316))
+			return nil, errors.New(Conf.Language(315))
 		}
 	}
 

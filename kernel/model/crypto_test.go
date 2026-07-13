@@ -554,3 +554,67 @@ func TestDecryptFileRejectsInvalidBaseName(t *testing.T) {
 		t.Fatal("should reject non-node-id stem on decrypt")
 	}
 }
+
+// TestEnabledWithoutBackupReturnsRecoveryError 验证「已启用但密钥备份缺失」不锁死全部笔记本：
+// 启动回填已删除（无 KEK 生成的备份 KEKMAC 必空，会被解锁路径拒绝），deriveKEK 在此情形返回
+// 恢复提示（Language 315，引导用户导入匹配备份），而非误报密钥损坏（316），且不在磁盘制造无效备份。
+func TestEnabledWithoutBackupReturnsRecoveryError(t *testing.T) {
+	origDataDir := util.DataDir
+	tempDir := t.TempDir()
+	util.DataDir = tempDir
+	defer func() { util.DataDir = origDataDir }()
+
+	password := "recovery-test-pw"
+	salt, _ := util.GenerateSalt()
+	params := util.DefaultArgon2Params()
+	kek := util.DeriveKey(password, salt, params)
+	defer zeroAndClear(kek)
+
+	// 构造本机已启用、本机 verifier 有效的配置（主密码能派生出可用 KEK），但不写备份文件
+	verifierCT, _ := util.EncryptWithAAD(kek, kekVerifierMagic, []byte("siyuan:v1:kek-verifier"))
+	nc := &conf.NotebookCrypto{
+		Enabled:     true,
+		MasterSalt:  salt,
+		KDFParams:   params,
+		KEKVerifier: verifierCT,
+	}
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = nc
+	defer func() { Conf = originalConf }()
+
+	_, err := deriveKEK(password)
+	if err == nil {
+		t.Fatal("deriveKEK should fail when enabled but backup is missing")
+	}
+	// 主密码正确（verifier 通过），故不应报「密码错」（311）或「密钥损坏」（316），
+	// 而应报「需恢复」（315）引导用户导入匹配备份
+	if err.Error() != Conf.Language(315) {
+		t.Fatalf("expected recovery hint (Language 315), got: %v", err)
+	}
+
+	// 关键：不在磁盘制造无效备份——备份文件应仍不存在
+	if _, statErr := os.Stat(notebookCryptoBackupPath()); !os.IsNotExist(statErr) {
+		t.Fatalf("backup file should not be generated during deriveKEK; stat err=%v", statErr)
+	}
+}
+
+// TestSaveNotebookCryptoBackupRejectsNilKEK 验证无 KEK 时拒绝生成备份（收口）：
+// nil KEK 生成的备份 KEKMAC 必空，会被解锁/恢复路径拒绝，等于制造无法解锁的状态。
+func TestSaveNotebookCryptoBackupRejectsNilKEK(t *testing.T) {
+	origDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	defer func() { util.DataDir = origDataDir }()
+
+	originalConf := Conf
+	Conf = NewAppConf()
+	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	defer func() { Conf = originalConf }()
+
+	if err := saveNotebookCryptoBackup(nil); err == nil {
+		t.Fatal("saveNotebookCryptoBackup(nil) should be rejected")
+	}
+	if err := writeNotebookCryptoBackupData(Conf.NotebookCrypto, nil); err == nil {
+		t.Fatal("writeNotebookCryptoBackupData(nc, nil) should be rejected")
+	}
+}

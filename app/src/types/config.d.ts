@@ -134,6 +134,7 @@ declare namespace Config {
         agent: IAgent;
         mcp: IMCP;
         embedding: IEmbedding;
+        rerank: IRerank;
     }
 
     /**
@@ -170,6 +171,19 @@ declare namespace Config {
         name: string;
         timeout: number;
         dimensions: number;
+    }
+
+    /**
+     * Rerank model configuration (semantic search result re-ranking)
+     */
+    export interface IRerank {
+        id: string;
+        enabled: boolean;
+        endpoint: string;
+        apiKey: string;
+        name: string;
+        timeout: number;
+        candidateCount: number;
     }
 
     /**

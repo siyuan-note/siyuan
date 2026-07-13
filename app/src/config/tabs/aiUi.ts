@@ -210,6 +210,55 @@ export const mountEmbeddingTestBtn = (root: HTMLElement) => {
     });
 };
 
+// mountRerankTestBtn 在重排「模型」输入框下方注入测试连接按钮，点击后用极简 query+documents 请求重排端点验证连通性。
+// 重排配置即时保存，点测试时内核已持最新配置，故无需前端传参。
+export const mountRerankTestBtn = (root: HTMLElement) => {
+    const inputEl = root.querySelector<HTMLInputElement>('[id="ai.rerank.name"]');
+    if (!inputEl) {
+        return;
+    }
+    const wrapper = inputEl.closest(".config-item")?.querySelector(".fn__block");
+    if (!wrapper) {
+        return;
+    }
+    const btnContainer = document.createElement("div");
+    btnContainer.style.textAlign = "right";
+    btnContainer.style.marginTop = "8px";
+    btnContainer.innerHTML = `<button class="b3-button b3-button--outline" id="aiRerankTestBtn"><svg class="b3-button__icon"><use xlink:href="#iconPlugZap"></use></svg><span>${window.siyuan.languages.testConnection}</span></button>`;
+    wrapper.appendChild(btnContainer);
+
+    const testBtn = btnContainer.querySelector<HTMLButtonElement>("#aiRerankTestBtn");
+    const iconUse = testBtn.querySelector("use");
+    const svgEl = testBtn.querySelector("svg");
+    const labelSpan = testBtn.querySelector("span");
+    testBtn.addEventListener("click", () => {
+        testBtn.disabled = true;
+        iconUse.setAttribute("xlink:href", "#iconRefresh");
+        svgEl.style.animation = "agent-mirror-spin 0.8s linear infinite";
+        labelSpan.textContent = window.siyuan.languages.testConnectionTesting;
+        const restoreBtn = () => {
+            testBtn.disabled = false;
+            iconUse.setAttribute("xlink:href", "#iconPlugZap");
+            svgEl.style.animation = "";
+            labelSpan.textContent = window.siyuan.languages.testConnection;
+        };
+        fetchPost("/api/ai/testRerankModel", {}, (response) => {
+            restoreBtn();
+            const data = response.data || {};
+            if (data.matched) {
+                showMessage(window.siyuan.languages.testConnectionSuccess, undefined, "info");
+                return;
+            }
+            showMessage(
+                data.msg
+                    ? window.siyuan.languages.testConnectionFailMsg.replace("${msg}", data.msg)
+                    : window.siyuan.languages.testConnectionFail,
+                undefined, "error",
+            );
+        });
+    });
+};
+
 export const genProvidersBlockHtml = (): string => `<div class="b3-label config-item" id="aiProvidersBlock">
     <div class="b3-label__text">${window.siyuan.languages.apiProviderTip}</div>
     <div class="fn__hr--small"></div>

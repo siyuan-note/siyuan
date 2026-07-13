@@ -344,8 +344,8 @@ func QueryBlockAliasesInBox(rootID, boxID string) (ret []string) {
 	}
 
 	for _, aliasStr := range aliasesRows {
-		aliases := strings.Split(aliasStr, ",")
-		for _, alias := range aliases {
+		aliases := strings.SplitSeq(aliasStr, ",")
+		for alias := range aliases {
 			var exist bool
 			for _, retAlias := range ret {
 				if retAlias == alias {

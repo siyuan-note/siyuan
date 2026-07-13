@@ -218,14 +218,14 @@ func CheckAuth(c *gin.Context) {
 	// 通过 API token (header: Authorization)
 	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
 		var token string
-		if strings.HasPrefix(authHeader, "Token ") {
-			token = strings.TrimPrefix(authHeader, "Token ")
-		} else if strings.HasPrefix(authHeader, "token ") {
-			token = strings.TrimPrefix(authHeader, "token ")
-		} else if strings.HasPrefix(authHeader, "Bearer ") {
-			token = strings.TrimPrefix(authHeader, "Bearer ")
-		} else if strings.HasPrefix(authHeader, "bearer ") {
-			token = strings.TrimPrefix(authHeader, "bearer ")
+		if after, ok := strings.CutPrefix(authHeader, "Token "); ok {
+			token = after
+		} else if after, ok := strings.CutPrefix(authHeader, "token "); ok {
+			token = after
+		} else if after, ok := strings.CutPrefix(authHeader, "Bearer "); ok {
+			token = after
+		} else if after, ok := strings.CutPrefix(authHeader, "bearer "); ok {
+			token = after
 		}
 
 		if "" != token {

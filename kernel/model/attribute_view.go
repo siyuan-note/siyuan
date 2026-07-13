@@ -1812,10 +1812,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 		pageSize = 16
 	}
 	start := (page - 1) * pageSize
-	end := start + pageSize
-	if len(keyValues.Values) < end {
-		end = len(keyValues.Values)
-	}
+	end := min(len(keyValues.Values), start+pageSize)
 	keyValues.Values = keyValues.Values[start:end]
 	return
 }
@@ -2082,8 +2079,8 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 	}
 
 	cachedAttrViews := map[string]*av.AttributeView{}
-	avIDs := strings.Split(avs, ",")
-	for _, avID := range avIDs {
+	avIDs := strings.SplitSeq(avs, ",")
+	for avID := range avIDs {
 		attrView := cachedAttrViews[avID]
 		if nil == attrView {
 			var err error
@@ -3478,8 +3475,8 @@ func getAvNames(avIDs string) (ret string) {
 		return
 	}
 	avNames := bytes.Buffer{}
-	nodeAvIDs := strings.Split(avIDs, ",")
-	for _, nodeAvID := range nodeAvIDs {
+	nodeAvIDs := strings.SplitSeq(avIDs, ",")
+	for nodeAvID := range nodeAvIDs {
 		nodeAvName, getErr := av.GetAttributeViewName(nodeAvID)
 		if nil != getErr {
 			continue

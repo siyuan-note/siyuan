@@ -156,10 +156,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 
 		diffLevel := heading.HeadingLevel - parentHeading.HeadingLevel - 1
-		heading.HeadingLevel = parentHeading.HeadingLevel + 1
-		if 6 < heading.HeadingLevel {
-			heading.HeadingLevel = 6
-		}
+		heading.HeadingLevel = min(6, parentHeading.HeadingLevel+1)
 
 		for i := len(headingChildren) - 1; i >= 0; i-- {
 			child := headingChildren[i]
@@ -191,7 +188,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		heading.HeadingLevel = firstHeading.HeadingLevel
 
 		firstHeading.InsertBefore(heading)
-		for i := 0; i < len(headingChildren); i++ {
+		for i := range headingChildren {
 			child := headingChildren[i]
 			if ast.NodeHeading == child.Type {
 				child.HeadingLevel -= diffLevel

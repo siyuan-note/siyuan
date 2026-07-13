@@ -79,12 +79,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					if argErr == nil {
 						if b := initObj.Get("body"); isJsValueNotNull(b) {
 							if goja.IsString(b) {
-								bodyString = lo.ToPtr(b.String())
+								bodyString = new(b.String())
 							} else {
 								body := b.Export()
 								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
 									src := arrayBuffer.Bytes()
-									bodyBytes = lo.ToPtr(src)
+									bodyBytes = new(src)
 								}
 							}
 						}
@@ -210,7 +210,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		if argErr == nil {
 			if proto := call.Argument(1); isJsValueNotNull(proto) {
 				if protoObj := proto.ToObject(rt); protoObj != nil && protoObj.ClassName() == "Array" {
-					if arr, ok := proto.Export().([]interface{}); ok {
+					if arr, ok := proto.Export().([]any); ok {
 						for _, v := range arr {
 							protocols = append(protocols, fmt.Sprintf("%v", v))
 						}

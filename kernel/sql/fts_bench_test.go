@@ -137,7 +137,7 @@ func genBlock(i, root int) []any {
 		"思源笔记使用 SQLite FTS5 提供全文检索能力，配合自定义的 siyuan 分词器处理中英文及 CJK 字符的逐字切分。"
 	// 重复约 10 次凑到 ~2KB
 	var bld strings.Builder
-	for k := 0; k < 10; k++ {
+	for range 10 {
 		bld.WriteString(para)
 	}
 	content := bld.String()
@@ -290,8 +290,8 @@ func (b *ftsBenchDB) queryFTS(keyword string, limit int) (int, error) {
 func (b *ftsBenchDB) seedData(nRoots, nBlocksPerRoot int, batch int) error {
 	var bulk [][]any
 	idx := 0
-	for r := 0; r < nRoots; r++ {
-		for k := 0; k < nBlocksPerRoot; k++ {
+	for r := range nRoots {
+		for range nBlocksPerRoot {
 			bulk = append(bulk, genBlock(idx, r))
 			idx++
 			if len(bulk) >= batch {

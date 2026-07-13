@@ -41,7 +41,7 @@ func init() {
 	register(ExportTool)
 }
 
-func exportHandler(args map[string]interface{}) (CallToolResult, error) {
+func exportHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "md":
@@ -65,7 +65,7 @@ func exportHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func exportMd(args map[string]interface{}) (CallToolResult, error) {
+func exportMd(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -79,7 +79,7 @@ func exportMd(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("# %s\n\n%s", hPath, content)}}}, nil
 }
 
-func exportHtml(args map[string]interface{}) (CallToolResult, error) {
+func exportHtml(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -91,7 +91,7 @@ func exportHtml(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: dom}}}, nil
 }
 
-func exportPreview(args map[string]interface{}) (CallToolResult, error) {
+func exportPreview(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -103,7 +103,7 @@ func exportPreview(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: html}}}, nil
 }
 
-func exportDocx(args map[string]interface{}) (CallToolResult, error) {
+func exportDocx(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	output, _ := args["output"].(string)
 	if id == "" {
@@ -119,7 +119,7 @@ func exportDocx(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported docx to: %s", fullPath)}}}, nil
 }
 
-func exportSy(args map[string]interface{}) (CallToolResult, error) {
+func exportSy(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -131,7 +131,7 @@ func exportSy(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported sy.zip to: %s", zipPath)}}}, nil
 }
 
-func exportMdZip(args map[string]interface{}) (CallToolResult, error) {
+func exportMdZip(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -143,7 +143,7 @@ func exportMdZip(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported md zip to: %s", zipPath)}}}, nil
 }
 
-func exportData(args map[string]interface{}) (CallToolResult, error) {
+func exportData(args map[string]any) (CallToolResult, error) {
 	zipPath, err := model.ExportData()
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export data failed: " + err.Error()}}, IsError: true}, nil

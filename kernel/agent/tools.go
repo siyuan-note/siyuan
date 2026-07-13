@@ -200,8 +200,8 @@ func resultToString(result tools.CallToolResult) string {
 	return strings.Join(parts, "\n")
 }
 
-func parseToolArgs(argsJSON string) map[string]interface{} {
-	args := map[string]interface{}{}
+func parseToolArgs(argsJSON string) map[string]any {
+	args := map[string]any{}
 	if argsJSON == "" {
 		return args
 	}

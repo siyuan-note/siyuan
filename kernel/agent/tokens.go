@@ -169,10 +169,7 @@ func computeTokenBreakdown(counter *tokenCounter, messages []openai.ChatCompleti
 			}
 		}
 	}
-	breakdown["system"] = systemTotal - skillsTokens
-	if breakdown["system"] < 0 {
-		breakdown["system"] = 0
-	}
+	breakdown["system"] = max(systemTotal-skillsTokens, 0)
 
 	// 统计 tools 定义（函数签名）：序列化每个 Function 的 Name+Description+Parameters JSON 计数。
 	// OpenAI 对每个 function 定义有固定结构开销（约 10 token：type/function 包装 + 字段名），
@@ -228,10 +225,7 @@ func computeTokenBreakdown(counter *tokenCounter, messages []openai.ChatCompleti
 			allocated += scaled
 		}
 		// 整数舍入残差计入 other（可能为正或负，clamp≥0）。
-		breakdown["other"] = realPromptTokens - allocated
-		if breakdown["other"] < 0 {
-			breakdown["other"] = 0
-		}
+		breakdown["other"] = max(realPromptTokens-allocated, 0)
 	}
 	return breakdown
 }

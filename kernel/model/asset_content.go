@@ -880,7 +880,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 	// next setup worker pool for processing PDF pages
 	pages := make(chan *pdfPage, pc.PageCount)
 	results := make(chan *pdfTextResult, pc.PageCount)
-	for i := 0; i < cores; i++ {
+	for range cores {
 		inst, err := pool.GetInstance(time.Second * 30)
 		if err != nil {
 			close(pages)

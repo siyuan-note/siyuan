@@ -1179,8 +1179,8 @@ func deleteAttrView(n *ast.Node, changedAvIDs []string) []string {
 		return nil
 	}
 
-	avIDs := strings.Split(avs, ",")
-	for _, avID := range avIDs {
+	avIDs := strings.SplitSeq(avs, ",")
+	for avID := range avIDs {
 		attrView, parseErr := av.ParseAttributeView(avID)
 		if nil != parseErr {
 			continue
@@ -1600,8 +1600,8 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		content := string(updatedNode.Tokens)
 		// 剔除连续的空行（包括空行内包含空格的情况） https://github.com/siyuan-note/siyuan/issues/15377
 		var newLines []string
-		lines := strings.Split(content, "\n")
-		for _, line := range lines {
+		lines := strings.SplitSeq(content, "\n")
+		for line := range lines {
 			if strings.TrimSpace(line) != "" {
 				newLines = append(newLines, line)
 			}

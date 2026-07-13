@@ -52,7 +52,7 @@ func init() {
 	register(InboxTool)
 }
 
-func inboxHandler(args map[string]interface{}) (CallToolResult, error) {
+func inboxHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -69,7 +69,7 @@ func inboxHandler(args map[string]interface{}) (CallToolResult, error) {
 }
 
 // inboxList 分页列出收集箱，仅返回摘要而非正文，控制 token 开销；正文用 get 按需拉取。
-func inboxList(args map[string]interface{}) (CallToolResult, error) {
+func inboxList(args map[string]any) (CallToolResult, error) {
 	page := 1
 	if v, ok := args["page"]; ok {
 		if f, ok := toInt(v); ok {
@@ -117,7 +117,7 @@ func inboxList(args map[string]interface{}) (CallToolResult, error) {
 }
 
 // inboxGet 取单条收集箱详情，返回完整 markdown 正文（shorthandMd）。
-func inboxGet(args map[string]interface{}) (CallToolResult, error) {
+func inboxGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -143,7 +143,7 @@ func inboxGet(args map[string]interface{}) (CallToolResult, error) {
 
 // inboxConvert 把一条或多条剪藏转为本地文档：取云端 md → 本地建文档 → 成功后清理云端原件。
 // 失败的条目不会被删除，也不会中断后续条目的处理；返回逐条结果供智能体汇报与生成文档链接。
-func inboxConvert(args map[string]interface{}) (CallToolResult, error) {
+func inboxConvert(args map[string]any) (CallToolResult, error) {
 	notebook, _ := args["notebook"].(string)
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
@@ -228,7 +228,7 @@ func inboxConvert(args map[string]interface{}) (CallToolResult, error) {
 }
 
 // parseShorthandIDs 兼容字符串（逗号分隔）和数组两种形态的 ids 入参，去除空白与重复。
-func parseShorthandIDs(v interface{}) []string {
+func parseShorthandIDs(v any) []string {
 	if v == nil {
 		return nil
 	}
@@ -238,13 +238,13 @@ func parseShorthandIDs(v interface{}) []string {
 		if val == "" {
 			return nil
 		}
-		for _, p := range strings.Split(val, ",") {
+		for p := range strings.SplitSeq(val, ",") {
 			p = strings.TrimSpace(p)
 			if p != "" {
 				raw = append(raw, p)
 			}
 		}
-	case []interface{}:
+	case []any:
 		for _, item := range val {
 			if s, ok := item.(string); ok {
 				s = strings.TrimSpace(s)
@@ -273,7 +273,7 @@ func parseShorthandIDs(v interface{}) []string {
 }
 
 // toInt 把 JSON 反序列化出的数字（float64）或整数类型安全地转成 int。
-func toInt(v interface{}) (int, bool) {
+func toInt(v any) (int, bool) {
 	switch n := v.(type) {
 	case float64:
 		return int(n), true
@@ -288,7 +288,7 @@ func toInt(v interface{}) (int, bool) {
 }
 
 // toBool 把 JSON 反序列化出的布尔值安全地转成 bool。
-func toBool(v interface{}) (bool, bool) {
+func toBool(v any) (bool, bool) {
 	if b, ok := v.(bool); ok {
 		return b, true
 	}

@@ -46,7 +46,7 @@ func init() {
 	register(AssetTool)
 }
 
-func assetHandler(args map[string]interface{}) (CallToolResult, error) {
+func assetHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "upload":
@@ -64,7 +64,7 @@ func assetHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func assetUpload(args map[string]interface{}) (CallToolResult, error) {
+func assetUpload(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -95,7 +95,7 @@ func assetUpload(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func assetUnused(args map[string]interface{}) (CallToolResult, error) {
+func assetUnused(args map[string]any) (CallToolResult, error) {
 	items := model.UnusedAssets(true)
 	if len(items) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no unused assets found"}}}, nil
@@ -108,7 +108,7 @@ func assetUnused(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func assetClean(args map[string]interface{}) (CallToolResult, error) {
+func assetClean(args map[string]any) (CallToolResult, error) {
 	singlePath, _ := args["path"].(string)
 	if singlePath != "" {
 		ret := model.RemoveUnusedAsset(singlePath)
@@ -126,7 +126,7 @@ func assetClean(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func assetStat(args map[string]interface{}) (CallToolResult, error) {
+func assetStat(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil

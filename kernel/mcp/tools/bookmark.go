@@ -43,7 +43,7 @@ func init() {
 	register(BookmarkTool)
 }
 
-func bookmarkHandler(args map[string]interface{}) (CallToolResult, error) {
+func bookmarkHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -61,7 +61,7 @@ func bookmarkHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func bookmarkList(args map[string]interface{}) (CallToolResult, error) {
+func bookmarkList(args map[string]any) (CallToolResult, error) {
 	bookmarks := model.BuildBookmark()
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Bookmarks (%d):\n\n", len(*bookmarks)))
@@ -71,7 +71,7 @@ func bookmarkList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func bookmarkLabels(args map[string]interface{}) (CallToolResult, error) {
+func bookmarkLabels(args map[string]any) (CallToolResult, error) {
 	labels := model.BookmarkLabels()
 	if len(labels) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no bookmark labels found"}}}, nil
@@ -84,7 +84,7 @@ func bookmarkLabels(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func bookmarkRemove(args map[string]interface{}) (CallToolResult, error) {
+func bookmarkRemove(args map[string]any) (CallToolResult, error) {
 	label, _ := args["label"].(string)
 	if label == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "label is required"}}, IsError: true}, nil
@@ -95,7 +95,7 @@ func bookmarkRemove(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "bookmark removed: " + label}}}, nil
 }
 
-func bookmarkRename(args map[string]interface{}) (CallToolResult, error) {
+func bookmarkRename(args map[string]any) (CallToolResult, error) {
 	oldLabel, _ := args["old"].(string)
 	newLabel, _ := args["new"].(string)
 	if oldLabel == "" || newLabel == "" {

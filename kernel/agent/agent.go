@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"math/rand/v2"
 	"os"
 
@@ -180,18 +181,19 @@ var toolSignatureKeys = map[string][]string{
 }
 
 // buildDoomSignature 用 toolName + action + 关键参数构造死循环签名。
-func buildDoomSignature(name, action string, args map[string]interface{}) string {
-	sig := name + "::action=" + action
+func buildDoomSignature(name, action string, args map[string]any) string {
+	var sig strings.Builder
+	sig.WriteString(name + "::action=" + action)
 	for _, k := range toolSignatureKeys[name] {
 		if v, ok := args[k]; ok {
 			s := fmt.Sprint(v)
 			if len(s) > 64 {
 				s = s[:64] + "..."
 			}
-			sig += "::" + k + "=" + s
+			sig.WriteString("::" + k + "=" + s)
 		}
 	}
-	return sig
+	return sig.String()
 }
 
 var confirmChannelsMu sync.Mutex
@@ -268,7 +270,7 @@ type AgentEvent struct {
 	Type             string
 	Token            string
 	Name             string
-	Arguments        map[string]interface{}
+	Arguments        map[string]any
 	Result           string
 	Reasoning        string
 	ConfirmID        string
@@ -293,10 +295,10 @@ type AgentMessage struct {
 }
 
 type AgentToolCall struct {
-	ID        string                 `json:"id,omitempty"`
-	Name      string                 `json:"name"`
-	Arguments map[string]interface{} `json:"arguments"`
-	Result    string                 `json:"result,omitempty"`
+	ID        string         `json:"id,omitempty"`
+	Name      string         `json:"name"`
+	Arguments map[string]any `json:"arguments"`
+	Result    string         `json:"result,omitempty"`
 }
 
 type Reference struct {
@@ -328,21 +330,21 @@ type PluginAction struct {
 // SessionEntry 与前端 SessionStore.ts 中 entries 元素一一对应，
 // 是会话持久化的唯一数据源（不再单独持久化 messages）。
 type SessionEntry struct {
-	ID            string                 `json:"id,omitempty"`
-	Type          string                 `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
-	Content       string                 `json:"content,omitempty"`
-	Steps         []SessionEntryStep     `json:"steps,omitempty"`        // 仅 thinking
-	ToolCalls     []AgentToolCall        `json:"toolCalls,omitempty"`    // 仅 assistant
-	Duration      float64                `json:"duration,omitempty"`     // 秒（thinking/assistant 均可能带）
-	PromptTokens  int                    `json:"promptTokens,omitempty"` // 仅 assistant
-	CompletionTok int                    `json:"completionTokens,omitempty"`
-	Timestamp     int64                  `json:"timestamp,omitempty"`
-	ReasoningCont string                 `json:"reasoningContent,omitempty"`
-	ConfirmName   string                 `json:"confirmName,omitempty"`
-	ConfirmArgs   map[string]interface{} `json:"confirmArgs,omitempty"`
-	ConfirmID     string                 `json:"confirmID,omitempty"`
-	ConfirmStatus string                 `json:"confirmStatus,omitempty"`
-	SnapshotID    string                 `json:"snapshotID,omitempty"`
+	ID            string             `json:"id,omitempty"`
+	Type          string             `json:"type"` // user|thinking|assistant|confirm|snapshot|rollback
+	Content       string             `json:"content,omitempty"`
+	Steps         []SessionEntryStep `json:"steps,omitempty"`        // 仅 thinking
+	ToolCalls     []AgentToolCall    `json:"toolCalls,omitempty"`    // 仅 assistant
+	Duration      float64            `json:"duration,omitempty"`     // 秒（thinking/assistant 均可能带）
+	PromptTokens  int                `json:"promptTokens,omitempty"` // 仅 assistant
+	CompletionTok int                `json:"completionTokens,omitempty"`
+	Timestamp     int64              `json:"timestamp,omitempty"`
+	ReasoningCont string             `json:"reasoningContent,omitempty"`
+	ConfirmName   string             `json:"confirmName,omitempty"`
+	ConfirmArgs   map[string]any     `json:"confirmArgs,omitempty"`
+	ConfirmID     string             `json:"confirmID,omitempty"`
+	ConfirmStatus string             `json:"confirmStatus,omitempty"`
+	SnapshotID    string             `json:"snapshotID,omitempty"`
 }
 
 // SessionEntryStep 描述一次思考步骤。工具调用只保留名字列表，
@@ -450,10 +452,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		if temperature < 0 || 2 < temperature {
 			temperature = 1.0
 		}
-		maxCompletionTokens := kernelModel.Conf.AI.Agent.MaxCompletionTokens
-		if maxCompletionTokens < 0 {
-			maxCompletionTokens = 0
-		}
+		maxCompletionTokens := max(kernelModel.Conf.AI.Agent.MaxCompletionTokens, 0)
 		maxRounds := kernelModel.Conf.AI.Agent.MaxToolCallRounds
 
 		for round := 0; maxRounds <= 0 || round < maxRounds; round++ {
@@ -492,10 +491,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			if streamErr != nil {
 				roundCancel()
 				if compactCount < 3 && isContextOverflow(streamErr) {
-					keepTurns := 3 - compactCount
-					if keepTurns < 1 {
-						keepTurns = 1
-					}
+					keepTurns := max(3-compactCount, 1)
 					messages = compactMessages(messages, keepTurns)
 					checkpointMsgs = compactCheckpointMsgs(checkpointMsgs, keepTurns)
 					compactCount++
@@ -604,7 +600,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					Role:    "assistant",
 					Content: contentBuilder.String(),
 				}
-				parsedArgs := make([]map[string]interface{}, len(aggregatedToolCalls))
+				parsedArgs := make([]map[string]any, len(aggregatedToolCalls))
 				for i, tc := range aggregatedToolCalls {
 					args := parseToolArgs(tc.Function.Arguments)
 					parsedArgs[i] = args
@@ -1112,10 +1108,7 @@ func buildSystemPrompt(language string, references []Reference, editorCtx Editor
 			} else {
 				sb.WriteString("Visible block ids:\n")
 			}
-			limit := totalVisible
-			if limit > maxVisibleBlockIDs {
-				limit = maxVisibleBlockIDs
-			}
+			limit := min(totalVisible, maxVisibleBlockIDs)
 			for i := 0; i < limit; i++ {
 				sb.WriteString("- ")
 				sb.WriteString(editorCtx.VisibleBlockIDs[i])
@@ -1339,17 +1332,13 @@ func saveCheckpointAsync(sessionID string, messages []AgentMessage, promptTokens
 	var alwaysAllowCopy map[string]bool
 	if alwaysAllow != nil {
 		alwaysAllowCopy = make(map[string]bool, len(alwaysAllow))
-		for k, v := range alwaysAllow {
-			alwaysAllowCopy[k] = v
-		}
+		maps.Copy(alwaysAllowCopy, alwaysAllow)
 	}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		checkpointMu.Lock()
 		defer checkpointMu.Unlock()
 		writeCheckpointLocked(sessionID, snap, promptTokens, completionTokens, startTime, snapshotIDsCopy, alwaysAllowCopy)
-	}()
+	})
 }
 
 func writeCheckpointLocked(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
@@ -1519,10 +1508,7 @@ func delayForCategory(category string, attempt int) time.Duration {
 }
 
 func backoffDuration(attempt int) time.Duration {
-	base := time.Duration(1<<uint(attempt)) * time.Second
-	if base > 64*time.Second {
-		base = 64 * time.Second
-	}
+	base := min(time.Duration(1<<uint(attempt))*time.Second, 64*time.Second)
 	if base <= 1*time.Second {
 		return base
 	}

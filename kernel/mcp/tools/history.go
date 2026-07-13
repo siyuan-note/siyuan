@@ -48,7 +48,7 @@ func init() {
 	register(HistoryTool)
 }
 
-func historyHandler(args map[string]interface{}) (CallToolResult, error) {
+func historyHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -68,7 +68,7 @@ func historyHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func historyList(args map[string]interface{}) (CallToolResult, error) {
+func historyList(args map[string]any) (CallToolResult, error) {
 	query, _ := args["query"].(string)
 	notebook, _ := args["notebook"].(string)
 	op, _ := args["op"].(string)
@@ -98,7 +98,7 @@ func historyList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func historyGet(args map[string]interface{}) (CallToolResult, error) {
+func historyGet(args map[string]any) (CallToolResult, error) {
 	path, _ := args["path"].(string)
 	if path == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -115,7 +115,7 @@ func historyGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: content}}}, nil
 }
 
-func historySearch(args map[string]interface{}) (CallToolResult, error) {
+func historySearch(args map[string]any) (CallToolResult, error) {
 	query, _ := args["query"].(string)
 	if query == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "query is required"}}, IsError: true}, nil
@@ -148,7 +148,7 @@ func historySearch(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func historyRollback(args map[string]interface{}) (CallToolResult, error) {
+func historyRollback(args map[string]any) (CallToolResult, error) {
 	path, _ := args["path"].(string)
 	if path == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -164,7 +164,7 @@ func historyRollback(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "history rolled back: " + path}}}, nil
 }
 
-func historyClear(args map[string]interface{}) (CallToolResult, error) {
+func historyClear(args map[string]any) (CallToolResult, error) {
 	if err := model.ClearWorkspaceHistory(); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "clear history failed: " + err.Error()}}, IsError: true}, nil
 	}

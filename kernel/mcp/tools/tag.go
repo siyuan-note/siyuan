@@ -44,7 +44,7 @@ func init() {
 	register(TagTool)
 }
 
-func tagHandler(args map[string]interface{}) (CallToolResult, error) {
+func tagHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -60,7 +60,7 @@ func tagHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func tagList(args map[string]interface{}) (CallToolResult, error) {
+func tagList(args map[string]any) (CallToolResult, error) {
 	keyword, _ := args["keyword"].(string)
 	tags := model.SearchTags(keyword)
 
@@ -76,7 +76,7 @@ func tagList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func tagRename(args map[string]interface{}) (CallToolResult, error) {
+func tagRename(args map[string]any) (CallToolResult, error) {
 	oldLabel, _ := args["old"].(string)
 	newLabel, _ := args["new"].(string)
 	if oldLabel == "" || newLabel == "" {
@@ -90,7 +90,7 @@ func tagRename(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "tag renamed: #" + oldLabel + " -> #" + newLabel}}}, nil
 }
 
-func tagRemove(args map[string]interface{}) (CallToolResult, error) {
+func tagRemove(args map[string]any) (CallToolResult, error) {
 	label, _ := args["label"].(string)
 	if label == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "label is required"}}, IsError: true}, nil

@@ -816,7 +816,7 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 		var deckIDs []string
 		if "" != deckID {
 			availableDeckIDs := getDeckIDs()
-			for _, dID := range strings.Split(deckAttrs, ",") {
+			for dID := range strings.SplitSeq(deckAttrs, ",") {
 				if dID != deckID && gulu.Str.Contains(dID, availableDeckIDs) {
 					deckIDs = append(deckIDs, dID)
 				}
@@ -976,8 +976,8 @@ func LoadFlashcards() {
 	}
 	for _, entry := range entries {
 		name := entry.Name()
-		if strings.HasSuffix(name, ".deck") {
-			deckID := strings.TrimSuffix(name, ".deck")
+		if before, ok := strings.CutSuffix(name, ".deck"); ok {
+			deckID := before
 			deck, loadErr := riff.LoadDeck(riffSavePath, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
 			if nil != loadErr {
 				logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)

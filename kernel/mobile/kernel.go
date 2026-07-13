@@ -312,8 +312,8 @@ func Unzip(zipFilePath, destination string) {
 // 解析失败返回空字符串。
 func GetExportFilePath(exportPath string) (ret string) {
 	var absPath string
-	if strings.HasPrefix(exportPath, "/export/") {
-		fileName := strings.TrimPrefix(exportPath, "/export/")
+	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
+		fileName := after
 		if decoded, err := url.PathUnescape(fileName); err == nil {
 			fileName = decoded
 		}

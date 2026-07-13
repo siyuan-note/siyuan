@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -68,9 +69,7 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 				break
 			}
 			encBTs := treenode.GetBlockTreesInBox(missing, encBoxID)
-			for id, bt := range encBTs {
-				bts[id] = bt
-			}
+			maps.Copy(bts, encBTs)
 			var stillMissing []string
 			for _, id := range missing {
 				if _, found := encBTs[id]; !found {

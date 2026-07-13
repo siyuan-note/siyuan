@@ -49,7 +49,7 @@ func init() {
 	register(DocumentTool)
 }
 
-func documentHandler(args map[string]interface{}) (CallToolResult, error) {
+func documentHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
@@ -77,7 +77,7 @@ func documentHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func documentGet(args map[string]interface{}) (CallToolResult, error) {
+func documentGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -99,7 +99,7 @@ func documentGet(args map[string]interface{}) (CallToolResult, error) {
 	)}}}, nil
 }
 
-func documentCreate(args map[string]interface{}) (CallToolResult, error) {
+func documentCreate(args map[string]any) (CallToolResult, error) {
 	notebook, _ := args["notebook"].(string)
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
@@ -146,7 +146,7 @@ func parentDir(p string) string {
 	return p[:i]
 }
 
-func documentList(args map[string]interface{}) (CallToolResult, error) {
+func documentList(args map[string]any) (CallToolResult, error) {
 	notebook, _ := args["notebook"].(string)
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
@@ -178,7 +178,7 @@ func documentList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func documentDelete(args map[string]interface{}) (CallToolResult, error) {
+func documentDelete(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -193,7 +193,7 @@ func documentDelete(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document deleted: " + id}}}, nil
 }
 
-func documentRename(args map[string]interface{}) (CallToolResult, error) {
+func documentRename(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	title, _ := args["title"].(string)
 	if id == "" || title == "" {
@@ -212,7 +212,7 @@ func documentRename(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document renamed: %s -> %s", id, title)}}}, nil
 }
 
-func documentMove(args map[string]interface{}) (CallToolResult, error) {
+func documentMove(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	notebook, _ := args["notebook"].(string)
 	hPath, _ := args["path"].(string)
@@ -241,7 +241,7 @@ func documentMove(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document moved: %s -> %s (hPath: %s)", id, notebook, hPath)}}}, nil
 }
 
-func documentDuplicate(args map[string]interface{}) (CallToolResult, error) {
+func documentDuplicate(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -257,7 +257,7 @@ func documentDuplicate(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document duplicated: " + id}}}, nil
 }
 
-func documentSearchDocs(args map[string]interface{}) (CallToolResult, error) {
+func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 	keyword, _ := args["keyword"].(string)
 	if keyword == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "keyword is required"}}, IsError: true}, nil
@@ -276,7 +276,7 @@ func documentSearchDocs(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func documentInfo(args map[string]interface{}) (CallToolResult, error) {
+func documentInfo(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil

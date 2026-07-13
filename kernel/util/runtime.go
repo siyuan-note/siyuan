@@ -295,7 +295,7 @@ func checkFileSysStatus() {
 		return
 	}
 
-	for i := 0; i < 7; i++ {
+	for range 7 {
 		tmp := filepath.Join(dir, "check_consistency")
 		data := make([]byte, 1024*4)
 		_, err := rand.Read(data)
@@ -311,7 +311,7 @@ func checkFileSysStatus() {
 
 		time.Sleep(5 * time.Second)
 
-		for j := 0; j < 32; j++ {
+		for range 32 {
 			renamed := tmp + "_renamed"
 			if err = os.Rename(tmp, renamed); err != nil {
 				ReportFileSysFatalError(err)

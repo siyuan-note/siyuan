@@ -42,9 +42,9 @@ func (p *Printer) Error(s string) {
 }
 
 // print logs the message line by line with the plugin name as prefix, using the provided log function.
-func print(name, s string, logf func(format string, v ...interface{})) {
-	rows := strings.Split(s, "\n")
-	for _, row := range rows {
+func print(name, s string, logf func(format string, v ...any)) {
+	rows := strings.SplitSeq(s, "\n")
+	for row := range rows {
 		logf("[plugin:%s] %s", name, row)
 	}
 }

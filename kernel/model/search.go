@@ -81,8 +81,8 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 
 						if ast.NodeTextMark == n.Type {
 							if n.IsTextMarkType("a") {
-								if strings.HasPrefix(n.TextMarkAHref, "siyuan://blocks/") {
-									defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+								if after, ok := strings.CutPrefix(n.TextMarkAHref, "siyuan://blocks/"); ok {
+									defID := after
 									if strings.Contains(defID, "?") {
 										defID = strings.Split(defID, "?")[0]
 									}
@@ -157,10 +157,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	allInvalidBlockIDs := invalidBlockIDs
 
 	start := (page - 1) * pageSize
-	end := page * pageSize
-	if end > len(invalidBlockIDs) {
-		end = len(invalidBlockIDs)
-	}
+	end := min(page*pageSize, len(invalidBlockIDs))
 	invalidBlockIDs = invalidBlockIDs[start:end]
 
 	sqlBlocks := sql.GetBlocks(invalidBlockIDs)
@@ -1865,22 +1862,23 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	keywords := strings.Split(query, " ")
 	contentField := columnConcat()
 	var likeFilter string
-	orderByLike := "("
+	var orderByLike strings.Builder
+	orderByLike.WriteString("(")
 	for i, keyword := range keywords {
 		likeFilter += "GROUP_CONCAT(" + contentField + ") LIKE '%" + keyword + "%'"
-		orderByLike += "(docContent LIKE '%" + keyword + "%')"
+		orderByLike.WriteString("(docContent LIKE '%" + keyword + "%')")
 		if i < len(keywords)-1 {
 			likeFilter += " AND "
-			orderByLike += " + "
+			orderByLike.WriteString(" + ")
 		}
 	}
-	orderByLike += ")"
+	orderByLike.WriteString(")")
 	// box/path 过滤子句在下方 dMatchStmt 与 selectStmt 中各出现一次，绑定参数需按出现顺序收集两份。
 	// 第一份对应 CTE 内的 WHERE
 	args := append(append([]any{}, boxArgs...), pathArgs...)
 	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent" +
 		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
+		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike.String() + " DESC, MAX(updated) DESC"
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
 	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
@@ -2235,8 +2233,8 @@ func stringQuery(query string) string {
 
 	if strings.Contains(trimmedQuery, " ") {
 		buf := bytes.Buffer{}
-		parts := strings.Split(query, " ")
-		for _, part := range parts {
+		parts := strings.SplitSeq(query, " ")
+		for part := range parts {
 			part = strings.TrimSpace(part)
 			part = "\"" + part + "\""
 			buf.WriteString(part)

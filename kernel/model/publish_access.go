@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -275,10 +276,8 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 				passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 				if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 					assets, _ := DocAssets(bt.ID, false)
-					for _, assetPath := range assets {
-						if assetPath == relPath {
-							return true
-						}
+					if slices.Contains(assets, relPath) {
+						return true
 					}
 				}
 			}

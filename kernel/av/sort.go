@@ -295,7 +295,7 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 			vLen := len(value.MSelect)
 			oLen := len(other.MSelect)
 			if vLen <= oLen {
-				for i := 0; i < vLen; i++ {
+				for i := range vLen {
 					v := value.MSelect[i].Content
 					o := other.MSelect[i].Content
 					vSort := optionSort[v]
@@ -309,7 +309,7 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 					}
 				}
 			} else {
-				for i := 0; i < oLen; i++ {
+				for i := range oLen {
 					v := value.MSelect[i].Content
 					o := other.MSelect[i].Content
 					vSort := optionSort[v]
@@ -363,20 +363,20 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 		}
 	case KeyTypeMAsset:
 		if nil != value.MAsset && nil != other.MAsset {
-			var v1 string
+			var v1 strings.Builder
 			for _, v := range value.MAsset {
-				v1 += v.Content
+				v1.WriteString(v.Content)
 			}
 			var v2 string
 			for _, v := range other.MAsset {
 				v2 += v.Content
 			}
 
-			if 0 == strings.Compare(v1, v2) {
+			if 0 == strings.Compare(v1.String(), v2) {
 				return 0
 			}
 
-			if util.EmojiPinYinCompare(v1, v2) {
+			if util.EmojiPinYinCompare(v1.String(), v2) {
 				return -1
 			}
 			return 1

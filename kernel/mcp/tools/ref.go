@@ -43,7 +43,7 @@ func init() {
 	register(RefTool)
 }
 
-func refHandler(args map[string]interface{}) (CallToolResult, error) {
+func refHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "backlinks":
@@ -59,7 +59,7 @@ func refHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func refBacklinks(args map[string]interface{}) (CallToolResult, error) {
+func refBacklinks(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyword, _ := args["keyword"].(string)
 	sortMode := 0
@@ -80,7 +80,7 @@ func refBacklinks(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func refMentions(args map[string]interface{}) (CallToolResult, error) {
+func refMentions(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyword, _ := args["keyword"].(string)
 	sortMode := 0
@@ -101,7 +101,7 @@ func refMentions(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func refRefresh(args map[string]interface{}) (CallToolResult, error) {
+func refRefresh(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	model.RefreshBacklink(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "backlink refreshed for: " + id}}}, nil

@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 
 	"github.com/siyuan-note/logging"
@@ -162,7 +163,7 @@ func rejectEncryptedNotebookCLI(cmd *cobra.Command, args []string) error {
 			values, _ = cmd.Flags().GetStringArray(flagName)
 		}
 		for _, value := range values {
-			for _, id := range strings.Split(value, ",") {
+			for id := range strings.SplitSeq(value, ",") {
 				if checkID(strings.TrimSpace(id)) {
 					return fmt.Errorf("CLI does not support encrypted notebook [%s]", encryptedTarget)
 				}
@@ -171,10 +172,8 @@ func rejectEncryptedNotebookCLI(cmd *cobra.Command, args []string) error {
 	}
 
 	if cmd.Parent() == fileCmd {
-		for _, arg := range args {
-			if isEncryptedNotebookWorkspacePath(arg) {
-				return fmt.Errorf("CLI does not support files in encrypted notebooks")
-			}
+		if slices.ContainsFunc(args, isEncryptedNotebookWorkspacePath) {
+			return fmt.Errorf("CLI does not support files in encrypted notebooks")
 		}
 		if pathFlag := cmd.Flags().Lookup("path"); pathFlag != nil && pathFlag.Value.String() != "" && isEncryptedNotebookWorkspacePath(pathFlag.Value.String()) {
 			return fmt.Errorf("CLI does not support files in encrypted notebooks")

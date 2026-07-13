@@ -104,10 +104,7 @@ func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error)
 		return
 	}
 
-	hLevel := level
-	if 6 < level {
-		hLevel = 6
-	}
+	hLevel := min(6, level)
 
 	heading := &ast.Node{ID: tree.Root.ID, Type: ast.NodeHeading, HeadingLevel: hLevel}
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(tree.Root.IALAttr("title"))})

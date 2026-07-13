@@ -56,12 +56,12 @@ func init() {
 	register(HTTPRequestTool)
 }
 
-func httpRequestHandler(args map[string]interface{}) (CallToolResult, error) {
+func httpRequestHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	rawURL, _ := args["url"].(string)
 
 	headers := map[string]string{}
-	if hs, ok := args["headers"].(map[string]interface{}); ok {
+	if hs, ok := args["headers"].(map[string]any); ok {
 		for k, v := range hs {
 			headers[k] = fmt.Sprintf("%v", v)
 		}

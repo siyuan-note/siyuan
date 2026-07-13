@@ -897,7 +897,7 @@ func GetTemplateKeysByResolutionOrder(attrView *av.AttributeView) (ret []*av.Key
 	ret = []*av.Key{}
 
 	resolvedTemplateKeys := map[string]bool{}
-	for i := 0; i < 7; i++ {
+	for range 7 {
 		templateKeyCount := 0
 		for _, keyValues := range attrView.KeyValues {
 			if av.KeyTypeTemplate != keyValues.Key.Type {

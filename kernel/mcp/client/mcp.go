@@ -265,8 +265,8 @@ func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession,
 	return session, nil, nil
 }
 
-func mcpToolHandler(serverName, toolName string, timeout time.Duration) func(args map[string]interface{}) (tools.CallToolResult, error) {
-	return func(args map[string]interface{}) (tools.CallToolResult, error) {
+func mcpToolHandler(serverName, toolName string, timeout time.Duration) func(args map[string]any) (tools.CallToolResult, error) {
+	return func(args map[string]any) (tools.CallToolResult, error) {
 		result, err := callMCPTool(serverName, toolName, timeout, args)
 		if err != nil && isReconnectableError(err) {
 			logging.LogWarnf("mcp: server [%s] tool [%s] disconnected (%s), reconnecting", serverName, toolName, err)
@@ -300,7 +300,7 @@ func mcpToolHandler(serverName, toolName string, timeout time.Duration) func(arg
 	}
 }
 
-func callMCPTool(serverName, toolName string, timeout time.Duration, args map[string]interface{}) (*mcp.CallToolResult, error) {
+func callMCPTool(serverName, toolName string, timeout time.Duration, args map[string]any) (*mcp.CallToolResult, error) {
 	session := getMCPSession(serverName)
 	if session == nil {
 		return nil, fmt.Errorf("mcp server [%s] not connected", serverName)

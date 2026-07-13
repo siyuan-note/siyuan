@@ -440,7 +440,7 @@ func expandGlobBrace(pattern string) []string {
 	body := pattern[i+1 : j]
 	suffix := pattern[j+1:]
 	var result []string
-	for _, opt := range strings.Split(body, ",") {
+	for opt := range strings.SplitSeq(body, ",") {
 		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
 	}
 	return result

@@ -40,7 +40,7 @@ func init() {
 	register(WorkspaceTool)
 }
 
-func workspaceHandler(args map[string]interface{}) (CallToolResult, error) {
+func workspaceHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -54,7 +54,7 @@ func workspaceHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func workspaceList(args map[string]interface{}) (CallToolResult, error) {
+func workspaceList(args map[string]any) (CallToolResult, error) {
 	paths, err := util.ReadWorkspacePaths()
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "list workspaces failed: " + err.Error()}}, IsError: true}, nil
@@ -74,7 +74,7 @@ func workspaceList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func workspaceInfo(args map[string]interface{}) (CallToolResult, error) {
+func workspaceInfo(args map[string]any) (CallToolResult, error) {
 	dir := util.WorkspaceDir
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("Path:    %s\n", dir))

@@ -51,7 +51,7 @@ func init() {
 	register(BlockTool)
 }
 
-func blockHandler(args map[string]interface{}) (CallToolResult, error) {
+func blockHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
@@ -89,7 +89,7 @@ func blockHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func blockGet(args map[string]interface{}) (CallToolResult, error) {
+func blockGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -109,7 +109,7 @@ func blockGet(args map[string]interface{}) (CallToolResult, error) {
 	)}}}, nil
 }
 
-func blockGetKramdown(args map[string]interface{}) (CallToolResult, error) {
+func blockGetKramdown(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -123,7 +123,7 @@ func blockGetKramdown(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: kramdown}}}, nil
 }
 
-func blockGetChildren(args map[string]interface{}) (CallToolResult, error) {
+func blockGetChildren(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -148,7 +148,7 @@ func blockGetChildren(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func blockInsert(args map[string]interface{}) (CallToolResult, error) {
+func blockInsert(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -209,7 +209,7 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block inserted"}}}, nil
 }
 
-func blockAppend(args map[string]interface{}) (CallToolResult, error) {
+func blockAppend(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -248,7 +248,7 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block appended"}}}, nil
 }
 
-func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
+func blockPrepend(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -287,7 +287,7 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block prepended"}}}, nil
 }
 
-func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
+func blockUpdate(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -354,7 +354,7 @@ func pinBlockID(data, dataType, id string) string {
 	return luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 }
 
-func blockDelete(args map[string]interface{}) (CallToolResult, error) {
+func blockDelete(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -378,7 +378,7 @@ func blockDelete(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block deleted: " + id}}}, nil
 }
 
-func getBlockData(args map[string]interface{}) (data, dataType string) {
+func getBlockData(args map[string]any) (data, dataType string) {
 	data, _ = args["data"].(string)
 	dataType, _ = args["dataType"].(string)
 	if dataType == "" {
@@ -397,7 +397,7 @@ func markdownToBlockDOM(md string) (string, error) {
 	return result, nil
 }
 
-func blockMove(args map[string]interface{}) (CallToolResult, error) {
+func blockMove(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -436,7 +436,7 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block moved: " + id}}}, nil
 }
 
-func blockBreadcrumb(args map[string]interface{}) (CallToolResult, error) {
+func blockBreadcrumb(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -454,7 +454,7 @@ func blockBreadcrumb(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func blockTreeStat(args map[string]interface{}) (CallToolResult, error) {
+func blockTreeStat(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -468,7 +468,7 @@ func blockTreeStat(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: text}}}, nil
 }
 
-func blockDom(args map[string]interface{}) (CallToolResult, error) {
+func blockDom(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -480,7 +480,7 @@ func blockDom(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: dom}}}, nil
 }
 
-func blockBatchGet(args map[string]interface{}) (CallToolResult, error) {
+func blockBatchGet(args map[string]any) (CallToolResult, error) {
 	idsStr, _ := args["ids"].(string)
 	if idsStr == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids is required (comma-separated)"}}, IsError: true}, nil
@@ -518,7 +518,7 @@ func blockBatchGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func blockBatchKramdown(args map[string]interface{}) (CallToolResult, error) {
+func blockBatchKramdown(args map[string]any) (CallToolResult, error) {
 	idsStr, _ := args["ids"].(string)
 	if idsStr == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids is required (comma-separated)"}}, IsError: true}, nil

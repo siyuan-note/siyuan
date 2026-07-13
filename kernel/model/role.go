@@ -16,6 +16,8 @@
 
 package model
 
+import "slices"
+
 import "github.com/gin-gonic/gin"
 
 type Role uint
@@ -32,12 +34,7 @@ const (
 )
 
 func IsValidRole(role Role, roles []Role) bool {
-	for _, role_ := range roles {
-		if role == role_ {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(roles, role)
 }
 
 func IsReadOnlyRole(role Role) bool {

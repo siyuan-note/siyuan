@@ -40,7 +40,7 @@ func init() {
 	register(FrontendTool)
 }
 
-func frontendHandler(args map[string]interface{}) (CallToolResult, error) {
+func frontendHandler(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "frontend actions are only available in the interactive agent chat (not via direct tool invocation)"}},
 		IsError: true,

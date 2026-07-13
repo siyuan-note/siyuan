@@ -325,7 +325,7 @@ func getVirtualRefKeywords(root *ast.Node) (ret []string) {
 		ret = gulu.Str.ExcludeElem(ret, []string{name})
 	}
 	if alias := root.IALAttr("alias"); "" != alias {
-		for _, a := range strings.Split(alias, ",") {
+		for a := range strings.SplitSeq(alias, ",") {
 			ret = gulu.Str.ExcludeElem(ret, []string{a})
 		}
 	}

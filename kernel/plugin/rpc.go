@@ -66,8 +66,8 @@ func (e *JsonRpcError) Error() string {
 type JsonRpcRequest struct {
 	JsonRpc string             `json:"jsonrpc"`
 	Method  string             `json:"method"`
-	Params  util.Optional[any] `json:"params,omitempty"`
-	ID      util.Optional[any] `json:"id,omitempty"`
+	Params  util.Optional[any] `json:"params"`
+	ID      util.Optional[any] `json:"id"`
 }
 
 func (r JsonRpcRequest) MarshalJSON() ([]byte, error) {

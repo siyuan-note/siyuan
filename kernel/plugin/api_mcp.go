@@ -121,7 +121,7 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 				InputSchema:  *inputSchema,
 				OutputSchema: outputSchema,
 				Source:       "plugin",
-				Handler: func(args map[string]interface{}) (tools.CallToolResult, error) {
+				Handler: func(args map[string]any) (tools.CallToolResult, error) {
 					return p.invokeMcpTool(handler, args)
 				},
 			}

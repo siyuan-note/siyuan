@@ -27,6 +27,7 @@ import (
 	"image/png"
 	"io"
 	"io/fs"
+	"maps"
 	"net/url"
 	"os"
 	"path"
@@ -566,9 +567,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		for _, toRemove := range toRemoves {
 			delete(renamePaths, toRemove)
 		}
-		for oldP, newP := range newRenamedPaths {
-			renamePaths[oldP] = newP
-		}
+		maps.Copy(renamePaths, newRenamedPaths)
 		for j := i + 1; j < len(oldPaths); j++ {
 			if strings.HasPrefix(oldPaths[j], oldPath) {
 				renamedOldP := strings.Replace(oldPaths[j], oldPath, newPath, 1)

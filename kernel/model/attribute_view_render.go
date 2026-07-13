@@ -484,10 +484,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 			pageSize = table.PageSize
 		}
 		start := (page - 1) * pageSize
-		end := start + pageSize
-		if len(table.Rows) < end {
-			end = len(table.Rows)
-		}
+		end := min(len(table.Rows), start+pageSize)
 		table.Rows = table.Rows[start:end]
 	case av.LayoutTypeGallery:
 		gallery := viewable.(*av.Gallery)
@@ -497,10 +494,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 			pageSize = gallery.PageSize
 		}
 		start := (page - 1) * pageSize
-		end := start + pageSize
-		if len(gallery.Cards) < end {
-			end = len(gallery.Cards)
-		}
+		end := min(len(gallery.Cards), start+pageSize)
 		gallery.Cards = gallery.Cards[start:end]
 	case av.LayoutTypeKanban:
 		kanban := viewable.(*av.Kanban)
@@ -510,10 +504,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 			pageSize = kanban.PageSize
 		}
 		start := (page - 1) * pageSize
-		end := start + pageSize
-		if len(kanban.Cards) < end {
-			end = len(kanban.Cards)
-		}
+		end := min(len(kanban.Cards), start+pageSize)
 		kanban.Cards = kanban.Cards[start:end]
 	}
 	return

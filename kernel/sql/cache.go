@@ -44,7 +44,7 @@ var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 	NumCounters: 100000,
 	MaxCost:     10240,
 	BufferItems: 64,
-	OnExit: func(value interface{}) {
+	OnExit: func(value any) {
 		if entry, ok := value.(*blockCacheEntry); ok {
 			removeBlockCacheKey(entry.block.ID, entry.key)
 		}

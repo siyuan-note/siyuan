@@ -40,7 +40,7 @@ func init() {
 	register(SystemTool)
 }
 
-func systemHandler(args map[string]interface{}) (CallToolResult, error) {
+func systemHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "version":
@@ -56,16 +56,16 @@ func systemHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func systemVersion(args map[string]interface{}) (CallToolResult, error) {
+func systemVersion(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: util.Ver}}}, nil
 }
 
-func systemCurrentTime(args map[string]interface{}) (CallToolResult, error) {
+func systemCurrentTime(args map[string]any) (CallToolResult, error) {
 	ms := util.CurrentTimeMillis()
 	t := time.UnixMilli(ms)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: t.Format(time.RFC3339)}}}, nil
 }
 
-func systemWorkspace(args map[string]interface{}) (CallToolResult, error) {
+func systemWorkspace(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("Workspace: %s\nVersion: %s\nContainer: %s", util.WorkspaceDir, util.Ver, util.Container)}}}, nil
 }

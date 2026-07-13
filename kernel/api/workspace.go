@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -195,13 +196,7 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	isKnown := false
-	for _, known := range knownPaths {
-		if known == cleanPath {
-			isKnown = true
-			break
-		}
-	}
+	isKnown := slices.Contains(knownPaths, cleanPath)
 	if !isKnown {
 		ret.Code = -1
 		ret.Msg = "path is not a registered workspace"

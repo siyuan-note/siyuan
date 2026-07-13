@@ -64,7 +64,7 @@ func init() {
 	register(DatabaseTool)
 }
 
-func databaseHandler(args map[string]interface{}) (CallToolResult, error) {
+func databaseHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "search":
@@ -96,7 +96,7 @@ func databaseHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func databaseSearch(args map[string]interface{}) (CallToolResult, error) {
+func databaseSearch(args map[string]any) (CallToolResult, error) {
 	keyword, _ := args["keyword"].(string)
 	if keyword == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "keyword is required"}}, IsError: true}, nil
@@ -115,7 +115,7 @@ func databaseSearch(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func databaseGet(args map[string]interface{}) (CallToolResult, error) {
+func databaseGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -140,7 +140,7 @@ func databaseGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func databaseRender(args map[string]interface{}) (CallToolResult, error) {
+func databaseRender(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -177,7 +177,7 @@ func databaseRender(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func databaseKeys(args map[string]interface{}) (CallToolResult, error) {
+func databaseKeys(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -194,7 +194,7 @@ func databaseKeys(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func databaseKeyAdd(args map[string]interface{}) (CallToolResult, error) {
+func databaseKeyAdd(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	name, _ := args["name"].(string)
 	keyType, _ := args["type"].(string)
@@ -211,7 +211,7 @@ func databaseKeyAdd(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("key added: %s (%s)", keyID, name)}}}, nil
 }
 
-func databaseKeyRemove(args map[string]interface{}) (CallToolResult, error) {
+func databaseKeyRemove(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyID, _ := args["keyID"].(string)
 	if id == "" || keyID == "" {
@@ -228,7 +228,7 @@ func databaseKeyRemove(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "key removed: " + keyID}}}, nil
 }
 
-func databaseItemAdd(args map[string]interface{}) (CallToolResult, error) {
+func databaseItemAdd(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -264,7 +264,7 @@ func databaseItemAdd(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "item added"}}}, nil
 }
 
-func databaseItemRemove(args map[string]interface{}) (CallToolResult, error) {
+func databaseItemRemove(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	itemIDsStr, _ := args["itemIDs"].(string)
 	if id == "" || itemIDsStr == "" {
@@ -281,7 +281,7 @@ func databaseItemRemove(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("%d item(s) removed", len(itemIDs))}}}, nil
 }
 
-func databaseItemUpdate(args map[string]interface{}) (CallToolResult, error) {
+func databaseItemUpdate(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyID, _ := args["keyID"].(string)
 	itemID, _ := args["itemID"].(string)
@@ -300,7 +300,7 @@ func databaseItemUpdate(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "cell updated"}}}, nil
 }
 
-func databaseUnused(args map[string]interface{}) (CallToolResult, error) {
+func databaseUnused(args map[string]any) (CallToolResult, error) {
 	items := model.UnusedAttributeViews(true)
 	if len(items) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no unused databases found"}}}, nil
@@ -313,7 +313,7 @@ func databaseUnused(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func databaseClean(args map[string]interface{}) (CallToolResult, error) {
+func databaseClean(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id != "" {
 		model.RemoveUnusedAttributeView(id)

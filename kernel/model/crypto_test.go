@@ -425,10 +425,8 @@ func TestLockBoxConcurrentReads(t *testing.T) {
 
 	stop := make(chan struct{})
 	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+	for range 5 {
+		wg.Go(func() {
 			for {
 				select {
 				case <-stop:
@@ -439,7 +437,7 @@ func TestLockBoxConcurrentReads(t *testing.T) {
 					ReleaseBoxReadLock(boxID)
 				}
 			}
-		}()
+		})
 	}
 
 	time.Sleep(10 * time.Millisecond)

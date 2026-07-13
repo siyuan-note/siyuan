@@ -187,7 +187,7 @@ func isOnline(checkURL string, skipTlsVerify bool, timeout int) (ret bool) {
 		c.EnableInsecureSkipVerify()
 	}
 
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		resp, err := c.R().Get(checkURL)
 		if resp.GetHeader("Location") != "" {
 			return true

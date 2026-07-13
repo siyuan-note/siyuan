@@ -90,7 +90,7 @@ func NewSearch() *Search {
 
 		Limit:         64,
 		CaseSensitive: false,
-		HanSensitive:  boolPtr(true),
+		HanSensitive:  new(true),
 
 		Name:  true,
 		Alias: true,
@@ -112,7 +112,8 @@ func NewSearch() *Search {
 	}
 }
 
-func boolPtr(v bool) *bool { return &v }
+//go:fix inline
+func boolPtr(v bool) *bool { return new(v) }
 
 // HanSensitiveVal 返回 HanSensitive 的 bool 值；nil 视为 true（与既往行为一致）。
 func (s *Search) HanSensitiveVal() bool {
@@ -124,7 +125,7 @@ func (s *Search) HanSensitiveVal() bool {
 
 // SetHanSensitive 设置 HanSensitive 字段。
 func (s *Search) SetHanSensitive(v bool) {
-	s.HanSensitive = boolPtr(v)
+	s.HanSensitive = new(v)
 }
 
 func (s *Search) NAMFilter(keyword string) string {

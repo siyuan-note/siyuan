@@ -2230,8 +2230,8 @@ func yfm(docIAL map[string]string) string {
 	buf.WriteString("\n")
 	if "" != tags {
 		buf.WriteString("tags:\n")
-		tagLines := strings.Split(tags, ",")
-		for _, tag := range tagLines {
+		tagLines := strings.SplitSeq(tags, ",")
+		for tag := range tagLines {
 			buf.WriteString("  - '")
 			tag = strings.ReplaceAll(tag, "'", "''")
 			buf.WriteString(tag)
@@ -2488,7 +2488,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				return ast.WalkContinue
 			}
 
-			for _, avID := range strings.Split(avs, ",") {
+			for avID := range strings.SplitSeq(avs, ",") {
 				avID = strings.TrimSpace(avID)
 				avIDs = append(avIDs, avID)
 				if IsEncryptedBox(tree.Box) {
@@ -3325,8 +3325,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 							}
 							col := table.GetColumn(cell.Value.KeyID)
 							if nil != col && col.Wrap {
-								lines := strings.Split(val, "\n")
-								for _, line := range lines {
+								lines := strings.SplitSeq(val, "\n")
+								for line := range lines {
 									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
 									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
 								}
@@ -3346,8 +3346,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 							}
 							col := table.GetColumn(cell.Value.KeyID)
 							if nil != col && col.Wrap {
-								lines := strings.Split(val, "\n")
-								for _, line := range lines {
+								lines := strings.SplitSeq(val, "\n")
+								for line := range lines {
 									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
 									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
 								}
@@ -3364,8 +3364,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 							val = strings.ReplaceAll(val, "|", "\\|")
 							col := table.GetColumn(cell.Value.KeyID)
 							if nil != col && col.Wrap {
-								lines := strings.Split(val, "\n")
-								for _, line := range lines {
+								lines := strings.SplitSeq(val, "\n")
+								for line := range lines {
 									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
 									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
 								}
@@ -3478,8 +3478,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 								col := table.GetColumn(cell.Value.KeyID)
 								if nil != col && col.Wrap {
-									lines := strings.Split(val, "\n")
-									for _, line := range lines {
+									lines := strings.SplitSeq(val, "\n")
+									for line := range lines {
 										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
 										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
 									}
@@ -3510,8 +3510,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 									col := table.GetColumn(cell.Value.KeyID)
 									if nil != col && col.Wrap {
-										lines := strings.Split(val, "\n")
-										for _, line := range lines {
+										lines := strings.SplitSeq(val, "\n")
+										for line := range lines {
 											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
 											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
 										}
@@ -3530,8 +3530,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 								col := table.GetColumn(cell.Value.KeyID)
 								if nil != col && col.Wrap {
-									lines := strings.Split(val, "\n")
-									for _, line := range lines {
+									lines := strings.SplitSeq(val, "\n")
+									for line := range lines {
 										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
 										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
 									}

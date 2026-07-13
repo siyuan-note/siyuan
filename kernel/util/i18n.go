@@ -29,7 +29,7 @@ func I18nTerm(language, key string) (ret string) {
 	if err != nil {
 		return
 	}
-	var m map[string]interface{}
+	var m map[string]any
 	if err = gulu.JSON.UnmarshalJSON(data, &m); err != nil {
 		return
 	}

@@ -283,8 +283,8 @@ func DocAssets(rootID string, retainQueryStr bool) (ret []string, err error) {
 	ret = getAssetsLinkDests(tree.Root, false)
 	if !retainQueryStr {
 		for i, asset := range ret {
-			if idx := strings.Index(asset, "?"); idx >= 0 {
-				ret[i] = asset[:idx]
+			if before, _, ok := strings.Cut(asset, "?"); ok {
+				ret[i] = before
 			}
 		}
 	}

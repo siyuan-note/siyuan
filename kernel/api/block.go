@@ -387,7 +387,7 @@ func checkBlocksExist(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, idArg := range idsArg {
 		if id, idOk := idArg.(string); idOk && ast.IsNodeIDPattern(id) {
@@ -775,7 +775,7 @@ func getBlockInfo(c *gin.Context) {
 
 	var rootChildID string
 	b := block
-	for i := 0; i < 128; i++ {
+	for range 128 {
 		parentID := b.ParentID
 		if "" == parentID {
 			rootChildID = b.ID

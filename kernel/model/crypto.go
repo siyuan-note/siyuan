@@ -38,6 +38,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1417,28 +1418,25 @@ func ExtractBoxIDFromHistoryPath(absPath string) string {
 	return boxID
 }
 
-// copyAssetDecryptIfEncrypted 把 srcPath 的 asset 复制到 destPath。
-// 若 srcPath 在已解锁的加密笔记本下，读密文→解密→写明文到 destPath（导出目录）；
-// 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
-// normalizeRelPath 标准化 box 内相对路径用于 AAD：去掉前导 /、统一为正斜杠。
-func normalizeRelPath(p string) string {
-	p = filepath.ToSlash(p)
-	p = strings.TrimPrefix(p, "/")
-	return p
-}
-
-// EncryptFile 用 fileKey（DEK 派生子密钥）加密 .sy 文档字节，AAD 绑定 boxID + 相对路径。
-// relativePath 在构造 AAD 前会标准化（去前导 /、统一斜杠），与 filesys.encryptData/decryptData 保持一致。
+// EncryptFile 用 fileKey（DEK 派生子密钥）加密 .sy 文档字节，AAD 绑定 boxID + 稳定文件基名（不含父目录）。
+// relativePath 会先经 filesys.SyAAD 提取稳定文件基名（<rootID>.sy）并校验合法性，
+// 与 filesys.encryptData/decryptData 共用同一 AAD 构造入口，保证加解密一致。
 func EncryptFile(boxID, relativePath string, dek, plaintext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad := "siyuan:v1:file:" + boxID + ":" + normalizeRelPath(relativePath)
+	aad, err := filesys.SyAAD(boxID, relativePath)
+	if err != nil {
+		return nil, err
+	}
 	return util.EncryptWithAAD(fileKey, plaintext, []byte(aad))
 }
 
 // DecryptFile 对应解密。
 func DecryptFile(boxID, relativePath string, dek, ciphertext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
-	aad := "siyuan:v1:file:" + boxID + ":" + normalizeRelPath(relativePath)
+	aad, err := filesys.SyAAD(boxID, relativePath)
+	if err != nil {
+		return nil, err
+	}
 	return util.DecryptWithAAD(fileKey, ciphertext, []byte(aad))
 }
 
@@ -1512,6 +1510,9 @@ func readNotebookCryptBackup(boxID string) (*conf.BoxEncryption, error) {
 	return &crypt, nil
 }
 
+// copyAssetDecryptIfEncrypted 把 srcPath 的 asset 复制到 destPath。
+// 若 srcPath 在已解锁的加密笔记本下，读密文→解密→写明文到 destPath（导出目录）；
+// 否则走 filelock.Copy 原路径（字节级复制，密文/明文均可）。
 func copyAssetDecryptIfEncrypted(srcPath, destPath string) error {
 	boxID := ExtractBoxIDFromAssetsPath(srcPath)
 	if boxID != "" && IsEncryptedBox(boxID) {

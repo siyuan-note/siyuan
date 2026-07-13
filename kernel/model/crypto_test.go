@@ -485,3 +485,72 @@ func TestLockBoxClearsTempDirs(t *testing.T) {
 		}
 	}
 }
+
+// TestEncryptFileAADBoundToBaseNameNotPath 验证 .sy 密文 AAD 绑定稳定文件基名而非父目录。
+// 同一基名、不同父目录加密出的密文，可用任一父目录路径解密；基名变化或 box 变化则解密失败。
+// 这是同 box 内移动文档可原样 Rename 密文（不重新封装）的密码学保证。
+func TestEncryptFileAADBoundToBaseNameNotPath(t *testing.T) {
+	boxID := "20240101120000-boxaaaaa"
+	dek, _ := util.GenerateDEK()
+	base := "20240101120000-1a2b3c4.sy"
+	plain := []byte(`{"ID":"20240101120000-1a2b3c4","Properties":{"title":"doc"}}`)
+
+	// 用父目录 A 加密
+	ct, err := EncryptFile(boxID, "/20240101120000-parentA/"+base, dek, plain)
+	if err != nil {
+		t.Fatalf("EncryptFile failed: %v", err)
+	}
+
+	// 用父目录 B（及裸基名）解密：必须成功——AAD 只绑基名
+	if got, err := DecryptFile(boxID, "/20240101120000-parentB/"+base, dek, ct); err != nil {
+		t.Fatalf("decrypt with different parent dir should succeed: %v", err)
+	} else if string(got) != string(plain) {
+		t.Fatalf("decrypted content mismatch")
+	}
+	if got, err := DecryptFile(boxID, base, dek, ct); err != nil {
+		t.Fatalf("decrypt with bare base name should succeed: %v", err)
+	} else if string(got) != string(plain) {
+		t.Fatalf("decrypted content mismatch")
+	}
+
+	// 用不同基名解密：必须失败——AAD 绑定基名
+	otherBase := "20240101120000-zzzzzzz.sy"
+	if _, err := DecryptFile(boxID, otherBase, dek, ct); err == nil {
+		t.Fatal("decrypt with different base name must fail")
+	}
+
+	// 用不同 boxID 解密：必须失败——AAD 绑定 boxID
+	otherBox := "20240101120000-otherbox"
+	if _, err := DecryptFile(otherBox, base, dek, ct); err == nil {
+		t.Fatal("decrypt with different boxID must fail")
+	}
+}
+
+// TestEncryptFileRejectsInvalidBaseName 验证非法基名（非 .sy、非节点 ID）直接拒绝加密，
+// 不产生可用于落盘的密文，避免把任意路径当 AAD 绑定物。
+func TestEncryptFileRejectsInvalidBaseName(t *testing.T) {
+	boxID := "20240101120000-boxaaaaa"
+	dek, _ := util.GenerateDEK()
+	plain := []byte("test")
+
+	if _, err := EncryptFile(boxID, "/dir/random.txt", dek, plain); err == nil {
+		t.Fatal("should reject non-.sy extension")
+	}
+	if _, err := EncryptFile(boxID, "/dir/notanid.sy", dek, plain); err == nil {
+		t.Fatal("should reject non-node-id stem")
+	}
+}
+
+// TestDecryptFileRejectsInvalidBaseName 验证解密路径同样拒绝非法基名。
+func TestDecryptFileRejectsInvalidBaseName(t *testing.T) {
+	boxID := "20240101120000-boxaaaaa"
+	dek, _ := util.GenerateDEK()
+	ct := []byte("ciphertext-bytes")
+
+	if _, err := DecryptFile(boxID, "/dir/random.txt", dek, ct); err == nil {
+		t.Fatal("should reject non-.sy extension on decrypt")
+	}
+	if _, err := DecryptFile(boxID, "/dir/notanid.sy", dek, ct); err == nil {
+		t.Fatal("should reject non-node-id stem on decrypt")
+	}
+}

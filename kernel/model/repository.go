@@ -1248,17 +1248,17 @@ func appendAgentRollbackEntries() {
 			continue
 		}
 
-		var session map[string]interface{}
+		var session map[string]any
 		if nil != gulu.JSON.UnmarshalJSON(sessionData, &session) {
 			os.Remove(markerPath)
 			continue
 		}
 
-		entries, ok := session["entries"].([]interface{})
+		entries, ok := session["entries"].([]any)
 		if !ok {
-			entries = make([]interface{}, 0)
+			entries = make([]any, 0)
 		}
-		entry := map[string]interface{}{
+		entry := map[string]any{
 			"type":       "rollback",
 			"snapshotID": marker.SnapshotID,
 		}

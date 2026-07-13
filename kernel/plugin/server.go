@@ -199,7 +199,7 @@ func isHopByHopHeader(header string) bool {
 func connectionHopByHopHeaders(header http.Header) map[string]bool {
 	result := map[string]bool{}
 	for _, value := range header.Values("Connection") {
-		for _, part := range strings.Split(value, ",") {
+		for part := range strings.SplitSeq(value, ",") {
 			if name := strings.ToLower(strings.TrimSpace(part)); name != "" {
 				result[name] = true
 			}

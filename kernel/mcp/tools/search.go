@@ -51,7 +51,7 @@ func init() {
 	register(SearchTool)
 }
 
-func searchHandler(args map[string]interface{}) (CallToolResult, error) {
+func searchHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "fulltext":
@@ -69,7 +69,7 @@ func searchHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func fulltextSearch(args map[string]interface{}) (CallToolResult, error) {
+func fulltextSearch(args map[string]any) (CallToolResult, error) {
 	query, _ := args["query"].(string)
 	page := 1
 	if v, ok := args["page"].(float64); ok {
@@ -131,7 +131,7 @@ func fulltextSearch(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func semanticSearch(args map[string]interface{}) (CallToolResult, error) {
+func semanticSearch(args map[string]any) (CallToolResult, error) {
 	query, _ := args["query"].(string)
 	page := 1
 	if v, ok := args["page"].(float64); ok {
@@ -181,7 +181,7 @@ func semanticSearch(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func assetSearch(args map[string]interface{}) (CallToolResult, error) {
+func assetSearch(args map[string]any) (CallToolResult, error) {
 	query, _ := args["query"].(string)
 	page := 1
 	if v, ok := args["page"].(float64); ok {
@@ -238,7 +238,7 @@ func assetSearch(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func getAssetHandler(args map[string]interface{}) (CallToolResult, error) {
+func getAssetHandler(args map[string]any) (CallToolResult, error) {
 	path, _ := args["path"].(string)
 	if path == "" {
 		return CallToolResult{
@@ -265,7 +265,7 @@ func getAssetHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func parseStringSlice(v interface{}) []string {
+func parseStringSlice(v any) []string {
 	s, ok := v.(string)
 	if !ok || s == "" {
 		return nil
@@ -284,7 +284,7 @@ func parseStringSlice(v interface{}) []string {
 	return result
 }
 
-func parseStringSet(v interface{}) map[string]bool {
+func parseStringSet(v any) map[string]bool {
 	slice := parseStringSlice(v)
 	if len(slice) == 0 {
 		return nil

@@ -47,7 +47,7 @@ func processRequest(req *JsonRpcRequest, session *Session, protocolVersion strin
 		}
 		return &JsonRpcResponse{
 			JsonRpc: "2.0",
-			Result:  map[string]interface{}{},
+			Result:  map[string]any{},
 			ID:      req.ID,
 		}
 
@@ -91,7 +91,7 @@ func processRequest2026(req *JsonRpcRequest) any {
 		}
 		return &JsonRpcResponse{
 			JsonRpc: "2.0",
-			Result:  map[string]interface{}{},
+			Result:  map[string]any{},
 			ID:      req.ID,
 		}
 
@@ -120,7 +120,7 @@ func processRequest2026(req *JsonRpcRequest) any {
 }
 
 func handleInitialize(req *JsonRpcRequest, session *Session) *JsonRpcResponse {
-	params, _ := req.Params.(map[string]interface{})
+	params, _ := req.Params.(map[string]any)
 
 	serverVersion := ProtocolVersion
 	if clientVersion, ok := params["protocolVersion"].(string); ok {
@@ -133,7 +133,7 @@ func handleInitialize(req *JsonRpcRequest, session *Session) *JsonRpcResponse {
 
 	return &JsonRpcResponse{
 		JsonRpc: "2.0",
-		Result: map[string]interface{}{
+		Result: map[string]any{
 			"protocolVersion": serverVersion,
 			"capabilities": ServerCapabilities{
 				Tools: &ToolsCapability{ListChanged: false},
@@ -151,13 +151,13 @@ func handleToolsList(id any) *JsonRpcResponse {
 	toolList := tools.GetAllTools()
 	return &JsonRpcResponse{
 		JsonRpc: "2.0",
-		Result:  map[string]interface{}{"tools": toolList},
+		Result:  map[string]any{"tools": toolList},
 		ID:      id,
 	}
 }
 
 func handleToolsCall(req *JsonRpcRequest) any {
-	params, ok := req.Params.(map[string]interface{})
+	params, ok := req.Params.(map[string]any)
 	if !ok {
 		return &JsonRpcErrorResponse{
 			JsonRpc: "2.0",
@@ -187,9 +187,9 @@ func handleToolsCall(req *JsonRpcRequest) any {
 		}
 	}
 
-	toolArgs, _ := params["arguments"].(map[string]interface{})
+	toolArgs, _ := params["arguments"].(map[string]any)
 	if toolArgs == nil {
-		toolArgs = map[string]interface{}{}
+		toolArgs = map[string]any{}
 	}
 
 	result, err := t.Handler(toolArgs)
@@ -214,7 +214,7 @@ func handleToolsCall(req *JsonRpcRequest) any {
 func handleDiscover(req *JsonRpcRequest) *JsonRpcResponse {
 	return &JsonRpcResponse{
 		JsonRpc: "2.0",
-		Result: map[string]interface{}{
+		Result: map[string]any{
 			"protocolVersion": ProtocolV20260728,
 			"capabilities": ServerCapabilities{
 				Tools: &ToolsCapability{ListChanged: false},
@@ -235,7 +235,7 @@ func handleToolsList2026(id any) *JsonRpcResponse {
 	}
 	return &JsonRpcResponse{
 		JsonRpc: "2.0",
-		Result: map[string]interface{}{
+		Result: map[string]any{
 			"tools":      toolList,
 			"ttlMs":      60000,
 			"cacheScope": "user",

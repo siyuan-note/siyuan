@@ -141,10 +141,8 @@ func processPendingEmbeddings() {
 	workCh := make(chan embeddingJob, embeddingMaxConcurrency*2)
 
 	var workersWg sync.WaitGroup
-	for i := 0; i < embeddingMaxConcurrency; i++ {
-		workersWg.Add(1)
-		go func() {
-			defer workersWg.Done()
+	for range embeddingMaxConcurrency {
+		workersWg.Go(func() {
 			for job := range workCh {
 				if embeddingStop.Load() {
 					// 本轮已熔断（其它 worker 处理失败触发），这些积压 job 里的块不能直接丢弃，
@@ -154,7 +152,7 @@ func processPendingEmbeddings() {
 				}
 				doEmbedAndStore(job.texts, job.blocks)
 			}
-		}()
+		})
 	}
 
 	go func() {
@@ -239,16 +237,10 @@ func processPendingEmbeddings() {
 			// 本轮没有提交任何 job，且全部是被退避跳过的块：这些块状态没变，下轮 SQL 还会捞出同样的块，
 			// 直接进下一轮会 CPU 忙等 + 高频 DB 查询。sleep 到最近的到期时间再继续，期间检查熔断以便及时退出。
 			if !anySubmitted && backoffSkipped > 0 {
-				wait := time.Duration(minRemaining) * time.Second
-				if wait < time.Second {
-					wait = time.Second
-				}
+				wait := max(time.Duration(minRemaining)*time.Second, time.Second)
 				// 分段 sleep，每秒检查一次 embeddingStop，熔断时尽快退出
 				for wait > 0 && !embeddingStop.Load() {
-					step := wait
-					if step > time.Second {
-						step = time.Second
-					}
+					step := min(wait, time.Second)
 					time.Sleep(step)
 					wait -= step
 				}
@@ -277,10 +269,9 @@ func embeddingBackoffFor(failCount int) time.Duration {
 	if failCount < 1 {
 		return time.Duration(embeddingBackoffBase) * time.Second
 	}
-	shift := failCount - 1
-	if shift > 20 {
-		shift = 20 // 防溢出
-	}
+	shift := min(failCount-1,
+		// 防溢出
+		20)
 	d := embeddingBackoffBase << uint(shift)
 	if d > embeddingBackoffMax || d < 0 {
 		return time.Duration(embeddingBackoffMax) * time.Second
@@ -453,10 +444,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types)
 	hasTypeFilter := 0 < len(types)
 
-	numWorkers := runtime.GOMAXPROCS(0)
-	if numWorkers < 1 {
-		numWorkers = 1
-	}
+	numWorkers := max(runtime.GOMAXPROCS(0), 1)
 
 	// 向量召回候选数：启用重排时至少召回 candidateCount 条，保证重排有足够候选精排；否则只取当前页所需。
 	topK := page * pageSize
@@ -506,10 +494,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 		for w := 0; w < numWorkers; w++ {
 			start := w * chunkSize
-			end := start + chunkSize
-			if end > len(rows) {
-				end = len(rows)
-			}
+			end := min(start+chunkSize, len(rows))
 			if start >= end {
 				continue
 			}
@@ -579,10 +564,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		return
 	}
 
-	end := offset + pageSize
-	if end > len(sqlBlocks) {
-		end = len(sqlBlocks)
-	}
+	end := min(offset+pageSize, len(sqlBlocks))
 
 	rootIDSet := map[string]bool{}
 	for i := offset; i < end; i++ {

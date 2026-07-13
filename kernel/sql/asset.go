@@ -45,8 +45,8 @@ type Asset struct {
 
 func docTagSpans(n *ast.Node) (ret []*Span) {
 	if tagsVal := n.IALAttr("tags"); "" != tagsVal {
-		tags := strings.Split(tagsVal, ",")
-		for _, tag := range tags {
+		tags := strings.SplitSeq(tagsVal, ",")
+		for tag := range tags {
 			escaped := util.EscapeHTML(tag)
 			markdown := "#" + escaped + "#"
 			span := &Span{

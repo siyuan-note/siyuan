@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"strings"
 	"sync"
@@ -151,9 +152,7 @@ func (t *extraBodyTransport) Do(req *http.Request) (*http.Response, error) {
 		return t.base.Do(req)
 	}
 
-	for k, v := range t.extraBody {
-		payload[k] = v
-	}
+	maps.Copy(payload, t.extraBody)
 
 	merged, err := json.Marshal(payload)
 	if err != nil {

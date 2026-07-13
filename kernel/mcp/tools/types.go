@@ -26,7 +26,7 @@ type Tool struct {
 	// 用于 token 分类统计按来源拆分。空值按 "native" 处理（兼容旧调用方）。
 	Source string `json:"source,omitempty"`
 
-	Handler func(args map[string]interface{}) (CallToolResult, error) `json:"-"`
+	Handler func(args map[string]any) (CallToolResult, error) `json:"-"`
 }
 
 type ToolSchema struct {

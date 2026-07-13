@@ -264,7 +264,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		changedRootIDs = append(changedRootIDs, t)
 	}
 
-	for i := 0; i < 7; i++ {
+	for range 7 {
 		updatedRefNodes, updatedRefTrees := refreshDynamicRefTexts0(updatedDefNodes, updatedTrees)
 		if 1 > len(updatedRefNodes) {
 			break
@@ -375,8 +375,8 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 			continue
 		}
 
-		avIDs := strings.Split(avs, ",")
-		for _, avID := range avIDs {
+		avIDs := strings.SplitSeq(avs, ",")
+		for avID := range avIDs {
 			attrView, parseErr := av.ParseAttributeView(avID)
 			if nil != parseErr {
 				continue

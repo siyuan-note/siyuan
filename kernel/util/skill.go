@@ -188,7 +188,7 @@ func parseSkillFrontmatter(text string) (fm map[string]string, body string) {
 	}
 	raw := text[3 : 3+end]
 	body = strings.TrimSpace(text[3+end+4:])
-	for _, line := range strings.Split(raw, "\n") {
+	for line := range strings.SplitSeq(raw, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue

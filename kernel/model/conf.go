@@ -620,7 +620,7 @@ func InitConf() {
 		}()
 	}
 	isInvalidFlashcardWeights := false
-	for _, w := range strings.Split(Conf.Flashcard.Weights, ",") {
+	for w := range strings.SplitSeq(Conf.Flashcard.Weights, ",") {
 		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
 			isInvalidFlashcardWeights = true
 			break

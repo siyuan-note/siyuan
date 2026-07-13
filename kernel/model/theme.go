@@ -94,7 +94,7 @@ func resolveNestedCSSVar(themeStyles map[string]string, varName string) string {
 	maxDepth := 10                   // 防止无限嵌套
 
 	currentName := varName
-	for depth := 0; depth < maxDepth; depth++ {
+	for range maxDepth {
 		if visited[currentName] {
 			return ""
 		}

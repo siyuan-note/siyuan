@@ -50,7 +50,7 @@ func init() {
 	register(RepoTool)
 }
 
-func repoHandler(args map[string]interface{}) (CallToolResult, error) {
+func repoHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -84,7 +84,7 @@ func repoHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func repoList(args map[string]interface{}) (CallToolResult, error) {
+func repoList(args map[string]any) (CallToolResult, error) {
 	tagged := false
 	if v, ok := args["tag"].(bool); ok {
 		tagged = v
@@ -128,7 +128,7 @@ func repoList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func repoCreate(args map[string]interface{}) (CallToolResult, error) {
+func repoCreate(args map[string]any) (CallToolResult, error) {
 	memo, _ := args["memo"].(string)
 	id, err := model.IndexRepo(memo)
 	if err != nil {
@@ -137,7 +137,7 @@ func repoCreate(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "snapshot created: " + id}}}, nil
 }
 
-func repoTag(args map[string]interface{}) (CallToolResult, error) {
+func repoTag(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	name, _ := args["name"].(string)
 	if id == "" || name == "" {
@@ -149,7 +149,7 @@ func repoTag(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("tagged snapshot %s with '%s'", id, name)}}}, nil
 }
 
-func repoUntag(args map[string]interface{}) (CallToolResult, error) {
+func repoUntag(args map[string]any) (CallToolResult, error) {
 	name, _ := args["name"].(string)
 	if name == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "name is required"}}, IsError: true}, nil
@@ -160,7 +160,7 @@ func repoUntag(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "tag removed: " + name}}}, nil
 }
 
-func repoCheckout(args map[string]interface{}) (CallToolResult, error) {
+func repoCheckout(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -171,7 +171,7 @@ func repoCheckout(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "checkout to snapshot: " + id}}}, nil
 }
 
-func repoDiff(args map[string]interface{}) (CallToolResult, error) {
+func repoDiff(args map[string]any) (CallToolResult, error) {
 	left, _ := args["left"].(string)
 	right, _ := args["right"].(string)
 	if left == "" || right == "" {
@@ -207,7 +207,7 @@ func repoDiff(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func repoSearch(args map[string]interface{}) (CallToolResult, error) {
+func repoSearch(args map[string]any) (CallToolResult, error) {
 	keyword, _ := args["keyword"].(string)
 	if keyword == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "keyword is required"}}, IsError: true}, nil
@@ -234,14 +234,14 @@ func repoSearch(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func repoPurge(args map[string]interface{}) (CallToolResult, error) {
+func repoPurge(args map[string]any) (CallToolResult, error) {
 	if err := model.PurgeRepo(); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "purge failed: " + err.Error()}}, IsError: true}, nil
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "old snapshots purged"}}}, nil
 }
 
-func repoFileGet(args map[string]interface{}) (CallToolResult, error) {
+func repoFileGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -253,7 +253,7 @@ func repoFileGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("Path: %s\nSize: %d\n---\n%s", path, len(data), string(data))}}}, nil
 }
 
-func repoFileRollback(args map[string]interface{}) (CallToolResult, error) {
+func repoFileRollback(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -267,7 +267,7 @@ func repoFileRollback(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "file rolled back: " + id}}}, nil
 }
 
-func repoFileOpen(args map[string]interface{}) (CallToolResult, error) {
+func repoFileOpen(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -279,7 +279,7 @@ func repoFileOpen(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("Title: %s\n---\n%s", title, content)}}}, nil
 }
 
-func repoFileExport(args map[string]interface{}) (CallToolResult, error) {
+func repoFileExport(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil

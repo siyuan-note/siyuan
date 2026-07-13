@@ -404,7 +404,7 @@ func IsBlockFolded(id string) (isFolded, isRoot bool) {
 		isRoot = true
 	}
 
-	for i := 0; i < 32; i++ {
+	for range 32 {
 		b, _ := getBlock(id, nil)
 		if nil == b {
 			return

@@ -39,7 +39,7 @@ func init() {
 	register(SyncTool)
 }
 
-func syncHandler(args map[string]interface{}) (CallToolResult, error) {
+func syncHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "perform":
@@ -57,22 +57,22 @@ func syncHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func syncPerform(args map[string]interface{}) (CallToolResult, error) {
+func syncPerform(args map[string]any) (CallToolResult, error) {
 	model.SyncData(true)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync done: " + model.Conf.Sync.Stat}}}, nil
 }
 
-func syncUpload(args map[string]interface{}) (CallToolResult, error) {
+func syncUpload(args map[string]any) (CallToolResult, error) {
 	model.SyncDataUpload()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync upload done: " + model.Conf.Sync.Stat}}}, nil
 }
 
-func syncDownload(args map[string]interface{}) (CallToolResult, error) {
+func syncDownload(args map[string]any) (CallToolResult, error) {
 	model.SyncDataDownload()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sync download done: " + model.Conf.Sync.Stat}}}, nil
 }
 
-func syncStatus(args map[string]interface{}) (CallToolResult, error) {
+func syncStatus(args map[string]any) (CallToolResult, error) {
 	s := model.Conf.Sync
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf(
 		"Sync Status:\n  Enabled: %v\n  Mode: %d (0/1=auto, 2=manual, 3=full-manual)\n  Provider: %d\n  Cloud: %s\n  Perception: %v\n  Interval: %ds\n  Synced: %d\n  Stat: %s",

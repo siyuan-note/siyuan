@@ -57,7 +57,7 @@ func init() {
 	register(FileTool)
 }
 
-func fileHandler(args map[string]interface{}) (CallToolResult, error) {
+func fileHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -108,7 +108,7 @@ func rejectEncryptedPath(absPath string) (boxID string, encrypted bool) {
 	return boxID, boxID != ""
 }
 
-func fileList(args map[string]interface{}) (CallToolResult, error) {
+func fileList(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -146,7 +146,7 @@ func fileList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func getFloat64Arg(args map[string]interface{}, key string) float64 {
+func getFloat64Arg(args map[string]any, key string) float64 {
 	if v, ok := args[key]; ok {
 		if f, ok := v.(float64); ok {
 			return f
@@ -155,7 +155,7 @@ func getFloat64Arg(args map[string]interface{}, key string) float64 {
 	return 0
 }
 
-func resolveLimit(args map[string]interface{}, defaultLimit int) int {
+func resolveLimit(args map[string]any, defaultLimit int) int {
 	limit := int(getFloat64Arg(args, "limit"))
 	if limit <= 0 {
 		return defaultLimit
@@ -163,7 +163,7 @@ func resolveLimit(args map[string]interface{}, defaultLimit int) int {
 	return limit
 }
 
-func fileRead(args map[string]interface{}) (CallToolResult, error) {
+func fileRead(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -188,10 +188,7 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	total := len(lines)
 
 	if offset < 0 {
-		offset = total + offset
-		if offset < 0 {
-			offset = 0
-		}
+		offset = max(total+offset, 0)
 	} else {
 		offset--
 		if offset < 0 {
@@ -201,10 +198,7 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 
 	end := total
 	if limit > 0 {
-		end = offset + limit
-		if end > total {
-			end = total
-		}
+		end = min(offset+limit, total)
 	}
 
 	if offset >= total {
@@ -215,7 +209,7 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: result}}}, nil
 }
 
-func fileWrite(args map[string]interface{}) (CallToolResult, error) {
+func fileWrite(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	dataStr, _ := args["data"].(string)
 	if p == "" || dataStr == "" {
@@ -234,7 +228,7 @@ func fileWrite(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "file written: " + p}}}, nil
 }
 
-func fileDelete(args map[string]interface{}) (CallToolResult, error) {
+func fileDelete(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -258,7 +252,7 @@ func fileDelete(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "deleted: " + p}}}, nil
 }
 
-func fileRename(args map[string]interface{}) (CallToolResult, error) {
+func fileRename(args map[string]any) (CallToolResult, error) {
 	old, _ := args["old"].(string)
 	newP, _ := args["new"].(string)
 	if old == "" || newP == "" {
@@ -281,7 +275,7 @@ func fileRename(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("renamed: %s -> %s", old, newP)}}}, nil
 }
 
-func fileCopy(args map[string]interface{}) (CallToolResult, error) {
+func fileCopy(args map[string]any) (CallToolResult, error) {
 	src, _ := args["src"].(string)
 	dst, _ := args["dst"].(string)
 	if src == "" || dst == "" {
@@ -353,7 +347,7 @@ func typeLabel(isDir bool) string {
 	return "FILE"
 }
 
-func fileGrep(args map[string]interface{}) (CallToolResult, error) {
+func fileGrep(args map[string]any) (CallToolResult, error) {
 	pattern, _ := args["pattern"].(string)
 	if pattern == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "pattern is required"}}, IsError: true}, nil
@@ -395,7 +389,7 @@ func fileGrep(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func fileFind(args map[string]interface{}) (CallToolResult, error) {
+func fileFind(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -490,13 +484,13 @@ func expandGlobBrace(pattern string) []string {
 	suffix := pattern[j+1:]
 
 	var result []string
-	for _, opt := range strings.Split(body, ",") {
+	for opt := range strings.SplitSeq(body, ",") {
 		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
 	}
 	return result
 }
 
-func fileStat(args map[string]interface{}) (CallToolResult, error) {
+func fileStat(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil

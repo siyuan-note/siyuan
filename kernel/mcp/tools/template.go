@@ -49,7 +49,7 @@ func init() {
 	register(TemplateTool)
 }
 
-func templateHandler(args map[string]interface{}) (CallToolResult, error) {
+func templateHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "search":
@@ -71,7 +71,7 @@ func templateHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func templateSearch(args map[string]interface{}) (CallToolResult, error) {
+func templateSearch(args map[string]any) (CallToolResult, error) {
 	keyword, _ := args["keyword"].(string)
 	results := model.SearchTemplate(keyword)
 	if len(results) == 0 {
@@ -104,7 +104,7 @@ func resolveTemplatePath(p string) (string, error) {
 	return abs, nil
 }
 
-func templateGet(args map[string]interface{}) (CallToolResult, error) {
+func templateGet(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	abs, err := resolveTemplatePath(p)
 	if err != nil {
@@ -117,7 +117,7 @@ func templateGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: string(data)}}}, nil
 }
 
-func templateRemove(args map[string]interface{}) (CallToolResult, error) {
+func templateRemove(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	abs, err := resolveTemplatePath(p)
 	if err != nil {
@@ -129,7 +129,7 @@ func templateRemove(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "template removed: " + p}}}, nil
 }
 
-func templateRender(args map[string]interface{}) (CallToolResult, error) {
+func templateRender(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	id, _ := args["id"].(string)
 	if id == "" {
@@ -147,7 +147,7 @@ func templateRender(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: dom}}}, nil
 }
 
-func templateSaveAs(args map[string]interface{}) (CallToolResult, error) {
+func templateSaveAs(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	name, _ := args["name"].(string)
 	if id == "" || name == "" {
@@ -165,7 +165,7 @@ func templateSaveAs(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "template saved: " + name + ".md"}}}, nil
 }
 
-func templateCreate(args map[string]interface{}) (CallToolResult, error) {
+func templateCreate(args map[string]any) (CallToolResult, error) {
 	name, _ := args["name"].(string)
 	content, _ := args["content"].(string)
 	if name == "" {

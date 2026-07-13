@@ -702,10 +702,7 @@ func setNotebookCryptoAutoLock(c *gin.Context) {
 		return
 	}
 
-	minutes := int(autoLockMinutes)
-	if minutes < 0 {
-		minutes = 0
-	}
+	minutes := max(int(autoLockMinutes), 0)
 
 	model.SetAutoLockMinutes(minutes)
 	model.Conf.Save()

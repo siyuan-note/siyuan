@@ -17,6 +17,7 @@
 package agent
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"sort"
@@ -169,9 +170,7 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 		}
 	}
 	snapshot := make(map[string]*SessionIndexItem, len(index))
-	for k, v := range index {
-		snapshot[k] = v
-	}
+	maps.Copy(snapshot, index)
 	indexMu.Unlock()
 
 	entries, err := os.ReadDir(sessionsDir())
@@ -251,10 +250,7 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 			PageSize: pageSize,
 		}
 	}
-	end := start + pageSize
-	if end > total {
-		end = total
-	}
+	end := min(start+pageSize, total)
 
 	return &SessionListResult{
 		Sessions: items[start:end],
@@ -264,7 +260,7 @@ func ListSessions(page, pageSize int, keyword string) *SessionListResult {
 	}
 }
 
-func GetSession(id string) (map[string]interface{}, error) {
+func GetSession(id string) (map[string]any, error) {
 	if id == "" || !isValidSessionID(id) {
 		return nil, nil
 	}
@@ -273,7 +269,7 @@ func GetSession(id string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var session map[string]interface{}
+	var session map[string]any
 	if err := gulu.JSON.UnmarshalJSON(data, &session); err != nil {
 		return nil, err
 	}
@@ -294,8 +290,8 @@ func SaveSession(data []byte) error {
 
 	existing, err := os.ReadFile(path)
 	if err == nil && len(existing) > 0 {
-		var existingData map[string]interface{}
-		var newData map[string]interface{}
+		var existingData map[string]any
+		var newData map[string]any
 		if gulu.JSON.UnmarshalJSON(existing, &existingData) == nil &&
 			gulu.JSON.UnmarshalJSON(data, &newData) == nil {
 			for k, v := range existingData {
@@ -314,7 +310,7 @@ func SaveSession(data []byte) error {
 			}
 		}
 	} else {
-		var newData map[string]interface{}
+		var newData map[string]any
 		if gulu.JSON.UnmarshalJSON(data, &newData) == nil {
 			indented, err := gulu.JSON.MarshalIndentJSON(newData, "", "\t")
 			if err == nil {

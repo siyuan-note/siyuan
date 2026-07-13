@@ -43,7 +43,7 @@ func init() {
 	register(ImportTool)
 }
 
-func importHandler(args map[string]interface{}) (CallToolResult, error) {
+func importHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "md":
@@ -59,7 +59,7 @@ func importHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func importMd(args map[string]interface{}) (CallToolResult, error) {
+func importMd(args map[string]any) (CallToolResult, error) {
 	notebook, _ := args["notebook"].(string)
 	filePath, _ := args["path"].(string)
 	if filePath == "" {
@@ -83,7 +83,7 @@ func importMd(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "markdown imported to notebook " + notebook}}}, nil
 }
 
-func importSy(args map[string]interface{}) (CallToolResult, error) {
+func importSy(args map[string]any) (CallToolResult, error) {
 	notebook, _ := args["notebook"].(string)
 	filePath, _ := args["path"].(string)
 	if filePath == "" {
@@ -107,7 +107,7 @@ func importSy(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "sy archive imported to notebook " + notebook}}}, nil
 }
 
-func importData(args map[string]interface{}) (CallToolResult, error) {
+func importData(args map[string]any) (CallToolResult, error) {
 	filePath, _ := args["path"].(string)
 	if filePath == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil

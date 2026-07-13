@@ -49,7 +49,7 @@ func init() {
 	register(UnzipTool)
 }
 
-func unzipHandler(args map[string]interface{}) (CallToolResult, error) {
+func unzipHandler(args map[string]any) (CallToolResult, error) {
 	zipPath, _ := args["zipPath"].(string)
 	destPath, _ := args["destPath"].(string)
 	if zipPath == "" {

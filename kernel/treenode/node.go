@@ -196,9 +196,9 @@ func IsNodeOCRed(node *ast.Node) (ret bool) {
 func GetNodeSrcTokens(n *ast.Node) (ret string) {
 	if index := bytes.Index(n.Tokens, []byte("src=\"")); 0 < index {
 		src := n.Tokens[index+len("src=\""):]
-		if closeQuote := bytes.Index(src, []byte("\"")); -1 < closeQuote {
+		if before, _, ok := bytes.Cut(src, []byte("\"")); ok {
 			// src 为空时闭合引号紧随其后，closeQuote 为 0 也是合法情况
-			ret = strings.TrimSpace(string(src[:closeQuote]))
+			ret = strings.TrimSpace(string(before))
 			return
 		}
 

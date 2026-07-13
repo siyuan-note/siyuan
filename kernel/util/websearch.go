@@ -40,8 +40,8 @@ type mcpRequest struct {
 }
 
 type mcpParams struct {
-	Name      string                 `json:"name"`
-	Arguments map[string]interface{} `json:"arguments"`
+	Name      string         `json:"name"`
+	Arguments map[string]any `json:"arguments"`
 }
 
 type mcpResponse struct {
@@ -69,7 +69,7 @@ func WebSearch(query, exaApiKey string) (string, error) {
 		Method:  "tools/call",
 		Params: mcpParams{
 			Name: "web_search_exa",
-			Arguments: map[string]interface{}{
+			Arguments: map[string]any{
 				"query":      query,
 				"type":       "auto",
 				"numResults": 8,
@@ -109,7 +109,7 @@ func parseMcpResponse(body string) string {
 		return text
 	}
 
-	for _, line := range strings.Split(body, "\n") {
+	for line := range strings.SplitSeq(body, "\n") {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "data:") {
 			payload := strings.TrimSpace(line[5:])

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"database/sql"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -455,9 +456,7 @@ func getBlockAttrsFromTree(id string, tree *parse.Tree) (ret map[string]string) 
 
 	ial := cache.GetBlockIALWithBoxFallback(id, tree.Box)
 	if nil != ial {
-		for k, v := range ial {
-			ret[k] = v
-		}
+		maps.Copy(ret, ial)
 		return
 	}
 

@@ -316,8 +316,8 @@ func queryDefIDsByNameAlias(keyword string, excludeIDs []string) (ret []string) 
 		}
 
 		var hitAlias bool
-		aliases := strings.Split(alias, ",")
-		for _, a := range aliases {
+		aliases := strings.SplitSeq(alias, ",")
+		for a := range aliases {
 			if "" == a {
 				continue
 			}

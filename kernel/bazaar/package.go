@@ -235,8 +235,8 @@ func getSearchKeywords(query string) (ret []string) {
 	if "" == query {
 		return
 	}
-	keywords := strings.Split(query, " ")
-	for _, k := range keywords {
+	keywords := strings.SplitSeq(query, " ")
+	for k := range keywords {
 		if "" != k {
 			ret = append(ret, strings.ToLower(k))
 		}

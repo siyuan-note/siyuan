@@ -18,7 +18,7 @@ package search
 
 import (
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -30,7 +30,7 @@ func init() {
 		hanSimpToTrads[s] = append(hanSimpToTrads[s], t)
 	}
 	for _, ts := range hanSimpToTrads {
-		sort.Slice(ts, func(i, j int) bool { return ts[i] < ts[j] })
+		slices.Sort(ts)
 	}
 }
 

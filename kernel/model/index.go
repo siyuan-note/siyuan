@@ -139,10 +139,7 @@ func indexBox(boxID string) {
 
 	util.SetBootDetails(Conf.Language(303))
 	files := box.ListFiles("/")
-	boxLen := len(Conf.GetOpenedBoxes())
-	if 1 > boxLen {
-		boxLen = 1
-	}
+	boxLen := max(1, len(Conf.GetOpenedBoxes()))
 	bootProgressPart := int32(30.0 / float64(boxLen) / float64(len(files)))
 
 	start := time.Now()

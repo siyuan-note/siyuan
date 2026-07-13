@@ -81,8 +81,8 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 
 						if ast.NodeTextMark == n.Type {
 							if n.IsTextMarkType("a") {
-								if strings.HasPrefix(n.TextMarkAHref, "siyuan://blocks/") {
-									defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+								if after, ok := strings.CutPrefix(n.TextMarkAHref, "siyuan://blocks/"); ok {
+									defID := after
 									if strings.Contains(defID, "?") {
 										defID = strings.Split(defID, "?")[0]
 									}
@@ -157,10 +157,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	allInvalidBlockIDs := invalidBlockIDs
 
 	start := (page - 1) * pageSize
-	end := page * pageSize
-	if end > len(invalidBlockIDs) {
-		end = len(invalidBlockIDs)
-	}
+	end := min(page*pageSize, len(invalidBlockIDs))
 	invalidBlockIDs = invalidBlockIDs[start:end]
 
 	sqlBlocks := sql.GetBlocks(invalidBlockIDs)
@@ -336,11 +333,28 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 	}
 
 	if "" == keyword {
-		// 查询为空时默认的块引排序规则按最近使用优先 https://github.com/siyuan-note/siyuan/issues/3218
+		// 查询为空时默认的块引排序规则按最近引用优先 https://github.com/siyuan-note/siyuan/issues/3218
 
 		typeFilter := Conf.Search.TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()
 		refs := sql.QueryRefsRecentInBox(onlyDoc, typeFilter, ignoreLines, boxID)
+		// 候选已按 refs.id DESC 兜底排序，这里再按"最近引用时间"精确排序：
+		// 有记录的目标块按时间戳降序排前，无记录的（历史数据）保持兜底序排后
+		refUsed := GetRefUsed()
+		sort.SliceStable(refs, func(i, j int) bool {
+			ti, oki := refUsed[refs[i].DefBlockID]
+			tj, okj := refUsed[refs[j].DefBlockID]
+			if oki && okj {
+				return ti > tj
+			}
+			if oki != okj {
+				return oki
+			}
+			return false
+		})
+		if 32 < len(refs) {
+			refs = refs[:32]
+		}
 		var btsID []string
 		for _, ref := range refs {
 			btsID = append(btsID, ref.DefBlockRootID)
@@ -1848,22 +1862,23 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	keywords := strings.Split(query, " ")
 	contentField := columnConcat()
 	var likeFilter string
-	orderByLike := "("
+	var orderByLike strings.Builder
+	orderByLike.WriteString("(")
 	for i, keyword := range keywords {
 		likeFilter += "GROUP_CONCAT(" + contentField + ") LIKE '%" + keyword + "%'"
-		orderByLike += "(docContent LIKE '%" + keyword + "%')"
+		orderByLike.WriteString("(docContent LIKE '%" + keyword + "%')")
 		if i < len(keywords)-1 {
 			likeFilter += " AND "
-			orderByLike += " + "
+			orderByLike.WriteString(" + ")
 		}
 	}
-	orderByLike += ")"
+	orderByLike.WriteString(")")
 	// box/path 过滤子句在下方 dMatchStmt 与 selectStmt 中各出现一次，绑定参数需按出现顺序收集两份。
 	// 第一份对应 CTE 内的 WHERE
 	args := append(append([]any{}, boxArgs...), pathArgs...)
 	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent" +
 		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
+		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike.String() + " DESC, MAX(updated) DESC"
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
 	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
@@ -2218,8 +2233,8 @@ func stringQuery(query string) string {
 
 	if strings.Contains(trimmedQuery, " ") {
 		buf := bytes.Buffer{}
-		parts := strings.Split(query, " ")
-		for _, part := range parts {
+		parts := strings.SplitSeq(query, " ")
+		for part := range parts {
 			part = strings.TrimSpace(part)
 			part = "\"" + part + "\""
 			buf.WriteString(part)

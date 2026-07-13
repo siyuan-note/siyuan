@@ -1179,8 +1179,8 @@ func deleteAttrView(n *ast.Node, changedAvIDs []string) []string {
 		return nil
 	}
 
-	avIDs := strings.Split(avs, ",")
-	for _, avID := range avIDs {
+	avIDs := strings.SplitSeq(avs, ",")
+	for avID := range avIDs {
 		attrView, parseErr := av.ParseAttributeView(avID)
 		if nil != parseErr {
 			continue
@@ -1404,6 +1404,8 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	for _, defID := range refDefIDs {
 		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 	}
+	// 新插入块中的引用均为本次新增，刷新其最近引用时间用于块引"最近引用"排序
+	TouchRefUsed(refDefIDs)
 	// 粘贴被引用的块后需刷新目标文档的引用计数，否则目标文档级计数角标不会更新
 	task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, tree.Root.ID)
 
@@ -1567,6 +1569,15 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		for _, defID := range refDefIDs {
 			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 		}
+
+		// 本次新增引用的目标块，刷新其最近引用时间用于块引"最近引用"排序
+		var newRefDefIDs []string
+		for _, defID := range newDefIDs {
+			if !gulu.Str.Contains(defID, oldDefIDs) {
+				newRefDefIDs = append(newRefDefIDs, defID)
+			}
+		}
+		TouchRefUsed(newRefDefIDs)
 	}
 
 	updatedNode := subTree.Root.FirstChild
@@ -1589,8 +1600,8 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		content := string(updatedNode.Tokens)
 		// 剔除连续的空行（包括空行内包含空格的情况） https://github.com/siyuan-note/siyuan/issues/15377
 		var newLines []string
-		lines := strings.Split(content, "\n")
-		for _, line := range lines {
+		lines := strings.SplitSeq(content, "\n")
+		for line := range lines {
 			if strings.TrimSpace(line) != "" {
 				newLines = append(newLines, line)
 			}
@@ -1870,6 +1881,8 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	tree := operation.Data.(*parse.Tree)
 	tx.writeTree(tree)
+	// 新建文档中的引用均为本次新增，刷新其最近引用时间用于块引"最近引用"排序
+	TouchRefUsed(getRefDefIDs(tree.Root))
 	return
 }
 

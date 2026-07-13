@@ -194,23 +194,23 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 				}
 			}
 
-			var condition string
+			var condition strings.Builder
 			for i, k := range keywords {
-				condition += "(hpath LIKE '%" + k + "%'"
+				condition.WriteString("(hpath LIKE '%" + k + "%'")
 				namCondition := Conf.Search.NAMFilter(k)
-				condition += " " + namCondition
-				condition += ")"
+				condition.WriteString(" " + namCondition)
+				condition.WriteString(")")
 
 				if i < len(keywords)-1 {
-					condition += " AND "
+					condition.WriteString(" AND ")
 				}
 			}
 
 			for _, excludeID := range excludeIDs {
-				condition += fmt.Sprintf(" AND path NOT LIKE '%%%s%%' ", excludeID)
+				condition.WriteString(fmt.Sprintf(" AND path NOT LIKE '%%%s%%' ", excludeID))
 			}
 
-			rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)
+			rootBlocks = sql.QueryRootBlockByCondition(condition.String(), Conf.Search.Limit)
 		} else {
 			for _, box := range boxes {
 				if flashcard {

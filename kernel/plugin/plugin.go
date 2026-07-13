@@ -388,7 +388,7 @@ func (p *KernelPlugin) unregisterMcpTool(name string) error {
 }
 
 // invokeMcpTool calls a JS handler registered via siyuan.mcp.registerTool and returns the CallToolResult.
-func (p *KernelPlugin) invokeMcpTool(handler goja.Callable, args map[string]interface{}) (tools.CallToolResult, error) {
+func (p *KernelPlugin) invokeMcpTool(handler goja.Callable, args map[string]any) (tools.CallToolResult, error) {
 	if p.State() != PluginStateRunning {
 		return tools.CallToolResult{
 			IsError: true,

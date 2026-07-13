@@ -45,7 +45,7 @@ func init() {
 	register(AttrTool)
 }
 
-func attrHandler(args map[string]interface{}) (CallToolResult, error) {
+func attrHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
@@ -61,7 +61,7 @@ func attrHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func attrGet(args map[string]interface{}) (CallToolResult, error) {
+func attrGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -80,13 +80,13 @@ func attrGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func attrSet(args map[string]interface{}) (CallToolResult, error) {
+func attrSet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	attrsArg, ok := args["attrs"].(map[string]interface{})
+	attrsArg, ok := args["attrs"].(map[string]any)
 	if !ok || len(attrsArg) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attrs (key-value object) is required"}}, IsError: true}, nil
 	}
@@ -104,7 +104,7 @@ func attrSet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attributes set for: " + id}}}, nil
 }
 
-func attrBatchGet(args map[string]interface{}) (CallToolResult, error) {
+func attrBatchGet(args map[string]any) (CallToolResult, error) {
 	idsStr, _ := args["ids"].(string)
 	if idsStr == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids (comma-separated) is required"}}, IsError: true}, nil

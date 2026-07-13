@@ -1,6 +1,7 @@
 package av
 
 import (
+	"maps"
 	"sync"
 
 	"github.com/88250/gulu"
@@ -32,15 +33,11 @@ func GetBlockRels() (ret map[string][]string) {
 
 	ret = map[string][]string{}
 	// 全局镜像索引（普通 box）
-	for k, v := range readMirrorBlocks("") {
-		ret[k] = v
-	}
+	maps.Copy(ret, readMirrorBlocks(""))
 	// 加密笔记本的镜像索引（已打开的）
 	if AVEncryptedBoxIDs != nil {
 		for _, encBoxID := range AVEncryptedBoxIDs() {
-			for k, v := range readMirrorBlocks(encBoxID) {
-				ret[k] = v
-			}
+			maps.Copy(ret, readMirrorBlocks(encBoxID))
 		}
 	}
 	return

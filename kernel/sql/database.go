@@ -1022,8 +1022,8 @@ func tagFromNode(node *ast.Node) (ret string) {
 
 	if ast.NodeDocument == node.Type {
 		tagIAL := html.UnescapeString(node.IALAttr("tags"))
-		tags := strings.Split(tagIAL, ",")
-		for _, t := range tags {
+		tags := strings.SplitSeq(tagIAL, ",")
+		for t := range tags {
 			t = strings.TrimSpace(t)
 			if "" == t {
 				continue

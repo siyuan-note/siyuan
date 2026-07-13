@@ -135,8 +135,8 @@ func QueryBlockAliases(rootID string) (ret []string) {
 	}
 
 	for _, aliasStr := range aliasesRows {
-		aliases := strings.Split(aliasStr, ",")
-		for _, alias := range aliases {
+		aliases := strings.SplitSeq(aliasStr, ",")
+		for alias := range aliases {
 			var exist bool
 			for _, retAlias := range ret {
 				if retAlias == alias {
@@ -177,8 +177,8 @@ func queryNames(searchIgnoreLines []string) (ret []string) {
 
 	set := hashset.New()
 	for _, namesStr := range namesRows {
-		names := strings.Split(namesStr, ",")
-		for _, name := range names {
+		names := strings.SplitSeq(namesStr, ",")
+		for name := range names {
 			if "" == strings.TrimSpace(name) {
 				continue
 			}
@@ -217,8 +217,8 @@ func queryAliases(searchIgnoreLines []string) (ret []string) {
 
 	set := hashset.New()
 	for _, aliasStr := range aliasesRows {
-		aliases := strings.Split(aliasStr, ",")
-		for _, alias := range aliases {
+		aliases := strings.SplitSeq(aliasStr, ",")
+		for alias := range aliases {
 			if "" == strings.TrimSpace(alias) {
 				continue
 			}
@@ -284,8 +284,8 @@ func queryDocTitles(searchIgnoreLines []string) (ret []string) {
 
 	set := hashset.New()
 	for _, nameStr := range docNamesRows {
-		names := strings.Split(nameStr, ",")
-		for _, name := range names {
+		names := strings.SplitSeq(nameStr, ",")
+		for name := range names {
 			if "" == strings.TrimSpace(name) {
 				continue
 			}

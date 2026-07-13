@@ -169,10 +169,10 @@ func ListNotebooks() (ret []*Box, err error) {
 			Icon:      icon,
 			Sort:      boxConf.Sort,
 			SortMode:  boxConf.SortMode,
-		Closed:    boxConf.Closed,
-		Encrypted: boxConf.Encrypted,
-		Unlocked:  IsBoxUnlocked(id),
-	}
+			Closed:    boxConf.Closed,
+			Encrypted: boxConf.Encrypted,
+			Unlocked:  IsBoxUnlocked(id),
+		}
 
 		if !isExistConf {
 			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
@@ -281,8 +281,8 @@ func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
 		return
 	}
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
-	if strings.HasSuffix(p, ".sy") {
-		dir := strings.TrimSuffix(p, ".sy")
+	if before, ok := strings.CutSuffix(p, ".sy"); ok {
+		dir := before
 		absDir := filepath.Join(boxLocalPath, dir)
 		if gulu.File.IsDir(absDir) {
 			p = dir
@@ -839,10 +839,7 @@ func VacuumDataIndex() {
 		humanize.BytesCustomCeil(uint64(oldHistoryDbSize), 2), humanize.BytesCustomCeil(uint64(newHistoryDbSize), 2),
 		humanize.BytesCustomCeil(uint64(oldAssetContentDbSize), 2), humanize.BytesCustomCeil(uint64(newAssetContentDbSize), 2))
 
-	releaseSize := (oldsyDbSize - newSyDbSize) + (oldHistoryDbSize - newHistoryDbSize) + (oldAssetContentDbSize - newAssetContentDbSize)
-	if releaseSize < 0 {
-		releaseSize = 0
-	}
+	releaseSize := max((oldsyDbSize-newSyDbSize)+(oldHistoryDbSize-newHistoryDbSize)+(oldAssetContentDbSize-newAssetContentDbSize), 0)
 	msg := fmt.Sprintf(Conf.language(271), humanize.BytesCustomCeil(uint64(releaseSize), 2))
 	util.PushMsg(msg, 7000)
 }

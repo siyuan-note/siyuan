@@ -413,14 +413,17 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
     const switchElement = root.querySelector("#encryptedNotebookSwitch") as HTMLInputElement;
     const actionsElement = root.querySelector("#encryptedNotebookActions");
     const enabledActionsElement = root.querySelector("#encryptedNotebookEnabledActions");
+    const importCryptoBackupBtnElement = root.querySelector("#importCryptoBackupBtn");
     const migrationAlertElement = root.querySelector("#encryptedNotebookMigrationAlert");
     const refresh = () => {
         fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
             const enabled = response.data.enabled;
             switchElement.checked = enabled;
             window.siyuan.config.notebookCrypto.enabled = enabled;
-            // 导入密钥始终可见，修改主密码/导出密钥仅在启用时可见
+            // 修改主密码/导出密钥仅在启用时可见；导入密钥仅在未启用时可见（详见设计 §4.1，
+            // 已启用时导入会用导入备份的 MasterSalt/KEKVerifier 覆盖当前配置，孤立现有 WrappedDEK）
             enabledActionsElement.classList.toggle("fn__none", !enabled);
+            importCryptoBackupBtnElement.classList.toggle("fn__none", enabled);
             actionsElement.classList.remove("fn__none");
             migrationAlertElement.classList.toggle("fn__none", !response.data.migrationPending);
         });
@@ -510,8 +513,17 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 if (response.data.count > 0) {
                     showMessage(window.siyuan.languages.encryptedNotebookDisableTip.replace("${x}", response.data.count), 4000);
                     switchElement.checked = true;
+                } else if (response.data.hasHistoryDependency) {
+                    // 已删除加密笔记本的历史仍依赖当前密钥备份，禁用会让其永久锁死（详见设计 §19）
+                    showMessage(window.siyuan.languages["_kernel"]["323"], 6000, "error");
+                    switchElement.checked = true;
                 } else {
-                    fetchPost("/api/notebook/disableEncryptedNotebooks", {}, () => {
+                    // 用 sync 调用以便后端因任何原因拒绝时回滚开关，避免 UI 与后端状态不一致
+                    fetchSyncPost("/api/notebook/disableEncryptedNotebooks", {}).then((res: IWebSocketData) => {
+                        if (res.code === -1) {
+                            switchElement.checked = true; // processMessage 已弹出错误，这里只回滚开关
+                            return;
+                        }
                         showMessage(window.siyuan.languages.encryptedNotebookDisabled);
                         refresh();
                     });

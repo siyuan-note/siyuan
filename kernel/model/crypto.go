@@ -185,9 +185,26 @@ func ExportNotebookCryptoBackup() (downloadPath string, err error) {
 // 防呆：本机已启用加密笔记本时拒绝导入，避免覆盖现有 salt/verifier 孤立现有 WrappedDEK。
 // ImportNotebookCryptoBackup 接收用户导入的密钥备份文件内容（JSON 字节）+ 主密码，
 // 校验主密码能解开备份里的 verifier 后才写回配置。防止 crafted 备份设置弱 KDFParams 等攻击。
+// 本机已启用时拒绝（详见设计 §4.1）：导入会用导入备份的 MasterSalt/KEKVerifier 覆盖当前配置，
+// 若有现存加密笔记本其 WrappedDEK 将被新 KEK 孤立（数据锁死）；即使无现存笔记本也拒绝，
+// 避免覆盖后旧主密码失效造成用户困惑。换密钥材料应走“先禁用再导入”。
 func ImportNotebookCryptoBackup(data []byte, password string) error {
 	notebookCryptoMu.Lock()
 	defer notebookCryptoMu.Unlock()
+
+	// 已启用即拒绝（对齐设计 §4.1，与 api handler 注释一致）
+	Conf.m.RLock()
+	enabled := Conf.NotebookCrypto.Enabled
+	Conf.m.RUnlock()
+	if enabled {
+		return errors.New(Conf.Language(324))
+	}
+
+	// 历史目录中存在已删除加密笔记本的历史时拒绝导入：导入会用新 MasterSalt 覆盖当前配置，
+	// 这些历史的恢复仍依赖原 MasterSalt，覆盖后永久锁死（与 EnableEncryptedNotebook 的对称守卫一致）
+	if HasEncryptedNotebookHistory() {
+		return errors.New(Conf.Language(323))
+	}
 
 	nc := &conf.NotebookCrypto{}
 	if err := json.Unmarshal(data, nc); err != nil {
@@ -511,7 +528,7 @@ func hasEncryptedNotebook() bool {
 	return len(ListAllEncryptedBoxIDs()) > 0
 }
 
-// hasEncryptedNotebookHistory 检查历史目录中是否存在加密笔记本的历史快照。
+// HasEncryptedNotebookHistory 检查历史目录中是否存在加密笔记本的历史快照。
 // 笔记本删除后其 box 目录（含 .siyuan/conf.json 和 notebook-crypt-backup.json）会被
 // 原样密文备份到历史目录（RemoveBox 的 filelock.Copy），但此时 IsEncryptedBox 已返回 false
 // （box 目录已删）。因此 DisableEncryptedNotebook 不能只靠 ListAllEncryptedBoxIDs 判定——
@@ -521,7 +538,7 @@ func hasEncryptedNotebook() bool {
 // 判定信号：历史条目 <HistoryDir>/<ts>-<op>/<boxID>/.siyuan/ 下存在
 // notebook-crypt-backup.json（专为 box 删除后的恢复设计），或 conf.json 标记 Encrypted=true。
 // boxID 用 ast.IsNodeIDPattern 校验，避免误判 assets/storage 等非 box 目录。
-func hasEncryptedNotebookHistory() bool {
+func HasEncryptedNotebookHistory() bool {
 	entries, err := os.ReadDir(util.HistoryDir)
 	if err != nil {
 		return false // 历史目录不存在或不可读 → 无依赖
@@ -616,7 +633,14 @@ func EnableEncryptedNotebook(password string) error {
 		return nil
 	}
 
-	// 不存在加密笔记本：正常生成新 MasterSalt
+	// 防呆：历史目录中存在已删除加密笔记本的历史快照时，禁止重新生成 MasterSalt。
+	// 这些历史的恢复仍依赖原 MasterSalt/KEKVerifier，生成新 salt 会让其永久锁死（违反设计 §4.1
+	// “内核可枚举的加密恢复数据存在时禁止重新生成 MasterSalt”）。此时应先恢复全局密钥备份或清除历史。
+	if HasEncryptedNotebookHistory() {
+		return errors.New(Conf.Language(323))
+	}
+
+	// 不存在加密笔记本且无历史依赖：正常生成新 MasterSalt
 	salt, err := util.GenerateSalt()
 	if err != nil {
 		return err
@@ -679,7 +703,7 @@ func DisableEncryptedNotebook() error {
 	}
 	// 检查历史目录中是否存在已删除加密笔记本的历史快照：其恢复仍依赖当前 MasterSalt/KEKVerifier，
 	// 删除备份前必须先清除这些历史（详见设计 §19）
-	if hasEncryptedNotebookHistory() {
+	if HasEncryptedNotebookHistory() {
 		return errors.New(Conf.Language(323))
 	}
 

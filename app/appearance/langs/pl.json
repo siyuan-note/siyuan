@@ -2135,6 +2135,7 @@
 		"320": "Master password change partially failed. Please restart SiYuan to complete recovery. Detail: %s",
 		"321": "Access to encrypted notebook data is not supported via this API",
 		"322": "Zaszyfrowany notatnik [%s] został automatycznie zablokowany z powodu braku aktywności",
-		"323": "Nie można wyłączyć zaszyfrowanych notatników: historia usuniętych notatników nadal zależy od bieżącej kopii zapasowej kluczy. Wyczyść tę historię najpierw"
+		"323": "Nie można wyłączyć zaszyfrowanych notatników: historia usuniętych notatników nadal zależy od bieżącej kopii zapasowej kluczy. Wyczyść tę historię najpierw",
+		"324": "Nie można zaimportować kopii zapasowej kluczy, gdy zaszyfrowane notatniki są włączone. Najpierw je wyłącz"
 	}
 	}

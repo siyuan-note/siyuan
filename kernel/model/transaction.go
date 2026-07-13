@@ -703,6 +703,9 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
+	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
+	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
+	degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
@@ -799,6 +802,9 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
+	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
+	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
+	degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
@@ -1880,6 +1886,9 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	tree := operation.Data.(*parse.Tree)
+	// 兜底校验：禁止跨加密边界块引（创建文档可能携带跨边界引用）
+	// 必须在 getRefDefIDs 之前，避免跨边界引用被收集进引用缓存
+	degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
 	tx.writeTree(tree)
 	// 新建文档中的引用均为本次新增，刷新其最近引用时间用于块引"最近引用"排序
 	TouchRefUsed(getRefDefIDs(tree.Root))

@@ -181,18 +181,16 @@ export const initRightMenu = (app: App) => {
                 exitSiYuan();
                 break;
             } else if ((settingTabDef = getSettingTabFromMenuTarget(target))) {
-                if (!settingTabDef.hidden) {
-                    openModel({
-                        title: settingTabDef.title,
-                        icon: settingTabDef.icon,
-                        html: `<div class="config${isMobile() ? " config--mobile" : ""}"></div>`,
-                        bindEvent(modelMainElement: HTMLElement) {
-                            const root = modelMainElement.firstElementChild as HTMLElement;
-                            bindSettingSaveDelegation(root);
-                            void getSettingTab(settingTabDef.id).mount(root, undefined, app);
-                        }
-                    });
-                }
+                openModel({
+                    title: settingTabDef.title,
+                    icon: settingTabDef.icon,
+                    html: `<div class="config${isMobile() ? " config--mobile" : ""}"></div>`,
+                    bindEvent(modelMainElement: HTMLElement) {
+                        const root = modelMainElement.firstElementChild as HTMLElement;
+                        bindSettingSaveDelegation(root);
+                        void getSettingTab(settingTabDef.id).mount(root, undefined, app);
+                    }
+                });
                 event.preventDefault();
                 event.stopPropagation();
                 break;

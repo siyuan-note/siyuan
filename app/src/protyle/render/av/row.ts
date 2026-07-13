@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName, hasTopClosestByAttribute, isInEmbedBlock} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
@@ -484,6 +484,16 @@ const syncFixedRowPos = (item: HTMLElement, bodyRect: DOMRect, scrollLeft: numbe
 
 export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement, status: "top" | "bottom" | "all") => {
     if (blockElement.dataset.avType !== "table") {
+        return;
+    }
+    const skipFixed = hasTopClosestByAttribute(blockElement, "fold", "1");
+    if (skipFixed) {
+        blockElement.querySelectorAll(".av__row--header--fixed").forEach((item: HTMLElement) => {
+            removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
+        });
+        blockElement.querySelectorAll(".av__row--footer--fixed").forEach((item: HTMLElement) => {
+            removeFixedRow(item, "av__row--footer--fixed", "av__row--footer-placeholder");
+        });
         return;
     }
     const scrollEl = blockElement.querySelector(".av__scroll") as HTMLElement;

@@ -715,6 +715,98 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	return
 }
 
+var refUsedLock = sync.Mutex{}
+
+// refUsedMaxCount 限制最近引用记录的最大条数，超出时淘汰最旧的记录，防止文件无限膨胀。
+const refUsedMaxCount = 512
+
+// TouchRefUsed 在用户真实插入引用时刷新目标块的最近引用时间。该时间独立于 refs 表的重建机制，
+// 仅在事务处理（真实编辑）时写入，用于稳定块引"最近引用"排序。
+func TouchRefUsed(defBlockIDs []string) {
+	if 1 > len(defBlockIDs) {
+		return
+	}
+
+	refUsedLock.Lock()
+	defer refUsedLock.Unlock()
+
+	used := loadRefUsed()
+	now := time.Now().Unix()
+	for _, defBlockID := range defBlockIDs {
+		used[defBlockID] = now
+	}
+	if refUsedMaxCount < len(used) {
+		// 超出上限时按时间戳淘汰最旧的记录
+		type entry struct {
+			id string
+			ts int64
+		}
+		entries := make([]entry, 0, len(used))
+		for id, ts := range used {
+			entries = append(entries, entry{id, ts})
+		}
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].ts > entries[j].ts
+		})
+		used = map[string]int64{}
+		for i := 0; i < refUsedMaxCount && i < len(entries); i++ {
+			used[entries[i].id] = entries[i].ts
+		}
+	}
+	setRefUsed(used)
+}
+
+// GetRefUsed 返回目标块→最近引用时间戳映射，供块引排序使用。
+func GetRefUsed() (ret map[string]int64) {
+	refUsedLock.Lock()
+	defer refUsedLock.Unlock()
+	ret = loadRefUsed()
+	return
+}
+
+func loadRefUsed() (ret map[string]int64) {
+	ret = map[string]int64{}
+	dataPath := filepath.Join(util.DataDir, "storage/ref-used.json")
+	if !filelock.IsExist(dataPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(dataPath)
+	if err != nil {
+		logging.LogErrorf("read storage [ref-used] failed: %s", err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
+		logging.LogErrorf("unmarshal storage [ref-used] failed: %s", err)
+		ret = map[string]int64{}
+		return
+	}
+	return
+}
+
+func setRefUsed(used map[string]int64) (err error) {
+	dirPath := filepath.Join(util.DataDir, "storage")
+	if err = os.MkdirAll(dirPath, 0755); err != nil {
+		logging.LogErrorf("create storage [ref-used] dir failed: %s", err)
+		return
+	}
+
+	data, err := gulu.JSON.MarshalIndentJSON(used, "", "  ")
+	if err != nil {
+		logging.LogErrorf("marshal storage [ref-used] failed: %s", err)
+		return
+	}
+
+	dataPath := filepath.Join(dirPath, "ref-used.json")
+	err = filelock.WriteFile(dataPath, data)
+	if err != nil {
+		logging.LogErrorf("write storage [ref-used] failed: %s", err)
+		return
+	}
+	return
+}
+
 type OutlineDoc struct {
 	DocID string         `json:"docID"`
 	Data  map[string]any `json:"data"`

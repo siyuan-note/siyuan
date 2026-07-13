@@ -336,11 +336,28 @@ func SearchRefBlockInBox(id, rootID, keyword string, beforeLen int, isSquareBrac
 	}
 
 	if "" == keyword {
-		// 查询为空时默认的块引排序规则按最近使用优先 https://github.com/siyuan-note/siyuan/issues/3218
+		// 查询为空时默认的块引排序规则按最近引用优先 https://github.com/siyuan-note/siyuan/issues/3218
 
 		typeFilter := Conf.Search.TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()
 		refs := sql.QueryRefsRecentInBox(onlyDoc, typeFilter, ignoreLines, boxID)
+		// 候选已按 refs.id DESC 兜底排序，这里再按"最近引用时间"精确排序：
+		// 有记录的目标块按时间戳降序排前，无记录的（历史数据）保持兜底序排后
+		refUsed := GetRefUsed()
+		sort.SliceStable(refs, func(i, j int) bool {
+			ti, oki := refUsed[refs[i].DefBlockID]
+			tj, okj := refUsed[refs[j].DefBlockID]
+			if oki && okj {
+				return ti > tj
+			}
+			if oki != okj {
+				return oki
+			}
+			return false
+		})
+		if 32 < len(refs) {
+			refs = refs[:32]
+		}
 		var btsID []string
 		for _, ref := range refs {
 			btsID = append(btsID, ref.DefBlockRootID)

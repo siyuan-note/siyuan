@@ -25,6 +25,13 @@ const bodyStates = new WeakMap<HTMLElement, IBodyState>();
 const trimPending = new WeakSet<HTMLElement>();
 let lastScrollTop: number;
 
+// 测量 DOM 变更前后容器 scrollHeight 的差值，用于精确计算 gallery 多列网格中行移除/回填的实际高度（含 gap）
+const measureHeightDiff = (el: HTMLElement, mutate: () => void): number => {
+    const before = el?.scrollHeight || 0;
+    mutate();
+    return Math.abs((el?.scrollHeight || 0) - before);
+};
+
 const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     const viewportHeight = elementRect.bottom - elementRect.top;
     const buffer = viewportHeight * BUFFER_RATIO;
@@ -55,6 +62,21 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
             bottomElement = bodyEl.querySelector(".av__gallery-add");
         }
         if (currentRows.length === 0) {
+            return;
+        }
+        // 数据行数不超过 trim 有效范围（视口 + 上下 buffer）时不 trim（如看板中较短的分组），
+        // 全部渲染即可，避免短列因 trim 导致 spacer 抖动或全部移除后无法回填
+        const trimRange = viewportHeight + buffer * 2;
+        if (dataRows.length <= Math.ceil(trimRange / Math.max(state.rowHeight || currentRows[0].offsetHeight, 1))) {
+            // 清理可能残留的 spacer 和状态，恢复全部渲染
+            const spacerEl = bodyEl.querySelector(".av__spacer") as HTMLElement;
+            if (spacerEl) {
+                spacerEl.remove();
+                state.topSpacerHeight = 0;
+                state.renderedStart = 0;
+                state.renderedEnd = dataRows.length - 1;
+                bodyStates.set(bodyEl, state);
+            }
             return;
         }
         let topElement = currentRows[0];
@@ -88,7 +110,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         let lastVisibleIndex: number;
         const toRemoveAbove: HTMLElement[] = [];
         const toRemoveBelow: HTMLElement[] = [];
-        let galleryColumn = type === "gallery" ? 0 : 1;
+        let galleryColumn = type === "table" ? 1 : 0;
         // 行高缓存，避免每帧读 offsetHeight 触发布局
         const rowHeight = state.rowHeight || currentRows[0].offsetHeight;
         state.rowHeight = rowHeight;
@@ -158,51 +180,50 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 lastVisibleIndex = Math.min(state.renderedEnd + Math.ceil((bottomLimit - rect.bottom) / rowHeight) * galleryColumn, dataRows.length - 1);
             }
         }
+        // gallery 多列布局需按视觉行整体移除，不能拆分同一行的卡片，否则 grid 重排导致列跳动。
+        // 若最后一个被收集卡片和首个保留卡片在同一视觉行，说明该行被拆分，需将该行从 toRemoveAbove 中移除
+        if (type === "gallery" && toRemoveAbove.length > 0 && !isScrollingUp) {
+            const lastRemoved = toRemoveAbove[toRemoveAbove.length - 1];
+            const firstKept = lastRemoved.nextElementSibling as HTMLElement;
+            if (firstKept && firstKept.offsetTop === lastRemoved.offsetTop) {
+                const incompleteTop = lastRemoved.offsetTop;
+                while (toRemoveAbove.length > 0 &&
+                    (toRemoveAbove[toRemoveAbove.length - 1] as HTMLElement).offsetTop === incompleteTop) {
+                    toRemoveAbove.pop();
+                }
+            }
+        }
         // 需等待 galleryColumn 计算完成
         if (isScrollingUp && firstTop > topLimit) {
             firstVisibleIndex = Math.max(0, state.renderedStart - Math.ceil((firstTop - topLimit) / rowHeight) * galleryColumn);
         }
         if (!isScrollingUp) {
             if (toRemoveAbove.length > 0) {
-                // 计算被移除行的总高度并累加到 topSpacerHeight，保持文档总高度不变、视口不跳。
-                // table 为连续前缀，用首行 top 与首个保留行 top 之差求得精确总高度；
-                // gallery/kanban 多列布局需逐行读取以判断换行。
-                let removeHeight = 0;
+                // 计算被移除行的总高度并累加到 topSpacerHeight，保持文档总高度不变、视口不跳
                 topElement = toRemoveAbove[toRemoveAbove.length - 1].nextElementSibling as HTMLElement;
-                if (type === "table" && topElement) {
+                let removeHeight = 0;
+                if (type === "gallery") {
+                    // gallery 多列网格：用容器 scrollHeight 差值精确计算（含 gap，避免逐行估算不准）
+                    const galleryEl = bodyEl.querySelector(".av__gallery") as HTMLElement;
+                    removeHeight = measureHeightDiff(galleryEl, () => {
+                        toRemoveAbove.forEach((row) => {
+                            row.remove();
+                        });
+                    });
+                } else if (type === "table" && topElement) {
                     const removeStartTop = toRemoveAbove[0].getBoundingClientRect().top;
                     const removeEndTop = topElement.getBoundingClientRect().top;
                     removeHeight = Math.round(removeEndTop - removeStartTop);
-                } else {
-                    const removeHeights: number[] = [];
-                    let galleryAccumulated = 0;
-                    toRemoveAbove.forEach((row, index) => {
-                        topElement = row.nextElementSibling as HTMLElement;
-                        if (type === "gallery") {
-                            if (galleryAccumulated === 0 || topElement.offsetTop !== row.offsetTop) {
-                                let h = row.offsetHeight;
-                                if (state.topSpacerHeight !== 0 && index !== 0) {
-                                    h += 16; // .av__kanban-group gap: 16px;
-                                }
-                                galleryAccumulated += h;
-                                removeHeights.push(h);
-                            } else {
-                                removeHeights.push(0);
-                            }
-                        } else { // kanban
-                            let h = row.offsetHeight;
-                            if (state.topSpacerHeight !== 0 && index !== 0) {
-                                h += 16; // .av__kanban-group gap: 16px;
-                            }
-                            removeHeights.push(h);
-                        }
+                    toRemoveAbove.forEach((row) => {
+                        row.remove();
                     });
-                    removeHeight = removeHeights.reduce((sum, h) => sum + h, 0);
+                } else { // kanban
+                    // grid 布局中 spacer 与行、行与行之间均有 16px gap，每行都需计入
+                    removeHeight = toRemoveAbove.reduce((sum, row) => sum + row.offsetHeight + 16, 0);
+                    toRemoveAbove.forEach((row) => {
+                        row.remove();
+                    });
                 }
-                // 统一移除，此时不再读取布局，仅触发一次重排
-                toRemoveAbove.forEach((row) => {
-                    row.remove();
-                });
                 state.topSpacerHeight += removeHeight;
                 state.renderedStart = state.renderedStart + toRemoveAbove.length;
 
@@ -259,24 +280,28 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 if (!topElement.isConnected) {
                     return;
                 }
-                topElement.insertAdjacentHTML("beforebegin", rowsHTML);
-
                 let renderedHeight = 0;
-                let newRowElement = topElement.previousElementSibling as HTMLElement;
-                while (newRowElement) {
-                    if (type === "table") {
-                        renderedHeight += newRowElement.offsetHeight;
-                    } else if (type === "gallery") {
-                        if (renderedHeight === 0 || (topElement.previousElementSibling as HTMLElement).offsetTop !== newRowElement.offsetTop) {
+                if (type === "gallery") {
+                    // gallery 多列网格：用容器 scrollHeight 差值精确计算（含 gap，避免逐行估算不准）
+                    const galleryEl = bodyEl.querySelector(".av__gallery") as HTMLElement;
+                    renderedHeight = measureHeightDiff(galleryEl, () => {
+                        topElement.insertAdjacentHTML("beforebegin", rowsHTML);
+                    });
+                } else {
+                    topElement.insertAdjacentHTML("beforebegin", rowsHTML);
+                    let newRowElement = topElement.previousElementSibling as HTMLElement;
+                    while (newRowElement) {
+                        if (type === "table") {
+                            renderedHeight += newRowElement.offsetHeight;
+                        } else { // kanban
+                            // grid 布局中行与行之间均有 16px gap，每行都需计入
                             renderedHeight += newRowElement.offsetHeight + 16;
                         }
-                    } else if (type === "kanban") {
-                        renderedHeight += newRowElement.offsetHeight + 16;
-                    }
-                    newRowElement = newRowElement.previousElementSibling as HTMLElement;
-                    if (!newRowElement || newRowElement.classList.contains("av__spacer") ||
-                        newRowElement.classList.contains("av__row--header")) {
-                        break;
+                        newRowElement = newRowElement.previousElementSibling as HTMLElement;
+                        if (!newRowElement || newRowElement.classList.contains("av__spacer") ||
+                            newRowElement.classList.contains("av__row--header")) {
+                            break;
+                        }
                     }
                 }
                 state.topSpacerHeight = Math.max(0, state.topSpacerHeight - renderedHeight);

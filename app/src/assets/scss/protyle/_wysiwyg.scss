@@ -792,19 +792,29 @@
       opacity: 0;
     }
 
-    &.list {
-      height: 1.625em;
-    }
-
     &.av {
       height: 4.8em;
     }
 
-    &.sb,
-    &.table,
-    &.bq,
-    &[data-type="NodeBlockQueryEmbed"] {
+    &.table {
+      height: calc(1.625em + 6px);
+    }
+
+    &.sb {
+      height: calc(1.625em + 14px);
+    }
+
+    &.list {
       height: calc(1.625em + 12px);
+    }
+
+    &.callout {
+      height: calc(1.625em * 2.14 + 8px);
+    }
+
+    &[data-type="NodeBlockQueryEmbed"],
+    &.bq {
+      height: calc(1.625em + 8px);
     }
 
     &.code-block {

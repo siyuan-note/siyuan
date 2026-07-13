@@ -225,6 +225,13 @@ func hasEncryptionMagic(ciphertext []byte) bool {
 	return len(ciphertext) >= len(encryptionMagic) && bytes.Equal(ciphertext[:len(encryptionMagic)], encryptionMagic[:])
 }
 
+// IsCiphertext 判断给定字节是否以加密信封魔数开头（即是否为密文）。
+// 供历史索引等无法取得 boxID/DEK 的路径做防御性检测：读到密文时跳过解析而非按 JSON 报错，
+// 避免加密笔记本的 AV 等对象因路径迁移（同步、导入、历史布局变化）落到全局位置时产生噪声错误。
+func IsCiphertext(data []byte) bool {
+	return hasEncryptionMagic(data)
+}
+
 // envelopeAAD 把公开信封头和调用方 AAD 一并纳入 GCM 认证，防止规范或算法标识被篡改。
 func envelopeAAD(header, aad []byte) []byte {
 	ret := make([]byte, 0, len(header)+len(aad))

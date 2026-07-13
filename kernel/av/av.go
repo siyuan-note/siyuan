@@ -580,6 +580,10 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 				logging.LogErrorf("decrypt attribute view [%s] failed: %s", avID, readErr)
 				return
 			}
+		} else if util.IsCiphertext(data) {
+			// 历史等无法取得 boxID/DEK 的全局路径上读到密文：无法解密，返回空内容而非按 JSON 解析报错。
+			// 这会在加密笔记本的 AV 因路径迁移（同步、导入、历史布局）落到全局位置时发生。
+			return
 		}
 		cache.SetAVDataInBox(avID, boxID, data)
 	}

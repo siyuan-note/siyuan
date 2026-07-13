@@ -28,7 +28,6 @@ import (
 	"math"
 	mathRand "math/rand"
 	"mime"
-	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -2417,7 +2416,8 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	case conf.ProviderSiYuan:
 		cloudRepo = cloud.NewSiYuan(&cloud.BaseCloud{Conf: cloudConf})
 	case conf.ProviderS3:
-		s3HTTPClient := &http.Client{Transport: httpclient.NewTransport(cloudConf.S3.SkipTlsVerify)}
+		// 显式注入 SiYuan UA，覆盖 aws SDK 默认 UA（含架构、Go 版本、SDK 版本等冗余信息），便于 S3 服务端按 SiYuan/ 前缀识别加白名单
+		s3HTTPClient := httpclient.NewUserAgentClient(httpclient.NewTransport(cloudConf.S3.SkipTlsVerify))
 		s3HTTPClient.Timeout = time.Duration(cloudConf.S3.Timeout) * time.Second
 		cloudRepo = cloud.NewS3(&cloud.BaseCloud{Conf: cloudConf}, s3HTTPClient)
 	case conf.ProviderWebDAV:

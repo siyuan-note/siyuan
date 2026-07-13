@@ -123,7 +123,10 @@ Four webpack configs each emit a separate bundle to `app/stage/build/{app,deskto
 4. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
 5. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
 6. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
-7. **Git:** **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions. When you do commit, follow the style of recent commits (gitmoji prefix + subject + issue/PR ref)
+7. **Git:**
+   - **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
+   - When you do commit, follow the style of recent commits (gitmoji prefix + subject)
+   - Append the full issue/PR URL (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; do not fabricate one
 
 ---
 

@@ -294,6 +294,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				openPromise, openResolve, openReject := rt.NewPromise()
 
+				// FIXME: ws.open() 在同一个 WebSocket 对象上被重复调用时，会因为 opening=false 分支直接 resolve，导致调用方误以为连接已建立（实际上仍处于 CONNECTING）。这会让 await open() 的语义不可靠。建议仅在 readyState=OPEN 时才 resolve；否则应 reject（或返回同一个 pending promise）。
 				openRunErr := p.worker.Run(func(rt *goja.Runtime) (opening any, err error) {
 					opening = false
 					openOnce.Do(func() {
@@ -504,6 +505,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					reason = []byte(closeCall.Argument(1).String())
 				}
 
+				// FIXME: ws.close() 在连接尚未建立（gwsConn=nil）时不会更新 readyState，也不会取消 context，导致 close() 之后对象状态仍可能保持 CONNECTING。建议在未连接时也将 readyState 置为 CLOSED 并执行 doClose()，以便行为与浏览器更一致、避免悬挂状态。
 				closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 					if c := gwsConn.Load(); c != nil {
 						setReadyState(rt, WebSocketReadyStateClosing)

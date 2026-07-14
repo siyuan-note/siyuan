@@ -9,6 +9,7 @@ import {openFile, openFileById} from "../editor/util";
 import {fetchPost} from "./fetch";
 import {checkFold} from "./noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
+import {isValidBazaarPackageName} from "./bazaarPackage";
 
 import type {App} from "../index";
 
@@ -110,6 +111,9 @@ const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
     try {
         resourceName = decodeURIComponent(_name);
     } catch {
+        return false;
+    }
+    if (!isValidBazaarPackageName(resourceName)) {
         return false;
     }
     switch (target) {

@@ -77,7 +77,7 @@
 
 | 场景 | 实现 |
 |---|---|
-| 加载 `loadNodes*` | `FoldHeadingStack` / `foldedHiddenSiblings` |
+| 加载 `loadNodes*` | `FoldHeadingStack` / `foldedHiddenSiblings`；聚焦标题（`mode=0` + `isHeading`）会先把当前标题入栈，自身 `fold=1` 时不摊开下方内容 |
 | `GetDocInBox` 渲染 | 顶层块单点 `IsInFoldedHeading`（`#9582`）；子树 `CollectFoldHiddenNodes`；Walk 内不再逐块回溯 |
 | 导出 `keepFold`（`#5941`） | `CollectFoldHiddenNodes` |
 | 模板（`#4488`） | 同上，对被盖住块打 `status=temp` |
@@ -120,6 +120,7 @@
 4. **存在祖先折叠标题时 `doUnfoldHeading` 可能 `ReloadProtyle`**：保守但正确；增量 RetData 路径须 `VisibleHeadingChildren` + `CollectRenderFoldHidden` 省略嵌套内容。
 5. 编辑路径上的「自动展开」清单很大（改层级、拖拽、粘贴等）；产品上允许展开必要祖先，但不得借机清子标题 `fold`。
 6. **仅靠 `VisibleHeadingChildren` 不够**：它只过滤标题同级兄弟；列表等容器内部的嵌套折叠必须在渲染层用 `CollectRenderFoldHidden` 跳过，不能再依赖前端 `removeFoldHeading` 兜底。
+7. **聚焦折叠标题勿空栈扫描下方块**：`loadNodesByMode` 的 `isHeading` 分支须先 `Enter` 当前标题，否则自身 `fold=1` 会被绕过而摊开整节；这与 `GetHeadingChildrenDOM`（顶层不入栈、复制须带走整节）相反，勿混用。
 
 ## 7. 相关 issue
 

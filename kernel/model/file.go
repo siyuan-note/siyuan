@@ -932,11 +932,11 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 				}
 			}
 		} else if isHeading {
-			// 展开某个标题，node 自身的折叠不参与隐藏判断，用新栈从其下方块开始扫描
-			// 大纲点击折叠标题跳转聚焦 https://github.com/siyuan-note/siyuan/issues/4920
-			// 多级标题折叠后上级块引浮窗中未折叠 https://github.com/siyuan-note/siyuan/issues/4997
+			// 聚焦标题：先把当前标题入栈，自身 fold=1 时不摊开下方内容（与旧 IsInFoldedHeading(n, node) 一致）；
+			// 未折叠时仍用栈省略更深层嵌套折叠 https://github.com/siyuan-note/siyuan/issues/4997
 			level := node.HeadingLevel
 			var stack treenode.FoldHeadingStack
+			stack.Enter(node)
 			for n := node.Next; nil != n; n = n.Next {
 				if ast.NodeHeading == n.Type && n.HeadingLevel <= level {
 					break

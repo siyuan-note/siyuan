@@ -130,6 +130,30 @@ func CollectFoldHiddenNodes(parent *ast.Node) (unlinks []*ast.Node) {
 	return
 }
 
+// CollectRenderFoldHidden 返回渲染 nodes 时应跳过的块集合（不改树结构、不 Unlink）。
+// 先对 nodes 做同级折叠栈过滤，再对每个可见节点用 CollectFoldHiddenNodes 覆盖容器内部的嵌套折叠。
+// 供 renderBlockDOMByNodes 等路径使用：VisibleHeadingChildren 只过滤标题同级兄弟，
+// 列表 / 引述 / 超级块等容器内部的 fold=1 子标题盖住的块需在此补齐省略。
+func CollectRenderFoldHidden(nodes []*ast.Node) map[*ast.Node]bool {
+	hidden := map[*ast.Node]bool{}
+	if 0 == len(nodes) {
+		return hidden
+	}
+
+	var stack FoldHeadingStack
+	for _, node := range nodes {
+		stack.Enter(node)
+		if stack.Hidden() {
+			hidden[node] = true
+			continue
+		}
+		for _, h := range CollectFoldHiddenNodes(node) {
+			hidden[h] = true
+		}
+	}
+	return hidden
+}
+
 func collectFoldHiddenNodes(parent *ast.Node, unlinks *[]*ast.Node) {
 	var stack FoldHeadingStack
 	for n := parent.FirstChild; nil != n; n = n.Next {

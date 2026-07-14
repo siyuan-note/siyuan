@@ -178,8 +178,16 @@ func fillBlockRefCount(nodes []*ast.Node) {
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	// 渲染时跳过嵌套折叠盖住的块，且不 Unlink，避免污染共享 AST（展开 RetData / 嵌入 / 复制共用）
+	foldHidden := treenode.CollectRenderFoldHidden(nodes)
 	for _, node := range nodes {
+		if foldHidden[node] {
+			continue
+		}
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if foldHidden[n] {
+				return ast.WalkSkipChildren
+			}
 			if entering {
 				if n.IsBlock() {
 					if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {

@@ -1020,19 +1020,14 @@ func resolveEmbedContentInBox(n *ast.Node, luteEngine *lute.Lute, boxID string) 
 				if nil == h {
 					continue
 				}
-				// 标题自身折叠时仅渲染标题，否则带按折叠层级栈可见的子块，避免嵌套折叠内容泄漏
+				// 标题自身折叠时仅渲染标题，否则带按折叠层级栈可见的子块；
+				// 容器内嵌套折叠由 renderBlockDOMByNodes 省略，避免 AppendChild 挪动共享树节点
 				var hChildren []*ast.Node
 				hChildren = append(hChildren, h)
 				if "1" != h.IALAttr("fold") {
 					hChildren = append(hChildren, treenode.VisibleHeadingChildren(h)...)
 				}
-
-				// 创建一个临时的文档节点来包含所有子节点
-				tempRoot := &ast.Node{Type: ast.NodeDocument}
-				for _, hChild := range hChildren {
-					tempRoot.AppendChild(hChild)
-				}
-				contentHTML = luteEngine.RenderNodeBlockDOM(tempRoot)
+				contentHTML = renderBlockDOMByNodes(hChildren, luteEngine)
 			} else {
 				// 其他块：直接使用原始 AST 节点渲染
 				blockNode := treenode.GetNodeInTree(subTree, sqlBlock.ID)
@@ -1337,8 +1332,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 			}
 		}
 	} else {
-		// 非标题块，直接添加。容器块内部嵌套折叠标题的剥离依赖加载路径 / 前端兜底，
-		// 此处不再 Unlink 共享树以避免污染 trees 缓存中的 AST。
+		// 非标题块直接添加；容器内嵌套折叠由 renderBlockDOMByNodes 跳过，不 Unlink 共享树
 		nodes = append(nodes, def)
 	}
 

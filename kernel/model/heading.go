@@ -98,8 +98,8 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	cache.PutBlockIALInBox(headingID, tree.Box, parse.IAL2Map(heading.KramdownIAL))
 	sql.UpsertTreeQueue(tree)
 
-	// 渲染标题下方的块，但用折叠层级栈省略仍被嵌套折叠子标题盖住的块；
-	// 子标题自身若 fold=1 仍保留在返回的 HTML 中（其子内容省略），由前端兜底再折叠
+	// 渲染标题下方的块：VisibleHeadingChildren 省略同级嵌套折叠盖住的块（fold=1 子标题自身仍保留）；
+	// 容器内部的嵌套折叠由 renderBlockDOMByNodes 经 CollectRenderFoldHidden 跳过，不 Unlink 共享树
 	renderNodes := treenode.VisibleHeadingChildren(heading)
 
 	// 展开折叠的标题后显示块引用计数 Display reference counts after unfolding headings https://github.com/siyuan-note/siyuan/issues/13618

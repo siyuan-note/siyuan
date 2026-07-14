@@ -21,8 +21,6 @@ import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {isEncryptedBox} from "../../util/pathName";
-import {removeFoldedHeadings} from "./heading";
-
 export const onGet = (options: {
     data: IWebSocketData,
     protyle: IProtyle,
@@ -245,8 +243,6 @@ const setHTML = (options: {
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
-    // 兜底：折叠状态以标题自身 fold 为唯一真相，若内核未省略折叠子标题之下的块则在此修正 DOM
-    removeFoldedHeadings(protyle.wysiwyg.element);
     if (options.action.includes(Constants.CB_GET_HISTORY)) {
         return;
     }

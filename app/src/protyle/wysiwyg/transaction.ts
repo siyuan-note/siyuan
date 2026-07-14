@@ -462,7 +462,6 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 if (isUndo) {
                     // kernel 权威撤销：retData 已由 doUnfoldHeading 填充，需要插入子块 HTML 恢复折叠的内容
                     if (operation.retData) {
-                        // 先去重，再插入并对新插入范围内仍折叠的子标题兜底，保留子级折叠态
                         removeUnfoldRepeatBlock(operation.retData, protyle);
                         insertUnfoldHeadingDOM(item, operation.retData);
                     }
@@ -475,7 +474,6 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     return;
                 }
                 if (operation.retData) {
-                    // 先去重，再插入并对新插入范围内仍折叠的子标题兜底，保留子级折叠态
                     removeUnfoldRepeatBlock(operation.retData, protyle);
                     insertUnfoldHeadingDOM(item, operation.retData);
                 }
@@ -1532,7 +1530,6 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
                 if (!item.lastElementChild.classList.contains("protyle-attr")) {
                     item.lastElementChild.remove();
                 }
-                // 先去重，再插入并对新插入范围内仍折叠的子标题兜底，保留子级折叠态
                 removeUnfoldRepeatBlock(operation.retData, protyle);
                 insertUnfoldHeadingDOM(item, operation.retData);
                 if (operation.data === "remove") {

@@ -58,6 +58,7 @@
 |---|---|
 | `FoldHeadingStack` | 正向扫描同级子块时维护层级栈；`Enter` / `Hidden` |
 | `VisibleHeadingChildren` | 标题下方按栈可见的子块（**顶层标题不入栈**）；展开 RetData / 嵌入 / 复制共用 |
+| `CollectRenderFoldHidden` | 渲染时收集应跳过的块（同级栈 + 容器内 `CollectFoldHiddenNodes`），不 Unlink |
 | `CollectFoldHiddenNodes` | 按容器递归用栈收集应剔除的被盖住块（导出 / 模板 / 加载渲染） |
 | `StripLegacyHeadingFoldAttrs` | 清 `heading-fold`；曾带该属性的非标题节点一并清 `fold`；未带该属性的容器自身 `fold` 保留 |
 | `IsInFoldedHeading` | 仅单点查询；禁止在批量热路径对每个块反复调用 |
@@ -68,7 +69,7 @@
 ### 5.2 写路径
 
 - `doFoldHeading`：只设该标题 `fold=1`；`RetData` 仍为全量子块 ID（前端远端折叠按 ID 删 DOM）
-- `doUnfoldHeading`：只清目标（及必要祖先）标题自身 `fold`；`RetData` = `VisibleHeadingChildren` 渲染 HTML（省略嵌套隐藏块，保留 `fold=1` 子标题节点）
+- `doUnfoldHeading`：只清目标（及必要祖先）标题自身 `fold`；`RetData` = `VisibleHeadingChildren` 经 `renderBlockDOMByNodes`（含容器内嵌套折叠跳过）渲染 HTML（保留 `fold=1` 子标题节点）
 - `unfoldHeading` / `doUpdate` / `Heading2Doc` / `doMove`：禁止再给子块批量写/清 `fold`
 - 全仓无 `SetIALAttr("heading-fold")`，仅有清除与迁移清洗
 
@@ -80,7 +81,7 @@
 | `GetDocInBox` 渲染 | 顶层块单点 `IsInFoldedHeading`（`#9582`）；子树 `CollectFoldHiddenNodes`；Walk 内不再逐块回溯 |
 | 导出 `keepFold`（`#5941`） | `CollectFoldHiddenNodes` |
 | 模板（`#4488`） | 同上，对被盖住块打 `status=temp` |
-| 嵌入 / `resolveEmbedR` 等（`#4765`） | 未折叠标题用 `VisibleHeadingChildren`；`fold=1` 不追加子块；**不在共享树上 Unlink**（旧 Walk Unlink 会污染 `trees` 缓存） |
+| 嵌入 / `resolveEmbedR` 等（`#4765`） | 未折叠标题用 `VisibleHeadingChildren`；`fold=1` 不追加子块；HTML 渲染走 `CollectRenderFoldHidden`（**不 Unlink** 共享树） |
 | `GetHeadingChildrenDOM` | 标题 + `VisibleHeadingChildren`（顶层不入栈，复制/剪切带走整节） |
 
 `sql` IAL 白名单仍保留 `heading-fold` 键，便于读旧文件再清洗。
@@ -91,14 +92,14 @@
 
 | 位置 | 行为 |
 |---|---|
-| `insertUnfoldHeadingDOM` | 插入 HTML + `applyNestedHeadingFolds`（对范围内仍折叠的子标题再 `removeFoldHeading`） |
+| `insertUnfoldHeadingDOM` | 仅插入内核已省略嵌套折叠的 HTML |
 | `processFold` / `onTransaction` / `turnsOneInto` | 展开插入走上述 helper |
-| `onGet` → `removeFoldedHeadings` | 加载/刷新兜底 |
+| `setFold` / `foldHeading`（无 retData ID 列表时） | 本地 `removeFoldHeading` |
 | 复制折叠标题 | `getHeadingChildrenDOM({ removeFoldAttr: false })`；子块可带 `parent-heading`，本地 `ignoreProcess` 不插可见 DOM |
 
-双保险：**内核 RetData/加载 HTML 用栈省略** + **前端插入后再跑 `removeFoldHeading`**，避免「假展开」。
+嵌套折叠省略在内核完成：`VisibleHeadingChildren`（同级）+ `renderBlockDOMByNodes` 内 `CollectRenderFoldHidden`（含容器内部），不 Unlink 共享树。加载路径用 `CollectFoldHiddenNodes`，前端不再二次兜底。
 
-自动展开（删除、拖拽、粘贴等）仍可对必要祖先 `setFold(..., true)`，依赖「内核不清子 fold + 后处理」。取消列表/引述/标注拍平时必须循环展开容器内全部折叠标题，否则拍平丢内容。前端不读写 `heading-fold`。
+自动展开（删除、拖拽、粘贴等）仍可对必要祖先 `setFold(..., true)`，依赖「内核不清子 fold」。取消列表/引述/标注拍平时必须循环展开容器内全部折叠标题，否则拍平丢内容。前端不读写 `heading-fold`。
 
 ### 5.5 迁移
 
@@ -114,10 +115,11 @@
 ## 6. 演进中确认过的陷阱（勿回退）
 
 1. **`GetHeadingChildrenDOM` 若把顶层折叠标题入栈**，会只复制标题行、丢掉整节——复制/剪切必须顶层不入栈，仅省略更深嵌套折叠盖住的块。
-2. **嵌入路径勿对 `trees` 缓存里的共享 AST 做 Unlink**；用收集阶段的 `VisibleHeadingChildren` 省略。
+2. **嵌入路径勿对 `trees` 缓存里的共享 AST 做 Unlink**；用 `VisibleHeadingChildren` + 渲染层 `CollectRenderFoldHidden` 省略。
 3. **`StripLegacy`：曾带 `heading-fold` 的容器上的 `fold` 视为残留一并清**，否则展开后列表等仍「假折叠」；未带该属性的容器真实 `fold` 保留。
-4. **存在祖先折叠标题时 `doUnfoldHeading` 可能 `ReloadProtyle`**：保守但正确；增量 RetData 路径仍须栈省略嵌套内容。
+4. **存在祖先折叠标题时 `doUnfoldHeading` 可能 `ReloadProtyle`**：保守但正确；增量 RetData 路径须 `VisibleHeadingChildren` + `CollectRenderFoldHidden` 省略嵌套内容。
 5. 编辑路径上的「自动展开」清单很大（改层级、拖拽、粘贴等）；产品上允许展开必要祖先，但不得借机清子标题 `fold`。
+6. **仅靠 `VisibleHeadingChildren` 不够**：它只过滤标题同级兄弟；列表等容器内部的嵌套折叠必须在渲染层用 `CollectRenderFoldHidden` 跳过，不能再依赖前端 `removeFoldHeading` 兜底。
 
 ## 7. 相关 issue
 

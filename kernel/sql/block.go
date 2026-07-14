@@ -170,7 +170,7 @@ func indexNode(tx *sql.Tx, id, boxID string) (err error) {
 		return
 	}
 
-	content := NodeStaticContent(node, nil, true, indexAssetPath, true)
+	content := nodeStaticContent(node, nil, true, indexAssetPath, true, true)
 	content = strings.ReplaceAll(content, editor.Zwsp, "")
 	var rowID int64
 	if rowID, err = blockRowIDByBlockID(tx, id); err != nil {
@@ -191,6 +191,10 @@ func indexNode(tx *sql.Tx, id, boxID string) (err error) {
 }
 
 func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView bool) string {
+	return nodeStaticContent(node, excludeTypes, includeTextMarkATitleURL, includeAssetPath, fullAttrView, false)
+}
+
+func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView, unescapeBlockRef bool) string {
 	if nil == node {
 		return ""
 	}
@@ -328,7 +332,11 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			if n.IsTextMarkType("tag") {
 				buf.WriteByte('#')
 			}
-			buf.WriteString(n.Content())
+			content := n.Content()
+			if unescapeBlockRef && treenode.IsBlockRef(n) {
+				content = util.UnescapeHTML(content)
+			}
+			buf.WriteString(content)
 			if n.IsTextMarkType("tag") {
 				buf.WriteByte('#')
 			}

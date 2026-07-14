@@ -439,12 +439,10 @@ export const bazaar = {
                     let hasSetting = false;
                     if (bazaarType === "plugins") {
                         const plugin = app.plugins.find((p: Plugin) => p.name === bazaarItem.name);
-                        if (plugin) {
-                            // @ts-ignore
-                            hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
-                        }
+                        // @ts-ignore
+                        hasSetting = plugin && (plugin.setting || plugin.__proto__.hasOwnProperty("openSetting"));
                     }
-                    return `<div data-repourl="${escapeAttr(bazaarItem.repoURL)}" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}${(window.siyuan.config.bazaar.petalDisabled && bazaarType === "plugins") ? " b3-card--disabled" : ""}">
+                    return `<div data-repourl="${escapeAttr(bazaarItem.repoURL)}" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${bazaarItem.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
@@ -455,9 +453,9 @@ export const bazaar = {
     <div class="b3-card__actions b3-card__actions--right">
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed")}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding)}
-        <span data-position="north" class="ariaLabel block__icon block__icon--show${hasSetting ? "" : " fn__none"}" data-type="setting" aria-label="${window.siyuan.languages.config}">
+        ${hasSetting ? `<span data-position="north" class="ariaLabel block__icon block__icon--show${window.siyuan.config.bazaar.petalDisabled ? " fn__none" : ""}" data-type="setting" aria-label="${window.siyuan.languages.config}">
             <svg><use xlink:href="#iconSettings"></use></svg>
-        </span>
+        </span>` : ""}
         <span data-position="north" class="ariaLabel block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
@@ -874,8 +872,9 @@ type="checkbox">
                                             enabled: true,
                                             app: Constants.SIYUAN_APPID,
                                         }, (response) => {
-                                            loadPlugin(app, response.data);
-                                            bazaar._genMyHTML(pkgType, app, false);
+                                            loadPlugin(app, response.data).then(() => {
+                                                bazaar._genMyHTML(pkgType, app, false);
+                                            });
                                         });
                                     });
                                 }
@@ -995,6 +994,11 @@ type="checkbox">
                     event.stopPropagation();
                     break;
                 } else if (type === "setting" && pkgItem) {
+                    if (window.siyuan.config.bazaar.petalDisabled) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    }
                     app.plugins.find((item: Plugin) => {
                         if (item.name === pkgItem.name) {
                             item.openSetting();
@@ -1012,7 +1016,7 @@ type="checkbox">
                             target.removeAttribute("disabled");
                             if (window.siyuan.config.bazaar.petalDisabled) {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
-                                    item.classList.add("b3-card--disabled");
+                                    item.querySelector('[data-type="setting"]')?.classList.add("fn__none");
                                     const repoURL = item.getAttribute("data-repourl");
                                     const pkg = bazaar._data.downloaded.find((p: IBazaarItem) => p.repoURL === repoURL);
                                     if (pkg) {
@@ -1020,13 +1024,11 @@ type="checkbox">
                                     }
                                 });
                             } else {
-                                bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
-                                    item.classList.remove("b3-card--disabled");
-                                });
                                 loadPlugins(app, null, false).then(() => {
                                     app.plugins.forEach(item => {
                                         afterLoadPlugin(item);
                                     });
+                                    this._genMyHTML("plugins", app, false);
                                 });
                                 saveLayout();
                             }
@@ -1045,17 +1047,16 @@ type="checkbox">
                         }, (response) => {
                             target.removeAttribute("disabled");
                             if (enabled) {
-                                loadPlugin(app, response.data).then((plugin: Plugin) => {
-                                    // @ts-ignore
-                                    if (plugin.setting || plugin.__proto__.hasOwnProperty("openSetting")) {
-                                        target.parentElement.querySelector('[data-type="setting"]').classList.remove("fn__none");
-                                    } else {
-                                        target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
-                                    }
+                                if (window.siyuan.config.bazaar.petalDisabled) {
+                                    target.parentElement.querySelector('[data-type="setting"]')?.classList.add("fn__none");
+                                    return;
+                                }
+                                loadPlugin(app, response.data).then(() => {
+                                    this._genMyHTML("plugins", app, false);
                                 });
                             } else {
                                 uninstall(app, pkgItem.name, true);
-                                target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
+                                target.parentElement.querySelector('[data-type="setting"]')?.classList.add("fn__none");
                                 const disableTip = target.getAttribute("data-disabletip");
                                 if (disableTip) {
                                     target.setAttribute("disabled", "disabled");

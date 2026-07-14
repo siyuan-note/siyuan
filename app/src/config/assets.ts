@@ -1,4 +1,4 @@
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -296,7 +296,8 @@ const assets = {
     },
     _renderList: (data: {
         item: string,
-        name: string
+        name: string,
+        blockIDs?: string[]
     }[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
         let html = "";
         let boxOpenHTML = "";
@@ -313,8 +314,12 @@ const assets = {
         }
         const mobile = isMobile();
         data.forEach((item) => {
+            const hasBlockPopover = type === "lostAssets" && item.blockIDs?.length > 0;
+            const blockPopoverData = hasBlockPopover
+                ? ` data-id="${escapeAttr(JSON.stringify(item.blockIDs))}"`
+                : "";
             html += `<li data-tab-type="${type}" data-item="${item.item}"  class="b3-list-item${mobile ? "" : " b3-list-item--hide-action"}">
-    <span class="b3-list-item__text">${escapeHtml(item.name || item.item)}</span>
+    <span class="b3-list-item__text${hasBlockPopover ? " popover__block" : ""}"${blockPopoverData}>${escapeHtml(item.name || item.item)}</span>
     <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${type === "unRefAV" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>

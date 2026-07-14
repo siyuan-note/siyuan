@@ -235,19 +235,6 @@ func NewAI() *AI {
 		}
 	}
 
-	rerankKey := os.Getenv("SIYUAN_OPENAI_RERANK_API_KEY")
-	rerankEndpoint := os.Getenv("SIYUAN_OPENAI_RERANK_ENDPOINT")
-	rerankModel := os.Getenv("SIYUAN_OPENAI_RERANK_MODEL")
-	if "" != rerankKey && "" != rerankEndpoint && "" != rerankModel {
-		ai.Rerank = &Rerank{
-			APIKey:         rerankKey,
-			Endpoint:       rerankEndpoint,
-			Name:           rerankModel,
-			Timeout:        30,
-			CandidateCount: 30,
-		}
-	}
-
 	return ai
 }
 

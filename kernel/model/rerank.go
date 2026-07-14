@@ -16,10 +16,6 @@
 
 package model
 
-import (
-	"os"
-)
-
 // defaultRerankCandidateCount 向量召回后默认送入重排的候选文档数，与 conf.defaultRerank 保持一致。
 const defaultRerankCandidateCount = 30
 
@@ -32,9 +28,6 @@ func rerankKey() string {
 	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && "" != Conf.AI.Rerank.APIKey {
 		return Conf.AI.Rerank.APIKey
 	}
-	if v := os.Getenv("SIYUAN_OPENAI_RERANK_API_KEY"); "" != v {
-		return v
-	}
 	return ""
 }
 
@@ -42,18 +35,12 @@ func rerankEndpoint() string {
 	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && "" != Conf.AI.Rerank.Endpoint {
 		return Conf.AI.Rerank.Endpoint
 	}
-	if v := os.Getenv("SIYUAN_OPENAI_RERANK_ENDPOINT"); "" != v {
-		return v
-	}
 	return ""
 }
 
 func rerankModel() string {
 	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled && "" != Conf.AI.Rerank.Name {
 		return Conf.AI.Rerank.Name
-	}
-	if v := os.Getenv("SIYUAN_OPENAI_RERANK_MODEL"); "" != v {
-		return v
 	}
 	return ""
 }

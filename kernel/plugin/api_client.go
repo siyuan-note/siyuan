@@ -294,62 +294,46 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				openPromise, openResolve, openReject := rt.NewPromise()
 
-				openRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					openOnce.Do(func() {
-						go func() {
-							conn, _, dialErr := gws.NewClient(h, &gws.ClientOption{
-								Addr:          wsURL,
-								RequestHeader: wsHeader,
-							})
-							if dialErr != nil {
-								p.worker.Run(func(rt *goja.Runtime) (_ any, dialErr2 error) {
-									event := rt.NewObject()
-									event.Set("type", rt.ToValue("error"))
-									event.Set("error", rt.NewGoError(dialErr))
-									invokeHook(rt, "onerror", event)
-
-									dialErr2 = dialErr
-									return
-								}, func(rt *goja.Runtime, _ any, dialErr2 error) {
-									if rejectErr := openReject(rt.NewGoError(dialErr2)); rejectErr != nil {
-										logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
-									}
-								})
-								doClose()
-								return
-							}
-							gwsConn.Store(conn)
-							go func() {
-								<-ctx.Done()
-								conn.NetConn().Close()
-							}()
-							// Resolve the open promise before starting ReadLoop so the caller
-							// can await open() and then rely on onopen for additional setup.
+				// FIXME: 兼容 open() 被调用多次的情况
+				openOnce.Do(func() {
+					go func() {
+						conn, _, dialErr := gws.NewClient(h, &gws.ClientOption{
+							Addr:          wsURL,
+							RequestHeader: wsHeader,
+						})
+						if dialErr != nil {
 							p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-								if resolveErr := openResolve(nil); resolveErr != nil {
-									logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
+								event := rt.NewObject()
+								event.Set("type", rt.ToValue("error"))
+								event.Set("error", rt.NewGoError(dialErr))
+								invokeHook(rt, "onerror", event)
+
+								if rejectErr := openReject(rt.NewGoError(dialErr)); rejectErr != nil {
+									logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
 								}
 								return
 							}, nil)
-							conn.ReadLoop()
 							doClose()
+							return
+						}
+						gwsConn.Store(conn)
+						go func() {
+							<-ctx.Done()
+							conn.NetConn().Close()
 						}()
-					})
-					return
-				}, func(rt *goja.Runtime, result any, err error) {
-					if lo.IsNil(err) {
-						if resolveErr := openResolve(nil); resolveErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
-						}
-					} else {
-						if rejectErr := openReject(rt.NewGoError(err)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
-						}
-					}
+						// Resolve the open promise before starting ReadLoop so the caller
+						// can await open() and then rely on onopen for additional setup.
+						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+							if resolveErr := openResolve(nil); resolveErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
+							}
+							return
+						}, nil)
+
+						conn.ReadLoop()
+						doClose()
+					}()
 				})
-				if openRunErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.client.socket.open worker run: %v", p.Name, openRunErr)
-				}
 
 				return rt.ToValue(openPromise)
 			})

@@ -467,11 +467,10 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
     }
     const undoOperations: IOperation[] = [];
+    // 撤销时先把目标移回原位，再撤源块移动，最后删横向超级块；
+    // 若先撤源块且 previousID 仍指向超级块内的目标，源块会被插回超级块内，随后删超级块会丢块并 undo failed
     const targetMoveUndo: IOperation = {
         action: "move",
-        context: {
-            removeFold: "true"
-        },
         id: targetElement.getAttribute("data-node-id"),
         previousID: getPreviousBlockSibling(targetElement)?.getAttribute("data-node-id"),
         parentID: getParentBlock(targetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
@@ -490,7 +489,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     sbElement.lastElementChild.before(targetElement);
     const moveToResult = await moveTo(protyle, sourceElements, sbElement, isSameDoc, "afterbegin", isCopy);
     doOperations.push(...moveToResult.doOperations);
-    undoOperations.push(...moveToResult.undoOperations);
+    const moveToUndos = moveToResult.undoOperations;
     const newSourceParentElement = moveToResult.newSourceElements;
     // 横向超级块A内两个元素拖拽成纵向超级块B，取消超级块A会导致 targetElement 被删除，需先移动再删除 https://github.com/siyuan-note/siyuan/issues/16292
     let removeIndex = doOperations.length;
@@ -521,22 +520,60 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             previousID: newSourceParentElement[0].getAttribute("data-node-id"),
         });
     }
-    undoOperations.push(targetMoveUndo);
+    // 撤销执行顺序须保证：移出横向超级块的双方都离开后，再删除该超级块。
+    // 若源块原来在目标下方（previousID=目标），须先撤目标再撤源块；反之则先撤源块，
+    // 否则 previousID 仍指向超级块内节点时会被插回超级块，随后删除超级块导致丢块 / undo failed。
+    const targetId = targetMoveUndo.id;
+    const sourceWasBelowTarget = moveToUndos.some(op => op.action === "move" && op.previousID === targetId);
+    if (sourceWasBelowTarget) {
+        undoOperations.push(targetMoveUndo);
+        undoOperations.push(...moveToUndos);
+    } else {
+        undoOperations.push(...moveToUndos);
+        undoOperations.push(targetMoveUndo);
+    }
     undoOperations.push({
         action: "delete",
         id: sbElement.getAttribute("data-node-id"),
     });
+    // 去 heading-fold 后折叠子块不在 DOM，不能再靠 nextElementSibling 判断「是否有子级」；
+    // 横向超级块内每个 fold=1 标题（含拖拽目标）都须单独包竖直超级块再展开，否则子块会摊成横向栏。
     const foldElements: Element[] = [];
-    newSourceParentElement.forEach(item => {
-        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
-            item.nextElementSibling && (
-                item.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
-                (item.nextElementSibling.getAttribute("data-subtype") || "") > item.getAttribute("data-subtype")
-            )) {
+    const collectFoldHeading = (item: Element) => {
+        if (item?.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
+            !foldElements.includes(item)) {
             foldElements.push(item);
         }
-    });
-    if ((newSourceParentElement.length > 1 || foldElements.length > 0) && direct === "col") {
+    };
+    newSourceParentElement.forEach(collectFoldHeading);
+    if (direct === "col") {
+        collectFoldHeading(targetElement);
+    }
+    if (direct === "col" && foldElements.length > 0) {
+        // 自下而上包裹：若先包下方折叠标题，再包上方时 HeadingChildren 会把下方竖直超级块整棵带走并嵌套/丢块
+        const foldBottomUp = foldElements.slice().sort((a, b) => {
+            const pos = a.compareDocumentPosition(b);
+            if (pos & Node.DOCUMENT_POSITION_FOLLOWING) {
+                return 1;
+            }
+            if (pos & Node.DOCUMENT_POSITION_PRECEDING) {
+                return -1;
+            }
+            return 0;
+        }).reverse();
+        for (const foldEl of foldBottomUp) {
+            const mergeOperations = await turnsIntoOneTransaction({
+                protyle,
+                selectsElement: [foldEl],
+                type: "BlocksMergeSuperBlock",
+                level: "row",
+                unfocus: true,
+                getOperations: true
+            });
+            doOperations.push(...mergeOperations.doOperations);
+            undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+        }
+    } else if (newSourceParentElement.length > 1 && direct === "col") {
         const mergeOperations = await turnsIntoOneTransaction({
             protyle,
             selectsElement: newSourceParentElement.reverse(),
@@ -548,6 +585,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         doOperations.push(...mergeOperations.doOperations);
         undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
     }
+    // 先包竖直超级块再展开：撤销时须先 foldHeading 再移出，子块才能随标题一起撤回
     foldElements.forEach(item => {
         const foldOperations = setFold(protyle, item, true, false, false, true);
         doOperations.push(...foldOperations.doOperations);
@@ -626,18 +664,11 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         });
     }
     let hasFoldHeading = false;
+    const sourceFoldHeadings: Element[] = [];
     newSourceParentElement.forEach(item => {
         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
             hasFoldHeading = true;
-            if (item.nextElementSibling && (
-                item.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
-                item.nextElementSibling.getAttribute("data-subtype") > item.getAttribute("data-subtype")
-            )) {
-                const foldOperations = setFold(protyle, item, true, false, false, true);
-                doOperations.push(...foldOperations.doOperations);
-                // 不折叠，否则无法撤销 undoOperations.push(...foldOperations.undoOperations);
-            }
-            return true;
+            sourceFoldHeadings.push(item);
         }
     });
     // 移入/移出超级块后刷新拖拽手柄并重新分配宽度（如 A 拖到超级块内 B 前面，需在 A、B 间补手柄）
@@ -655,16 +686,61 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         newSourceParentElement[0].parentElement.classList.contains("sb") &&
         newSourceParentElement[0].parentElement.getAttribute("data-sb-layout") === "col") {
         // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
-        const mergeOperations = await turnsIntoOneTransaction({
-            protyle,
-            selectsElement: newSourceParentElement.reverse(),
-            type: "BlocksMergeSuperBlock",
-            level: "row",
-            unfocus: true,
-            getOperations: true
+        // 须在仍 fold=1 时移入竖直超级块，内核才会带走 HeadingChildren
+        if (hasFoldHeading && sourceFoldHeadings.length > 0) {
+            // 自下而上包裹，避免 HeadingChildren 把下方已包好的竖直超级块带走
+            const foldBottomUp = sourceFoldHeadings.slice().sort((a, b) => {
+                const pos = a.compareDocumentPosition(b);
+                if (pos & Node.DOCUMENT_POSITION_FOLLOWING) {
+                    return 1;
+                }
+                if (pos & Node.DOCUMENT_POSITION_PRECEDING) {
+                    return -1;
+                }
+                return 0;
+            }).reverse();
+            for (const foldEl of foldBottomUp) {
+                const mergeOperations = await turnsIntoOneTransaction({
+                    protyle,
+                    selectsElement: [foldEl],
+                    type: "BlocksMergeSuperBlock",
+                    level: "row",
+                    unfocus: true,
+                    getOperations: true
+                });
+                doOperations.push(...mergeOperations.doOperations);
+                undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+            }
+            const nonFoldSources = newSourceParentElement.filter(item => !sourceFoldHeadings.includes(item));
+            if (nonFoldSources.length > 1) {
+                const mergeOperations = await turnsIntoOneTransaction({
+                    protyle,
+                    selectsElement: nonFoldSources.reverse(),
+                    type: "BlocksMergeSuperBlock",
+                    level: "row",
+                    unfocus: true,
+                    getOperations: true
+                });
+                doOperations.push(...mergeOperations.doOperations);
+                undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+            }
+        } else {
+            const mergeOperations = await turnsIntoOneTransaction({
+                protyle,
+                selectsElement: newSourceParentElement.reverse(),
+                type: "BlocksMergeSuperBlock",
+                level: "row",
+                unfocus: true,
+                getOperations: true
+            });
+            doOperations.push(...mergeOperations.doOperations);
+            undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+        }
+        // 包完竖直超级块后再展开；不写入 fold 的 undo，否则无法撤销（与历史行为一致）
+        sourceFoldHeadings.forEach(item => {
+            const foldOperations = setFold(protyle, item, true, false, false, true);
+            doOperations.push(...foldOperations.doOperations);
         });
-        doOperations.push(...mergeOperations.doOperations);
-        undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
     }
     // 跨文档移动为可逆条目：全局撤销栈按 rootID 分栈联动，撤销时经 mutatedRootIDs 判定弹确认
     transaction(protyle, doOperations, undoOperations);

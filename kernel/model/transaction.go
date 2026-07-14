@@ -540,6 +540,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			return
 		}
 
+		headingChildren = filterHeadingChildrenForMove(headingChildren, targetNode, srcNode)
+
 		if 0 < len(headingChildren) {
 			// 折叠标题再编辑形成外层列表（前面加上 * ）时，前端给的 tx 序列会形成死循环，在这里解开
 			// Nested lists cause hang after collapsing headings https://github.com/siyuan-note/siyuan/issues/15943
@@ -605,13 +607,19 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetParentID}
 	}
 
+	// 上方折叠标题移入其下方新建的超级块时，HeadingChildren 会包含该超级块；
+	// 若直接 isMovingFoldHeadingIntoSelf 会 no-op，前端已移入 DOM 而后端未动，随后包竖直超级块会把整棵超级块当子块带走并丢块。
 	if isMovingFoldHeadingIntoSelf(targetNode, headingChildren) {
-		return
+		if ast.NodeSuperBlock != targetNode.Type {
+			return
+		}
 	}
 
 	if isMovingParentIntoChild(srcNode, targetNode) {
 		return
 	}
+
+	headingChildren = filterHeadingChildrenForMove(headingChildren, targetNode, srcNode)
 
 	processed := false
 	if ast.NodeSuperBlock == targetNode.Type {
@@ -674,6 +682,66 @@ func isMovingFoldHeadingIntoSelf(targetNode *ast.Node, headingChildren []*ast.No
 		}
 	}
 	return false
+}
+
+// filterHeadingChildrenForMove 移动折叠标题时排除不应带走的节点：
+// 1. 移动目标及其后方（标题下方新建的超级块会出现在 HeadingChildren 中）
+// 2. 已包成竖直超级块的同级 / 更高级标题（先包下方再包上方时会把整棵竖直超级块当子块嵌进去）
+func filterHeadingChildrenForMove(children []*ast.Node, target, src *ast.Node) (ret []*ast.Node) {
+	if 1 > len(children) {
+		return children
+	}
+	srcLevel := 0
+	if nil != src && ast.NodeHeading == src.Type {
+		srcLevel = src.HeadingLevel
+	}
+	for _, c := range children {
+		if nil != target && (c.ID == target.ID || nodeContainsID(c, target.ID)) {
+			break
+		}
+		if 0 < srcLevel && ast.NodeSuperBlock == c.Type && superBlockHasHeadingLevelAtMost(c, srcLevel) {
+			break
+		}
+		ret = append(ret, c)
+	}
+	return
+}
+
+func nodeContainsID(n *ast.Node, id string) bool {
+	if nil == n || "" == id {
+		return false
+	}
+	found := false
+	ast.Walk(n, func(x *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if x.ID == id {
+			found = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return found
+}
+
+// superBlockHasHeadingLevelAtMost 判断超级块内是否含有层级 ≤ level 的标题（同级或更高级）。
+func superBlockHasHeadingLevelAtMost(sb *ast.Node, level int) bool {
+	if nil == sb || ast.NodeSuperBlock != sb.Type || 1 > level {
+		return false
+	}
+	found := false
+	ast.Walk(sb, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeHeading != n.Type {
+			return ast.WalkContinue
+		}
+		if n.HeadingLevel <= level {
+			found = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return found
 }
 
 func isMovingParentIntoChild(srcNode, targetNode *ast.Node) bool {

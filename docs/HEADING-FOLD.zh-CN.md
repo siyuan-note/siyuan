@@ -121,7 +121,8 @@
 4. **存在祖先折叠标题时 `doUnfoldHeading` 可能 `ReloadProtyle`**：保守但正确；增量 RetData 路径须 `VisibleHeadingChildren` + `CollectRenderFoldHidden` 省略嵌套内容。
 5. 编辑路径上的「自动展开」清单很大（改层级、拖拽、粘贴等）；产品上允许展开必要祖先，但不得借机清子标题 `fold`。
 6. **仅靠 `VisibleHeadingChildren` 不够**：它只过滤标题同级兄弟；列表等容器内部的嵌套折叠必须在渲染层用 `CollectRenderFoldHidden` 跳过，不能再依赖前端 `removeFoldHeading` 兜底。
-7. **聚焦折叠标题勿空栈扫描下方块**：`loadNodesByMode` 的 `isHeading` 分支须先 `Enter` 当前标题，否则自身 `fold=1` 会被绕过而摊开整节；这与 `GetHeadingChildrenDOM`（顶层不入栈、复制须带走整节）相反，勿混用。
+8. **横向超级块拖拽折叠标题**：去 `heading-fold` 后子块不在 DOM，不能靠 `nextElementSibling` 判断有无子级；`dragSb` 须对源与目标上每个 `fold=1` 标题各自包一层竖直超级块再展开。撤销时须先让双方都离开横向超级块再删除它，且按原相对位置决定撤出顺序。
+9. **上方折叠标题移入下方新建超级块 / 先包下方再包上方**：`HeadingChildren` 会把目标超级块或已包好的同级竖直超级块算进去；`doMove` 须 `filterHeadingChildrenForMove`（排除目标容器，并在遇到含同级 / 更高级标题的超级块时截断）。前端 `dragSb` 包竖直超级块须自下而上，避免嵌套后刷新只见标题不见内容。
 
 ## 7. 相关 issue
 

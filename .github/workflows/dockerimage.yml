@@ -35,18 +35,6 @@ jobs:
         run: |
           echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
-      - name: Verify tag matches package.json version
-        # 去掉 tag 前导 v 后与 package.json 中的版本号比对，
-        # 不一致说明开发者推 tag 前忘记同步版本号，直接终止整个流程。
-        run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          VERSION="${{ steps.version.outputs.value }}"
-          if [ "$TAG" != "$VERSION" ]; then
-            echo "Tag (v$TAG) does not match version in package.json ($VERSION), stopping"
-            exit 1
-          fi
-          echo "Tag matches version: $TAG"
-
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:

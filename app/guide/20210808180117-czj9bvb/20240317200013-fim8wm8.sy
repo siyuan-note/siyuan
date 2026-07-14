@@ -7,7 +7,7 @@
 		"id": "20240317200013-fim8wm8",
 		"title": "扩展开发",
 		"type": "doc",
-		"updated": "20240407172150"
+		"updated": "20240317201433"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240317200016-xvywk4p",
-				"updated": "20240317200558"
+				"updated": "20240317201433"
 			},
 			"Children": [
 				{
@@ -62,7 +62,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240317200705-tk4ayhp"
+						"id": "20240317200705-tk4ayhp",
+						"updated": "20240317200705"
 					},
 					"Children": [
 						{
@@ -96,7 +97,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240317200724-tsalfh6"
+						"id": "20240317200724-tsalfh6",
+						"updated": "20240317200724"
 					},
 					"Children": [
 						{
@@ -130,7 +132,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240317200744-xhlofif"
+						"id": "20240317200744-xhlofif",
+						"updated": "20240317200744"
 					},
 					"Children": [
 						{
@@ -164,7 +167,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240317200746-2zoowq8"
+						"id": "20240317200746-2zoowq8",
+						"updated": "20240317200746"
 					},
 					"Children": [
 						{
@@ -198,7 +202,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240317201413-gnqg9wp"
+						"id": "20240317201413-gnqg9wp",
+						"updated": "20240317201433"
 					},
 					"Children": [
 						{
@@ -212,35 +217,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "集市仓库 github repo: siyuan-note/bazaar"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240317201527-h016be8",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20240317201527-h016be8"
-					},
-					"Children": [
-						{
-							"ID": "20240317201527-191zcb8",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240317201527-191zcb8",
-								"updated": "20240317201608"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://docs.siyuan-note.club/",
-									"TextMarkTextContent": "社区开发者资源"
 								}
 							]
 						}

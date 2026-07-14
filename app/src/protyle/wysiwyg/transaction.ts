@@ -497,6 +497,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
         if (operation.action === "foldHeading") {
+            // 分屏聚焦在被折叠标题的子块上时（如右侧聚焦标题 333，左侧折叠其祖先标题 111），
+            // retData 为祖先标题的全量子块 ID，包含当前聚焦块及其子树。若照常移除会清空聚焦视图并退出聚焦，
+            // 故此处保持聚焦不做处理，聚焦视图与主文档的折叠态相互独立
+            if (protyle.block.showAll && operation.retData && operation.retData.includes(protyle.block.id)) {
+                return;
+            }
             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
                 item.setAttribute("fold", "1");
                 if (!operation.retData) {

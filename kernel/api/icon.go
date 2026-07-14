@@ -18,6 +18,7 @@ package api
 
 import (
 	"fmt"
+	"html"
 	"math"
 	"net/http"
 	"regexp"
@@ -166,10 +167,17 @@ func getDynamicIcon(c *gin.Context) {
 	}
 
 	if !model.Conf.Editor.AllowSVGScript {
-		svg = util.SanitizeSVG(svg)
+		var err error
+		svg, err = util.SanitizeSVG(svg)
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	c.Header("Content-Type", "image/svg+xml")
+	c.Header("Content-Security-Policy", "script-src 'none'; object-src 'none'; base-uri 'none'")
+	c.Header("X-Content-Type-Options", "nosniff")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Pragma", "no-cache")
 	c.String(http.StatusOK, svg)
@@ -577,10 +585,11 @@ func generateTypeEightSVG(color, content, id string) string {
 		}
 	}
 
+	escapedContent := html.EscapeString(content)
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path d="M39,0h434c20.97,0,38,17.03,38,38v412c0,33.11-26.89,60-60,60H60c-32.56,0-59-26.44-59-59V38C1,17.03,18.03,0,39,0Z" style="fill: %s;"/>
         <text x="50%%" y="55%%" dy="%s" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
 	</svg>
-    `, colorScheme.Primary, dy, fontSize, content)
+    `, colorScheme.Primary, dy, fontSize, escapedContent)
 }

@@ -790,9 +790,17 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 		}
 
 		if !model.Conf.Editor.AllowSVGScript {
-			data = []byte(util.SanitizeSVG(string(data)))
+			sanitized, sanitizeErr := util.SanitizeSVG(string(data))
+			if sanitizeErr != nil {
+				logging.LogWarnf("sanitize svg file failed [%s]: %s", assetAbsPath, sanitizeErr)
+				context.Status(http.StatusUnprocessableEntity)
+				return true
+			}
+			data = []byte(sanitized)
+			context.Header("Content-Security-Policy", "script-src 'none'; object-src 'none'; base-uri 'none'")
 		}
 
+		context.Header("X-Content-Type-Options", "nosniff")
 		setAssetsAttachmentDisposition(context, assetAbsPath)
 		context.Data(200, "image/svg+xml", data)
 		return true

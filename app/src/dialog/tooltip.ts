@@ -1,8 +1,5 @@
 import {isMobile} from "../util/functions";
 
-// 记录当前 tooltip 对应的触发元素，便于判断鼠标是否已离开触发区域
-export let tooltipTargetElement: Element | null = null;
-
 export const showTooltip = (
     message: string,
     target: Element,
@@ -13,7 +10,6 @@ export const showTooltip = (
     if (isMobile() || !message) {
         return;
     }
-    tooltipTargetElement = target;
     let targetRect = target.getBoundingClientRect();
     // 跨行元素
     const clientRects = Array.from(target.getClientRects());
@@ -137,6 +133,5 @@ export const showTooltip = (
 };
 
 export const hideTooltip = () => {
-    tooltipTargetElement = null;
     document.getElementById("tooltip").classList.add("fn__none");
 };

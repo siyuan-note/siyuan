@@ -270,6 +270,9 @@ interface Window {
         toCanvas: (element: Element, options?: Partial<IObject>) => Promise<HTMLCanvasElement>
         toBlob: (element: Element, options?: Partial<IObject>) => Promise<Blob>
     };
+    modernScreenshot: {
+        domToBlob: (element: Element, options?: Partial<IObject>) => Promise<Blob>
+    };
     siyuan: ISiyuan;
     JSAndroid: {
         returnDesktop(): void

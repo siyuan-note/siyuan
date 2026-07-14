@@ -63,12 +63,15 @@ export const initUI = (protyle: IProtyle) => {
     protyle.element.appendChild(protyle.toolbar.element);
     protyle.element.appendChild(protyle.toolbar.subElement);
     /// #if !MOBILE
-    moveResize(protyle.toolbar.subElement, () => {
+    moveResize(protyle.toolbar.subElement, (type) => {
         const pinElement = protyle.toolbar.subElement.querySelector('.block__icons [data-type="pin"]');
         if (pinElement) {
             pinElement.querySelector("svg use").setAttribute("xlink:href", "#iconUnpin");
             pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
             protyle.toolbar.subElement.firstElementChild.setAttribute("data-drag", "true");
+        }
+        if (type !== "move" && protyle.toolbar.subElementResizeCB) {
+            protyle.toolbar.subElementResizeCB();
         }
     });
     /// #endif

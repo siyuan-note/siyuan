@@ -200,6 +200,7 @@ export const initWindowEvent = (app: App) => {
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;
+        window.siyuan.metaIsPressed = false;
         document.body.classList.remove("body--shift-pressed");
         /// #if BROWSER
         setWebViewFocusable();

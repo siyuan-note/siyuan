@@ -181,6 +181,7 @@ class App {
             closedTabs: [],
             ctrlIsPressed: false,
             altIsPressed: false,
+            metaIsPressed: false,
             ws: mainWs,
         };
         fetchPost("/api/system/getConf", {}, async (response) => {

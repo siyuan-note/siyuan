@@ -80,7 +80,7 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
 
 const genAccountMainHTML = () => {
     if (!window.siyuan.user) {
-        return `<div id="configAccountMain" class="b3-label config-item fn__flex-column config-account--login">${genAccountAuthHTML("login")}</div>`;
+        return `<div id="configAccountMain" class="b3-label b3-label--noborder config-item fn__flex-column config-account--login">${genAccountAuthHTML("login")}</div>`;
     }
 
     const isIOS = isInIOS();
@@ -97,7 +97,7 @@ const genAccountMainHTML = () => {
         }).join("")}</div>`
         : "";
 
-    return `<div id="configAccountMain" class="fn__flex b3-label config-item config-wrap">
+    return `<div id="configAccountMain" class="b3-label--noborder fn__flex b3-label config-item config-wrap">
     <div class="fn__flex fn__flex-1 config-account__profile">
     <a href="${getCloudURL("settings/avatar")}" class="config-account__profile-avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
     <span class="fn__space"></span>

@@ -785,7 +785,8 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 	}
 
 	luteEngine := util.NewLute()
-	ret = renderBlockDOMByNodes(nodes, luteEngine)
+	// 顶层标题不入折叠栈：保留 fold=1 外观时 CollectRenderFoldHidden 若入栈会误藏 VisibleHeadingChildren
+	ret = renderBlockDOMByNodesSkipTopFold(nodes, luteEngine)
 	return
 }
 

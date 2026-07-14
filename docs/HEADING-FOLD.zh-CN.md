@@ -59,6 +59,7 @@
 | `FoldHeadingStack` | 正向扫描同级子块时维护层级栈；`Enter` / `Hidden` |
 | `VisibleHeadingChildren` | 标题下方按栈可见的子块（**顶层标题不入栈**）；展开 RetData / 嵌入 / 复制共用 |
 | `CollectRenderFoldHidden` | 渲染时收集应跳过的块（同级栈 + 容器内 `CollectFoldHiddenNodes`），不 Unlink |
+| `CollectRenderFoldHiddenSkipTop` | 同上，但 `nodes[0]` 不入栈；供 `GetHeadingChildrenDOM` 复制折叠标题整节 |
 | `CollectFoldHiddenNodes` | 按容器递归用栈收集应剔除的被盖住块（导出 / 模板 / 加载渲染） |
 | `StripLegacyHeadingFoldAttrs` | 清 `heading-fold`；曾带该属性的非标题节点一并清 `fold`；未带该属性的容器自身 `fold` 保留 |
 | `IsInFoldedHeading` | 仅单点查询；禁止在批量热路径对每个块反复调用 |
@@ -82,7 +83,7 @@
 | 导出 `keepFold`（`#5941`） | `CollectFoldHiddenNodes` |
 | 模板（`#4488`） | 同上，对被盖住块打 `status=temp` |
 | 嵌入 / `resolveEmbedR` 等（`#4765`） | 未折叠标题用 `VisibleHeadingChildren`；`fold=1` 不追加子块；HTML 渲染走 `CollectRenderFoldHidden`（**不 Unlink** 共享树） |
-| `GetHeadingChildrenDOM` | 标题 + `VisibleHeadingChildren`（顶层不入栈，复制/剪切带走整节） |
+| `GetHeadingChildrenDOM` | 标题 + `VisibleHeadingChildren`（顶层不入栈）+ `renderBlockDOMByNodesSkipTopFold`（复制/剪切带走整节） |
 
 `sql` IAL 白名单仍保留 `heading-fold` 键，便于读旧文件再清洗。
 
@@ -114,7 +115,7 @@
 
 ## 6. 演进中确认过的陷阱（勿回退）
 
-1. **`GetHeadingChildrenDOM` 若把顶层折叠标题入栈**，会只复制标题行、丢掉整节——复制/剪切必须顶层不入栈，仅省略更深嵌套折叠盖住的块。
+1. **`GetHeadingChildrenDOM` 若把顶层折叠标题入栈**，会只复制标题行、丢掉整节——复制/剪切必须顶层不入栈，仅省略更深嵌套折叠盖住的块。收集用 `VisibleHeadingChildren` 不够：渲染层 `CollectRenderFoldHidden` 若再对含 `fold=1` 顶层标题的 `nodes` 做同级入栈，会把已收集的子块全部跳过；须走 `CollectRenderFoldHiddenSkipTop` / `renderBlockDOMByNodesSkipTopFold`。
 2. **嵌入路径勿对 `trees` 缓存里的共享 AST 做 Unlink**；用 `VisibleHeadingChildren` + 渲染层 `CollectRenderFoldHidden` 省略。
 3. **`StripLegacy`：曾带 `heading-fold` 的容器上的 `fold` 视为残留一并清**，否则展开后列表等仍「假折叠」；未带该属性的容器真实 `fold` 保留。
 4. **存在祖先折叠标题时 `doUnfoldHeading` 可能 `ReloadProtyle`**：保守但正确；增量 RetData 路径须 `VisibleHeadingChildren` + `CollectRenderFoldHidden` 省略嵌套内容。

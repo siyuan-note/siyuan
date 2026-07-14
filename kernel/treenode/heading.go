@@ -135,13 +135,30 @@ func CollectFoldHiddenNodes(parent *ast.Node) (unlinks []*ast.Node) {
 // 供 renderBlockDOMByNodes 等路径使用：VisibleHeadingChildren 只过滤标题同级兄弟，
 // 列表 / 引述 / 超级块等容器内部的 fold=1 子标题盖住的块需在此补齐省略。
 func CollectRenderFoldHidden(nodes []*ast.Node) map[*ast.Node]bool {
+	return collectRenderFoldHidden(nodes, false)
+}
+
+// CollectRenderFoldHiddenSkipTop 与 CollectRenderFoldHidden 相同，但 nodes[0] 不入折叠栈。
+// 用于 GetHeadingChildrenDOM：nodes 为「顶层标题 + VisibleHeadingChildren」，顶层标题若 fold=1 且入栈会误藏整节。
+func CollectRenderFoldHiddenSkipTop(nodes []*ast.Node) map[*ast.Node]bool {
+	return collectRenderFoldHidden(nodes, true)
+}
+
+func collectRenderFoldHidden(nodes []*ast.Node, skipTopHeadingStack bool) map[*ast.Node]bool {
 	hidden := map[*ast.Node]bool{}
 	if 0 == len(nodes) {
 		return hidden
 	}
 
 	var stack FoldHeadingStack
-	for _, node := range nodes {
+	for i, node := range nodes {
+		if skipTopHeadingStack && 0 == i {
+			// 顶层标题不入栈（与 VisibleHeadingChildren 约定一致），仍收集其容器内部嵌套折叠
+			for _, h := range CollectFoldHiddenNodes(node) {
+				hidden[h] = true
+			}
+			continue
+		}
 		stack.Enter(node)
 		if stack.Hidden() {
 			hidden[node] = true

@@ -176,10 +176,25 @@ func fillBlockRefCount(nodes []*ast.Node) {
 }
 
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes0(nodes, luteEngine, false)
+}
+
+// renderBlockDOMByNodesSkipTopFold 渲染时顶层标题不入折叠栈。
+// 供 GetHeadingChildrenDOM：nodes 含 fold=1 顶层标题时仍须输出 VisibleHeadingChildren，避免 CollectRenderFoldHidden 误藏整节。
+func renderBlockDOMByNodesSkipTopFold(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes0(nodes, luteEngine, true)
+}
+
+func renderBlockDOMByNodes0(nodes []*ast.Node, luteEngine *lute.Lute, skipTopHeadingStack bool) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	// 渲染时跳过嵌套折叠盖住的块，且不 Unlink，避免污染共享 AST（展开 RetData / 嵌入 / 复制共用）
-	foldHidden := treenode.CollectRenderFoldHidden(nodes)
+	var foldHidden map[*ast.Node]bool
+	if skipTopHeadingStack {
+		foldHidden = treenode.CollectRenderFoldHiddenSkipTop(nodes)
+	} else {
+		foldHidden = treenode.CollectRenderFoldHidden(nodes)
+	}
 	for _, node := range nodes {
 		if foldHidden[node] {
 			continue

@@ -21,6 +21,7 @@ import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {isEncryptedBox} from "../../util/pathName";
+
 export const onGet = (options: {
     data: IWebSocketData,
     protyle: IProtyle,

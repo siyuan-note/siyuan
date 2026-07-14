@@ -446,12 +446,10 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 	numWorkers := max(runtime.GOMAXPROCS(0), 1)
 
-	// 向量召回候选数：启用重排时至少召回 candidateCount 条，保证重排有足够候选精排；否则只取当前页所需。
+	// 向量召回候选数：启用重排时固定召回 candidateCount 条，保证所有分页基于同一候选集；否则只取当前页所需。
 	topK := page * pageSize
 	if isRerankEnabled() {
-		if cc := rerankCandidateCount(); cc > topK {
-			topK = cc
-		}
+		topK = rerankCandidateCount()
 	}
 	h := &scoredHeap{}
 	heap.Init(h)
@@ -545,7 +543,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		result[i] = heap.Pop(h).(scoredBlock)
 	}
 
-	// 按向量相似度降序取出全部候选块 ID。重排启用时 result 已是 topK（含 candidateCount）；
+	// 按向量相似度降序取出全部候选块 ID。重排启用时 result 已是固定的 candidateCount；
 	// 未启用时 result 即当前页所需，后续分页逻辑统一处理。
 	var candidateIDs []string
 	for _, s := range result {

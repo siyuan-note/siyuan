@@ -19,7 +19,9 @@ package util
 import (
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
+	"io"
 	"math/rand"
 	"reflect"
 	"regexp"
@@ -29,7 +31,6 @@ import (
 
 	"github.com/88250/lute/html"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/siyuan-note/logging"
 )
 
 // Optional is a generic type that represents an optional value, which can be in one of three states:
@@ -316,121 +317,189 @@ func SanitizeHTML(h string) string {
 	return p.Sanitize(h)
 }
 
-func SanitizeSVG(svgInput string) string {
-	// 1. 将字符串解析为节点树
-	doc, err := html.Parse(strings.NewReader(svgInput))
-	if err != nil {
-		logging.LogWarnf("parse svg failed: %v", err)
-		return svgInput
-	}
+const (
+	maxSVGDepth  = 256
+	maxSVGTokens = 1_000_000
+)
 
-	// 2. 定义递归移除逻辑
-	var walk func(*html.Node)
-	walk = func(n *html.Node) {
-		// 倒序遍历子节点，确保删除操作不影响后续迭代
-		for c := n.FirstChild; c != nil; {
-			next := c.NextSibling
-			if c.Type == html.ElementNode {
-				tag := strings.ToLower(c.Data)
-				if i := strings.LastIndex(tag, ":"); i >= 0 {
-					tag = tag[i+1:]
+var unsafeSVGElements = map[string]struct{}{
+	"script":           {},
+	"iframe":           {},
+	"object":           {},
+	"embed":            {},
+	"foreignobject":    {},
+	"animate":          {},
+	"animatetransform": {},
+	"animatecolor":     {},
+	"animatemotion":    {},
+	"set":              {},
+}
+
+// SanitizeSVG 使用 XML 语义过滤 SVG，避免 HTML 与 XML 解析规则差异导致活动内容绕过过滤。
+func SanitizeSVG(svgInput string) (string, error) {
+	decoder := xml.NewDecoder(strings.NewReader(svgInput))
+	decoder.Strict = true
+
+	var buf bytes.Buffer
+	encoder := xml.NewEncoder(&buf)
+	rootSeen := false
+	rootClosed := false
+	depth := 0
+	skipDepth := 0
+	tokenCount := 0
+	var elementStack []xml.Name
+
+	for {
+		token, err := decoder.RawToken()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("parse svg failed: %w", err)
+		}
+		tokenCount++
+		if tokenCount > maxSVGTokens {
+			return "", fmt.Errorf("svg contains too many tokens")
+		}
+
+		switch typed := token.(type) {
+		case xml.StartElement:
+			elementStack = append(elementStack, typed.Name)
+			depth++
+			if depth > maxSVGDepth {
+				return "", fmt.Errorf("svg nesting depth exceeds %d", maxSVGDepth)
+			}
+			if rootClosed {
+				return "", fmt.Errorf("svg contains multiple root elements")
+			}
+			if !rootSeen {
+				if !strings.EqualFold(typed.Name.Local, "svg") {
+					return "", fmt.Errorf("root element is not svg")
 				}
-				if tag == "script" || tag == "iframe" || tag == "object" || tag == "embed" || tag == "foreignobject" || "animate" == tag ||
-					"animatetransform" == tag || "animatecolor" == tag || "animatemotion" == tag || "set" == tag {
-					n.RemoveChild(c)
-					c = next
-					continue
-				}
-
-				// 清理不安全属性
-				if len(c.Attr) > 0 {
-					// 过滤属性：删除以 on 开头的属性（事件处理），href/xlink:href 指向 javascript: 或不安全 data:，以及危险的 style 表达式
-					filtered := c.Attr[:0]
-					for _, a := range c.Attr {
-						key := strings.ToLower(a.Key)
-						val := strings.TrimSpace(strings.ToLower(a.Val))
-						val = strings.Map(func(r rune) rune {
-							if r == '\t' || r == '\n' || r == '\r' {
-								return -1 // Remove character
-							}
-							return r
-						}, val)
-
-						// 删除事件处理器属性（onload, onerror 等）
-						if strings.HasPrefix(key, "on") {
-							continue
-						}
-
-						if key == "values" || key == "from" || key == "to" {
-							// 删除 animate* 元素的 values、from、to 属性以防止恶意动画
-							if strings.Contains(val, "javascript:") {
-								continue
-							}
-						}
-
-						// 删除 href 或 xlink:href 指向 javascript: 或某些不安全的 data: URI
-						if key == "href" || key == "xlink:href" || key == "xlinkhref" {
-							if strings.HasPrefix(val, "javascript:") {
-								continue
-							}
-							// 对 data: 做保守处理，只允许常见安全的图片格式（png/jpeg/gif/webp）
-							if strings.HasPrefix(val, "data:") {
-								safe := strings.HasPrefix(val, "data:image/png") ||
-									strings.HasPrefix(val, "data:image/jpeg") ||
-									strings.HasPrefix(val, "data:image/gif") ||
-									strings.HasPrefix(val, "data:image/webp")
-								if !safe {
-									continue
-								}
-							}
-						}
-
-						// 清理 style 中的危险表达式，如 expression() 或 url(javascript:...)
-						if key == "style" {
-							low := val
-							if strings.Contains(low, "expression(") || strings.Contains(low, "url(javascript:") || strings.Contains(low, "javascript:") {
-								// 丢弃整个 style 属性以保证安全
-								continue
-							}
-						}
-
-						// 其它属性保留
-						filtered = append(filtered, a)
-					}
-					c.Attr = filtered
-				}
+				rootSeen = true
 			}
 
-			// 递归处理子节点（如果节点尚未被删除）
-			if c.Parent != nil {
-				walk(c)
+			if skipDepth > 0 {
+				skipDepth++
+				continue
+			}
+			if _, unsafe := unsafeSVGElements[strings.ToLower(typed.Name.Local)]; unsafe {
+				skipDepth = 1
+				continue
 			}
 
-			c = next
+			typed.Name = preserveXMLName(typed.Name)
+			typed.Attr = sanitizeSVGAttributes(typed.Attr)
+			if err = encoder.EncodeToken(typed); err != nil {
+				return "", fmt.Errorf("render svg failed: %w", err)
+			}
+		case xml.EndElement:
+			if depth <= 0 || len(elementStack) == 0 {
+				return "", fmt.Errorf("svg contains an unexpected closing element")
+			}
+			startName := elementStack[len(elementStack)-1]
+			if startName != typed.Name {
+				return "", fmt.Errorf("svg closing element %q does not match %q", typed.Name.Local, startName.Local)
+			}
+			elementStack = elementStack[:len(elementStack)-1]
+			if skipDepth > 0 {
+				skipDepth--
+				depth--
+				if depth == 0 {
+					rootClosed = true
+				}
+				continue
+			}
+			typed.Name = preserveXMLName(typed.Name)
+			if err = encoder.EncodeToken(typed); err != nil {
+				return "", fmt.Errorf("render svg failed: %w", err)
+			}
+			depth--
+			if depth == 0 {
+				rootClosed = true
+			}
+		case xml.CharData:
+			if skipDepth > 0 {
+				continue
+			}
+			if (!rootSeen || rootClosed) && strings.TrimSpace(string(typed)) != "" {
+				return "", fmt.Errorf("svg contains text outside the root element")
+			}
+			if rootSeen && !rootClosed {
+				if err = encoder.EncodeToken(typed); err != nil {
+					return "", fmt.Errorf("render svg failed: %w", err)
+				}
+			}
+		case xml.Comment:
+			if skipDepth == 0 && rootSeen && !rootClosed {
+				if err = encoder.EncodeToken(typed); err != nil {
+					return "", fmt.Errorf("render svg failed: %w", err)
+				}
+			}
+		case xml.Directive:
+			return "", fmt.Errorf("svg directives are not allowed")
+		case xml.ProcInst:
+			// XML 声明和处理指令不影响 SVG 图像内容，输出时统一省略。
 		}
 	}
 
-	// 3. 执行移除
-	walk(doc)
-
-	// 4. 将处理后的树重新渲染回字符串
-	var buf bytes.Buffer
-	if err = html.Render(&buf, doc); err != nil {
-		logging.LogWarnf("render svg failed: %v", err)
-		return svgInput
+	if !rootSeen || !rootClosed || depth != 0 || skipDepth != 0 || len(elementStack) != 0 {
+		return "", fmt.Errorf("svg root element is incomplete")
 	}
-
-	// 5. 提取 SVG 部分 (html.Render 会自动加上 <html><body> 标签)
-	return extractSVG(buf.String())
+	if err := encoder.Close(); err != nil {
+		return "", fmt.Errorf("render svg failed: %w", err)
+	}
+	return buf.String(), nil
 }
 
-func extractSVG(fullHTML string) string {
-	start := strings.Index(fullHTML, "<svg")
-	end := strings.LastIndex(fullHTML, "</svg>")
-	if start == -1 || end == -1 {
-		return fullHTML
+func preserveXMLName(name xml.Name) xml.Name {
+	if name.Space != "" {
+		name.Local = name.Space + ":" + name.Local
+		name.Space = ""
 	}
-	return fullHTML[start : end+6]
+	return name
+}
+
+func sanitizeSVGAttributes(attrs []xml.Attr) []xml.Attr {
+	filtered := make([]xml.Attr, 0, len(attrs))
+	for _, attr := range attrs {
+		key := strings.ToLower(attr.Name.Local)
+		value := normalizeSVGAttributeValue(attr.Value)
+		if strings.HasPrefix(key, "on") {
+			continue
+		}
+		if key == "href" {
+			if strings.HasPrefix(value, "javascript:") || strings.HasPrefix(value, "vbscript:") {
+				continue
+			}
+			if strings.HasPrefix(value, "data:") && !isSafeSVGDataImage(value) {
+				continue
+			}
+		}
+		if key == "style" && (strings.Contains(value, "expression(") || strings.Contains(value, "javascript:") ||
+			strings.Contains(value, "vbscript:")) {
+			continue
+		}
+		attr.Name = preserveXMLName(attr.Name)
+		filtered = append(filtered, attr)
+	}
+	return filtered
+}
+
+func normalizeSVGAttributeValue(value string) string {
+	return strings.ToLower(strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) || unicode.IsControl(r) {
+			return -1
+		}
+		return r
+	}, strings.TrimSpace(value)))
+}
+
+func isSafeSVGDataImage(value string) bool {
+	return strings.HasPrefix(value, "data:image/png") ||
+		strings.HasPrefix(value, "data:image/jpeg") ||
+		strings.HasPrefix(value, "data:image/gif") ||
+		strings.HasPrefix(value, "data:image/webp")
 }
 
 var nonAlphanumericRegexp = regexp.MustCompile(`[^0-9a-zA-Z]`)

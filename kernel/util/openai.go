@@ -344,8 +344,8 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, dimension
 	return
 }
 
-// rerankDocTextMaxLen 限制单篇文档送入重排服务的最大字符数，避免超出服务端 token 上限。
-const rerankDocTextMaxLen = 2000
+// rerankDocTextMaxRunes 限制单篇文档送入重排服务的最大 Unicode 字符数，兼顾常见模型的输入上限。
+const rerankDocTextMaxRunes = 4000
 
 // rerankHTTPClient 单例 HTTP 客户端，复用连接池并限制每主机最大连接数，避免重排请求打满连接。
 var (
@@ -355,13 +355,12 @@ var (
 
 func getRerankHTTPClient() *http.Client {
 	rerankHTTPClientOnce.Do(func() {
-		transport := &http.Transport{
-			MaxConnsPerHost:     4,
-			MaxIdleConns:        8,
-			MaxIdleConnsPerHost: 4,
-			IdleConnTimeout:     90 * time.Second,
-		}
-		rerankHTTPClient = &http.Client{Transport: transport}
+		transport := httpclient.NewTransport(false)
+		transport.MaxConnsPerHost = 4
+		transport.MaxIdleConns = 8
+		transport.MaxIdleConnsPerHost = 4
+		transport.IdleConnTimeout = 90 * time.Second
+		rerankHTTPClient = httpclient.NewUserAgentClient(transport)
 	})
 	return rerankHTTPClient
 }
@@ -388,7 +387,7 @@ type rerankResponse struct {
 // Rerank 调用重排服务对 query 与候选文档逐对精排。endpoint 为完整重排端点地址，不同服务商路径无统一标准
 // （Jina /v1/rerank、阿里云 compatible-api/v1/reranks、Cohere /v1/rerank 等），由用户照文档填写。
 // 返回的 indices 与 scores 均按 relevance_score 降序，indices 指向传入 documents 的下标。
-// 对每条 document 文本按 rerankDocTextMaxLen 截断，防超服务端 token 限制。
+// 对每条 document 文本按 rerankDocTextMaxRunes 截断，防超服务端 token 限制并保证 UTF-8 完整。
 // topN 语义：topN <= 0 时不传 top_n（服务端默认返回全部文档评分，搜索场景用此避免被服务端 top_n 上限截断）；
 // topN > 0 时透传给服务端，仅用于测试连通性等只需少量结果的场景。
 func Rerank(query string, documents []string, apiKey, endpoint, model string, topN, timeout int) (indices []int, scores []float64, err error) {
@@ -404,11 +403,7 @@ func Rerank(query string, documents []string, apiKey, endpoint, model string, to
 
 	trimmed := make([]string, len(documents))
 	for i, doc := range documents {
-		if len(doc) > rerankDocTextMaxLen {
-			trimmed[i] = doc[:rerankDocTextMaxLen]
-		} else {
-			trimmed[i] = doc
-		}
+		trimmed[i] = truncateRerankDocument(doc)
 	}
 
 	body, err := json.Marshal(rerankRequest{
@@ -465,12 +460,33 @@ func Rerank(query string, documents []string, apiKey, endpoint, model string, to
 	return
 }
 
+func truncateRerankDocument(document string) string {
+	runes := []rune(document)
+	if len(runes) > rerankDocTextMaxRunes {
+		return string(runes[:rerankDocTextMaxRunes])
+	}
+	return document
+}
+
 // TestRerankModel 测试重排模型可用性，用极简 query+documents 发一次重排请求验证连通性与鉴权。
 // 返回值：matched 表示是否连通成功，err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
 func TestRerankModel(apiKey, apiBaseURL, model string, timeout int) (matched bool, err error) {
-	_, _, err = Rerank("1", []string{"a", "b"}, apiKey, apiBaseURL, model, 2, timeout)
+	documents := []string{"a", "b"}
+	indices, _, err := Rerank("1", documents, apiKey, apiBaseURL, model, len(documents), timeout)
 	if nil != err {
 		return
+	}
+	if len(indices) != len(documents) {
+		err = fmt.Errorf("rerank returned %d indices for %d documents", len(indices), len(documents))
+		return
+	}
+	seen := make(map[int]bool, len(indices))
+	for _, index := range indices {
+		if seen[index] {
+			err = fmt.Errorf("rerank returned duplicate index %d", index)
+			return
+		}
+		seen[index] = true
 	}
 	matched = true
 	return

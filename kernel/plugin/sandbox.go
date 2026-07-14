@@ -53,6 +53,11 @@ var (
 	httpClient *req.Client = req.C().SetTimeout(time.Minute)
 )
 
+type Promise struct {
+	Resolve func(reason interface{}) error
+	Reject  func(reason interface{}) error
+}
+
 type FunctionResult[T any] struct {
 	Value T
 	Error error

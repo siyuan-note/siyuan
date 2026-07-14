@@ -344,7 +344,8 @@ func getSafeClient(timeout time.Duration) *req.Client {
 // Query params:
 //   - `u`: RawURLEncoding base64 of the target URL string.
 //   - `h`: RawURLEncoding base64 of a JSON object map[string][]string.
-func parseForwardProxyParams(c *gin.Context) (parsedURL *url.URL, headers *http.Header, err error) {
+//   - `timeout`: The timeout for the request in nanoseconds.
+func parseForwardProxyParams(c *gin.Context) (parsedURL *url.URL, headers *http.Header, timeout time.Duration, err error) {
 	uParam := c.Query("u")
 	if uParam == "" {
 		err = fmt.Errorf("missing query param [u]")
@@ -377,6 +378,18 @@ func parseForwardProxyParams(c *gin.Context) (parsedURL *url.URL, headers *http.
 		err = fmt.Errorf("parse [h] failed: %s", jsonErr.Error())
 		return
 	}
+
+	timeout = 30 * time.Second
+	tParam := c.Query("t")
+	if tParam != "" {
+		if t, parseErr := time.ParseDuration(tParam); parseErr != nil {
+			err = fmt.Errorf("parse [t] failed: %s", parseErr.Error())
+			return
+		} else {
+			timeout = t
+		}
+	}
+
 	for k, vs := range record {
 		for _, v := range vs {
 			h.Add(k, v)
@@ -403,7 +416,7 @@ func forwardResponseHeaders(dst http.Header, src http.Header) {
 // The request method and body are taken from the incoming request.
 // Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
 func httpProxy(c *gin.Context) {
-	targetURL, targetHeaders, err := parseForwardProxyParams(c)
+	targetURL, targetHeaders, timeout, err := parseForwardProxyParams(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
 		return
@@ -415,7 +428,7 @@ func httpProxy(c *gin.Context) {
 	}
 
 	transport := &http.Transport{
-		DialContext: util.SSRFSafeDialer(30 * time.Second).DialContext,
+		DialContext: util.SSRFSafeDialer(timeout).DialContext,
 	}
 	httpClient := &http.Client{Transport: transport}
 
@@ -458,7 +471,7 @@ func httpProxy(c *gin.Context) {
 //
 // Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
 func wsProxy(c *gin.Context) {
-	targetURL, targetHeaders, err := parseForwardProxyParams(c)
+	targetURL, targetHeaders, timeout, err := parseForwardProxyParams(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
 		return
@@ -470,8 +483,8 @@ func wsProxy(c *gin.Context) {
 	}
 
 	wsDialer := &websocket.Dialer{
-		NetDialContext:   util.SSRFSafeDialer(30 * time.Second).DialContext,
-		HandshakeTimeout: 30 * time.Second,
+		NetDialContext:   util.SSRFSafeDialer(timeout).DialContext,
+		HandshakeTimeout: timeout,
 	}
 
 	targetConn, targetResp, dialErr := wsDialer.DialContext(c.Request.Context(), targetURL.String(), *targetHeaders)
@@ -551,7 +564,7 @@ func wsProxy(c *gin.Context) {
 //
 // Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
 func esProxy(c *gin.Context) {
-	targetURL, targetHeaders, err := parseForwardProxyParams(c)
+	targetURL, targetHeaders, timeout, err := parseForwardProxyParams(c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
 		return
@@ -563,7 +576,7 @@ func esProxy(c *gin.Context) {
 	}
 
 	transport := &http.Transport{
-		DialContext: util.SSRFSafeDialer(30 * time.Second).DialContext,
+		DialContext: util.SSRFSafeDialer(timeout).DialContext,
 	}
 	httpClient := &http.Client{Transport: transport}
 

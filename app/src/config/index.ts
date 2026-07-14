@@ -10,6 +10,7 @@ import {bazaar, renderReadme} from "./bazaar";
 import {fetchSyncPost} from "../util/fetch";
 import {getFrontend} from "../util/functions";
 import {showMessage} from "../dialog/message";
+import {escapeHtml} from "../util/escape";
 /// #endif
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
@@ -123,7 +124,7 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
 
     const resource = (response.data.packages as IBazaarItem[]).find((item: IBazaarItem) => item.name === itemName);
     if (!resource) {
-        showMessage(`Package not found: ${itemName}`);
+        showMessage(`Package not found: ${escapeHtml(itemName)}`);
         return;
     }
 

@@ -1,4 +1,4 @@
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -17,6 +17,11 @@ import {App} from "../index";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {removeLoading} from "../protyle/ui/initUI";
 import {switchSettingPanelSubTab} from "./setting/mount";
+/// #if MOBILE
+import {openMobileFileById} from "../mobile/editor";
+/// #else
+import {BlockPanel} from "../block/Panel";
+/// #endif
 
 /** 资源 Tab 侧栏 / 全局搜索索引文案 */
 export const collectAssetsTabSearchStrings = (): string[] => [
@@ -204,6 +209,23 @@ const assets = {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "openFloat") {
+                    const blockIDs = JSON.parse(target.getAttribute("data-id")) as string[];
+                    if (blockIDs.length > 0) {
+                        /// #if MOBILE
+                        openMobileFileById(app, blockIDs[0], [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        /// #else
+                        window.siyuan.blockPanels.push(new BlockPanel({
+                            app,
+                            isBacklink: false,
+                            targetElement: target,
+                            refDefs: blockIDs.map(refID => ({refID})),
+                        }));
+                        /// #endif
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "copy") {
                     if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
                         writeText(`<div class="av" data-node-id="${Lute.NewNodeID()}" data-av-id="${target.parentElement.dataset.item}" data-type="NodeAttributeView" data-av-type="table"></div>`);
@@ -296,7 +318,8 @@ const assets = {
     },
     _renderList: (data: {
         item: string,
-        name: string
+        name: string,
+        blockIDs?: string[]
     }[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
         let html = "";
         let boxOpenHTML = "";
@@ -313,8 +336,14 @@ const assets = {
         }
         const mobile = isMobile();
         data.forEach((item) => {
+            const blockPopoverHTML = type === "lostAssets" && item.blockIDs?.length > 0
+                ? `<span data-type="openFloat" data-id="${escapeAttr(JSON.stringify(item.blockIDs))}" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.refPopover}">
+        <svg><use xlink:href="#iconPictureInPicture"></use></svg>
+    </span>`
+                : "";
             html += `<li data-tab-type="${type}" data-item="${item.item}"  class="b3-list-item${mobile ? "" : " b3-list-item--hide-action"}">
     <span class="b3-list-item__text">${escapeHtml(item.name || item.item)}</span>
+    ${blockPopoverHTML}
     <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${type === "unRefAV" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>

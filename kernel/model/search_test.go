@@ -16,7 +16,10 @@
 
 package model
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 // TestIsValidSearchBoxPath 覆盖搜索入参的笔记本 ID 与文档路径校验，阻止 SQL 元字符进入语句拼接。
 // 回归用例参考 /api/search/fullTextSearchBlock 的 SQL 注入报告（paths[] 投毒）。
@@ -106,4 +109,33 @@ func countPlaceholder(s string) (n int) {
 		}
 	}
 	return
+}
+
+func TestBuildRefUsedOrderBy(t *testing.T) {
+	newestID := "20260714120000-newest1"
+	olderID := "20260714110000-older01"
+	invalidID := "invalid-id' OR 1=1 --"
+	orderBy := buildRefUsedOrderBy(map[string]int64{
+		olderID:   100,
+		newestID:  200,
+		invalidID: 300,
+	})
+
+	newestPos := strings.Index(orderBy, newestID)
+	olderPos := strings.Index(orderBy, olderID)
+	if 0 > newestPos || 0 > olderPos || newestPos >= olderPos {
+		t.Fatalf("最近引用块应排在较早引用块之前：%q", orderBy)
+	}
+	if strings.Contains(orderBy, invalidID) {
+		t.Fatalf("排序语句不应包含非法块 ID：%q", orderBy)
+	}
+	if !strings.HasSuffix(orderBy, "END ASC, ") {
+		t.Fatalf("排序语句格式错误：%q", orderBy)
+	}
+}
+
+func TestBuildRefUsedOrderByEmpty(t *testing.T) {
+	if orderBy := buildRefUsedOrderBy(nil); "" != orderBy {
+		t.Fatalf("空记录不应生成排序语句：%q", orderBy)
+	}
 }

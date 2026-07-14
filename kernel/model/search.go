@@ -1716,7 +1716,7 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 		stmt += buf.String()
 	}
 
-	orderBy := ` ORDER BY CASE
+	orderBy := " ORDER BY " + buildRefUsedOrderBy(GetRefUsed()) + `CASE
              WHEN name = '${keyword}' THEN 10
              WHEN alias = '${keyword}' THEN 20
              WHEN memo = '${keyword}' THEN 30
@@ -1739,6 +1739,44 @@ func fullTextSearchRefBlockInBox(keyword string, beforeLen int, onlyDoc bool, bo
 		ret = []*Block{}
 	}
 	return
+}
+
+func buildRefUsedOrderBy(refUsed map[string]int64) string {
+	type refUsedEntry struct {
+		id        string
+		timestamp int64
+	}
+
+	entries := make([]refUsedEntry, 0, len(refUsed))
+	for id, timestamp := range refUsed {
+		if 22 == len(id) && ast.IsNodeIDPattern(id) {
+			entries = append(entries, refUsedEntry{id: id, timestamp: timestamp})
+		}
+	}
+	if 1 > len(entries) {
+		return ""
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].timestamp == entries[j].timestamp {
+			return entries[i].id > entries[j].id
+		}
+		return entries[i].timestamp > entries[j].timestamp
+	})
+
+	buf := bytes.Buffer{}
+	buf.WriteString("CASE id ")
+	for i, entry := range entries {
+		buf.WriteString("WHEN '")
+		buf.WriteString(entry.id)
+		buf.WriteString("' THEN ")
+		buf.WriteString(strconv.Itoa(i))
+		buf.WriteByte(' ')
+	}
+	buf.WriteString("ELSE ")
+	buf.WriteString(strconv.Itoa(len(entries)))
+	buf.WriteString(" END ASC, ")
+	return buf.String()
 }
 
 func extractID(content string) (ret string) {

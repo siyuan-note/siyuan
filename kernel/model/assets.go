@@ -1273,9 +1273,10 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 }
 
 type UnusedItem struct {
-	Item    string    `json:"item"`
-	Name    string    `json:"name"`
-	ModTime time.Time `json:"-"`
+	Item     string    `json:"item"`
+	Name     string    `json:"name"`
+	BlockIDs []string  `json:"blockIDs,omitempty"`
+	ModTime  time.Time `json:"-"`
 }
 
 func UnusedAssets(sorted bool) (ret []*UnusedItem) {
@@ -1477,12 +1478,12 @@ func MissingAssets() (ret []*UnusedItem) {
 		return
 	}
 	luteEngine := util.NewLute()
+	destBlockIDs := map[string]map[string]bool{}
 	for _, notebook := range notebooks {
 		if notebook.Closed {
 			continue
 		}
 
-		dests := map[string]bool{}
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {
 			var trees []*parse.Tree
@@ -1494,58 +1495,113 @@ func MissingAssets() (ret []*UnusedItem) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range getAssetsLinkDests(tree.Root, false) {
-					dests[d] = true
-				}
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering {
+						return ast.WalkContinue
+					}
+
+					blockID := assetLinkDestBlockID(n)
+					for _, dest := range getAssetLinkDestsByNode(n, false) {
+						addAssetLinkDestBlockID(destBlockIDs, dest, blockID)
+					}
+					return ast.WalkContinue
+				})
 
 				if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
 					// 题头图计入
 					if !util.IsAssetLinkDest([]byte(titleImgPath), false) {
 						continue
 					}
-					dests[titleImgPath] = true
+					addAssetLinkDestBlockID(destBlockIDs, titleImgPath, tree.Root.ID)
 				}
-			}
-		}
-
-		for dest := range dests {
-			if !strings.HasPrefix(dest, "assets/") {
-				continue
-			}
-
-			if idx := strings.Index(dest, "?"); 0 < idx {
-				dest = dest[:idx]
-			}
-
-			if strings.HasSuffix(dest, "/") {
-				continue
-			}
-
-			if strings.Contains(strings.ToLower(dest), ".pdf/") {
-				if idx := strings.LastIndex(dest, "/"); -1 < idx {
-					if ast.IsNodeIDPattern(dest[idx+1:]) {
-						// PDF 标注不计入 https://github.com/siyuan-note/siyuan/issues/13891
-						continue
-					}
-				}
-			}
-
-			if "" == assetsPathMap[dest] {
-				if strings.HasPrefix(dest, "assets/.") {
-					// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
-					if !filelock.IsExist(filepath.Join(util.DataDir, dest)) {
-						name := path.Base(dest)
-						ret = append(ret, &UnusedItem{Item: dest, Name: name})
-					}
-				} else {
-					name := path.Base(dest)
-					ret = append(ret, &UnusedItem{Item: dest, Name: name})
-				}
-				continue
 			}
 		}
 	}
+
+	for dest, blockIDSet := range destBlockIDs {
+		if "" == assetsPathMap[dest] {
+			if strings.HasPrefix(dest, "assets/.") {
+				// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
+				if filelock.IsExist(filepath.Join(util.DataDir, dest)) {
+					continue
+				}
+			}
+
+			blockIDs := make([]string, 0, len(blockIDSet))
+			for blockID := range blockIDSet {
+				blockIDs = append(blockIDs, blockID)
+			}
+			sort.Strings(blockIDs)
+			ret = append(ret, &UnusedItem{Item: dest, Name: path.Base(dest), BlockIDs: blockIDs})
+		}
+	}
+	sort.Slice(ret, func(i, j int) bool {
+		return ret[i].Item < ret[j].Item
+	})
 	return
+}
+
+func addAssetLinkDestBlockID(destBlockIDs map[string]map[string]bool, dest, blockID string) {
+	dest = normalizeMissingAssetLinkDest(dest)
+	if "" == dest {
+		return
+	}
+
+	blockIDs := destBlockIDs[dest]
+	if nil == blockIDs {
+		blockIDs = map[string]bool{}
+		destBlockIDs[dest] = blockIDs
+	}
+	if "" != blockID {
+		blockIDs[blockID] = true
+	}
+}
+
+func normalizeMissingAssetLinkDest(dest string) string {
+	dest = strings.TrimSpace(dest)
+	if !strings.HasPrefix(dest, "assets/") {
+		return ""
+	}
+	if idx := strings.Index(dest, "?"); 0 < idx {
+		dest = dest[:idx]
+	}
+	if strings.HasSuffix(dest, "/") || strings.HasSuffix(dest, ".rtfd") {
+		return ""
+	}
+	if strings.Contains(strings.ToLower(dest), ".pdf/") {
+		if idx := strings.LastIndex(dest, "/"); -1 < idx && ast.IsNodeIDPattern(dest[idx+1:]) {
+			// PDF 标注不计入 https://github.com/siyuan-note/siyuan/issues/13891
+			return ""
+		}
+	}
+	return dest
+}
+
+func assetLinkDestBlockID(node *ast.Node) string {
+	if node.IsBlock() && "" != node.ID {
+		return node.ID
+	}
+	if block := treenode.ParentBlock(node); nil != block {
+		return block.ID
+	}
+	return ""
+}
+
+func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool) []string {
+	if !node.IsBlock() && ast.NodeLinkDest != node.Type && ast.NodeHTMLBlock != node.Type && ast.NodeInlineHTML != node.Type &&
+		ast.NodeIFrame != node.Type && ast.NodeWidget != node.Type && ast.NodeAudio != node.Type && ast.NodeVideo != node.Type &&
+		ast.NodeAttributeView != node.Type && !node.IsTextMarkType("a") && !node.IsTextMarkType("file-annotation-ref") {
+		return nil
+	}
+
+	// 复用统一的资源链接提取逻辑，但仅处理当前节点，避免重复遍历子树。
+	nodeCopy := *node
+	nodeCopy.Parent = nil
+	nodeCopy.Previous = nil
+	nodeCopy.Next = nil
+	nodeCopy.FirstChild = nil
+	nodeCopy.LastChild = nil
+	return getAssetsLinkDests(&nodeCopy, includeServePath)
 }
 
 func emojisInTree(tree *parse.Tree) (ret []string) {

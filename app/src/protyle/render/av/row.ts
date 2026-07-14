@@ -21,6 +21,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {escapeAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
 import {getAVSelectStat, getAvBodyData, resetAVRowSelect, updateAVRowSelect} from "./virtualScroll";
+import {getCardCoverImageHTML} from "./cover";
 
 export const getRowHTML = (options: {
     data: IAVView
@@ -37,11 +38,7 @@ export const getRowHTML = (options: {
         if (kanbanData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (galleryRow.coverURL) {
-                if (galleryRow.coverURL.startsWith("background")) {
-                    html += `<div class="${coverClass}"><img class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${galleryRow.coverURL}"></div>`;
-                } else {
-                    html += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${kanbanData.fitImage ? " av__gallery-img--fit" : ""}" src="${getCompressURL(galleryRow.coverURL)}"></div>`;
-                }
+                html += `<div class="${coverClass}">${getCardCoverImageHTML(galleryRow.coverURL, getCompressURL(galleryRow.coverURL), kanbanData.fitImage)}</div>`;
             } else if (galleryRow.coverContent) {
                 html += `<div class="${coverClass}"><div class="av__gallery-content">${galleryRow.coverContent}</div><div></div></div>`;
             } else {
@@ -109,11 +106,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
         if (kanbanData.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + kanbanData.cardAspectRatio;
             if (kanbanRow.coverURL) {
-                if (kanbanRow.coverURL.startsWith("background")) {
-                    html += `<div class="${coverClass}"><img class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${kanbanRow.coverURL}"></div>`;
-                } else {
-                    html += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${kanbanData.fitImage ? " av__gallery-img--fit" : ""}" src="${getCompressURL(kanbanRow.coverURL)}"></div>`;
-                }
+                html += `<div class="${coverClass}">${getCardCoverImageHTML(kanbanRow.coverURL, getCompressURL(kanbanRow.coverURL), kanbanData.fitImage)}</div>`;
             } else if (kanbanRow.coverContent.trim()) {
                 html += `<div class="${coverClass}"><div class="av__gallery-content">${kanbanRow.coverContent}</div><div></div></div>`;
             }

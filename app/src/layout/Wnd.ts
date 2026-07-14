@@ -52,6 +52,7 @@ import {clearOBG} from "./dock/util";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
+import {dragOverScroll} from "../boot/globalEvent/dragover";
 
 export class Wnd {
     private app: App;
@@ -186,6 +187,8 @@ export class Wnd {
                 return;
             }
             event.preventDefault();
+            const tabBarElement = it.firstElementChild as HTMLElement;
+            dragOverScroll(event, tabBarElement.getBoundingClientRect(), tabBarElement, "x");
             let oldTabHeaderElement = window.siyuan.dragElement;
             let exitDrag = false;
             Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {

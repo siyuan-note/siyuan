@@ -99,10 +99,11 @@ const handleTouchStart = (e: TouchEvent) => {
                 startX: touch.clientX,
                 startY: touch.clientY,
                 touchStartTime: Date.now(),
-                // File tree, gallery items and list actions need long-press to avoid conflict with scroll
+                // 文件树、画廊、页签和列表操作需长按，以避免与滚动冲突
                 requireLongPress: draggable.closest(".sy__file") !== null ||
                     draggable.closest(".sy__outline") !== null ||
                     draggable.closest(".av__gallery-item") !== null ||
+                    draggable.closest(".layout-tab-bar") !== null ||
                     draggable.closest(".protyle-action") !== null,
                 longPressCancelled: false,
                 isMouse: isMouseInput(touch),

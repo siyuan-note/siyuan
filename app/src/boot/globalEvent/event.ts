@@ -77,6 +77,12 @@ export const initWindowEvent = (app: App) => {
 
     let scrollTarget: HTMLElement | false;
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
+        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+            if (!hasClosestByClassName(event.target, "layout-tab-bar")) {
+                stopScrollAnimation();
+            }
+            return;
+        }
         if (event.dataTransfer.types.includes("text/plain")) {
             return;
         }
@@ -139,8 +145,7 @@ export const initWindowEvent = (app: App) => {
         } else if (scrollTarget && scrollTarget.classList.contains("protyle") && fileElement) {
             scrollTarget = fileElement;
         }
-        if (hasClosestByClassName(event.target, "layout-tab-container__drag") ||
-            event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+        if (hasClosestByClassName(event.target, "layout-tab-container__drag")) {
             stopScrollAnimation();
             return;
         }

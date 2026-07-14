@@ -347,8 +347,10 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             });
             const foldElement = document.createElement("template");
             foldElement.innerHTML = responseHTML.data;
-            Array.from(foldElement.content.children).reverse().forEach((childItem: HTMLElement, childIndex) => {
-                if (childIndex === foldElement.content.children.length - 1) {
+            // 内核 doInsert：previousID 指向 fold=1 标题时会插到该节末尾，故正序插入即可；
+            // 若再 reverse，子块顺序会倒转。首项为标题自身，已在上方插入副本，跳过。
+            Array.from(foldElement.content.children).forEach((childItem: HTMLElement, childIndex) => {
+                if (childIndex === 0) {
                     return;
                 }
                 childItem.querySelectorAll("[data-node-id]").forEach(subItem => {
@@ -357,6 +359,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                 });
                 const newChildId = Lute.NewNodeID();
                 childItem.setAttribute("data-node-id", newChildId);
+                childItem.removeAttribute("parent-heading");
                 clearBlockElement(childItem);
                 doOperations.push({
                     context: {

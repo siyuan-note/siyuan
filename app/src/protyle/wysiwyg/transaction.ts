@@ -223,6 +223,10 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "insert") {
+                // 折叠标题副本的子块等仅写入内核、不插 DOM（与 onTransaction 一致）
+                if (operation.context?.ignoreProcess === "true") {
+                    return;
+                }
                 // 块已被本地 DOM 操作插入时跳过，避免重复 https://github.com/siyuan-note/siyuan/issues/17890
                 if (protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`)) {
                     return;

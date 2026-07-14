@@ -479,9 +479,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	var headingChildren []*ast.Node
 	if isMovingFoldHeading := ast.NodeHeading == srcNode.Type && "1" == srcNode.IALAttr("fold"); isMovingFoldHeading {
+		// 折叠标题带走的块由结构决定（HeadingChildren），不再依赖子块 heading-fold 属性 https://github.com/siyuan-note/siyuan/issues/8321
 		headingChildren = treenode.HeadingChildren(srcNode)
-		// Blocks below other non-folded headings are no longer moved when moving a folded heading https://github.com/siyuan-note/siyuan/issues/8321
-		headingChildren = treenode.GetHeadingFold(headingChildren)
 	}
 
 	var srcEmptyList *ast.Node
@@ -491,6 +490,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 
 	if nil != operation.Context && "true" == operation.Context["removeFold"] {
+		// 只清节点自身的折叠状态（及残留 heading-fold），不影响其子级
 		srcNode.RemoveIALAttr("heading-fold")
 		srcNode.RemoveIALAttr("fold")
 	}
@@ -525,9 +525,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 
 		if ast.NodeHeading == targetNode.Type && "1" == targetNode.IALAttr("fold") {
+			// 目标是折叠标题时插到其结构子块之后 https://github.com/siyuan-note/siyuan/issues/8321
 			targetChildren := treenode.HeadingChildren(targetNode)
-			targetChildren = treenode.GetHeadingFold(targetChildren)
-
 			if l := len(targetChildren); 0 < l {
 				targetNode = targetChildren[l-1]
 			}
@@ -545,15 +544,15 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			// 折叠标题再编辑形成外层列表（前面加上 * ）时，前端给的 tx 序列会形成死循环，在这里解开
 			// Nested lists cause hang after collapsing headings https://github.com/siyuan-note/siyuan/issues/15943
 			lastChild := headingChildren[len(headingChildren)-1]
-			if "1" == lastChild.IALAttr("heading-fold") && ast.NodeList == lastChild.Type &&
+			if ast.NodeList == lastChild.Type &&
 				nil != lastChild.FirstChild && nil != lastChild.FirstChild.FirstChild && lastChild.FirstChild.FirstChild.ID == targetPreviousID {
+				// 用「折叠标题 + 末尾列表恰好是移动目标」的结构特征识别死循环，不再依赖 heading-fold
 				ast.Walk(lastChild, func(n *ast.Node, entering bool) ast.WalkStatus {
 					if !entering || !n.IsBlock() {
 						return ast.WalkContinue
 					}
 
-					n.RemoveIALAttr("heading-fold")
-					n.RemoveIALAttr("fold")
+					treenode.StripLegacyHeadingFoldAttrs(n)
 					return ast.WalkContinue
 				})
 				headingChildren = headingChildren[:len(headingChildren)-1]
@@ -1640,18 +1639,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if needInsertAfterParentHeading {
 		insertDom := data
 		if 2 == len(tx.DoOperations) && "foldHeading" == tx.DoOperations[1].Action {
-			children := treenode.HeadingChildren(updatedNode)
-			for _, child := range children {
-				ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-					if !entering || !n.IsBlock() {
-						return ast.WalkContinue
-					}
-
-					n.SetIALAttr("fold", "1")
-					n.SetIALAttr("heading-fold", "1")
-					return ast.WalkContinue
-				})
-			}
+			// 折叠状态只写在标题自身的 fold 上，不再给子块批量写 fold / heading-fold
 			updatedNode.SetIALAttr("fold", "1")
 			insertDom = tx.luteEngine.RenderNodeBlockDOM(updatedNode)
 		}
@@ -1707,18 +1695,7 @@ func unfoldHeading(heading, currentNode *ast.Node) {
 		return
 	}
 
-	children := treenode.HeadingChildren(heading)
-	for _, child := range children {
-		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || !n.IsBlock() {
-				return ast.WalkContinue
-			}
-
-			n.RemoveIALAttr("fold")
-			n.RemoveIALAttr("heading-fold")
-			return ast.WalkContinue
-		})
-	}
+	// 只清目标标题自身的 fold（及残留 heading-fold），不清其整棵子树，保留子级折叠态
 	heading.RemoveIALAttr("fold")
 	heading.RemoveIALAttr("heading-fold")
 

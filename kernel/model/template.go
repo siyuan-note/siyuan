@@ -516,16 +516,10 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	}
 
 	// 折叠标题导出为模板后使用会出现内容重复 https://github.com/siyuan-note/siyuan/issues/4488
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if "1" == n.IALAttr("heading-fold") { // 为标题折叠下方块添加属性，前端渲染以后会统一做移除处理
-			n.SetIALAttr("status", "temp")
-		}
-		return ast.WalkContinue
-	})
+	// 用折叠层级栈标记被折叠标题盖住的块，前端渲染以后会统一做移除处理，不再依赖子块 heading-fold
+	for _, n := range treenode.CollectFoldHiddenNodes(tree.Root) {
+		n.SetIALAttr("status", "temp")
+	}
 
 	icon := tree.Root.IALAttr("icon")
 	if "" != icon {

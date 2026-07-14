@@ -279,7 +279,6 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
         }
     }
     let listHTML = "";
-    const foldHeadingIds = [];
     for (let index = nodeElements.length - 1; index >= 0; --index) {
         const item = nodeElements[index];
         item.classList.remove("protyle-wysiwyg--select");
@@ -341,8 +340,11 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             id: newId,
         });
         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            foldHeadingIds.push({oldId: item.getAttribute("data-node-id"), newId});
-            const responseHTML = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {id: item.getAttribute("data-node-id")});
+            // 复制折叠标题时保留子块自身的 fold 属性，使副本折叠外观与原块一致（内核默认会剥离 fold）
+            const responseHTML = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
+                id: item.getAttribute("data-node-id"),
+                removeFoldAttr: false
+            });
             const foldElement = document.createElement("template");
             foldElement.innerHTML = responseHTML.data;
             Array.from(foldElement.content.children).reverse().forEach((childItem: HTMLElement, childIndex) => {

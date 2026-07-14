@@ -47,27 +47,16 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
+	// 折叠状态只写在标题自身的 fold 上，不再给子块写 fold / heading-fold
 	children := treenode.HeadingChildren(heading)
 	for _, child := range children {
 		childrenIDs = append(childrenIDs, child.ID)
-		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || !n.IsBlock() {
-				return ast.WalkContinue
-			}
-
-			n.SetIALAttr("fold", "1")
-			n.SetIALAttr("heading-fold", "1")
-			return ast.WalkContinue
-		})
 	}
 	heading.SetIALAttr("fold", "1")
 
 	tx.writeTree(tree)
 	IncSync()
 	cache.PutBlockIALInBox(headingID, tree.Box, parse.IAL2Map(heading.KramdownIAL))
-	for _, child := range children {
-		cache.PutBlockIALInBox(child.ID, tree.Box, parse.IAL2Map(child.KramdownIAL))
-	}
 	sql.UpsertTreeQueue(tree)
 	operation.RetData = childrenIDs
 	return
@@ -89,19 +78,8 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	luteEngine := NewLute()
 	parentFoldedHeading := treenode.GetParentFoldedHeading(heading)
 	if nil != parentFoldedHeading {
-		// 如果当前标题在上方某个折叠的标题下方，则展开上方那个折叠标题以保持一致性
-		children := treenode.HeadingChildren(parentFoldedHeading)
-		for _, child := range children {
-			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.RemoveIALAttr("heading-fold")
-				n.RemoveIALAttr("fold")
-				return ast.WalkContinue
-			})
-		}
+		// 如果当前标题在上方某个折叠的标题下方，则展开上方那个折叠标题以保持一致性；
+		// 只清该父标题自身的 fold（及残留 heading-fold），不清其整棵子树，保留子级折叠态
 		parentFoldedHeading.RemoveIALAttr("fold")
 		parentFoldedHeading.RemoveIALAttr("heading-fold")
 		go func() {
@@ -110,18 +88,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 		}()
 	}
 
-	children := treenode.HeadingChildren(heading)
-	for _, child := range children {
-		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			n.RemoveIALAttr("heading-fold")
-			n.RemoveIALAttr("fold")
-			return ast.WalkContinue
-		})
-	}
+	// 只清当前标题自身的 fold（及残留 heading-fold），子标题各自独立，展开父级不影响子级折叠态
 	heading.RemoveIALAttr("fold")
 	heading.RemoveIALAttr("heading-fold")
 
@@ -129,15 +96,16 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	IncSync()
 
 	cache.PutBlockIALInBox(headingID, tree.Box, parse.IAL2Map(heading.KramdownIAL))
-	for _, child := range children {
-		cache.PutBlockIALInBox(child.ID, tree.Box, parse.IAL2Map(child.KramdownIAL))
-	}
 	sql.UpsertTreeQueue(tree)
 
-	// 展开折叠的标题后显示块引用计数 Display reference counts after unfolding headings https://github.com/siyuan-note/siyuan/issues/13618
-	fillBlockRefCount(children)
+	// 渲染标题下方的块，但用折叠层级栈省略仍被嵌套折叠子标题盖住的块；
+	// 子标题自身若 fold=1 仍保留在返回的 HTML 中（其子内容省略），由前端兜底再折叠
+	renderNodes := treenode.VisibleHeadingChildren(heading)
 
-	operation.RetData = renderBlockDOMByNodes(children, luteEngine)
+	// 展开折叠的标题后显示块引用计数 Display reference counts after unfolding headings https://github.com/siyuan-note/siyuan/issues/13618
+	fillBlockRefCount(renderNodes)
+
+	operation.RetData = renderBlockDOMByNodes(renderNodes, luteEngine)
 	return
 }
 
@@ -376,16 +344,16 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 		}
 	}
 
-	// 折叠标题转换为文档时需要自动展开下方块 https://github.com/siyuan-note/siyuan/issues/2947
+	// 折叠标题转换为文档时展开该标题自身 https://github.com/siyuan-note/siyuan/issues/2947
+	// 只清标题自身的 fold，子标题各自的折叠态予以保留；子块仅清洗历史残留属性
 	children := treenode.HeadingChildren(headingNode)
 	for _, child := range children {
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
+			if !entering || !n.IsBlock() {
 				return ast.WalkContinue
 			}
 
-			n.RemoveIALAttr("heading-fold")
-			n.RemoveIALAttr("fold")
+			treenode.StripLegacyHeadingFoldAttrs(n)
 			return ast.WalkContinue
 		})
 	}

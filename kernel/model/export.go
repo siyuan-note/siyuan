@@ -3156,22 +3156,24 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	}
 
 	unlinks = nil
+	// 支持按照现有折叠状态导出 PDF https://github.com/siyuan-note/siyuan/issues/5941
+	if keepFold {
+		// 用折叠层级栈剔除被折叠标题盖住的块，折叠标题自身保留 fold=1 以呈现折叠外观
+		for _, n := range treenode.CollectFoldHiddenNodes(ret.Root) {
+			n.Unlink()
+		}
+	}
+
 	var emptyParagraphs []*ast.Node
 	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
 
-		// 支持按照现有折叠状态导出 PDF https://github.com/siyuan-note/siyuan/issues/5941
 		if !keepFold {
 			// 块折叠以后导出 HTML/PDF 固定展开 https://github.com/siyuan-note/siyuan/issues/4064
 			n.RemoveIALAttr("fold")
 			n.RemoveIALAttr("heading-fold")
-		} else {
-			if "1" == n.IALAttr("heading-fold") {
-				unlinks = append(unlinks, n)
-				return ast.WalkContinue
-			}
 		}
 
 		// 导出时去掉内容块闪卡样式 https://github.com/siyuan-note/siyuan/issues/7374

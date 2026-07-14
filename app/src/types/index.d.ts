@@ -93,7 +93,8 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide" |
     "code-language-update" | "code-language-change" |
-    "kernel-plugin-state-change"
+    "kernel-plugin-state-change" |
+    "before-show-tooltip" | "before-hide-tooltip"
 type TAVView = "table" | "gallery" | "kanban"
 type TAVCol =
     "text"

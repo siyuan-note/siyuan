@@ -3,7 +3,6 @@ import {
     isMac,
     isNotCtrl,
     isOnlyMeta,
-    isPhysicalMetaKeyEvent,
     updateHotkeyTip,
     writeText
 } from "../../protyle/util/compatibility";
@@ -1176,9 +1175,6 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
 
 let switchDialog: Dialog;
 export const windowKeyDown = (app: App, event: KeyboardEvent) => {
-    if (isPhysicalMetaKeyEvent(event)) {
-        window.siyuan.metaIsPressed = true;
-    }
     if (filterHotkey(event, app)) {
         return;
     }

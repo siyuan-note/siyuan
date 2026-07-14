@@ -359,6 +359,9 @@ func GetDocTitleImgPath(root *ast.Node) (ret string) {
 
 	start := strings.Index(titleImg, background) + len(background)
 	end := strings.LastIndex(titleImg, ")")
+	if end < start {
+		return
+	}
 	ret = titleImg[start:end]
 	ret = strings.TrimPrefix(ret, "\"")
 	ret = strings.TrimPrefix(ret, "'")

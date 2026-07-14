@@ -8,7 +8,7 @@
 		"id": "20240530101000-bgv304g",
 		"title": "拡張機能の開発",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260714132012"
 	},
 	"Children": [
 		{
@@ -16,9 +16,8 @@
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-koir7y7",
 				"id": "20240530101000-fsbbc8j",
-				"updated": "20240530101000"
+				"updated": "20260714132012"
 			},
 			"Children": [
 				{
@@ -29,18 +28,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-251vwi5",
 						"id": "20240530101000-oe3hs1t",
-						"updated": "20240530101000"
+						"updated": "20260714131958"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-fcrarv5",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-7ti2m1i",
 								"id": "20240530101000-fcrarv5",
-								"updated": "20240530101000"
+								"updated": "20260714131958"
 							},
 							"Children": [
 								{
@@ -52,13 +49,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/theme-sample",
-									"TextMarkTextContent": "siyuan-note/theme-sample"
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: siyuan-note/theme-sample"
 								}
 							]
 						}
@@ -72,18 +63,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-fqveu4o",
 						"id": "20240530101000-wcrplsz",
-						"updated": "20240530101000"
+						"updated": "20260714132001"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-kq0ujbf",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-ywayiv5",
 								"id": "20240530101000-kq0ujbf",
-								"updated": "20240530101000"
+								"updated": "20260714132001"
 							},
 							"Children": [
 								{
@@ -95,13 +84,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/icon-sample",
-									"TextMarkTextContent": "siyuan-note/icon-sample"
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: siyuan-note/icon-sample"
 								}
 							]
 						}
@@ -115,18 +98,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-amghiyh",
 						"id": "20240530101000-dboomaq",
-						"updated": "20240530101000"
+						"updated": "20260714132006"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-9bernsq",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-d7efx1z",
 								"id": "20240530101000-9bernsq",
-								"updated": "20240530101000"
+								"updated": "20260714132006"
 							},
 							"Children": [
 								{
@@ -138,13 +119,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/widget-sample",
-									"TextMarkTextContent": "siyuan-note/widget-sample"
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: siyuan-note/widget-sample"
 								}
 							]
 						}
@@ -158,18 +133,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-yaicnji",
 						"id": "20240530101000-iaenqu1",
-						"updated": "20240530101000"
+						"updated": "20260714132008"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-82wzq7c",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-y07qj5a",
 								"id": "20240530101000-82wzq7c",
-								"updated": "20240530101000"
+								"updated": "20260714132008"
 							},
 							"Children": [
 								{
@@ -181,13 +154,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/plugin-sample",
-									"TextMarkTextContent": "siyuan-note/plugin-sample"
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: siyuan-note/plugin-sample"
 								}
 							]
 						}
@@ -201,18 +168,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-wj41mdk",
 						"id": "20240530101000-flrpo8c",
-						"updated": "20240530101000"
+						"updated": "20260714132010"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-it5d5lp",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-i74mgau",
 								"id": "20240530101000-it5d5lp",
-								"updated": "20240530101000"
+								"updated": "20260714132010"
 							},
 							"Children": [
 								{
@@ -224,13 +189,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "プロジェクトのサンプル GitHub リポジトリ: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/template-sample",
-									"TextMarkTextContent": "siyuan-note/template-sample"
+									"Data": "プロジェクトのサンプル GitHub リポジトリ: siyuan-note/template-sample"
 								}
 							]
 						}
@@ -244,61 +203,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-8w4sun7",
 						"id": "20240530101000-ohqu6o7",
-						"updated": "20240530101000"
+						"updated": "20260714132012"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-hmleqk8",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-y940x5x",
 								"id": "20240530101000-hmleqk8",
-								"updated": "20240530101000"
+								"updated": "20260714132012"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "マーケットプレイスのサンプル GitHub リポジトリ: "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
-									"TextMarkTextContent": "siyuan-note/bazaar"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240530101000-zgpk0v5",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"ID": "20240530101000-9lgu0a6",
-						"id": "20240530101000-zgpk0v5",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-f1tl08i",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-8dhl0t3",
-								"id": "20240530101000-f1tl08i",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://docs.siyuan-note.club/",
-									"TextMarkTextContent": "コミュニティ開発者用のリソース"
+									"Data": "マーケットプレイスのサンプル GitHub リポジトリ: siyuan-note/bazaar"
 								}
 							]
 						}

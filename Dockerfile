@@ -23,7 +23,7 @@ mv appearance stage guide /artifacts/
 if [ -d changelogs ]; then mv changelogs /artifacts/; fi
 EORUN
 
-FROM golang:1.25-alpine AS go-build
+FROM golang:1.26-alpine AS go-build
 
 RUN <<EORUN
 #!/bin/sh -e

@@ -41,11 +41,15 @@ NPM 镜像：
 
 1. 安装最新版 [golang](https://go.dev/)
 2. 打开 CGO 支持，即配置环境变量 `CGO_ENABLED=1`
+3. Windows 下需将 `go env GOBIN` 输出的目录添加到 `PATH`；如果输出为空，则添加 `go env GOPATH` 目录下的 `bin` 子目录
 
 ### 桌面端
 
 * `cd kernel`
-* Windows: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Windows：
+  * `go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest`
+  * `goversioninfo -platform-specific=true -icon=resource/icon.ico -manifest=resource/goversioninfo.exe.manifest`
+  * `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
 * Linux/macOS: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
 * Windows: `./SiYuan-Kernel.exe serve --mode=dev`

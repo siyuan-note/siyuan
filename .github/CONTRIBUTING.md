@@ -41,11 +41,15 @@ Note: In the development environment, the kernel process will not be automatical
 
 1. Install the latest version of [golang](https://go.dev/)
 2. Open CGO support, that is, configure the environment variable `CGO_ENABLED=1`
+3. On Windows, add the directory reported by `go env GOBIN` to `PATH`; if it is empty, add the `bin` subdirectory of `go env GOPATH`
 
 ### Desktop
 
 * `cd kernel`
-* Windows: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Windows:
+  * `go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest`
+  * `goversioninfo -platform-specific=true -icon=resource/icon.ico -manifest=resource/goversioninfo.exe.manifest`
+  * `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
 * Linux/macOS: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
 * Windows: `./SiYuan-Kernel.exe serve --mode=dev`

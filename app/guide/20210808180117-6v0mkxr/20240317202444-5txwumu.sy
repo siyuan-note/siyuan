@@ -7,7 +7,7 @@
 		"id": "20240317202444-5txwumu",
 		"title": "Extend development",
 		"type": "doc",
-		"updated": "20240407172201"
+		"updated": "20240317202552"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240317202544-xj5ch3g",
-				"updated": "20240317202645"
+				"updated": "20240317202552"
 			},
 			"Children": [
 				{
@@ -217,36 +217,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "Marketplace github repo: siyuan-note/bazaar"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240317202544-qdnea4l",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20240317202544-qdnea4l",
-						"updated": "20240317202544"
-					},
-					"Children": [
-						{
-							"ID": "20240317202544-qkqfisa",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240317202544-qkqfisa",
-								"updated": "20240317202544"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://docs.siyuan-note.club/",
-									"TextMarkTextContent": "Community Developer Resources"
 								}
 							]
 						}

@@ -7,7 +7,7 @@
 		"id": "20240317202230-l8duv3r",
 		"title": "擴充開發",
 		"type": "doc",
-		"updated": "20240407172156"
+		"updated": "20240317202310"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240317202310-5hm9jav",
-				"updated": "20240317202429"
+				"updated": "20240317202310"
 			},
 			"Children": [
 				{
@@ -217,36 +217,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "市集倉庫 github repo: siyuan-note/bazaar"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240317202310-ed4q32m",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20240317202310-ed4q32m",
-						"updated": "20240317202310"
-					},
-					"Children": [
-						{
-							"ID": "20240317202310-gxcut0e",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240317202310-gxcut0e",
-								"updated": "20240317202310"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://docs.siyuan-note.club/",
-									"TextMarkTextContent": "社區開發者資源"
 								}
 							]
 						}

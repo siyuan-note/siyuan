@@ -26,6 +26,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -36,6 +37,8 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
+
+var auditedAddresses sync.Map // 用于记录已审计的 SSRF 地址，避免重复日志输出
 
 // GetPrivateIPv4s 获取本地所有的私有 IPv4 地址（排除虚拟网卡）
 func GetPrivateIPv4s() (ret []string) {
@@ -130,7 +133,12 @@ func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 				return err
 			}
 			if ip := net.ParseIP(host); ip != nil && isPrivateIP(ip) {
-				return fmt.Errorf("ip address [%s] is prohibited", host)
+				if _, loaded := auditedAddresses.LoadOrStore(address, struct{}{}); !loaded {
+					logging.LogWarnf("Establishing a connection to the private network [address=%s, network=%s]", address, network)
+				}
+				if SafeMode {
+					return fmt.Errorf("ip address [%s] is prohibited", host)
+				}
 			}
 			return nil
 		},

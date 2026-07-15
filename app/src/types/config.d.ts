@@ -165,6 +165,7 @@ declare namespace Config {
 
     export interface IVision {
         modelId: string;
+        requestTimeout: number;
         maxImageBytes: number;
         maxPixels: number;
         maxEdge: number;
@@ -172,6 +173,7 @@ declare namespace Config {
 
     export interface IImageGeneration {
         modelId: string;
+        requestTimeout: number;
         size: string;
         quality: string;
         outputFormat: "png" | "jpeg" | "webp";

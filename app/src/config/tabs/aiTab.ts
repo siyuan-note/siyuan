@@ -125,6 +125,13 @@ const registerAiVisionGroup = (tab: SettingTabBuilder) => {
         html: () => genModelPickerHtml(groupId),
         afterMount: (root) => mountModelPickerBlock(root, groupId),
     });
+    group.number("ai.vision.requestTimeout", {
+        title: window.siyuan.languages.apiTimeout,
+        desc: window.siyuan.languages.apiTimeoutTip,
+        min: 1,
+        max: 600,
+        unit: "s",
+    });
 };
 
 const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
@@ -136,6 +143,13 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
         keywords: getModelPickerKeywords(groupId),
         html: () => genModelPickerHtml(groupId),
         afterMount: (root) => mountModelPickerBlock(root, groupId),
+    });
+    group.number("ai.imageGeneration.requestTimeout", {
+        title: window.siyuan.languages.apiTimeout,
+        desc: window.siyuan.languages.apiTimeoutTip,
+        min: 1,
+        max: 600,
+        unit: "s",
     });
 };
 

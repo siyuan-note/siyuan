@@ -21,10 +21,10 @@ import "testing"
 func TestNormalizeMultimodalDefaultsAndCapabilities(t *testing.T) {
 	ai := &AI{Providers: []*Provider{{Enabled: true, Models: []*Model{{Enabled: true, Name: " vision ", Capabilities: []string{" Image-Input ", "image-input", " image-output "}}}}}}
 	ai.Normalize()
-	if ai.Vision == nil || ai.Vision.MaxImageBytes != 20*1024*1024 || ai.Vision.MaxEdge != 2048 {
+	if ai.Vision == nil || ai.Vision.RequestTimeout != 300 || ai.Vision.MaxImageBytes != 20*1024*1024 || ai.Vision.MaxEdge != 2048 {
 		t.Fatalf("unexpected vision defaults: %#v", ai.Vision)
 	}
-	if ai.ImageGeneration == nil || ai.ImageGeneration.Size != "1024x1024" || ai.ImageGeneration.OutputFormat != "png" {
+	if ai.ImageGeneration == nil || ai.ImageGeneration.RequestTimeout != 300 || ai.ImageGeneration.Size != "1024x1024" || ai.ImageGeneration.OutputFormat != "png" {
 		t.Fatalf("unexpected image generation defaults: %#v", ai.ImageGeneration)
 	}
 	provider := ai.Providers[0]
@@ -34,5 +34,16 @@ func TestNormalizeMultimodalDefaultsAndCapabilities(t *testing.T) {
 	capabilities := provider.Models[0].Capabilities
 	if len(capabilities) != 2 || capabilities[0] != "image-input" || capabilities[1] != "image-output" {
 		t.Fatalf("unexpected normalized capabilities: %#v", capabilities)
+	}
+}
+
+func TestNormalizeMultimodalTimeouts(t *testing.T) {
+	ai := &AI{
+		Vision:          &Vision{RequestTimeout: 601},
+		ImageGeneration: &ImageGeneration{RequestTimeout: 30},
+	}
+	ai.Normalize()
+	if ai.Vision.RequestTimeout != 600 || ai.ImageGeneration.RequestTimeout != 30 {
+		t.Fatalf("unexpected multimodal timeouts: vision=%d generation=%d", ai.Vision.RequestTimeout, ai.ImageGeneration.RequestTimeout)
 	}
 }

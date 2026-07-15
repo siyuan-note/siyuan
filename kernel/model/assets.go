@@ -407,7 +407,7 @@ func AnalyzeImage(ctx context.Context, data []byte, question, detail string) (An
 		return AnalyzeImageResult{}, err
 	}
 	analysis, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, visionModel.Name, provider.RequestTimeout,
+		provider.APIKey, provider.BaseURL, visionModel.Name, Conf.AI.Vision.RequestTimeout,
 	).Analyze(ctx, prepared, question, detail)
 	if err != nil {
 		return AnalyzeImageResult{}, fmt.Errorf("analyze image failed: %w", err)
@@ -435,7 +435,7 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 		return GenerateImageResult{}, errors.New("unsupported image output format")
 	}
 	generated, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, generationModel.Name, provider.RequestTimeout,
+		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.ImageGeneration.RequestTimeout,
 	).Generate(ctx, util.GenerateImageRequest{
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})

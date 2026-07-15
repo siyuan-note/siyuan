@@ -61,18 +61,20 @@ type Editing struct {
 
 // Vision 配置图片理解场景及发送到模型前的资源限制。
 type Vision struct {
-	ModelID       string `json:"modelId"`
-	MaxImageBytes int    `json:"maxImageBytes"`
-	MaxPixels     int    `json:"maxPixels"`
-	MaxEdge       int    `json:"maxEdge"`
+	ModelID        string `json:"modelId"`
+	RequestTimeout int    `json:"requestTimeout"`
+	MaxImageBytes  int    `json:"maxImageBytes"`
+	MaxPixels      int    `json:"maxPixels"`
+	MaxEdge        int    `json:"maxEdge"`
 }
 
 // ImageGeneration 配置图片生成场景的模型和默认输出参数。
 type ImageGeneration struct {
-	ModelID      string `json:"modelId"`
-	Size         string `json:"size"`
-	Quality      string `json:"quality"`
-	OutputFormat string `json:"outputFormat"`
+	ModelID        string `json:"modelId"`
+	RequestTimeout int    `json:"requestTimeout"`
+	Size           string `json:"size"`
+	Quality        string `json:"quality"`
+	OutputFormat   string `json:"outputFormat"`
 }
 
 type Embedding struct {
@@ -165,11 +167,11 @@ func defaultEditing() *Editing {
 }
 
 func defaultVision() *Vision {
-	return &Vision{MaxImageBytes: 20 * 1024 * 1024, MaxPixels: 40 * 1000 * 1000, MaxEdge: 2048}
+	return &Vision{RequestTimeout: 300, MaxImageBytes: 20 * 1024 * 1024, MaxPixels: 40 * 1000 * 1000, MaxEdge: 2048}
 }
 
 func defaultImageGeneration() *ImageGeneration {
-	return &ImageGeneration{Size: "1024x1024", Quality: "auto", OutputFormat: "png"}
+	return &ImageGeneration{RequestTimeout: 300, Size: "1024x1024", Quality: "auto", OutputFormat: "png"}
 }
 
 func NewAI() *AI {
@@ -406,6 +408,11 @@ func (ai *AI) Normalize() {
 	if ai.Vision == nil {
 		ai.Vision = defaultVision()
 	}
+	if ai.Vision.RequestTimeout < 1 {
+		ai.Vision.RequestTimeout = 300
+	} else if ai.Vision.RequestTimeout > 600 {
+		ai.Vision.RequestTimeout = 600
+	}
 	if ai.Vision.MaxImageBytes < 1024*1024 {
 		ai.Vision.MaxImageBytes = 20 * 1024 * 1024
 	} else if ai.Vision.MaxImageBytes > 100*1024*1024 {
@@ -423,6 +430,11 @@ func (ai *AI) Normalize() {
 	}
 	if ai.ImageGeneration == nil {
 		ai.ImageGeneration = defaultImageGeneration()
+	}
+	if ai.ImageGeneration.RequestTimeout < 1 {
+		ai.ImageGeneration.RequestTimeout = 300
+	} else if ai.ImageGeneration.RequestTimeout > 600 {
+		ai.ImageGeneration.RequestTimeout = 600
 	}
 	ai.ImageGeneration.Size = strings.TrimSpace(ai.ImageGeneration.Size)
 	if ai.ImageGeneration.Size == "" {

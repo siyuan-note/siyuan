@@ -24,11 +24,14 @@ import (
 	"image/png"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAnalyzeImageDoesNotRequireDocument(t *testing.T) {
@@ -92,6 +95,64 @@ func TestGenerateImageDoesNotRequireDocument(t *testing.T) {
 	}
 	if !bytes.Equal(result.Data, source.Bytes()) || result.MIMEType != "image/png" || result.Extension != ".png" || result.RevisedPrompt != "refined" {
 		t.Fatalf("unexpected generated image result: %#v", result)
+	}
+}
+
+func TestMultimodalProviderErrorsPreventAutomaticRetry(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "provider failed", http.StatusBadGateway)
+	}))
+	defer server.Close()
+
+	originalConf := Conf
+	t.Cleanup(func() { Conf = originalConf })
+	ai := conf.NewAI()
+	visionModelID := "20260715130000-provider"
+	generationModelID := "20260715130001-provider"
+	ai.Providers = []*conf.Provider{{
+		ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1", Protocol: "openai", RequestTimeout: 5,
+		Models: []*conf.Model{
+			{ID: visionModelID, Enabled: true, Name: "vision-model", Capabilities: []string{"image-input"}},
+			{ID: generationModelID, Enabled: true, Name: "image-model", Capabilities: []string{"image-output"}},
+		},
+	}}
+	ai.Vision.ModelID = visionModelID
+	ai.ImageGeneration.ModelID = generationModelID
+	Conf = NewAppConf()
+	Conf.AI = ai
+
+	var source bytes.Buffer
+	if err := png.Encode(&source, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := AnalyzeImage(context.Background(), source.Bytes(), "describe", "low"); !IsImageExecutionUnknown(err) {
+		t.Fatalf("vision provider error should prevent automatic retry: %v", err)
+	}
+	if _, err := GenerateImage(context.Background(), GenerateImageRequest{Prompt: "draw", OutputFormat: "png"}); !IsImageExecutionUnknown(err) {
+		t.Fatalf("image provider error should prevent automatic retry: %v", err)
+	}
+}
+
+func TestClearWorkspaceTempRemovesImageOperations(t *testing.T) {
+	originalDataDir, originalTempDir, originalWorkspaceDir := util.DataDir, util.TempDir, util.WorkspaceDir
+	t.Cleanup(func() {
+		util.DataDir, util.TempDir, util.WorkspaceDir = originalDataDir, originalTempDir, originalWorkspaceDir
+	})
+	root := t.TempDir()
+	util.DataDir = filepath.Join(root, "data")
+	util.TempDir = filepath.Join(root, "temp")
+	util.WorkspaceDir = root
+	operationDir := filepath.Join(util.DataDir, "storage", "ai", "agent", "operations", "image")
+	if err := os.MkdirAll(operationDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(operationDir, "operation.json"), []byte("{}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	clearWorkspaceTemp()
+	if _, err := os.Stat(operationDir); !os.IsNotExist(err) {
+		t.Fatalf("image operation directory was not removed: %v", err)
 	}
 }
 

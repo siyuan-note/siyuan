@@ -340,6 +340,31 @@ type GenerateDocumentImageResult struct {
 	RevisedPrompt string           `json:"revisedPrompt,omitempty"`
 }
 
+type imageExecutionUnknownError struct {
+	err error
+}
+
+func (err *imageExecutionUnknownError) Error() string {
+	return err.err.Error()
+}
+
+func (err *imageExecutionUnknownError) Unwrap() error {
+	return err.err
+}
+
+// IsImageExecutionUnknown 判断图片提供商调用是否已经开始，调用方不得自动重试这类错误。
+func IsImageExecutionUnknown(err error) bool {
+	var target *imageExecutionUnknownError
+	return errors.As(err, &target)
+}
+
+func markImageExecutionUnknown(err error) error {
+	if err == nil || IsImageExecutionUnknown(err) {
+		return err
+	}
+	return &imageExecutionUnknownError{err: err}
+}
+
 // ListDocumentImages 返回文档引用的本地图片，供智能体工具和编辑器功能复用。
 func ListDocumentImages(documentID string) (DocumentImageList, error) {
 	bt, err := resolveMultimodalDocument(documentID)
@@ -410,7 +435,7 @@ func AnalyzeImage(ctx context.Context, data []byte, question, detail string) (An
 		provider.APIKey, provider.BaseURL, visionModel.Name, Conf.AI.Vision.RequestTimeout,
 	).Analyze(ctx, prepared, question, detail)
 	if err != nil {
-		return AnalyzeImageResult{}, fmt.Errorf("analyze image failed: %w", err)
+		return AnalyzeImageResult{}, markImageExecutionUnknown(fmt.Errorf("analyze image failed: %w", err))
 	}
 	return AnalyzeImageResult{Analysis: analysis, Width: prepared.Width, Height: prepared.Height}, nil
 }
@@ -440,10 +465,10 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})
 	if err != nil {
-		return GenerateImageResult{}, fmt.Errorf("generate image failed: %w", err)
+		return GenerateImageResult{}, markImageExecutionUnknown(fmt.Errorf("generate image failed: %w", err))
 	}
 	if ctx.Err() != nil {
-		return GenerateImageResult{}, errors.New("image generation was cancelled")
+		return GenerateImageResult{}, markImageExecutionUnknown(errors.New("image generation was cancelled"))
 	}
 	return GenerateImageResult{
 		Data: generated.Data, MIMEType: generated.MIMEType, Extension: generated.Extension, RevisedPrompt: generated.RevisedPrompt,
@@ -464,7 +489,7 @@ func GenerateDocumentImage(ctx context.Context, request GenerateDocumentImageReq
 	}
 	assetPath, _, err := InsertAssetBytes(bt.RootID, "ai-image"+generated.Extension, generated.Data)
 	if err != nil {
-		return GenerateDocumentImageResult{}, fmt.Errorf("save generated image failed: %w", err)
+		return GenerateDocumentImageResult{}, markImageExecutionUnknown(fmt.Errorf("save generated image failed: %w", err))
 	}
 	return GenerateDocumentImageResult{
 		Artifact: ImageArtifactRef{

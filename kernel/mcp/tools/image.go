@@ -143,7 +143,7 @@ func imageAnalyze(ctx context.Context, documentID string, args map[string]any) C
 		Detail:     detail,
 	})
 	if err != nil {
-		return imageError(err.Error())
+		return imageResultForError(err)
 	}
 	return imageJSON(result)
 }
@@ -161,7 +161,7 @@ func imageGenerate(ctx context.Context, documentID string, args map[string]any) 
 		OutputFormat: outputFormat,
 	})
 	if err != nil {
-		return imageError(err.Error())
+		return imageResultForError(err)
 	}
 	operationID := imageOperationKey(args, "generate")
 	return imageJSON(map[string]any{
@@ -206,7 +206,9 @@ func runImageOperation(ctx context.Context, key string, meta imageOperationMeta,
 		return operation.result
 	}
 	operation.result = execute()
-	if operation.result.IsError {
+	if operation.result.ExecutionUnknown {
+		// running 记录表示外部请求可能已经执行，保留它以阻止恢复流程自动重试。
+	} else if operation.result.IsError {
 		removeImageOperationRecord(key)
 	} else if err := saveImageOperationRecord(key, meta, imageOperationStateCompleted, operation.result); err != nil {
 		logging.LogWarnf("save image operation [%s] failed: %s", key, err)
@@ -335,6 +337,13 @@ func imageError(message string) CallToolResult {
 		message = errors.New("image operation failed").Error()
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: message}}, IsError: true}
+}
+
+func imageResultForError(err error) CallToolResult {
+	if model.IsImageExecutionUnknown(err) {
+		return imageUnknown(err.Error())
+	}
+	return imageError(err.Error())
 }
 
 func imageUnknown(message string) CallToolResult {

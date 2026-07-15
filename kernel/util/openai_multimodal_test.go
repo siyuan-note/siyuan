@@ -82,18 +82,25 @@ func TestModelWithImageOutputDoesNotGenerateBillableImage(t *testing.T) {
 	}
 }
 
-func TestPrepareForVisionReencodesAndLimitsImage(t *testing.T) {
+func TestPrepareForVisionPreservesAndLimitsImage(t *testing.T) {
 	var source bytes.Buffer
 	img := image.NewRGBA(image.Rect(0, 0, 4, 2))
 	img.Set(0, 0, color.RGBA{R: 255, A: 255})
 	if err := png.Encode(&source, img); err != nil {
 		t.Fatal(err)
 	}
+	original, err := PrepareForVision(source.Bytes(), 1024*1024, 8, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if original.MIMEType != "image/png" || !bytes.Equal(original.Data, source.Bytes()) {
+		t.Fatalf("supported image should be preserved: %#v", original)
+	}
 	prepared, err := PrepareForVision(source.Bytes(), 1024*1024, 8, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if prepared.MIMEType != "image/jpeg" || prepared.Width != 2 || prepared.Height != 1 {
+	if prepared.MIMEType != "image/png" || prepared.Width != 2 || prepared.Height != 1 {
 		t.Fatalf("unexpected prepared image: %#v", prepared)
 	}
 	if _, err = PrepareForVision(source.Bytes(), 1024*1024, 7, 2); err == nil {
@@ -175,6 +182,9 @@ func TestGeneratedImageDownloadSSRFGuards(t *testing.T) {
 	}
 	if err := dialer.Control("tcp", "1.1.1.1:443", nil); err != nil {
 		t.Fatalf("public generated image address was rejected: %v", err)
+	}
+	if timeout := generatedImageHTTPClient().Timeout; timeout != 0 {
+		t.Fatalf("generated image download must use the request context timeout, got %s", timeout)
 	}
 }
 

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260517211244"
+		"updated": "20260715225615"
 	},
 	"Children": [
 		{
@@ -40,7 +40,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20260504121841"
+				"updated": "20260715225615"
 			},
 			"Children": [
 				{
@@ -1729,6 +1729,15 @@
 								}
 							]
 						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "Switch left/right/bottom panel layout"}]},
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "-"}]},
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "Go to "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Settings"}, {"Type": "NodeText", "Data": "​ - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "Shortcuts"}, {"Type": "NodeText", "Data": "​ to configure them separately"}]}
 					]
 				},
 				{

@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260517165255"
+		"updated": "20260715225615"
 	},
 	"Children": [
 		{
@@ -39,7 +39,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-5z0uafx",
-				"updated": "20260504121953"
+				"updated": "20260715225615"
 			},
 			"Children": [
 				{
@@ -1728,6 +1728,15 @@
 								}
 							]
 						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "左/右/下部パネルのレイアウトを切り替える"}]},
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "-"}]},
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "​"}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "設定"}, {"Type": "NodeText", "Data": "​ - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "ショートカット"}, {"Type": "NodeText", "Data": "​ で個別に設定できます"}]}
 					]
 				},
 				{

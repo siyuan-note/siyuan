@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260517165333"
+		"updated": "20260715225615"
 	},
 	"Children": [
 		{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20260504121430"
+				"updated": "20260715225615"
 			},
 			"Children": [
 				{
@@ -1727,6 +1727,15 @@
 								}
 							]
 						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "切换左侧/右侧/底部面板布局"}]},
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "-"}]},
+						{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "可前往 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "设置"}, {"Type": "NodeText", "Data": "​ - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "快捷键"}, {"Type": "NodeText", "Data": "​ 中分别配置"}]}
 					]
 				},
 				{

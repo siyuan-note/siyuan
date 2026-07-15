@@ -13,6 +13,8 @@ import {processRender} from "../util/processCode";
 import {isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
 
+const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
     showMessage(`${window.siyuan.languages.exported} ${escapeHtml(exportPath)}
@@ -91,12 +93,18 @@ export const exportImage = (id: string) => {
         });
         setTimeout(() => {
             addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image").then(async () => {
-                let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));
+                const options = {
+                    imagePlaceholder: IMAGE_PLACEHOLDER,
+                    onImageErrorHandler: (event: Event) => {
+                        (event.target as HTMLImageElement).src = IMAGE_PLACEHOLDER;
+                    }
+                };
+                let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"), options);
                 if (isIPhone() || isSafari()) {
-                    await window.htmlToImage.toBlob(contentElement);
-                    await window.htmlToImage.toBlob(contentElement);
-                    await window.htmlToImage.toBlob(contentElement);
-                    blob = await window.htmlToImage.toBlob(contentElement);
+                    await window.htmlToImage.toBlob(contentElement, options);
+                    await window.htmlToImage.toBlob(contentElement, options);
+                    await window.htmlToImage.toBlob(contentElement, options);
+                    blob = await window.htmlToImage.toBlob(contentElement, options);
                 }
                 const formData = new FormData();
                 formData.append("file", blob, btnsElement[1].getAttribute("data-title"));

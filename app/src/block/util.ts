@@ -28,7 +28,10 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
     // 缩放和反链需要接口获取
     if (!previousId && !parentID) {
         if (protyle.block.showAll || protyle.options.backlinkData) {
-            const idData = await fetchSyncPost("/api/block/getBlockSiblingID", {id});
+            const idData = await fetchSyncPost("/api/block/getBlockSiblingID", {
+                id,
+                notebook: protyle.notebookId,
+            });
             previousId = idData.data.previous;
             parentID = idData.data.parent;
         } else {
@@ -178,7 +181,10 @@ export const refreshSbAndPersistWidth = (sbElement: Element,
 };
 
 export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "parent" | "next" | "previous") => {
-    fetchPost("/api/block/getBlockSiblingID", {id: nodeElement.getAttribute("data-node-id")}, (response) => {
+    fetchPost("/api/block/getBlockSiblingID", {
+        id: nodeElement.getAttribute("data-node-id"),
+        notebook: protyle.notebookId,
+    }, (response) => {
         const targetId = response.data[type];
         if (!targetId) {
             return;

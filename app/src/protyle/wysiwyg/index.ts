@@ -344,6 +344,7 @@ export class WYSIWYG {
                             needClipboardWrite = true;
                             const response = await fetchSyncPost("/api/block/getBlockDOM", {
                                 id: item.getAttribute("data-node-id"),
+                                notebook: protyle.notebookId,
                             });
                             itemHTML = response.data.dom;
                         } else {
@@ -2155,6 +2156,7 @@ export class WYSIWYG {
                         needClipboardWrite = true;
                         const response = await fetchSyncPost("/api/block/getBlockDOM", {
                             id: item.getAttribute("data-node-id"),
+                            notebook: protyle.notebookId,
                         });
                         itemHTML = response.data.dom;
                     } else {

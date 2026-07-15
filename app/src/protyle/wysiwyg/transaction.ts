@@ -748,6 +748,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 updateElements.push(tempEl);
                 fetchPost("/api/block/getBlockDOM", {
                     id: operation.id,
+                    notebook: protyle.notebookId,
                 }, (response) => {
                     document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${response.data.id}"]`).forEach(item => {
                         if (item.getAttribute("data-protyle-id")) {
@@ -1399,7 +1400,10 @@ export const turnsOneInto = async (options: {
     const oldHTML = options.nodeElement.outerHTML;
     let previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
     if (!options.nodeElement.previousElementSibling && options.protyle.block.showAll) {
-        const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {id: options.id});
+        const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
+            id: options.id,
+            notebook: options.protyle.notebookId,
+        });
         previousId = response.data.previousID;
     }
     const parentId = options.nodeElement.parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;

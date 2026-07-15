@@ -107,10 +107,10 @@ func QueryRefsByDefIDInBox(defBlockID string, containChildren bool, boxID string
 	return
 }
 
-// QueryRootChildrenRefCountInBox 按 defRootID 在指定 box 的 db 里查子文档引用计数。
+// QueryRootChildrenRefCountInBox 按 defRootID 在指定 box 的 db 里查询根文档下各块的引用计数。
 func QueryRootChildrenRefCountInBox(defRootID, boxID string) (ret map[string]int) {
 	ret = map[string]int{}
-	sqlStmt := "SELECT r.def_block_root_id, COUNT(*) FROM refs r WHERE r.def_block_root_id IN (SELECT id FROM blocks WHERE root_id = ? AND type = 'd') GROUP BY r.def_block_root_id"
+	sqlStmt := "SELECT def_block_id, COUNT(*) AS ref_cnt FROM refs WHERE def_block_root_id = ? GROUP BY def_block_id"
 	rows, err := queryForBox(boxID, sqlStmt, defRootID)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)

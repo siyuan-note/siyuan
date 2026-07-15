@@ -191,7 +191,7 @@ func NewAI() *AI {
 	if apiKey != "" && apiModel != "" && apiBaseURL != "" {
 		provider := &Provider{
 			BaseURL:        apiBaseURL,
-			RequestTimeout: 30,
+			RequestTimeout: 120,
 			Enabled:        true,
 			APIKey:         apiKey,
 		}
@@ -452,7 +452,7 @@ func (ai *AI) Normalize() {
 			p.Protocol = "openai"
 		}
 		if 1 > p.RequestTimeout {
-			p.RequestTimeout = 30
+			p.RequestTimeout = 120
 		} else if 600 < p.RequestTimeout {
 			p.RequestTimeout = 600
 		}

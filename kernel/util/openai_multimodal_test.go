@@ -113,6 +113,9 @@ func TestOpenAIImageAdapterAnalyzeAndGenerate(t *testing.T) {
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 				t.Error(err)
 			}
+			if body["max_completion_tokens"] != float64(imageAnalysisMaxTokens) {
+				t.Errorf("unexpected vision max completion tokens: %v", body["max_completion_tokens"])
+			}
 			encoded, _ := json.Marshal(body)
 			if !strings.Contains(string(encoded), "data:image/jpeg;base64,") {
 				t.Errorf("vision request does not contain an image data URL: %s", encoded)
@@ -139,6 +142,20 @@ func TestOpenAIImageAdapterAnalyzeAndGenerate(t *testing.T) {
 	}
 	if generated.MIMEType != "image/png" || generated.Extension != ".png" || generated.RevisedPrompt != "refined" {
 		t.Fatalf("unexpected generated image metadata: %#v", generated)
+	}
+}
+
+func TestOpenAIImageAdapterRejectsTruncatedAnalysis(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"partial"},"finish_reason":"length"}]}`))
+	}))
+	defer server.Close()
+
+	adapter := NewOpenAIImageAdapter("test", server.URL+"/v1", "test-model", 5)
+	_, err := adapter.Analyze(context.Background(), PreparedImage{Data: []byte("jpeg"), MIMEType: "image/jpeg"}, "Describe", "low")
+	if err == nil || !strings.Contains(err.Error(), "truncated") {
+		t.Fatalf("unexpected truncated analysis error: %v", err)
 	}
 }
 

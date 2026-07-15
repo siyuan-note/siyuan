@@ -539,7 +539,7 @@ const openProviderDialog = (root: HTMLElement, providerId: string | null) => {
         id: "",
         apiKey: "",
         baseURL: "",
-        requestTimeout: 30,
+        requestTimeout: 120,
         enabled: true,
         models: [],
     } : existingProvider;

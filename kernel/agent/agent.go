@@ -841,6 +841,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						if result.always {
 							alwaysAllow["*"] = true
 						}
+						// 确认卡片会结束当前思考状态，工具执行前重新通知前端显示“思考中”。
+						sendEvent(ch, AgentEvent{Type: "thinking", Reasoning: "processing"})
 					}
 					select {
 					case <-ctx.Done():

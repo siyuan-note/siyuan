@@ -49,6 +49,7 @@ import (
 const (
 	maxGeneratedImageBytes  = 50 * 1024 * 1024
 	maxGeneratedImagePixels = 100 * 1000 * 1000
+	imageAnalysisMaxTokens  = 4096
 )
 
 type PreparedImage struct {
@@ -677,15 +678,23 @@ func (adapter *OpenAIImageAdapter) Analyze(ctx context.Context, image PreparedIm
 				},
 			},
 		},
-		MaxCompletionTokens: 1024,
+		MaxCompletionTokens: imageAnalysisMaxTokens,
 	})
 	if err != nil {
 		return "", err
 	}
-	if len(response.Choices) == 0 || strings.TrimSpace(response.Choices[0].Message.Content) == "" {
+	if len(response.Choices) == 0 {
 		return "", errors.New("vision model returned an empty response")
 	}
-	return strings.TrimSpace(response.Choices[0].Message.Content), nil
+	choice := response.Choices[0]
+	if choice.FinishReason == openai.FinishReasonLength {
+		return "", errors.New("vision model response was truncated")
+	}
+	content := strings.TrimSpace(choice.Message.Content)
+	if content == "" {
+		return "", errors.New("vision model returned an empty response")
+	}
+	return content, nil
 }
 
 func (adapter *OpenAIImageAdapter) Generate(ctx context.Context, request GenerateImageRequest) (GeneratedImage, error) {

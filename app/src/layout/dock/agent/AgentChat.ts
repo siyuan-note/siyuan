@@ -2096,7 +2096,8 @@ export class AgentChat extends Model {
             const L = window.siyuan.languages;
             // 与 finishActiveThinking 对齐：先把本张思考卡片的耗时算出来，
             // 既用于 DOM 显示「已思考 Xs」，也用于落盘 entry.duration（重载后仍能显示正确耗时）。
-            const durSec = this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0;
+            const durSec = this.currentThinkingDuration ||
+                (this.requestStartTime ? (Date.now() - this.requestStartTime) / 1000 : 0);
             this.currentThinkingDuration = durSec;
             const doneText = durSec > 0
                 ? (L.agentThinkingDoneTime ? L.agentThinkingDoneTime.replace("%s", Math.round(durSec) + "s") : (L.agentThinking || "Thinking"))
@@ -2123,8 +2124,6 @@ export class AgentChat extends Model {
                 });
                 this.currentThinkingSteps = [];
                 this.currentThinkingEntryId = "";
-                // 已落盘的卡片耗时归零，避免下一张思考卡片读到上一张的残留值。
-                this.currentThinkingDuration = 0;
             }
             // 卡片边界：一张思考卡片已落盘，重置工具名去重表，使下一张卡片独立显示本轮工具
             // （与重载路径 renderMergedThinkingCard 的单卡片局部去重 seenTools 对齐）。
@@ -2146,6 +2145,9 @@ export class AgentChat extends Model {
                 }
                 this.pendingConfirms = [];
             }
+            // 确认、提问等交互卡片会中断思考，新卡片应从交互完成后重新计时。
+            this.currentThinkingDuration = 0;
+            this.requestStartTime = Date.now();
             this.hasInterveningCard = false;
         }
 

@@ -313,6 +313,20 @@ type AnalyzeImageResult struct {
 	Height   int    `json:"height"`
 }
 
+type GenerateImageRequest struct {
+	Prompt       string `json:"prompt"`
+	Size         string `json:"size"`
+	Quality      string `json:"quality"`
+	OutputFormat string `json:"outputFormat"`
+}
+
+type GenerateImageResult struct {
+	Data          []byte `json:"-"`
+	MIMEType      string `json:"mimeType"`
+	Extension     string `json:"extension"`
+	RevisedPrompt string `json:"revisedPrompt,omitempty"`
+}
+
 type GenerateDocumentImageRequest struct {
 	DocumentID   string `json:"documentId"`
 	Prompt       string `json:"prompt"`
@@ -352,6 +366,9 @@ func ListDocumentImages(documentID string) (DocumentImageList, error) {
 func AnalyzeDocumentImage(ctx context.Context, request AnalyzeDocumentImageRequest) (AnalyzeDocumentImageResult, error) {
 	if strings.TrimSpace(request.AssetPath) == "" {
 		return AnalyzeDocumentImageResult{}, errors.New("assetPath is required for analyze")
+	}
+	if !strings.HasPrefix(AssetPathWithoutQuery(request.AssetPath), "assets/") {
+		return AnalyzeDocumentImageResult{}, errors.New("only local assets/... images are supported")
 	}
 	bt, err := resolveMultimodalDocument(request.DocumentID)
 	if err != nil {
@@ -398,28 +415,24 @@ func AnalyzeImage(ctx context.Context, data []byte, question, detail string) (An
 	return AnalyzeImageResult{Analysis: analysis, Width: prepared.Width, Height: prepared.Height}, nil
 }
 
-// GenerateDocumentImage 使用全局图片生成配置创建文档资源。
-func GenerateDocumentImage(ctx context.Context, request GenerateDocumentImageRequest) (GenerateDocumentImageResult, error) {
-	bt, err := resolveMultimodalDocument(request.DocumentID)
-	if err != nil {
-		return GenerateDocumentImageResult{}, err
-	}
+// GenerateImage 使用全局图片生成配置创建图片字节，可供文档资源、编辑器和其他图片入口复用。
+func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateImageResult, error) {
 	if Conf == nil || Conf.AI == nil {
-		return GenerateDocumentImageResult{}, errors.New("AI configuration is unavailable")
+		return GenerateImageResult{}, errors.New("AI configuration is unavailable")
 	}
 	provider, generationModel := Conf.AI.GetImageGenerationModel()
-	if err = validateMultimodalModel(provider, generationModel, capabilityImageOutput); err != nil {
-		return GenerateDocumentImageResult{}, err
+	if err := validateMultimodalModel(provider, generationModel, capabilityImageOutput); err != nil {
+		return GenerateImageResult{}, err
 	}
 	prompt := strings.TrimSpace(request.Prompt)
 	if prompt == "" {
-		return GenerateDocumentImageResult{}, errors.New("prompt is required for image generation")
+		return GenerateImageResult{}, errors.New("prompt is required for image generation")
 	}
 	size := multimodalValueOrDefault(request.Size, Conf.AI.ImageGeneration.Size)
 	quality := multimodalValueOrDefault(request.Quality, Conf.AI.ImageGeneration.Quality)
 	outputFormat := strings.ToLower(multimodalValueOrDefault(request.OutputFormat, Conf.AI.ImageGeneration.OutputFormat))
 	if outputFormat != "png" && outputFormat != "jpeg" && outputFormat != "webp" {
-		return GenerateDocumentImageResult{}, errors.New("unsupported image output format")
+		return GenerateImageResult{}, errors.New("unsupported image output format")
 	}
 	generated, err := util.NewOpenAIImageAdapter(
 		provider.APIKey, provider.BaseURL, generationModel.Name, provider.RequestTimeout,
@@ -427,10 +440,27 @@ func GenerateDocumentImage(ctx context.Context, request GenerateDocumentImageReq
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})
 	if err != nil {
-		return GenerateDocumentImageResult{}, fmt.Errorf("generate image failed: %w", err)
+		return GenerateImageResult{}, fmt.Errorf("generate image failed: %w", err)
 	}
 	if ctx.Err() != nil {
-		return GenerateDocumentImageResult{}, errors.New("image generation was cancelled")
+		return GenerateImageResult{}, errors.New("image generation was cancelled")
+	}
+	return GenerateImageResult{
+		Data: generated.Data, MIMEType: generated.MIMEType, Extension: generated.Extension, RevisedPrompt: generated.RevisedPrompt,
+	}, nil
+}
+
+// GenerateDocumentImage 使用通用图片生成能力创建文档资源。
+func GenerateDocumentImage(ctx context.Context, request GenerateDocumentImageRequest) (GenerateDocumentImageResult, error) {
+	bt, err := resolveMultimodalDocument(request.DocumentID)
+	if err != nil {
+		return GenerateDocumentImageResult{}, err
+	}
+	generated, err := GenerateImage(ctx, GenerateImageRequest{
+		Prompt: request.Prompt, Size: request.Size, Quality: request.Quality, OutputFormat: request.OutputFormat,
+	})
+	if err != nil {
+		return GenerateDocumentImageResult{}, err
 	}
 	assetPath, _, err := InsertAssetBytes(bt.RootID, "ai-image"+generated.Extension, generated.Data)
 	if err != nil {

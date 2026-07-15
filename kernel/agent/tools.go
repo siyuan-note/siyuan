@@ -17,6 +17,7 @@
 package agent
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 
@@ -41,11 +42,17 @@ func convertMCPToolsToOpenAI() []openai.Tool {
 }
 
 // executeTool 执行单次工具调用。
-// 返回值：结果文本（已展平为字符串），isErr 表示工具是否返回错误结果。
-func executeTool(tc openai.ToolCall, sessionID string) (string, bool) {
+// 返回值：结果文本（已展平为字符串），isErr 表示工具是否返回错误结果，executionUnknown 表示副作用结果无法确定。
+func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (resultText string, isErr, executionUnknown bool) {
 	t := tools.GetTool(tc.Function.Name)
 	if t == nil {
-		return "unknown tool: " + tc.Function.Name, true
+		return "unknown tool: " + tc.Function.Name, true, false
+	}
+	if t.ContextHandler == nil && t.Handler == nil {
+		return "tool handler unavailable: " + tc.Function.Name, true, false
+	}
+	if ctx.Err() != nil {
+		return "tool execution was cancelled before it started", true, false
 	}
 
 	args := parseToolArgs(tc.Function.Arguments)
@@ -56,12 +63,37 @@ func executeTool(tc openai.ToolCall, sessionID string) (string, bool) {
 	if t.Source == "native" || t.Source == "" {
 		args["_sessionID"] = sessionID
 	}
-	result, err := t.Handler(args)
+	type executionResult struct {
+		result tools.CallToolResult
+		err    error
+	}
+	executionCh := make(chan executionResult, 1)
+	go func() {
+		var result tools.CallToolResult
+		var err error
+		if t.ContextHandler != nil {
+			result, err = t.ContextHandler(ctx, args)
+		} else {
+			result, err = t.Handler(args)
+		}
+		executionCh <- executionResult{result: result, err: err}
+	}()
+
+	var execution executionResult
+	select {
+	case execution = <-executionCh:
+	case <-ctx.Done():
+		return "tool execution was interrupted; execution result is unknown and must not be retried automatically", true, true
+	}
+	result, err := execution.result, execution.err
 	if err != nil {
-		return "tool execution error: " + err.Error(), true
+		if ctx.Err() != nil {
+			return "tool execution was interrupted; execution result is unknown and must not be retried automatically", true, true
+		}
+		return "tool execution error: " + err.Error(), true, false
 	}
 
-	return resultToString(result), result.IsError
+	return resultToString(result), result.IsError, result.ExecutionUnknown
 }
 
 func convertSchema(schema tools.ToolSchema) any {

@@ -39,6 +39,7 @@ type AI struct {
 type Agent struct {
 	ModelID             string  `json:"modelId"`
 	SessionTimeout      int     `json:"sessionTimeout"`
+	StreamIdleTimeout   int     `json:"streamIdleTimeout"`
 	ConfirmTimeout      int     `json:"confirmTimeout"`
 	MaxRetries          int     `json:"maxRetries"`
 	Temperature         float64 `json:"temperature"`
@@ -104,14 +105,15 @@ type MCP struct {
 }
 
 type MCPServer struct {
-	Name    string            `json:"name"`
-	Enabled bool              `json:"enabled"`
-	Type    string            `json:"type"`
-	Command string            `json:"command"`
-	Args    []string          `json:"args"`
-	URL     string            `json:"url"`
-	Headers map[string]string `json:"headers"`
-	Timeout int               `json:"timeout"`
+	Name                 string            `json:"name"`
+	Enabled              bool              `json:"enabled"`
+	Type                 string            `json:"type"`
+	Command              string            `json:"command"`
+	Args                 []string          `json:"args"`
+	URL                  string            `json:"url"`
+	Headers              map[string]string `json:"headers"`
+	Timeout              int               `json:"timeout"`
+	TrustToolAnnotations bool              `json:"trustToolAnnotations"`
 }
 
 func defaultEmbedding() *Embedding {
@@ -125,6 +127,7 @@ func defaultRerank() *Rerank {
 func defaultAgent() *Agent {
 	return &Agent{
 		SessionTimeout:      600,
+		StreamIdleTimeout:   120,
 		ConfirmTimeout:      120,
 		MaxRetries:          3,
 		Temperature:         1.0,
@@ -195,6 +198,11 @@ func NewAI() *AI {
 	if agentTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_TIMEOUT"); "" != agentTimeout {
 		if v, err := strconv.Atoi(agentTimeout); err == nil {
 			ai.Agent.SessionTimeout = v
+		}
+	}
+	if agentStreamIdleTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_STREAM_IDLE_TIMEOUT"); "" != agentStreamIdleTimeout {
+		if v, err := strconv.Atoi(agentStreamIdleTimeout); err == nil {
+			ai.Agent.StreamIdleTimeout = v
 		}
 	}
 	if agentConfirmTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_CONFIRM_TIMEOUT"); "" != agentConfirmTimeout {
@@ -317,6 +325,22 @@ func (ai *AI) Normalize() {
 	}
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
+	} else {
+		if ai.Agent.SessionTimeout < 0 {
+			ai.Agent.SessionTimeout = 0
+		} else if ai.Agent.SessionTimeout > 3600 {
+			ai.Agent.SessionTimeout = 3600
+		}
+		if ai.Agent.StreamIdleTimeout < 1 {
+			ai.Agent.StreamIdleTimeout = 120
+		} else if ai.Agent.StreamIdleTimeout > 600 {
+			ai.Agent.StreamIdleTimeout = 600
+		}
+		if ai.Agent.MaxRetries < 0 {
+			ai.Agent.MaxRetries = 0
+		} else if ai.Agent.MaxRetries > 10 {
+			ai.Agent.MaxRetries = 10
+		}
 	}
 	if ai.Editing == nil {
 		ai.Editing = defaultEditing()
@@ -595,14 +619,15 @@ func migrateMCP(raw map[string]any) *MCP {
 			continue
 		}
 		mcp.Servers = append(mcp.Servers, MCPServer{
-			Name:    getString(sm, "name"),
-			Enabled: getBool(sm, "enabled"),
-			Type:    getString(sm, "type"),
-			Command: getString(sm, "command"),
-			Args:    getStringSlice(sm, "args"),
-			URL:     getString(sm, "url"),
-			Headers: getStringMap(sm, "headers"),
-			Timeout: getInt(sm, "timeout"),
+			Name:                 getString(sm, "name"),
+			Enabled:              getBool(sm, "enabled"),
+			Type:                 getString(sm, "type"),
+			Command:              getString(sm, "command"),
+			Args:                 getStringSlice(sm, "args"),
+			URL:                  getString(sm, "url"),
+			Headers:              getStringMap(sm, "headers"),
+			Timeout:              getInt(sm, "timeout"),
+			TrustToolAnnotations: getBool(sm, "trustToolAnnotations"),
 		})
 	}
 	return mcp

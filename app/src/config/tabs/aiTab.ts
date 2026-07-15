@@ -94,6 +94,13 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
         max: 3600,
         unit: "s",
     });
+    group.number("ai.agent.streamIdleTimeout", {
+        title: window.siyuan.languages.agentStreamIdleTimeout,
+        desc: window.siyuan.languages.agentStreamIdleTimeoutTip,
+        min: 1,
+        max: 600,
+        unit: "s",
+    });
     group.number("ai.agent.confirmTimeout", {
         title: window.siyuan.languages.agentConfirmTimeout,
         desc: window.siyuan.languages.agentConfirmTimeoutTip,
@@ -104,6 +111,7 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.agentMaxRetries,
         desc: window.siyuan.languages.agentMaxRetriesTip,
         min: 0,
+        max: 10,
     });
 };
 

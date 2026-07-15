@@ -2,9 +2,32 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {Constants} from "../../../constants";
 
 const API = "/api/ai/agent";
+const sessionRevisions = new Map<string, number>();
+const sessionRuntimeRevisions = new Map<string, number>();
+const sessionSaveQueues = new Map<string, Promise<SessionSaveResult>>();
+
+interface SessionSaveResult {
+    revision: number;
+    session?: AgentSession;
+}
+
+async function waitForPendingSave(id: string) {
+    const pending = sessionSaveQueues.get(id);
+    if (pending) {
+        try {
+            await pending;
+        } catch (e) {
+            // 后续读取或删除以服务端当前状态为准。
+        }
+    }
+}
 
 // 标识发起者 app，后端 saveSession/removeSession 据此排除自身、向其他实例广播会话变更。
-const APP_HEADER = {"X-SiYuan-App-ID": Constants.SIYUAN_APPID};
+const APP_HEADER = {
+    "Content-Type": "application/json",
+    "X-SiYuan-App-ID": Constants.SIYUAN_APPID,
+    "X-SiYuan-Agent-Checkpoint": "2",
+};
 
 export interface SessionIndexItem {
     id: string;
@@ -41,15 +64,15 @@ export interface AgentSession {
             toolCalls?: Array<{name: string; result?: string}>
         }>;
         reasoningContent?: string;
-        toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string}>;
+        toolCalls?: Array<{name: string; arguments?: Record<string, unknown>; result?: string; state?: string}>;
         duration?: number;
-        confirmName?: string;
-        confirmArgs?: Record<string, unknown>;
+        timestamp?: number;
+        name?: string;
+        args?: Record<string, unknown>;
         confirmID?: string;
-        confirmStatus?: string;
+        status?: string;
         questionID?: string;
         questions?: Array<Record<string, unknown>>;
-        questionStatus?: string;
         answers?: string[];
         snapshotID?: string;
     }>;
@@ -64,6 +87,14 @@ export interface AgentSession {
     messageHistory?: string[];
     createdAt: number;
     updatedAt: number;
+    revision?: number;
+    expectedRevision?: number;
+    commitTurnID?: string;
+    lastCommittedTurnID?: string;
+    recoveryTurnID?: string;
+    recoveryState?: string;
+    recoveryRevision?: number;
+    agentRunning?: boolean;
 }
 
 function newSessionId(): string {
@@ -87,17 +118,69 @@ export const SessionStore = {
     },
 
     async load(id: string): Promise<AgentSession | null> {
-        const resp = await fetchSyncPost(API + "/getSession", {id}) as {code: number, data: AgentSession};
-        return (resp && resp.code === 0) ? resp.data : null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            await waitForPendingSave(id);
+            const resp = await fetchSyncPost(API + "/getSession", {id}) as {code: number, data: AgentSession};
+            if (!resp || resp.code !== 0) {
+                return null;
+            }
+            const revision = resp.data.revision ?? 0;
+            const runtimeRevision = resp.data.recoveryRevision ?? 0;
+            const knownRevision = sessionRevisions.get(id) ?? 0;
+            const knownRuntimeRevision = sessionRuntimeRevisions.get(id) ?? 0;
+            if (revision < knownRevision ||
+                (revision === knownRevision && runtimeRevision < knownRuntimeRevision)) {
+                continue;
+            }
+            sessionRevisions.set(id, revision);
+            sessionRuntimeRevisions.set(id, runtimeRevision);
+            return resp.data;
+        }
+        // 连续写入期间若三次读取都落后于本地已知版本，则不返回旧数据覆盖界面。
+        return null;
     },
 
-    async save(session: AgentSession): Promise<void> {
-        session.updatedAt = Date.now();
-        await fetchSyncPost(API + "/saveSession", session, APP_HEADER);
+    async save(session: AgentSession): Promise<SessionSaveResult> {
+        const snapshot = JSON.parse(JSON.stringify(session)) as AgentSession;
+        snapshot.updatedAt = Date.now();
+        const baseRevision = snapshot.expectedRevision ?? sessionRevisions.get(snapshot.id) ?? snapshot.revision ?? 0;
+        const previous = sessionSaveQueues.get(snapshot.id);
+        const persist = async (expectedRevision: number) => {
+            snapshot.expectedRevision = expectedRevision;
+            const resp = await fetchSyncPost(API + "/saveSession", snapshot, APP_HEADER) as {
+                code: number;
+                msg?: string;
+                data?: {revision?: number; session?: AgentSession};
+            };
+            if (!resp || resp.code !== 0) {
+                throw new Error(resp?.msg || "Failed to save agent session");
+            }
+            const revision = resp.data?.revision ?? expectedRevision;
+            sessionRevisions.set(snapshot.id, revision);
+            if (snapshot.commitTurnID || snapshot.recoveryTurnID) {
+                sessionRuntimeRevisions.set(snapshot.id, 0);
+            }
+            return {revision, session: resp.data?.session};
+        };
+        const save = previous ? previous.then((result) => persist(result.revision)) : persist(baseRevision);
+        sessionSaveQueues.set(snapshot.id, save);
+        try {
+            return await save;
+        } finally {
+            if (sessionSaveQueues.get(snapshot.id) === save) {
+                sessionSaveQueues.delete(snapshot.id);
+            }
+        }
     },
 
     async remove(id: string): Promise<void> {
-        await fetchSyncPost(API + "/removeSession", {id}, APP_HEADER);
+        await waitForPendingSave(id);
+        const resp = await fetchSyncPost(API + "/removeSession", {id}, APP_HEADER) as {code: number; msg?: string};
+        if (!resp || resp.code !== 0) {
+            throw new Error(resp?.msg || "Failed to remove agent session");
+        }
+        sessionRevisions.delete(id);
+        sessionRuntimeRevisions.delete(id);
     },
 
     async rename(id: string, newTitle: string): Promise<void> {
@@ -105,6 +188,10 @@ export const SessionStore = {
         if (!session) { return; }
         session.title = newTitle;
         await this.save(session);
+    },
+
+    getRevision(id: string): number {
+        return sessionRevisions.get(id) ?? 0;
     },
 
     newSessionId,

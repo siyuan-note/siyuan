@@ -1,4 +1,9 @@
 {
+	"agentRetrying": "Reintentando (${attempt}/${maxRetries})...",
+	"agentStreamIdleTimeout": "Tiempo de espera inactivo del flujo",
+	"agentStreamIdleTimeoutTip": "Tiempo máximo sin salida del modelo antes de detener la solicitud",
+	"aiMcpTrustToolAnnotations": "Confiar en las anotaciones de herramientas",
+	"aiMcpTrustToolAnnotationsTip": "Permite que las anotaciones de herramientas de solo lectura de este servidor omitan la confirmación de operaciones. Actívalo solo para servidores de confianza.",
 	"testConnectionFailMsg": "Error de conexión: ${msg}",
 	"testConnectionSuccessDimensions": "Conexión exitosa (dimensiones ${dimensions})",
 	"masterPasswordMigrationPending": "Migración de contraseña maestra en progreso",
@@ -247,7 +252,7 @@
 	"agentConfirmAlways": "Permitir sesión",
 	"agentConfirmAlwaysDesc": "No preguntar de nuevo para ninguna operación en esta sesión",
 	"agentConfirmPending": "Pendiente",
-	"agentTimeout": "Tiempo de espera del agente",
+	"agentTimeout": "Tiempo de espera",
 	"agentTimeoutTip": "Tiempo de espera total de la sesión del agente, 0 = sin límite",
 	"agentConfirmTimeout": "Tiempo de espera de confirmación",
 	"agentConfirmTimeoutTip": "Rechazo automático tras agotar el tiempo",

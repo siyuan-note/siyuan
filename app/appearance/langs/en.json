@@ -1,4 +1,9 @@
 {
+	"agentRetrying": "Retrying (${attempt}/${maxRetries})...",
+	"agentStreamIdleTimeout": "Stream Idle Timeout",
+	"agentStreamIdleTimeoutTip": "Maximum time without model output before the request is stopped",
+	"aiMcpTrustToolAnnotations": "Trust tool annotations",
+	"aiMcpTrustToolAnnotationsTip": "Allow this server's read-only tool annotations to skip operation confirmation. Enable only for trusted servers.",
 	"testConnectionFailMsg": "Connection failed: ${msg}",
 	"testConnectionSuccessDimensions": "Connection successful (dimensions ${dimensions})",
 	"masterPasswordMigrationPending": "Master password migration in progress",
@@ -247,7 +252,7 @@
 	"agentConfirmAlways": "Session Allow",
 	"agentConfirmAlwaysDesc": "Don't ask again for any operations in this session",
 	"agentConfirmPending": "Pending",
-	"agentTimeout": "Agent Timeout",
+	"agentTimeout": "Timeout",
 	"agentTimeoutTip": "0 = no limit",
 	"agentConfirmTimeout": "Confirm Timeout",
 	"agentConfirmTimeoutTip": "Auto reject after timeout",

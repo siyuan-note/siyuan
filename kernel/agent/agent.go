@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"maps"
 	"math/rand/v2"
 	"os"
 
@@ -31,11 +30,12 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
 
 	"github.com/sashabaranov/go-openai"
-	"github.com/siyuan-note/filelock"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
+	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -199,12 +199,19 @@ func buildDoomSignature(name, action string, args map[string]any) string {
 var confirmChannelsMu sync.Mutex
 var confirmChannels = make(map[string]chan confirmResult)
 
-func ConfirmSession(id string, approved bool, always bool) {
+func ConfirmSession(id string, approved bool, always bool) bool {
 	confirmChannelsMu.Lock()
+	defer confirmChannelsMu.Unlock()
 	ch, ok := confirmChannels[id]
-	confirmChannelsMu.Unlock()
-	if ok {
-		ch <- confirmResult{approved: approved, always: always}
+	if !ok {
+		return false
+	}
+	select {
+	case ch <- confirmResult{approved: approved, always: always}:
+		delete(confirmChannels, id)
+		return true
+	default:
+		return false
 	}
 }
 
@@ -215,16 +222,23 @@ type QuestionAnswer struct {
 var questionChannelsMu sync.Mutex
 var questionChannels = make(map[string]chan QuestionAnswer)
 
-func AnswerQuestion(id string, answers []string) {
+func AnswerQuestion(id string, answers []string) bool {
 	questionChannelsMu.Lock()
+	defer questionChannelsMu.Unlock()
 	ch, ok := questionChannels[id]
-	questionChannelsMu.Unlock()
-	if ok {
-		ch <- QuestionAnswer{Answers: answers}
+	if !ok {
+		return false
+	}
+	select {
+	case ch <- QuestionAnswer{Answers: answers}:
+		delete(questionChannels, id)
+		return true
+	default:
+		return false
 	}
 }
 
-// frontendCallResult carries the result of a frontend tool action back from the browser.
+// frontendCallResult 承载浏览器返回的前端工具执行结果。
 type frontendCallResult struct {
 	result  string
 	isError bool
@@ -233,14 +247,20 @@ type frontendCallResult struct {
 var frontendCallChannelsMu sync.Mutex
 var frontendCallChannels = make(map[string]chan frontendCallResult)
 
-// FrontendToolResult is called by the API handler when the browser POSTs the outcome of a
-// frontend tool action. It unblocks the agent goroutine waiting in handleFrontendTool.
-func FrontendToolResult(callID string, result string, isError bool) {
+// FrontendToolResult 由 API 在浏览器回传前端工具结果时调用，用于解除 Agent 的等待。
+func FrontendToolResult(callID string, result string, isError bool) bool {
 	frontendCallChannelsMu.Lock()
+	defer frontendCallChannelsMu.Unlock()
 	ch, ok := frontendCallChannels[callID]
-	frontendCallChannelsMu.Unlock()
-	if ok {
-		ch <- frontendCallResult{result: result, isError: isError}
+	if !ok {
+		return false
+	}
+	select {
+	case ch <- frontendCallResult{result: result, isError: isError}:
+		delete(frontendCallChannels, callID)
+		return true
+	default:
+		return false
 	}
 }
 
@@ -286,12 +306,14 @@ type AgentEvent struct {
 	RetryAttempt     int
 	RetryMax         int
 	SnapshotID       string
+	TurnID           string
 }
 
 type AgentMessage struct {
 	Role      string          `json:"role"`
 	Content   string          `json:"content"`
 	ToolCalls []AgentToolCall `json:"toolCalls,omitempty"`
+	EntryID   string          `json:"entryID,omitempty"`
 }
 
 type AgentToolCall struct {
@@ -299,6 +321,7 @@ type AgentToolCall struct {
 	Name      string         `json:"name"`
 	Arguments map[string]any `json:"arguments"`
 	Result    string         `json:"result,omitempty"`
+	State     string         `json:"state,omitempty"`
 }
 
 type Reference struct {
@@ -340,10 +363,13 @@ type SessionEntry struct {
 	CompletionTok int                `json:"completionTokens,omitempty"`
 	Timestamp     int64              `json:"timestamp,omitempty"`
 	ReasoningCont string             `json:"reasoningContent,omitempty"`
-	ConfirmName   string             `json:"confirmName,omitempty"`
-	ConfirmArgs   map[string]any     `json:"confirmArgs,omitempty"`
+	Name          string             `json:"name,omitempty"`
+	Args          map[string]any     `json:"args,omitempty"`
 	ConfirmID     string             `json:"confirmID,omitempty"`
-	ConfirmStatus string             `json:"confirmStatus,omitempty"`
+	Status        string             `json:"status,omitempty"`
+	QuestionID    string             `json:"questionID,omitempty"`
+	Questions     []map[string]any   `json:"questions,omitempty"`
+	Answers       []string           `json:"answers,omitempty"`
 	SnapshotID    string             `json:"snapshotID,omitempty"`
 }
 
@@ -372,9 +398,11 @@ type agentCheckpoint struct {
 	ContextTokenBreakdown map[string]int `json:"contextTokenBreakdown,omitempty"`
 	ContextCachedTokens   int            `json:"contextCachedTokens,omitempty"`
 	ContextLimit          int            `json:"contextLimit,omitempty"`
+	Revision              int64          `json:"revision,omitempty"`
+	LastCommittedTurnID   string         `json:"lastCommittedTurnID,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout time.Duration) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userEntryID string, contentRevision int64, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -382,12 +410,16 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		defer func() {
 			if r := recover(); r != nil {
 				logging.LogErrorf("agent chat panic: %v\n%s", r, logging.ShortStack())
-				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
 			}
 		}()
 
 		if kernelModel.Conf.AI.MCP != nil {
 			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.MCP.Servers)
+		}
+		select {
+		case <-ctx.Done():
+			return
+		default:
 		}
 
 		// 变量（非敏感）在用户消息注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
@@ -399,20 +431,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		var checkpointMsgs []AgentMessage
 		var totalPrompt, totalCompletion, lastPromptTokens, lastCachedTokens int
 		contextLimit := GetModelContextLimit(model)
-		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
 		var compactCount int
 		var snapshotIDs []string
 		snapshotCreated := false // 整个 AgentChat 过程最多打一次自动快照，避免多轮工具调用时每轮都打
 		var roundsSinceCheckpoint int
-		var pendingCheckpoints sync.WaitGroup // 跟踪挂起的中途异步 checkpoint，保证最终落盘前全部完成
-		// finalCheckpoint 先等待所有挂起的中途异步 checkpoint 完成，再做最终的同步落盘，
-		// 确保旧的异步数据不会在最终 checkpoint 之后写入而覆盖新数据。
-		finalCheckpoint := func() {
-			pendingCheckpoints.Wait()
-			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow)
-		}
 
 		if sessionID != "" {
 			if cp := loadCheckpoint(sessionID); cp != nil {
@@ -424,29 +448,111 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					// 截断/重建逻辑（thinking/confirm/snapshot 不参与 LLM 上下文）。
 					loadedMsgs := entriesToAgentMessages(cp.Entries)
 					truncated := loadedMsgs
+					currentUserExists := false
 					if regenerate {
 						lastUserIdx := -1
 						for i := len(truncated) - 1; i >= 0; i-- {
-							if truncated[i].Role == "user" {
+							if truncated[i].Role == "user" && (userEntryID == "" || truncated[i].EntryID == userEntryID) {
 								lastUserIdx = i
 								break
 							}
 						}
-						if lastUserIdx >= 0 && truncated[lastUserIdx].Content == userMessage {
+						if lastUserIdx >= 0 {
 							truncated = truncated[:lastUserIdx]
+						} else if userEntryID != "" {
+							sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+							return
+						}
+					} else {
+						for i := len(truncated) - 1; i >= 0; i-- {
+							if truncated[i].Role != "user" {
+								continue
+							}
+							currentUserExists = userEntryID != "" && truncated[i].EntryID == userEntryID
+							if userEntryID == "" && truncated[i].Content == userMessage {
+								currentUserExists = true
+							}
+							break
 						}
 					}
 					checkpointMsgs = truncated
-					checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage})
+					if regenerate || !currentUserExists {
+						checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "user", Content: userMessage, EntryID: userEntryID})
+					}
 					messages = checkpointMessagesToOpenAI(checkpointMsgs, language, references, editorCtx, pluginActions)
 				}
+			}
+			if runtime, err := loadRuntimeState(sessionID); err == nil && runtime != nil && runtime.AlwaysAllow {
+				alwaysAllow["*"] = true
 			}
 		}
 
 		if messages == nil {
-			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage}}
+			checkpointMsgs = []AgentMessage{{Role: "user", Content: userMessage, EntryID: userEntryID}}
 			messages = buildInitialMessages(userMessage, language, references, editorCtx, pluginActions)
 		}
+
+		turnBaseIndex := len(checkpointMsgs)
+		turn := &agentRuntimeTurn{
+			TurnID:       ast.NewNodeID(),
+			Mode:         "append",
+			UserEntryID:  userEntryID,
+			BaseRevision: contentRevision,
+			State:        "running",
+			UpdatedAt:    time.Now().UnixMilli(),
+		}
+		if regenerate {
+			turn.Mode = "regenerate"
+			turn.TargetUserEntryID = userEntryID
+		}
+		select {
+		case <-ctx.Done():
+			return
+		default:
+		}
+		if err := beginRuntimeTurn(sessionID, turn, alwaysAllow["*"]); err != nil {
+			logging.LogErrorf("begin agent runtime failed: %s", err)
+			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: kernelModel.Conf.Language(28)})
+			return
+		}
+		// turn 是恢复协议的身份锚点，且此时事件通道仍为空。直接写入缓冲区，确保请求刚被取消时
+		// API 的后台排空逻辑仍能记录 turnID 并在最终检查点落盘后通知前端恢复。
+		ch <- AgentEvent{Type: "turn", TurnID: turn.TurnID}
+		runtimeFinalized := false
+		saveTurn := func(state string) bool {
+			turn.State = state
+			deltaStart := turnBaseIndex
+			for i := len(checkpointMsgs) - 1; i >= 0; i-- {
+				message := checkpointMsgs[i]
+				if message.Role == "user" && ((userEntryID != "" && message.EntryID == userEntryID) ||
+					(userEntryID == "" && message.Content == userMessage)) {
+					deltaStart = i + 1
+					break
+				}
+			}
+			if deltaStart > len(checkpointMsgs) {
+				deltaStart = len(checkpointMsgs)
+			}
+			turn.Delta = append([]AgentMessage(nil), checkpointMsgs[deltaStart:]...)
+			turn.SnapshotIDs = append([]string(nil), snapshotIDs...)
+			turn.PromptTokens = totalPrompt
+			turn.CompletionTokens = totalCompletion
+			turn.LastPromptTokens = lastPromptTokens
+			turn.CachedTokens = lastCachedTokens
+			turn.ContextLimit = contextLimit
+			if err := saveRuntimeTurn(sessionID, turn, alwaysAllow["*"]); err != nil {
+				logging.LogErrorf("save agent runtime failed: %s", err)
+				return false
+			} else if state != "running" {
+				runtimeFinalized = true
+			}
+			return true
+		}
+		defer func() {
+			if !runtimeFinalized {
+				saveTurn("interrupted")
+			}
+		}()
 
 		temperature := kernelModel.Conf.AI.Agent.Temperature
 		if temperature < 0 || 2 < temperature {
@@ -480,16 +586,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				ReasoningEffort: reasoningEffort,
 			}
 
-			// 为每轮单次上游调用派生独立子 context，便于把单轮卡死转为可重试错误，
-			// 而不是直接取消整会话。requestTimeout<=0 时退化为可取消但无超时的 context。
-			roundCtx, roundCancel := context.WithCancel(ctx)
-			if requestTimeout > 0 {
-				roundCtx, roundCancel = context.WithTimeout(ctx, requestTimeout)
-			}
-
-			stream, streamErr := createStreamWithRetry(roundCtx, client, req, maxRetries, ch)
+			stream, firstResp, roundCancel, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
 			if streamErr != nil {
-				roundCancel()
 				if compactCount < 3 && isContextOverflow(streamErr) {
 					keepTurns := max(3-compactCount, 1)
 					messages = compactMessages(messages, keepTurns)
@@ -499,35 +597,50 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					continue
 				}
 				logging.LogErrorf("agent API request failed: %s", streamErr.Error())
+				if !saveTurn("interrupted") {
+					return
+				}
 				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(streamErr)})
-				finalCheckpoint()
 				return
 			}
 
 			var contentBuilder strings.Builder
 			var reasoningBuilder strings.Builder
 			var aggregatedToolCalls []openai.ToolCall
+			lastDraftCheckpoint := time.Now()
 
+			firstResponsePending := true
 			for {
-				resp, recvErr := stream.Recv()
+				resp := firstResp
+				var recvErr error
+				if firstResponsePending {
+					firstResponsePending = false
+				} else {
+					resp, recvErr = recvStreamWithIdleTimeout(stream, streamIdleTimeout, roundCancel)
+				}
 				if recvErr != nil {
 					if recvErr == io.EOF {
 						break
 					}
 					logging.LogErrorf("agent stream error: %s", recvErr.Error())
-					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(recvErr)})
 					content := contentBuilder.String()
 					if content != "" || reasoningBuilder.String() != "" {
 						checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+						turn.DraftContent = ""
 					}
-					finalCheckpoint()
+					finalized := saveTurn("interrupted")
 					stream.Close()
 					roundCancel()
+					if finalized {
+						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: getAgentErrorMessage(recvErr)})
+					}
 					return
 				}
 
 				select {
 				case <-ctx.Done():
+					turn.DraftContent = contentBuilder.String()
+					saveTurn("interrupted")
 					stream.Close()
 					roundCancel()
 					return
@@ -563,6 +676,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						aggregatedToolCalls[idx].Function.Arguments += tcd.Function.Arguments
 					}
 				}
+				if contentBuilder.Len() > 0 && time.Since(lastDraftCheckpoint) >= time.Second {
+					turn.DraftContent = contentBuilder.String()
+					saveTurn("running")
+					lastDraftCheckpoint = time.Now()
+				}
 
 				if resp.Usage != nil {
 					totalPrompt += resp.Usage.PromptTokens
@@ -579,6 +697,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 			stream.Close()
 			roundCancel()
+			turn.DraftContent = ""
 
 			if len(aggregatedToolCalls) > 0 {
 				filtered := make([]openai.ToolCall, 0, len(aggregatedToolCalls))
@@ -608,10 +727,23 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						ID:        tc.ID,
 						Name:      tc.Function.Name,
 						Arguments: args,
+						State:     "pending",
 					})
 				}
 				checkpointMsgs = append(checkpointMsgs, checkpointMsg)
 				assistantIdx := len(checkpointMsgs) - 1
+				skipRemainingTools := func(start int, result string) {
+					for j := start; j < len(aggregatedToolCalls); j++ {
+						checkpointMsgs[assistantIdx].ToolCalls[j].Result = result
+						checkpointMsgs[assistantIdx].ToolCalls[j].State = "skipped"
+						sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: result})
+					}
+				}
+				// 在展示确认框前记录模型提出的整批调用。此时都尚未执行，崩溃恢复可以明确区分
+				// “未执行”和“执行结果未知”，不会把后续尚未开始的调用误判为可能已产生副作用。
+				if !saveTurn("running") {
+					return
+				}
 
 				for i, tc := range aggregatedToolCalls {
 					args := parsedArgs[i]
@@ -627,12 +759,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					})
 
 					if needsConfirm(tc.Function.Name, action, alwaysAllow) {
-						confirmID := fmt.Sprintf("%s_%d", tc.ID, i)
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID})
+						confirmID := fmt.Sprintf("%s_%s_%d", turn.TurnID, tc.ID, i)
 						ch2 := make(chan confirmResult, 1)
 						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = ch2
 						confirmChannelsMu.Unlock()
+						sendCriticalEvent(ctx, ch, AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID})
 						var rejectionMsg string
 						var result confirmResult
 						timedOut := false
@@ -643,12 +775,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							delete(confirmChannels, confirmID)
 							confirmChannelsMu.Unlock()
 						case <-ctx.Done():
-							confirmChannelsMu.Lock()
-							delete(confirmChannels, confirmID)
-							confirmChannelsMu.Unlock()
+							if acceptedResult, accepted := finishConfirmWait(confirmID, ch2); accepted {
+								result = acceptedResult
+								break
+							}
 
 							cancelMsg := "Operation cancelled"
 							checkpointMsgs[assistantIdx].ToolCalls[i].Result = cancelMsg
+							checkpointMsgs[assistantIdx].ToolCalls[i].State = "skipped"
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:       openai.ChatMessageRoleTool,
 								Content:    wrapToolOutput(cancelMsg),
@@ -658,6 +792,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 							for j := i + 1; j < len(aggregatedToolCalls); j++ {
 								checkpointMsgs[assistantIdx].ToolCalls[j].Result = cancelMsg
+								checkpointMsgs[assistantIdx].ToolCalls[j].State = "skipped"
 								messages = append(messages, openai.ChatCompletionMessage{
 									Role:       openai.ChatMessageRoleTool,
 									Content:    wrapToolOutput(cancelMsg),
@@ -665,12 +800,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								})
 								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: cancelMsg})
 							}
-							finalCheckpoint()
+							if !saveTurn("interrupted") {
+								return
+							}
 							return
 						case <-time.After(confirmTimeout):
-							confirmChannelsMu.Lock()
-							delete(confirmChannels, confirmID)
-							confirmChannelsMu.Unlock()
+							if acceptedResult, accepted := finishConfirmWait(confirmID, ch2); accepted {
+								result = acceptedResult
+								break
+							}
 							timedOut = true
 							rejectionMsg = "Confirmation timed out, operation skipped automatically"
 							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg})
@@ -687,6 +825,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 								ToolCallID: tc.ID,
 							})
 							checkpointMsgs[assistantIdx].ToolCalls[i].Result = rejectionMsg
+							checkpointMsgs[assistantIdx].ToolCalls[i].State = "skipped"
+							if !saveTurn("running") {
+								return
+							}
 							continue
 						}
 
@@ -694,35 +836,46 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 							alwaysAllow["*"] = true
 						}
 					}
+					select {
+					case <-ctx.Done():
+						skipRemainingTools(i, "Operation cancelled")
+						saveTurn("interrupted")
+						return
+					default:
+					}
 
-					if !snapshotCreated && action != "" && !safeActions[action] && tc.Function.Name != "frontend" && !(tc.Function.Name == "repo" && action == "create") {
+					if !snapshotCreated && needsLocalSnapshot(tc.Function.Name, action) {
 						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
 						if err != nil {
 							logging.LogErrorf("agent auto snapshot failed: %s", err)
-							sendCriticalEvent(ctx, ch, AgentEvent{
-								Type:  "error",
-								Error: "auto snapshot failed, operation aborted: " + err.Error(),
-							})
-
 							abortMsg := "Operation aborted due to snapshot failure"
 							checkpointMsgs[assistantIdx].ToolCalls[i].Result = abortMsg
+							checkpointMsgs[assistantIdx].ToolCalls[i].State = "skipped"
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:       openai.ChatMessageRoleTool,
 								Content:    wrapToolOutput(abortMsg),
 								ToolCallID: tc.ID,
 							})
-							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: abortMsg})
-
 							for j := i + 1; j < len(aggregatedToolCalls); j++ {
 								checkpointMsgs[assistantIdx].ToolCalls[j].Result = abortMsg
+								checkpointMsgs[assistantIdx].ToolCalls[j].State = "skipped"
 								messages = append(messages, openai.ChatCompletionMessage{
 									Role:       openai.ChatMessageRoleTool,
 									Content:    wrapToolOutput(abortMsg),
 									ToolCallID: aggregatedToolCalls[j].ID,
 								})
+							}
+							if !saveTurn("interrupted") {
+								return
+							}
+							sendEvent(ch, AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: abortMsg})
+							for j := i + 1; j < len(aggregatedToolCalls); j++ {
 								sendEvent(ch, AgentEvent{Type: "tool_result", Name: aggregatedToolCalls[j].Function.Name, Result: abortMsg})
 							}
-							finalCheckpoint()
+							sendCriticalEvent(ctx, ch, AgentEvent{
+								Type:  "error",
+								Error: "auto snapshot failed, operation aborted: " + err.Error(),
+							})
 							return
 						}
 						snapshotIDs = append(snapshotIDs, id)
@@ -730,14 +883,29 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", SnapshotID: id})
 					}
 
+					// 工具执行前先持久化“即将执行”状态。若落盘失败则禁止执行，避免外部写操作已经发生，
+					// 但恢复层没有任何记录可用于阻止自动重试。
+					checkpointMsgs[assistantIdx].ToolCalls[i].State = "executing"
+					if !saveTurn("running") {
+						return
+					}
+					select {
+					case <-ctx.Done():
+						skipRemainingTools(i, "Operation cancelled")
+						saveTurn("interrupted")
+						return
+					default:
+					}
 					var resultStr string
 					isErr := false
+					executionUnknown := false
 					if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
 					} else if tc.Function.Name == "frontend" {
-						resultStr = handleFrontendTool(ctx, tc, ch, confirmTimeout)
+						resultStr, executionUnknown = handleFrontendTool(ctx, tc, ch, confirmTimeout)
+						isErr = executionUnknown
 					} else {
-						resultStr, isErr = executeTool(tc, sessionID)
+						resultStr, isErr, executionUnknown = executeTool(ctx, tc, sessionID)
 					}
 					// rawResult 保留 wrap/truncate 之前的原始文本，用于判断是否为空。
 					rawResult := resultStr
@@ -757,6 +925,20 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						ToolCallID: tc.ID,
 					})
 					checkpointMsgs[assistantIdx].ToolCalls[i].Result = resultStr
+					checkpointState := "running"
+					if executionUnknown {
+						checkpointMsgs[assistantIdx].ToolCalls[i].State = "unknown"
+						checkpointState = "interrupted"
+					} else {
+						checkpointMsgs[assistantIdx].ToolCalls[i].State = "finished"
+					}
+					if !saveTurn(checkpointState) {
+						return
+					}
+					if executionUnknown {
+						sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: rawResult})
+						return
+					}
 
 					// 死循环检测：只有 question/frontend 之外的普通工具参与，
 					// 且仅当本次调用失败或无返回（即"卡住反复重试"的真死循环特征）时才累加计数。
@@ -788,16 +970,17 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				}
 				if doomLoop.count >= doomLoopStopThreshold {
 					errMsg := "Repetitive tool calls detected: '" + doomLoop.prevName + "' called " + fmt.Sprintf("%d", doomLoop.count) + " times with the same action. Operation terminated."
+					if !saveTurn("interrupted") {
+						return
+					}
 					sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: errMsg})
-					finalCheckpoint()
 					return
 				}
 
 				roundsSinceCheckpoint++
 				if roundsSinceCheckpoint >= 3 {
-					// 流式中途的兜底 checkpoint 改为异步写盘，避免随会话增长的全文件重写阻塞 agent 主循环。
-					// 出错/取消/done 时的 checkpoint 仍为同步调用，确保最终状态可靠落盘。
-					saveCheckpointAsync(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime, snapshotIDs, alwaysAllow, &pendingCheckpoints)
+					// 每三轮工具调用持久化一次当前 turn 增量，避免长任务仅依赖工具前后的检查点。
+					saveTurn("running")
 					roundsSinceCheckpoint = 0
 				}
 				continue
@@ -807,7 +990,6 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			if content != "" {
 				checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
 			}
-			finalCheckpoint()
 			if content == "" {
 				content = " "
 			}
@@ -816,15 +998,22 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				Content:          content,
 				ReasoningContent: reasoningBuilder.String(),
 			})
+			turn.TokenBreakdown = computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens)
+			if !saveTurn("finished") {
+				return
+			}
 
-			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
-			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
+			sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+			sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 			return
 		}
 
-		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens), CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
-		finalCheckpoint()
-		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done"})
+		turn.TokenBreakdown = computeBreakdownIfNeeded(model, messages, tools, lastPromptTokens)
+		if !saveTurn("finished") {
+			return
+		}
+		sendEvent(ch, AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion, LastPromptTokens: lastPromptTokens, TokenBreakdown: turn.TokenBreakdown, CachedTokens: lastCachedTokens, ContextLimit: contextLimit})
+		sendCriticalEvent(ctx, ch, AgentEvent{Type: "done", TurnID: turn.TurnID})
 	}()
 
 	return ch
@@ -872,19 +1061,35 @@ var safeActions = map[string]bool{
 	"grep": true, "find": true, "stat": true, "unused": true,
 	"keys": true, "render": true, "diff": true,
 	"file_get": true, "file_open": true, "file_export": true,
-	"open": true, "close": true, "batch-get": true, "question": true, "todo_write": true,
+	"open": true, "close": true, "batch-get": true,
 	"md": true, "query": true,
+}
+
+var safeWholeTools = map[string]bool{
+	"question": true, "todo_write": true, "web_fetch": true, "web_search": true,
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
 	if alwaysAllow["*"] {
 		return false
 	}
+	tool := tools.GetTool(toolName)
+	if tool != nil && tool.Source != "" && tool.Source != "native" {
+		// 外部 MCP 与插件工具不能复用原生工具的全局 action 白名单，否则 close/open 等同名动作
+		// 可能在外部服务中产生写入。仅工具明确声明只读时免确认，未知能力按写操作处理。
+		return !tool.ReadOnlyHint
+	}
+	if toolName == "http_request" && action == "" {
+		action = "get"
+	}
 	if action == "" {
-		return false
+		return !safeWholeTools[toolName]
 	}
 	if alwaysAllow[toolName+"::"+action] {
 		return false
+	}
+	if toolName == "import" && action == "md" {
+		return true
 	}
 	if safeActions[action] {
 		return false
@@ -892,18 +1097,42 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 	if toolName == "sync" && action == "status" {
 		return false
 	}
-	if toolName == "import" && action == "md" {
-		return true
-	}
 	return true
+}
+
+func needsLocalSnapshot(toolName, action string) bool {
+	if toolName == "http_request" && action == "" {
+		action = "get"
+	}
+	actionSafe := safeActions[action]
+	if toolName == "import" && action == "md" {
+		actionSafe = false
+	}
+	if safeWholeTools[toolName] || actionSafe || toolName == "frontend" || (toolName == "repo" && action == "create") {
+		return false
+	}
+	tool := tools.GetTool(toolName)
+	if tool == nil {
+		return false
+	}
+	switch tool.EffectScope {
+	case tools.EffectScopeLocal, tools.EffectScopeMixed:
+		return true
+	case tools.EffectScopeExternal, tools.EffectScopeUnknown:
+		return false
+	default:
+		// 未声明范围的内置工具按本地数据操作处理，兼容现有工具；外部来源按未知范围处理。
+		return tool.Source == "" || tool.Source == "native"
+	}
 }
 
 func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, timeout time.Duration) string {
 	args := parseToolArgs(argsJSON)
-	questionID := fmt.Sprintf("%d", time.Now().UnixNano())
-	if len(questionID) > 10 {
-		questionID = questionID[:10]
-	}
+	questionID := ast.NewNodeID()
+	ch2 := make(chan QuestionAnswer, 1)
+	questionChannelsMu.Lock()
+	questionChannels[questionID] = ch2
+	questionChannelsMu.Unlock()
 
 	sendCriticalEvent(ctx, ch, AgentEvent{
 		Type:       "question",
@@ -911,24 +1140,21 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 		Arguments:  args,
 	})
 
-	ch2 := make(chan QuestionAnswer, 1)
-	questionChannelsMu.Lock()
-	questionChannels[questionID] = ch2
-	questionChannelsMu.Unlock()
-
 	var answer QuestionAnswer
 	select {
 	case answer = <-ch2:
 	case <-ctx.Done():
-		questionChannelsMu.Lock()
-		delete(questionChannels, questionID)
-		questionChannelsMu.Unlock()
-		return "Question cancelled."
+		if acceptedAnswer, accepted := finishQuestionWait(questionID, ch2); accepted {
+			answer = acceptedAnswer
+		} else {
+			return "Question cancelled."
+		}
 	case <-time.After(timeout):
-		questionChannelsMu.Lock()
-		delete(questionChannels, questionID)
-		questionChannelsMu.Unlock()
-		return "No answer received (timed out)."
+		if acceptedAnswer, accepted := finishQuestionWait(questionID, ch2); accepted {
+			answer = acceptedAnswer
+		} else {
+			return "No answer received (timed out)."
+		}
 	}
 
 	questionChannelsMu.Lock()
@@ -942,16 +1168,52 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	return strings.Join(answer.Answers, ", ")
 }
 
-// handleFrontendTool dispatches a frontend tool action to the browser via SSE and blocks until
-// the browser POSTs the result (or the context is cancelled / timeout fires). It mirrors
-// handleQuestion's structure exactly — the only difference is the channel registry and the
-// event type ("frontend_tool_call").
-func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- AgentEvent, timeout time.Duration) string {
-	args := parseToolArgs(tc.Function.Arguments)
-	callID := fmt.Sprintf("%d", time.Now().UnixNano())
-	if len(callID) > 12 {
-		callID = callID[:12]
+func finishQuestionWait(questionID string, ch chan QuestionAnswer) (QuestionAnswer, bool) {
+	questionChannelsMu.Lock()
+	registered, exists := questionChannels[questionID]
+	pending := exists && registered == ch
+	if pending {
+		delete(questionChannels, questionID)
 	}
+	questionChannelsMu.Unlock()
+	if pending {
+		return QuestionAnswer{}, false
+	}
+	select {
+	case answer := <-ch:
+		return answer, true
+	default:
+		return QuestionAnswer{}, false
+	}
+}
+
+func finishConfirmWait(confirmID string, ch chan confirmResult) (confirmResult, bool) {
+	confirmChannelsMu.Lock()
+	registered, exists := confirmChannels[confirmID]
+	pending := exists && registered == ch
+	if pending {
+		delete(confirmChannels, confirmID)
+	}
+	confirmChannelsMu.Unlock()
+	if pending {
+		return confirmResult{}, false
+	}
+	select {
+	case result := <-ch:
+		return result, true
+	default:
+		return confirmResult{}, false
+	}
+}
+
+// handleFrontendTool 通过 SSE 把前端工具操作发送到浏览器，并等待浏览器回传结果。
+func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- AgentEvent, timeout time.Duration) (string, bool) {
+	args := parseToolArgs(tc.Function.Arguments)
+	callID := ast.NewNodeID()
+	ch2 := make(chan frontendCallResult, 1)
+	frontendCallChannelsMu.Lock()
+	frontendCallChannels[callID] = ch2
+	frontendCallChannelsMu.Unlock()
 
 	sendCriticalEvent(ctx, ch, AgentEvent{
 		Type:      "frontend_tool_call",
@@ -960,24 +1222,21 @@ func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- Agent
 		Arguments: args,
 	})
 
-	ch2 := make(chan frontendCallResult, 1)
-	frontendCallChannelsMu.Lock()
-	frontendCallChannels[callID] = ch2
-	frontendCallChannelsMu.Unlock()
-
 	var fr frontendCallResult
 	select {
 	case fr = <-ch2:
 	case <-ctx.Done():
-		frontendCallChannelsMu.Lock()
-		delete(frontendCallChannels, callID)
-		frontendCallChannelsMu.Unlock()
-		return "Frontend action cancelled."
+		if acceptedResult, accepted := finishFrontendWait(callID, ch2); accepted {
+			fr = acceptedResult
+		} else {
+			return "Frontend action was interrupted; execution result is unknown and must not be retried automatically.", true
+		}
 	case <-time.After(timeout):
-		frontendCallChannelsMu.Lock()
-		delete(frontendCallChannels, callID)
-		frontendCallChannelsMu.Unlock()
-		return "Frontend action timed out (no response from the editor)."
+		if acceptedResult, accepted := finishFrontendWait(callID, ch2); accepted {
+			fr = acceptedResult
+		} else {
+			return "Frontend action timed out; execution result is unknown and must not be retried automatically.", true
+		}
 	}
 
 	frontendCallChannelsMu.Lock()
@@ -985,9 +1244,28 @@ func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- Agent
 	frontendCallChannelsMu.Unlock()
 
 	if fr.isError {
-		return "Frontend action failed: " + fr.result
+		return "Frontend action failed: " + fr.result, false
 	}
-	return fr.result
+	return fr.result, false
+}
+
+func finishFrontendWait(callID string, ch chan frontendCallResult) (frontendCallResult, bool) {
+	frontendCallChannelsMu.Lock()
+	registered, exists := frontendCallChannels[callID]
+	pending := exists && registered == ch
+	if pending {
+		delete(frontendCallChannels, callID)
+	}
+	frontendCallChannelsMu.Unlock()
+	if pending {
+		return frontendCallResult{}, false
+	}
+	select {
+	case result := <-ch:
+		return result, true
+	default:
+		return frontendCallResult{}, false
+	}
 }
 
 func buildSystemPrompt(language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) string {
@@ -1190,9 +1468,9 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 		e := &entries[i]
 		switch e.Type {
 		case "user":
-			msgs = append(msgs, AgentMessage{Role: "user", Content: e.Content})
+			msgs = append(msgs, AgentMessage{Role: "user", Content: e.Content, EntryID: e.ID})
 		case "assistant":
-			m := AgentMessage{Role: "assistant", Content: e.Content}
+			m := AgentMessage{Role: "assistant", Content: e.Content, EntryID: e.ID}
 			if len(e.ToolCalls) > 0 {
 				m.ToolCalls = make([]AgentToolCall, len(e.ToolCalls))
 				for j := range e.ToolCalls {
@@ -1288,14 +1566,22 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 		m := &msgs[i]
 		switch m.Role {
 		case "user":
+			id := m.EntryID
+			if id == "" {
+				id = fmt.Sprintf("cp_%d", i)
+			}
 			entries = append(entries, SessionEntry{
-				ID:      fmt.Sprintf("cp_%d", i),
+				ID:      id,
 				Type:    "user",
 				Content: m.Content,
 			})
 		case "assistant":
+			id := m.EntryID
+			if id == "" {
+				id = fmt.Sprintf("cp_%d", i)
+			}
 			e := SessionEntry{
-				ID:        fmt.Sprintf("cp_%d", i),
+				ID:        id,
 				Type:      "assistant",
 				Content:   m.Content,
 				ToolCalls: m.ToolCalls,
@@ -1306,149 +1592,107 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 	return entries
 }
 
-// checkpointMu 串行化对 session.json 的 read-modify-write，避免同步与异步 checkpoint 并发写时丢数据。
-var checkpointMu sync.Mutex
+var (
+	errModelRequestTimeout    = errors.New("model request timeout")
+	errModelStreamIdleTimeout = errors.New("model stream idle timeout")
+)
 
-func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
-	if sessionID == "" || !isValidSessionID(sessionID) {
-		return
-	}
-	checkpointMu.Lock()
-	defer checkpointMu.Unlock()
-	writeCheckpointLocked(sessionID, messages, promptTokens, completionTokens, startTime, snapshotIDs, alwaysAllow)
-}
-
-// saveCheckpointAsync 在独立 goroutine 中执行写盘，不阻塞 agent 主循环（用于流式中途的兜底 checkpoint）。
-// messages 会被深拷贝，避免与主循环的 append 产生数据竞争；写盘仍经 checkpointMu 串行化。
-// wg 用于在最终落盘（saveCheckpoint）前等待所有挂起的中途 checkpoint 完成，避免旧数据覆盖新数据。
-func saveCheckpointAsync(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool, wg *sync.WaitGroup) {
-	if sessionID == "" || !isValidSessionID(sessionID) {
-		return
-	}
-	// 深拷贝 messages：主循环会持续 append/替换 checkpointMsgs，异步读需隔离。
-	snap := make([]AgentMessage, len(messages))
-	copy(snap, messages)
-	snapshotIDsCopy := append([]string(nil), snapshotIDs...)
-	var alwaysAllowCopy map[string]bool
-	if alwaysAllow != nil {
-		alwaysAllowCopy = make(map[string]bool, len(alwaysAllow))
-		maps.Copy(alwaysAllowCopy, alwaysAllow)
-	}
-	wg.Go(func() {
-		checkpointMu.Lock()
-		defer checkpointMu.Unlock()
-		writeCheckpointLocked(sessionID, snap, promptTokens, completionTokens, startTime, snapshotIDsCopy, alwaysAllowCopy)
-	})
-}
-
-func writeCheckpointLocked(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64, snapshotIDs []string, alwaysAllow map[string]bool) {
-	cp := agentCheckpoint{
-		ID:               sessionID,
-		Title:            "AI Agent",
-		Entries:          agentMessagesToEntries(messages),
-		PromptTokens:     promptTokens,
-		CompletionTokens: completionTokens,
-		TotalDuration:    time.Now().UnixMilli() - startTime,
-		CreatedAt:        startTime,
-		UpdatedAt:        time.Now().UnixMilli(),
-		Snapshots:        snapshotIDs,
-		AlwaysAllow:      alwaysAllow["*"],
-	}
-
-	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		logging.LogErrorf("create session dir failed: %s", err)
-		return
-	}
-
-	path := filepath.Join(dir, "session.json")
-	existing, err := os.ReadFile(path)
-	if err == nil {
-		var old agentCheckpoint
-		if gulu.JSON.UnmarshalJSON(existing, &old) == nil {
-			if old.Titled {
-				cp.Title = old.Title
-				cp.Titled = true
-			}
-		}
-		if old.CreatedAt > 0 {
-			cp.CreatedAt = old.CreatedAt
-		}
-		if len(old.MessageHistory) > 0 {
-			cp.MessageHistory = old.MessageHistory
-		}
-		// 后端中途 checkpoint 只能派生最小 entries（user/assistant/toolCalls）。
-		// 若磁盘上已有前端写入的完整 entries（含 thinking/confirm/snapshot），
-		// 优先保留它，避免后端兜底数据覆盖前端的富信息。
-		if len(old.Entries) > 0 {
-			cp.Entries = old.Entries
-		}
-		if len(old.Snapshots) > 0 {
-			cp.Snapshots = old.Snapshots
-		}
-		// 回填前端写入的上下文 token 统计字段，避免后端 checkpoint 擦除它们（双写覆盖修复）。
-		// 后端 saveCheckpoint 在流式中途/结束都会触发，但这些统计值是 stream 结束时才由前端写入的，
-		// 所以后端只保留磁盘已有值，不自行计算。
-		if old.ContextTokens > 0 {
-			cp.ContextTokens = old.ContextTokens
-		}
-		if len(old.ContextTokenBreakdown) > 0 {
-			cp.ContextTokenBreakdown = old.ContextTokenBreakdown
-		}
-		if old.ContextCachedTokens > 0 {
-			cp.ContextCachedTokens = old.ContextCachedTokens
-		}
-		if old.ContextLimit > 0 {
-			cp.ContextLimit = old.ContextLimit
-		}
-	}
-
-	data, err := gulu.JSON.MarshalIndentJSON(cp, "", "\t")
-	if err != nil {
-		return
-	}
-	if err := filelock.WriteFile(path, data); err != nil {
-		logging.LogErrorf("save checkpoint file failed: %s", err)
-	}
-	UpdateSessionIndex(sessionID, cp.Title, cp.CreatedAt, cp.UpdatedAt)
-}
-
-func createStreamWithRetry(ctx context.Context, client *openai.Client, req openai.ChatCompletionRequest, maxRetries int, ch chan<- AgentEvent) (*openai.ChatCompletionStream, error) {
-	if maxRetries <= 0 {
-		maxRetries = 1
+func createStreamWithRetry(ctx context.Context, client *openai.Client, req openai.ChatCompletionRequest, maxRetries int, requestTimeout, streamIdleTimeout time.Duration, retryDelay func(string, int) time.Duration, ch chan<- AgentEvent) (*openai.ChatCompletionStream, openai.ChatCompletionStreamResponse, context.CancelFunc, error) {
+	if maxRetries < 0 {
+		maxRetries = 0
 	}
 
 	var lastErr error
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := 0; attempt <= maxRetries; attempt++ {
 		if attempt > 0 {
 			category := classifyRetry(lastErr)
-			delay := delayForCategory(category, attempt)
+			delay := retryDelay(category, attempt)
 			select {
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 			case <-time.After(delay):
 			}
-			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt + 1, RetryMax: maxRetries})
+			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
 		}
 
-		stream, err := client.CreateChatCompletionStream(ctx, req)
-		if err == nil {
-			return stream, nil
+		streamCtx, streamCancel := context.WithCancel(ctx)
+		requestTimer, requestTimerDone := startCancelTimer(requestTimeout, streamCancel)
+		stream, err := client.CreateChatCompletionStream(streamCtx, req)
+		requestTimedOut := stopCancelTimer(requestTimer, requestTimerDone)
+		if ctx.Err() != nil {
+			if stream != nil {
+				stream.Close()
+			}
+			streamCancel()
+			return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 		}
+		if requestTimedOut {
+			err = errModelRequestTimeout
+		}
+		if err == nil && stream == nil {
+			err = errors.New("model returned nil stream")
+		}
+		if err == nil {
+			firstResp, firstErr := recvStreamWithIdleTimeout(stream, streamIdleTimeout, streamCancel)
+			if firstErr == nil || errors.Is(firstErr, io.EOF) {
+				return stream, firstResp, streamCancel, nil
+			}
+			err = firstErr
+		}
+		if stream != nil {
+			stream.Close()
+		}
+		streamCancel()
 
 		lastErr = err
 		category := classifyRetry(err)
 		if category == "fatal" {
-			return nil, err
+			return nil, openai.ChatCompletionStreamResponse{}, nil, err
 		}
 		if ctx.Err() != nil {
-			return nil, ctx.Err()
+			return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 		}
 	}
-	return nil, lastErr
+	return nil, openai.ChatCompletionStreamResponse{}, nil, lastErr
+}
+
+func recvStreamWithIdleTimeout(stream *openai.ChatCompletionStream, timeout time.Duration, cancel context.CancelFunc) (openai.ChatCompletionStreamResponse, error) {
+	timer, timerDone := startCancelTimer(timeout, cancel)
+	resp, err := stream.Recv()
+	if stopCancelTimer(timer, timerDone) {
+		return openai.ChatCompletionStreamResponse{}, errModelStreamIdleTimeout
+	}
+	return resp, err
+}
+
+func startCancelTimer(timeout time.Duration, cancel context.CancelFunc) (*time.Timer, <-chan struct{}) {
+	if timeout <= 0 {
+		return nil, nil
+	}
+	done := make(chan struct{})
+	timer := time.AfterFunc(timeout, func() {
+		cancel()
+		close(done)
+	})
+	return timer, done
+}
+
+func stopCancelTimer(timer *time.Timer, done <-chan struct{}) bool {
+	if timer == nil {
+		return false
+	}
+	if timer.Stop() {
+		return false
+	}
+	<-done
+	return true
 }
 
 func classifyRetry(err error) string {
+	if errors.Is(err, errModelRequestTimeout) || errors.Is(err, errModelStreamIdleTimeout) || errors.Is(err, context.DeadlineExceeded) {
+		return "timeout"
+	}
+
 	var apiErr *openai.APIError
 	if errors.As(err, &apiErr) {
 		switch apiErr.HTTPStatusCode {
@@ -1481,11 +1725,6 @@ func classifyRetry(err error) string {
 	// 父 context 被取消（用户停止 / 会话结束）属于不可重试的致命错误。
 	if errors.Is(err, context.Canceled) {
 		return "fatal"
-	}
-	// per-request 超时（本会话主动加的 roundCtx deadline）通常意味着对端只是慢，
-	// 归入 timeout 类走退避重试，避免一次卡顿直接终结整个会话。
-	if errors.Is(err, context.DeadlineExceeded) {
-		return "timeout"
 	}
 	return "network"
 }

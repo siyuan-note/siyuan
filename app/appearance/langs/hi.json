@@ -1,4 +1,9 @@
 {
+	"agentRetrying": "पुनः प्रयास जारी है (${attempt}/${maxRetries})...",
+	"agentStreamIdleTimeout": "स्ट्रीम निष्क्रियता समय सीमा",
+	"agentStreamIdleTimeoutTip": "अनुरोध रोकने से पहले मॉडल आउटपुट के बिना अधिकतम समय",
+	"aiMcpTrustToolAnnotations": "टूल एनोटेशन पर भरोसा करें",
+	"aiMcpTrustToolAnnotationsTip": "इस सर्वर के केवल-पढ़ने योग्य टूल एनोटेशन को कार्रवाई की पुष्टि छोड़ने दें। इसे केवल विश्वसनीय सर्वर के लिए सक्षम करें।",
 	"testConnectionFailMsg": "कनेक्शन विफल: ${msg}",
 	"testConnectionSuccessDimensions": "कनेक्शन सफल (आयाम ${dimensions})",
 	"masterPasswordMigrationPending": "मास्टर पासवर्ड माइग्रेशन प्रगति पर है",
@@ -247,7 +252,7 @@
 	"agentConfirmAlways": "सत्र अनुमति दें",
 	"agentConfirmAlwaysDesc": "इस सत्र में किसी भी कार्रवाई के लिए दोबारा न पूछें",
 	"agentConfirmPending": "लंबित",
-	"agentTimeout": "एजेंट समय समाप्ति",
+	"agentTimeout": "समय सीमा",
 	"agentTimeoutTip": "एजेंट सत्र की कुल समय सीमा, 0 = कोई सीमा नहीं",
 	"agentConfirmTimeout": "पुष्टि समय समाप्ति",
 	"agentConfirmTimeoutTip": "ऑपरेशन पुष्टिकरण समय समाप्त होने पर स्वचालित रूप से अस्वीकार कर दिया जाएगा",

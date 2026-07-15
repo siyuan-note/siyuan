@@ -18,6 +18,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -154,12 +155,19 @@ func connectServers(servers []conf.MCPServer) []Connection {
 				desc = "[MCP:" + server.Name + "] " + desc
 			}
 
+			readOnlyHint := trustedReadOnlyHint(server, tool)
+			handler := mcpToolContextHandler(server.Name, tool.Name, serverTimeout(server))
 			tools.SetTool(name, &tools.Tool{
-				Name:        name,
-				Description: desc,
-				InputSchema: convertMCPSchema(tool.InputSchema),
-				Source:      "mcp",
-				Handler:     mcpToolHandler(server.Name, tool.Name, serverTimeout(server)),
+				Name:         name,
+				Description:  desc,
+				InputSchema:  convertMCPSchema(tool.InputSchema),
+				Source:       "mcp",
+				ReadOnlyHint: readOnlyHint,
+				EffectScope:  tools.EffectScopeExternal,
+				Handler: func(args map[string]any) (tools.CallToolResult, error) {
+					return handler(context.Background(), args)
+				},
+				ContextHandler: handler,
 			})
 			registered++
 		}
@@ -265,48 +273,70 @@ func connectHTTP(client *mcp.Client, server conf.MCPServer) (*mcp.ClientSession,
 	return session, nil, nil
 }
 
-func mcpToolHandler(serverName, toolName string, timeout time.Duration) func(args map[string]any) (tools.CallToolResult, error) {
-	return func(args map[string]any) (tools.CallToolResult, error) {
-		result, err := callMCPTool(serverName, toolName, timeout, args)
-		if err != nil && isReconnectableError(err) {
+func mcpToolContextHandler(serverName, toolName string, timeout time.Duration) func(context.Context, map[string]any) (tools.CallToolResult, error) {
+	return func(ctx context.Context, args map[string]any) (tools.CallToolResult, error) {
+		result := callMCPToolOnce(func() (*mcp.CallToolResult, error) {
+			return callMCPTool(ctx, serverName, toolName, timeout, args)
+		}, func(err error) {
 			logging.LogWarnf("mcp: server [%s] tool [%s] disconnected (%s), reconnecting", serverName, toolName, err)
-			if reconnectMCP() {
-				result, err = callMCPTool(serverName, toolName, timeout, args)
-			}
-		}
-		if err != nil {
-			return tools.CallToolResult{
-				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("mcp tool error: %s", err.Error())}},
-				IsError: true,
-			}, nil
-		}
-
-		var textParts []string
-		for _, content := range result.Content {
-			if textContent, ok := content.(*mcp.TextContent); ok {
-				textParts = append(textParts, textContent.Text)
-			}
-		}
-		text := strings.Join(textParts, "\n")
-		if text == "" {
-			text = "(empty result)"
-		}
-
-		syr := tools.CallToolResult{
-			IsError: result.IsError,
-			Content: []tools.ContentItem{{Type: "text", Text: text}},
-		}
-		return syr, nil
+			go reconnectMCP()
+		})
+		return result, nil
 	}
 }
 
-func callMCPTool(serverName, toolName string, timeout time.Duration, args map[string]any) (*mcp.CallToolResult, error) {
+// callMCPToolOnce 保证一次工具请求最多发送一次。断线时只恢复后续调用所需的连接，不重放当前请求。
+func callMCPToolOnce(call func() (*mcp.CallToolResult, error), reconnect func(error)) tools.CallToolResult {
+	result, err := call()
+	if err != nil && isExecutionUnknownError(err) {
+		if isReconnectableError(err) {
+			reconnect(err)
+		}
+		return tools.CallToolResult{
+			Content: []tools.ContentItem{{
+				Type: "text",
+				Text: "mcp tool transport failed; execution result is unknown and must not be retried automatically",
+			}},
+			IsError:          true,
+			ExecutionUnknown: true,
+		}
+	}
+	if err != nil {
+		return tools.CallToolResult{
+			Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("mcp tool error: %s", err.Error())}},
+			IsError: true,
+		}
+	}
+
+	var textParts []string
+	for _, content := range result.Content {
+		if textContent, ok := content.(*mcp.TextContent); ok {
+			textParts = append(textParts, textContent.Text)
+		}
+	}
+	text := strings.Join(textParts, "\n")
+	if text == "" {
+		text = "(empty result)"
+	}
+
+	syr := tools.CallToolResult{
+		IsError: result.IsError,
+		Content: []tools.ContentItem{{Type: "text", Text: text}},
+	}
+	return syr
+}
+
+func trustedReadOnlyHint(server conf.MCPServer, tool *mcp.Tool) bool {
+	return server.TrustToolAnnotations && tool.Annotations != nil && tool.Annotations.ReadOnlyHint
+}
+
+func callMCPTool(parentCtx context.Context, serverName, toolName string, timeout time.Duration, args map[string]any) (*mcp.CallToolResult, error) {
 	session := getMCPSession(serverName)
 	if session == nil {
 		return nil, fmt.Errorf("mcp server [%s] not connected", serverName)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(parentCtx, timeout)
 	defer cancel()
 
 	return session.CallTool(ctx, &mcp.CallToolParams{
@@ -401,7 +431,23 @@ func isReconnectableError(err error) bool {
 		strings.Contains(msg, "client is closing") ||
 		strings.Contains(msg, "standalone sse") ||
 		strings.Contains(msg, "session missing") ||
-		strings.Contains(msg, "not connected")
+		strings.Contains(msg, "not connected") ||
+		strings.Contains(msg, "connection reset") ||
+		strings.Contains(msg, "broken pipe") ||
+		strings.Contains(msg, "unexpected eof") ||
+		strings.Contains(msg, "use of closed network connection") ||
+		errors.Is(err, io.EOF)
+}
+
+func isExecutionUnknownError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if isReconnectableError(err) || errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "deadline exceeded")
 }
 
 func sanitize(s string) string {

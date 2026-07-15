@@ -1,4 +1,9 @@
 {
+	"agentRetrying": "Mencoba lagi (${attempt}/${maxRetries})...",
+	"agentStreamIdleTimeout": "Batas waktu diam aliran",
+	"agentStreamIdleTimeoutTip": "Waktu maksimum tanpa keluaran model sebelum permintaan dihentikan",
+	"aiMcpTrustToolAnnotations": "Percayai anotasi alat",
+	"aiMcpTrustToolAnnotationsTip": "Izinkan anotasi alat hanya-baca dari server ini melewati konfirmasi operasi. Aktifkan hanya untuk server tepercaya.",
 	"testConnectionFailMsg": "Koneksi gagal: ${msg}",
 	"testConnectionSuccessDimensions": "Koneksi berhasil (dimensi ${dimensions})",
 	"masterPasswordMigrationPending": "Migrasi kata sandi utama sedang berlangsung",
@@ -247,7 +252,7 @@
 	"agentConfirmAlways": "Izinkan sesi",
 	"agentConfirmAlwaysDesc": "Jangan tanya lagi untuk operasi apa pun di sesi ini",
 	"agentConfirmPending": "Menunggu",
-	"agentTimeout": "Batas waktu agen",
+	"agentTimeout": "Batas waktu",
 	"agentTimeoutTip": "Batas waktu total sesi agen, 0 = tanpa batas",
 	"agentConfirmTimeout": "Batas waktu konfirmasi",
 	"agentConfirmTimeoutTip": "Tolak otomatis setelah waktu habis",

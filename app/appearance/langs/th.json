@@ -1,4 +1,9 @@
 {
+	"agentRetrying": "กำลังลองใหม่ (${attempt}/${maxRetries})...",
+	"agentStreamIdleTimeout": "หมดเวลาว่างของสตรีม",
+	"agentStreamIdleTimeoutTip": "เวลาสูงสุดที่ไม่มีเอาต์พุตจากโมเดลก่อนหยุดคำขอ",
+	"aiMcpTrustToolAnnotations": "เชื่อถือคำอธิบายประกอบของเครื่องมือ",
+	"aiMcpTrustToolAnnotationsTip": "อนุญาตให้คำอธิบายประกอบเครื่องมือแบบอ่านอย่างเดียวจากเซิร์ฟเวอร์นี้ข้ามการยืนยันการดำเนินการ เปิดใช้เฉพาะกับเซิร์ฟเวอร์ที่เชื่อถือได้เท่านั้น",
 	"testConnectionFailMsg": "การเชื่อมต่อล้มเหลว: ${msg}",
 	"testConnectionSuccessDimensions": "เชื่อมต่อสำเร็จ (มิติ ${dimensions})",
 	"masterPasswordMigrationPending": "กำลังย้ายรหัสผ่านหลัก",
@@ -247,7 +252,7 @@
 	"agentConfirmAlways": "อนุญาตเซสชัน",
 	"agentConfirmAlwaysDesc": "ไม่ต้องถามอีกสำหรับการดำเนินการใดๆ ในเซสชันนี้",
 	"agentConfirmPending": "รอดำเนินการ",
-	"agentTimeout": "หมดเวลาเอเจนต์",
+	"agentTimeout": "หมดเวลา",
 	"agentTimeoutTip": "หมดเวลารวมของเซสชันเอเจนต์, 0 = ไม่จำกัด",
 	"agentConfirmTimeout": "หมดเวลายืนยัน",
 	"agentConfirmTimeoutTip": "ปฏิเสธอัตโนมัติเมื่อหมดเวลา",

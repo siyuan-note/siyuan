@@ -1,4 +1,9 @@
 {
+	"agentRetrying": "재시도 중 (${attempt}/${maxRetries})...",
+	"agentStreamIdleTimeout": "스트림 유휴 시간 초과",
+	"agentStreamIdleTimeoutTip": "모델 출력이 없을 때 요청을 중지하기까지의 최대 시간",
+	"aiMcpTrustToolAnnotations": "도구 주석 신뢰",
+	"aiMcpTrustToolAnnotationsTip": "이 서버의 읽기 전용 도구 주석이 작업 확인을 건너뛰도록 허용합니다. 신뢰할 수 있는 서버에만 활성화하세요.",
 	"testConnectionFailMsg": "연결 실패: ${msg}",
 	"testConnectionSuccessDimensions": "연결 성공(차원 ${dimensions})",
 	"masterPasswordMigrationPending": "마스터 비밀번호 마이그레이션 진행 중",
@@ -247,7 +252,7 @@
 	"agentConfirmAlways": "세션 허용",
 	"agentConfirmAlwaysDesc": "이 세션에서 모든 작업에 대해 다시 묻지 않음",
 	"agentConfirmPending": "대기 중",
-	"agentTimeout": "에이전트 시간 초과",
+	"agentTimeout": "시간 초과",
 	"agentTimeoutTip": "에이전트 세션 전체 시간 초과, 0 은 제한 없음",
 	"agentConfirmTimeout": "확인 시간 초과",
 	"agentConfirmTimeoutTip": "시간 초과 후 자동 거부",

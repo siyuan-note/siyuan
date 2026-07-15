@@ -1,4 +1,9 @@
 {
+	"agentRetrying": "Tentando novamente (${attempt}/${maxRetries})...",
+	"agentStreamIdleTimeout": "Tempo limite de inatividade do fluxo",
+	"agentStreamIdleTimeoutTip": "Tempo máximo sem saída do modelo antes de interromper a solicitação",
+	"aiMcpTrustToolAnnotations": "Confiar nas anotações das ferramentas",
+	"aiMcpTrustToolAnnotationsTip": "Permite que as anotações de ferramentas somente leitura deste servidor ignorem a confirmação de operações. Ative apenas para servidores confiáveis.",
 	"testConnectionFailMsg": "Falha na conexão: ${msg}",
 	"testConnectionSuccessDimensions": "Conexão bem-sucedida (dimensões ${dimensions})",
 	"masterPasswordMigrationPending": "Migração de senha mestra em andamento",
@@ -247,7 +252,7 @@
 	"agentConfirmAlways": "Permitir sessão",
 	"agentConfirmAlwaysDesc": "Não perguntar novamente para nenhuma operação nesta sessão",
 	"agentConfirmPending": "Pendente",
-	"agentTimeout": "Tempo limite do agente",
+	"agentTimeout": "Tempo limite",
 	"agentTimeoutTip": "Tempo limite total da sessão do agente, 0 = sem limite",
 	"agentConfirmTimeout": "Tempo limite de confirmação",
 	"agentConfirmTimeoutTip": "Rejeição automática após expirar o tempo",

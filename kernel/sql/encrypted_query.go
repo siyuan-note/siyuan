@@ -51,18 +51,42 @@ func GetBlocksInBox(ids []string, boxID string) (ret []*Block) {
 	if 1 > len(ids) {
 		return
 	}
-	sqlStmt := "SELECT * FROM blocks WHERE id IN ('" + strings.Join(ids, "','") + "')"
-	rows, err := queryForBox(boxID, sqlStmt)
+
+	var notHitIDs []string
+	cached := map[string]*Block{}
+	for _, id := range ids {
+		if block := getBlockCacheInBox(id, boxID); nil != block {
+			cached[id] = block
+		} else {
+			notHitIDs = append(notHitIDs, id)
+		}
+	}
+
+	if 1 > len(notHitIDs) {
+		for _, id := range ids {
+			ret = append(ret, cached[id])
+		}
+		return
+	}
+
+	sqlStmt := "SELECT * FROM blocks WHERE id IN (" + strings.Repeat("?,", len(notHitIDs)-1) + "?)"
+	args := make([]any, len(notHitIDs))
+	for i, id := range notHitIDs {
+		args[i] = id
+	}
+	rows, err := queryForBox(boxID, sqlStmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
-		b := scanBlockRows(rows)
-		if b != nil {
-			ret = append(ret, b)
+		if block := scanBlockRows(rows); nil != block {
+			cached[block.ID] = block
 		}
+	}
+	for _, id := range ids {
+		ret = append(ret, cached[id])
 	}
 	return
 }
@@ -83,14 +107,22 @@ func GetRefTextInBox(defBlockID, boxID string) (ret string) {
 }
 
 // QueryRefsByDefIDInBox 按 defBlockID 在指定 box 的 db 里查引用列表。
-// 注意：加密 content db 里没有 blocktrees 表（在独立的 blocktree db），containChildren 时
-// 不能 JOIN blocktrees，改为用 def_block_root_id 查询。
+// containChildren 为 true 时递归查询定义块及其所有子块，与 QueryRefsByDefID 保持一致。
 func QueryRefsByDefIDInBox(defBlockID string, containChildren bool, boxID string) (ret []*Ref) {
-	sqlStmt := "SELECT * FROM refs WHERE def_block_id = ?"
+	var sqlStmt string
+	var args []any
 	if containChildren {
-		sqlStmt = "SELECT * FROM refs WHERE def_block_root_id = ?"
+		blockIDs := queryBlockChildrenIDsForBox(defBlockID, boxID)
+		sqlStmt = "SELECT * FROM refs WHERE def_block_id IN (" + strings.Repeat("?,", len(blockIDs)-1) + "?)"
+		args = make([]any, len(blockIDs))
+		for i, id := range blockIDs {
+			args[i] = id
+		}
+	} else {
+		sqlStmt = "SELECT * FROM refs WHERE def_block_id = ?"
+		args = []any{defBlockID}
 	}
-	rows, err := queryForBox(boxID, sqlStmt, defBlockID)
+	rows, err := queryForBox(boxID, sqlStmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
@@ -131,27 +163,10 @@ func QueryRootChildrenRefCountInBox(defRootID, boxID string) (ret map[string]int
 
 // SelectBlocksRawStmtInBox 在指定 box 的 db 里执行原始 SQL 查询 blocks。
 func SelectBlocksRawStmtInBox(stmt string, page, limit int, boxID string) (ret []*Block) {
-	stmt = strings.TrimSpace(stmt)
-	if 1 > page {
-		page = 1
+	queryFn := func(stmt string, args ...any) (*sql.Rows, error) {
+		return queryForBox(boxID, stmt, args...)
 	}
-	offset := (page - 1) * limit
-	if 0 < limit && !strings.Contains(strings.ToLower(stmt), " limit ") {
-		stmt += " LIMIT " + itoa(limit) + " OFFSET " + itoa(offset)
-	}
-	rows, err := queryForBox(boxID, stmt)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", stmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		b := scanBlockRows(rows)
-		if b != nil {
-			ret = append(ret, b)
-		}
-	}
-	return
+	return selectBlocksRawStmtWithQuery(stmt, page, limit, queryFn)
 }
 
 // QueryRefCountInBox 按 defBlockIDs 在指定 box 的 db 里查引用计数。

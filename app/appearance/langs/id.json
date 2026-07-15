@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Data dokumen atau gambar akan dikirim ke penyedia API yang dikonfigurasi",
+  "agentEffectExternalCost": "Biaya API eksternal mungkin berlaku",
+  "agentEffectLocalWrite": "Data lokal akan diubah",
 	"agentRetrying": "Mencoba lagi (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Batas waktu diam aliran",
 	"agentStreamIdleTimeoutTip": "Waktu maksimum tanpa keluaran model sebelum permintaan dihentikan",
@@ -460,8 +463,8 @@
 	"enterKey": "Enter",
 	"doubleClick": "Klik Dua Kali",
 	"click": "Klik",
-	"allowHTMLBLockScript": "Izinkan eksekusi skrip di dalam blok HTML",
-	"allowHTMLBLockScriptTip": "Saat diaktifkan, skrip dalam blok HTML tidak akan dibersihkan, Harap waspadai potensi risiko serangan XSS",
+	"allowHTMLBLockScript": "Izinkan eksekusi skrip dalam konten HTML",
+	"allowHTMLBLockScriptTip": "Saat diaktifkan, kode dalam blok HTML dan bidang templat basis data tidak akan difilter. Harap waspadai potensi risiko serangan XSS",
 	"allowSVGScript": "Izinkan eksekusi skrip di dalam SVG",
 	"allowSVGScriptTip": "Saat diaktifkan, kode di dalam SVG tidak akan disaring keamanannya. Waspadai potensi risiko XSS",
 	"autoLaunchMode0": "Jangan luncurkan secara otomatis",

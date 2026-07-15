@@ -228,11 +228,13 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         }
         let scrollLeft: number;
         let scrollTop: number;
+        let contentScrollTop: number;
         if (blockElement.classList.contains("table")) {
             // 表格的横向、纵向滚动均发生在首个子节点（contenteditable 容器，overflow:auto）上，
             // 重建 DOM 后需一并还原，否则固定表头长表格输入会跳回开头 https://github.com/siyuan-note/siyuan/issues/18035
             scrollLeft = blockElement.firstElementChild.scrollLeft;
             scrollTop = blockElement.firstElementChild.scrollTop;
+            contentScrollTop = protyle.contentElement.scrollTop;
         }
         if (!/<span data-type="backslash">.{1,8}<\/span><wbr>/.test(html)) {
             // 使用 md 闭合后继续输入应为普通文本, 转义不需要添加 zwsp
@@ -314,6 +316,13 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                     }
                     if (scrollTop > 0) {
                         blockElement.firstElementChild.scrollTop = scrollTop;
+                    }
+                    // SpinBlockDOM 会生成新表格并替换旧节点，旧节点移除时外层编辑器的滚动锚点会失效，
+                    // 因此需在恢复光标后还原滚动位置
+                    // https://github.com/siyuan-note/siyuan/issues/18235
+                    if (contentScrollTop > 0) {
+                        protyle.contentElement.scrollTop = contentScrollTop;
+                        protyle.scroll.lastScrollTop = contentScrollTop - 1;
                     }
                 }
             }

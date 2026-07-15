@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Document- of afbeeldingsgegevens worden naar de geconfigureerde API-provider verzonden",
+  "agentEffectExternalCost": "Er kunnen kosten voor de externe API gelden",
+  "agentEffectLocalWrite": "Lokale gegevens worden gewijzigd",
 	"agentRetrying": "Opnieuw proberen (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Time-out bij inactiviteit van stream",
 	"agentStreamIdleTimeoutTip": "Maximale tijd zonder modeluitvoer voordat de aanvraag wordt gestopt",
@@ -460,8 +463,8 @@
 	"enterKey": "Entertoets",
 	"doubleClick": "Dubbelklik",
 	"click": "Klik",
-	"allowHTMLBLockScript": "Uitvoering van scripts in HTML-blokken toestaan",
-	"allowHTMLBLockScriptTip": "Bij inschakelen worden scripts in HTML-blokken niet gefilterd. Let op XSS-risico",
+	"allowHTMLBLockScript": "Uitvoering van scripts in HTML-inhoud toestaan",
+	"allowHTMLBLockScriptTip": "Na inschakeling wordt code in HTML-blokken en databasesjabloonvelden niet gefilterd. Let op het mogelijke risico van XSS-aanvallen",
 	"allowSVGScript": "Uitvoering van scripts in SVG toestaan",
 	"allowSVGScriptTip": "Bij inschakelen wordt code in SVG niet gefilterd. Let op XSS-risico",
 	"autoLaunchMode0": "Niet automatisch starten",

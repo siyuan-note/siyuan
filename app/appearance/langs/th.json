@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "ข้อมูลเอกสารหรือรูปภาพจะถูกส่งไปยังผู้ให้บริการ API ที่กำหนดค่าไว้",
+  "agentEffectExternalCost": "อาจมีค่าบริการ API ภายนอก",
+  "agentEffectLocalWrite": "ข้อมูลภายในเครื่องจะถูกแก้ไข",
 	"agentRetrying": "กำลังลองใหม่ (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "หมดเวลาว่างของสตรีม",
 	"agentStreamIdleTimeoutTip": "เวลาสูงสุดที่ไม่มีเอาต์พุตจากโมเดลก่อนหยุดคำขอ",
@@ -460,8 +463,8 @@
 	"enterKey": "Enter",
 	"doubleClick": "ดับเบิลคลิก",
 	"click": "คลิก",
-	"allowHTMLBLockScript": "อนุญาตสคริปต์ HTML",
-	"allowHTMLBLockScriptTip": "เมื่อเปิดใช้งาน สคริปต์ในบล็อก HTML จะไม่ถูกกรองความปลอดภัย โปรดระวังความเสี่ยงจากการโจมตี XSS",
+	"allowHTMLBLockScript": "อนุญาตให้เรียกใช้สคริปต์ในเนื้อหา HTML",
+	"allowHTMLBLockScriptTip": "เมื่อเปิดใช้งาน โค้ดในบล็อก HTML และฟิลด์เทมเพลตฐานข้อมูลจะไม่ถูกกรองความปลอดภัย โปรดระวังความเสี่ยงที่อาจเกิดขึ้นจากการโจมตี XSS",
 	"allowSVGScript": "อนุญาตสคริปต์ SVG",
 	"allowSVGScriptTip": "เมื่อเปิดใช้งาน โค้ดใน SVG จะไม่ถูกกรองความปลอดภัย โปรดระวังความเสี่ยงจากการโจมตี XSS",
 	"autoLaunchMode0": "ไม่เปิดอัตโนมัติ",

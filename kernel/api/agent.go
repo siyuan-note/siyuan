@@ -637,6 +637,7 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			"name":      event.Name,
 			"arguments": event.Arguments,
 			"confirmID": event.ConfirmID,
+			"effects":   event.Effects,
 		})
 	case "tool_call":
 		return writeSSEEvent(c, "tool_call", map[string]any{

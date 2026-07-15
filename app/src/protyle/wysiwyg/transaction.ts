@@ -400,11 +400,16 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         // 表格的横向、纵向滚动均发生在首个子节点（contenteditable 容器，overflow:auto）上，
         // 更新块后需一并还原，否则固定表头长表格撤销/重做会跳回开头
         // https://github.com/siyuan-note/siyuan/issues/3650 https://github.com/siyuan-note/siyuan/issues/18035
+        // https://github.com/siyuan-note/siyuan/issues/18235
         let tableScrollLeft: number;
         let tableScrollTop: number;
+        let contentScrollTop: number;
         if (item.classList.contains("table")) {
             tableScrollLeft = (item.firstElementChild as HTMLElement).scrollLeft;
             tableScrollTop = (item.firstElementChild as HTMLElement).scrollTop;
+            if (isRangeBlock) {
+                contentScrollTop = protyle.contentElement.scrollTop;
+            }
         }
         item.insertAdjacentHTML("afterend",
             // 图标撤销后无法渲染
@@ -421,12 +426,16 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
             }
         }
         wbrElement?.remove();
-        // 聚焦后再还原滚动，避免 focusByWbr/focusBlock 改变滚动位置导致表格跳回开头
+        // update 操作会生成新表格并替换旧节点，聚焦后需还原滚动，避免表格跳回开头
         if (tableScrollLeft > 0) {
             (item.firstElementChild as HTMLElement).scrollLeft = tableScrollLeft;
         }
         if (tableScrollTop > 0) {
             (item.firstElementChild as HTMLElement).scrollTop = tableScrollTop;
+        }
+        if (contentScrollTop > 0) {
+            protyle.contentElement.scrollTop = contentScrollTop;
+            protyle.scroll.lastScrollTop = contentScrollTop - 1;
         }
 
         processRender(item);
@@ -748,6 +757,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 updateElements.push(tempEl);
                 fetchPost("/api/block/getBlockDOM", {
                     id: operation.id,
+                    notebook: protyle.notebookId,
                 }, (response) => {
                     document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${response.data.id}"]`).forEach(item => {
                         if (item.getAttribute("data-protyle-id")) {
@@ -1399,7 +1409,10 @@ export const turnsOneInto = async (options: {
     const oldHTML = options.nodeElement.outerHTML;
     let previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
     if (!options.nodeElement.previousElementSibling && options.protyle.block.showAll) {
-        const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {id: options.id});
+        const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
+            id: options.id,
+            notebook: options.protyle.notebookId,
+        });
         previousId = response.data.previousID;
     }
     const parentId = options.nodeElement.parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;

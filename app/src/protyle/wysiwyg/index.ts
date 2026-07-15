@@ -344,6 +344,7 @@ export class WYSIWYG {
                             needClipboardWrite = true;
                             const response = await fetchSyncPost("/api/block/getBlockDOM", {
                                 id: item.getAttribute("data-node-id"),
+                                notebook: protyle.notebookId,
                             });
                             itemHTML = response.data.dom;
                         } else {
@@ -2160,6 +2161,7 @@ export class WYSIWYG {
                         needClipboardWrite = true;
                         const response = await fetchSyncPost("/api/block/getBlockDOM", {
                             id: item.getAttribute("data-node-id"),
+                            notebook: protyle.notebookId,
                         });
                         itemHTML = response.data.dom;
                     } else {
@@ -2278,33 +2280,45 @@ export class WYSIWYG {
                     range.deleteContents();
                     tempElement.append(newSpanElement);
                 } else {
-                    if (selectTableRange) {
-                        // 表格内跨多单元格的文本选区：按网格映射重建合法 table，重新计算 colspan/rowspan。
-                        // 必须在 extractContents 删除原内容前计算，否则 getBoundingClientRect 拿不到原始位置
-                        const tableElement = tableRangeElement.querySelector("table");
-                        const newTableHTML = getTableRangeHTML(tableElement, tableRangeStartCell, tableRangeEndCell);
-                        // 放入 tempElement 以便后续 html = tempElement.innerHTML 取用（裸 table，后续统一包 BlockDOM）
-                        tempElement.innerHTML = newTableHTML;
-                        textPlain = protyle.lute.HTML2Md(newTableHTML);
-                        // 删除选区内容并修复表格 DOM
-                        const wbrElement = document.createElement("wbr");
-                        range.insertNode(wbrElement);
-                        range.setStartAfter(wbrElement);
-                        range.extractContents();
+                    if (selectTableRange || cloneElement.querySelectorAll("td, th").length > 0) {
+                        const tableScrollLeft = nodeElement.firstElementChild.scrollLeft;
+                        const tableScrollTop = nodeElement.firstElementChild.scrollTop;
+                        const contentScrollTop = protyle.contentElement.scrollTop;
+                        if (selectTableRange) {
+                            // 表格内跨多单元格的文本选区：按网格映射重建合法 table，重新计算 colspan/rowspan。
+                            // 必须在 extractContents 删除原内容前计算，否则 getBoundingClientRect 拿不到原始位置
+                            const tableElement = tableRangeElement.querySelector("table");
+                            const newTableHTML = getTableRangeHTML(tableElement, tableRangeStartCell, tableRangeEndCell);
+                            // 放入 tempElement 以便后续 html = tempElement.innerHTML 取用（裸 table，后续统一包 BlockDOM）
+                            tempElement.innerHTML = newTableHTML;
+                            textPlain = protyle.lute.HTML2Md(newTableHTML);
+                            // 删除选区内容并修复表格 DOM
+                            const wbrElement = document.createElement("wbr");
+                            range.insertNode(wbrElement);
+                            range.setStartAfter(wbrElement);
+                            range.extractContents();
+                        } else {
+                            // 表格内多格子 cut https://github.com/siyuan-note/siyuan/issues/564
+                            const wbrElement = document.createElement("wbr");
+                            range.insertNode(wbrElement);
+                            range.setStartAfter(wbrElement);
+                            tempElement.append(range.extractContents());
+                        }
                         nodeElement.outerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
                         nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
                         mathRender(nodeElement);
                         focusByWbr(nodeElement, range);
-                    } else if (cloneElement.querySelectorAll("td, th").length > 0) {
-                        // 表格内多格子 cut https://github.com/siyuan-note/siyuan/issues/564
-                        const wbrElement = document.createElement("wbr");
-                        range.insertNode(wbrElement);
-                        range.setStartAfter(wbrElement);
-                        tempElement.append(range.extractContents());
-                        nodeElement.outerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
-                        nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement;
-                        mathRender(nodeElement);
-                        focusByWbr(nodeElement, range);
+                        // SpinBlockDOM 替换整张表格后，恢复旧表格的内外层滚动位置
+                        if (tableScrollLeft > 0) {
+                            nodeElement.firstElementChild.scrollLeft = tableScrollLeft;
+                        }
+                        if (tableScrollTop > 0) {
+                            nodeElement.firstElementChild.scrollTop = tableScrollTop;
+                        }
+                        if (contentScrollTop > 0) {
+                            protyle.contentElement.scrollTop = contentScrollTop;
+                            protyle.scroll.lastScrollTop = contentScrollTop - 1;
+                        }
                     } else {
                         const inlineMathElement = hasClosestByAttribute(range.commonAncestorContainer, "data-type", "inline-math");
                         if (inlineMathElement) {

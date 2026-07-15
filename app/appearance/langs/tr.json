@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Belge veya görsel verileri yapılandırılmış API sağlayıcısına gönderilecek",
+  "agentEffectExternalCost": "Harici API ücretleri uygulanabilir",
+  "agentEffectLocalWrite": "Yerel veriler değiştirilecek",
 	"agentRetrying": "Yeniden deneniyor (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Akış boşta kalma zaman aşımı",
 	"agentStreamIdleTimeoutTip": "İstek durdurulmadan önce model çıktısı olmadan geçecek en uzun süre",
@@ -460,8 +463,8 @@
 	"enterKey": "Enter",
 	"doubleClick": "Çift tıkla",
 	"click": "Tıkla",
-	"allowHTMLBLockScript": "HTML bloklarındaki betiklerin çalıştırılmasına izin ver",
-	"allowHTMLBLockScriptTip": "Etkinleştirildiğinde, HTML bloğundaki betikler filtrelenmez. XSS saldırısı riski olduğunu unutma",
+	"allowHTMLBLockScript": "HTML içeriğindeki betiklerin çalıştırılmasına izin ver",
+	"allowHTMLBLockScriptTip": "Etkinleştirildiğinde, HTML bloklarındaki ve veritabanı şablon alanlarındaki kod filtrelenmez. Olası XSS saldırısı riskine karşı dikkatli olun",
 	"allowSVGScript": "SVG içindeki betiklerin çalıştırılmasına izin ver",
 	"allowSVGScriptTip": "Etkinleştirildiğinde SVG içindeki kod güvenlik filtresinden geçirilmez, potansiyel XSS saldırılarına karşı dikkatli olun",
 	"autoLaunchMode0": "Otomatik başlatma",

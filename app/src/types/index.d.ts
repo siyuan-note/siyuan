@@ -267,8 +267,8 @@ interface Window {
         }
     };
     htmlToImage: {
-        toCanvas: (element: Element, options?: Partial<IObject>) => Promise<HTMLCanvasElement>
-        toBlob: (element: Element, options?: Partial<IObject>) => Promise<Blob>
+        toCanvas: (element: Element, options?: IHtmlToImageOptions) => Promise<HTMLCanvasElement>
+        toBlob: (element: Element, options?: IHtmlToImageOptions) => Promise<Blob>
     };
     siyuan: ISiyuan;
     JSAndroid: {
@@ -676,6 +676,12 @@ interface IOperationSrcs {
 
 interface IObject {
     [key: string]: string | number | boolean;
+}
+
+interface IHtmlToImageOptions {
+    [key: string]: unknown;
+    imagePlaceholder?: string;
+    onImageErrorHandler?: (event: Event) => void;
 }
 
 interface ILayoutJSON extends ILayoutOptions {

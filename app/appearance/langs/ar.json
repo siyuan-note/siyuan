@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "سيتم إرسال بيانات المستند أو الصورة إلى موفر واجهة API المهيأ",
+  "agentEffectExternalCost": "قد تترتب رسوم على استخدام واجهة API الخارجية",
+  "agentEffectLocalWrite": "سيتم تعديل البيانات المحلية",
 	"agentRetrying": "جارٍ إعادة المحاولة (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "مهلة خمول التدفق",
 	"agentStreamIdleTimeoutTip": "أقصى مدة دون إخراج من النموذج قبل إيقاف الطلب",
@@ -460,8 +463,8 @@
 	"enterKey": "Enter",
 	"doubleClick": "نقر مزدوج",
 	"click": "نقر",
-	"allowHTMLBLockScript": "‫السماح بتنفيذ البرامج النصية في كتل HTML‬",
-	"allowHTMLBLockScriptTip": "‫بعد التمكين، لن يتم تصحيح البرنامج النصي في كتلة HTML، يرجى إدراك المخاطر المحتملة لهجمات XSS‬",
+	"allowHTMLBLockScript": "‫السماح بتنفيذ البرامج النصية في محتوى HTML‬",
+	"allowHTMLBLockScriptTip": "‫بعد التمكين، لن تتم تصفية التعليمات البرمجية في كتل HTML وحقول قوالب قواعد البيانات، يرجى الانتباه إلى المخاطر المحتملة لهجمات XSS‬",
 	"allowSVGScript": "السماح بتشغيل السكربتات داخل SVG",
 	"allowSVGScriptTip": "عند التفعيل، لن يتم تصفية الكود داخل SVG لأغراض الأمان. يرجى الانتباه إلى مخاطر XSS المحتملة",
 	"autoLaunchMode0": "عدم التشغيل تلقائيًا",

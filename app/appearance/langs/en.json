@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Document or image data will be sent to the configured API provider",
+  "agentEffectExternalCost": "External API charges may apply",
+  "agentEffectLocalWrite": "Local data will be modified",
 	"agentRetrying": "Retrying (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Stream Idle Timeout",
 	"agentStreamIdleTimeoutTip": "Maximum time without model output before the request is stopped",
@@ -460,8 +463,8 @@
 	"enterKey": "Enter",
 	"doubleClick": "Double Click",
 	"click": "Click",
-	"allowHTMLBLockScript": "Allow execution of scripts within HTML blocks",
-	"allowHTMLBLockScriptTip": "When enabled, the script in the HTML block will not be sanitized, Please be aware of the potential risk of XSS attacks",
+	"allowHTMLBLockScript": "Allow execution of scripts in HTML content",
+	"allowHTMLBLockScriptTip": "When enabled, code in HTML blocks and database template fields will not be sanitized. Please be aware of the potential risk of XSS attacks",
 	"allowSVGScript": "Allow execution of scripts inside SVG",
 	"allowSVGScriptTip": "When enabled, code inside SVG will not be security-filtered. Be aware of potential XSS risks",
 	"autoLaunchMode0": "Do not launch automatically",

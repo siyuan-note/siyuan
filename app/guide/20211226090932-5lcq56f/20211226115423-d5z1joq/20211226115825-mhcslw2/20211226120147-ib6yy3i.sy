@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20260425180526"
+		"updated": "20260715112109"
 	},
 	"Children": [
 		{
@@ -1820,7 +1820,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230732-p75fah5",
-								"updated": "20241018105334"
+								"updated": "20260715112109"
 							},
 							"Children": [
 								{
@@ -1848,7 +1848,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "允許執行 HTML 塊內腳本"
+									"TextMarkTextContent": "允許執行 HTML 內容中的腳本"
 								},
 								{
 									"Type": "NodeText",

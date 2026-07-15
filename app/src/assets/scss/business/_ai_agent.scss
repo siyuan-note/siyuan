@@ -538,6 +538,16 @@
   border-top: 1px solid var(--b3-border-color);
 }
 
+.agent-chat__confirm-effects {
+  margin: 0;
+  padding: 8px 12px 8px 30px;
+  border-top: 1px solid var(--b3-border-color);
+  background: color-mix(in srgb, var(--b3-theme-warning) 10%, transparent);
+  color: var(--b3-theme-on-background);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .agent-chat__confirm-actions {
   display: flex;
   justify-content: flex-end;

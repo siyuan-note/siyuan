@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -36,6 +37,98 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// InsertAssetBytes 将内存中的资源直接写入目标文档资源目录，避免生成内容经过明文临时文件。
+func InsertAssetBytes(id, fileName string, data []byte) (assetPath string, created bool, err error) {
+	bt := treenode.GetBlockTree(id)
+	if bt == nil {
+		return "", false, errors.New(Conf.Language(71))
+	}
+	if len(data) == 0 {
+		return "", false, errors.New("asset data is empty")
+	}
+
+	baseName := filepath.Base(fileName)
+	fName := util.FilterUploadFileName(baseName)
+	ext := strings.ToLower(filepath.Ext(fName))
+	fName = strings.TrimSuffix(fName, filepath.Ext(fName)) + ext
+	if fName == "" || fName == "." || ext == "" {
+		return "", false, errors.New("invalid asset filename")
+	}
+
+	docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
+	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
+	if err = os.MkdirAll(assetsDirPath, 0755); err != nil {
+		return "", false, err
+	}
+
+	reader := bytes.NewReader(data)
+	hash, err := util.GetEtagByHandle(reader, int64(len(data)))
+	if err != nil {
+		return "", false, err
+	}
+	if existAssetPath := GetAssetPathByHash(hash, bt.BoxID); existAssetPath != "" {
+		originalName := util.RemoveID(filepath.Base(existAssetPath))
+		if strings.EqualFold(fName, originalName) {
+			return strings.TrimPrefix(existAssetPath, "/"), false, nil
+		}
+		hash = "random_2_" + gulu.Rand.String(12)
+	}
+
+	blockID := ast.NewNodeID()
+	if IsEncryptedBox(bt.BoxID) {
+		fName = encryptedAssetName(util.Ext(fName), blockID)
+		if err = writeAssetNameMapping(bt.BoxID, fName, baseName); err != nil {
+			return "", false, err
+		}
+	} else {
+		fName = util.AssetName(fName, blockID)
+	}
+	writePath := filepath.Join(assetsDirPath, fName)
+	if err = writeAssetFile(writePath, bytes.NewReader(data), bt.BoxID); err != nil {
+		if IsEncryptedBox(bt.BoxID) {
+			_ = removeAssetNameMapping(bt.BoxID, fName)
+		}
+		return "", false, err
+	}
+
+	assetPath = "assets/" + fName
+	if IsEncryptedBox(bt.BoxID) {
+		assetPath += "?box=" + bt.BoxID
+	} else {
+		cache.SetAssetHash(hash, assetPath)
+	}
+	IncSync()
+	return assetPath, true, nil
+}
+
+// RemoveGeneratedAsset 回滚本次新建的生成资源，并同步清理加密名称映射、索引和缓存。
+func RemoveGeneratedAsset(boxID, assetPath string) error {
+	absPath, err := GetAssetAbsPathInBox(assetPath, boxID)
+	if err != nil {
+		return err
+	}
+	if effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath); effectiveBoxID != "" && effectiveBoxID != boxID {
+		return errors.New("generated asset does not belong to the target notebook")
+	}
+	if !filelock.IsExist(absPath) {
+		return nil
+	}
+	HandleAssetsRemoveEvent(absPath)
+	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
+		return err
+	}
+	if IsEncryptedBox(boxID) {
+		if err = removeAssetNameMapping(boxID, filepath.Base(absPath)); err != nil {
+			return err
+		}
+	}
+	cleanPath := AssetPathWithoutQuery(assetPath)
+	util.RemoveAssetText(cleanPath)
+	cache.RemoveAsset(cleanPath)
+	IncSync()
+	return nil
+}
 
 func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any, err error) {
 	succMap = map[string]any{}
@@ -563,6 +656,40 @@ func writeAssetNameMappingLocked(boxID, diskName, originalName string) error {
 		return fmt.Errorf("encrypt asset name mapping failed: %w", err)
 	}
 	// 原子写入（temp+rename）：防止半写映射残留，并避免与并发写者竞争同一文件造成 lost update
+	if err = atomicWriteFile(assetNameMappingPath(boxID), enc); err != nil {
+		return fmt.Errorf("write asset name mapping failed: %w", err)
+	}
+	return nil
+}
+
+func removeAssetNameMapping(boxID, diskName string) error {
+	if boxID == "" || !IsEncryptedBox(boxID) {
+		return nil
+	}
+	HoldBoxReadLock(boxID)
+	defer ReleaseBoxReadLock(boxID)
+
+	muI, _ := assetNameMappingLocks.LoadOrStore(boxID, &sync.Mutex{})
+	mu := muI.(*sync.Mutex)
+	mu.Lock()
+	defer mu.Unlock()
+	mapping := readAssetNameMappingLocked(boxID)
+	if _, exists := mapping[diskName]; !exists {
+		return nil
+	}
+	delete(mapping, diskName)
+	data, err := json.Marshal(mapping)
+	if err != nil {
+		return fmt.Errorf("marshal asset name mapping failed: %w", err)
+	}
+	dek, err := GetDEK(boxID)
+	if err != nil || dek == nil {
+		return fmt.Errorf("get DEK for asset name mapping failed: %w", err)
+	}
+	enc, err := EncryptAssetNameMapping(boxID, dek, data)
+	if err != nil {
+		return fmt.Errorf("encrypt asset name mapping failed: %w", err)
+	}
 	if err = atomicWriteFile(assetNameMappingPath(boxID), enc); err != nil {
 		return fmt.Errorf("write asset name mapping failed: %w", err)
 	}

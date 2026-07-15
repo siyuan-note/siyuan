@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Los datos del documento o de la imagen se enviarán al proveedor de API configurado",
+  "agentEffectExternalCost": "Pueden aplicarse cargos de la API externa",
+  "agentEffectLocalWrite": "Se modificarán los datos locales",
 	"agentRetrying": "Reintentando (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Tiempo de espera inactivo del flujo",
 	"agentStreamIdleTimeoutTip": "Tiempo máximo sin salida del modelo antes de detener la solicitud",
@@ -460,8 +463,8 @@
 	"enterKey": "Entrar",
 	"doubleClick": "Doble clic",
 	"click": "Hacer clic",
-	"allowHTMLBLockScript": "Permitir la ejecución de scripts dentro de bloques HTML",
-	"allowHTMLBLockScriptTip": "Después de habilitarlo, el script en el bloque HTML no se desinfectará. Tenga en cuenta el riesgo potencial de ataques XSS",
+	"allowHTMLBLockScript": "Permitir la ejecución de scripts en contenido HTML",
+	"allowHTMLBLockScriptTip": "Al habilitarlo, no se desinfectará el código de los bloques HTML ni de los campos de plantilla de la base de datos. Tenga en cuenta el riesgo potencial de ataques XSS",
 	"allowSVGScript": "Permitir ejecutar scripts dentro del SVG",
 	"allowSVGScriptTip": "Al activarlo, el código dentro del SVG no será filtrado por seguridad. Tenga en cuenta el riesgo potencial de XSS",
 	"autoLaunchMode0": "No iniciar automáticamente",

@@ -38,9 +38,26 @@ type Tool struct {
 	ReadOnlyHint bool `json:"readOnlyHint,omitempty"`
 	// EffectScope 描述写操作影响范围，用于判断本地数据仓库快照是否具有回滚价值。
 	EffectScope string `json:"effectScope,omitempty"`
+	// ActionEffects 按 action 描述本地读写、数据外发与外部计费，供智能体精确执行确认和快照策略。
+	ActionEffects map[string]ToolEffects `json:"-"`
 
 	Handler        func(args map[string]any) (CallToolResult, error)                      `json:"-"`
 	ContextHandler func(ctx context.Context, args map[string]any) (CallToolResult, error) `json:"-"`
+}
+
+type ToolEffects struct {
+	LocalRead    bool `json:"localRead,omitempty"`
+	LocalWrite   bool `json:"localWrite,omitempty"`
+	DataEgress   bool `json:"dataEgress,omitempty"`
+	ExternalCost bool `json:"externalCost,omitempty"`
+}
+
+func (t *Tool) EffectsFor(action string) (ToolEffects, bool) {
+	if t == nil || t.ActionEffects == nil {
+		return ToolEffects{}, false
+	}
+	effects, ok := t.ActionEffects[action]
+	return effects, ok
 }
 
 type ToolSchema struct {

@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20260425181343"
+		"updated": "20260715112109"
 	},
 	"Children": [
 		{
@@ -1833,7 +1833,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230507-i73h3ru",
-								"updated": "20240427230507"
+								"updated": "20260715112109"
 							},
 							"Children": [
 								{
@@ -1877,7 +1877,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "允许执行 HTML 块内脚本"
+									"TextMarkTextContent": "允许执行 HTML 内容中的脚本"
 								},
 								{
 									"Type": "NodeText",

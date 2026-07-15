@@ -594,10 +594,16 @@ func SelectBlocksRawStmtArgs(stmt string, args []any, limit int) (ret []*Block) 
 	return
 }
 
+type queryRowsFunc func(string, ...any) (*sql.Rows, error)
+
 func SelectBlocksRawStmt(stmt string, page, limit int) (ret []*Block) {
+	return selectBlocksRawStmtWithQuery(stmt, page, limit, query)
+}
+
+func selectBlocksRawStmtWithQuery(stmt string, page, limit int, queryFn queryRowsFunc) (ret []*Block) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
-		return selectBlocksRawStmt(stmt, limit)
+		return selectBlocksRawStmtNoParseWithQuery(stmt, limit, queryFn)
 	}
 
 	switch parsedStmt.(type) {
@@ -673,7 +679,7 @@ func SelectBlocksRawStmt(stmt string, page, limit int) (ret []*Block) {
 	stmt = strings.ReplaceAll(stmt, "\\\"", "\"")
 	stmt = strings.ReplaceAll(stmt, "\\\\*", "\\*")
 	stmt = strings.ReplaceAll(stmt, "from dual", "")
-	rows, err := query(stmt)
+	rows, err := queryFn(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return
@@ -795,7 +801,11 @@ func SelectBlocksRegexArgs(stmt string, exp *regexp.Regexp, name, alias, memo, i
 }
 
 func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
-	rows, err := query(stmt)
+	return selectBlocksRawStmtNoParseWithQuery(stmt, limit, query)
+}
+
+func selectBlocksRawStmtNoParseWithQuery(stmt string, limit int, queryFn queryRowsFunc) (ret []*Block) {
+	rows, err := queryFn(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return

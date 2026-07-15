@@ -132,6 +132,8 @@ declare namespace Config {
         providers: IProvider[];
         editing: IEditing;
         agent: IAgent;
+        vision: IVision;
+        imageGeneration: IImageGeneration;
         mcp: IMCP;
         embedding: IEmbedding;
         rerank: IRerank;
@@ -159,6 +161,20 @@ declare namespace Config {
         maxHistoryMessages: number;
         temperature: number;
         maxCompletionTokens: number;
+    }
+
+    export interface IVision {
+        modelId: string;
+        maxImageBytes: number;
+        maxPixels: number;
+        maxEdge: number;
+    }
+
+    export interface IImageGeneration {
+        modelId: string;
+        size: string;
+        quality: string;
+        outputFormat: "png" | "jpeg" | "webp";
     }
 
     /**
@@ -195,6 +211,7 @@ declare namespace Config {
         enabled: boolean;
         displayName?: string;
         baseURL: string;
+        protocol?: string;
         apiKey: string;
         requestTimeout: number;
         models: IModel[];
@@ -209,6 +226,7 @@ declare namespace Config {
         enabled: boolean;
         name: string;
         displayName?: string;
+        capabilities?: string[];
     }
 
     /**
@@ -429,7 +447,7 @@ declare namespace Config {
         allowSVGScript: boolean;
 
         /**
-         * Whether to allow to execute javascript in the HTML block
+         * 是否允许在 HTML 内容中执行 JavaScript
          */
         allowHTMLBLockScript: boolean;
 

@@ -289,6 +289,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
             const response = await fetchSyncPost("/api/block/getBlockDOM", {
                 id: item.getAttribute("data-node-id"),
+                notebook: protyle.notebookId,
             });
             const foldTempElement = document.createElement("template");
             foldTempElement.innerHTML = response.data.dom;

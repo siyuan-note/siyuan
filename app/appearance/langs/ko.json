@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "문서 또는 이미지 데이터가 설정된 API 제공업체로 전송됩니다",
+  "agentEffectExternalCost": "외부 API 요금이 발생할 수 있습니다",
+  "agentEffectLocalWrite": "로컬 데이터가 변경됩니다",
 	"agentRetrying": "재시도 중 (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "스트림 유휴 시간 초과",
 	"agentStreamIdleTimeoutTip": "모델 출력이 없을 때 요청을 중지하기까지의 최대 시간",
@@ -460,8 +463,8 @@
 	"enterKey": "엔터(Enter)",
 	"doubleClick": "더블 클릭",
 	"click": "클릭",
-	"allowHTMLBLockScript": "HTML 블록 내 스크립트 실행 허용",
-	"allowHTMLBLockScriptTip": "활성화하면 HTML 블록의 스크립트가 삭제되지 않습니다. XSS 공격의 잠재적 위험에 주의하세요",
+	"allowHTMLBLockScript": "HTML 콘텐츠 내 스크립트 실행 허용",
+	"allowHTMLBLockScriptTip": "활성화하면 HTML 블록과 데이터베이스 템플릿 필드의 코드가 필터링되지 않습니다. XSS 공격의 잠재적 위험에 주의하세요",
 	"allowSVGScript": "SVG 내부 스크립트 실행 허용",
 	"allowSVGScriptTip": "활성화하면 SVG 내의 코드는 보안 필터링 대상이 되지 않습니다. 잠재적 XSS 공격에 주의하세요",
 	"autoLaunchMode0": "자동으로 시작하지 않음",

@@ -18,6 +18,14 @@ import {isBrowser} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 
+export const getAVTemplateHTML = (content: string) => {
+    if (window.siyuan.config.editor.allowHTMLBLockScript) {
+        return content;
+    }
+    // 默认过滤危险标签和事件属性，避免数据库模板字段中的代码直接执行
+    return window.DOMPurify.sanitize(content);
+};
+
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
     const dataValue: IAVCellDateValue = value[value.type as "date"];
@@ -126,7 +134,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<svg class="av__checkbox"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
             break;
         case "template":
-            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${window.DOMPurify.sanitize(value.template.content)}</div>`;
+            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.template.content)}</div>`;
             break;
         case "email":
             html = `<input value="${escapeAttr(value.email.content)}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">

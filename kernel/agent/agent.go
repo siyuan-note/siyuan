@@ -35,7 +35,7 @@ import (
 
 	"github.com/sashabaranov/go-openai"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
-	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	mcptools "github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -61,6 +61,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Inbox (cloud-synced clippings, messages, and audio/video/file attachments; requires subscription): inbox.list (paged, summaries only) → inbox.get (read full content to judge how to file it) → inbox.convert (move one or many into local documents under a notebook, auto-deleting the cloud originals on success). Failed conversions are left in the inbox for retry. If a request fails with an auth/subscription error, report it honestly — do not retry.
 - Attributes: attr.get/set on any block. Database/attribute views: database.item_add (rows), database.key_add (columns), database.render (view). Create database blocks via database tools, never via the file tool.
 - Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
+- Document images: image.list finds local images referenced by a document; call image.analyze on a returned asset path to understand one. For a document header illustration use image.generate_title, which derives context from the document and applies the generated asset without constructing title-img CSS yourself.
 
 ## Response Guidelines
 - Reply in the user's language. When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
@@ -170,6 +171,7 @@ var toolSignatureKeys = map[string][]string{
 	"history":   {"path", "notebook", "query"},
 	"repo":      {"id", "left", "right", "name", "keyword"},
 	"asset":     {"id", "path"},
+	"image":     {"documentID", "assetPath", "action"},
 	"import":    {"notebook", "path"},
 	"export":    {"id"},
 	"skill":     {"name", "url"},
@@ -307,6 +309,7 @@ type AgentEvent struct {
 	RetryMax         int
 	SnapshotID       string
 	TurnID           string
+	Effects          mcptools.ToolEffects
 }
 
 type AgentMessage struct {
@@ -764,7 +767,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = ch2
 						confirmChannelsMu.Unlock()
-						sendCriticalEvent(ctx, ch, AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID})
+						effects, _ := mcptools.GetTool(tc.Function.Name).EffectsFor(action)
+						sendCriticalEvent(ctx, ch, AgentEvent{
+							Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID, Effects: effects,
+						})
 						var rejectionMsg string
 						var result confirmResult
 						timedOut := false
@@ -1073,7 +1079,13 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 	if alwaysAllow["*"] {
 		return false
 	}
-	tool := tools.GetTool(toolName)
+	tool := mcptools.GetTool(toolName)
+	if alwaysAllow[toolName+"::"+action] {
+		return false
+	}
+	if effects, ok := tool.EffectsFor(action); ok {
+		return effects.LocalWrite || effects.DataEgress || effects.ExternalCost
+	}
 	if tool != nil && tool.Source != "" && tool.Source != "native" {
 		// 外部 MCP 与插件工具不能复用原生工具的全局 action 白名单，否则 close/open 等同名动作
 		// 可能在外部服务中产生写入。仅工具明确声明只读时免确认，未知能力按写操作处理。
@@ -1084,9 +1096,6 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 	}
 	if action == "" {
 		return !safeWholeTools[toolName]
-	}
-	if alwaysAllow[toolName+"::"+action] {
-		return false
 	}
 	if toolName == "import" && action == "md" {
 		return true
@@ -1101,6 +1110,10 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 }
 
 func needsLocalSnapshot(toolName, action string) bool {
+	tool := mcptools.GetTool(toolName)
+	if effects, ok := tool.EffectsFor(action); ok {
+		return effects.LocalWrite
+	}
 	if toolName == "http_request" && action == "" {
 		action = "get"
 	}
@@ -1111,14 +1124,13 @@ func needsLocalSnapshot(toolName, action string) bool {
 	if safeWholeTools[toolName] || actionSafe || toolName == "frontend" || (toolName == "repo" && action == "create") {
 		return false
 	}
-	tool := tools.GetTool(toolName)
 	if tool == nil {
 		return false
 	}
 	switch tool.EffectScope {
-	case tools.EffectScopeLocal, tools.EffectScopeMixed:
+	case mcptools.EffectScopeLocal, mcptools.EffectScopeMixed:
 		return true
-	case tools.EffectScopeExternal, tools.EffectScopeUnknown:
+	case mcptools.EffectScopeExternal, mcptools.EffectScopeUnknown:
 		return false
 	default:
 		// 未声明范围的内置工具按本地数据操作处理，兼容现有工具；外部来源按未知范围处理。

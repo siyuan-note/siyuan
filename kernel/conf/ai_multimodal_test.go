@@ -24,7 +24,7 @@ func TestNormalizeMultimodalDefaultsAndCapabilities(t *testing.T) {
 	if ai.Vision == nil || ai.Vision.MaxImageBytes != 20*1024*1024 || ai.Vision.MaxEdge != 2048 {
 		t.Fatalf("unexpected vision defaults: %#v", ai.Vision)
 	}
-	if ai.ImageGeneration == nil || ai.ImageGeneration.Size != "1536x1024" || ai.ImageGeneration.OutputFormat != "png" {
+	if ai.ImageGeneration == nil || ai.ImageGeneration.Size != "1024x1024" || ai.ImageGeneration.OutputFormat != "png" {
 		t.Fatalf("unexpected image generation defaults: %#v", ai.ImageGeneration)
 	}
 	provider := ai.Providers[0]

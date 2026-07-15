@@ -155,9 +155,6 @@ func TestImageToolActionEffects(t *testing.T) {
 	if !needsConfirm("image", "generate", nil) || !needsLocalSnapshot("image", "generate") {
 		t.Fatal("image generation must confirm external cost and snapshot the local write")
 	}
-	if !needsConfirm("image", "generate_title", nil) || !needsLocalSnapshot("image", "generate_title") {
-		t.Fatal("title image generation must confirm and snapshot the title attribute write")
-	}
 	if needsConfirm("image", "analyze", map[string]bool{"image::analyze": true}) {
 		t.Fatal("an explicitly allowed image action should not ask again")
 	}

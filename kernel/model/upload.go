@@ -102,34 +102,6 @@ func InsertAssetBytes(id, fileName string, data []byte) (assetPath string, creat
 	return assetPath, true, nil
 }
 
-// RemoveGeneratedAsset 回滚本次新建的生成资源，并同步清理加密名称映射、索引和缓存。
-func RemoveGeneratedAsset(boxID, assetPath string) error {
-	absPath, err := GetAssetAbsPathInBox(assetPath, boxID)
-	if err != nil {
-		return err
-	}
-	if effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath); effectiveBoxID != "" && effectiveBoxID != boxID {
-		return errors.New("generated asset does not belong to the target notebook")
-	}
-	if !filelock.IsExist(absPath) {
-		return nil
-	}
-	HandleAssetsRemoveEvent(absPath)
-	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
-		return err
-	}
-	if IsEncryptedBox(boxID) {
-		if err = removeAssetNameMapping(boxID, filepath.Base(absPath)); err != nil {
-			return err
-		}
-	}
-	cleanPath := AssetPathWithoutQuery(assetPath)
-	util.RemoveAssetText(cleanPath)
-	cache.RemoveAsset(cleanPath)
-	IncSync()
-	return nil
-}
-
 func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any, err error) {
 	succMap = map[string]any{}
 

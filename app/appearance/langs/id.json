@@ -1,6 +1,6 @@
 {
-  "aiImageUnderstandingTip": "Menganalisis gambar dan berkas sumber daya dalam dokumen. Pilih model yang mendukung masukan gambar",
-  "aiImageGenerationTip": "Membuat gambar biasa dan gambar header dokumen. Pilih model yang mendukung keluaran gambar",
+  "aiImageUnderstandingTip": "Menganalisis gambar. Pilih model yang mendukung masukan gambar",
+  "aiImageGenerationTip": "Membuat gambar. Pilih model yang mendukung keluaran gambar",
   "aiImageUnderstanding": "Pemahaman Gambar",
   "aiImageGeneration": "Pembuatan Gambar",
   "agentEffectDataEgress": "Data dokumen atau gambar akan dikirim ke penyedia API yang dikonfigurasi",

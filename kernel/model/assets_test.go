@@ -17,11 +17,50 @@
 package model
 
 import (
+	"bytes"
+	"context"
+	"image"
+	"image/png"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 )
+
+func TestAnalyzeImageDoesNotRequireDocument(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"an image"}}]}`))
+	}))
+	defer server.Close()
+
+	originalConf := Conf
+	t.Cleanup(func() { Conf = originalConf })
+	ai := conf.NewAI()
+	modelID := "20260715130000-abcdefg"
+	ai.Providers = []*conf.Provider{{
+		ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1", Protocol: "openai", RequestTimeout: 5,
+		Models: []*conf.Model{{ID: modelID, Enabled: true, Name: "vision-model", Capabilities: []string{"image-input"}}},
+	}}
+	ai.Vision.ModelID = modelID
+	Conf = NewAppConf()
+	Conf.AI = ai
+
+	var source bytes.Buffer
+	if err := png.Encode(&source, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+		t.Fatal(err)
+	}
+	result, err := AnalyzeImage(context.Background(), source.Bytes(), "describe", "low")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Analysis != "an image" || result.Width != 2 || result.Height != 2 {
+		t.Fatalf("unexpected image analysis result: %#v", result)
+	}
+}
 
 func TestNormalizeMissingAssetLinkDest(t *testing.T) {
 	tests := []struct {

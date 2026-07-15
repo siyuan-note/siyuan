@@ -169,7 +169,9 @@ func SyncData(byHand bool) {
 }
 
 func lockSync() {
+	officialSyncWaiters.Add(1)
 	syncLock.Lock()
+	officialSyncWaiters.Add(-1)
 	isSyncing.Store(true)
 }
 
@@ -779,6 +781,7 @@ func getSyncIgnoreLines() (ret []string) {
 }
 
 func IncSync() {
+	AdvanceWorkspaceGeneration()
 	syncSameCount.Store(0)
 	planSyncAfter(time.Duration(Conf.Sync.Interval) * time.Second)
 }

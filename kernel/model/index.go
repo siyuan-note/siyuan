@@ -18,13 +18,19 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"io/fs"
+	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
+	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/go-humanize"
@@ -45,6 +51,422 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+const maxRawDocumentIndexBytes = int64(256 * 1024 * 1024)
+
+// PreparedDocumentIndex contains a validated tree which can be published to
+// the index only after the corresponding staged file has been committed.
+// Its fields stay private so callers cannot bypass identity validation.
+type PreparedDocumentIndex struct {
+	tree *parse.Tree
+}
+
+// PreparedDocumentIndexRemoval contains the exact indexed location approved
+// for deletion while the raw document still exists.
+type PreparedDocumentIndexRemoval struct {
+	boxID        string
+	rootID       string
+	documentPath string
+	matched      bool
+}
+
+// RawDocumentIndexBatch owns the exclusive document-identity domain and all
+// root-identity stripes needed by one local sync commit.
+type RawDocumentIndexBatch struct {
+	identityGuard treenode.DocumentIdentitySetGuard
+	unlockRoots   func()
+	rootIDs       map[string]struct{}
+	locations     map[string]string
+	identities    map[string]string
+	prepared      map[string]*PreparedRawDocumentIndexMutation
+	active        atomic.Bool
+	committed     atomic.Bool
+}
+
+// PreparedRawDocumentIndexMutation is validated before filesystem publication
+// and committed only after the corresponding file mutation succeeds.
+type PreparedRawDocumentIndexMutation struct {
+	batch        *RawDocumentIndexBatch
+	tree         *parse.Tree
+	removal      *PreparedDocumentIndexRemoval
+	documentPath string
+}
+
+// RawDocumentIndexTarget 是一个批次最终会替换或删除的文档位置。
+type RawDocumentIndexTarget struct {
+	BoxID        string
+	DocumentPath string
+}
+
+func rawDocumentLocationKey(boxID, documentPath string) string {
+	return boxID + path.Clean("/"+strings.TrimPrefix(filepath.ToSlash(documentPath), "/"))
+}
+
+func LockRawDocumentIndexBatch(targets []RawDocumentIndexTarget) (*RawDocumentIndexBatch, error) {
+	unique := map[string]struct{}{}
+	locations := map[string]string{}
+	for _, target := range targets {
+		documentPath := path.Clean("/" + strings.TrimPrefix(filepath.ToSlash(target.DocumentPath), "/"))
+		rootID := util.GetTreeID(documentPath)
+		if !ast.IsNodeIDPattern(target.BoxID) || !ast.IsNodeIDPattern(rootID) {
+			return nil, fmt.Errorf("invalid notebook or document ID in path: %s%s", target.BoxID, documentPath)
+		}
+		unique[rootID] = struct{}{}
+		key := rawDocumentLocationKey(target.BoxID, documentPath)
+		if _, exists := locations[key]; exists {
+			return nil, fmt.Errorf("duplicate document batch target: %s%s", target.BoxID, documentPath)
+		}
+		locations[key] = rootID
+	}
+	ordered := make([]string, 0, len(unique))
+	for rootID := range unique {
+		ordered = append(ordered, rootID)
+	}
+	sort.Strings(ordered)
+	identityGuard := treenode.LockDocumentIdentitySet()
+	batch := &RawDocumentIndexBatch{
+		identityGuard: identityGuard,
+		unlockRoots:   treenode.LockRootIdentities(ordered),
+		rootIDs:       unique,
+		locations:     locations,
+		identities:    map[string]string{},
+		prepared:      map[string]*PreparedRawDocumentIndexMutation{},
+	}
+	batch.active.Store(true)
+	return batch, nil
+}
+
+func (batch *RawDocumentIndexBatch) locationPlanned(boxID, documentPath string) bool {
+	_, exists := batch.locations[rawDocumentLocationKey(boxID, documentPath)]
+	return exists
+}
+
+func (batch *RawDocumentIndexBatch) validateTreeIdentities(tree *parse.Tree) error {
+	target := rawDocumentLocationKey(tree.Box, tree.Path)
+	seen := map[string]struct{}{}
+	var blockIDs []string
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !node.IsBlock() || node.ID == "" {
+			return ast.WalkContinue
+		}
+		if _, exists := seen[node.ID]; exists {
+			return ast.WalkContinue
+		}
+		seen[node.ID] = struct{}{}
+		blockIDs = append(blockIDs, node.ID)
+		return ast.WalkContinue
+	})
+	rootLocations, err := lookupIndexedRootLocations(tree.ID)
+	if err != nil {
+		return fmt.Errorf("lookup indexed root %s failed: %w", tree.ID, err)
+	}
+	blockLocations, err := lookupIndexedBlockLocations(blockIDs)
+	if err != nil {
+		return fmt.Errorf("lookup indexed document block IDs failed: %w", err)
+	}
+	for _, location := range append(rootLocations, blockLocations...) {
+		locationKey := rawDocumentLocationKey(location.BoxID, location.Path)
+		if locationKey != target && !batch.locationPlanned(location.BoxID, location.Path) {
+			return fmt.Errorf("%w: block [%s] belongs to root [%s] at [%s%s], target root [%s] at [%s%s]",
+				ErrIndexPathConflict, location.ID, location.RootID, location.BoxID, path.Clean(location.Path), tree.ID, tree.Box, path.Clean(tree.Path))
+		}
+	}
+	for _, blockID := range blockIDs {
+		if existing, exists := batch.identities[blockID]; exists && existing != target {
+			return fmt.Errorf("%w: block [%s] is staged for both [%s] and [%s]", ErrIndexPathConflict, blockID, existing, target)
+		}
+		batch.identities[blockID] = target
+	}
+	return nil
+}
+
+func (batch *RawDocumentIndexBatch) PrepareUpsert(boxID, documentPath string, reader io.Reader, size int64) (*PreparedRawDocumentIndexMutation, error) {
+	documentPath = path.Clean("/" + strings.TrimPrefix(filepath.ToSlash(documentPath), "/"))
+	rootID := util.GetTreeID(documentPath)
+	if err := batch.validate(rootID); err != nil {
+		return nil, err
+	}
+	key := rawDocumentLocationKey(boxID, documentPath)
+	if plannedRoot, exists := batch.locations[key]; !exists || plannedRoot != rootID {
+		return nil, fmt.Errorf("document location is outside the locked batch: %s%s", boxID, documentPath)
+	}
+	if _, exists := batch.prepared[key]; exists {
+		return nil, fmt.Errorf("document location is already prepared: %s%s", boxID, documentPath)
+	}
+	tree, err := filesys.LoadTreeReaderReadOnly(boxID, documentPath, reader, size, util.NewLute(), maxRawDocumentIndexBytes)
+	if err != nil {
+		return nil, fmt.Errorf("load staged document %s%s failed: %w", boxID, documentPath, err)
+	}
+	if tree == nil || tree.Root == nil || tree.Root.ID != rootID || tree.Box != boxID {
+		return nil, fmt.Errorf("document root identity does not match path: %s%s", boxID, documentPath)
+	}
+	if err = batch.validateTreeIdentities(tree); err != nil {
+		return nil, fmt.Errorf("document index identity conflict for %s%s: %w", boxID, documentPath, err)
+	}
+	prepared := &PreparedRawDocumentIndexMutation{batch: batch, tree: tree, documentPath: documentPath}
+	batch.prepared[key] = prepared
+	return prepared, nil
+}
+
+func (batch *RawDocumentIndexBatch) PrepareRemoval(boxID, documentPath string) (*PreparedRawDocumentIndexMutation, error) {
+	documentPath = path.Clean("/" + strings.TrimPrefix(filepath.ToSlash(documentPath), "/"))
+	rootID := util.GetTreeID(documentPath)
+	if err := batch.validate(rootID); err != nil {
+		return nil, err
+	}
+	key := rawDocumentLocationKey(boxID, documentPath)
+	if plannedRoot, exists := batch.locations[key]; !exists || plannedRoot != rootID {
+		return nil, fmt.Errorf("document location is outside the locked batch: %s%s", boxID, documentPath)
+	}
+	if _, exists := batch.prepared[key]; exists {
+		return nil, fmt.Errorf("document location is already prepared: %s%s", boxID, documentPath)
+	}
+	locations, err := lookupIndexedRootLocations(rootID)
+	if err != nil {
+		return nil, fmt.Errorf("lookup indexed root %s failed: %w", rootID, err)
+	}
+	removal := &PreparedDocumentIndexRemoval{boxID: boxID, rootID: rootID, documentPath: documentPath}
+	for _, location := range locations {
+		locationKey := rawDocumentLocationKey(location.BoxID, location.Path)
+		if locationKey == key {
+			removal.matched = true
+			continue
+		}
+		if !batch.locationPlanned(location.BoxID, location.Path) {
+			return nil, fmt.Errorf("%w: requested [%s%s], root [%s] is also indexed at [%s%s]",
+				ErrIndexPathConflict, boxID, documentPath, rootID, location.BoxID, path.Clean(location.Path))
+		}
+	}
+	prepared := &PreparedRawDocumentIndexMutation{batch: batch, removal: removal, documentPath: documentPath}
+	batch.prepared[key] = prepared
+	return prepared, nil
+}
+
+// Commit 原子更新批次内的块树索引。文件发布必须在调用前全部成功。
+func (batch *RawDocumentIndexBatch) Commit() error {
+	if batch == nil || !batch.active.Load() || !batch.committed.CompareAndSwap(false, true) {
+		return errors.New("raw document index batch cannot be committed")
+	}
+	if len(batch.prepared) != len(batch.locations) {
+		batch.committed.Store(false)
+		return fmt.Errorf("raw document index batch is incomplete: prepared=%d targets=%d", len(batch.prepared), len(batch.locations))
+	}
+	keys := make([]string, 0, len(batch.prepared))
+	for key := range batch.prepared {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(left, right int) bool {
+		leftRemoval := batch.prepared[keys[left]].removal != nil
+		rightRemoval := batch.prepared[keys[right]].removal != nil
+		if leftRemoval != rightRemoval {
+			return leftRemoval
+		}
+		return keys[left] < keys[right]
+	})
+	mutations := make([]treenode.RawDocumentIndexMutation, 0, len(keys))
+	for _, key := range keys {
+		prepared := batch.prepared[key]
+		if prepared.tree != nil {
+			mutations = append(mutations, treenode.RawDocumentIndexMutation{Tree: prepared.tree})
+			continue
+		}
+		removal := prepared.removal
+		mutations = append(mutations, treenode.RawDocumentIndexMutation{
+			BoxID: removal.boxID, RootID: removal.rootID, DocumentPath: removal.documentPath,
+		})
+	}
+	if err := treenode.ApplyRawDocumentIndexBatchIdentityLocked(batch.identityGuard, mutations); err != nil {
+		batch.committed.Store(false)
+		return err
+	}
+	for _, key := range keys {
+		prepared := batch.prepared[key]
+		if prepared.tree != nil {
+			queueIndexedTree(prepared.tree)
+			cache.RemoveTreeData(prepared.tree.ID)
+			for _, block := range getIndexedRootBlocks(prepared.tree.ID, prepared.tree.Box) {
+				cache.RemoveBlockIAL(block.ID)
+			}
+			cache.RemoveDocIAL(prepared.tree.Path)
+			continue
+		}
+		removal := prepared.removal
+		cache.RemoveTreeData(removal.rootID)
+		cache.RemoveDocIAL(removal.documentPath)
+		sql.RemoveTreeQueue(removal.boxID, removal.rootID)
+	}
+	return nil
+}
+
+func (batch *RawDocumentIndexBatch) validate(rootID string) error {
+	if batch == nil || !batch.active.Load() {
+		return errors.New("raw document index batch is not active")
+	}
+	if _, exists := batch.rootIDs[rootID]; !exists {
+		return fmt.Errorf("document root %s is outside the locked batch", rootID)
+	}
+	return treenode.ValidateDocumentIdentitySetGuard(batch.identityGuard)
+}
+
+func (batch *RawDocumentIndexBatch) Unlock() {
+	if batch == nil || !batch.active.CompareAndSwap(true, false) {
+		panic("model: invalid raw document index batch unlock")
+	}
+	batch.unlockRoots()
+	batch.identityGuard.Unlock()
+}
+
+var (
+	ErrIndexPathConflict        = errors.New("document index path does not match the indexed root location")
+	ErrIndexDocumentStillExists = errors.New("document file still exists; remove the file before removing its index")
+	lookupIndexedRootLocations  = treenode.LookupRootBlockTreeLocations
+	lookupIndexedBlockLocations = treenode.LookupBlockTreeIdentityLocations
+	replaceIndexedTree          = treenode.ReplaceBlockTreeIdentityLocked
+	getIndexedRootBlocks        = treenode.GetBlockTreesByRootIDInBox
+	queueIndexedTree            = sql.UpsertTreeQueue
+	indexedDocumentExists       = func(boxID, documentPath string) (bool, error) {
+		filePath := filepath.Join(util.DataDir, boxID, filepath.FromSlash(strings.TrimPrefix(path.Clean(documentPath), "/")))
+		_, err := os.Lstat(filePath)
+		if err == nil {
+			return true, nil
+		}
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	removeIndexedRootLocation = func(guard treenode.DocumentIdentitySetGuard, boxID, rootID, documentPath string) error {
+		if err := treenode.RemoveBlockTreesByRootPathIdentityLocked(guard, boxID, rootID, path.Clean(documentPath)); err != nil {
+			return err
+		}
+		cache.RemoveTreeData(rootID)
+		cache.RemoveDocIAL(documentPath)
+		sql.RemoveTreeQueue(boxID, rootID)
+		blocks := treenode.GetBlockTreesByRootIDInBox(rootID, boxID)
+		for _, block := range blocks {
+			if path.Clean(block.Path) == path.Clean(documentPath) {
+				cache.RemoveBlockIAL(block.ID)
+			}
+		}
+		return nil
+	}
+)
+
+func validateUpsertTreeIdentity(tree *parse.Tree, rootID, boxID, documentPath string) error {
+	rootLocations, err := lookupIndexedRootLocations(rootID)
+	if err != nil {
+		return fmt.Errorf("lookup indexed root %s failed: %w", rootID, err)
+	}
+	seen := map[string]struct{}{}
+	var blockIDs []string
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !node.IsBlock() || node.ID == "" {
+			return ast.WalkContinue
+		}
+		if _, exists := seen[node.ID]; !exists {
+			seen[node.ID] = struct{}{}
+			blockIDs = append(blockIDs, node.ID)
+		}
+		return ast.WalkContinue
+	})
+	blockLocations, err := lookupIndexedBlockLocations(blockIDs)
+	if err != nil {
+		return fmt.Errorf("lookup indexed document block IDs failed: %w", err)
+	}
+	targetPath := path.Clean(documentPath)
+	for _, location := range append(rootLocations, blockLocations...) {
+		if location.RootID != rootID || location.BoxID != boxID || path.Clean(location.Path) != targetPath {
+			return fmt.Errorf("%w: block [%s] belongs to root [%s] at [%s%s], target root [%s] at [%s%s]",
+				ErrIndexPathConflict, location.ID, location.RootID, location.BoxID, path.Clean(location.Path), rootID, boxID, targetPath)
+		}
+	}
+	return nil
+}
+
+// PrepareDocumentIndexIdentityLocked parses a staged plaintext document and
+// validates every block identity while the caller owns the exclusive raw
+// publication lock. It does not mutate the current index.
+func PrepareDocumentIndexIdentityLocked(guard treenode.DocumentIdentitySetGuard, boxID, documentPath string, reader io.Reader, size int64) (*PreparedDocumentIndex, error) {
+	documentPath = path.Clean("/" + strings.TrimPrefix(filepath.ToSlash(documentPath), "/"))
+	rootID := util.GetTreeID(documentPath)
+	if !ast.IsNodeIDPattern(boxID) || !ast.IsNodeIDPattern(rootID) {
+		return nil, fmt.Errorf("invalid notebook or document ID in path: %s%s", boxID, documentPath)
+	}
+	tree, err := filesys.LoadTreeReaderReadOnly(boxID, documentPath, reader, size, util.NewLute(), maxRawDocumentIndexBytes)
+	if err != nil {
+		return nil, fmt.Errorf("load staged document %s%s failed: %w", boxID, documentPath, err)
+	}
+	if tree == nil || tree.Root == nil || tree.Root.ID != rootID || tree.Box != boxID {
+		return nil, fmt.Errorf("document root identity does not match path: %s%s", boxID, documentPath)
+	}
+	if err = validateUpsertTreeIdentity(tree, rootID, boxID, documentPath); err != nil {
+		return nil, fmt.Errorf("document index identity conflict for %s%s: %w", boxID, documentPath, err)
+	}
+	// Validate the opaque token before returning a prepared mutation. The same
+	// token is checked again when the mutation is committed.
+	if err = treenode.ValidateDocumentIdentitySetGuard(guard); err != nil {
+		return nil, err
+	}
+	return &PreparedDocumentIndex{tree: tree}, nil
+}
+
+// CommitPreparedDocumentIndexIdentityLocked replaces the exact document
+// index after its file publication has succeeded.
+func CommitPreparedDocumentIndexIdentityLocked(guard treenode.DocumentIdentitySetGuard, prepared *PreparedDocumentIndex) error {
+	if prepared == nil || prepared.tree == nil {
+		return errors.New("prepared document index is nil")
+	}
+	tree := prepared.tree
+	if err := replaceIndexedTree(guard, tree); err != nil {
+		return err
+	}
+	queueIndexedTree(tree)
+	cache.RemoveTreeData(tree.ID)
+	for _, block := range getIndexedRootBlocks(tree.ID, tree.Box) {
+		cache.RemoveBlockIAL(block.ID)
+	}
+	cache.RemoveDocIAL(tree.Path)
+	return nil
+}
+
+// PrepareDocumentIndexRemovalIdentityLocked validates that rootID is indexed
+// only at the exact path being removed. Missing index state is an idempotent
+// success and is represented by matched=false.
+func PrepareDocumentIndexRemovalIdentityLocked(guard treenode.DocumentIdentitySetGuard, boxID, rootID, documentPath string) (*PreparedDocumentIndexRemoval, error) {
+	if err := treenode.ValidateDocumentIdentitySetGuard(guard); err != nil {
+		return nil, err
+	}
+	documentPath = path.Clean("/" + strings.TrimPrefix(filepath.ToSlash(documentPath), "/"))
+	if !ast.IsNodeIDPattern(boxID) || !ast.IsNodeIDPattern(rootID) || util.GetTreeID(documentPath) != rootID {
+		return nil, fmt.Errorf("invalid document index path: %s%s", boxID, documentPath)
+	}
+	locations, err := lookupIndexedRootLocations(rootID)
+	if err != nil {
+		return nil, fmt.Errorf("lookup indexed root %s failed: %w", rootID, err)
+	}
+	prepared := &PreparedDocumentIndexRemoval{boxID: boxID, rootID: rootID, documentPath: documentPath}
+	for _, location := range locations {
+		if location.RootID == rootID && location.BoxID == boxID && path.Clean(location.Path) == documentPath {
+			prepared.matched = true
+			continue
+		}
+		return nil, fmt.Errorf("%w: requested [%s/%s], root [%s] is also indexed at [%s%s]",
+			ErrIndexPathConflict, boxID, strings.TrimPrefix(documentPath, "/"), rootID, location.BoxID, path.Clean(location.Path))
+	}
+	return prepared, nil
+}
+
+// CommitPreparedDocumentIndexRemovalIdentityLocked removes the exact index
+// location after the corresponding file deletion has succeeded.
+func CommitPreparedDocumentIndexRemovalIdentityLocked(guard treenode.DocumentIdentitySetGuard, prepared *PreparedDocumentIndexRemoval) error {
+	if prepared == nil {
+		return errors.New("prepared document index removal is nil")
+	}
+	if !prepared.matched {
+		return treenode.ValidateDocumentIdentitySetGuard(guard)
+	}
+	return removeIndexedRootLocation(guard, prepared.boxID, prepared.rootID, prepared.documentPath)
+}
 
 func UpsertIndexes(paths []string) {
 	var syFiles []string
@@ -166,13 +588,15 @@ func indexBox(boxID string) {
 			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
 			return
 		}
+		identityGuard := treenode.LockDocumentIdentityMutation()
+		defer identityGuard.Unlock()
 
 		docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 		if "" == docIAL["updated"] { // 早期的数据可能没有 updated 属性，这里进行订正
 			updated := util.TimeFromID(tree.Root.ID)
 			tree.Root.SetIALAttr("updated", updated)
 			docIAL["updated"] = updated
-			if _, writeErr := filesys.WriteTree(tree); nil != writeErr {
+			if _, writeErr := filesys.WriteTreeIdentityLocked(identityGuard, tree); nil != writeErr {
 				logging.LogErrorf("write tree [%s] failed: %s", tree.Path, writeErr)
 			}
 		}
@@ -182,7 +606,10 @@ func indexBox(boxID string) {
 		lock.Unlock()
 
 		cache.PutDocIALInBox(file.path, tree.Box, docIAL)
-		treenode.IndexBlockTree(tree)
+		if indexErr := treenode.IndexBlockTreeMutationLocked(identityGuard, tree); indexErr != nil {
+			logging.LogErrorf("index tree [%s] failed: %s", tree.Path, indexErr)
+			return
+		}
 		sql.IndexTreeQueue(tree)
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
 		if 1 < i && 0 == i%64 {

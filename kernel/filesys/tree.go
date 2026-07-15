@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"os"
 	"path/filepath"
@@ -169,13 +170,31 @@ func ValidateBoxRelativePath(boxID, p string) (string, error) {
 }
 
 func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
+	guard := treenode.LockDocumentIdentityMutation()
+	defer guard.Unlock()
+	return LoadTreeWithFixIdentityLocked(guard, boxID, p, luteEngine)
+}
+
+// LoadTreeWithFixIdentityLocked loads an editor tree while reusing the
+// caller's ordinary document-identity transaction. Loading can repair legacy
+// JSON or rebuild a missing parent document, so those filesystem and index
+// side effects must stay in the same identity domain as the caller's later
+// blocktree mutation and publication.
+func LoadTreeWithFixIdentityLocked(guard treenode.DocumentIdentityMutationGuard, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
+	if err = treenode.ValidateDocumentIdentityMutationGuard(guard); err != nil {
+		return nil, false, err
+	}
+	return loadTreeWithFixIdentityLocked(guard, boxID, p, luteEngine)
+}
+
+func loadTreeWithFixIdentityLocked(guard treenode.DocumentIdentityMutationGuard, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
 	if _, err = ValidateBoxRelativePath(boxID, p); err != nil {
 		logging.LogErrorf("invalid tree path [%s] for box [%s]: %s", p, boxID, err)
 		return
 	}
 	rootID := util.GetTreeID(p)
 	if raw, ok := cache.GetTreeDataInBox(rootID, boxID); ok {
-		ret, err = LoadTreeByData(raw, boxID, p, luteEngine)
+		ret, err = loadTreeByData(raw, boxID, p, luteEngine, true, guard)
 		return
 	}
 
@@ -197,7 +216,7 @@ func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, n
 		return
 	}
 
-	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
+	ret, err = loadTreeByData(data, boxID, p, luteEngine, true, guard)
 	if nil == err {
 		cache.SetTreeDataInBox(rootID, boxID, data)
 	}
@@ -209,7 +228,95 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	return
 }
 
+// LoadTreeIdentityLocked is the ordinary-transaction variant of LoadTree.
+func LoadTreeIdentityLocked(guard treenode.DocumentIdentityMutationGuard, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	ret, _, err = LoadTreeWithFixIdentityLocked(guard, boxID, p, luteEngine)
+	return
+}
+
 func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	guard := treenode.LockDocumentIdentityMutation()
+	defer guard.Unlock()
+	return LoadTreeByDataIdentityLocked(guard, data, boxID, p, luteEngine)
+}
+
+// LoadTreeByDataIdentityLocked parses editor data while reusing the caller's
+// ordinary document-identity transaction for any missing-parent repair.
+func LoadTreeByDataIdentityLocked(guard treenode.DocumentIdentityMutationGuard, data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	if err = treenode.ValidateDocumentIdentityMutationGuard(guard); err != nil {
+		return nil, err
+	}
+	return loadTreeByData(data, boxID, p, luteEngine, true, guard)
+}
+
+// LoadTreeReadOnly loads and strictly validates the document currently stored
+// at p without using the tree cache, repairing its payload, or rebuilding a
+// missing parent document. It is intended for callers that already hold the
+// exclusive document-identity lock and therefore must not re-enter an ordinary
+// tree mutation through the legacy parent-rebuild path.
+//
+// Both encrypted and unencrypted notebooks use this same path: the stored
+// bytes are bounded first, then decrypted when necessary, validated against
+// the document ID in p, and finally parsed with side effects disabled.
+func LoadTreeReadOnly(boxID, p string, luteEngine *lute.Lute, maxDocumentBytes int64) (ret *parse.Tree, err error) {
+	const encryptionOverhead = int64(12 + 16) // AES-GCM nonce and tag
+	if maxDocumentBytes < 2 || maxDocumentBytes > (1<<63-1)-encryptionOverhead-1 {
+		return nil, errors.New("invalid maximum document size")
+	}
+
+	filePath := filepath.Join(util.DataDir, boxID, p)
+	filelock.Lock(filePath)
+	file, err := os.Open(filePath)
+	if err != nil {
+		filelock.Unlock(filePath)
+		return nil, err
+	}
+	maxStoredBytes := maxDocumentBytes + encryptionOverhead
+	data, readErr := io.ReadAll(io.LimitReader(file, maxStoredBytes+1))
+	closeErr := file.Close()
+	filelock.Unlock(filePath)
+	if readErr != nil {
+		return nil, readErr
+	}
+	if closeErr != nil {
+		return nil, closeErr
+	}
+	if int64(len(data)) > maxStoredBytes {
+		return nil, errors.New("stored document size is outside the supported range")
+	}
+	if data, err = decryptData(boxID, p, data); err != nil {
+		return nil, err
+	}
+	rootID := util.GetTreeID(p)
+	if _, err = ValidateDocumentPayloadBlockIDs(bytes.NewReader(data), int64(len(data)), rootID, maxDocumentBytes); err != nil {
+		return nil, err
+	}
+	return loadTreeByData(data, boxID, p, luteEngine, false, nil)
+}
+
+// LoadTreeReaderReadOnly strictly parses an unencrypted document stream
+// without reopening its workspace path. Raw publication callers use this for
+// a staged file while they hold that path's file lock, avoiding a recursive
+// filelock acquisition between publication and index maintenance.
+func LoadTreeReaderReadOnly(boxID, p string, reader io.Reader, size int64, luteEngine *lute.Lute, maxDocumentBytes int64) (*parse.Tree, error) {
+	if maxDocumentBytes < 2 || maxDocumentBytes == 1<<63-1 || size < 2 || size > maxDocumentBytes {
+		return nil, errors.New("document size is outside the supported range")
+	}
+	data, err := io.ReadAll(io.LimitReader(reader, maxDocumentBytes+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(data)) != size || int64(len(data)) > maxDocumentBytes {
+		return nil, errors.New("document stream size does not match metadata")
+	}
+	rootID := util.GetTreeID(p)
+	if _, err = ValidateDocumentPayloadBlockIDs(bytes.NewReader(data), int64(len(data)), rootID, maxDocumentBytes); err != nil {
+		return nil, err
+	}
+	return loadTreeByData(data, boxID, p, luteEngine, false, nil)
+}
+
+func loadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute, rebuildMissingParents bool, guard treenode.DocumentIdentityMutationGuard) (ret *parse.Tree, err error) {
 	ret, err = parseJSON2Tree(boxID, p, data, luteEngine)
 	if nil != err {
 		logging.LogErrorf("parse tree [%s] failed: %s", p, err)
@@ -247,15 +354,26 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 		parentPath := parentAbsPath
 		parentAbsPath = filepath.Join(util.DataDir, boxID, parentAbsPath)
 
-		parentDocIAL := DocIAL(parentAbsPath)
+		var parentDocIAL map[string]string
+		if rebuildMissingParents {
+			parentDocIAL = DocIAL(parentAbsPath)
+		} else if _, statErr := os.Lstat(parentAbsPath); statErr == nil {
+			parentDocIAL = DocIAL(parentAbsPath)
+		} else if !os.IsNotExist(statErr) {
+			logging.LogErrorf("inspect parent tree [%s] failed: %s", parentAbsPath, statErr)
+		}
 		if 1 > len(parentDocIAL) {
-			// 子文档缺失父文档时自动补全 https://github.com/siyuan-note/siyuan/issues/7376
-			parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
-			if _, writeErr := WriteTree(parentTree); nil != writeErr {
-				logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
-			} else {
-				logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
-				treenode.UpsertBlockTree(parentTree)
+			if rebuildMissingParents {
+				// 子文档缺失父文档时自动补全 https://github.com/siyuan-note/siyuan/issues/7376
+				parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
+				if _, writeErr := WriteTreeIdentityLocked(guard, parentTree); nil != writeErr {
+					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
+				} else {
+					logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
+					if upsertErr := treenode.UpsertBlockTreeMutationLocked(guard, parentTree); upsertErr != nil {
+						logging.LogErrorf("index rebuilt parent tree [%s] failed: %s", parentAbsPath, upsertErr)
+					}
+				}
 			}
 			hPathBuilder.WriteString("Untitled/")
 			continue
@@ -344,7 +462,20 @@ func TreeSize(tree *parse.Tree) (size uint64) {
 }
 
 func WriteTree(tree *parse.Tree) (size uint64, err error) {
-	data, filePath, err := prepareWriteTree(tree)
+	guard := treenode.LockDocumentIdentityMutation()
+	defer guard.Unlock()
+	return WriteTreeIdentityLocked(guard, tree)
+}
+
+// WriteTreeIdentityLocked publishes one ordinary editor tree while reusing the
+// caller's opaque document-identity mutation guard. Callers which also update
+// blocktree rows must use this variant so an exclusive raw publication cannot
+// interleave between the index and filesystem halves of the transaction.
+func WriteTreeIdentityLocked(guard treenode.DocumentIdentityMutationGuard, tree *parse.Tree) (size uint64, err error) {
+	if err = treenode.ValidateDocumentIdentityMutationGuard(guard); err != nil {
+		return 0, err
+	}
+	data, filePath, err := prepareWriteTreeIdentityLocked(guard, tree)
 	if err != nil {
 		return
 	}
@@ -399,14 +530,16 @@ func writeTreeByWriteFile(filePath string, data []byte) (err error) {
 	return
 }
 
-func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error) {
+func prepareWriteTreeIdentityLocked(guard treenode.DocumentIdentityMutationGuard, tree *parse.Tree) (data []byte, filePath string, err error) {
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
 
 	if nil == tree.Root.FirstChild {
 		newP := treenode.NewParagraph("")
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
-		treenode.UpsertBlockTree(tree)
+		if err = treenode.UpsertBlockTreeMutationLocked(guard, tree); err != nil {
+			return nil, "", err
+		}
 	}
 
 	treenode.UpgradeSpec(tree)
@@ -569,7 +702,12 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (d
 }
 
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
-	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, _, err = parseJSON2TreeWithFixState(boxID, p, jsonData, luteEngine)
+	return
+}
+
+func parseJSON2TreeWithFixState(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
+	ret, needFix, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)

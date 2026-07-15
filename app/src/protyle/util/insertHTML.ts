@@ -1,7 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {getContenteditableElement, getParentBlock, fixAdjacentTags} from "../wysiwyg/getBlock";
+import {fixAdjacentTags, getContenteditableElement, getParentBlock, getPreviousBlockSibling} from "../wysiwyg/getBlock";
 import {
     fixTableRange,
     focusBlock,
@@ -668,7 +668,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             action: "insert",
             data: oldHTML,
             id,
-            previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
+            previousID: getPreviousBlockSibling(blockElement)?.getAttribute("data-node-id") || "",
             parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID
         });
         blockElement.remove();

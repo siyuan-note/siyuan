@@ -173,8 +173,7 @@ export const getTopEmptyElement = (element: Element) => {
                     return true;
                 }
             });
-            if (hasText || topElement.previousElementSibling?.getAttribute("data-node-id") ||
-                topElement.nextElementSibling?.getAttribute("data-node-id")) {
+            if (hasText || getPreviousBlockSibling(topElement) || getNextBlockSibling(topElement)) {
                 break;
             } else {
                 topElement = topElement.parentElement;

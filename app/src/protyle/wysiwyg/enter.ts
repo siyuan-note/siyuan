@@ -2,6 +2,7 @@ import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/
 import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement, getParentBlock,
+    getPreviousBlockSibling,
     getTopEmptyElement,
     hasNextSibling,
     hasPreviousSibling,
@@ -147,7 +148,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             undoInsert.previousID = blockElement.previousElementSibling.getAttribute("data-node-id");
             parentBlockElement.after(blockElement);
         } else {
-            doInsert.previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : undefined;
+            doInsert.previousID = getPreviousBlockSibling(topElement)?.getAttribute("data-node-id");
             doInsert.parentID = topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID;
             undoInsert.previousID = doInsert.previousID;
             undoInsert.parentID = doInsert.parentID;
@@ -197,10 +198,10 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     // 段首换行
     if (editableElement.textContent !== "" && range.toString() === "" && position.start === 0) {
         let newElement;
-        if (blockElement.previousElementSibling &&
-            blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-            blockElement.previousElementSibling.getAttribute("fold") === "1") {
-            newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
+        const previousBlockElement = getPreviousBlockSibling(blockElement);
+        if (previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
+            previousBlockElement.getAttribute("fold") === "1") {
+            newElement = genHeadingElement(previousBlockElement, false, true) as HTMLDivElement;
         } else {
             newElement = genEmptyElement(false, true);
         }

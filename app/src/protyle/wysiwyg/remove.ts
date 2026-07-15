@@ -441,10 +441,10 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
     if (blockType === "NodeHeading") {
-        if (blockElement.previousElementSibling &&
-            blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-            blockElement.previousElementSibling.getAttribute("fold") === "1") {
-            setFold(protyle, blockElement.previousElementSibling, true, false, false);
+        const previousBlockElement = getPreviousBlockSibling(blockElement);
+        if (previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
+            previousBlockElement.getAttribute("fold") === "1") {
+            setFold(protyle, previousBlockElement, true, false, false);
         }
         if (blockType === "NodeHeading" &&
             blockElement.getAttribute("fold") === "1") {
@@ -761,7 +761,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
                 action: "insert",
                 id: item.getAttribute("data-node-id"),
                 data: item.outerHTML,
-                previousID: index === 0 ? listElement.previousElementSibling?.getAttribute("data-node-id") : doOperations[index - 1].id,
+                previousID: index === 0 ? getPreviousBlockSibling(listElement)?.getAttribute("data-node-id") : doOperations[index - 1].id,
                 parentID: getParentBlock(listElement).getAttribute("data-node-id") || protyle.block.parentID
             });
             undoOperations.push({

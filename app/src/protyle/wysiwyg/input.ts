@@ -4,7 +4,15 @@ import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
-import {getContenteditableElement, fixAdjacentTags, hasNextSibling, hasPreviousSibling, isNotEditBlock} from "./getBlock";
+import {
+    fixAdjacentTags,
+    getContenteditableElement,
+    getNextBlockSibling,
+    getPreviousBlockSibling,
+    hasNextSibling,
+    hasPreviousSibling,
+    isNotEditBlock
+} from "./getBlock";
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
@@ -153,8 +161,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {
         html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
         // https://github.com/siyuan-note/siyuan/issues/12593
-        const nextBlockElement = blockElement.nextElementSibling;
-        if (nextBlockElement && nextBlockElement.getAttribute("data-node-id")) {
+        const nextBlockElement = getNextBlockSibling(blockElement);
+        if (nextBlockElement) {
             if (!isNotEditBlock(nextBlockElement)) {
                 focusBlock(nextBlockElement);
             } else {
@@ -371,7 +379,7 @@ const updateInput = (html: string, protyle: IProtyle, id: string) => {
                 action: "insert",
                 data: item.outerHTML,
                 id: tempId,
-                previousID: index === 0 ? firstElement?.previousElementSibling?.getAttribute("data-node-id") : item.previousElementSibling.getAttribute("data-node-id"),
+                previousID: index === 0 ? (firstElement ? getPreviousBlockSibling(firstElement)?.getAttribute("data-node-id") : undefined) : item.previousElementSibling.getAttribute("data-node-id"),
                 parentID: firstElement?.parentElement.getAttribute("data-node-id") || protyle.block.parentID
             });
             undoOperations.push({

@@ -1,6 +1,7 @@
 import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
 import {
     getContenteditableElement,
+    getNextBlockSibling,
     getParentBlock,
     getPreviousBlockSibling,
     getSbChildBlockCount,
@@ -268,7 +269,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "insert",
                     data: topSourceElement.outerHTML,
                     id: topSourceElement.getAttribute("data-node-id"),
-                    previousID: topSourceElement.previousElementSibling?.getAttribute("data-node-id"),
+                    previousID: getPreviousBlockSibling(topSourceElement)?.getAttribute("data-node-id"),
                     parentID: getParentBlock(topSourceElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
                 });
                 const topSourceParentElement = topSourceElement.parentElement;
@@ -482,8 +483,8 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         action: "insert",
         data: sbElement.outerHTML,
         id: sbElement.getAttribute("data-node-id"),
-        nextID: sbElement.nextElementSibling?.getAttribute("data-node-id"),
-        previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
+        nextID: getNextBlockSibling(sbElement)?.getAttribute("data-node-id"),
+        previousID: getPreviousBlockSibling(sbElement)?.getAttribute("data-node-id"),
         parentID: getParentBlock(sbElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
     // 临时插入，防止后面计算错误，最终再移动矫正
@@ -528,10 +529,11 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     });
     const foldElements: Element[] = [];
     newSourceParentElement.forEach(item => {
+        const nextBlockElement = getNextBlockSibling(item);
         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
-            item.nextElementSibling && (
-                item.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
-                (item.nextElementSibling.getAttribute("data-subtype") || "") > item.getAttribute("data-subtype")
+            nextBlockElement && (
+                nextBlockElement.getAttribute("data-type") !== "NodeHeading" ||
+                (nextBlockElement.getAttribute("data-subtype") || "") > item.getAttribute("data-subtype")
             )) {
             foldElements.push(item);
         }
@@ -584,14 +586,15 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     undoOperations.push(...moveToResult.undoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
     let foldData;
+    const previousBlockElement = getPreviousBlockSibling(targetElement);
     if (isBottom &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
         targetElement.getAttribute("fold") === "1") {
         foldData = setFold(protyle, targetElement, true, false, false, true);
-    } else if (!isBottom && targetElement.previousElementSibling &&
-        targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-        targetElement.previousElementSibling.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
+    } else if (!isBottom &&
+        previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
+        previousBlockElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, previousBlockElement, true, false, false, true);
     }
     if (foldData) {
         foldData.doOperations[0].context = {
@@ -629,9 +632,10 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     newSourceParentElement.forEach(item => {
         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
             hasFoldHeading = true;
-            if (item.nextElementSibling && (
-                item.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
-                item.nextElementSibling.getAttribute("data-subtype") > item.getAttribute("data-subtype")
+            const nextBlockElement = getNextBlockSibling(item);
+            if (nextBlockElement && (
+                nextBlockElement.getAttribute("data-type") !== "NodeHeading" ||
+                nextBlockElement.getAttribute("data-subtype") > item.getAttribute("data-subtype")
             )) {
                 const foldOperations = setFold(protyle, item, true, false, false, true);
                 doOperations.push(...foldOperations.doOperations);
@@ -1755,7 +1759,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (targetElement && (targetElement.classList.contains("bq") || targetElement.classList.contains("sb") || targetElement.classList.contains("list") || targetElement.classList.contains("li"))) {
             let prevElement = hasClosestBlock(document.elementFromPoint(point.x, point.y - 6));
             while (prevElement && targetElement.contains(prevElement)) {
-                if (prevElement.nextElementSibling?.getAttribute("data-node-id")) {
+                if (getNextBlockSibling(prevElement)) {
                     targetElement = prevElement;
                 }
                 prevElement = prevElement.parentElement;

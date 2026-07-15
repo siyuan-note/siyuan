@@ -1,6 +1,11 @@
 import {focusByWbr, getEditorRange} from "../protyle/util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement, getParentBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {
+    getContenteditableElement,
+    getParentBlock,
+    getPreviousBlockSibling,
+    getTopAloneElement
+} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
@@ -15,7 +20,7 @@ import {mathRender} from "../protyle/render/mathRender";
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    let previousId = nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined;
+    let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
     nodeElement.classList.remove("protyle-wysiwyg--select");
     nodeElement.removeAttribute("select-start");
     nodeElement.removeAttribute("select-end");
@@ -70,7 +75,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
         undoOperations.push({
             action: "move",
             id: item.getAttribute("data-node-id"),
-            previousID: item.previousElementSibling ? item.previousElementSibling.getAttribute("data-node-id") : undefined,
+            previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
             parentID: id
         });
         previousId = item.getAttribute("data-node-id");
@@ -232,13 +237,14 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     protyle.observerLoad?.disconnect();
     let newElement = genEmptyElement(false, true);
     let orderIndex = 1;
+    const previousBlockElement = getPreviousBlockSibling(blockElement);
     if (blockElement.getAttribute("data-type") === "NodeListItem") {
         newElement = genListItemElement(blockElement, 0, true) as HTMLDivElement;
         orderIndex = parseInt(blockElement.parentElement.firstElementChild.getAttribute("data-marker"));
-    } else if (position === "beforebegin" && blockElement.previousElementSibling &&
-        blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-        blockElement.previousElementSibling.getAttribute("fold") === "1") {
-        newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
+    } else if (position === "beforebegin" &&
+        previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
+        previousBlockElement.getAttribute("fold") === "1") {
+        newElement = genHeadingElement(previousBlockElement, false, true) as HTMLDivElement;
     } else if (position === "afterend" && blockElement &&
         blockElement.getAttribute("data-type") === "NodeHeading" &&
         blockElement.getAttribute("fold") === "1") {

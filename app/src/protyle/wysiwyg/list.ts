@@ -5,7 +5,7 @@ import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
 import {moveToPrevious, removeBlock} from "./remove";
 import {hasClosestByClassName, isBlockElement} from "../util/hasClosest";
-import {getParentBlock} from "./getBlock";
+import {getParentBlock, getPreviousBlockSibling} from "./getBlock";
 import {setFold} from "../util/blockFold";
 import {scrollCenter} from "../../util/highlightById";
 
@@ -430,7 +430,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
             id: parentId,
             action: "insert",
             data: listItemElement.parentElement.outerHTML,
-            previousID: listItemElement.parentElement.previousElementSibling?.getAttribute("data-node-id"),
+            previousID: getPreviousBlockSibling(listItemElement.parentElement)?.getAttribute("data-node-id"),
             parentID: listItemElement.parentElement.parentElement.getAttribute("data-node-id") || protyle.block.rootID
         });
         listItemElement.parentElement.remove();
@@ -443,7 +443,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
             id: listItemId,
             action: "insert",
             data: listItemElement.outerHTML,
-            previousID: listItemElement.previousElementSibling?.getAttribute("data-node-id"),
+            previousID: getPreviousBlockSibling(listItemElement)?.getAttribute("data-node-id"),
             parentID: parentId
         });
         listItemElement.remove();
@@ -565,7 +565,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
                     action: "move",
                     id: nextElement.getAttribute("data-node-id"),
                     parentID: lastBlockElement.getAttribute("data-node-id"),
-                    previousID: topOldPreviousID || nextElement.previousElementSibling?.getAttribute("data-node-id"),
+                    previousID: topOldPreviousID || getPreviousBlockSibling(nextElement)?.getAttribute("data-node-id"),
                 });
                 topOldPreviousID = nextElement.getAttribute("data-node-id");
                 const tempElement = nextElement;
@@ -621,7 +621,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
                 action: "insert",
                 data: movedHTML,
                 id: liId,
-                previousID: liElement.previousElementSibling?.getAttribute("data-node-id"),
+                previousID: getPreviousBlockSibling(liElement)?.getAttribute("data-node-id"),
                 parentID: parentLiItemElement.getAttribute("data-node-id") || protyle.block.parentID
             });
             liElement.remove();
@@ -678,7 +678,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
     range.insertNode(document.createElement("wbr"));
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    const previousID = liItemElements[0].previousElementSibling?.getAttribute("data-node-id");
+    const previousID = getPreviousBlockSibling(liItemElements[0])?.getAttribute("data-node-id");
     let startIndex;
     if (!liItemElements[0].previousElementSibling && liElement.getAttribute("data-subtype") === "o") {
         startIndex = parseInt(liItemElements[0].getAttribute("data-marker"));
@@ -876,7 +876,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
             action: "insert",
             id: parentLiItemElement.getAttribute("data-node-id"),
             data: parentLiItemElement.outerHTML,
-            previousID: parentLiItemElement.previousElementSibling?.getAttribute("data-node-id"),
+            previousID: getPreviousBlockSibling(parentLiItemElement)?.getAttribute("data-node-id"),
             // https://github.com/siyuan-note/siyuan/issues/9237 无 previousID
             parentID: parentLiItemElement.parentElement.getAttribute("data-node-id"),
         });
@@ -890,7 +890,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
             action: "insert",
             id: liElement.getAttribute("data-node-id"),
             data: liElement.outerHTML,
-            previousID: liElement.previousElementSibling.getAttribute("data-node-id")
+            previousID: getPreviousBlockSibling(liElement)?.getAttribute("data-node-id")
         });
         liElement.remove();
     } else if (liElement.getAttribute("data-subtype") === "o") {

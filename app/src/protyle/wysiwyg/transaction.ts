@@ -1,6 +1,13 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {focusBlock, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
-import {getContenteditableElement, getFirstBlock, getSbChildBlockCount, getTopAloneElement} from "./getBlock";
+import {
+    getContenteditableElement,
+    getFirstBlock,
+    getNextBlockSibling,
+    getPreviousBlockSibling,
+    getSbChildBlockCount,
+    getTopAloneElement
+} from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
 import {processRender} from "../util/processCode";
@@ -178,7 +185,7 @@ const promiseTransaction = (options: {
                     let hasFind = false;
                     if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
-                            if (!isInEmbedBlock(item) && !item.nextElementSibling.contains(range.startContainer)) {
+                            if (!isInEmbedBlock(item) && !getNextBlockSibling(item)?.contains(range.startContainer)) {
                                 item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                                 hasFind = true;
                             }
@@ -230,7 +237,7 @@ const promiseTransaction = (options: {
                 const cursorElements: Element[] = [];
                 if (operation.previousID) {
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
-                        if (item.nextElementSibling?.getAttribute("data-node-id") !== operation.id &&
+                        if (getNextBlockSibling(item)?.getAttribute("data-node-id") !== operation.id &&
                             !item.contains(range.startContainer) && // 当前操作块不再进行操作
                             // 段落转列表会在段落后插入新列表
                             !hasClosestByAttribute(item, "data-node-id", operation.id) &&
@@ -1222,8 +1229,7 @@ export const turnsIntoTransaction = (options: {
                 isList = true;
                 return true;
             }
-            if (item.nextElementSibling && selectsElement[index + 1] &&
-                item.nextElementSibling === selectsElement[index + 1]) {
+            if (selectsElement[index + 1] && getNextBlockSibling(item) === selectsElement[index + 1]) {
                 isContinue = true;
             } else if (index !== selectsElement.length - 1) {
                 isContinue = false;
@@ -1263,7 +1269,7 @@ export const turnsIntoTransaction = (options: {
                 undoOperations.push({
                     action: "insert",
                     id,
-                    previousID: previousId || item.previousElementSibling?.getAttribute("data-node-id"),
+                    previousID: previousId || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                     data: item.outerHTML,
                     parentID: item.parentElement?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
                 });
@@ -1272,7 +1278,7 @@ export const turnsIntoTransaction = (options: {
                     doOperations.push({
                         action: "insert",
                         id: tempItemId,
-                        previousID: tempItem.previousElementSibling?.getAttribute("data-node-id") || item.previousElementSibling?.getAttribute("data-node-id"),
+                        previousID: tempItem.previousElementSibling?.getAttribute("data-node-id") || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                         data: tempItem.outerHTML,
                         parentID: item.parentElement?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
                     });
@@ -1285,7 +1291,7 @@ export const turnsIntoTransaction = (options: {
                     action: "delete",
                     id,
                 });
-                if (item === selectsElement[index + 1]?.previousElementSibling) {
+                if (selectsElement[index + 1] && item === getPreviousBlockSibling(selectsElement[index + 1])) {
                     previousId = id;
                 } else {
                     previousId = undefined;
@@ -1323,7 +1329,7 @@ export const turnsIntoTransaction = (options: {
             undoOperations.push({
                 action: "insert",
                 id,
-                previousID: doOperations[doOperations.length - 1]?.id || item.previousElementSibling?.getAttribute("data-node-id"),
+                previousID: doOperations[doOperations.length - 1]?.id || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                 data: item.outerHTML,
                 parentID: item.parentElement?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
             });
@@ -1340,7 +1346,7 @@ export const turnsIntoTransaction = (options: {
                     doOperations.push({
                         action: "insert",
                         id: tempItemId,
-                        previousID: tempItem.previousElementSibling?.getAttribute("data-node-id") || item.previousElementSibling?.getAttribute("data-node-id"),
+                        previousID: tempItem.previousElementSibling?.getAttribute("data-node-id") || getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
                         data: tempItem.outerHTML,
                         parentID: item.parentElement?.getAttribute("data-node-id") || options.protyle.block.parentID || options.protyle.block.rootID,
                     });
@@ -1407,8 +1413,9 @@ export const turnsOneInto = async (options: {
         }
     }
     const oldHTML = options.nodeElement.outerHTML;
-    let previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
-    if (!options.nodeElement.previousElementSibling && options.protyle.block.showAll) {
+    const previousBlockElement = getPreviousBlockSibling(options.nodeElement);
+    let previousId = previousBlockElement?.getAttribute("data-node-id");
+    if (!previousBlockElement && options.protyle.block.showAll) {
         const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
             id: options.id,
             notebook: options.protyle.notebookId,

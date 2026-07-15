@@ -1,4 +1,8 @@
 {
+  "aiImageUnderstandingTip": "Analiza imágenes y archivos de recursos de los documentos. Selecciona un modelo que admita entrada de imágenes",
+  "aiImageGenerationTip": "Genera imágenes normales e imágenes de cabecera de documentos. Selecciona un modelo que admita salida de imágenes",
+  "aiImageUnderstanding": "Comprensión de imágenes",
+  "aiImageGeneration": "Generación de imágenes",
   "agentEffectDataEgress": "Los datos del documento o de la imagen se enviarán al proveedor de API configurado",
   "agentEffectExternalCost": "Pueden aplicarse cargos de la API externa",
   "agentEffectLocalWrite": "Se modificarán los datos locales",

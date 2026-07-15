@@ -18,8 +18,10 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -116,5 +118,40 @@ func TestRemoveGeneratedAssetCleansEncryptedNameMapping(t *testing.T) {
 	}
 	if _, err = os.Stat(filepath.Join(assetsDir, diskName)); !os.IsNotExist(err) {
 		t.Fatalf("encrypted generated asset was not removed: %v", err)
+	}
+}
+
+func TestApplyGeneratedTitleImageRollsBackOnlyNewAsset(t *testing.T) {
+	setErr := errors.New("set failed")
+	removed := 0
+	setTitle := func(_, _ string) error { return setErr }
+	removeAsset := func(boxID, assetPath string) error {
+		removed++
+		if boxID != "box" || assetPath != "assets/generated.png" {
+			t.Fatalf("unexpected rollback target: %s %s", boxID, assetPath)
+		}
+		return nil
+	}
+	if err := applyGeneratedTitleImageWith("doc", "box", "assets/generated.png", true, setTitle, removeAsset); !errors.Is(err, setErr) {
+		t.Fatalf("unexpected title error: %v", err)
+	}
+	if removed != 1 {
+		t.Fatalf("new generated asset rollback count: %d", removed)
+	}
+	if err := applyGeneratedTitleImageWith("doc", "box", "assets/existing.png", false, setTitle, removeAsset); !errors.Is(err, setErr) {
+		t.Fatalf("unexpected reused asset error: %v", err)
+	}
+	if removed != 1 {
+		t.Fatal("reused asset must not be removed after title failure")
+	}
+}
+
+func TestTitleImagePromptBoundsDocumentContext(t *testing.T) {
+	prompt := titleImagePrompt("minimal", strings.Repeat("文", 7000))
+	if !strings.Contains(prompt, "Art direction:\nminimal") {
+		t.Fatal("art direction was not included")
+	}
+	if strings.Count(prompt, "文") != 6000 {
+		t.Fatalf("document context was not bounded: %d", strings.Count(prompt, "文"))
 	}
 }

@@ -1,4 +1,8 @@
 {
+  "aiImageUnderstandingTip": "يحلل الصور وملفات الموارد في المستندات. اختر نموذجًا يدعم إدخال الصور",
+  "aiImageGenerationTip": "ينشئ صورًا عادية وصور رؤوس المستندات. اختر نموذجًا يدعم إخراج الصور",
+  "aiImageUnderstanding": "فهم الصور",
+  "aiImageGeneration": "إنشاء الصور",
   "agentEffectDataEgress": "سيتم إرسال بيانات المستند أو الصورة إلى موفر واجهة API المهيأ",
   "agentEffectExternalCost": "قد تترتب رسوم على استخدام واجهة API الخارجية",
   "agentEffectLocalWrite": "سيتم تعديل البيانات المحلية",

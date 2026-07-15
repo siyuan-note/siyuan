@@ -1,4 +1,8 @@
 {
+  "aiImageUnderstandingTip": "Belgelerdeki görselleri ve kaynak dosyalarını analiz eder. Görsel girişini destekleyen bir model seçin",
+  "aiImageGenerationTip": "Normal görseller ve belge başlık görselleri oluşturur. Görsel çıktısını destekleyen bir model seçin",
+  "aiImageUnderstanding": "Görsel Anlama",
+  "aiImageGeneration": "Görsel Oluşturma",
   "agentEffectDataEgress": "Belge veya görsel verileri yapılandırılmış API sağlayıcısına gönderilecek",
   "agentEffectExternalCost": "Harici API ücretleri uygulanabilir",
   "agentEffectLocalWrite": "Yerel veriler değiştirilecek",

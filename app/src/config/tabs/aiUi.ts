@@ -901,8 +901,10 @@ export const getModelPickerKeywords = (group: ModelPickerGroup): string[] => {
             window.siyuan.languages.aiAgentModelPickerTip,
             window.siyuan.languages.agentChat,
         );
+    } else if (group === "vision") {
+        keywords.push(window.siyuan.languages.aiImageUnderstanding, window.siyuan.languages.aiImageUnderstandingTip);
     } else {
-        keywords.push(window.siyuan.languages.image, window.siyuan.languages.generate);
+        keywords.push(window.siyuan.languages.aiImageGeneration, window.siyuan.languages.aiImageGenerationTip);
     }
     return keywords;
 };
@@ -918,8 +920,10 @@ export const genModelPickerHtml = (group: ModelPickerGroup): string => {
         desc = window.siyuan.languages.aiEditingModelPickerTip;
     } else if (group === "agent") {
         desc = window.siyuan.languages.aiAgentModelPickerTip;
+    } else if (group === "vision") {
+        desc = window.siyuan.languages.aiImageUnderstandingTip;
     } else {
-        desc = window.siyuan.languages.apiModelTip;
+        desc = window.siyuan.languages.aiImageGenerationTip;
     }
 
     return `<div class="b3-label config-item" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">

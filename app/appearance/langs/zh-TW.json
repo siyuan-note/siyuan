@@ -1,4 +1,8 @@
 {
+  "aiImageUnderstandingTip": "用於分析文件中的圖片和資源檔案，請選擇支援圖片輸入的模型",
+  "aiImageGenerationTip": "用於產生一般圖片和文件題頭圖，請選擇支援圖片輸出的模型",
+  "aiImageUnderstanding": "圖片理解",
+  "aiImageGeneration": "圖片生成",
   "agentEffectDataEgress": "將向已設定的 API 提供者傳送文件或圖片資料",
   "agentEffectExternalCost": "可能產生外部 API 呼叫費用",
   "agentEffectLocalWrite": "將修改本機資料",

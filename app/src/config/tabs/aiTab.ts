@@ -117,7 +117,7 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
 
 const registerAiVisionGroup = (tab: SettingTabBuilder) => {
     const groupId = "vision";
-    const group = tab.group(groupId, window.siyuan.languages.image);
+    const group = tab.group(groupId, window.siyuan.languages.aiImageUnderstanding);
 
     group.slot({
         key: "visionModelPicker",
@@ -129,7 +129,7 @@ const registerAiVisionGroup = (tab: SettingTabBuilder) => {
 
 const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
     const groupId = "imageGeneration";
-    const group = tab.group(groupId, window.siyuan.languages.configGroupImages);
+    const group = tab.group(groupId, window.siyuan.languages.aiImageGeneration);
 
     group.slot({
         key: "imageGenerationModelPicker",

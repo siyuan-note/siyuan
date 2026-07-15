@@ -1,4 +1,8 @@
 {
+  "aiImageUnderstandingTip": "Analyzuje obrázky a súbory prostriedkov v dokumentoch. Vyberte model podporujúci obrazový vstup",
+  "aiImageGenerationTip": "Generuje bežné obrázky a hlavičkové obrázky dokumentov. Vyberte model podporujúci obrazový výstup",
+  "aiImageUnderstanding": "Porozumenie obrázkom",
+  "aiImageGeneration": "Generovanie obrázkov",
   "agentEffectDataEgress": "Údaje dokumentu alebo obrázka sa odošlú nakonfigurovanému poskytovateľovi API",
   "agentEffectExternalCost": "Môžu sa účtovať poplatky za externé API",
   "agentEffectLocalWrite": "Lokálne údaje sa zmenia",

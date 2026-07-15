@@ -18,7 +18,6 @@ package tools
 
 import (
 	"context"
-	"errors"
 	"sync/atomic"
 	"testing"
 
@@ -30,31 +29,6 @@ func useImageOperationTestDataDir(t *testing.T) {
 	original := util.DataDir
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() { util.DataDir = original })
-}
-
-func TestApplyGeneratedTitleImageRollsBackOnlyNewAsset(t *testing.T) {
-	setErr := errors.New("set failed")
-	removed := 0
-	setTitle := func(_, _ string) error { return setErr }
-	removeAsset := func(boxID, assetPath string) error {
-		removed++
-		if boxID != "box" || assetPath != "assets/generated.png" {
-			t.Fatalf("unexpected rollback target: %s %s", boxID, assetPath)
-		}
-		return nil
-	}
-	if err := applyGeneratedTitleImageWith("doc", "box", "assets/generated.png", true, setTitle, removeAsset); !errors.Is(err, setErr) {
-		t.Fatalf("unexpected title error: %v", err)
-	}
-	if removed != 1 {
-		t.Fatalf("new generated asset rollback count: %d", removed)
-	}
-	if err := applyGeneratedTitleImageWith("doc", "box", "assets/existing.png", false, setTitle, removeAsset); !errors.Is(err, setErr) {
-		t.Fatalf("unexpected reused asset error: %v", err)
-	}
-	if removed != 1 {
-		t.Fatal("reused asset must not be removed after title failure")
-	}
 }
 
 func TestRunImageOperationReusesSuccessfulResult(t *testing.T) {

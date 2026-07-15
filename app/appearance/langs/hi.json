@@ -1,4 +1,8 @@
 {
+  "aiImageUnderstandingTip": "दस्तावेज़ों में चित्रों और संसाधन फ़ाइलों का विश्लेषण करता है। चित्र इनपुट समर्थित मॉडल चुनें",
+  "aiImageGenerationTip": "सामान्य चित्र और दस्तावेज़ शीर्ष चित्र बनाता है। चित्र आउटपुट समर्थित मॉडल चुनें",
+  "aiImageUnderstanding": "छवि समझ",
+  "aiImageGeneration": "छवि निर्माण",
   "agentEffectDataEgress": "दस्तावेज़ या छवि डेटा कॉन्फ़िगर किए गए API प्रदाता को भेजा जाएगा",
   "agentEffectExternalCost": "बाहरी API शुल्क लागू हो सकते हैं",
   "agentEffectLocalWrite": "स्थानीय डेटा में बदलाव किया जाएगा",

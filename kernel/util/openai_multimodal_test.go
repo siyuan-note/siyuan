@@ -17,7 +17,13 @@
 package util
 
 import (
+	"bytes"
+	"context"
+	"encoding/base64"
 	"encoding/json"
+	"image"
+	"image/color"
+	"image/png"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -74,4 +80,89 @@ func TestModelWithImageOutputDoesNotGenerateBillableImage(t *testing.T) {
 	if !strings.Contains(err.Error(), "potentially billed image") {
 		t.Fatalf("unexpected image generation test error: %v", err)
 	}
+}
+
+func TestPrepareForVisionReencodesAndLimitsImage(t *testing.T) {
+	var source bytes.Buffer
+	img := image.NewRGBA(image.Rect(0, 0, 4, 2))
+	img.Set(0, 0, color.RGBA{R: 255, A: 255})
+	if err := png.Encode(&source, img); err != nil {
+		t.Fatal(err)
+	}
+	prepared, err := PrepareForVision(source.Bytes(), 1024*1024, 8, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if prepared.MIMEType != "image/jpeg" || prepared.Width != 2 || prepared.Height != 1 {
+		t.Fatalf("unexpected prepared image: %#v", prepared)
+	}
+	if _, err = PrepareForVision(source.Bytes(), 1024*1024, 7, 2); err == nil {
+		t.Fatal("pixel limit was not enforced before decoding")
+	}
+	if _, err = PrepareForVision([]byte(`<svg xmlns="http://www.w3.org/2000/svg"></svg>`), 1024, 100, 100); err == nil {
+		t.Fatal("SVG input must be rejected")
+	}
+}
+
+func TestOpenAIImageAdapterAnalyzeAndGenerate(t *testing.T) {
+	generatedBytes := testGeneratedPNG(t)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v1/chat/completions":
+			var body map[string]any
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				t.Error(err)
+			}
+			encoded, _ := json.Marshal(body)
+			if !strings.Contains(string(encoded), "data:image/jpeg;base64,") {
+				t.Errorf("vision request does not contain an image data URL: %s", encoded)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"a diagram"}}]}`))
+		case "/v1/images/generations":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"data":[{"b64_json":"` + base64.StdEncoding.EncodeToString(generatedBytes) + `","revised_prompt":"refined"}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	adapter := NewOpenAIImageAdapter("test", server.URL+"/v1", "test-model", 5)
+	analysis, err := adapter.Analyze(context.Background(), PreparedImage{Data: []byte("jpeg"), MIMEType: "image/jpeg"}, "What is shown?", "high")
+	if err != nil || analysis != "a diagram" {
+		t.Fatalf("unexpected analysis %q: %v", analysis, err)
+	}
+	generated, err := adapter.Generate(context.Background(), GenerateImageRequest{Prompt: "A header", Size: "1024x1024", OutputFormat: "png"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if generated.MIMEType != "image/png" || generated.Extension != ".png" || generated.RevisedPrompt != "refined" {
+		t.Fatalf("unexpected generated image metadata: %#v", generated)
+	}
+}
+
+func TestGeneratedImageDownloadSSRFGuards(t *testing.T) {
+	if _, err := downloadGeneratedImage(context.Background(), "http://example.com/image.png"); err == nil {
+		t.Fatal("non-HTTPS generated image URL must be rejected")
+	}
+	dialer := generatedImageDialer()
+	if err := dialer.Control("tcp", "127.0.0.1:443", nil); err == nil {
+		t.Fatal("private generated image address must be rejected")
+	}
+	if err := dialer.Control("tcp", "100.64.0.1:443", nil); err == nil {
+		t.Fatal("shared address space must be rejected")
+	}
+	if err := dialer.Control("tcp", "1.1.1.1:443", nil); err != nil {
+		t.Fatalf("public generated image address was rejected: %v", err)
+	}
+}
+
+func testGeneratedPNG(t *testing.T) []byte {
+	t.Helper()
+	var output bytes.Buffer
+	if err := png.Encode(&output, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+		t.Fatal(err)
+	}
+	return output.Bytes()
 }

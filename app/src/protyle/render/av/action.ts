@@ -644,7 +644,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         srcIDs: sourceIds,
                         avID,
                     }]);
-                });
+                }, true, blockElement.getAttribute("data-node-id"));
             }
         });
         if (rowElements.length === 1) {

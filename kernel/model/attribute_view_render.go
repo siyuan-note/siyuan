@@ -66,8 +66,12 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		existPath, _ = av.FindAttributeViewPath(avID)
 	}
 	if "" == existPath {
-		// fallback 找不到时按全局路径检查（首次创建场景）
-		existPath = av.GetAttributeViewDataPath(avID)
+		if avBoxID != "" {
+			existPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", avID+".json")
+		} else {
+			// fallback 找不到时按全局路径检查（首次创建场景）
+			existPath = av.GetAttributeViewDataPath(avID)
+		}
 	}
 	if !filelock.IsExist(existPath) {
 		if !createIfNotExist {
@@ -89,6 +93,9 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 			return
+		}
+		if blockID != "" {
+			av.UpsertBlockRel(avID, blockID)
 		}
 	}
 

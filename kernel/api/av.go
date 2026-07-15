@@ -739,13 +739,21 @@ func searchAttributeView(c *gin.Context) {
 	}
 
 	keyword := arg["keyword"].(string)
+	currentAvID := ""
+	if nil != arg["avID"] {
+		currentAvID = arg["avID"].(string)
+	}
+	currentBlockID := ""
+	if nil != arg["blockID"] {
+		currentBlockID = arg["blockID"].(string)
+	}
 	var excludes []string
 	if nil != arg["excludes"] {
 		for _, e := range arg["excludes"].([]any) {
 			excludes = append(excludes, e.(string))
 		}
 	}
-	results := model.SearchAttributeView(keyword, excludes)
+	results := model.SearchAttributeView(keyword, excludes, currentAvID, currentBlockID)
 	ret.Data = map[string]any{
 		"results": results,
 	}

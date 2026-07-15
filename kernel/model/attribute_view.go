@@ -1911,7 +1911,7 @@ type AvSearchTempResult struct {
 	Score     float64
 }
 
-func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearchResult) {
+func SearchAttributeView(keyword string, excludeAvIDs []string, currentAvID, currentBlockID string) (ret []*AvSearchResult) {
 	waitForSyncingStorages()
 
 	ret = []*AvSearchResult{}
@@ -1919,8 +1919,18 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 	keywords := strings.Fields(keyword)
 
 	var avSearchTmpResults []*AvSearchTempResult
-	// 只扫全局 AV 目录。加密笔记本的 AV 不参与全局搜索——避免跨加密边界暴露数据库名等元信息
+	boxID := ""
+	if currentBlockID != "" {
+		if bt := treenode.GetBlockTree(currentBlockID); nil != bt && IsEncryptedBox(bt.BoxID) {
+			boxID = bt.BoxID
+		}
+	} else if currentAvID != "" {
+		_, boxID = av.FindAttributeViewPath(currentAvID)
+	}
 	avDir := filepath.Join(util.DataDir, "storage", "av")
+	if boxID != "" {
+		avDir = filepath.Join(util.DataDir, boxID, "storage", "av")
+	}
 	entries, err := os.ReadDir(avDir)
 	if err != nil {
 		logging.LogErrorf("read directory [%s] failed: %s", avDir, err)
@@ -1950,7 +1960,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 			continue
 		}
 
-		name, _ := av.GetAttributeViewNameByPath(filepath.Join(avDir, entry.Name()))
+		name, _ := av.GetAttributeViewNameInBox(id, boxID)
 		info, _ := entry.Info()
 		if "" != keyword {
 			score := 0.0
@@ -1999,7 +2009,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 		bIDs := avBlockRels[tmpResult.AvID]
 		var node *ast.Node
 		for _, bID := range bIDs {
-			tree, _ := LoadTreeByBlockID(bID)
+			tree, _ := loadTreeByBlockIDInBox(bID, boxID)
 			if nil == tree {
 				continue
 			}
@@ -2017,7 +2027,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 			continue
 		}
 
-		attrView, _ := av.ParseAttributeView(tmpResult.AvID)
+		attrView, _ := av.ParseAttributeViewInBox(tmpResult.AvID, boxID)
 		if nil == attrView {
 			continue
 		}

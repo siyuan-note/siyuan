@@ -31,7 +31,7 @@ import (
 	"testing"
 )
 
-func TestModelWithImageInputCapability(t *testing.T) {
+func TestModelFallsBackToChatCompletion(t *testing.T) {
 	var chatRequests atomic.Int32
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
@@ -43,9 +43,8 @@ func TestModelWithImageInputCapability(t *testing.T) {
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 				t.Error(err)
 			}
-			encoded, _ := json.Marshal(body)
-			if !strings.Contains(string(encoded), "data:image/png;base64,") {
-				t.Errorf("vision capability test did not include an image: %s", encoded)
+			if body["model"] != "test-model" {
+				t.Errorf("unexpected model test request: %#v", body)
 			}
 			w.Header().Set("Content-Type", "application/json")
 			_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"1"}}]}`))
@@ -55,30 +54,9 @@ func TestModelWithImageInputCapability(t *testing.T) {
 	}))
 	defer server.Close()
 
-	_, matched, err := TestModelWithCapabilities("test", server.URL+"/v1", "vision-model", []string{"image-input"}, 5)
+	_, matched, err := TestModel("test", server.URL+"/v1", "test-model", 5)
 	if err != nil || !matched || chatRequests.Load() != 1 {
-		t.Fatalf("unexpected vision model test result: matched=%v requests=%d err=%v", matched, chatRequests.Load(), err)
-	}
-}
-
-func TestModelWithImageOutputDoesNotGenerateBillableImage(t *testing.T) {
-	var nonListRequests atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/v1/models" {
-			http.Error(w, "unsupported", http.StatusNotFound)
-			return
-		}
-		nonListRequests.Add(1)
-		http.NotFound(w, r)
-	}))
-	defer server.Close()
-
-	_, matched, err := TestModelWithCapabilities("test", server.URL+"/v1", "image-model", []string{"image-output"}, 5)
-	if err == nil || matched || nonListRequests.Load() != 0 {
-		t.Fatalf("image generation test must stop after model listing: matched=%v requests=%d err=%v", matched, nonListRequests.Load(), err)
-	}
-	if !strings.Contains(err.Error(), "potentially billed image") {
-		t.Fatalf("unexpected image generation test error: %v", err)
+		t.Fatalf("unexpected model test result: matched=%v requests=%d err=%v", matched, chatRequests.Load(), err)
 	}
 }
 

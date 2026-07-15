@@ -283,11 +283,6 @@ type ImageArtifactRef struct {
 	DocumentID string `json:"documentId,omitempty"`
 }
 
-const (
-	capabilityImageInput  = "image-input"
-	capabilityImageOutput = "image-output"
-)
-
 type DocumentImageList struct {
 	DocumentID string             `json:"documentId"`
 	Images     []ImageArtifactRef `json:"images"`
@@ -424,7 +419,7 @@ func AnalyzeImage(ctx context.Context, data []byte, question, detail string) (An
 		return AnalyzeImageResult{}, errors.New("AI configuration is unavailable")
 	}
 	provider, visionModel := Conf.AI.GetVisionModel()
-	if err := validateMultimodalModel(provider, visionModel, capabilityImageInput); err != nil {
+	if err := validateImageModel(provider, visionModel); err != nil {
 		return AnalyzeImageResult{}, err
 	}
 	prepared, err := util.PrepareForVision(data, Conf.AI.Vision.MaxImageBytes, Conf.AI.Vision.MaxPixels, Conf.AI.Vision.MaxEdge)
@@ -446,7 +441,7 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 		return GenerateImageResult{}, errors.New("AI configuration is unavailable")
 	}
 	provider, generationModel := Conf.AI.GetImageGenerationModel()
-	if err := validateMultimodalModel(provider, generationModel, capabilityImageOutput); err != nil {
+	if err := validateImageModel(provider, generationModel); err != nil {
 		return GenerateImageResult{}, err
 	}
 	prompt := strings.TrimSpace(request.Prompt)
@@ -507,23 +502,14 @@ func resolveMultimodalDocument(documentID string) (*treenode.BlockTree, error) {
 	return bt, nil
 }
 
-func validateMultimodalModel(provider *conf.Provider, imageModel *conf.Model, capability string) error {
+func validateImageModel(provider *conf.Provider, imageModel *conf.Model) error {
 	if provider == nil || imageModel == nil {
-		return fmt.Errorf("model for capability %s is not configured", capability)
+		return errors.New("image model is not configured")
 	}
 	if provider.Protocol != "" && provider.Protocol != "openai" {
 		return fmt.Errorf("unsupported multimodal provider protocol: %s", provider.Protocol)
 	}
-	if len(imageModel.Capabilities) == 0 {
-		// 旧配置没有能力声明时保持兼容，新配置通过能力标记收窄选择范围。
-		return nil
-	}
-	for _, current := range imageModel.Capabilities {
-		if current == capability {
-			return nil
-		}
-	}
-	return fmt.Errorf("model %s does not declare capability %s", imageModel.Name, capability)
+	return nil
 }
 
 func documentReferencesImage(rootID, assetPath string) bool {

@@ -75,11 +75,9 @@ func testModel(c *gin.Context) {
 	}
 
 	var providerID, modelName string
-	var rawCapabilities []any
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("provider", &providerID, true, true),
 		util.BindJsonArg("model", &modelName, true, true),
-		util.BindJsonArg("capabilities", &rawCapabilities, false, false),
 	) {
 		return
 	}
@@ -98,13 +96,7 @@ func testModel(c *gin.Context) {
 		return
 	}
 
-	capabilities := make([]string, 0, len(rawCapabilities))
-	for _, rawCapability := range rawCapabilities {
-		if capability, ok := rawCapability.(string); ok {
-			capabilities = append(capabilities, capability)
-		}
-	}
-	available, matched, err := util.TestModelWithCapabilities(provider.APIKey, provider.BaseURL, modelName, capabilities, provider.RequestTimeout)
+	available, matched, err := util.TestModel(provider.APIKey, provider.BaseURL, modelName, provider.RequestTimeout)
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
 	if 50 < len(available) {
 		available = available[:50]

@@ -47,7 +47,7 @@ func TestAnalyzeImageDoesNotRequireDocument(t *testing.T) {
 	modelID := "20260715130000-abcdefg"
 	ai.Providers = []*conf.Provider{{
 		ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1", Protocol: "openai", RequestTimeout: 5,
-		Models: []*conf.Model{{ID: modelID, Enabled: true, Name: "vision-model", Capabilities: []string{"image-input"}}},
+		Models: []*conf.Model{{ID: modelID, Enabled: true, Name: "vision-model"}},
 	}}
 	ai.Vision.ModelID = modelID
 	Conf = NewAppConf()
@@ -83,7 +83,7 @@ func TestGenerateImageDoesNotRequireDocument(t *testing.T) {
 	modelID := "20260715130000-hijklmn"
 	ai.Providers = []*conf.Provider{{
 		ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1", Protocol: "openai", RequestTimeout: 5,
-		Models: []*conf.Model{{ID: modelID, Enabled: true, Name: "image-model", Capabilities: []string{"image-output"}}},
+		Models: []*conf.Model{{ID: modelID, Enabled: true, Name: "image-model"}},
 	}}
 	ai.ImageGeneration.ModelID = modelID
 	Conf = NewAppConf()
@@ -112,8 +112,8 @@ func TestMultimodalProviderErrorsPreventAutomaticRetry(t *testing.T) {
 	ai.Providers = []*conf.Provider{{
 		ID: "provider", Enabled: true, APIKey: "test", BaseURL: server.URL + "/v1", Protocol: "openai", RequestTimeout: 5,
 		Models: []*conf.Model{
-			{ID: visionModelID, Enabled: true, Name: "vision-model", Capabilities: []string{"image-input"}},
-			{ID: generationModelID, Enabled: true, Name: "image-model", Capabilities: []string{"image-output"}},
+			{ID: visionModelID, Enabled: true, Name: "vision-model"},
+			{ID: generationModelID, Enabled: true, Name: "image-model"},
 		},
 	}}
 	ai.Vision.ModelID = visionModelID

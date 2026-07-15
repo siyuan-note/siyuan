@@ -232,11 +232,6 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
 // 返回值：available 为可用模型清单（仅 ListModels 成功时填充），matched 表示 model 是否可用，
 // err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
 func TestModel(apiKey, apiBaseURL, model string, timeout int) (available []string, matched bool, err error) {
-	return TestModelWithCapabilities(apiKey, apiBaseURL, model, nil, timeout)
-}
-
-// TestModelWithCapabilities 根据模型能力选择安全的回退测试。图片生成模型不会为测试连接而产生计费图片。
-func TestModelWithCapabilities(apiKey, apiBaseURL, model string, capabilities []string, timeout int) (available []string, matched bool, err error) {
 	if 1 > timeout {
 		timeout = 30
 	}
@@ -258,28 +253,9 @@ func TestModelWithCapabilities(apiKey, apiBaseURL, model string, capabilities []
 		return
 	}
 
-	if hasModelCapability(capabilities, "image-output") {
-		return nil, false, fmt.Errorf("list models failed and image generation capability cannot be tested without creating a potentially billed image: %w", listErr)
-	}
-
 	// ListModels 不可用时回退到极简 Chat Completion 验证连通性与鉴权
 	logging.LogInfof("list models failed [%s], fallback to chat completion: %s", apiBaseURL, listErr)
 	messages := []openai.ChatCompletionMessage{{Role: "user", Content: "1"}}
-	if hasModelCapability(capabilities, "image-input") {
-		messages = []openai.ChatCompletionMessage{{
-			Role: openai.ChatMessageRoleUser,
-			MultiContent: []openai.ChatMessagePart{
-				{Type: openai.ChatMessagePartTypeText, Text: "Reply with 1."},
-				{
-					Type: openai.ChatMessagePartTypeImageURL,
-					ImageURL: &openai.ChatMessageImageURL{
-						URL:    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-						Detail: openai.ImageURLDetailLow,
-					},
-				},
-			},
-		}}
-	}
 	_, err = client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
 		Model:               model,
 		Messages:            messages,
@@ -292,15 +268,6 @@ func TestModelWithCapabilities(apiKey, apiBaseURL, model string, capabilities []
 	matched = true
 	available = nil
 	return
-}
-
-func hasModelCapability(capabilities []string, target string) bool {
-	for _, capability := range capabilities {
-		if strings.EqualFold(strings.TrimSpace(capability), target) {
-			return true
-		}
-	}
-	return false
 }
 
 // TestEmbeddingModel 测试嵌入模型可用性，发送极简文本并返回首个向量维度。

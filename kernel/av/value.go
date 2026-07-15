@@ -885,6 +885,7 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 	switch calc.Operator {
 	case CalcOperatorNone:
 	case CalcOperatorUniqueValues:
+		var newContents []*Value
 		uniqueValues := map[string]bool{}
 		for _, content := range r.Contents {
 			switch content.Type {
@@ -898,6 +899,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					}
 				}
 				content.Relation.Contents = newRelationContents
+				if 0 < len(newRelationContents) {
+					newContents = append(newContents, content)
+				}
 			case KeyTypeMSelect:
 				var newMSelect []*ValueSelect
 				for _, mSelect := range content.MSelect {
@@ -907,6 +911,9 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					}
 				}
 				content.MSelect = newMSelect
+				if 0 < len(newMSelect) {
+					newContents = append(newContents, content)
+				}
 			case KeyTypeMAsset:
 				var newMAsset []*ValueAsset
 				for _, mAsset := range content.MAsset {
@@ -916,8 +923,18 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					}
 				}
 				content.MAsset = newMAsset
+				if 0 < len(newMAsset) {
+					newContents = append(newContents, content)
+				}
+			default:
+				key := content.String(true)
+				if !uniqueValues[key] {
+					uniqueValues[key] = true
+					newContents = append(newContents, content)
+				}
 			}
 		}
+		r.Contents = newContents
 	case CalcOperatorCountAll:
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountValues:

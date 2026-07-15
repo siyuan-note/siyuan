@@ -577,14 +577,9 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 				idx++
 				if index == idx {
 					node = n.DocChild()
-					if "1" == node.IALAttr("heading-fold") {
-						// 加载到折叠标题下方块的话需要回溯到上方标题块
-						for h := node.Previous; nil != h; h = h.Previous {
-							if "1" == h.IALAttr("fold") {
-								node = h
-								break
-							}
-						}
+					if foldedHeading := treenode.GetParentFoldedHeading(node); nil != foldedHeading {
+						// 加载到折叠标题下方块时回溯到上方折叠标题块（单点查询，不依赖子块 heading-fold）
+						node = foldedHeading
 					}
 					located = true
 					return ast.WalkStop
@@ -720,23 +715,36 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	existKeywords := 0 < len(keywords)
 	for _, n := range nodes {
 		var unlinks []*ast.Node
+
+		// 顶层块整体位于折叠标题下方时用单点查询判断（不依赖子块 heading-fold）：
+		// 非当前 ID 的悬浮或文档加载场景整块剔除；当前 ID 的悬浮保留
+		// The referenced block under the folded heading cannot be hovered to view https://github.com/siyuan-note/siyuan/issues/9582
+		nInFoldedHeading := treenode.IsInFoldedHeading(n, nil)
+		if nInFoldedHeading && ((0 != mode && id != n.ID) || isDoc) {
+			continue
+		}
+
+		// 一次正向扫描收集 n 子树内被折叠标题盖住的后代，避免逐块 O(N²) 回溯 IsInFoldedHeading
+		foldHidden := map[*ast.Node]bool{}
+		for _, h := range treenode.CollectFoldHiddenNodes(n) {
+			foldHidden[h] = true
+		}
+
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
 				return ast.WalkContinue
 			}
 
 			if n.IsBlock() {
-				if treenode.IsInFoldedHeading(n, nil) {
-					// 折叠标题下被引用的块无法悬浮查看
-					// The referenced block under the folded heading cannot be hovered to view https://github.com/siyuan-note/siyuan/issues/9582
-					if (0 != mode && id != n.ID) || isDoc {
-						unlinks = append(unlinks, n)
-						return ast.WalkContinue
-					}
-				} else if "1" == n.IALAttr("heading-fold") {
-					// 标题已展开但子块仍残留 heading-fold 时清理，避免列表等嵌套块渲染为空
-					n.RemoveIALAttr("heading-fold")
-					n.RemoveIALAttr("fold")
+				if foldHidden[n] {
+					// 被嵌套折叠标题盖住的整棵子树剔除，无需继续递归其内部
+					unlinks = append(unlinks, n)
+					return ast.WalkSkipChildren
+				}
+
+				if !nInFoldedHeading {
+					// 标题已展开但子块仍残留 heading-fold（及历史误写的 fold）时清理，避免列表等嵌套块渲染为空
+					treenode.StripLegacyHeadingFoldAttrs(n)
 				}
 
 				if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
@@ -816,14 +824,49 @@ func GetDocInBox(startID, endID, id string, index int, query string, queryTypes,
 	return
 }
 
+// foldedHiddenSiblings 正向扫描 anchor 所在层级的兄弟子块序列，返回被折叠标题盖住（应隐藏）的块 ID 集合。
+// 一次 O(N) 扫描，供加载读路径的向上 / 双向遍历使用，避免逐块回溯 IsInFoldedHeading 造成 O(N²)。
+func foldedHiddenSiblings(anchor *ast.Node) (hidden map[string]bool) {
+	hidden = map[string]bool{}
+	if nil == anchor || nil == anchor.Parent {
+		return
+	}
+
+	var stack treenode.FoldHeadingStack
+	for n := anchor.Parent.FirstChild; nil != n; n = n.Next {
+		stack.Enter(n)
+		if stack.Hidden() {
+			hidden[n.ID] = true
+		}
+	}
+	return
+}
+
+// foldHeadingStackBefore 通过扫描 node 之前的同级兄弟节点，构造到达 node 之前（不含 node）的折叠层级栈。
+func foldHeadingStackBefore(node *ast.Node) (stack treenode.FoldHeadingStack) {
+	if nil == node || nil == node.Parent {
+		return
+	}
+
+	for n := node.Parent.FirstChild; nil != n && n != node; n = n.Next {
+		stack.Enter(n)
+	}
+	return
+}
+
 func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.Node, eof bool) {
 	node := treenode.GetNodeInTree(tree, startID)
 	if nil == node {
 		return
 	}
+
+	// 用折叠层级栈正向扫描跳过被折叠标题盖住的块
+	stack := foldHeadingStackBefore(node)
+	stack.Enter(node)
 	nodes = append(nodes, node)
 	for n := node.Next; nil != n; n = n.Next {
-		if treenode.IsInFoldedHeading(n, nil) {
+		stack.Enter(n)
+		if stack.Hidden() {
 			continue
 		}
 		nodes = append(nodes, n)
@@ -862,13 +905,20 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		}
 	}
 
+	// 一次正向扫描顶层同级子块，标记被折叠标题盖住的隐藏块，向上 / 双向遍历据此判断，避免逐块 O(N²) 回溯
+	hidden := foldedHiddenSiblings(node)
+
 	count := 0
 	switch mode {
 	case 0: // 仅加载当前 ID
 		nodes = append(nodes, node)
 		if isDoc {
+			// 用折叠层级栈正向扫描顶层同级子块（含 node 自身折叠），避免嵌套折叠漏网（与 case 2 一致）
+			stack := foldHeadingStackBefore(node)
+			stack.Enter(node)
 			for n := node.Next; nil != n; n = n.Next {
-				if treenode.IsInFoldedHeading(n, nil) {
+				stack.Enter(n)
+				if stack.Hidden() {
 					continue
 				}
 				nodes = append(nodes, n)
@@ -882,17 +932,18 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 				}
 			}
 		} else if isHeading {
+			// 聚焦标题：先把当前标题入栈，自身 fold=1 时不摊开下方内容（与旧 IsInFoldedHeading(n, node) 一致）；
+			// 未折叠时仍用栈省略更深层嵌套折叠 https://github.com/siyuan-note/siyuan/issues/4997
 			level := node.HeadingLevel
+			var stack treenode.FoldHeadingStack
+			stack.Enter(node)
 			for n := node.Next; nil != n; n = n.Next {
-				if treenode.IsInFoldedHeading(n, node) {
-					// 大纲点击折叠标题跳转聚焦 https://github.com/siyuan-note/siyuan/issues/4920
-					// 多级标题折叠后上级块引浮窗中未折叠 https://github.com/siyuan-note/siyuan/issues/4997
-					continue
+				if ast.NodeHeading == n.Type && n.HeadingLevel <= level {
+					break
 				}
-				if ast.NodeHeading == n.Type {
-					if n.HeadingLevel <= level {
-						break
-					}
+				stack.Enter(n)
+				if stack.Hidden() {
+					continue
 				}
 				nodes = append(nodes, n)
 				count++
@@ -903,7 +954,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		}
 	case 4: // Ctrl+End 跳转到末尾后向上加载
 		for n := node; nil != n; n = n.Previous {
-			if treenode.IsInFoldedHeading(n, nil) {
+			if hidden[n.ID] {
 				continue
 			}
 			nodes = append([]*ast.Node{n}, nodes...)
@@ -919,7 +970,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		eof = true
 	case 1: // 向上加载
 		for n := node.Previous; /* 从上一个节点开始加载 */ nil != n; n = n.Previous {
-			if treenode.IsInFoldedHeading(n, nil) {
+			if hidden[n.ID] {
 				continue
 			}
 			nodes = append([]*ast.Node{n}, nodes...)
@@ -934,8 +985,11 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		}
 		eof = nil == node.Previous
 	case 2: // 向下加载
+		// node 自身的折叠不参与隐藏判断（正在从 node 向下加载），用新栈从其下方块开始扫描
+		var stack treenode.FoldHeadingStack
 		for n := node.Next; /* 从下一个节点开始加载 */ nil != n; n = n.Next {
-			if treenode.IsInFoldedHeading(n, node) {
+			stack.Enter(n)
+			if stack.Hidden() {
 				continue
 			}
 			nodes = append(nodes, n)
@@ -950,7 +1004,7 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 		}
 	case 3: // 上下都加载
 		for n := node; nil != n; n = n.Previous {
-			if treenode.IsInFoldedHeading(n, nil) {
+			if hidden[n.ID] {
 				continue
 			}
 			nodes = append([]*ast.Node{n}, nodes...)
@@ -975,8 +1029,12 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 			size = size - count
 		}
 		count = 0
+		// 用折叠层级栈正向扫描 node 下方的同级子块（含 node 自身折叠），避免嵌套折叠漏网（与 case 2 一致）
+		downStack := foldHeadingStackBefore(node)
+		downStack.Enter(node)
 		for n := node.Next; nil != n; n = n.Next {
-			if treenode.IsInFoldedHeading(n, nil) {
+			downStack.Enter(n)
+			if downStack.Hidden() {
 				continue
 			}
 			nodes = append(nodes, n)

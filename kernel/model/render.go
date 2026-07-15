@@ -176,10 +176,33 @@ func fillBlockRefCount(nodes []*ast.Node) {
 }
 
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes0(nodes, luteEngine, false)
+}
+
+// renderBlockDOMByNodesSkipTopFold 渲染时顶层标题不入折叠栈。
+// 供 GetHeadingChildrenDOM：nodes 含 fold=1 顶层标题时仍须输出 VisibleHeadingChildren，避免 CollectRenderFoldHidden 误藏整节。
+func renderBlockDOMByNodesSkipTopFold(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes0(nodes, luteEngine, true)
+}
+
+func renderBlockDOMByNodes0(nodes []*ast.Node, luteEngine *lute.Lute, skipTopHeadingStack bool) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	// 渲染时跳过嵌套折叠盖住的块，且不 Unlink，避免污染共享 AST（展开 RetData / 嵌入 / 复制共用）
+	var foldHidden map[*ast.Node]bool
+	if skipTopHeadingStack {
+		foldHidden = treenode.CollectRenderFoldHiddenSkipTop(nodes)
+	} else {
+		foldHidden = treenode.CollectRenderFoldHidden(nodes)
+	}
 	for _, node := range nodes {
+		if foldHidden[node] {
+			continue
+		}
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if foldHidden[n] {
+				return ast.WalkSkipChildren
+			}
 			if entering {
 				if n.IsBlock() {
 					if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
@@ -225,8 +248,11 @@ func renderBlockContentByNodes(nodes []*ast.Node) string {
 func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resolved *[]string, depth *int) {
 	var children []*ast.Node
 	if ast.NodeHeading == n.Type {
+		// 与嵌入块 mode 0 一致：标题自身折叠时仅带标题，否则带按折叠层级栈可见的子块，避免嵌套折叠泄漏
 		children = append(children, n)
-		children = append(children, treenode.HeadingChildren(n)...)
+		if "1" != n.IALAttr("fold") {
+			children = append(children, treenode.VisibleHeadingChildren(n)...)
+		}
 	} else if ast.NodeDocument == n.Type {
 		for c := n.FirstChild; nil != c; c = c.Next {
 			children = append(children, c)
@@ -328,19 +354,16 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					} else if 2 == blockHeadingMode {
 						// 仅显示标题下方的块（默认行为）
 						if "1" != h.IALAttr("fold") {
-							children := treenode.HeadingChildren(h)
-							for _, c := range children {
-								if "1" == c.IALAttr("heading-fold") {
-									// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
-									continue
-								}
-								hChildren = append(hChildren, c)
-							}
+							// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+							hChildren = append(hChildren, treenode.VisibleHeadingChildren(h)...)
 						}
 					} else {
 						// 0: 显示标题与下方的块
 						hChildren = append(hChildren, h)
-						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+						if "1" != h.IALAttr("fold") {
+							// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+							hChildren = append(hChildren, treenode.VisibleHeadingChildren(h)...)
+						}
 					}
 					if 0 == blockEmbedMode {
 						embedTopLevel := 0
@@ -455,8 +478,11 @@ func renderBlockMarkdownR(id string, rendered *[]string) (ret []*ast.Node) {
 
 	var children []*ast.Node
 	if ast.NodeHeading == node.Type {
+		// 与嵌入块 mode 0 一致：标题自身折叠时仅带标题，否则带按折叠层级栈可见的子块，避免嵌套折叠泄漏
 		children = append(children, node)
-		children = append(children, treenode.HeadingChildren(node)...)
+		if "1" != node.IALAttr("fold") {
+			children = append(children, treenode.VisibleHeadingChildren(node)...)
+		}
 	} else if ast.NodeDocument == node.Type {
 		for c := node.FirstChild; nil != c; c = c.Next {
 			children = append(children, c)

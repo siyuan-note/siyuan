@@ -12,7 +12,7 @@ import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {avRender, refreshAV} from "../render/av/render";
-import {removeFoldHeading} from "../util/heading";
+import {insertUnfoldHeadingDOM, removeFoldHeading} from "../util/heading";
 import {cancelSB, genEmptyElement, genSBElement, refreshSbResize} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
@@ -223,6 +223,10 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "insert") {
+                // 折叠标题副本的子块等仅写入内核、不插 DOM（与 onTransaction 一致）
+                if (operation.context?.ignoreProcess === "true") {
+                    return;
+                }
                 // 块已被本地 DOM 操作插入时跳过，避免重复 https://github.com/siyuan-note/siyuan/issues/17890
                 if (protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`)) {
                     return;
@@ -463,7 +467,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     // kernel 权威撤销：retData 已由 doUnfoldHeading 填充，需要插入子块 HTML 恢复折叠的内容
                     if (operation.retData) {
                         removeUnfoldRepeatBlock(operation.retData, protyle);
-                        item.insertAdjacentHTML("afterend", operation.retData);
+                        insertUnfoldHeadingDOM(item, operation.retData);
                     }
                     return;
                 }
@@ -475,7 +479,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 }
                 if (operation.retData) {
                     removeUnfoldRepeatBlock(operation.retData, protyle);
-                    item.insertAdjacentHTML("afterend", operation.retData);
+                    insertUnfoldHeadingDOM(item, operation.retData);
                 }
                 if (operation.data === "remove") {
                     item.remove();
@@ -495,6 +499,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
         if (operation.action === "foldHeading") {
+            // 分屏聚焦在被折叠标题的子块上时（如右侧聚焦标题 333，左侧折叠其祖先标题 111），
+            // retData 为祖先标题的全量子块 ID，包含当前聚焦块及其子树。若照常移除会清空聚焦视图并退出聚焦，
+            // 故此处保持聚焦不做处理，聚焦视图与主文档的折叠态相互独立
+            if (protyle.block.showAll && operation.retData && operation.retData.includes(protyle.block.id)) {
+                return;
+            }
             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
                 item.setAttribute("fold", "1");
                 if (!operation.retData) {
@@ -1370,9 +1380,13 @@ export const turnsOneInto = async (options: {
         getContenteditableElement(options.nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
     }
     if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
-        for (const item of options.nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')) {
-            const itemId = item.getAttribute("data-node-id");
-            item.removeAttribute("fold");
+        // 取消列表 / 引述 / 标注会将容器内的块拍平到上层，此处语义上必须展开容器内所有折叠子标题，
+        // 否则折叠标题之下的内容无法随容器拍平而保留。由于内核展开单个标题不再清理其子标题的 fold，
+        // 展开后可能出现新的嵌套折叠标题，故用循环反复查找并展开，直至容器内不再有折叠标题
+        let foldedHeading = options.nodeElement.querySelector('[data-type="NodeHeading"][fold="1"]');
+        while (foldedHeading) {
+            const itemId = foldedHeading.getAttribute("data-node-id");
+            foldedHeading.removeAttribute("fold");
             const response = await fetchSyncPost("/api/transactions", {
                 session: options.protyle.id,
                 app: Constants.SIYUAN_APPID,
@@ -1394,7 +1408,9 @@ export const turnsOneInto = async (options: {
                 action: "foldHeading",
                 id: itemId
             }], options.protyle);
-            item.insertAdjacentHTML("afterend", response.data[0].doOperations[0].retData);
+            // 插入子块后对新插入范围内仍折叠的子标题兜底，避免展开父标题时子级折叠内容重复渲染
+            insertUnfoldHeadingDOM(foldedHeading, response.data[0].doOperations[0].retData);
+            foldedHeading = options.nodeElement.querySelector('[data-type="NodeHeading"][fold="1"]');
         }
     }
     const oldHTML = options.nodeElement.outerHTML;
@@ -1523,7 +1539,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
                     item.lastElementChild.remove();
                 }
                 removeUnfoldRepeatBlock(operation.retData, protyle);
-                item.insertAdjacentHTML("afterend", operation.retData);
+                insertUnfoldHeadingDOM(item, operation.retData);
                 if (operation.data === "remove") {
                     // https://github.com/siyuan-note/siyuan/issues/2188
                     const selection = getSelection();

@@ -132,7 +132,8 @@ body {
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {
-      padding-top: 42px;
+      height: calc(100% - 42px);
+      margin-top: 42px;
     }
 
     .toolbar {

@@ -360,6 +360,15 @@
   width: 42px;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &__split {
     height: 17px;

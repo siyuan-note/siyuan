@@ -453,6 +453,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer as HTMLElement;
+            const splitElements: HTMLElement[] = [];
             if (spanElement.tagName === "SPAN" && spanElement === (range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
                 // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
                 // emoji 图片需要切割 https://github.com/siyuan-note/siyuan/issues/9370
@@ -468,10 +469,17 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 spanElement.after(afterElement);
                 range.setStartBefore(afterElement);
                 range.collapse(true);
+                splitElements.push(spanElement, afterElement);
             }
             range.insertNode(tempElement.content.cloneNode(true));
             range.collapse(false);
             blockElement.querySelector("wbr")?.remove();
+            // 移除行级元素边界插入时产生的空拆分元素，避免相邻标签修复在新标签后插入空格
+            splitElements.forEach((item) => {
+                if (item.childElementCount === 0 && item.textContent.replaceAll(Constants.ZWSP, "") === "") {
+                    item.remove();
+                }
+            });
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
             fixAdjacentTags(getContenteditableElement(blockElement));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;

@@ -19,7 +19,7 @@ import {updateCellsValue} from "../render/av/cell";
 import {input} from "../wysiwyg/input";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost} from "../../util/fetch";
-import {isIncludeCell} from "./table";
+import {getTableRangeCells, isIncludeCell} from "./table";
 import {getFieldIdByCellElement, getRowHTML} from "../render/av/row";
 import {getAvBodyData} from "../render/av/virtualScroll";
 import {processClonePHElement} from "../render/util";
@@ -265,37 +265,86 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
     });
 };
 
-const processTable = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
+interface ITablePasteRange {
+    table: HTMLTableElement;
+    startCell: HTMLTableCellElement;
+    endCell: HTMLTableCellElement;
+}
+
+const getTablePasteRange = (range: Range): ITablePasteRange | undefined => {
+    if (range.collapsed) {
+        return undefined;
+    }
+    const startCell = (hasClosestByTag(range.startContainer, "TD") ||
+        hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
+    const endCell = (hasClosestByTag(range.endContainer, "TD") ||
+        hasClosestByTag(range.endContainer, "TH")) as HTMLTableCellElement;
+    if (!startCell || !endCell || startCell === endCell) {
+        return undefined;
+    }
+    const table = startCell.closest("table");
+    if (!table || table !== endCell.closest("table")) {
+        return undefined;
+    }
+    return {table, startCell, endCell};
+};
+
+const processTable = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement,
+                      pasteRange?: ITablePasteRange) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
-    const copyCellElements = tempElement.content.querySelectorAll("th, td");
-    if (copyCellElements.length === 0) {
+    const copyTableElement = tempElement.content.querySelector("table") as HTMLTableElement;
+    if (!copyTableElement) {
         return false;
     }
+    const copyCells = getTableRangeCells(copyTableElement);
+    if (copyCells.length === 0) {
+        return false;
+    }
+    const tableElement = blockElement.querySelector("table") as HTMLTableElement;
     const scrollLeft = blockElement.firstElementChild.scrollLeft;
-    const scrollTop = blockElement.querySelector("table").scrollTop;
+    const scrollTop = tableElement.scrollTop;
     const tableSelectElement = blockElement.querySelector(".table__select") as HTMLElement;
-    let index = 0;
-    const matchCellsElement: HTMLTableCellElement[] = [];
-    blockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-        if (!item.classList.contains("fn__none") && copyCellElements.length > index &&
-            isIncludeCell({
+    let startCell = pasteRange?.table === tableElement ? pasteRange.startCell : undefined;
+    let endCell = pasteRange?.table === tableElement ? pasteRange.endCell : undefined;
+    if (!startCell || !endCell) {
+        tableElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+            if (!item.classList.contains("fn__none") && isIncludeCell({
                 tableSelectElement,
                 scrollLeft,
                 scrollTop,
                 item,
             })) {
-            matchCellsElement.push(item);
-            index++;
+                if (!startCell) {
+                    startCell = item;
+                }
+                endCell = item;
+            }
+        });
+    }
+    if (!startCell || !endCell) {
+        return false;
+    }
+    const targetCells = getTableRangeCells(tableElement, startCell, endCell);
+    // 按逻辑网格坐标匹配实际单元格，避免 colspan/rowspan 的 fn__none 占位导致内容错位。
+    const copyCellMap = new Map(copyCells.map(item => [`${item.row}:${item.col}`, item.cell]));
+    const matchedCells: { source: HTMLTableCellElement; target: HTMLTableCellElement }[] = [];
+    targetCells.forEach(item => {
+        const source = copyCellMap.get(`${item.row}:${item.col}`);
+        if (source) {
+            matchedCells.push({source, target: item.cell});
         }
     });
+    if (matchedCells.length === 0) {
+        return false;
+    }
     tableSelectElement.removeAttribute("style");
     const oldHTML = blockElement.outerHTML;
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-    matchCellsElement.forEach((item, matchIndex) => {
-        item.innerHTML = copyCellElements[matchIndex].innerHTML;
-        if (matchIndex === matchCellsElement.length - 1) {
-            setLastNodeRange(item, range, false);
+    matchedCells.forEach((item, index) => {
+        item.target.innerHTML = item.source.innerHTML;
+        if (index === matchedCells.length - 1) {
+            setLastNodeRange(item.target, range, false);
         }
     });
     range.collapse(false);
@@ -312,6 +361,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
     const range = useProtyleRange ? protyle.toolbar.range : getEditorRange(protyle.wysiwyg.element);
+    const tablePasteRange = getTablePasteRange(range);
     fixTableRange(range);
     let unSpinHTML;
     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
@@ -343,8 +393,9 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             return;
         }
     }
-    if (blockElement.classList.contains("table") && blockElement.querySelector(".table__select").clientWidth > 0 &&
-        processTable(range, html, protyle, blockElement)) {
+    if (blockElement.classList.contains("table") &&
+        (tablePasteRange || blockElement.querySelector(".table__select").clientWidth > 0) &&
+        processTable(range, html, protyle, blockElement, tablePasteRange)) {
         return;
     }
 

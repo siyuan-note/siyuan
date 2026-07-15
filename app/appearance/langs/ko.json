@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "문서 또는 이미지 데이터가 설정된 API 제공업체로 전송됩니다",
+  "agentEffectExternalCost": "외부 API 요금이 발생할 수 있습니다",
+  "agentEffectLocalWrite": "로컬 데이터가 변경됩니다",
 	"agentRetrying": "재시도 중 (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "스트림 유휴 시간 초과",
 	"agentStreamIdleTimeoutTip": "모델 출력이 없을 때 요청을 중지하기까지의 최대 시간",

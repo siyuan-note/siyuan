@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Дані документа або зображення буде надіслано налаштованому постачальнику API",
+  "agentEffectExternalCost": "Може стягуватися плата за використання зовнішнього API",
+  "agentEffectLocalWrite": "Локальні дані буде змінено",
 	"agentRetrying": "Повторна спроба (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Тайм-аут бездіяльності потоку",
 	"agentStreamIdleTimeoutTip": "Максимальний час без виводу моделі до зупинки запиту",

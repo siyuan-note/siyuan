@@ -274,6 +274,25 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
+// SetDocumentTitleImage 将同一笔记本中的资源设置为文档题头图。
+func SetDocumentTitleImage(documentID, assetPath string) error {
+	bt := treenode.GetBlockTree(documentID)
+	if bt == nil {
+		return errors.New(Conf.Language(71))
+	}
+	if !strings.HasPrefix(AssetPathWithoutQuery(assetPath), "assets/") || strings.ContainsAny(assetPath, "\"')\\") {
+		return errors.New("invalid title image asset path")
+	}
+	absPath, err := GetAssetAbsPathInBox(assetPath, bt.BoxID)
+	if err != nil {
+		return err
+	}
+	if effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath); effectiveBoxID != "" && effectiveBoxID != bt.BoxID {
+		return errors.New("title image must belong to the document notebook")
+	}
+	return SetBlockAttrs(bt.RootID, map[string]string{"title-img": `background-image:url("` + assetPath + `")`})
+}
+
 func DocAssets(rootID string, retainQueryStr bool) (ret []string, err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {

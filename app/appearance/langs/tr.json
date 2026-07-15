@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Belge veya görsel verileri yapılandırılmış API sağlayıcısına gönderilecek",
+  "agentEffectExternalCost": "Harici API ücretleri uygulanabilir",
+  "agentEffectLocalWrite": "Yerel veriler değiştirilecek",
 	"agentRetrying": "Yeniden deneniyor (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Akış boşta kalma zaman aşımı",
 	"agentStreamIdleTimeoutTip": "İstek durdurulmadan önce model çıktısı olmadan geçecek en uzun süre",

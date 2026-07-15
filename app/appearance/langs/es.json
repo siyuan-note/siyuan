@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Los datos del documento o de la imagen se enviarán al proveedor de API configurado",
+  "agentEffectExternalCost": "Pueden aplicarse cargos de la API externa",
+  "agentEffectLocalWrite": "Se modificarán los datos locales",
 	"agentRetrying": "Reintentando (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Tiempo de espera inactivo del flujo",
 	"agentStreamIdleTimeoutTip": "Tiempo máximo sin salida del modelo antes de detener la solicitud",

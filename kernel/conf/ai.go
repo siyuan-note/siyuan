@@ -28,12 +28,14 @@ import (
 )
 
 type AI struct {
-	MCP       *MCP        `json:"mcp"`
-	Embedding *Embedding  `json:"embedding"`
-	Rerank    *Rerank     `json:"rerank"`
-	Agent     *Agent      `json:"agent"`
-	Editing   *Editing    `json:"editing"`
-	Providers []*Provider `json:"providers"`
+	MCP             *MCP             `json:"mcp"`
+	Embedding       *Embedding       `json:"embedding"`
+	Rerank          *Rerank          `json:"rerank"`
+	Agent           *Agent           `json:"agent"`
+	Editing         *Editing         `json:"editing"`
+	Vision          *Vision          `json:"vision"`
+	ImageGeneration *ImageGeneration `json:"imageGeneration"`
+	Providers       []*Provider      `json:"providers"`
 }
 
 type Agent struct {
@@ -55,6 +57,22 @@ type Editing struct {
 	MaxHistoryMessages  int     `json:"maxHistoryMessages"`  // Max number of prior turns kept as context
 	Temperature         float64 `json:"temperature"`         // Alignment with Agent.Temperature
 	MaxCompletionTokens int     `json:"maxCompletionTokens"` // Alignment with Agent.MaxCompletionTokens
+}
+
+// Vision 配置图片理解场景及发送到模型前的资源限制。
+type Vision struct {
+	ModelID       string `json:"modelId"`
+	MaxImageBytes int    `json:"maxImageBytes"`
+	MaxPixels     int    `json:"maxPixels"`
+	MaxEdge       int    `json:"maxEdge"`
+}
+
+// ImageGeneration 配置图片生成场景的模型和默认输出参数。
+type ImageGeneration struct {
+	ModelID      string `json:"modelId"`
+	Size         string `json:"size"`
+	Quality      string `json:"quality"`
+	OutputFormat string `json:"outputFormat"`
 }
 
 type Embedding struct {
@@ -86,6 +104,7 @@ type Provider struct {
 	Enabled        bool     `json:"enabled"`
 	APIKey         string   `json:"apiKey"`
 	BaseURL        string   `json:"baseURL"`
+	Protocol       string   `json:"protocol,omitempty"`
 	RequestTimeout int      `json:"requestTimeout"`
 	Models         []*Model `json:"models"`
 }
@@ -94,10 +113,11 @@ type Provider struct {
 // MaxContexts remain the persisted UI-facing config (the settings page still
 // reads/writes them). Editing holds the runtime view derived from them.
 type Model struct {
-	ID          string `json:"id"`
-	DisplayName string `json:"displayName,omitempty"`
-	Enabled     bool   `json:"enabled"`
-	Name        string `json:"name"`
+	ID           string   `json:"id"`
+	DisplayName  string   `json:"displayName,omitempty"`
+	Enabled      bool     `json:"enabled"`
+	Name         string   `json:"name"`
+	Capabilities []string `json:"capabilities,omitempty"`
 }
 
 type MCP struct {
@@ -144,14 +164,24 @@ func defaultEditing() *Editing {
 	}
 }
 
+func defaultVision() *Vision {
+	return &Vision{MaxImageBytes: 20 * 1024 * 1024, MaxPixels: 40 * 1000 * 1000, MaxEdge: 2048}
+}
+
+func defaultImageGeneration() *ImageGeneration {
+	return &ImageGeneration{Size: "1536x1024", Quality: "auto", OutputFormat: "png"}
+}
+
 func NewAI() *AI {
 	ai := &AI{
-		Providers: []*Provider{},
-		MCP:       &MCP{Servers: []MCPServer{}},
-		Embedding: defaultEmbedding(),
-		Rerank:    defaultRerank(),
-		Agent:     defaultAgent(),
-		Editing:   defaultEditing(),
+		Providers:       []*Provider{},
+		MCP:             &MCP{Servers: []MCPServer{}},
+		Embedding:       defaultEmbedding(),
+		Rerank:          defaultRerank(),
+		Agent:           defaultAgent(),
+		Editing:         defaultEditing(),
+		Vision:          defaultVision(),
+		ImageGeneration: defaultImageGeneration(),
 	}
 
 	apiKey := os.Getenv("SIYUAN_OPENAI_API_KEY")
@@ -314,6 +344,20 @@ func (ai *AI) GetAgentModel() (*Provider, *Model) {
 	return ai.GetModel(ai.Agent.ModelID)
 }
 
+func (ai *AI) GetVisionModel() (*Provider, *Model) {
+	if ai.Vision == nil || ai.Vision.ModelID == "" {
+		return nil, nil
+	}
+	return ai.GetModel(ai.Vision.ModelID)
+}
+
+func (ai *AI) GetImageGenerationModel() (*Provider, *Model) {
+	if ai.ImageGeneration == nil || ai.ImageGeneration.ModelID == "" {
+		return nil, nil
+	}
+	return ai.GetModel(ai.ImageGeneration.ModelID)
+}
+
 func (ai *AI) Normalize() {
 	if ai.Providers == nil {
 		ai.Providers = []*Provider{}
@@ -359,6 +403,39 @@ func (ai *AI) Normalize() {
 			ai.Editing.MaxHistoryMessages = 64
 		}
 	}
+	if ai.Vision == nil {
+		ai.Vision = defaultVision()
+	}
+	if ai.Vision.MaxImageBytes < 1024*1024 {
+		ai.Vision.MaxImageBytes = 20 * 1024 * 1024
+	} else if ai.Vision.MaxImageBytes > 100*1024*1024 {
+		ai.Vision.MaxImageBytes = 100 * 1024 * 1024
+	}
+	if ai.Vision.MaxPixels < 1000*1000 {
+		ai.Vision.MaxPixels = 40 * 1000 * 1000
+	} else if ai.Vision.MaxPixels > 100*1000*1000 {
+		ai.Vision.MaxPixels = 100 * 1000 * 1000
+	}
+	if ai.Vision.MaxEdge < 512 {
+		ai.Vision.MaxEdge = 2048
+	} else if ai.Vision.MaxEdge > 4096 {
+		ai.Vision.MaxEdge = 4096
+	}
+	if ai.ImageGeneration == nil {
+		ai.ImageGeneration = defaultImageGeneration()
+	}
+	ai.ImageGeneration.Size = strings.TrimSpace(ai.ImageGeneration.Size)
+	if ai.ImageGeneration.Size == "" {
+		ai.ImageGeneration.Size = "1536x1024"
+	}
+	ai.ImageGeneration.Quality = strings.TrimSpace(ai.ImageGeneration.Quality)
+	if ai.ImageGeneration.Quality == "" {
+		ai.ImageGeneration.Quality = "auto"
+	}
+	ai.ImageGeneration.OutputFormat = strings.ToLower(strings.TrimSpace(ai.ImageGeneration.OutputFormat))
+	if ai.ImageGeneration.OutputFormat != "jpeg" && ai.ImageGeneration.OutputFormat != "webp" {
+		ai.ImageGeneration.OutputFormat = "png"
+	}
 	providers := make([]*Provider, 0, len(ai.Providers))
 	for _, p := range ai.Providers {
 		if p == nil {
@@ -370,6 +447,10 @@ func (ai *AI) Normalize() {
 		}
 		p.DisplayName = strings.TrimSpace(p.DisplayName)
 		p.APIKey = strings.TrimSpace(p.APIKey)
+		p.Protocol = strings.ToLower(strings.TrimSpace(p.Protocol))
+		if p.Protocol == "" {
+			p.Protocol = "openai"
+		}
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 30
 		} else if 600 < p.RequestTimeout {
@@ -388,6 +469,17 @@ func (ai *AI) Normalize() {
 				m.Name = "model"
 			}
 			m.DisplayName = strings.TrimSpace(m.DisplayName)
+			capabilities := make([]string, 0, len(m.Capabilities))
+			seenCapabilities := map[string]bool{}
+			for _, capability := range m.Capabilities {
+				capability = strings.ToLower(strings.TrimSpace(capability))
+				if capability == "" || seenCapabilities[capability] {
+					continue
+				}
+				seenCapabilities[capability] = true
+				capabilities = append(capabilities, capability)
+			}
+			m.Capabilities = capabilities
 			if !ast.IsNodeIDPattern(m.ID) {
 				m.ID = ast.NewNodeID()
 			}

@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "將向已設定的 API 提供者傳送文件或圖片資料",
+  "agentEffectExternalCost": "可能產生外部 API 呼叫費用",
+  "agentEffectLocalWrite": "將修改本機資料",
 	"agentRetrying": "正在重試（${attempt}/${maxRetries}）...",
 	"agentStreamIdleTimeout": "串流閒置逾時時間",
 	"agentStreamIdleTimeoutTip": "模型持續無輸出多久後停止本次請求",

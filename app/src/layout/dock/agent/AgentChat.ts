@@ -1,7 +1,7 @@
 import {Tab} from "../../Tab";
 import {Model} from "../../Model";
 import {App} from "../../../index";
-import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult} from "./agentSSE";
+import {AgentHttpError, fetchAgentSSE, IEditorContext, ISSEResult, IToolEffects} from "./agentSSE";
 import {genUUID} from "../../../util/genID";
 import {mountComposer} from "./AgentComposer";
 import {getAllEditor} from "../../getAll";
@@ -55,7 +55,7 @@ type SessionEntry =
     toolCalls?: Array<{ name: string; arguments: Record<string, unknown>; result?: string; state?: string }>;
     timestamp?: number
 })
-    | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; status?: string })
+    | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; effects?: IToolEffects; status?: string })
     | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string; answers?: string[] })
     | (EntryBase & { type: "snapshot"; snapshotID: string })
     | (EntryBase & { type: "rollback"; snapshotID: string });
@@ -1160,6 +1160,7 @@ export class AgentChat extends Model {
         name: string;
         args: Record<string, unknown>;
         confirmID: string;
+        effects?: IToolEffects;
         status?: string
     }) {
         const L = window.siyuan.languages;
@@ -1184,6 +1185,7 @@ export class AgentChat extends Model {
         }
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
+            this.renderConfirmEffects(entry.effects) +
             '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
             (statusLabel ? '<div class="agent-chat__confirm-actions"><span class="agent-chat__confirm-done">' + statusLabel + "</span></div>" : "") +
             "</div>";
@@ -1738,7 +1740,7 @@ export class AgentChat extends Model {
                     this.currentToolCalls.push({name: event.name, arguments: event.arguments});
                     break;
                 case "confirm":
-                    this.appendConfirm(event.name, event.arguments, event.confirmID);
+                    this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects);
                     break;
                 case "tool_result":
                     if (this.currentToolCalls.length > 0) {
@@ -2708,7 +2710,28 @@ export class AgentChat extends Model {
         }
     }
 
-    private async appendConfirm(name: string, args: Record<string, unknown>, confirmID: string) {
+    private renderConfirmEffects(effects?: IToolEffects) {
+        if (!effects) {
+            return "";
+        }
+        const L = window.siyuan.languages;
+        const items: string[] = [];
+        if (effects.dataEgress) {
+            items.push(L.agentEffectDataEgress);
+        }
+        if (effects.externalCost) {
+            items.push(L.agentEffectExternalCost);
+        }
+        if (effects.localWrite) {
+            items.push(L.agentEffectLocalWrite);
+        }
+        if (items.length === 0) {
+            return "";
+        }
+        return '<ul class="agent-chat__confirm-effects">' + items.map((item) => `<li>${escapeHtml(item)}</li>`).join("") + "</ul>";
+    }
+
+    private async appendConfirm(name: string, args: Record<string, unknown>, confirmID: string, effects?: IToolEffects) {
         this.finishActiveThinking();
         this.flushThinkingStep();
         const L = window.siyuan.languages;
@@ -2718,6 +2741,7 @@ export class AgentChat extends Model {
         const desc = (L.agentConfirmDesc || "Agent: {category} operation").replace("{category}", escapeHtml(this.toolCategory(name)));
         el.innerHTML = '<div class="agent-chat__confirm-card">' +
             '<div class="agent-chat__confirm-header"><svg class="agent-chat__confirm-icon"><use xlink:href="#iconInfo"></use></svg> ' + desc + "</div>" +
+            this.renderConfirmEffects(effects) +
             '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
             '<div class="agent-chat__confirm-actions">' +
             '<button class="b3-button b3-button--cancel agent-chat__confirm-reject">' + (L.agentConfirmReject || "Reject") + "</button>" +
@@ -2733,6 +2757,7 @@ export class AgentChat extends Model {
             name,
             args,
             confirmID,
+            effects,
             status: "pending",
         };
         el.setAttribute("data-message-id", confirmEntryId);

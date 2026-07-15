@@ -56,12 +56,13 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) (res
 	}
 
 	args := parseToolArgs(tc.Function.Arguments)
-	// _sessionID 是原生工具（如 todo_write）专用的内部字段，用于关联会话状态。
+	// _sessionID 和 _toolCallID 是原生工具专用的内部字段，用于关联会话状态和实现幂等操作。
 	// 仅注入给原生工具；MCP/插件工具的参数会原样转发给外部服务端，
 	// 严格校验（additionalProperties:false）的服务端（如 Flomo MCP）会因这个多余字段报错。
 	// https://github.com/siyuan-note/siyuan/issues/17927
 	if t.Source == "native" || t.Source == "" {
 		args["_sessionID"] = sessionID
+		args["_toolCallID"] = tc.ID
 	}
 	type executionResult struct {
 		result tools.CallToolResult

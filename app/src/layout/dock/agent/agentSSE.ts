@@ -1,3 +1,10 @@
+export type IToolEffects = {
+    localRead?: boolean;
+    localWrite?: boolean;
+    dataEgress?: boolean;
+    externalCost?: boolean;
+};
+
 export type ISSEResult = {
     type: "turn";
     turnID: string;
@@ -16,6 +23,7 @@ export type ISSEResult = {
     name: string;
     arguments: Record<string, unknown>;
     confirmID: string;
+    effects?: IToolEffects;
 } | {
     type: "tool_result";
     name: string;

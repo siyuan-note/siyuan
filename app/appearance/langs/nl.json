@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Document- of afbeeldingsgegevens worden naar de geconfigureerde API-provider verzonden",
+  "agentEffectExternalCost": "Er kunnen kosten voor de externe API gelden",
+  "agentEffectLocalWrite": "Lokale gegevens worden gewijzigd",
 	"agentRetrying": "Opnieuw proberen (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Time-out bij inactiviteit van stream",
 	"agentStreamIdleTimeoutTip": "Maximale tijd zonder modeluitvoer voordat de aanvraag wordt gestopt",

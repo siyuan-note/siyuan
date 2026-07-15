@@ -115,6 +115,30 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+const registerAiVisionGroup = (tab: SettingTabBuilder) => {
+    const groupId = "vision";
+    const group = tab.group(groupId, window.siyuan.languages.image);
+
+    group.slot({
+        key: "visionModelPicker",
+        keywords: getModelPickerKeywords(groupId),
+        html: () => genModelPickerHtml(groupId),
+        afterMount: (root) => mountModelPickerBlock(root, groupId),
+    });
+};
+
+const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
+    const groupId = "imageGeneration";
+    const group = tab.group(groupId, window.siyuan.languages.configGroupImages);
+
+    group.slot({
+        key: "imageGenerationModelPicker",
+        keywords: getModelPickerKeywords(groupId),
+        html: () => genModelPickerHtml(groupId),
+        afterMount: (root) => mountModelPickerBlock(root, groupId),
+    });
+};
+
 const registerAiMcpGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
 
@@ -230,6 +254,8 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
+    registerAiVisionGroup(tab);
+    registerAiImageGenerationGroup(tab);
     registerAiMcpGroup(tab);
     // TODO: add skills group?
     registerAiEmbeddingGroup(tab);

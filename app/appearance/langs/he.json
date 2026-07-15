@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "נתוני המסמך או התמונה יישלחו לספק ה-API שהוגדר",
+  "agentEffectExternalCost": "ייתכנו חיובים עבור ה-API החיצוני",
+  "agentEffectLocalWrite": "הנתונים המקומיים ישתנו",
 	"agentRetrying": "מנסה שוב (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "זמן קצוב לחוסר פעילות בזרם",
 	"agentStreamIdleTimeoutTip": "משך הזמן המרבי ללא פלט מהמודל לפני עצירת הבקשה",

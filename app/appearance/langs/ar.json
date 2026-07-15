@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "سيتم إرسال بيانات المستند أو الصورة إلى موفر واجهة API المهيأ",
+  "agentEffectExternalCost": "قد تترتب رسوم على استخدام واجهة API الخارجية",
+  "agentEffectLocalWrite": "سيتم تعديل البيانات المحلية",
 	"agentRetrying": "جارٍ إعادة المحاولة (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "مهلة خمول التدفق",
 	"agentStreamIdleTimeoutTip": "أقصى مدة دون إخراج من النموذج قبل إيقاف الطلب",

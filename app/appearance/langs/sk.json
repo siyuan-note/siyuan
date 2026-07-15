@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Údaje dokumentu alebo obrázka sa odošlú nakonfigurovanému poskytovateľovi API",
+  "agentEffectExternalCost": "Môžu sa účtovať poplatky za externé API",
+  "agentEffectLocalWrite": "Lokálne údaje sa zmenia",
 	"agentRetrying": "Opakovaný pokus (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Časový limit nečinnosti toku",
 	"agentStreamIdleTimeoutTip": "Maximálny čas bez výstupu modelu pred zastavením požiadavky",

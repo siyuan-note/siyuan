@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "Dokument- oder Bilddaten werden an den konfigurierten API-Anbieter gesendet",
+  "agentEffectExternalCost": "Es können Gebühren des externen API-Anbieters anfallen",
+  "agentEffectLocalWrite": "Lokale Daten werden geändert",
 	"agentRetrying": "Erneuter Versuch (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "Leerlaufzeitlimit des Streams",
 	"agentStreamIdleTimeoutTip": "Maximale Zeit ohne Modellausgabe, bevor die Anfrage beendet wird",

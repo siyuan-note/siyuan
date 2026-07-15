@@ -1,4 +1,7 @@
 {
+  "agentEffectDataEgress": "दस्तावेज़ या छवि डेटा कॉन्फ़िगर किए गए API प्रदाता को भेजा जाएगा",
+  "agentEffectExternalCost": "बाहरी API शुल्क लागू हो सकते हैं",
+  "agentEffectLocalWrite": "स्थानीय डेटा में बदलाव किया जाएगा",
 	"agentRetrying": "पुनः प्रयास जारी है (${attempt}/${maxRetries})...",
 	"agentStreamIdleTimeout": "स्ट्रीम निष्क्रियता समय सीमा",
 	"agentStreamIdleTimeoutTip": "अनुरोध रोकने से पहले मॉडल आउटपुट के बिना अधिकतम समय",

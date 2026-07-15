@@ -936,7 +936,16 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 		}
 		r.Contents = newContents
 	case CalcOperatorCountAll:
-		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
+		countAll := len(r.Contents)
+		if KeyTypeRelation == destKey.Type {
+			countAll = 0
+			for _, content := range r.Contents {
+				if nil != content.Relation {
+					countAll += len(content.Relation.BlockIDs)
+				}
+			}
+		}
+		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countAll), NumberFormatNone)}}
 	case CalcOperatorCountValues:
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountUniqueValues:

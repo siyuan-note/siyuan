@@ -53,3 +53,37 @@ func TestValueRollupCalcUniqueValues(t *testing.T) {
 		}
 	})
 }
+
+func TestValueRollupCalcCountAll(t *testing.T) {
+	t.Run("Relation", func(t *testing.T) {
+		rollup := &ValueRollup{Contents: []*Value{
+			{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"order-1", "order-2"}}},
+			{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"order-3"}}},
+		}}
+
+		rollup.calcContents(&RollupCalc{Operator: CalcOperatorCountAll}, &Key{Type: KeyTypeRelation})
+
+		if 1 != len(rollup.Contents) || nil == rollup.Contents[0].Number {
+			t.Fatalf("unexpected calculation result: %+v", rollup.Contents)
+		}
+		if 3 != rollup.Contents[0].Number.Content {
+			t.Fatalf("expected 3 relation entries, got %v", rollup.Contents[0].Number.Content)
+		}
+	})
+
+	t.Run("Scalar", func(t *testing.T) {
+		rollup := &ValueRollup{Contents: []*Value{
+			{Type: KeyTypeText, Text: &ValueText{Content: "A"}},
+			{Type: KeyTypeText, Text: &ValueText{Content: "B"}},
+		}}
+
+		rollup.calcContents(&RollupCalc{Operator: CalcOperatorCountAll}, &Key{Type: KeyTypeText})
+
+		if 1 != len(rollup.Contents) || nil == rollup.Contents[0].Number {
+			t.Fatalf("unexpected calculation result: %+v", rollup.Contents)
+		}
+		if 2 != rollup.Contents[0].Number.Content {
+			t.Fatalf("expected 2 scalar entries, got %v", rollup.Contents[0].Number.Content)
+		}
+	})
+}

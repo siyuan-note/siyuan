@@ -1290,6 +1290,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goUpdateColType") {
+                    window.siyuan.menus.menu.remove();
                     const editMenuElement = hasClosestByClassName(target, "b3-menu");
                     if (editMenuElement) {
                         editMenuElement.firstElementChild.classList.add("fn__none");

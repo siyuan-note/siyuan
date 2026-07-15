@@ -507,7 +507,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				return true
 			}
 
-			if v := filter.Value.GetValByType(filter.Value.Rollup.Contents[0].Type); nil == v || reflect.ValueOf(v).IsNil() {
+			if isRollupFilterValueEmpty(filter) {
 				return true
 			}
 
@@ -553,7 +553,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				return true
 			}
 
-			if v := filter.Value.GetValByType(filter.Value.Rollup.Contents[0].Type); nil == v || reflect.ValueOf(v).IsNil() {
+			if isRollupFilterValueEmpty(filter) {
 				return true
 			}
 
@@ -596,7 +596,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				return true
 			}
 
-			if v := filter.Value.GetValByType(filter.Value.Rollup.Contents[0].Type); nil == v || reflect.ValueOf(v).IsNil() {
+			if isRollupFilterValueEmpty(filter) {
 				return true
 			}
 
@@ -791,6 +791,16 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		}
 	}
 	return value.filter(filter.Value, filter.RelativeDate, filter.RelativeDate2, filter.Operator)
+}
+
+// isRollupFilterValueEmpty 判断汇总筛选是否缺少比较值，相对日期仅依赖相对时间配置。
+func isRollupFilterValueEmpty(filter *ViewFilter) bool {
+	valueType := filter.Value.Rollup.Contents[0].Type
+	if nil != filter.RelativeDate && (KeyTypeDate == valueType || KeyTypeCreated == valueType || KeyTypeUpdated == valueType) {
+		return false
+	}
+	v := filter.Value.GetValByType(valueType)
+	return nil == v || reflect.ValueOf(v).IsNil()
 }
 
 func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDate, operator FilterOperator) bool {

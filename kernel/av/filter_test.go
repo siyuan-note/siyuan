@@ -18,6 +18,7 @@ package av
 
 import (
 	"testing"
+	"time"
 )
 
 // leaf 构造一个叶子过滤节点。
@@ -118,6 +119,69 @@ func TestEvalNode_GroupSemantics(t *testing.T) {
 	root = group(FilterCombinationAnd, missingCol)
 	if evalNode(root, values, colIndex, nil, "", nil, nil) {
 		t.Fatalf("leaf referencing missing column should not pass")
+	}
+}
+
+func TestIsRollupFilterValueEmpty(t *testing.T) {
+	filter := &ViewFilter{
+		Value: &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{{Type: KeyTypeDate}}}},
+	}
+	if !isRollupFilterValueEmpty(filter) {
+		t.Fatalf("rollup filter without an absolute value should be empty")
+	}
+
+	filter.RelativeDate = &RelativeDate{Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis}
+	if isRollupFilterValueEmpty(filter) {
+		t.Fatalf("rollup filter with a relative date should not be empty")
+	}
+
+	filter.RelativeDate = nil
+	filter.Value.Rollup.Contents[0].Date = &ValueDate{Content: 1, IsNotEmpty: true}
+	if isRollupFilterValueEmpty(filter) {
+		t.Fatalf("rollup filter with an absolute date should not be empty")
+	}
+
+	filter.RelativeDate = &RelativeDate{Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis}
+	filter.Value.Rollup.Contents[0] = &Value{Type: KeyTypeNumber}
+	if !isRollupFilterValueEmpty(filter) {
+		t.Fatalf("relative date should not configure a non-date rollup filter")
+	}
+}
+
+func TestRollupRelativeDateFilter(t *testing.T) {
+	relationKey := NewKey("relation", "关联", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: "target"}
+	rollupKey := NewKey("rollup", "汇总", "", KeyTypeRollup)
+	rollupKey.Rollup = &Rollup{RelationKeyID: relationKey.ID, KeyID: "date"}
+	attrView := &AttributeView{KeyValues: []*KeyValues{
+		{Key: relationKey, Values: []*Value{{
+			KeyID: relationKey.ID, BlockID: "source-item", Type: KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"target-item"}},
+		}}},
+		{Key: rollupKey},
+	}}
+
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	targetDate := &Value{
+		KeyID: "date", BlockID: "target-item", Type: KeyTypeDate,
+		Date: &ValueDate{Content: today.AddDate(0, 0, -1).UnixMilli(), IsNotEmpty: true},
+	}
+	targetView := &AttributeView{KeyValues: []*KeyValues{{Key: NewKey("date", "日期", "", KeyTypeDate), Values: []*Value{targetDate}}}}
+	value := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+	filter := &ViewFilter{
+		Qualifier:    FilterQuantifierAny,
+		Operator:     FilterOperatorIsLess,
+		Value:        &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{{Type: KeyTypeDate}}}},
+		RelativeDate: &RelativeDate{Count: 1, Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis},
+	}
+
+	if !value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView}) {
+		t.Fatalf("rollup date before today should pass the relative date filter")
+	}
+	targetDate.Date.Content = today.AddDate(0, 0, 1).UnixMilli()
+	if value.Filter(filter, attrView, "source-item", map[string]Collection{}, map[string]*AttributeView{"target": targetView}) {
+		t.Fatalf("future rollup date should not pass the before-today filter")
 	}
 }
 

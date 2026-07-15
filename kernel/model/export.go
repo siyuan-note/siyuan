@@ -2625,6 +2625,10 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 		return
 	}
 	if avData != nil {
+		if mkdirErr := os.MkdirAll(exportStorageAvDir, 0755); mkdirErr != nil {
+			logging.LogErrorf("create export av folder [%s] failed: %s", exportStorageAvDir, mkdirErr)
+			return
+		}
 		if writeErr := os.WriteFile(filepath.Join(exportStorageAvDir, avID+".json"), avData, 0644); writeErr != nil {
 			logging.LogErrorf("write av json failed: %s", writeErr)
 		}

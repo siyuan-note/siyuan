@@ -44,6 +44,14 @@ export const getPreviousBlockSibling = (element: Element): Element => {
     return previous;
 };
 
+export const getNextBlockSibling = (element: Element): Element => {
+    let next = element.nextElementSibling;
+    while (next && !next.getAttribute("data-node-id")) {
+        next = next.nextElementSibling;
+    }
+    return next;
+};
+
 export const getLastBlock = (element: Element) => {
     let lastElement;
     Array.from(element.querySelectorAll("[data-node-id]")).reverse().find(item => {

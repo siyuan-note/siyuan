@@ -476,7 +476,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             blockElement.querySelector("wbr")?.remove();
             // 移除行级元素边界插入时产生的空拆分元素，避免相邻标签修复在新标签后插入空格
             splitElements.forEach((item) => {
-                if (item.childElementCount === 0 && item.textContent.replaceAll(Constants.ZWSP, "") === "") {
+                if (item.childElementCount === 0 && item.textContent.split(Constants.ZWSP).join("") === "") {
                     item.remove();
                 }
             });

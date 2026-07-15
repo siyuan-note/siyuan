@@ -265,8 +265,10 @@ export const handleTouchStart = (event: TouchEvent) => {
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
             longPressTimer = window.setTimeout(() => {
                 window.getSelection()?.removeAllRanges();
-                activeBlur();
                 editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
+                if (editor.protyle.options.render.gutter) {
+                    editor.protyle.gutter.render(editor.protyle, blockElement, target);
+                }
             }, Constants.TIMEOUT_MULTIPLE_SELECT);
         }
     }

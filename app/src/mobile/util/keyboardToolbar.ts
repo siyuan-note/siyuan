@@ -19,6 +19,7 @@ import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
 import {getMirror} from "../../protyle/undo/globalUndo";
 
 let renderKeyboardToolbarTimeout: number;
+let scrollSelectionIntoViewTimeout: number;
 let showUtil = false;
 
 const getSlashItem = (value: string, icon: string, text: string, focus = "false") => {
@@ -444,7 +445,11 @@ export const showKeyboardToolbar = () => {
             item.eventBus.emit("mobile-keyboard-show");
         });
     }
-    setTimeout(() => {
+    clearTimeout(scrollSelectionIntoViewTimeout);
+    scrollSelectionIntoViewTimeout = window.setTimeout(() => {
+        if (editor?.protyle.toolbar.isMultiSelectMode()) {
+            return;
+        }
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
             let cursorTop = getSelectionPosition(contentElement).top;
@@ -473,6 +478,8 @@ export const showKeyboardToolbar = () => {
 };
 
 export const hideKeyboardToolbar = () => {
+    clearTimeout(renderKeyboardToolbarTimeout);
+    clearTimeout(scrollSelectionIntoViewTimeout);
     if (showUtil) {
         return;
     }

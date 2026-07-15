@@ -565,6 +565,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            if (protyle.toolbar.isMultiSelectMode()) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
             if (event.button === 2) {
                 // 右键
@@ -2937,6 +2942,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("dblclick", (event: MouseEvent) => {
+            if (protyle.toolbar.isMultiSelectMode()) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             const target = event.target as HTMLElement;
             // 双击超级块拖拽手柄，均分所有列宽
             if (target.classList.contains("sb__resize")) {
@@ -2979,6 +2989,11 @@ export class WYSIWYG {
         });
         let mobileBlur = false;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+            if (protyle.toolbar.isMultiSelectMode()) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (this.preventClick) {
                 this.preventClick = false;
                 return;

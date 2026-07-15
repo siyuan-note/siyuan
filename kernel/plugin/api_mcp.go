@@ -50,6 +50,7 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 		var name string
 		var title string
 		var description string
+		var readOnlyHint bool
 		var inputSchema *tools.ToolSchema
 		var outputSchema *tools.ToolSchema
 		var handler goja.Callable
@@ -91,6 +92,13 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 								return
 							}
 						}
+						if readOnlyValue := configObj.Get("readOnly"); !goja.IsUndefined(readOnlyValue) && !goja.IsNull(readOnlyValue) {
+							var ok bool
+							if readOnlyHint, ok = readOnlyValue.Export().(bool); !ok {
+								err = fmt.Errorf("config.readOnly must be a boolean")
+								return
+							}
+						}
 					}
 				} else {
 					err = fmt.Errorf("second argument must be a config object")
@@ -121,6 +129,7 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 				InputSchema:  *inputSchema,
 				OutputSchema: outputSchema,
 				Source:       "plugin",
+				ReadOnlyHint: readOnlyHint,
 				Handler: func(args map[string]any) (tools.CallToolResult, error) {
 					return p.invokeMcpTool(handler, args)
 				},
@@ -132,6 +141,7 @@ func injectMcp(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 				"name":         fullToolName,
 				"title":        title,
 				"description":  description,
+				"readOnly":     readOnlyHint,
 				"inputSchema":  inputSchema,
 				"outputSchema": outputSchema,
 			}

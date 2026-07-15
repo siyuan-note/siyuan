@@ -1,4 +1,7 @@
 export type ISSEResult = {
+    type: "turn";
+    turnID: string;
+} | {
     type: "content";
     token: string;
 } | {
@@ -21,7 +24,11 @@ export type ISSEResult = {
     type: "error";
     message: string;
 } | {
+    type: "interrupted";
+    message: string;
+} | {
     type: "done";
+    turnID: string;
 } | {
     type: "usage";
     promptTokens: number;
@@ -77,7 +84,7 @@ export async function fetchAgentSSE(
     language: string,
     references: Array<{id: string; title: string}>,
     onEvent: (event: ISSEResult) => void | Promise<void>,
-    onError: (err: Error) => void,
+    onError: (err: Error) => void | Promise<void>,
     signal?: AbortSignal,
     sessionID?: string,
     model?: string,
@@ -85,7 +92,21 @@ export async function fetchAgentSSE(
     regenerate?: boolean,
     editorContext?: IEditorContext,
     pluginActions?: Array<{name: string; description: string}>,
+    userEntryID?: string,
+    contentRevision?: number,
 ): Promise<void> {
+    let errorReported = false;
+    const reportError = async (err: Error) => {
+        if (errorReported) {
+            return;
+        }
+        errorReported = true;
+        try {
+            await onError(err);
+        } catch (handlerErr) {
+            console.error("agent SSE error handler failed:", handlerErr);
+        }
+    };
     try {
         const body: Record<string, unknown> = {message: message, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
@@ -94,6 +115,8 @@ export async function fetchAgentSSE(
         if (regenerate) { body.regenerate = regenerate; }
         if (editorContext) { body.editorContext = editorContext; }
         if (pluginActions && pluginActions.length > 0) { body.pluginActions = pluginActions; }
+        if (userEntryID) { body.userEntryID = userEntryID; }
+        if (typeof contentRevision === "number") { body.contentRevision = contentRevision; }
 
         const response = await fetch("/api/ai/agent/chat", {
             method: "POST",
@@ -118,7 +141,7 @@ export async function fetchAgentSSE(
                 }
                 msg = window.siyuan.languages.agentChatBusy || msg;
             }
-            onError(new AgentHttpError(msg, response.status));
+            await reportError(new AgentHttpError(msg, response.status));
             return;
         }
 
@@ -130,22 +153,23 @@ export async function fetchAgentSSE(
                 const text = await response.text();
                 const data = text ? JSON.parse(text) : null;
                 const errMsg = (data && (data.msg || data.message)) || window.siyuan.languages._kernel[28];
-                onError(new AgentHttpError(errMsg, response.status));
+                await reportError(new AgentHttpError(errMsg, response.status));
             } catch (e) {
-                onError(new Error(window.siyuan.languages._kernel[28]));
+                await reportError(new Error(window.siyuan.languages._kernel[28]));
             }
             return;
         }
 
         const reader = response.body ? response.body.getReader() : null;
         if (!reader) {
-            onError(new Error(window.siyuan.languages._kernel[28]));
+            await reportError(new Error(window.siyuan.languages._kernel[28]));
             return;
         }
 
         const decoder = new TextDecoder();
         let buffer = "";
         let currentEvent = "";
+        let terminalReceived = false;
 
         while (true) {
             const readResult = await reader.read();
@@ -164,14 +188,16 @@ export async function fetchAgentSSE(
                 } else if (line.indexOf("data:") === 0) {
                     const dataStr = line.slice(5).trim();
                     if (currentEvent && dataStr) {
+                        let result: ISSEResult | null = null;
                         try {
-                            const data = JSON.parse(dataStr);
-                            const result = buildSSEResult(currentEvent, data);
-                            if (result) {
-                                await onEvent(result);
-                            }
+                            result = buildSSEResult(currentEvent, JSON.parse(dataStr));
                         } catch (e) {
                             // skip malformed data
+                        }
+                        if (result) {
+                            await onEvent(result);
+                            terminalReceived = result.type === "done" || result.type === "error" ||
+                                result.type === "interrupted" || terminalReceived;
                         }
                     }
                     currentEvent = "";
@@ -185,26 +211,31 @@ export async function fetchAgentSSE(
             if (line.indexOf("data:") === 0 && currentEvent) {
                 const dataStr = line.slice(5).trim();
                 if (dataStr) {
+                    let result: ISSEResult | null = null;
                     try {
-                        const data = JSON.parse(dataStr);
-                        const result = buildSSEResult(currentEvent, data);
-                        if (result) {
-                            await onEvent(result);
-                        }
+                        result = buildSSEResult(currentEvent, JSON.parse(dataStr));
                     } catch (e) {
                         // skip malformed data
                     }
+                    if (result) {
+                        await onEvent(result);
+                        terminalReceived = result.type === "done" || result.type === "error" ||
+                            result.type === "interrupted" || terminalReceived;
+                    }
                 }
             }
+        }
+        if (!terminalReceived && !signal?.aborted) {
+            await reportError(new Error(window.siyuan.languages._kernel[28]));
         }
     } catch (err) {
         const e = err as Error;
         if (e.name !== "AbortError") {
             const msg = e.message.toLowerCase();
             if (msg.indexOf("timeout") !== -1 || msg.indexOf("deadline") !== -1) {
-                onError(new Error(window.siyuan.languages._kernel[24]));
+                await reportError(new Error(window.siyuan.languages._kernel[24]));
             } else {
-                onError(new Error(window.siyuan.languages._kernel[28]));
+                await reportError(new Error(window.siyuan.languages._kernel[28]));
             }
         }
     }
@@ -212,6 +243,8 @@ export async function fetchAgentSSE(
 
 function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResult | null {
     switch (event) {
+        case "turn":
+            return {type: "turn", turnID: data.turnID as string};
         case "content":
             return {type: "content", token: data.token as string};
         case "thinking":
@@ -237,8 +270,10 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
             };
         case "error":
             return {type: "error", message: data.message as string};
+        case "interrupted":
+            return {type: "interrupted", message: data.message as string};
         case "done":
-            return {type: "done"};
+            return {type: "done", turnID: data.turnID as string};
         case "usage":
             return {
                 type: "usage",

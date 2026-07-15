@@ -25,6 +25,8 @@ type Tool struct {
 	// Source 标记工具来源："native"（SiYuan 内置）、"plugin"（插件注册）、"mcp"（外部 MCP 服务）。
 	// 用于 token 分类统计按来源拆分。空值按 "native" 处理（兼容旧调用方）。
 	Source string `json:"source,omitempty"`
+	// ReadOnlyHint 仅在外部工具明确声明只读时为 true；未声明时按可能写入处理并要求确认。
+	ReadOnlyHint bool `json:"readOnlyHint,omitempty"`
 
 	Handler func(args map[string]any) (CallToolResult, error) `json:"-"`
 }

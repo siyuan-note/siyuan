@@ -89,3 +89,57 @@ func TestConvertSchemaRootAnyOf(t *testing.T) {
 		t.Fatalf("expected 1 property, got %d", len(props))
 	}
 }
+
+func TestNeedsConfirmScopesReadOnlyActionsByToolSource(t *testing.T) {
+	const externalWrite = "test_external_write"
+	const externalRead = "test_external_read"
+	const nativeWrite = "test_native_write"
+	tools.SetTool(externalWrite, &tools.Tool{Name: externalWrite, Source: "mcp"})
+	tools.SetTool(externalRead, &tools.Tool{Name: externalRead, Source: "mcp", ReadOnlyHint: true})
+	tools.SetTool(nativeWrite, &tools.Tool{Name: nativeWrite, Source: "native"})
+	t.Cleanup(func() {
+		tools.RemoveTool(externalWrite)
+		tools.RemoveTool(externalRead)
+		tools.RemoveTool(nativeWrite)
+	})
+
+	if !needsConfirm(externalWrite, "", nil) {
+		t.Fatal("external tool with unknown mutability must require confirmation")
+	}
+	if !needsConfirm(externalWrite, "close", nil) {
+		t.Fatal("native safe action name must not bypass external tool confirmation")
+	}
+	if needsConfirm(externalRead, "query", nil) {
+		t.Fatal("external tool explicitly declared read-only should not require confirmation")
+	}
+	if needsLocalSnapshot(externalWrite, "write") {
+		t.Fatal("external write cannot be rolled back by a local repository snapshot")
+	}
+	if !needsLocalSnapshot(nativeWrite, "write") {
+		t.Fatal("native write should create a local repository snapshot")
+	}
+}
+
+func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
+	const confirmID = "test-confirm"
+	ch := make(chan confirmResult, 1)
+	confirmChannelsMu.Lock()
+	confirmChannels[confirmID] = ch
+	confirmChannelsMu.Unlock()
+	t.Cleanup(func() {
+		confirmChannelsMu.Lock()
+		delete(confirmChannels, confirmID)
+		confirmChannelsMu.Unlock()
+	})
+
+	if !ConfirmSession(confirmID, true, false) {
+		t.Fatal("registered confirmation was rejected")
+	}
+	if ConfirmSession(confirmID, false, false) {
+		t.Fatal("duplicate confirmation was accepted")
+	}
+	result := <-ch
+	if !result.approved || result.always {
+		t.Fatalf("unexpected confirmation result: %#v", result)
+	}
+}

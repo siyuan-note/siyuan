@@ -154,12 +154,14 @@ func connectServers(servers []conf.MCPServer) []Connection {
 				desc = "[MCP:" + server.Name + "] " + desc
 			}
 
+			readOnlyHint := tool.Annotations != nil && tool.Annotations.ReadOnlyHint
 			tools.SetTool(name, &tools.Tool{
-				Name:        name,
-				Description: desc,
-				InputSchema: convertMCPSchema(tool.InputSchema),
-				Source:      "mcp",
-				Handler:     mcpToolHandler(server.Name, tool.Name, serverTimeout(server)),
+				Name:         name,
+				Description:  desc,
+				InputSchema:  convertMCPSchema(tool.InputSchema),
+				Source:       "mcp",
+				ReadOnlyHint: readOnlyHint,
+				Handler:      mcpToolHandler(server.Name, tool.Name, serverTimeout(server)),
 			})
 			registered++
 		}

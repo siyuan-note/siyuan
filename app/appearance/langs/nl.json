@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "Time-out bij inactiviteit van stream",
+	"agentStreamIdleTimeoutTip": "Maximale tijd zonder modeluitvoer voordat de aanvraag wordt gestopt",
 	"aiMcpTrustToolAnnotations": "Toolannotaties vertrouwen",
 	"aiMcpTrustToolAnnotationsTip": "Sta toe dat alleen-lezen-toolannotaties van deze server de bevestiging van bewerkingen overslaan. Schakel dit alleen in voor vertrouwde servers.",
 	"testConnectionFailMsg": "Verbinding mislukt: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "Sessie toestaan",
 	"agentConfirmAlwaysDesc": "Niet meer vragen voor enige operatie deze sessie",
 	"agentConfirmPending": "In behandeling",
-	"agentTimeout": "Time-out agent",
+	"agentTimeout": "Time-out",
 	"agentTimeoutTip": "Totale time-out van de agentsessie, 0 = geen limiet",
 	"agentConfirmTimeout": "Bevestigingstime-out",
 	"agentConfirmTimeoutTip": "Automatisch afwijzen na time-out",

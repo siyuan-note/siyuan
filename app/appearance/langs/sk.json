@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "Časový limit nečinnosti toku",
+	"agentStreamIdleTimeoutTip": "Maximálny čas bez výstupu modelu pred zastavením požiadavky",
 	"aiMcpTrustToolAnnotations": "Dôverovať anotáciám nástrojov",
 	"aiMcpTrustToolAnnotationsTip": "Umožní anotáciám nástrojov iba na čítanie z tohto servera preskočiť potvrdenie operácie. Povoľte iba pre dôveryhodné servery.",
 	"testConnectionFailMsg": "Pripojenie zlyhalo: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "Povoliť reláciu",
 	"agentConfirmAlwaysDesc": "V tejto relácii sa už nepýtať na žiadnu operáciu",
 	"agentConfirmPending": "Čaká sa",
-	"agentTimeout": "Časový limit agenta",
+	"agentTimeout": "Časový limit",
 	"agentTimeoutTip": "Celkový časový limit relácie agenta, 0 = bez limitu",
 	"agentConfirmTimeout": "Časový limit potvrdenia",
 	"agentConfirmTimeoutTip": "Automatické odmietnutie po uplynutí času",

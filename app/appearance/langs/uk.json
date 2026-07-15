@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "Тайм-аут бездіяльності потоку",
+	"agentStreamIdleTimeoutTip": "Максимальний час без виводу моделі до зупинки запиту",
 	"aiMcpTrustToolAnnotations": "Довіряти анотаціям інструментів",
 	"aiMcpTrustToolAnnotationsTip": "Дозволяє анотаціям інструментів лише для читання з цього сервера пропускати підтвердження операцій. Вмикайте лише для довірених серверів.",
 	"testConnectionFailMsg": "Помилка підключення: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "Дозволити сесію",
 	"agentConfirmAlwaysDesc": "Більше не питати про жодні операції в цій сесії",
 	"agentConfirmPending": "Очікує",
-	"agentTimeout": "Таймаут агента",
+	"agentTimeout": "Таймаут",
 	"agentTimeoutTip": "Загальний таймаут сесії агента, 0 = без обмежень",
 	"agentConfirmTimeout": "Таймаут підтвердження",
 	"agentConfirmTimeoutTip": "Автоматична відмова після спливу часу",

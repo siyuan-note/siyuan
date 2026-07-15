@@ -39,6 +39,7 @@ type AI struct {
 type Agent struct {
 	ModelID             string  `json:"modelId"`
 	SessionTimeout      int     `json:"sessionTimeout"`
+	StreamIdleTimeout   int     `json:"streamIdleTimeout"`
 	ConfirmTimeout      int     `json:"confirmTimeout"`
 	MaxRetries          int     `json:"maxRetries"`
 	Temperature         float64 `json:"temperature"`
@@ -126,6 +127,7 @@ func defaultRerank() *Rerank {
 func defaultAgent() *Agent {
 	return &Agent{
 		SessionTimeout:      600,
+		StreamIdleTimeout:   120,
 		ConfirmTimeout:      120,
 		MaxRetries:          3,
 		Temperature:         1.0,
@@ -196,6 +198,11 @@ func NewAI() *AI {
 	if agentTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_TIMEOUT"); "" != agentTimeout {
 		if v, err := strconv.Atoi(agentTimeout); err == nil {
 			ai.Agent.SessionTimeout = v
+		}
+	}
+	if agentStreamIdleTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_STREAM_IDLE_TIMEOUT"); "" != agentStreamIdleTimeout {
+		if v, err := strconv.Atoi(agentStreamIdleTimeout); err == nil {
+			ai.Agent.StreamIdleTimeout = v
 		}
 	}
 	if agentConfirmTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_CONFIRM_TIMEOUT"); "" != agentConfirmTimeout {
@@ -318,6 +325,22 @@ func (ai *AI) Normalize() {
 	}
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
+	} else {
+		if ai.Agent.SessionTimeout < 0 {
+			ai.Agent.SessionTimeout = 0
+		} else if ai.Agent.SessionTimeout > 3600 {
+			ai.Agent.SessionTimeout = 3600
+		}
+		if ai.Agent.StreamIdleTimeout < 1 {
+			ai.Agent.StreamIdleTimeout = 120
+		} else if ai.Agent.StreamIdleTimeout > 600 {
+			ai.Agent.StreamIdleTimeout = 600
+		}
+		if ai.Agent.MaxRetries < 0 {
+			ai.Agent.MaxRetries = 0
+		} else if ai.Agent.MaxRetries > 10 {
+			ai.Agent.MaxRetries = 10
+		}
 	}
 	if ai.Editing == nil {
 		ai.Editing = defaultEditing()

@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "זמן קצוב לחוסר פעילות בזרם",
+	"agentStreamIdleTimeoutTip": "משך הזמן המרבי ללא פלט מהמודל לפני עצירת הבקשה",
 	"aiMcpTrustToolAnnotations": "מתן אמון בהערות כלי",
 	"aiMcpTrustToolAnnotationsTip": "אפשר להערות כלי לקריאה בלבד משרת זה לדלג על אישור הפעולה. יש להפעיל רק עבור שרתים מהימנים.",
 	"testConnectionFailMsg": "החיבור נכשל: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "אפשר הפעלה",
 	"agentConfirmAlwaysDesc": "אל תשאל שוב על שום פעולה בהפעלה זו",
 	"agentConfirmPending": "ממתין",
-	"agentTimeout": "פג זמן סוכן",
+	"agentTimeout": "זמן קצוב",
 	"agentTimeoutTip": "זמן קצוב כולל להפעלת הסוכן, 0 = ללא הגבלה",
 	"agentConfirmTimeout": "פג זמן אישור",
 	"agentConfirmTimeoutTip": "דחייה אוטומטית לאחר פקיעת זמן",

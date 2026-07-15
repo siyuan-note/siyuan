@@ -143,6 +143,7 @@ declare namespace Config {
     export interface IAgent {
         modelId: string;
         sessionTimeout: number;
+        streamIdleTimeout: number;
         confirmTimeout: number;
         maxRetries: number;
         temperature: number;

@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "Limit bezczynności strumienia",
+	"agentStreamIdleTimeoutTip": "Maksymalny czas bez odpowiedzi modelu przed zatrzymaniem żądania",
 	"aiMcpTrustToolAnnotations": "Ufaj adnotacjom narzędzi",
 	"aiMcpTrustToolAnnotationsTip": "Zezwala adnotacjom narzędzi tylko do odczytu z tego serwera na pomijanie potwierdzenia operacji. Włączaj tylko dla zaufanych serwerów.",
 	"testConnectionFailMsg": "Połączenie nie powiodło się: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "Zezwól sesję",
 	"agentConfirmAlwaysDesc": "Nie pytaj ponownie o żadną operację w tej sesji",
 	"agentConfirmPending": "Oczekujące",
-	"agentTimeout": "Limit czasu agenta",
+	"agentTimeout": "Limit czasu",
 	"agentTimeoutTip": "Całkowity limit czasu sesji agenta, 0 = bez limitu",
 	"agentConfirmTimeout": "Limit czasu potwierdzenia",
 	"agentConfirmTimeoutTip": "Automatyczne odrzucenie po przekroczeniu czasu",

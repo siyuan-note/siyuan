@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "Délai d'inactivité du flux",
+	"agentStreamIdleTimeoutTip": "Durée maximale sans sortie du modèle avant l'arrêt de la requête",
 	"aiMcpTrustToolAnnotations": "Faire confiance aux annotations des outils",
 	"aiMcpTrustToolAnnotationsTip": "Autorise les annotations d’outils en lecture seule de ce serveur à ignorer la confirmation des opérations. À activer uniquement pour les serveurs de confiance.",
 	"testConnectionFailMsg": "Échec de la connexion : ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "Autoriser session",
 	"agentConfirmAlwaysDesc": "Ne plus demander pour aucune opération durant cette session",
 	"agentConfirmPending": "En attente",
-	"agentTimeout": "Délai d'expiration de l'agent",
+	"agentTimeout": "Délai d'expiration",
 	"agentTimeoutTip": "Délai d'expiration total de la session de l'agent, 0 = sans limite",
 	"agentConfirmTimeout": "Délai de confirmation",
 	"agentConfirmTimeoutTip": "Rejet automatique après expiration",

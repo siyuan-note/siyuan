@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "مهلة خمول التدفق",
+	"agentStreamIdleTimeoutTip": "أقصى مدة دون إخراج من النموذج قبل إيقاف الطلب",
 	"aiMcpTrustToolAnnotations": "الوثوق بتعليقات الأدوات",
 	"aiMcpTrustToolAnnotationsTip": "السماح لتعليقات الأدوات للقراءة فقط من هذا الخادم بتخطي تأكيد العملية. فعّل هذا الخيار للخوادم الموثوقة فقط.",
 	"testConnectionFailMsg": "فشل الاتصال: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "السماح بالجلسة",
 	"agentConfirmAlwaysDesc": "لا تسأل عن أي عملية في هذه الجلسة",
 	"agentConfirmPending": "قيد الانتظار",
-	"agentTimeout": "مهلة الوكيل",
+	"agentTimeout": "المهلة",
 	"agentTimeoutTip": "إجمالي مهلة جلسة الوكيل، 0 = بلا حد",
 	"agentConfirmTimeout": "مهلة التأكيد",
 	"agentConfirmTimeoutTip": "الرفض التلقائي بعد انتهاء المهلة",

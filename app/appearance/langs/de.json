@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "Leerlaufzeitlimit des Streams",
+	"agentStreamIdleTimeoutTip": "Maximale Zeit ohne Modellausgabe, bevor die Anfrage beendet wird",
 	"aiMcpTrustToolAnnotations": "Werkzeuganmerkungen vertrauen",
 	"aiMcpTrustToolAnnotationsTip": "Erlaubt den Nur-Lese-Anmerkungen dieses Servers, die Bestätigung von Vorgängen zu überspringen. Nur für vertrauenswürdige Server aktivieren.",
 	"testConnectionFailMsg": "Verbindung fehlgeschlagen: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "Sitzung erlauben",
 	"agentConfirmAlwaysDesc": "In dieser Sitzung für keine Operation erneut fragen",
 	"agentConfirmPending": "Ausstehend",
-	"agentTimeout": "Agent-Timeout",
+	"agentTimeout": "Timeout",
 	"agentTimeoutTip": "Gesamt-Timeout der Agent-Sitzung, 0 = kein Limit",
 	"agentConfirmTimeout": "Bestätigungs-Timeout",
 	"agentConfirmTimeoutTip": "Nach Timeout automatisch ablehnen",

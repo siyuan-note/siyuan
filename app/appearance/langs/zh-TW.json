@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "串流閒置逾時時間",
+	"agentStreamIdleTimeoutTip": "模型持續無輸出多久後停止本次請求",
 	"aiMcpTrustToolAnnotations": "信任工具註解",
 	"aiMcpTrustToolAnnotationsTip": "允許此服務的唯讀工具註解略過操作確認。僅對可信服務啟用。",
 	"testConnectionFailMsg": "連線失敗：${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "會話允許",
 	"agentConfirmAlwaysDesc": "本次會話中不再詢問任何確認",
 	"agentConfirmPending": "待確認",
-	"agentTimeout": "智能體超時時間",
+	"agentTimeout": "逾時時間",
 	"agentTimeoutTip": "智能體會話總超時時間，0 表示不限制",
 	"agentConfirmTimeout": "確認超時時間",
 	"agentConfirmTimeoutTip": "操作確認超時後自動拒絕",

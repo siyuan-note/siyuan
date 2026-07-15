@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "ストリームのアイドルタイムアウト",
+	"agentStreamIdleTimeoutTip": "モデルから出力がない状態でリクエストを停止するまでの最大時間",
 	"aiMcpTrustToolAnnotations": "ツール注釈を信頼する",
 	"aiMcpTrustToolAnnotationsTip": "このサーバーの読み取り専用ツール注釈による操作確認の省略を許可します。信頼できるサーバーに対してのみ有効にしてください。",
 	"testConnectionFailMsg": "接続に失敗しました：${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "セッション許可",
 	"agentConfirmAlwaysDesc": "このセッションではいかなる操作も確認しない",
 	"agentConfirmPending": "保留中",
-	"agentTimeout": "エージェント タイムアウト",
+	"agentTimeout": "タイムアウト",
 	"agentTimeoutTip": "エージェント セッション全体のタイムアウト、0 は制限なし",
 	"agentConfirmTimeout": "確認タイムアウト",
 	"agentConfirmTimeoutTip": "タイムアウト後に自動的に拒否",

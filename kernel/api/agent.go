@@ -98,14 +98,18 @@ func agentChat(c *gin.Context) {
 		confirmTimeout = 120 * time.Second
 	}
 	maxRetries := model.Conf.AI.Agent.MaxRetries
-	if maxRetries <= 0 {
-		maxRetries = 3
+	if maxRetries < 0 {
+		maxRetries = 0
 	}
-	// per-request 超时：作用到 agent 每一轮上游 chat-completions 调用上，
-	// 让单次卡死的请求转为可重试错误，而不是干等到整会话超时。
+	// Provider 请求超时只限制建立上游流；流建立后由可重置的空闲超时检测连续无输出，
+	// 避免持续正常输出的长回答被固定截止时间中断。
 	requestTimeout := time.Duration(selectedProvider.RequestTimeout) * time.Second
 	if requestTimeout <= 0 {
 		requestTimeout = 30 * time.Second
+	}
+	streamIdleTimeout := time.Duration(model.Conf.AI.Agent.StreamIdleTimeout) * time.Second
+	if streamIdleTimeout <= 0 {
+		streamIdleTimeout = 120 * time.Second
 	}
 
 	app := c.GetHeader("X-SiYuan-App-ID")
@@ -130,7 +134,7 @@ func agentChat(c *gin.Context) {
 	if req.ContentRevision != nil {
 		contentRevision = *req.ContentRevision
 	}
-	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout)
+	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
 	defer cancel()
 	streamClosed := false
 	defer func() {
@@ -155,13 +159,16 @@ func agentChat(c *gin.Context) {
 	}
 
 	totalTimeout := time.Duration(model.Conf.AI.Agent.SessionTimeout) * time.Second
-	if totalTimeout <= 0 {
-		totalTimeout = 600 * time.Second
-	}
 	if totalTimeout > 3600*time.Second {
 		totalTimeout = 3600 * time.Second
 	}
-	deadline := time.After(totalTimeout)
+	var deadline <-chan time.Time
+	var deadlineTimer *time.Timer
+	if totalTimeout > 0 {
+		deadlineTimer = time.NewTimer(totalTimeout)
+		deadline = deadlineTimer.C
+		defer deadlineTimer.Stop()
+	}
 
 	// 通知其他实例：该会话的流已开始，镜像端可显示"对话进行中"占位。
 	broadcastAgentSessionChanged(app, req.SessionID, "streamStart")

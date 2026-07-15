@@ -402,7 +402,7 @@ type agentCheckpoint struct {
 	LastCommittedTurnID   string         `json:"lastCommittedTurnID,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userEntryID string, contentRevision int64, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout time.Duration) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, userEntryID string, contentRevision int64, userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -586,16 +586,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				ReasoningEffort: reasoningEffort,
 			}
 
-			// 为每轮单次上游调用派生独立子 context，便于把单轮卡死转为可重试错误，
-			// 而不是直接取消整会话。requestTimeout<=0 时退化为可取消但无超时的 context。
-			roundCtx, roundCancel := context.WithCancel(ctx)
-			if requestTimeout > 0 {
-				roundCtx, roundCancel = context.WithTimeout(ctx, requestTimeout)
-			}
-
-			stream, streamErr := createStreamWithRetry(roundCtx, client, req, maxRetries, ch)
+			stream, firstResp, roundCancel, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
 			if streamErr != nil {
-				roundCancel()
 				if compactCount < 3 && isContextOverflow(streamErr) {
 					keepTurns := max(3-compactCount, 1)
 					messages = compactMessages(messages, keepTurns)
@@ -617,8 +609,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 			var aggregatedToolCalls []openai.ToolCall
 			lastDraftCheckpoint := time.Now()
 
+			firstResponsePending := true
 			for {
-				resp, recvErr := stream.Recv()
+				resp := firstResp
+				var recvErr error
+				if firstResponsePending {
+					firstResponsePending = false
+				} else {
+					resp, recvErr = recvStreamWithIdleTimeout(stream, streamIdleTimeout, roundCancel)
+				}
 				if recvErr != nil {
 					if recvErr == io.EOF {
 						break
@@ -1593,42 +1592,107 @@ func agentMessagesToEntries(msgs []AgentMessage) []SessionEntry {
 	return entries
 }
 
-func createStreamWithRetry(ctx context.Context, client *openai.Client, req openai.ChatCompletionRequest, maxRetries int, ch chan<- AgentEvent) (*openai.ChatCompletionStream, error) {
-	if maxRetries <= 0 {
-		maxRetries = 1
+var (
+	errModelRequestTimeout    = errors.New("model request timeout")
+	errModelStreamIdleTimeout = errors.New("model stream idle timeout")
+)
+
+func createStreamWithRetry(ctx context.Context, client *openai.Client, req openai.ChatCompletionRequest, maxRetries int, requestTimeout, streamIdleTimeout time.Duration, retryDelay func(string, int) time.Duration, ch chan<- AgentEvent) (*openai.ChatCompletionStream, openai.ChatCompletionStreamResponse, context.CancelFunc, error) {
+	if maxRetries < 0 {
+		maxRetries = 0
 	}
 
 	var lastErr error
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	for attempt := 0; attempt <= maxRetries; attempt++ {
 		if attempt > 0 {
 			category := classifyRetry(lastErr)
-			delay := delayForCategory(category, attempt)
+			delay := retryDelay(category, attempt)
 			select {
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 			case <-time.After(delay):
 			}
-			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt + 1, RetryMax: maxRetries})
+			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
 		}
 
-		stream, err := client.CreateChatCompletionStream(ctx, req)
-		if err == nil {
-			return stream, nil
+		streamCtx, streamCancel := context.WithCancel(ctx)
+		requestTimer, requestTimerDone := startCancelTimer(requestTimeout, streamCancel)
+		stream, err := client.CreateChatCompletionStream(streamCtx, req)
+		requestTimedOut := stopCancelTimer(requestTimer, requestTimerDone)
+		if ctx.Err() != nil {
+			if stream != nil {
+				stream.Close()
+			}
+			streamCancel()
+			return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 		}
+		if requestTimedOut {
+			err = errModelRequestTimeout
+		}
+		if err == nil && stream == nil {
+			err = errors.New("model returned nil stream")
+		}
+		if err == nil {
+			firstResp, firstErr := recvStreamWithIdleTimeout(stream, streamIdleTimeout, streamCancel)
+			if firstErr == nil || errors.Is(firstErr, io.EOF) {
+				return stream, firstResp, streamCancel, nil
+			}
+			err = firstErr
+		}
+		if stream != nil {
+			stream.Close()
+		}
+		streamCancel()
 
 		lastErr = err
 		category := classifyRetry(err)
 		if category == "fatal" {
-			return nil, err
+			return nil, openai.ChatCompletionStreamResponse{}, nil, err
 		}
 		if ctx.Err() != nil {
-			return nil, ctx.Err()
+			return nil, openai.ChatCompletionStreamResponse{}, nil, ctx.Err()
 		}
 	}
-	return nil, lastErr
+	return nil, openai.ChatCompletionStreamResponse{}, nil, lastErr
+}
+
+func recvStreamWithIdleTimeout(stream *openai.ChatCompletionStream, timeout time.Duration, cancel context.CancelFunc) (openai.ChatCompletionStreamResponse, error) {
+	timer, timerDone := startCancelTimer(timeout, cancel)
+	resp, err := stream.Recv()
+	if stopCancelTimer(timer, timerDone) {
+		return openai.ChatCompletionStreamResponse{}, errModelStreamIdleTimeout
+	}
+	return resp, err
+}
+
+func startCancelTimer(timeout time.Duration, cancel context.CancelFunc) (*time.Timer, <-chan struct{}) {
+	if timeout <= 0 {
+		return nil, nil
+	}
+	done := make(chan struct{})
+	timer := time.AfterFunc(timeout, func() {
+		cancel()
+		close(done)
+	})
+	return timer, done
+}
+
+func stopCancelTimer(timer *time.Timer, done <-chan struct{}) bool {
+	if timer == nil {
+		return false
+	}
+	if timer.Stop() {
+		return false
+	}
+	<-done
+	return true
 }
 
 func classifyRetry(err error) string {
+	if errors.Is(err, errModelRequestTimeout) || errors.Is(err, errModelStreamIdleTimeout) || errors.Is(err, context.DeadlineExceeded) {
+		return "timeout"
+	}
+
 	var apiErr *openai.APIError
 	if errors.As(err, &apiErr) {
 		switch apiErr.HTTPStatusCode {
@@ -1661,11 +1725,6 @@ func classifyRetry(err error) string {
 	// 父 context 被取消（用户停止 / 会话结束）属于不可重试的致命错误。
 	if errors.Is(err, context.Canceled) {
 		return "fatal"
-	}
-	// per-request 超时（本会话主动加的 roundCtx deadline）通常意味着对端只是慢，
-	// 归入 timeout 类走退避重试，避免一次卡顿直接终结整个会话。
-	if errors.Is(err, context.DeadlineExceeded) {
-		return "timeout"
 	}
 	return "network"
 }

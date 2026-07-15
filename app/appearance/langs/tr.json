@@ -1,4 +1,6 @@
 {
+	"agentStreamIdleTimeout": "Akış boşta kalma zaman aşımı",
+	"agentStreamIdleTimeoutTip": "İstek durdurulmadan önce model çıktısı olmadan geçecek en uzun süre",
 	"aiMcpTrustToolAnnotations": "Araç ek açıklamalarına güven",
 	"aiMcpTrustToolAnnotationsTip": "Bu sunucunun salt okunur araç ek açıklamalarının işlem onayını atlamasına izin verir. Yalnızca güvenilir sunucular için etkinleştirin.",
 	"testConnectionFailMsg": "Bağlantı başarısız: ${msg}",
@@ -249,7 +251,7 @@
 	"agentConfirmAlways": "Oturuma izin ver",
 	"agentConfirmAlwaysDesc": "Bu oturumda hiçbir işlem için tekrar sorma",
 	"agentConfirmPending": "Beklemede",
-	"agentTimeout": "Agent zaman aşımı",
+	"agentTimeout": "Zaman aşımı",
 	"agentTimeoutTip": "Agent oturumu toplam zaman aşımı, 0 = sınırsız",
 	"agentConfirmTimeout": "Onay zaman aşımı",
 	"agentConfirmTimeoutTip": "Zaman aşımından sonra otomatik reddet",

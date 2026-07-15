@@ -349,23 +349,32 @@ export const fixAdjacentTags = (editableElement: Element) => {
     if (!editableElement) {
         return;
     }
+    const isTag = (node: Node | null) => node?.nodeType === 1 && (node as HTMLElement).tagName === "SPAN" &&
+        ((node as HTMLElement).getAttribute("data-type") || "").split(" ").includes("tag");
+    const getSibling = (node: Node, previous: boolean) => {
+        let sibling = previous ? node.previousSibling : node.nextSibling;
+        while (sibling && ((sibling.nodeType === 3 && sibling.textContent === Constants.ZWSP) ||
+            (sibling.nodeType === 1 && (sibling as HTMLElement).tagName === "WBR"))) {
+            sibling = previous ? sibling.previousSibling : sibling.nextSibling;
+        }
+        return sibling;
+    };
+    // 在行级元素末尾插入标签时会产生空的拆分标签，需先移除，避免在新标签后插入空格
+    Array.from(editableElement.childNodes).forEach((node) => {
+        if (isTag(node) && node.textContent.replace(Constants.ZWSP, "") === "" &&
+            (isTag(getSibling(node, true)) || isTag(getSibling(node, false)))) {
+            node.remove();
+        }
+    });
     let node: Node = editableElement.firstChild;
     while (node) {
         const next: Node = node.nextSibling;
-        if (node.nodeType !== 3) {
+        if (isTag(node)) {
             const tagSpan = node as HTMLElement;
-            if (tagSpan.tagName === "SPAN" &&
-                (tagSpan.getAttribute("data-type") || "").split(" ").includes("tag")) {
-                // 向后查找跳过 ZWSP 文本节点和 <wbr> 后的下一个节点
-                let after = next;
-                while (after && ((after.nodeType === 3 && after.textContent === Constants.ZWSP) ||
-                    (after.nodeType === 1 && (after as HTMLElement).tagName === "WBR"))) {
-                    after = after.nextSibling;
-                }
-                if (after && after.nodeType !== 3 && (after as HTMLElement).tagName === "SPAN" &&
-                    ((after as HTMLElement).getAttribute("data-type") || "").split(" ").includes("tag")) {
-                    tagSpan.after(" ");
-                }
+            // 向后查找跳过 ZWSP 文本节点和 <wbr> 后的下一个节点
+            const after = getSibling(node, false);
+            if (after && isTag(after)) {
+                tagSpan.after(" ");
             }
         }
         node = next;
